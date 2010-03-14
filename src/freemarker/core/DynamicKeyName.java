@@ -86,11 +86,11 @@ final class DynamicKeyName extends Expression {
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
-            int index = EvaluationUtil.getNumber(keyModel, nameExpression, env).intValue();
+            int index = EvaluationRules.getNumber(keyModel, nameExpression, env).intValue();
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvaluationUtil.getString((TemplateScalarModel)keyModel, nameExpression, env);
+            String key = EvaluationRules.getString((TemplateScalarModel)keyModel, nameExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
         throw invalidTypeException(keyModel, nameExpression, env, "number, range, or string");
@@ -143,11 +143,11 @@ final class DynamicKeyName extends Expression {
                                            Environment env)
         throws TemplateException
     {
-        int start = EvaluationUtil.getNumber(range.left, env).intValue();
+        int start = EvaluationRules.getNumber(range.left, env).intValue();
         int end = 0;
         boolean hasRhs = range.hasRhs();
         if (hasRhs) {
-            end = EvaluationUtil.getNumber(range.right, env).intValue();
+            end = EvaluationRules.getNumber(range.right, env).intValue();
         }
         if (targetModel instanceof TemplateSequenceModel) {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;

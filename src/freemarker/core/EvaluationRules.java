@@ -59,9 +59,9 @@ import freemarker.template.*;
  * @version 1.0
  * @author Attila Szegedi
  */
-class EvaluationUtil
+class EvaluationRules
 {
-    private EvaluationUtil()
+    private EvaluationRules()
     {
     }
     

@@ -66,7 +66,7 @@ abstract class NumericalBuiltins {
                 throws TemplateException
         {
             TemplateModel model = target.getAsTemplateModel(env);
-            return calculateResult(EvaluationUtil.getNumber(model, target, env), model);
+            return calculateResult(EvaluationRules.getNumber(model, target, env), model);
         }
         abstract TemplateModel calculateResult(Number num, TemplateModel model);
     }
@@ -154,7 +154,7 @@ abstract class NumericalBuiltins {
                 throws TemplateException
         {
             TemplateModel model = target.getAsTemplateModel(env);
-            Number num = EvaluationUtil.getNumber(model, target, env);
+            Number num = EvaluationRules.getNumber(model, target, env);
             if (num instanceof Integer) {
                 // We accelerate this fairly common case
                 return new SimpleScalar(num.toString());

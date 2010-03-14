@@ -144,7 +144,7 @@ final class Include extends TemplateElement {
                 }
             }
             if (tm instanceof TemplateScalarModel) {
-                parse = getYesNo(EvaluationUtil.getString((TemplateScalarModel)tm, parseExp, env));
+                parse = getYesNo(EvaluationRules.getString((TemplateScalarModel)tm, parseExp, env));
             }
             else {
                 parse = parseExp.isTrue(env);

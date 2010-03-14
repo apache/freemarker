@@ -343,12 +343,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvaluationUtil.getNumber((TemplateNumberModel)model, target, env), env);
+                return new NumberFormatter(EvaluationRules.getNumber((TemplateNumberModel)model, target, env), env);
             }
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
                 int dateType = dm.getDateType();
-                return new DateFormatter(EvaluationUtil.getDate(dm, target, env), dateType, env);
+                return new DateFormatter(EvaluationRules.getDate(dm, target, env), dateType, env);
             }
             if (model instanceof SimpleScalar) {
                 return model;

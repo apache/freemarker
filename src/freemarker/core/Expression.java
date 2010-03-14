@@ -98,14 +98,14 @@ abstract public class Expression extends TemplateObject {
         TemplateException
     {
         if (referentModel instanceof TemplateNumberModel) {
-            return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) referentModel, exp, env));
+            return env.formatNumber(EvaluationRules.getNumber((TemplateNumberModel) referentModel, exp, env));
         }
         if (referentModel instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) referentModel;
-            return env.formatDate(EvaluationUtil.getDate(dm, exp, env), dm.getDateType());
+            return env.formatDate(EvaluationRules.getDate(dm, exp, env), dm.getDateType());
         }
         if (referentModel instanceof TemplateScalarModel) {
-            return EvaluationUtil.getString((TemplateScalarModel) referentModel, exp, env);
+            return EvaluationRules.getString((TemplateScalarModel) referentModel, exp, env);
         }
         if(env.isClassicCompatible()) {
             if (referentModel instanceof TemplateBooleanModel) {

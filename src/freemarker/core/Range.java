@@ -74,10 +74,10 @@ final class Range extends Expression {
     TemplateModel _getAsTemplateModel(Environment env) 
         throws TemplateException
     {
-        int min = EvaluationUtil.getNumber(left, env).intValue();
+        int min = EvaluationRules.getNumber(left, env).intValue();
         int max = 0;
         if (right != null) {
-            max = EvaluationUtil.getNumber(right, env).intValue();
+            max = EvaluationRules.getNumber(right, env).intValue();
             return new NumericalRange(min, max);
         }
         return new NumericalRange(min);

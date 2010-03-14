@@ -95,8 +95,8 @@ final class ArithmeticExpression extends Expression {
             }
             throw new NonNumericalException(msg, env);
         }
-        Number first = EvaluationUtil.getNumber(leftModel, left, env);
-        Number second = EvaluationUtil.getNumber(rightModel, right, env);
+        Number first = EvaluationRules.getNumber(leftModel, left, env);
+        Number second = EvaluationRules.getNumber(rightModel, right, env);
         ArithmeticEngine ae = 
             env != null 
                 ? env.getArithmeticEngine()
