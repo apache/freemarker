@@ -1,0 +1,66 @@
+<html>
+<head>
+  <title>FreeMarker Example Web Application 2 - Help</title>
+  <meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1">
+</head>
+<body>
+
+<h1>FreeMarker Example Web Application 2</h1>
+
+<p>To try this example you should visit
+<a href="index.a"><code>http://<i>yourServer</i>/<i>thisWebApp</i>/index.a</code></a>
+
+<p><b>Note:</b> To simplify the example, the guest-book entries are not stored
+persistently. If you reload the servlet all guest-book entry will lose.
+
+
+<h2>What's this example about?</h2>
+
+<p>This is a very primitive controller servlet class (was written based on FreeMarker Example Web Application 1)
+and a simple guest-book appliction that uses the conroller servlet class. This whole stuff is a very
+primitive thing. It is only to get you started if you plan to develop some custom "framework" for your
+Web applications, rather than using an already written framework.
+Note that a Web application framework can use very different approach than this
+example.
+
+
+<h2>How this example works?</h2>
+
+<p>This example uses a primitive controller servlet, <code>example.ControllerServlet</code>.
+To add application specific behavior, you should extend this servlet
+with an application specific subclass, that adds the so-called action
+methods. Here we implement a primitive guest book application by
+extending <code>ControllerServlet</code> with <code>GuestbookServlet</code>, that adds 3
+action methods:
+<ul>
+  <li><code>indexAction</code>: Shows the whole guest-book.
+  <li><code>formAction</code>: Show the from where you enter a guest-book entry.
+  <li><code>addAction</code>: Adds a new guest-book entry.
+</ul>
+
+<p>The <code>ControllerServlet</code> calls the action methods when it receives client requests.
+It deduces the name of the action methods to call
+from the request URL. The servlet will be invoked only if the request URL is
+ending with ".a", as you can see in the <code>WEB-INF/web.xml</code>, otherwise a static file
+(for example this html file, or an image file) will be returned as is.
+To deduce the method name, the servlet removes the <code>.a</code> and the Web-application directory
+from the request URL, and then appends <code>"Action"</code>. Thus, if you type
+<code>http://<i>yourServler</i>/<i>thisWebApp</i>/foo.a</code>, then it will try to
+call the <code>fooAction</code> method.
+
+<p>Each action method gets two parameters: the <code>HttpServletRequest</code>, and
+the <code>Page</code> object. The <code>Page</code> object plays the role of
+<code>HttpServletResponse</code>, but instead of calling low lever methods,
+you add objects to the data model with <code>put(<i>name</i>, <i>value</i>)</code>, and
+choose the template (the view) with <code>setTemplate(<i>templateName</i>)</code>; the
+tedious dirty work is done by <code>ControllerServlet</code>.
+
+<p>The templates are stored in the <code>WEB-INF/templates</code> directory.
+
+<p>For more details read the source code.
+
+<hr>
+<p><a href="index.a">Back to the index page</a>
+  
+</body>
+</html>

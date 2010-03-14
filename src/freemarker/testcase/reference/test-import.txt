@@ -1,0 +1,22 @@
+--
+--
+
+
+jsmith@acme.com
+  Test bar.
+  Email: jsmith@acme.com
+
+jsmith@acme.com
+  Test bar.
+  Email: jsmith@acme.com
+    Email in the root: jsmith@other1.com
+
+jsmith@other2.com
+  Test bar.
+  Email: jsmith@other2.com
+    Email in the root: jsmith@other1.com
+
+jsmith@other2.com
+jsmith@other3.com
+
+foobarfoobar

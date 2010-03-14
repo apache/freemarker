@@ -1,0 +1,7 @@
+No NS = No NS
+x NS = x NS
+y NS = y NS
+x NS = x NS
+
+true
+

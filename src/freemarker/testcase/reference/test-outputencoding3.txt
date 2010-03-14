@@ -1,0 +1,8 @@
+Output charset: ISO-8859-1
+URL escaping charset: UTF-16
+
+UTF-16: a%FE%FF%00%2F%00%25b
+ISO-8859-1: a%2F%25b
+UTF-16: a%FE%FF%00%2F%00%25b
+ISO-8859-1: a%2F%25b
+ISO-8859-1: a%2F%25b

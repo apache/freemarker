@@ -1,0 +1,14 @@
+<#assign twit=RequestParameters.twit>
+<html>
+<head>
+<#assign title="Upper Class Twit of the Year contestant info - " + twit>
+<title>${title}</title>
+</head>
+<body>
+<h1>${title}</h1>
+<#assign info=Application.twits[twit]>
+<p><b>Biographical information:</b> ${info[0]}</p>
+<p><b>Ended the contest by:</b> ${info[1]}</p>
+<p><b>Placement:</b> ${info[2]}</p>
+</body>
+</html>

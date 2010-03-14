@@ -1,0 +1,7 @@
+    test 3/1: undefined undefined undefined 
+    test 3/2: undefined undefined undefined 
+    test 3/3: undefined undefined undefined 
+
+    test 3/1: Y X Count 1 
+    test 3/2: Y X Count 2 
+    test 3/3: Y X Count 3 

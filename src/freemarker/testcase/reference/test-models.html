@@ -1,0 +1,75 @@
+<html>
+<head>
+<title>FreeMarker: Test of Multiple Model implementations</title>
+</head>
+<body>
+
+<p>Let's begin with a simple model:</p>
+<p>Hello, world!</p>
+
+<p>Cool, now get into the first model. This implements a scalar, list, and
+hash as a single class. Let's try some tests...</p>
+
+<p>MultiModel1 as a string!</p>
+
+<p>Now as a list...</p>
+
+Model1 value: 0<br />
+Model1 value: 1<br />
+Model1 value: 2<br />
+Model1 value: 3<br />
+Model1 value: 4<br />
+Model1 value: 5<br />
+Model1 value: 6<br />
+Model1 value: 7<br />
+Model1 value: 8<br />
+Model1 value: 9<br />
+Model3 is alive!<br />
+
+<p>Index into a list...</p>
+<p>Model1 value: 1</p>
+<p>List size is: Nasty!</p>
+<p>List size is: Nasty!</p>
+
+<p>Now, again, as a hash. First using dot notation, then using [] notation:</p>
+
+<p>Selftest of a hash from MultiModel1</p>
+<p>Selftest of a hash from MultiModel1</p>
+
+<p>Now for the tricky stuff... use a model to index into another model...</p>
+<p>selftest</p>
+<p>Selftest of a hash from MultiModel1</p>
+<p>self</p>
+<p>Selftest of a hash from MultiModel1</p>
+
+<p>Same thing, this time a List index...</p>
+<p>0</p>
+<p>Model1 value: 0</p>
+<p>Model1 value: 1</p>
+
+<p>Now, do the same recursively...</p>
+<p>MultiModel1 as a string!</p>
+<p>Model2 is alive!</p>
+<p>Arguments are:<br />test<br /></p>
+<p>Arguments are:<br />MultiModel1 as a string!<br />Selftest of a hash from MultiModel1<br />Hello, world!<br /></p>
+
+<p>Does this really not work?</p>
+<p>Model3 is alive!</p>
+<p>Selftest from MultiModel3!</p>
+<p>Hello world from MultiModel3!</p>
+
+<p>(Again, with Hashes)</p>
+<p>Model3 is alive!</p>
+<p>Selftest from MultiModel3!</p>
+
+<p>Model3 is alive!</p>
+<p>Selftest from MultiModel3!</p>
+<p>Selftest from MultiModel3!</p>
+
+<p>As I suspected! (Manual on Expressions needs updating.)</p>
+
+<p>Second test on list size</p>
+<p>Key size, not the listSize method.</p>
+<p>Key size, not the listSize method.</p>
+</body>
+</html>

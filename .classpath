@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="freemarker/ext/jsp/FreeMarkerJspFactory2.java|freemarker/ext/jsp/FreeMarkerPageContext1.java|freemarker/ext/jsp/FreeMarkerPageContext2.java|freemarker/testcase/models/BeanTestClass.java|freemarker/testcase/models/EnumTestClass.java|freemarker/testcase/models/BeanTestSuperclass.java|freemarker/testcase/models/BeanTestInterface.java" kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/xalan.jar"/>
+	<classpathentry kind="lib" path="lib/servlet.jar"/>
+	<classpathentry kind="lib" path="lib/saxpath.jar"/>
+	<classpathentry kind="lib" path="lib/logkit.jar"/>
+	<classpathentry kind="lib" path="lib/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/jython.jar"/>
+	<classpathentry kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="lib/js.jar"/>
+	<classpathentry kind="lib" path="lib/jdom.jar"/>
+	<classpathentry kind="lib" path="lib/jaxen.jar"/>
+	<classpathentry kind="lib" path="lib/emma.jar"/>
+	<classpathentry kind="lib" path="lib/emma_ant.jar"/>
+	<classpathentry kind="lib" path="lib/dom4j.jar"/>
+	<classpathentry kind="lib" path="lib/ant.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-api-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/javarebel-sdk.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/struts.jar"/>
+	<classpathentry kind="output" path=".bin"/>
+</classpath>

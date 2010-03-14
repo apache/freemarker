@@ -1,0 +1,9 @@
+3.00
+3.00
+---
+de
+true false
+yes no
+igen nem
+0.0 1.0
+true true

@@ -1,0 +1,42 @@
+LB
+LB
+LB
+LB
+  IB
+  IC1  IC2C1C2  ICS CS1 CS2 C3C1C2
+B
+B
+C1CB
+C1
+C2  ICB
+  IC  ICB
+  ICCB
+--
+LB
+LB
+LB
+LB
+  IB
+  IC1  IC2C1C2  ICS CS1 CS2 C3C1C2
+B
+B
+C1CB
+C1
+C2  ICB
+  IC  ICB
+  ICCB
+--
+  IB
+  IC1C2  IB
+12
+---
+1 23
+  4
+  5  6
+---
+a
+bc
+---
+foo
+---
+foo

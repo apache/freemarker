@@ -1,0 +1,28 @@
+﻿olinks: {
+  homepage: "http://freemarker.org/"
+  api: "api/index.html"
+}
+
+internalBookmarks: {
+  "Alphabetical Index": alphaidx
+  "Glossary": gloss
+  "Reference": ref
+  "FAQ": app_faq
+}
+
+externalBookmarks: {
+  "Java API": "api/index.html"
+  "FreeMarker Home": "../index.html"
+}
+
+validation: {
+  programlistingsRequireRole
+  // programlistingsRequireLanguage
+}
+
+generateEclipseTOC
+// eclipse: {
+//  link_to: "freemarker-toc.xml#ManualLink"
+// }
+
+showXXELogo

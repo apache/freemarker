@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+  PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN"
+  "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+
+<web-app>
+  <display-name>FreeMarker Struts Example</display-name>
+
+  <!-- Struts controller servlet -->
+  <servlet>
+    <servlet-name>action</servlet-name>
+    <servlet-class>example.GuestbookActionServlet</servlet-class>
+    <init-param>
+      <param-name>config</param-name>
+      <param-value>/WEB-INF/struts-config.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>debug</param-name>
+      <param-value>2</param-value>
+    </init-param>
+    <init-param>
+      <param-name>detail</param-name>
+      <param-value>2</param-value>
+    </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+  <!-- FreeMarker view servlet (to replace JSP) -->
+  <servlet>
+    <servlet-name>freemarker</servlet-name>
+    <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+    
+    <!-- FreemarkerServlet settings: -->
+    <init-param>
+      <param-name>TemplatePath</param-name>
+      <param-value>/</param-value>
+    </init-param>
+    <init-param>
+      <param-name>NoCache</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ContentType</param-name>
+      <param-value>text/html</param-value>
+    </init-param>
+    
+    <!-- FreeMarker settings: -->
+    <init-param>
+      <param-name>template_update_delay</param-name>
+      <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
+    </init-param>
+    <init-param>
+      <param-name>default_encoding</param-name>
+      <param-value>ISO-8859-1</param-value>
+    </init-param>
+    <init-param>
+      <param-name>locale</param-name>
+      <param-value>en_US</param-value>
+    </init-param>
+    <init-param>
+      <param-name>number_format</param-name>
+      <param-value>0.##########</param-value>
+    </init-param>
+    
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>action</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>freemarker</servlet-name>
+    <url-pattern>*.ftl</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+      <welcome-file>help.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>

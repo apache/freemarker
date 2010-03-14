@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>FreeMarker: Transformation Test</title>
+</head>
+<body>
+
+<p>A simple test follows:</p>
+
+<p>Hello, world!</p>
+
+&lt;p&gt;Hello, world!&lt;/p&gt;
+
+<P>Now try the Utility package:</p>
+<p>Utility transformations</p>
+
+&lt;p&gt;Utility transformations&lt;/p&gt;
+
+<p>Now some nested transforms:</p>
+<p >This tests the compress transformation</p >&lt;p &gt;This tests the compress transformation&lt;/p &gt;&lt;p &gt;This tests the compress transformation&lt;/p &gt;
+<p>Now try method and transform interactions:</p>
+&lt;p&gt;This isn&apos;t a valid XML string.&lt;/p&gt;
+&lt;p&gt;This isn't a valid HTML string.&lt;/p&gt;
+
+<p>A more advanced interaction involves getting a TemplateMethodModel
+to initialise a TemplateTransformModel, as follow:</p>
+
+Comment: This is a comment
+
+A test string containing quotes: "This isn't a test".
+A test string containing amps: Fish & Chips.
+A test string containing tags: <p>Fish &amp; Chips.</p>
+
+Comment: This is a second comment
+
+A test string containing quotes: &quot;This isn&apos;t a test&quot;.
+A test string containing amps: Fish & Chips.
+A test string containing tags: <p>Fish &amp; Chips.</p>
+Comment: This is a third comment
+
+A test string containing quotes: &quot;This isn&apos;t a test&quot;.
+A test string containing amps: Fish &amp; Chips.
+A test string containing tags: <p>Fish &amp;amp; Chips.</p>
+Comment: Utility transformations
+
+A test string containing quotes: "This isn't a test".
+A test string containing amps: Fish & Chips.
+A test string containing tags: &lt;p&gt;Fish &amp; Chips.&lt;/p&gt;
+
+
+I saw the python. It was cool.
+
+4
+5
+2
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+<foreach i in ii>
+<if i.if>
+  ${j["" + i]}
+<else>
+  #{k(i)}
+</if>
+</foreach>

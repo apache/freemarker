@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.1//EN"
+          "http://jakarta.apache.org/struts/dtds/struts-config_1_1.dtd">
+
+<struts-config>
+  <form-beans>
+    <form-bean name="guestbookEntry" type="example.GuestbookEntryForm"/>
+  </form-beans>
+    
+  <action-mappings>
+    <action
+          path="/index"
+          type="example.IndexAction">
+      <forward name="success" path="/index.ftl"/>
+    </action>
+
+    <action
+          path="/form"
+          type="example.FormAction"
+          name="guestbookEntry"
+          scope="request"
+          validate="false">
+      <forward name="success" path="/form.ftl"/>
+    </action>
+    
+    <action
+          path="/add"
+          type="example.AddAction"
+          name="guestbookEntry"
+          validate="true"
+          scope="request"
+          input="/form.do">
+      <forward name="success" path="/add.ftl"/>
+    </action>
+    
+  </action-mappings>
+
+  <message-resources parameter="example.ApplicationResources"/>
+
+</struts-config>

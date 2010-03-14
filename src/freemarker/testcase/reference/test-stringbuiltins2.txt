@@ -1,0 +1,117 @@
+--
+1 = 1
+5 = 5
+0 = 0
+--
+5 = 5
+1 = 1
+7 = 7
+--
+true = true
+false = false
+true = true
+--
+true = true
+false = false
+true = true
+--
+true = true
+true = true
+true = true
+false = false
+true = true
+--
+[abbcdbb] = [abbcdbb]
+[qwe] = [qwe]
+[qwe] = [qwe]
+[qwe] = [qwe]
+[qwe
+] = [qwe
+]
+[qwe
+] = [qwe
+]
+--
+[abbcdbb] = [abbcdbb]
+[abb-dbb] = [abb-dbb]
+[a-=*cd-=*] = [a-=*cd-=*]
+--
+[a][][cd][][] == [a][][cd][][]
+[][die][maggots][!] == [][die][maggots][!]
+[Die maggots!] == [Die maggots!]
+--
+[     ]
+[    a]
+[   ab]
+[  abc]
+[ abcd]
+[abcde]
+[abcdef]
+[abcdefg]
+[abcdefgh]
+[-----]
+[----a]
+[---ab]
+[--abc]
+[-abcd]
+[abcde]
+[abcdef]
+[abcdefg]
+[abcdefgh]
+[.oO.oO.o]
+[.oO.oO.a]
+[.oO.oOab]
+[.oO.oabc]
+[.oO.abcd]
+[.oOabcde]
+[.oabcdef]
+[.abcdefg]
+[abcdefgh]
+[abcdefghi]
+[abcdefghij]
+[]
+[/]
+[/\]
+[/\_]
+[/\_/]
+[/\_/\]
+[/\_/\_]
+[/\_/\_/]
+--
+[     ]
+[a    ]
+[ab   ]
+[abc  ]
+[abcd ]
+[abcde]
+[abcdef]
+[abcdefg]
+[abcdefgh]
+[-----]
+[a----]
+[ab---]
+[abc--]
+[abcd-]
+[abcde]
+[abcdef]
+[abcdefg]
+[abcdefgh]
+[.oO.oO.o]
+[aoO.oO.o]
+[abO.oO.o]
+[abc.oO.o]
+[abcdoO.o]
+[abcdeO.o]
+[abcdef.o]
+[abcdefgo]
+[abcdefgh]
+[abcdefghi]
+[abcdefghij]
+[]
+[/]
+[/\]
+[/\_]
+[/\_/]
+[/\_/\]
+[/\_/\_]
+[/\_/\_/]

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<?firstPi customKey="something"?>
+<?secondPi secondPiData?>
+<ns1:root xmlns:ns1="http://www.foo.com/ns1/">
+  <ns1:e1 a1="v1" a2="v2">
+    <ns1:e11>text1</ns1:e11>
+    <ns1:e12><![CDATA[cdata-section1]]></ns1:e12>
+  </ns1:e1>
+  <ns1:e2>
+    <ns1:e11>text2</ns1:e11>
+    <ns1:e12><![CDATA[cdata-section2<&]]></ns1:e12>
+  </ns1:e2>
+</ns1:root>

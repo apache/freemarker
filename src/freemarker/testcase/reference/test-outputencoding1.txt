@@ -1,0 +1,9 @@
+Output charset: UTF-8
+URL escaping charset: undefined
+
+a%FE%FF%00%2F%00%25b
+a%FE%FF%00%2F%00%25b
+a%2F%25b
+a%2F%25b
+a%FE%FF%00%2F%00%25b
+a%2F%25b

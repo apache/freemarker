@@ -1,0 +1,19 @@
+<html>
+<head>
+<title></title>
+</head>
+<body>
+
+<p>Provides model implementations that allow access to arbitrary Java objects.</p>
+<p>Most of the issues dealing with beans are handled by the 
+{@link freemarker.ext.beans.BeansWrapper#wrap(Object)}and {@link 
+freemarker.ext.beans.BeansWrapper#getStaticModels()} methods. In normal cases, 
+ these are the only methods
+you should use to turn an arbitrary Java object into a 
+FreeMarker {@link freemarker.template.TemplateModel}. Additionally, you can manually create 
+instance of any wrapper class using its constructors.
+Note, however that in such cases you bypass the eventual model caching
+of the wrapper.</p>
+
+</body>
+</html>

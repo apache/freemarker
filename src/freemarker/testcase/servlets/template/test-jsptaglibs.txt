@@ -1,0 +1,54 @@
+<#assign tl = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2"]>
+
+<!-- Test repeated execution -->
+<@tl.testtag repeatCount=3 throwException=false
+>Blah
+</@>
+
+<!-- Test 0-time execution -->
+<@tl.testtag repeatCount=0 throwException=false
+>Blah
+</@>
+
+<!-- Test abrupt execution -->
+<@tl.testtag repeatCount=0 throwException=true
+>Blah
+</@>
+
+<!-- Test nested execution -->
+<@tl.testtag repeatCount=2 throwException=false
+>Outer Blah
+<@tl.testtag repeatCount=2 throwException=false
+>Inner Blah
+</@>
+</@>
+
+<!-- Test nested execution with intermittent non-JSP transform -->
+<@tl.testtag repeatCount=2 throwException=false>
+Outer Blah
+<@compress>
+<@tl.testtag repeatCount=2 throwException=false>
+Inner Blah
+</@>
+</@>
+</@>
+
+<@tl.simpletag bodyLoopCount=2 name="simpletag1">
+foo
+<@tl.simpletag bodyLoopCount=3 name="simpletag2">
+bar
+</@>
+</@>
+
+<!-- Test loading from JAR -->
+<#assign tl2 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-2"]>
+<@tl2.testtag></@>
+<!-- Test loading from autodeployed JAR -->
+<#assign tl3 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-foo"]>
+<@tl3.testtag></@>
+<!-- Test loading from root-relative URL -->
+<#assign tl4 = JspTaglibs["/WEB-INF/taglib2.jar"]>
+<@tl4.testtag></@>
+<!-- Test loading from non-root-relative URL -->
+<#assign tl5 = JspTaglibs["WEB-INF/taglib2.jar"]>
+<@tl5.testtag></@>
