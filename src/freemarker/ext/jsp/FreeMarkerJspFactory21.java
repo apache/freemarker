@@ -10,7 +10,7 @@ import javax.servlet.jsp.JspApplicationContext;
 class FreeMarkerJspFactory21 extends FreeMarkerJspFactory
 {
     private static final String JSPCTX_KEY = 
-        FreeMarkerJspApplicationContext.class.getName();
+        FreeMarkerJspFactory21.class.getName() + "#jspAppContext";
 
     protected String getSpecificationVersion() {
         return "2.1";
