@@ -2343,7 +2343,7 @@ autumn
             logic further, we can read the name of the author with this
             expression: <literal>book.author.name</literal>.</para>
 
-            <para>There is an alternative syntax if we want to give the
+            <para>There is an alternative syntax if we want to specify the
             subvariable name with an expression:
             <literal>book["title"]</literal>. In the square brackets you can
             give any expression as long as it evaluates to a string. So with
