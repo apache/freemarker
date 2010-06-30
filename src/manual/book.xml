@@ -2894,7 +2894,7 @@ ${-1.999?int}</programlisting>
           <literal>&gt;</literal>. FreeMarker interprets the
           <literal>&gt;</literal> as the closing character of the FTL tag. To
           prevent this, you have to put the expression into <link
-          linkend="dgui_template_exp_parentheses">parenthesis</link>:
+          linkend="dgui_template_exp_parentheses">parentheses</link>:
           <literal>&lt;#if (x &gt; y)&gt;</literal>. Or, you can use
           <literal>&amp;gt;</literal> and <literal>&amp;lt;</literal> on the
           place of the problematic relation marks: <literal>&lt;#if x &amp;gt;
