@@ -3560,19 +3560,19 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         role="markedText">text</phrase> sections</link> (e.g.,
         <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and <link
         linkend="dgui_template_exp_stringop_interpolation">in string literal
-        expressions</link> (e.g., <literal>[#include
-        "/footer/${company}.html"]</literal>).</para>
+        expressions</link> (e.g., <literal>&lt;#include
+        "/footer/${company}.html"&gt;</literal>).</para>
 
         <warning>
           <para>A frequent mistake is the usage of interpolations in places
           where it shouldn't/can't be used. A typical bad usage is
-          <literal>[#if ${isBig}]Wow![/#if]</literal>, which is syntactically
-          <emphasis>WRONG</emphasis>. You should simply write <literal>[#if
-          isBig]Wow![/#if]</literal>. Also, <literal>[#if
-          "${isBig}"]Wow![/#if]</literal> is <emphasis>WRONG</emphasis>, since
-          the parameter value will be a string, and the <literal>if</literal>
-          directive wants a boolean value, so it will cause a runtime
-          error.</para>
+          <literal>&lt;#if ${isBig}&gt;Wow!&lt;/#if&gt;</literal>, which is
+          syntactically <emphasis>WRONG</emphasis>. You should simply write
+          <literal>&lt;#if isBig&gt;Wow!&lt;/#if&gt;</literal>. Also,
+          <literal>&lt;#if "${isBig}"&gt;Wow!&lt;/#if&gt;</literal> is
+          <emphasis>WRONG</emphasis>, since the parameter value will be a
+          string, and the <literal>if</literal> directive wants a boolean
+          value, so it will cause a runtime error.</para>
         </warning>
 
         <para>The result of the expression must be a string, number or date
@@ -19477,8 +19477,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed a bug that caused rounding of float and double values
-              (<link
+              <para>Fixed a bug that caused rounding of float and double
+              values (<link
               xlink:href="https://sourceforge.net/tracker/?func=detail&amp;aid=2503124&amp;group_id=794&amp;atid=100794">See
               bug report</link>)</para>
             </listitem>
@@ -19516,9 +19516,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>FreemarkerServlet now cooperates with Session Fixation 
-              Attack Protection in Spring Security, see 
-              <link xlink:href="https://sourceforge.net/projects/freemarker/forums/forum/2345/topic/3475868">
+              <para>FreemarkerServlet now cooperates with Session Fixation
+              Attack Protection in Spring Security, see <link
+              xlink:href="https://sourceforge.net/projects/freemarker/forums/forum/2345/topic/3475868">
               forum discussion</link> for details.</para>
             </listitem>
 
@@ -19531,6 +19531,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <section>
           <title>Changes on the FTL side</title>
+
           <itemizedlist>
             <listitem>
               <para>Fixed bug where
