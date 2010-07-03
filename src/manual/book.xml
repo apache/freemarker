@@ -3699,8 +3699,8 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           <title>The exact conversion rules</title>
 
           <para>For those who are interested, the exact rules of conversion
-          from the expression value to string (that is then still subject to
-          escaping) are these, in in this order:</para>
+          from the expression value to string (which is then still subject to
+          escaping) are these, in this order:</para>
 
           <orderedlist>
             <listitem>
@@ -3874,7 +3874,7 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           <emphasis role="term">parameters</emphasis>. You define the
           parameters after the name of the macro in the
           <literal>macro</literal> directive. Here we define one parameter for
-          the <literal>green</literal> macro,
+          the <literal>greet</literal> macro,
           <literal>person</literal>:</para>
 
           <programlisting role="template">&lt;#macro greet <emphasis>person</emphasis>&gt;
@@ -4030,9 +4030,9 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
   Anything.
   Anything.</programlisting>
 
-          <para>If you don't use the nested directive, then the nested content
-          will not be executed. Thus, if you accidentally use the
-          <literal>greet</literal> directive like this:</para>
+          <para>If you don't use the <literal>nested</literal> directive, then
+          the nested content will not be executed. Thus, if you accidentally
+          use the <literal>greet</literal> directive like this:</para>
 
           <programlisting role="template">&lt;@greet person="Joe"&gt;
   Anything.
