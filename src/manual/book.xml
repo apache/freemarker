@@ -4764,7 +4764,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
               <listitem>
                 <para><link
                 linkend="ref.directive.ftl"><literal>ftl</literal></link>
-                parameter <literal>strip_text</literal>. This removes all
+                parameter <literal>strip_text</literal>: This removes all
                 top-level text from the template. It is useful for templates
                 that contain macro definitions only (and some other
                 non-outputting directives), because it removes the line-breaks
