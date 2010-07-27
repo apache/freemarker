@@ -47,6 +47,8 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
     <property name="lib.saxpath" location="lib/saxpath.jar"/>
     <property name="lib.log4j" location="lib/log4j.jar"/>
     <property name="lib.logkit" location="lib/logkit.jar"/>
+    <property name="lib.slf4j" location="lib/slf4j-api.jar"/>
+    <property name="lib.commons-logging" location="lib/commons-logging.jar"/>
     <property name="lib.xerces" location="lib/xerces.jar"/>
     <property name="lib.junit" location="lib/junit.jar"/>
     <property name="lib.dom4j" location="lib/dom4j.jar"/>
@@ -72,6 +74,8 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <pathelement path="${lib.jython}"/>
         <pathelement path="${lib.logkit}"/>
         <pathelement path="${lib.log4j}"/>
+        <pathelement path="${lib.slf4j}"/>
+        <pathelement path="${lib.commons-logging}"/>
         <pathelement path="${lib.rhino}"/>
         <pathelement path="${lib.javarebel-sdk}"/>
         <pathelement path="${java.class.path}"/>
@@ -113,6 +117,8 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <pathelement path="${lib.jsp21}"/>
         <pathelement path="${lib.logkit}"/>
         <pathelement path="${lib.log4j}"/>
+        <pathelement path="${lib.slf4j}"/>
+        <pathelement path="${lib.commons-logging}"/>
         <pathelement path="${src.dir}"/>
         <pathelement path="${build.javacc.dir}"/>
         <pathelement path="${java.class.path}"/>
@@ -136,6 +142,8 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <pathelement path="${lib.jython}"/>
         <pathelement path="${lib.logkit}"/>
         <pathelement path="${lib.log4j}"/>
+        <pathelement path="${lib.slf4j}"/>
+        <pathelement path="${lib.commons-logging}"/>
         <pathelement path="${java.class.path}"/>
     </path>
     
@@ -176,10 +184,6 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <include name="freemarker/**"/>
     </patternset>
 
-    <patternset id="freemarker.compile.logkit">
-        <include name="freemarker/log/AvalonLoggerFactory.java"/>
-    </patternset>
-
     <patternset id="freemarker.compile.jdk14">
         <include name="freemarker/log/JDK14LoggerFactory.java"/>
         <include name="freemarker/core/RegexBuiltins.java"/>
@@ -193,11 +197,23 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
     <patternset id="freemarker.compile.xalan">
         <include name="freemarker/ext/dom/XalanXPathSupport.java"/>
     </patternset>
+    
+    <patternset id="freemarker.compile.logkit">
+        <include name="freemarker/log/AvalonLoggerFactory.java"/>
+    </patternset>
 
     <patternset id="freemarker.compile.log4j">
         <include name="freemarker/log/Log4JLoggerFactory.java"/>
     </patternset>
 
+    <patternset id="freemarker.compile.slf4j">
+        <include name="freemarker/log/SLF4JLoggerFactory.java"/>
+    </patternset>
+    
+    <patternset id="freemarker.compile.commons-logging">
+        <include name="freemarker/log/CommonsLoggingLoggerFactory.java"/>
+    </patternset>
+    
     <patternset id="freemarker.compile.dom4j">
         <include name="freemarker/ext/xml/Dom4jNavigator.java"/>
     </patternset>
@@ -284,6 +300,9 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <get src="${libs.location}/jython.jar" dest="lib/jython.jar" usetimestamp="true"/>
         <get src="${libs.location}/log4j.jar" dest="lib/log4j.jar" usetimestamp="true"/>
         <get src="${libs.location}/2.3/logkit.jar" dest="lib/logkit.jar" usetimestamp="true"/>
+        <get src="${libs.location}/slf4j-api.jar" dest="lib/slf4j-api.jar" usetimestamp="true"/>
+        <get src="${libs.location}/slf4j-jdk14.jar" dest="lib/slf4j-jdk14.jar" usetimestamp="true"/> <!-- Needed only for testing SLF4J: -->
+        <get src="${libs.location}/commons-logging.jar" dest="lib/commons-logging.jar" usetimestamp="true"/>
         <get src="${libs.location}/2.3/rt122.jar" dest="lib/rt122.jar" usetimestamp="true"/>
         <get src="${libs.location}/saxpath.jar" dest="lib/saxpath.jar" usetimestamp="true"/>
         <get src="${libs.location}/servlet.jar" dest="lib/servlet.jar" usetimestamp="true"/>
@@ -312,6 +331,9 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
                 <available file="lib/jython.jar"/>
                 <available file="lib/log4j.jar"/>
                 <available file="lib/logkit.jar"/>
+                <available file="lib/slf4j-api.jar"/>
+                <available file="lib/slf4j-jdk14.jar"/>
+                <available file="lib/commons-logging.jar"/>
                 <available file="lib/rt122.jar"/>
                 <available file="lib/saxpath.jar"/>
                 <available file="lib/servlet.jar"/>
@@ -330,6 +352,14 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <available
             property="logkit.available"
             classname="org.apache.log.Logger"
+            classpathref="compile.classpath"/>
+        <available
+            property="slf4j.available"
+            classname="org.slf4j.Logger"
+            classpathref="compile.classpath"/>
+        <available
+            property="commons-logging.available"
+            classname="org.apache.commons.logging.Log"
             classpathref="compile.classpath"/>
         <available
             property="jdk14.available"
@@ -503,6 +533,8 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
           includes="freemarker/debug/impl/Rmi*Impl.class" verify="yes" stubversion="1.2"/>
         <antcall target="compile-log4j"/>
         <antcall target="compile-logkit"/>
+        <antcall target="compile-slf4j"/>
+        <antcall target="compile-commons-logging"/>
         <antcall target="compile-jdk14"/>
         <antcall target="compile-jdk15"/>
         <antcall target="compile-jsp1"/>
@@ -533,6 +565,22 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
             <src path="${src.dir}"/>
             <classpath refid="compile.classpath"/>
             <patternset refid="freemarker.compile.logkit"/>
+        </javac>
+    </target>
+
+    <target name="compile-slf4j" if="slf4j.available">
+        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
+            <src path="${src.dir}"/>
+            <classpath refid="compile.classpath"/>
+            <patternset refid="freemarker.compile.slf4j"/>
+        </javac>
+    </target>
+
+    <target name="compile-commons-logging" if="commons-logging.available">
+        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
+            <src path="${src.dir}"/>
+            <classpath refid="compile.classpath"/>
+            <patternset refid="freemarker.compile.commons-logging"/>
         </javac>
     </target>
 
@@ -767,6 +815,14 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
       <fail message="Can't build dist because Log4J classes are not available."/>
     </target>
 
+    <target name="fail.slf4j" unless="slf4j.available">
+      <fail message="Can't build dist because SLF4J classes are not available."/>
+    </target>
+
+    <target name="fail.commons-logging" unless="commons-logging.available">
+      <fail message="Can't build dist because Apache commons-logging classes are not available."/>
+    </target>
+
     <target name="fail.jdk14" unless="jdk14.available">
       <fail message="Can't build dist because JDK 1.4 classes are not available."/>
     </target>
@@ -797,7 +853,7 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
 
     <target
             name="dist"
-            depends="init, fail.logkit, fail.log4j, fail.jdk14, fail.jdk15,
+            depends="init, fail.logkit, fail.log4j, fail.slf4j, fail.commons-logging, fail.jdk14, fail.jdk15,
                     fail.jython, fail.jsp21, fail.rhino, fail.jaxen, fail.xalan,
                     jar, javadoc, manual"
             description="Build the FreeMarker distribution files">

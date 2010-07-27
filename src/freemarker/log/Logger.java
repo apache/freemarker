@@ -60,48 +60,72 @@ import freemarker.template.utility.ClassUtil;
 /**
  * The FreeMarker logging facility. This is a polymorphic implementation
  * that will use whatever logging package it can find on the system:
- * Apache Jakarta Log4J, Apache Jakarta Avalon LogKit, JDK1.4 logging
- * (in this order). If it fails to find any of the above, logging will
- * be suppressed and a short notice output to System.err. You can use the
- * {@link #selectLoggerLibrary(int)} static method to force use of a specific
- * logger package, or to turn off logging.
- * @version $Id: Logger.java,v 1.24 2003/10/03 15:35:10 stephanmueller Exp $
+ * SLF4J, Apache Commons Logging, Apache Log4J, Apache Avalon LogKit,
+ * <tt>java.util.logging</tt> (in this order). If it fails to find any of the
+ * above, logging will be suppressed and a short notice will be printed to
+ * <tt>System.err</tt>.
+ *
+ * <p>You can use the {@link #selectLoggerLibrary(int)} static method to force
+ * use of a specific logger package, or to turn off logging.
+ * 
  * @author Attila Szegedi
  */
 public abstract class Logger
 {
+	
     /**
      * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
      * engine should automatically lookup and use any available logger library.
      */
     public static final int LIBRARY_AUTO = -1;
+    
     /**
      * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
      * engine should use no logger package (i.e. turn off logging).
      */
     public static final int LIBRARY_NONE = 0;
+    
     /**
      * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
      * engine should use the <tt>java.util.logging</tt> logger package.
      */
     public static final int LIBRARY_JAVA = 1;
+    
     /**
      * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
      * engine should use the Apache Jakarta Avalon LogKit logger package.
      */
     public static final int LIBRARY_AVALON = 2;
+    
     /**
      * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
      * engine should use the Apache Jakarta Log4J logger package.
      */
     public static final int LIBRARY_LOG4J = 3;
 
+    /**
+     * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
+     * engine should use the Apache commons-logging logger adapter package.
+     */
+    public static final int LIBRARY_COMMONS = 4;
+    
+    /**
+     * Constant used with {@link #selectLoggerLibrary(int)} that indicates the
+     * engine should use the SLF4J logger adapter package.
+     */
+    public static final int LIBRARY_SLF4J = 5;
+
+    /**
+     * Order matters! Starts with the lowest priority.
+     */
     private static final String[] LIBINIT =
     {
-        "freemarker.log", "Null",
-        "java.util.logging", "JDK14",
-        "org.apache.log",    "Avalon",
-        "org.apache.log4j",  "Log4J"
+        "freemarker.log.Logger", "Null",
+        "java.util.logging.Logger", "JDK14",
+        "org.apache.log.Logger",    "Avalon",
+        "org.apache.log4j.Logger",  "Log4J",
+        "org.apache.commons.logging.Log",  "CommonsLogging",
+        "org.slf4j.Logger",  "SLF4J",
     };
 
     private static int logLibrary;
@@ -289,12 +313,12 @@ public abstract class Logger
     throws
         ClassNotFoundException
     {
-        String requiredPackage = LIBINIT[library * 2];
+        String loggerClassName = LIBINIT[library * 2];
         String factoryType = LIBINIT[library * 2 + 1];
 
         try
         {
-            ClassUtil.forName(requiredPackage + ".Logger");
+            ClassUtil.forName(loggerClassName);
             return (LoggerFactory)Class.forName("freemarker.log." + factoryType + "LoggerFactory").newInstance();
         }
         catch(IllegalAccessException e)

@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.16</subtitle>
+  <subtitle>For FreeMarker 2.3.17</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -8178,15 +8178,39 @@ TemplateHashModel roundingModeEnums =
         </indexterm>
 
         <para>FreeMarker integrates with the following logging packages: <link
+        xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
+        xlink:href="http://commons.apache.org/logging/">Apache Commons
+        Logging</link>, <link
         xlink:href="http://jakarta.apache.org/log4j">Log4J</link>, <link
         xlink:href="http://jakarta.apache.org/avalon/logkit">Avalon
         LogKit</link>, and <link
-        xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html">java.util.logging</link>
-        (Java2 platform 1.4 and above). You need not do anything in order for
-        FreeMarker to use these loggers; if any of them is discovered through
-        the class loader that loaded FreeMarker classes, it is used
-        automatically. All log messages produced by FreeMarker are logged into
-        the logger hierarchy whose top-level logger is named
+        xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>
+        (Java 1.4 and above). By default, FreeMarker will look for the
+        following logging packages in this order, and will automatically use
+        the first package it finds: <remark>[2.4 - un-remark this] SLF4J,
+        Apache Commons Logging, </remark>Log4J, Avalon,
+        <literal>java.util.logging</literal>. However, if you call the static
+        <literal>selectLoggerLibrary</literal> method on the
+        <literal>freemarker.log.Logger</literal> class with appropriate
+        parameter and <emphasis>before using any FreeMarker classes that log
+        messages</emphasis>, you can explicitly select a logger package, or
+        even disable the logging. See the API documentation for more
+        details.</para>
+
+        <note>
+          <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging
+          aren't searched automatically due to backward compatibility
+          constraints, so to use them you must do this:</para>
+
+          <programlisting role="unspecified">import freemarker.log.Logger;
+...
+    // IMPORTANT: This should be executed before using other FreeMarker classes!
+    Logger.selectLoggerLibrary(Logger.LIBRARY_SLF4J);  // or Logger.LIBRARY_COMMONS
+...</programlisting>
+        </note>
+
+        <para>All log messages produced by FreeMarker are logged into the
+        logger hierarchy whose top-level logger is named
         <literal>freemarker</literal>. Currently used loggers are:</para>
 
         <informaltable border="1">
@@ -8235,19 +8259,11 @@ TemplateHashModel roundingModeEnums =
           </tbody>
         </informaltable>
 
-        <para>FreeMarker will look for the logging packages in this order, and
-        will use the first package it finds: Log4J, Avalon, java.util.logging.
-        However, if you call the static <literal>selectLoggerLibrary</literal>
-        method on the <literal>freemarker.log.Logger</literal> class with
-        appropriate parameter, you can explicitly select a logger package, or
-        even disable the logging.</para>
-
-        <para>You can also call the static
-        <literal>selectLoggerLibrary</literal> method on the
-        <literal>freemarker.log.Logger</literal> class and pass it a string
-        that will be used to prefix the above mentioned logger names. This is
-        useful if you want to have separate loggers on a per-application
-        basis.</para>
+        <para>You can call the static <literal>selectLoggerLibrary</literal>
+        method on the <literal>freemarker.log.Logger</literal> class and pass
+        it a string that will be used to prefix the above mentioned logger
+        names. This is useful if you want to have separate loggers on a
+        per-application basis.</para>
       </section>
 
       <section xml:id="pgui_misc_servlet">
@@ -19459,6 +19475,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Versions</title>
+
+      <section xml:id="versions_2_3_17">
+        <title>2.3.17</title>
+
+        <para>Date of release: FIXME</para>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>FreeMarker now can log its messages using SLF4J or Apache
+              Commons Logging. However, it will not use these logger libraries
+              automatically (until 2.4); <link linkend="pgui_misc_logging">see
+              more here...</link></para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_16">
         <title>2.3.16</title>
