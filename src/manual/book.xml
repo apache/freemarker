@@ -414,7 +414,7 @@
         <literal>"banana"</literal>) you write
         <literal>whatnot.fruits[1]</literal>.</para>
 
-        <para>Scalars can further divided into these categories:</para>
+        <para>Scalars can be further divided into these categories:</para>
 
         <itemizedlist>
           <listitem>
@@ -784,7 +784,7 @@ All Rights Reserved.
           covers both cases.</phrase></para>
 
           <para>Wherever you refer to a variable, you can specify a default
-          value for the case the variable is missing, by followin the variable
+          value for the case the variable is missing, by following the variable
           name with a <literal>!</literal> and the default value. Like in the
           following example, when <literal>user</literal> is missing from data
           model, the template will behave like if <literal>user</literal>'s
@@ -901,7 +901,7 @@ All Rights Reserved.
 
           <programlisting role="template">&lt;#if cargo.weight &lt; <emphasis>100</emphasis>&gt;Light cargo&lt;/#if&gt;</programlisting>
 
-          <para>Or the temporaly result of a calculations are also called
+          <para>The temporaly result of a calculations are also called
           values, like 20 and 120 when this template is executed (it will
           print 120):</para>
 
@@ -909,7 +909,7 @@ All Rights Reserved.
 
           <para>Explanation for this last: As the result of dividing the two
           values, 40 (the weight of the cargo) and 2, a new value 20 is
-          created. Then 100 is addted to it, so the value 120 is created. Then
+          created. Then 100 is added to it, so the value 120 is created. Then
           120 is printed
           (<literal>${<replaceable>...</replaceable>}</literal>), and the
           template execution goes on and all these values gone.</para>
