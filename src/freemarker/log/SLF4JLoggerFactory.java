@@ -66,8 +66,8 @@ public class SLF4JLoggerFactory implements LoggerFactory {
 	}
 
 	/**
-	 * Logger where the log entry issuer position (class, method, line number) will
-	 * correctly point to the caller of <tt>LocationAwareSLF4JLogger</tt> methods.
+	 * Logger where the log entry issuer (class, method) will be correctly
+	 * shown to be the caller of <tt>LocationAwareSLF4JLogger</tt> methods.
 	 */
 	private static final class LocationAwareSLF4JLogger extends Logger {
 		
@@ -139,8 +139,8 @@ public class SLF4JLoggerFactory implements LoggerFactory {
 	}
 	
 	/**
-	 * Logger where the log entry issuer position (class, method, line number) will
-	 * unfortunately point to where we call the logger.&lt;level> methods.
+	 * Logger where the log entry issuer (class, method) will be incorrectly
+	 * shown to be a method of this class.
 	 */
 	private static class LocationUnawareSLF4JLogger extends Logger {
 		
