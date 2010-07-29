@@ -52,17 +52,101 @@
 
 package freemarker.log;
 
-public class SLF4JLoggerFactory implements LoggerFactory {
+import org.slf4j.spi.LocationAwareLogger;
 
+public class SLF4JLoggerFactory implements LoggerFactory {
+	
 	public Logger getLogger(String category) {
-		return new SLF4JLogger(org.slf4j.LoggerFactory.getLogger(category));
+		org.slf4j.Logger slf4jLogger = org.slf4j.LoggerFactory.getLogger(category);
+		if (slf4jLogger instanceof LocationAwareLogger) {
+			return new LocationAwareSLF4JLogger((LocationAwareLogger) slf4jLogger);
+		} else {
+			return new LocationUnawareSLF4JLogger(slf4jLogger);
+		}
+	}
+
+	/**
+	 * Logger where the log entry issuer position (class, method, line number) will
+	 * correctly point to the caller of <tt>LocationAwareSLF4JLogger</tt> methods.
+	 */
+	private static final class LocationAwareSLF4JLogger extends Logger {
+		
+		private static final String ADAPTER_FQCN
+				= LocationAwareSLF4JLogger.class.getName();
+		
+		private final LocationAwareLogger logger;
+		
+		LocationAwareSLF4JLogger(LocationAwareLogger logger) {
+			this.logger = logger;
+		}
+
+		public void debug(String message) {
+			debug(message, null);
+		}
+
+		public void debug(String message, Throwable t) {
+			logger.log(null, ADAPTER_FQCN,
+					LocationAwareLogger.DEBUG_INT, message, null, t);
+		}
+
+		public void info(String message) {
+			info(message, null);
+		}
+
+		public void info(String message, Throwable t) {
+			logger.log(null, ADAPTER_FQCN,
+					LocationAwareLogger.INFO_INT, message, null, t);
+		}
+
+		public void warn(String message) {
+			warn(message, null);
+		}
+
+		public void warn(String message, Throwable t) {
+			logger.log(null, ADAPTER_FQCN,
+					LocationAwareLogger.WARN_INT, message, null, t);
+		}
+
+		public void error(String message) {
+			error(message, null);
+		}
+
+		public void error(String message, Throwable t) {
+			logger.log(null, ADAPTER_FQCN,
+					LocationAwareLogger.ERROR_INT, message, null, t);
+		}
+
+		public boolean isDebugEnabled() {
+			return logger.isDebugEnabled();
+		}
+
+		public boolean isInfoEnabled() {
+			return logger.isInfoEnabled();
+		}
+
+		public boolean isWarnEnabled() {
+			return logger.isWarnEnabled();
+		}
+
+		public boolean isErrorEnabled() {
+			return logger.isErrorEnabled();
+		}
+
+		public boolean isFatalEnabled() {
+			return logger.isErrorEnabled();
+		}
+		
 	}
 	
-	private static class SLF4JLogger extends Logger {
+	/**
+	 * Logger where the log entry issuer position (class, method, line number) will
+	 * unfortunately point to where we call the logger.&lt;level> methods.
+	 */
+	private static class LocationUnawareSLF4JLogger extends Logger {
 		
 		private final org.slf4j.Logger logger;
 
-		SLF4JLogger(org.slf4j.Logger logger) {
+		LocationUnawareSLF4JLogger(org.slf4j.Logger logger) {
 			this.logger = logger;
 		}
 
