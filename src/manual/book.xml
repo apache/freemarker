@@ -8306,7 +8306,7 @@ TemplateHashModel roundingModeEnums =
         here, it is up to you how to build a Web application around
         this.</para>
 
-        <para>But, probably you want to user FreeMarker with some already
+        <para>But, probably you want to use FreeMarker with some already
         existing Web application framework. Many frameworks rely on the
         ``Model 2'' architecture, where JSP pages handle presentation. If you
         use such a framework (for example, <link
