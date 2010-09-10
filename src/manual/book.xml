@@ -784,13 +784,14 @@ All Rights Reserved.
           covers both cases.</phrase></para>
 
           <para>Wherever you refer to a variable, you can specify a default
-          value for the case the variable is missing, by following the variable
-          name with a <literal>!</literal> and the default value. Like in the
-          following example, when <literal>user</literal> is missing from data
-          model, the template will behave like if <literal>user</literal>'s
-          value were the string <literal>"Anonymous"</literal>. (When
-          <literal>user</literal> isn't missing, this template behaves exactly
-          like if <literal>!"Anonymous"</literal> were not there):</para>
+          value for the case the variable is missing, by following the
+          variable name with a <literal>!</literal> and the default value.
+          Like in the following example, when <literal>user</literal> is
+          missing from data model, the template will behave like if
+          <literal>user</literal>'s value were the string
+          <literal>"Anonymous"</literal>. (When <literal>user</literal> isn't
+          missing, this template behaves exactly like if
+          <literal>!"Anonymous"</literal> were not there):</para>
 
           <programlisting role="template">&lt;h1&gt;Welcome ${user<emphasis>!"Anonymous"</emphasis>}!&lt;/h1&gt;</programlisting>
 
@@ -901,9 +902,9 @@ All Rights Reserved.
 
           <programlisting role="template">&lt;#if cargo.weight &lt; <emphasis>100</emphasis>&gt;Light cargo&lt;/#if&gt;</programlisting>
 
-          <para>The temporaly result of a calculations are also called
-          values, like 20 and 120 when this template is executed (it will
-          print 120):</para>
+          <para>The temporaly result of a calculations are also called values,
+          like 20 and 120 when this template is executed (it will print
+          120):</para>
 
           <programlisting role="template">${cargo.weight / 2 + 100}</programlisting>
 
@@ -8702,7 +8703,7 @@ TemplateHashModel roundingModeEnums =
           variables. For the custom JSP tags, the request, session and
           application scopes are exactly the same as with real JSP: the
           attributes of the <literal>javax.servlet.ServletContext</literal>,
-          <literal>HttpSession</literal> and <literal>ServerRequest</literal>
+          <literal>HttpSession</literal> and <literal>ServletRequest</literal>
           objects. From the FTL side you see these 3 scopes together as the
           data-model, as it was explained earlier. The page scope corresponds
           to the FTL global variables (see the <link
@@ -9108,10 +9109,10 @@ grant codeBase "file:/path/to/freemarker.jar"
 
                 <td>Returns a node list containing one string per node
                 describing the type of the node. Possible node type names are:
-                Valid type names are: "attribute", "cdata", "comment",
-                "document", "documentType", "element", "entity",
-                "entityReference", "processingInstruction", "text". If the
-                type of the node is unknown, returns "unknown".</td>
+                "attribute", "cdata", "comment", "document", "documentType",
+                "element", "entity", "entityReference",
+                "processingInstruction", "text". If the type of the node is
+                unknown, returns "unknown".</td>
               </tr>
 
               <tr>
@@ -9636,9 +9637,9 @@ root.put(
 
           <para>As you see, both <literal>doc</literal> and
           <literal>book</literal> can be used as hashes; you get their child
-          nodes as subvariables. Basically, you descriptione the path by which
-          you reach the target (element <literal>title</literal>) in the DOM
-          tree. You may notice that there was some swindle above: with
+          nodes as subvariables. Basically, you describe the path by which you
+          reach the target (element <literal>title</literal>) in the DOM tree.
+          You may notice that there was some swindle above: with
           <literal>${doc.book.title}</literal>, it seems that we instruct
           FreeMarker to print the <literal>title</literal> element itself, but
           we should print its child text node (check the <link
@@ -10328,8 +10329,8 @@ Test Book</programlisting>
             registered a default XML namespace), and names with prefix
             (<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>)
             selects only elements that are belonging to the XML namespace
-            denoted by the prefix. The registarion of prefixes and the setting
-            of the default XML namespace is done with the
+            denoted by the prefix. The registration of prefixes and the
+            setting of the default XML namespace is done with the
             <literal>ns_prefixes</literal> parameter of the <link
             linkend="ref.directive.ftl"><literal>ftl</literal>
             directive</link>.</para>
@@ -10372,7 +10373,7 @@ Test Book</programlisting>
             returns only the attribute that belongs to the XML namespace
             associated with the
             <literal><replaceable>prefix</replaceable></literal>. The
-            registarion of prefixes is done with the
+            registration of prefixes is done with the
             <literal>ns_prefixes</literal> parameter of the <link
             linkend="ref.directive.ftl"><literal>ftl</literal>
             directive</link>.</para>
@@ -11651,7 +11652,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           </indexterm>
 
           <para>The lower case version of the string. For example
-          <literal>"GrEeN MoUsE"</literal> will be <literal>"green
+          <literal>"GrEeN MoUsE"?lower_case</literal> will be <literal>"green
           mouse"</literal>.</para>
         </section>
 
@@ -12537,7 +12538,7 @@ rif: foo XYr baar</programlisting>
           1E-16 will be shown as 0. This built-in is crucial because be
           default (like with <literal>${x}</literal>) numbers are converted to
           strings with the locale (language, country) specific number
-          formatting, which is for human readers (like 300000 is possibly
+          formatting, which is for human readers (like 3000000 is possibly
           printed as 3,000,000). When the number is printed not for human
           audience (e.g., for a database record ID used as the part of an URL,
           or as invisible field value in a HTML form, or for printing
@@ -12675,7 +12676,7 @@ ${12345?string("0.##E0")}</programlisting>
           1.5 and of 2.5, as both were rounded to 2, since 2 is even, but 1
           and 3 are odds.</para>
 
-          <para>Appart from the Java decimal syntax patterns, you can also
+          <para>Apart from the Java decimal syntax patterns, you can also
           write <literal>${aNumber?string("currency")}</literal> and like,
           that will do the same as
           <literal>${aNumber?string.currency}</literal> and like.</para>
@@ -12702,9 +12703,6 @@ Hungarian people write: ${12345678?string(",##0.00")}</programlisting>
 
           <programlisting role="output">US people write:        12,345,678.00
 Hungarian people write: 12 345 678,00</programlisting>
-
-          <para>You can find information about the formatting of dates <link
-          linkend="ref_builtin_string_for_date">here</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_rounding">
@@ -14643,7 +14641,7 @@ or
           parameter) into your template. The output from the included template
           is inserted at the point where the <literal>include</literal> tag
           occurs. The included file shares the variables with the including
-          template, similarly like if it was copy-pased into it. The
+          template, similarly like if it was copy-pasted into it. The
           <literal>include</literal> directive is not replaced by the content
           of the included file, it just processes the included file each time
           when FreeMarker reaches the <literal>include</literal> directive in
@@ -14840,15 +14838,6 @@ All rights reserved.</emphasis></programlisting>
             programmer wrote and he chooses a locale for the template based on
             some aspect. For example, when the
             <literal>FreemarkerServlet</literal> loads templates, it always
-            requests the template with locale matching the language preference
-            of the browser that requested the web page.</para>
-
-            <para>Whenever a template is loaded, it is assigned a locale. A
-            locale is a language and an optional country or dialect
-            identifier. A template is typically loaded by some code that the
-            programmer wrote and he chooses a locale for the template based on
-            some aspect. For example, when the
-            <literal>FreeMarkerServlet</literal> loads templates, it always
             requests the template with locale matching the language preference
             of the browser that requested the web page.</para>
 
@@ -16870,15 +16859,6 @@ or
           <primary>error handling</primary>
         </indexterm>
 
-        <note>
-          <para>The above format is supported starting from 2.3.3, earlier it
-          was
-          <literal>&lt;#attempt&gt;<replaceable>...</replaceable>&lt;#recover&gt;<replaceable>...</replaceable>&lt;/#recover&gt;</literal>,
-          which is still supported for backward compatibility. Furthermore,
-          these directives were introduced with FreeMarker 2.3.1, so they
-          aren't exist in 2.3.</para>
-        </note>
-
         <section>
           <title>Synopsis</title>
 
@@ -16918,6 +16898,15 @@ or
           be nested freely into other <literal><replaceable>attempt
           block</replaceable></literal>s or <literal><replaceable>recover
           block</replaceable></literal>s.</para>
+
+          <note>
+            <para>The format shown here is supported starting from 2.3.3;
+            earlier it was
+            <literal>&lt;#attempt&gt;<replaceable>...</replaceable>&lt;#recover&gt;<replaceable>...</replaceable>&lt;/#recover&gt;</literal>,
+            which is still supported for backward compatibility. Furthermore,
+            these directives were introduced with FreeMarker 2.3.1, so they
+            aren't exist in 2.3.</para>
+          </note>
         </section>
 
         <section>
@@ -18212,7 +18201,7 @@ or
               </listitem>
 
               <listitem>
-                <para>Its syntax doesn't follow the HTML/XML rules appart from
+                <para>Its syntax doesn't follow the HTML/XML rules apart from
                 some visual similarity, which is confusing for new users.
                 (It's the price of the terseness...)</para>
               </listitem>
