@@ -54,6 +54,7 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.*;
 
 import freemarker.template.*;
@@ -92,6 +93,7 @@ public class Configurable
     public static final String OUTPUT_ENCODING_KEY = "output_encoding";
     public static final String URL_ESCAPING_CHARSET_KEY = "url_escaping_charset";
     public static final String STRICT_BEAN_MODELS = "strict_bean_models";
+    public static final String AUTO_FLUSH_KEY = "auto_flush";
 
     private static final char COMMA = ',';
     
@@ -115,6 +117,7 @@ public class Configurable
     private boolean outputEncodingSet;
     private String urlEscapingCharset;
     private boolean urlEscapingCharsetSet;
+    private Boolean autoFlush;
     
     public Configurable() {
         parent = null;
@@ -130,6 +133,7 @@ public class Configurable
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
+        autoFlush = Boolean.TRUE;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         
@@ -144,6 +148,7 @@ public class Configurable
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
         properties.setProperty(BOOLEAN_FORMAT_KEY, "true,false");
+        properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         // as outputEncoding and urlEscapingCharset defaults to null, 
         // they are not set
         
@@ -498,6 +503,38 @@ public class Configurable
     }
     
     /**
+     * See {@link #setAutoFlush(boolean)}
+     * 
+     * @since 2.3.17
+     */
+    public boolean getAutoFlush() {
+        return autoFlush != null 
+            ? autoFlush.booleanValue()
+            : (parent != null ? parent.getAutoFlush() : true);
+    }
+
+    /**
+     * Sets whether the output {@link Writer} is automatically flushed at
+     * the end of {@link Template#process(Object, Writer)} (and its
+     * overloads). The default is {@code true}.
+     * 
+     * <p>Using {@code false} is needed for example when a Web page is composed
+     * from several boxes (like portlets, GUI panels, etc.) that aren't inserted
+     * with <tt>#include</tt> (or with similar directives) into a master
+     * FreeMarker template, rather they are all processed with a separate
+     * {@link Template#process(Object, Writer)} call. In a such scenario the
+     * automatic flushes would commit the HTTP response after each box, hence
+     * interfering with full-page buffering, and also possibly decreasing
+     * performance with too frequent and too early response buffer flushes.
+     * 
+     * @since 2.3.17
+     */
+    public void setAutoFlush(boolean autoFlush) {
+        this.autoFlush = autoFlush ? Boolean.TRUE : Boolean.FALSE;
+        properties.setProperty(AUTO_FLUSH_KEY, String.valueOf(autoFlush));
+    }
+    
+    /**
      * Sets a setting by a name and string value.
      * 
      * <p>List of supported names and their valid values:
@@ -539,6 +576,7 @@ public class Configurable
      *   <li><code>"url_escaping_charset"</code>: If this setting is set, then it
      *       overrides the value of the <code>"output_encoding"</code> setting when
      *       FreeMarker does URL encoding.
+     *   <li><code>"auto_flush"</code>: see {@link #setAutoFlush(boolean)}
      * </ul>
      * 
      * @param key the name of the setting.
@@ -629,12 +667,11 @@ public class Configurable
                 setURLEscapingCharset(value);
             } else if (STRICT_BEAN_MODELS.equals(key)) {
 		setStrictBeanModels(StringUtil.getYesNo(value));
-	    }
-	    else {
+	    } else if (AUTO_FLUSH_KEY.equals(key)) {
+		setAutoFlush(StringUtil.getYesNo(value));
+	    } else {
                 throw unknownSettingException(key);
             }
-        } catch(TemplateException e) {
-            throw e;
         } catch(Exception e) {
             throw new TemplateException(
                     "Failed to set setting " + key + " to value " + value,

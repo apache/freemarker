@@ -188,8 +188,10 @@ public final class Environment extends Configurable {
             try {
                 doAutoImportsAndIncludes(this);
                 visit(getTemplate().getRootTreeNode());
-                // Do not flush if there was an exception.
-                out.flush();
+                // It's here as we must not flush if there was an exception.
+                if (getAutoFlush()) {
+                    out.flush();
+                }
             } finally {
                 // It's just to allow the GC to free memory...
                 clearCachedValues();

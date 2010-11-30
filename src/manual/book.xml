@@ -19480,6 +19480,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               automatically (until 2.4); <link linkend="pgui_misc_logging">see
               more here...</link></para>
             </listitem>
+
+            <listitem>
+              <para>New setting: <literal>"auto_flush"</literal>,
+              <literal>Configurable.setAutoFlush(boolean)</literal>. Sets
+              whether the output <literal>Writer</literal> is automatically
+              flushed at the end of <literal>Template.process(Object,
+              Writer)</literal> (and its overloads). The default is
+              <literal>true</literal>, which corresponds to the earlier
+              behavior. Using <literal>false</literal> is needed for example
+              when a Web page is composed from several boxes (like portlets,
+              GUI panels, etc.) that aren't inserted with
+              <literal>#include</literal> (or with similar directives) into a
+              master FreeMarker template, rather they are all processed with a
+              separate
+              <literal>Template.process(<replaceable>...</replaceable>)</literal>
+              call. In a such scenario the automatic flushes would commit the
+              HTTP response after each box, hence interfering with full-page
+              buffering, and also possibly decreasing performance with too
+              frequent and too early response buffer flushes.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
