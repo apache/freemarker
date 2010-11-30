@@ -437,8 +437,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * @return whether the alternative square bracket
-     * syntax is set as the default
+     * See {@link #setTagSyntax(int)} to see the returned number.
      */
     public int getTagSyntax() {
         return tagSyntax;
