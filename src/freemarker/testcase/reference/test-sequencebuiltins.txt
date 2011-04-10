@@ -36,6 +36,12 @@ Date/time order:
 - 08:15
 - 18:00
 
+Boolean order:
+- false
+- false
+- true
+- true
+
 
 Sorting hashes:
 ---------------

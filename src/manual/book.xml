@@ -13342,12 +13342,15 @@ No 2nd param: ${names?seq_last_index_of("Joe")}
             <secondary>sorting</secondary>
           </indexterm>
 
-          <para>Returns the sequence sorted in ascending order. This will work
-          only if all subvariables are strings, or if all subvariables are
-          numbers, or, since FreeMarker 2.3.1, if all subvariables are date
-          values (date, time, or date+time). If the subvariables are strings,
-          it uses locale (language) specific lexical sorting (which is usually
-          not case sensitive). For example:</para>
+          <para>Returns the sequence sorted in ascending order. (For
+          descending order use this and then the <link
+          linkend="ref_builtin_reverse"><literal>reverse</literal> built
+          in</link>.) This will work only if all subvariables are strings, or
+          if all subvariables are numbers, or if all subvariables are date
+          values (date, time, or date+time), or if all subvariables are
+          booleans (since 2.3.17). If the subvariables are strings, it uses
+          locale (language) specific lexical sorting (which is usually not
+          case sensitive). For example:</para>
 
           <programlisting role="template">&lt;#assign ls = ["whale", "Barbara", "zeppelin", "aardvark", "beetroot"]?sort&gt;
 &lt;#list ls as i&gt;${i} &lt;/#list&gt;</programlisting>
@@ -13371,10 +13374,14 @@ No 2nd param: ${names?seq_last_index_of("Joe")}
           </indexterm>
 
           <para>Returns the sequence of hashes sorted by the given hash
-          subvariable in ascending order. The rules are the same as with the
-          <literal>sort</literal> built-in, except that the subvariables of
-          the sequence must be hashes, and you have to give the name of a hash
-          subvariable that will decide the order. For example:</para>
+          subvariable in ascending order. (For descending order use this and
+          then the <link
+          linkend="ref_builtin_reverse"><literal>reverse</literal> built
+          in</link>.) The rules are the same as with the <link
+          linkend="ref_builtin_sort"><literal>sort</literal> built-in</link>,
+          except that the subvariables of the sequence must be hashes, and you
+          have to give the name of a hash subvariable that will decide the
+          order. For example:</para>
 
           <programlisting role="template">&lt;#assign ls = [
   {"name":"whale", "weight":2000},
@@ -13409,11 +13416,11 @@ Order by weight:
 - Barbara: 53
 - whale: 2000</programlisting>
 
-          <para>Since FreeMarker 2.3.1, if the subvariable that you want to
-          use for the sorting is on a deeper level (that is, if it is a
-          subvariable of a subvariable and so on), then you can use a sequence
-          as parameter, that specifies the names of the subvariables that lead
-          down to the desired subvariable. For example:</para>
+          <para>If the subvariable that you want to use for the sorting is on
+          a deeper level (that is, if it is a subvariable of a subvariable and
+          so on), then you can use a sequence as parameter, that specifies the
+          names of the subvariables that lead down to the desired subvariable.
+          For example:</para>
 
           <programlisting role="template">&lt;#assign members = [
     {"name": {"first": "Joe", "last": "Smith"}, "age": 40},
@@ -19468,7 +19475,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_17">
         <title>2.3.17</title>
 
-        <para>Date of release: FIXME</para>
+        <para>Date of release: 2011-FIXME</para>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>The <literal>sort</literal> and <literal>sort_by</literal>
+              built-ins now support sorting boolean values. </para>
+            </listitem>
+          </itemizedlist>
+        </section>
 
         <section>
           <title>Changes on the Java side</title>

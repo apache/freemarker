@@ -153,17 +153,44 @@ abstract class SequenceBuiltins {
 
     static class sortBI extends SequenceBuiltIn {
         
+        static final int KEY_TYPE_NOT_YET_DETECTED = 0;
         static final int KEY_TYPE_STRING = 1;
         static final int KEY_TYPE_NUMBER = 2;
         static final int KEY_TYPE_DATE = 3;
+        static final int KEY_TYPE_BOOLEAN = 4;
         
         TemplateModel calculateResult(TemplateSequenceModel seq)
                 throws TemplateModelException {
             return sort(seq, null);
         }
+
+        static String startErrorMessage(int keyNamesLn) {
+            return (keyNamesLn == 0 ? "?sort" : "?sort_by(...)") + " failed: ";
+        }
+
+        static String startErrorMessage(int keyNamesLn, int index) {
+            return (keyNamesLn == 0 ? "?sort" : "?sort_by(...)")
+                    + " failed at sequence index " + index
+                    + (index == 0 ? ": " : " (0-based): ");
+        }
         
-        static String startErrorMessage(Object keys) {
-            return (keys == null ? "?sort" : "?sort_by(...)") + " failed: ";
+        static TemplateModelException newInconsistentSortKeyTypeException(
+                int keyNamesLn, String firstType, String firstTypePlural, int index) {
+            String valueInMsg;
+            String valuesInMsg;
+            if (keyNamesLn == 0) {
+                valueInMsg  = "value";
+                valuesInMsg  = "values";
+            } else {
+                valueInMsg  = "key value";
+                valuesInMsg  = "key values";
+            }
+            return new TemplateModelException(
+                    startErrorMessage(keyNamesLn, index)
+                    + "All " + valuesInMsg + " in the sequence must be "
+                    + firstTypePlural + ", because the first " + valueInMsg
+                    + " was that. However, the " + valueInMsg
+                    + " of the current item isn't a " + firstType + ".");
         }
         
         /**
@@ -171,7 +198,7 @@ abstract class SequenceBuiltins {
          * built-ins.
          * 
          * @param seq the sequence to sort.
-         * @param keys the name of the subvariable whose value is used for the
+         * @param keyNames the name of the subvariable whose value is used for the
          *     sorting. If the sorting is done by a sub-subvaruable, then this
          *     will be of length 2, and so on. If the sorting is done by the
          *     sequene items directly, then this argument has to be 0 length
@@ -179,244 +206,152 @@ abstract class SequenceBuiltins {
          * @return a new sorted sequence, or the original sequence if the
          *     sequence length was 0.
          */
-        static TemplateSequenceModel sort(TemplateSequenceModel seq, String[] keys)
+        static TemplateSequenceModel sort(TemplateSequenceModel seq, String[] keyNames)
                 throws TemplateModelException {
-            int i;
-            int keyCnt;
-
             int ln = seq.size();
-            if (ln == 0) {
-                return seq;
-            }
+            if (ln == 0) return seq;
             
-            List res = new ArrayList(ln);
-            Object item;
-            item = seq.get(0);
-            if (keys != null) {
-                keyCnt = keys.length;
-                if (keyCnt == 0) {
-                    keys = null;
-                } else {
-                    for (i = 0; i < keyCnt; i++) {
-                        if (!(item instanceof TemplateHashModel)) {
+            ArrayList res = new ArrayList(ln);
+
+            int keyNamesLn = keyNames == null ? 0 : keyNames.length;
+
+            // Copy the Seq into a Java List[KVP] (also detects key type at the 1st item):
+            int keyType = KEY_TYPE_NOT_YET_DETECTED;
+            Comparator keyComparator = null;
+            for (int i = 0; i < ln; i++) {
+                TemplateModel item = seq.get(i);
+                
+                Object key = item;
+                for (int keyNameI = 0; keyNameI < keyNamesLn; keyNameI++) {
+                    try {
+                        key = ((TemplateHashModel) key).get(keyNames[keyNameI]);
+                    } catch (ClassCastException e) {
+                        if (!(key instanceof TemplateHashModel)) {
                             throw new TemplateModelException(
-                                    startErrorMessage(keys)
-                                    + (i == 0
-                                            ? "You can't use ?sort_by when the "
-                                              + "sequence items are not hashes."
-                                            : "The subvariable "
-                                              + StringUtil.jQuote(keys[i - 1])
-                                              + " is not a hash, so ?sort_by "
-                                              + "can't proceed by getting the "
-                                              + StringUtil.jQuote(keys[i])
+                                    startErrorMessage(keyNamesLn, i)
+                                    + (keyNameI == 0
+                                            ? "Sequence items must be hashes when using ?sort_by. "
+                                            : "The " + StringUtil.jQuote(keyNames[keyNameI - 1])
+                                              + " subvariable is not a hash, so ?sort_by "
+                                              + "can't proceed with getting the "
+                                              + StringUtil.jQuote(keyNames[keyNameI])
                                               + " subvariable."));
+                        } else {
+                            throw e;
                         }
-                        
-                        item = ((TemplateHashModel) item).get(keys[i]);
-                        if (item == null) {
-                            throw new TemplateModelException(
-                                    startErrorMessage(keys)
-                                    + "The " + StringUtil.jQuote(keys[i])
-                                    + " subvariable "
-                                    + (keyCnt == 1
-                                        ? "was not found."
-                                        : "(specified by ?sort_by argument number "
-                                          + (i + 1) + ") was not found."));
-                        }
+                    }
+                    if (key == null) {
+                        throw new TemplateModelException(
+                                startErrorMessage(keyNamesLn, i)
+                                + "The " + StringUtil.jQuote(keyNames[keyNameI])
+                                + " subvariable was not found.");
+                    }
+                } // for each key
+                
+                if (keyType == KEY_TYPE_NOT_YET_DETECTED) {
+                    if (key instanceof TemplateScalarModel) {
+                        keyType = KEY_TYPE_STRING;
+                        keyComparator = new LexicalKVPComparator(
+                                Environment.getCurrentEnvironment().getCollator());
+                    } else if (key instanceof TemplateNumberModel) {
+                        keyType = KEY_TYPE_NUMBER;
+                        keyComparator = new NumericalKVPComparator(
+                                Environment.getCurrentEnvironment()
+                                        .getArithmeticEngine());
+                    } else if (key instanceof TemplateDateModel) {
+                        keyType = KEY_TYPE_DATE;
+                        keyComparator = new DateKVPComparator();
+                    } else if (key instanceof TemplateBooleanModel) {
+                        keyType = KEY_TYPE_BOOLEAN;
+                        keyComparator = new BooleanKVPComparator();
+                    } else {
+                        throw new TemplateModelException(
+                                startErrorMessage(keyNamesLn, i)
+                                + "Values used for sorting must be numbers, strings, "
+                                + "date/times or booleans.");
                     }
                 }
-            } else {
-                keyCnt = 0;
-            }
-
-            int keyType;
-            if (item instanceof TemplateScalarModel) {
-                keyType = KEY_TYPE_STRING;
-            } else if (item instanceof TemplateNumberModel) {
-                keyType = KEY_TYPE_NUMBER;
-            } else if (item instanceof TemplateDateModel) {
-                keyType = KEY_TYPE_DATE;
-            } else {
-                throw new TemplateModelException(
-                        startErrorMessage(keys)
-                        + "Values used for sorting must be numbers, strings, or date/time values.");
-            }
-
-            if (keys == null) {
-                if (keyType == KEY_TYPE_STRING) {
-                    for (i = 0; i < ln; i++) {
-                        item = seq.get(i);
-                        try {
-                            res.add(new KVP(
-                                    ((TemplateScalarModel) item).getAsString(),
-                                    item));
-                        } catch (ClassCastException e) {
-                            if (!(item instanceof TemplateScalarModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(null)
-                                        + "All values in the sequence must be "
-                                        + "strings, because the first value "
-                                        + "was a string. "
-                                        + "The value at index " + i
-                                        + " is not string.");
-                            } else {
-                                throw e;
-                            }
-                        }
-                    }
-                } else if (keyType == KEY_TYPE_NUMBER) {
-                    for (i = 0; i < ln; i++) {
-                        item = seq.get(i);
-                        try {
-                            res.add(new KVP(
-                                    ((TemplateNumberModel) item).getAsNumber(),
-                                    item));
-                        } catch (ClassCastException e) {
-                            if (!(item instanceof TemplateNumberModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(null)
-                                        + "All values in the sequence must be "
-                                        + "numbers, because the first value "
-                                        + "was a number. "
-                                        + "The value at index " + i
-                                        + " is not number.");
-                            } else {
-                                throw e;
-                            }
-                        }
-                    }
-                } else if (keyType == KEY_TYPE_DATE) {
-                    for (i = 0; i < ln; i++) {
-                        item = seq.get(i);
-                        try {
-                            res.add(new KVP(
-                                    ((TemplateDateModel) item).getAsDate(),
-                                    item));
-                        } catch (ClassCastException e) {
-                            if (!(item instanceof TemplateNumberModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(null)
-                                        + "All values in the sequence must be "
-                                        + "date/time values, because the first "
-                                        + "value was a date/time. "
-                                        + "The value at index " + i
-                                        + " is not date/time.");
-                            } else {
-                                throw e;
-                            }
-                        }
-                    }
-                } else {
-                    throw new RuntimeException("FreeMarker bug: Bad key type");
-                }
-            } else {
-                for (i = 0; i < ln; i++) {
-                    item = seq.get(i);
-                    Object key = item;
-                    for (int j = 0; j < keyCnt; j++) {
-                        try {
-                            key = ((TemplateHashModel) key).get(keys[j]);
-                        } catch (ClassCastException e) {
-                            if (!(key instanceof TemplateHashModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(keys)
-                                        + "Problem with the sequence item at index " + i + ": "
-                                        + "Can't get the " + StringUtil.jQuote(keys[j])
-                                        + " subvariable, because the value is not a hash.");
-                            } else {
-                                throw e;
-                            }
-                        }
-                        if (key == null) {
-                            throw new TemplateModelException(
-                                    startErrorMessage(keys)
-                                    + "Problem with the sequence item at index " + i + ": "
-                                    + "The " + StringUtil.jQuote(keys[j])
-                                    + " subvariable was not found.");
-                        }
-                    }
-                    if (keyType == KEY_TYPE_STRING) {
+                switch(keyType) {
+                    case KEY_TYPE_STRING:
                         try {
                             res.add(new KVP(
                                     ((TemplateScalarModel) key).getAsString(),
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateScalarModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(keys)
-                                        + "All key values in the sequence must be "
-                                        + "date/time values, because the first key "
-                                        + "value was a date/time. The key value at "
-                                        + "index " + i + " is not a date/time.");
+                                throw newInconsistentSortKeyTypeException(
+                                        keyNamesLn, "string", "strings", i);
                             } else {
                                 throw e;
                             }
                         }
-                    } else if (keyType == KEY_TYPE_NUMBER) {
+                        break;
+                        
+                    case KEY_TYPE_NUMBER:
                         try {
                             res.add(new KVP(
                                     ((TemplateNumberModel) key).getAsNumber(),
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateNumberModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(keys)
-                                        + "All key values in the sequence must be "
-                                        + "numbers, because the first key "
-                                        + "value was a number. The key value at "
-                                        + "index " + i + " is not a number.");
+                                throw newInconsistentSortKeyTypeException(
+                                        keyNamesLn, "number", "numbers", i);
                             }
                         }
-                    } else if (keyType == KEY_TYPE_DATE) {
+                        break;
+                        
+                    case KEY_TYPE_DATE:
                         try {
                             res.add(new KVP(
                                     ((TemplateDateModel) key).getAsDate(),
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateDateModel)) {
-                                throw new TemplateModelException(
-                                        startErrorMessage(keys)
-                                        + "All key values in the sequence must be "
-                                        + "dates, because the first key "
-                                        + "value was a date. The key value at "
-                                        + "index " + i + " is not a date.");
+                                throw newInconsistentSortKeyTypeException(
+                                        keyNamesLn, "date/time", "date/times", i);
                             }
                         }
-                    } else {
-                        throw new RuntimeException("FreeMarker bug: Bad key type");
-                    }
+                        break;
+                        
+                    case KEY_TYPE_BOOLEAN:
+                        try {
+                            res.add(new KVP(
+                                    ((TemplateBooleanModel) key).getAsBoolean() ?
+                                            Boolean.TRUE : Boolean.FALSE,
+                                    item));
+                        } catch (ClassCastException e) {
+                            if (!(key instanceof TemplateBooleanModel)) {
+                                throw newInconsistentSortKeyTypeException(
+                                        keyNamesLn, "boolean", "booleans", i);
+                            }
+                        }
+                        break;
+                        
+                    default:
+                        throw new RuntimeException("FreeMarker bug: Unexpected key type");
                 }
             }
 
-            Comparator cmprtr;
-            if (keyType == KEY_TYPE_STRING) {
-                cmprtr = new LexicalKVPComparator(
-                        Environment.getCurrentEnvironment().getCollator());
-            } else if (keyType == KEY_TYPE_NUMBER) {
-                cmprtr = new NumericalKVPComparator(
-                        Environment.getCurrentEnvironment()
-                                .getArithmeticEngine());
-            } else if (keyType == KEY_TYPE_DATE) {
-                cmprtr = new DateKVPComparator();
-            } else {
-                throw new RuntimeException("FreeMarker bug: Bad key type");
-            }
-
+            // Sort tje List[KVP]:
             try {
-                Collections.sort(res, cmprtr);
-            } catch (ClassCastException exc) {
+                Collections.sort(res, keyComparator);
+            } catch (Exception exc) {
                 throw new TemplateModelException(
-                        startErrorMessage(keys)
+                        startErrorMessage(keyNamesLn)
                         + "Unexpected error while sorting:" + exc, exc);
             }
 
-            for (i = 0; i < ln; i++) {
+            // Convert the List[KVP] to List[V]:
+            for (int i = 0; i < ln; i++) {
                 res.set(i, ((KVP) res.get(i)).value);
             }
 
             return new TemplateModelListSequence(res);
         }
 
+        /**
+         * Stores a key-value pair.
+         */
         private static class KVP {
             private KVP(Object key, Object value) {
                 this.key = key;
@@ -467,11 +402,24 @@ abstract class SequenceBuiltins {
             }
         }
         
+        private static class BooleanKVPComparator implements Comparator, Serializable {
+
+            public int compare(Object arg0, Object arg1) {
+                // JDK 1.2 doesn't have Boolean.compareTo
+                boolean b0 = ((Boolean) ((KVP) arg0).key).booleanValue();
+                boolean b1 = ((Boolean) ((KVP) arg1).key).booleanValue();
+                if (b0) {
+                    return b1 ? 0 : 1;
+                } else {
+                    return b1 ? -1 : 0;
+                }
+            }
+        }
+        
     }
     
     static class sort_byBI extends sortBI {
-        TemplateModel calculateResult(TemplateSequenceModel seq)
-        {
+        TemplateModel calculateResult(TemplateSequenceModel seq) {
             return new BIMethod(seq);
         }
         

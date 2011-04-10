@@ -40,6 +40,16 @@ Date/time order:
 - ${i?string('HH:mm')}
 </#list>
 
+Boolean order:
+<#assign x = [
+        true,
+        false,
+        false,
+        true]>
+<#list x?sort as i>
+- ${i?string}
+</#list>
+
 
 Sorting hashes:
 ---------------
