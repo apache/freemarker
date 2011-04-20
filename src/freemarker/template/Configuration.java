@@ -297,6 +297,13 @@ public class Configuration extends Configurable implements Cloneable {
         return cache.getTemplateLoader();
     }
 
+    /**
+     * Sets the {@link CacheStorage} used for caching {@link Template}-s. The
+     * default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
+     * objects is significant but most templates are used rarely, using a
+     * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
+     * all, use {@link freemarker.cache.NullCacheStorage} (you can't use <tt>null</tt>).
+     */
     public synchronized void setCacheStorage(CacheStorage storage) {
         createTemplateCache(cache.getTemplateLoader(), storage);
     }
@@ -442,7 +449,7 @@ public class Configuration extends Configurable implements Cloneable {
     public int getTagSyntax() {
         return tagSyntax;
     }
-
+    
     /**
      * Equivalent to <tt>getTemplate(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
      */
@@ -702,7 +709,7 @@ public class Configuration extends Configurable implements Cloneable {
      *       </table>
      *       The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
      *       entries is not significant.
-     *       See also: {@link #setCacheStorage}
+     *       For more details see: {@link #setCacheStorage}
      *   <li><code>"template_update_delay"</code>: Valid positive integer, the
      *       update delay measured in seconds.
      *       See: {@link #setTemplateUpdateDelay}

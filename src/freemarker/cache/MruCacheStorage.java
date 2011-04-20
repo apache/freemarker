@@ -83,8 +83,10 @@ import java.util.Map;
  * recently used references, so you can get reasonably good (and 
  * memory-sensitive) most-recently-used caching through 
  * {@link SoftCacheStorage} as well.
+ *
+ * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
+ *
  * @author Attila Szegedi
- * @version $Id: MruCacheStorage.java,v 1.7.2.1 2007/04/02 13:07:32 szegedia Exp $
  */
 public class MruCacheStorage implements CacheStorage
 {

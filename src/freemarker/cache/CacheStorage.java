@@ -59,8 +59,10 @@ package freemarker.cache;
  * The implementations can be coded in a non-threadsafe manner as the natural
  * user of the cache storage, {@link TemplateCache} does the necessary
  * synchronization.
+ *
+ * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
+ *
  * @author Attila Szegedi
- * @version $Id: CacheStorage.java,v 1.2 2003/08/08 10:10:58 szegedia Exp $
  */
 public interface CacheStorage
 {

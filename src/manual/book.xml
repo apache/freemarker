@@ -19478,12 +19478,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Date of release: 2011-FIXME</para>
 
         <section>
-          <title>Changes on the Java side</title>
+          <title>Changes on the FTL side</title>
 
           <itemizedlist>
             <listitem>
               <para>The <literal>sort</literal> and <literal>sort_by</literal>
-              built-ins now support sorting boolean values. </para>
+              built-ins now support sorting boolean values.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -19493,10 +19493,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>FreeMarker now can log its messages using SLF4J or Apache
-              Commons Logging. However, it will not use these logger libraries
-              automatically (until 2.4); <link linkend="pgui_misc_logging">see
-              more here...</link></para>
+              <para>FreeMarker now can log its messages directly using SLF4J
+              or Apache Commons Logging. However, it will not use these logger
+              libraries automatically (until 2.4); <link
+              linkend="pgui_misc_logging">see more here...</link></para>
             </listitem>
 
             <listitem>
@@ -19517,6 +19517,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               HTTP response after each box, hence interfering with full-page
               buffering, and also possibly decreasing performance with too
               frequent and too early response buffer flushes.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>freemarker.cache.NullCacheStorage</literal>: Setting
+              this as the cache storage in <literal>Configuration</literal>
+              disables caching.</para>
             </listitem>
           </itemizedlist>
         </section>

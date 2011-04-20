@@ -69,9 +69,10 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * This class is thread-safe to the extent that its underlying map is. The 
  * default implementation uses a concurrent map on Java 5 and above, so it is
  * thread-safe in that case.
- * @author Attila Szegedi
- * @version $Id: SoftCacheStorage.java,v 1.4 2003/09/22 20:47:03 ddekany Exp $
  *
+ * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
+ *
+ * @author Attila Szegedi
  */
 public class SoftCacheStorage implements ConcurrentCacheStorage
 {

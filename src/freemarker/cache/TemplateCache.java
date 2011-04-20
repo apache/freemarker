@@ -73,9 +73,11 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * The actual loading is delegated to a {@link TemplateLoader}. Also,
  * various constructors provide you with convenient caches with predefined
  * behavior. Typically you don't use this class directly - in normal
- * circumstances it is hidden behind a {@link Configuration}.
- * @author Attila Szegedi, szegedia at freemail dot hu
- * @version $Id: TemplateCache.java,v 1.62.2.2 2007/04/03 18:06:07 szegedia Exp $
+ * circumstances it is hidden behind a {@link Configuration}. However,
+ * the {@link CacheStorage} it uses can be set with
+ * {@link freemarker.template.Configuration#setCacheStorage(CacheStorage)}
+ *
+ * @author Attila Szegedi
  */
 public class TemplateCache
 {
