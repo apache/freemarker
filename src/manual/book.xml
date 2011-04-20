@@ -8269,7 +8269,7 @@ TemplateHashModel roundingModeEnums =
         method on the <literal>freemarker.log.Logger</literal> class and pass
         it a string that will be used to prefix the above mentioned logger
         names. This is useful if you want to have separate loggers on a
-        per-web-application basis (assuming the application uses is own local
+        per-web-application basis (assuming the application uses its own local
         <literal>freemarker.jar</literal>). Also, you can disable logging with
         <literal>Logger.selectLoggerLibrary(Logger.LIBRARY_NONE)</literal>. In
         any case, <literal>selectLoggerLibrary</literal> must be called early,
