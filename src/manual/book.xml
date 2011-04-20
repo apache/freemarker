@@ -8201,13 +8201,17 @@ TemplateHashModel roundingModeEnums =
         <note>
           <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging
           aren't searched automatically due to backward compatibility
-          constraints, so to use them you must do this:</para>
+          constraints, so to use one of them you must do this:</para>
 
           <programlisting role="unspecified">import freemarker.log.Logger;
 ...
     // IMPORTANT: This should be executed before using other FreeMarker classes!
     Logger.selectLoggerLibrary(Logger.LIBRARY_SLF4J);  // or Logger.LIBRARY_COMMONS
 ...</programlisting>
+
+          <para>Doing this is recommended, because starting from 2.4 SLF4J
+          will be used by default if present, otherwise Apache Commons Logging
+          if present, otherwise Log4J if present, etc.</para>
         </note>
 
         <para>All log messages produced by FreeMarker are logged into the
@@ -8255,7 +8259,8 @@ TemplateHashModel roundingModeEnums =
             <tr>
               <td><literal>freemarker.servlet</literal></td>
 
-              <td>Logs messages of the FreemarkerServlet class.</td>
+              <td>Logs messages of the <literal>FreemarkerServlet</literal>
+              class.</td>
             </tr>
           </tbody>
         </informaltable>
@@ -8264,7 +8269,12 @@ TemplateHashModel roundingModeEnums =
         method on the <literal>freemarker.log.Logger</literal> class and pass
         it a string that will be used to prefix the above mentioned logger
         names. This is useful if you want to have separate loggers on a
-        per-application basis.</para>
+        per-web-application basis (assuming the application uses is own local
+        <literal>freemarker.jar</literal>). Also, you can disable logging with
+        <literal>Logger.selectLoggerLibrary(Logger.LIBRARY_NONE)</literal>. In
+        any case, <literal>selectLoggerLibrary</literal> must be called early,
+        before FreeMarker could log anything, or else it will not have
+        (consistent) effect.</para>
       </section>
 
       <section xml:id="pgui_misc_servlet">
@@ -19495,7 +19505,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>FreeMarker now can log its messages directly using SLF4J
               or Apache Commons Logging. However, it will not use these logger
-              libraries automatically (until 2.4); <link
+              libraries automatically, until 2.4; <link
               linkend="pgui_misc_logging">see more here...</link></para>
             </listitem>
 
