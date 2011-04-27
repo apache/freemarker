@@ -19485,7 +19485,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_17">
         <title>2.3.17</title>
 
-        <para>Date of release: 2011-FIXME</para>
+        <para>Date of release: 2011-05-FIXME</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -19506,7 +19506,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>FreeMarker now can log its messages directly using SLF4J
               or Apache Commons Logging. However, it will not use these logger
               libraries automatically, until 2.4; <link
-              linkend="pgui_misc_logging">see more here...</link></para>
+              linkend="pgui_misc_logging">see more here...</link> But it's
+              recommended to switch to SLF4J now.</para>
             </listitem>
 
             <listitem>
@@ -19534,6 +19535,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>freemarker.cache.NullCacheStorage</literal>: Setting
               this as the cache storage in <literal>Configuration</literal>
               disables caching.</para>
+            </listitem>
+
+            <listitem>
+              <para>Log messages doesn't contain line-breaks (CR or LF)
+              anymore. This is most noticeable on template processing error
+              entries, which will now quote the exception message as a Java
+              string literal. Note that how stack traces are logged is still
+              up to the logger you are using; this all only applies to the
+              message part.</para>
             </listitem>
           </itemizedlist>
         </section>

@@ -66,6 +66,7 @@ import freemarker.core.Environment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -248,7 +249,9 @@ public class TemplateCache
     throws IOException
     {
         boolean debug = logger.isDebugEnabled();
-        String debugName = debug ? name + "[" + locale + "," + encoding + (parse ? ",parsed] " : ",unparsed] ") : null;
+        String debugName = debug
+                ? StringUtil.jQuote(name) + "[" + locale + "," + encoding + (parse ? ",parsed] " : ",unparsed] ")
+                : null;
         TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
         
         CachedTemplate cachedTemplate;
@@ -320,8 +323,8 @@ public class TemplateCache
                     if(debug && !sourceEquals) {
                         logger.debug("Updating source, info for cause: " + 
                             "sourceEquals=" + sourceEquals + 
-                            ", newlyFoundSource=" + newlyFoundSource + 
-                            ", cachedTemplate.source=" + cachedTemplate.source);
+                            ", newlyFoundSource=" + StringUtil.jQuote(newlyFoundSource) + 
+                            ", cachedTemplate.source=" + StringUtil.jQuote(cachedTemplate.source));
                     }
                     if(debug && !lastModifiedNotChanged) {
                         logger.debug("Updating source, info for cause: " + 
@@ -335,10 +338,11 @@ public class TemplateCache
             }
             else {
                 if(debug) {
-                    logger.debug("Could not find template in cache, "
-                        + "creating new one; id=[" + 
-                        tk.name + "[" + tk.locale + "," + tk.encoding + 
-                        (tk.parse ? ",parsed] " : ",unparsed] ") + "]");
+                    logger.debug("Could not find template in cache, " +
+                        "creating new one; id=[" +
+                        StringUtil.jQuote(tk.name) + "[" + tk.locale + "," +
+                        tk.encoding + (tk.parse ? ",parsed] " : ",unparsed] ") +
+                        "]");
                 }
                 
                 // Construct a new CachedTemplate entry. Note we set the
@@ -356,7 +360,7 @@ public class TemplateCache
             }
             if(debug) {
                 logger.debug("Compiling FreeMarker template " + 
-                    debugName + " from " + newlyFoundSource);
+                    debugName + " from " + StringUtil.jQuote(newlyFoundSource));
             }
             // If we get here, then we need to (re)load the template
             Object source = cachedTemplate.source;
@@ -631,7 +635,8 @@ public class TemplateCache
             String fullPath = buf.append(resourcePath).toString();
             if(debug)
             {
-                logger.debug("Trying to find template source " + fullPath);
+                logger.debug("Trying to find template source "
+                        + StringUtil.jQuote(fullPath));
             }
             Object templateSource = mainLoader.findTemplateSource(fullPath);
             if(templateSource != null)

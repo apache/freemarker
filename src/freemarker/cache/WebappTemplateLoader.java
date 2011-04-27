@@ -63,6 +63,7 @@ import java.net.URL;
 import javax.servlet.ServletContext;
 
 import freemarker.log.Logger;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A {@link TemplateLoader} that uses streams reachable through 
@@ -144,7 +145,8 @@ public class WebappTemplateLoader implements TemplateLoader
         try {
             url = servletContext.getResource(fullPath);
         } catch(MalformedURLException e) {
-            logger.warn("Could not retrieve resource " + fullPath, e);
+            logger.warn("Could not retrieve resource " + StringUtil.jQuote(fullPath),
+                    e);
             return null;
         }
         return url == null ? null : new URLTemplateSource(url);

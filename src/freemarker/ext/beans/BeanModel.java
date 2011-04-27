@@ -78,6 +78,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A class that will wrap an arbitrary object into {@link freemarker.template.TemplateHashModel}
@@ -227,7 +228,7 @@ implements
 
     private void logNoSuchKey(String key, Map keyMap)
     {
-        logger.debug("Key '" + key + "' was not found on instance of " + 
+        logger.debug("Key " + StringUtil.jQuote(key) + " was not found on instance of " + 
             object.getClass().getName() + ". Introspection information for " +
             "the class is: " + keyMap);
     }

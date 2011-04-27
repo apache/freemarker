@@ -757,6 +757,14 @@ public class StringUtil {
     }
 
     /**
+     * Converts the parameter with <code>toString</code> (if not
+     * <code>null</code>)and passes it to {@link #jQuote(String)}. 
+     */
+    public static String jQuote(Object obj) {
+        return jQuote(obj != null ? obj.toString() : null);
+    }
+    
+    /**
      * Quotes string as Java Language string literal.
      * Returns string <code>"null"</code> if <code>s</code>
      * is <code>null</code>.

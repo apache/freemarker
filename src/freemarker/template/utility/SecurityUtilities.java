@@ -96,8 +96,9 @@ public class SecurityUtilities
         }
         catch(AccessControlException e)
         {
-            logger.warn("Insufficient permissions to read system property '" + 
-                    key + "', using default value '" + defValue + "'");
+            logger.warn("Insufficient permissions to read system property " + 
+                    StringUtil.jQuote(key) + ", using default value " +
+                    StringUtil.jQuote(defValue));
             return defValue;
         }
     }
@@ -117,8 +118,8 @@ public class SecurityUtilities
         }
         catch(AccessControlException e)
         {
-            logger.warn("Insufficient permissions to read system property '" + 
-                    key + "', using default value " + defValue + "");
+            logger.warn("Insufficient permissions to read system property " + 
+                    StringUtil.jQuote(key) + ", using default value " + defValue);
             return new Integer(defValue);
         }
     }

@@ -412,7 +412,7 @@ public class FreemarkerServlet extends HttpServlet
         String path = requestUrlToTemplatePath(request);
 
         if (debug) {
-            log("Requested template: " + path);
+            log("Requested template: " + StringUtil.jQuote(path));
         }
 
         Template template = null;

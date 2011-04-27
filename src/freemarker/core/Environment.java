@@ -59,6 +59,7 @@ import java.util.*;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.*;
+import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -358,7 +359,7 @@ public final class Environment extends Configurable {
          if (thrownException != null) {
              if (attemptLogger.isDebugEnabled()) {
                  attemptLogger.debug("Error in attempt block " + 
-                         attemptBlock.getStartLocation(), thrownException);
+                         attemptBlock.getStartLocationQuoted(), thrownException);
              }
              try {
                  recoveredErrorStack.add(thrownException.getMessage());
@@ -664,7 +665,7 @@ public final class Environment extends Configurable {
 
         // Log the exception
         if(logger.isErrorEnabled()) {
-            logger.error(te.getMessage(), te);
+            logger.error("Template processing error: " + StringUtil.jQuote(te.getMessage()), te);
         }
 
         // Stop exception is not passed to the handler, but

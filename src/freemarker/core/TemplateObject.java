@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.*;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Objects that represent instructions or expressions
@@ -152,6 +153,22 @@ public abstract class TemplateObject {
               + templateName;
     }
 
+    /**
+     * Same as {@link #getStartLocation}, but quotes the template name with
+     * {@link StringUtil#jQuote(String)}. If the template name is unknown,
+     * it uses <code>"input"</code> as the template name without quotation
+     * marks.  
+     */
+    public String getStartLocationQuoted() {
+        String templateName = template != null ? StringUtil.jQuote(template.getName()) : "input";
+        return "on line " 
+              + beginLine 
+              + ", column " 
+              + beginColumn
+              + " in "
+              + templateName;
+    }
+
     public String getEndLocation() {
         String templateName = template != null ? template.getName() : "input";
         return "on line " 
@@ -162,6 +179,22 @@ public abstract class TemplateObject {
               + templateName;
     }
 
+    /**
+     * Same as {@link #getStartLocation}, but quotes the template name with
+     * {@link StringUtil#jQuote(String)}. If the template name is unknown,
+     * it uses <code>"input"</code> as the template name without quotation
+     * marks.  
+     */
+    public String getEndLocationQuoted() {
+        String templateName = template != null ? StringUtil.jQuote(template.getName()) : "input";
+        return "on line " 
+              + endLine
+              + ", column "
+              + endColumn
+              + " in "
+              + templateName;
+    }
+    
     public final String getSource() {
         if (template != null) {
             return template.getSource(beginColumn, beginLine, endColumn, endLine);
