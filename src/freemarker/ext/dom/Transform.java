@@ -55,6 +55,7 @@ package freemarker.ext.dom;
 
 import java.io.*;
 import java.util.*;
+import freemarker.core.Environment;
 import freemarker.template.*;
 
 /**
@@ -224,6 +225,9 @@ public class Transform {
     
     static void usage() {
         System.err.println("Usage: java freemarker.ext.dom.Transform -in <xmlfile> -ftl <ftlfile> [-out <outfile>] [-locale <locale>] [-encoding <encoding>]");
-        System.exit(-1);
+        // Security: prevents shutting down the container from a template:
+        if (Environment.getCurrentEnvironment() == null) {
+            System.exit(-1);
+        }
     }
 }
