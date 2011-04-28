@@ -166,7 +166,7 @@ public class TaglibFactory implements TemplateHashModel {
                 // Not found -- in case of NOROOT_REL_URI, let's resolve it and
                 // try again.
                 String resolvedUri = resolveRelativeUri(uri);
-                if(resolvedUri != uri) {
+                if(!resolvedUri.equals(uri)) {
                     taglib = (Taglib) taglibs.get(resolvedUri);
                     if(taglib != null) {
                         return taglib;
