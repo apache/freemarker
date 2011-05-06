@@ -19539,11 +19539,41 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Log messages doesn't contain line-breaks (CR or LF)
-              anymore. This is most noticeable on template processing error
-              entries, which will now quote the exception message as a Java
-              string literal. Note that how stack traces are logged is still
-              up to the logger you are using; this all only applies to the
-              message part.</para>
+              anymore, and quote paths and other arbitrary text with Java
+              string literal syntax. This is most noticeable on template
+              processing error entries, which will now quote the exception
+              message. Note that how stack traces (the
+              <literal>Throwable</literal> objects) are logged is still up to
+              the logging framework you are using.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed <link
+              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3033015&amp;group_id=794">[3033015]</link>:
+              <literal>AllHttpScopesHashModel</literal> used
+              <literal>WrappingTemplateModel.getDefaultObjectWrapper()</literal>
+              for wrapping variables in the page scope, while used the
+              user-specified <literal>ObjectWrapper</literal> for all other
+              scopes (request, session, etc.). Now it uses the user-specified
+              wrapper in the page scope as well.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed <link
+              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3033015&amp;group_id=794">[3128073]</link>:
+              <literal>HashAdapther.containsKey(...)</literal> returned
+              <literal>true</literal> for a key that doesn't exist when
+              unwrapping the key has failed. As a side effect of the fix,
+              <literal>BeansWrapper.CAN_NOT_UNWRAP</literal> is now private;
+              earlier it was public by mistake.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: Unwrapping <literal>null</literal> with a
+              <literal>BeansWrapper</literal> that had a custom null-model
+              didn't result in <literal>null</literal>. Now both unwrapping
+              <literal>null</literal> and the custom null-model gives
+              <literal>null</literal>.</para>
             </listitem>
           </itemizedlist>
         </section>
