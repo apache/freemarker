@@ -80,7 +80,6 @@ import freemarker.template.TemplateModelException;
  */
 public class AllHttpScopesHashModel extends SimpleHash
 {
-    private final ObjectWrapper wrapper;
     private final ServletContext context;
     private final HttpServletRequest request;
     private final Map unlistedModels = new HashMap();
@@ -94,7 +93,7 @@ public class AllHttpScopesHashModel extends SimpleHash
      */
     public AllHttpScopesHashModel(ObjectWrapper wrapper, 
             ServletContext context, HttpServletRequest request) {
-        this.wrapper = wrapper;
+        setObjectWrapper(wrapper);
         this.context = context;
         this.request = request;
     }
@@ -127,7 +126,7 @@ public class AllHttpScopesHashModel extends SimpleHash
         // Lookup in request scope
         Object obj = request.getAttribute(key);
         if(obj != null) {
-            return wrapper.wrap(obj);
+            return wrap(obj);
         }
 
         // Lookup in session scope
@@ -135,17 +134,17 @@ public class AllHttpScopesHashModel extends SimpleHash
         if(session != null) {
             obj = session.getAttribute(key);
             if(obj != null) {
-                return wrapper.wrap(obj);
+                return wrap(obj);
             }
         }
 
         // Lookup in application scope
         obj = context.getAttribute(key);
         if(obj != null) {
-            return wrapper.wrap(obj);
+            return wrap(obj);
         }
 
         // return wrapper's null object (probably null).        
-        return wrapper.wrap(null);
+        return wrap(null);
     }
 }
