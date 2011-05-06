@@ -228,7 +228,7 @@ implements
 
     private void logNoSuchKey(String key, Map keyMap)
     {
-        logger.debug("Key " + StringUtil.jQuote(key) + " was not found on instance of " + 
+        logger.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
             object.getClass().getName() + ". Introspection information for " +
             "the class is: " + keyMap);
     }

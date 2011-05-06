@@ -155,12 +155,12 @@ public abstract class TemplateObject {
 
     /**
      * Same as {@link #getStartLocation}, but quotes the template name with
-     * {@link StringUtil#jQuote(String)}. If the template name is unknown,
+     * {@link StringUtil#jQuoteNoXSS(String)}. If the template name is unknown,
      * it uses <code>"input"</code> as the template name without quotation
      * marks.  
      */
     public String getStartLocationQuoted() {
-        String templateName = template != null ? StringUtil.jQuote(template.getName()) : "input";
+        String templateName = template != null ? StringUtil.jQuoteNoXSS(template.getName()) : "input";
         return "on line " 
               + beginLine 
               + ", column " 
@@ -181,12 +181,12 @@ public abstract class TemplateObject {
 
     /**
      * Same as {@link #getStartLocation}, but quotes the template name with
-     * {@link StringUtil#jQuote(String)}. If the template name is unknown,
+     * {@link StringUtil#jQuoteNoXSS(String)}. If the template name is unknown,
      * it uses <code>"input"</code> as the template name without quotation
      * marks.  
      */
     public String getEndLocationQuoted() {
-        String templateName = template != null ? StringUtil.jQuote(template.getName()) : "input";
+        String templateName = template != null ? StringUtil.jQuoteNoXSS(template.getName()) : "input";
         return "on line " 
               + endLine
               + ", column "

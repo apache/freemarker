@@ -145,7 +145,7 @@ public class WebappTemplateLoader implements TemplateLoader
         try {
             url = servletContext.getResource(fullPath);
         } catch(MalformedURLException e) {
-            logger.warn("Could not retrieve resource " + StringUtil.jQuote(fullPath),
+            logger.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath),
                     e);
             return null;
         }

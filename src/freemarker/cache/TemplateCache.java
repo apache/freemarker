@@ -250,7 +250,9 @@ public class TemplateCache
     {
         boolean debug = logger.isDebugEnabled();
         String debugName = debug
-                ? StringUtil.jQuote(name) + "[" + locale + "," + encoding + (parse ? ",parsed] " : ",unparsed] ")
+                ? StringUtil.jQuoteNoXSS(name) + "["
+                        + StringUtil.jQuoteNoXSS(locale) + "," + encoding
+                        + (parse ? ",parsed] " : ",unparsed] ")
                 : null;
         TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
         
@@ -323,8 +325,8 @@ public class TemplateCache
                     if(debug && !sourceEquals) {
                         logger.debug("Updating source, info for cause: " + 
                             "sourceEquals=" + sourceEquals + 
-                            ", newlyFoundSource=" + StringUtil.jQuote(newlyFoundSource) + 
-                            ", cachedTemplate.source=" + StringUtil.jQuote(cachedTemplate.source));
+                            ", newlyFoundSource=" + StringUtil.jQuoteNoXSS(newlyFoundSource) + 
+                            ", cachedTemplate.source=" + StringUtil.jQuoteNoXSS(cachedTemplate.source));
                     }
                     if(debug && !lastModifiedNotChanged) {
                         logger.debug("Updating source, info for cause: " + 
@@ -340,7 +342,8 @@ public class TemplateCache
                 if(debug) {
                     logger.debug("Could not find template in cache, " +
                         "creating new one; id=[" +
-                        StringUtil.jQuote(tk.name) + "[" + tk.locale + "," +
+                        StringUtil.jQuoteNoXSS(tk.name) + "[" +
+                        StringUtil.jQuoteNoXSS(tk.locale) + "," +
                         tk.encoding + (tk.parse ? ",parsed] " : ",unparsed] ") +
                         "]");
                 }
@@ -360,7 +363,7 @@ public class TemplateCache
             }
             if(debug) {
                 logger.debug("Compiling FreeMarker template " + 
-                    debugName + " from " + StringUtil.jQuote(newlyFoundSource));
+                    debugName + " from " + StringUtil.jQuoteNoXSS(newlyFoundSource));
             }
             // If we get here, then we need to (re)load the template
             Object source = cachedTemplate.source;
@@ -636,7 +639,7 @@ public class TemplateCache
             if(debug)
             {
                 logger.debug("Trying to find template source "
-                        + StringUtil.jQuote(fullPath));
+                        + StringUtil.jQuoteNoXSS(fullPath));
             }
             Object templateSource = mainLoader.findTemplateSource(fullPath);
             if(templateSource != null)

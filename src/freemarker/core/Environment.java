@@ -665,7 +665,7 @@ public final class Environment extends Configurable {
 
         // Log the exception
         if(logger.isErrorEnabled()) {
-            logger.error("Template processing error: " + StringUtil.jQuote(te.getMessage()), te);
+            logger.error("Template processing error: " + StringUtil.jQuoteNoXSS(te.getMessage()), te);
         }
 
         // Stop exception is not passed to the handler, but

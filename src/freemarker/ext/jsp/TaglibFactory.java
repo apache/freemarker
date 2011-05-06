@@ -278,8 +278,8 @@ public class TaglibFactory implements TemplateHashModel {
                 }
                 locations.put(uri, loc);
                 if(logger.isDebugEnabled()) {
-                    logger.debug("web.xml assigned URI " + StringUtil.jQuote(uri) +
-                            " to location " + StringUtil.jQuote(loc[0] + (loc[1] != null ? "!" + loc[1] : "")));
+                    logger.debug("web.xml assigned URI " + StringUtil.jQuoteNoXSS(uri) +
+                            " to location " + StringUtil.jQuoteNoXSS(loc[0] + (loc[1] != null ? "!" + loc[1] : "")));
                 }
             }
         }
@@ -313,8 +313,8 @@ public class TaglibFactory implements TemplateHashModel {
                             if(loc != null) {
                                 locations.put(loc, new String[] { path, zname });
                                 if(logger.isDebugEnabled()) {
-                                    logger.debug("libjar assigned URI " + StringUtil.jQuote(loc) +
-                                            " to location " + StringUtil.jQuote(path+ "!" + zname));
+                                    logger.debug("libjar assigned URI " + StringUtil.jQuoteNoXSS(loc) +
+                                            " to location " + StringUtil.jQuoteNoXSS(path+ "!" + zname));
                                 }
                             } 
                         }
@@ -411,8 +411,8 @@ public class TaglibFactory implements TemplateHashModel {
             String[] tldPath = getTldPath(uri, locations);
             if(tldPath != null) {
                 if(logger.isDebugEnabled()) {
-                    logger.debug("Loading taglib " + StringUtil.jQuote(uri) + " from location " + 
-                            StringUtil.jQuote(tldPath[0] + (tldPath[1] != null ? "!" + tldPath[1] : "")));
+                    logger.debug("Loading taglib " + StringUtil.jQuoteNoXSS(uri) + " from location " + 
+                            StringUtil.jQuoteNoXSS(tldPath[0] + (tldPath[1] != null ? "!" + tldPath[1] : "")));
                 }
                 tags = loadTaglib(tldPath, ctx);
                 if(tags != null) {
