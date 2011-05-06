@@ -32,6 +32,8 @@ public class StringUtilTest extends TestCase {
                 StringUtil.jQuoteNoXSS("\n\r\t\u0001"));
         assertEquals("\"\\u003C\\nb\\rc\\td\\u0001>\"",
                 StringUtil.jQuoteNoXSS("<\nb\rc\td\u0001>"));
+        assertEquals("\"\\u003C\\nb\\rc\\td\\u0001>\"",
+                StringUtil.jQuoteNoXSS((Object) "<\nb\rc\td\u0001>"));
     }
     
 }

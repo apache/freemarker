@@ -813,7 +813,7 @@ public class StringUtil {
      * <code>null</code>)and passes it to {@link #jQuoteNoXSS(String)}. 
      */
     public static String jQuoteNoXSS(Object obj) {
-        return jQuote(obj != null ? obj.toString() : null);
+        return jQuoteNoXSS(obj != null ? obj.toString() : null);
     }
     
     /**
