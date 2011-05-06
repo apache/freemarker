@@ -303,7 +303,6 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <get src="${libs.location}/slf4j-api.jar" dest="lib/slf4j-api.jar" usetimestamp="true"/>
         <get src="${libs.location}/slf4j-jdk14.jar" dest="lib/slf4j-jdk14.jar" usetimestamp="true"/> <!-- Needed only for testing SLF4J: -->
         <get src="${libs.location}/commons-logging.jar" dest="lib/commons-logging.jar" usetimestamp="true"/>
-        <get src="${libs.location}/2.3/rt122.jar" dest="lib/rt122.jar" usetimestamp="true"/>
         <get src="${libs.location}/saxpath.jar" dest="lib/saxpath.jar" usetimestamp="true"/>
         <get src="${libs.location}/servlet.jar" dest="lib/servlet.jar" usetimestamp="true"/>
         <get src="${libs.location}/struts.jar" dest="lib/struts.jar" usetimestamp="true"/>
@@ -334,7 +333,6 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
                 <available file="lib/slf4j-api.jar"/>
                 <available file="lib/slf4j-jdk14.jar"/>
                 <available file="lib/commons-logging.jar"/>
-                <available file="lib/rt122.jar"/>
                 <available file="lib/saxpath.jar"/>
                 <available file="lib/servlet.jar"/>
                 <available file="lib/struts.jar"/>
@@ -523,7 +521,7 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
     <target depends="init, prepare, javacc" name="compile"
             description="Compile Java source files">
         <mkdir dir="${build.classes.dir}"/>
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="lib/rt122.jar" source="1.2" target="1.2">
+        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="boot.class.path" source="1.5" target="1.5">
             <src path="${src.dir}"/>
             <patternset refid="freemarker.compile"/>
             <!-- src path="${build.javacc.dir}"/ -->
