@@ -94,7 +94,7 @@ class OverloadedFixArgMethod extends OverloadedMethod
         Object[] args = new Object[l];
         Iterator it = arguments.iterator();
         for(int i = 0; i < l; ++i) {
-            Object obj = w.unwrap((TemplateModel)it.next(), types[i]);
+            Object obj = w.unwrapInternal((TemplateModel)it.next(), types[i]);
             if(obj == BeansWrapper.CAN_NOT_UNWRAP) {
                 return NO_SUCH_METHOD;
             }

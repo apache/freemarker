@@ -90,7 +90,7 @@ class OverloadedVarArgMethod extends OverloadedMethod
                 System.arraycopy(args, 0, newargs, 0, fixArgCount);
                 Object array = Array.newInstance(varArgType, actualArgCount - fixArgCount);
                 for(int i = fixArgCount; i < actualArgCount; ++i) {
-                    Object val = w.unwrap((TemplateModel)modelArgs.get(i), varArgType);
+                    Object val = w.unwrapInternal((TemplateModel)modelArgs.get(i), varArgType);
                     if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                         return null;
                     }
@@ -231,7 +231,7 @@ outer:  for(int j = Math.min(l + 1, marshalTypes.length - 1); j >= 0; --j) {
             // Try to marshal the arguments
             Iterator it = arguments.iterator();
             for(int i = 0; i < l; ++i) {
-                Object dst = w.unwrap((TemplateModel)it.next(), i < j ? types[i] : types[j - 1]);
+                Object dst = w.unwrapInternal((TemplateModel)it.next(), i < j ? types[i] : types[j - 1]);
                 if(dst == BeansWrapper.CAN_NOT_UNWRAP) {
                     continue outer;
                 }

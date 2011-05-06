@@ -127,7 +127,7 @@ class SimpleMemberModel
 
     private static Object unwrapArgument(TemplateModel model, Class type, BeansWrapper w) 
     throws TemplateModelException {
-        Object val = w.unwrap(model, type);
+        Object val = w.unwrapInternal(model, type);
         if(val == BeansWrapper.CAN_NOT_UNWRAP) {
             throw new TemplateModelException("Can not unwrap argument " +
                     model + " to " + type.getName());

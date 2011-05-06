@@ -534,25 +534,51 @@ public class BeansWrapper implements ObjectWrapper
      * method is the inverse of the {@link #wrap(Object)} method. In addition
      * it will unwrap arbitrary {@link TemplateNumberModel} instances into
      * a number, arbitrary {@link TemplateDateModel} instances into a date,
-     * {@link TemplateScalarModel} instances into a String, and
-     * {@link TemplateBooleanModel} instances into a Boolean.
-     * All other objects are returned unchanged.
+     * {@link TemplateScalarModel} instances into a String, arbitrary 
+     * {@link TemplateBooleanModel} instances into a Boolean, arbitrary 
+     * {@link TemplateHashModel} instances into a Map, arbitrary 
+     * {@link TemplateSequenceModel} into a List, and arbitrary 
+     * {@link TemplateCollectionModel} into a Set. All other objects are 
+     * returned unchanged.
+     * @throws TemplateModelException if an attempted unwrapping fails.
      */
     public Object unwrap(TemplateModel model) throws TemplateModelException
     {
         return unwrap(model, OBJECT_CLASS);
     }
     
+    /**
+     * Attempts to unwrap a model into an object of the desired class. 
+     * Generally, this method is the inverse of the {@link #wrap(Object)} 
+     * method. It recognizes a wide range of hint classes - all Java built-in
+     * primitives, primitive wrappers, numbers, dates, sets, lists, maps, and
+     * native arrays.
+     * @param model the model to unwrap
+     * @param hint the class of the unwrapped result
+     * @return the unwrapped result of the desired class
+     * @throws TemplateModelException if an attempted unwrapping fails.
+     */
     public Object unwrap(TemplateModel model, Class hint) 
+    throws TemplateModelException
+    {
+        final Object obj = unwrapInternal(model, hint);
+        if(obj == CAN_NOT_UNWRAP) {
+          throw new TemplateModelException("Can not unwrap model of type " + 
+              model.getClass().getName() + " to type " + hint.getName());
+        }
+        return obj;
+    }
+    
+    Object unwrapInternal(TemplateModel model, Class hint) 
     throws TemplateModelException
     {
         return unwrap(model, hint, null);
     }
-    
+
     private Object unwrap(TemplateModel model, Class hint, Map recursionStops) 
     throws TemplateModelException
     {
-        if(model == nullModel) {
+        if(model == null || model == nullModel) {
             return null;
         }
         
