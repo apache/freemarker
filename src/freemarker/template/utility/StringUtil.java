@@ -809,6 +809,60 @@ public class StringUtil {
     }
 
     /**
+     * Converts the parameter with <code>toString</code> (if not
+     * <code>null</code>)and passes it to {@link #jQuoteNoXSS(String)}. 
+     */
+    public static String jQuoteNoXSS(Object obj) {
+        return jQuote(obj != null ? obj.toString() : null);
+    }
+    
+    /**
+     * Same as {@link #jQuoteNoXSS(String)} but also escapes <code>'&lt;'</code>
+     * as <code>\u003C</code>. This is used for log messages to prevent XSS
+     * on poorly written Web-based log viewers. 
+     */
+    public static String jQuoteNoXSS(String s) {
+        if (s == null) {
+            return "null";
+        }
+        int ln = s.length();
+        StringBuffer b = new StringBuffer(ln + 4);
+        b.append('"');
+        for (int i = 0; i < ln; i++) {
+            char c = s.charAt(i);
+            if (c == '"') {
+                b.append("\\\"");
+            } else if (c == '\\') {
+                b.append("\\\\");
+            } else if (c == '<') {
+                b.append("\\u003C");
+            } else if (c < 0x20) {
+                if (c == '\n') {
+                    b.append("\\n");
+                } else if (c == '\r') {
+                    b.append("\\r");
+                } else if (c == '\f') {
+                    b.append("\\f");
+                } else if (c == '\b') {
+                    b.append("\\b");
+                } else if (c == '\t') {
+                    b.append("\\t");
+                } else {
+                    b.append("\\u00");
+                    int x = c / 0x10;
+                    b.append((char) (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                    x = c & 0xF;
+                    b.append((char) (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                }
+            } else {
+                b.append(c);
+            }
+        } // for each characters
+        b.append('"');
+        return b.toString();
+    }
+    
+    /**
      * Escapes the <code>String</code> with the escaping rules of Java language
      * string literals, so it is safe to insert the value into a string literal.
      * The resulting string will not be quoted.
