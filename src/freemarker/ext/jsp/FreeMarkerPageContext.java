@@ -55,6 +55,7 @@ package freemarker.ext.jsp;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -424,10 +425,12 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     }
 
     public BodyContent pushBody() {
-        BodyContent bc = new TagTransformModel.BodyContentImpl(getOut(), true);
-        pushWriter(bc);
-        return bc;
-    }
+      return (BodyContent)pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
+  }
+
+  public JspWriter pushBody(Writer w) {
+      return pushWriter(new JspWriterAdapter(w));
+  }
 
     public JspWriter popBody() {
         popWriter();
@@ -458,10 +461,11 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         tags.add(tag);
     } 
     
-    void pushWriter(JspWriter out) {
+    JspWriter pushWriter(JspWriter out) {
         outs.add(jspOut);
         jspOut = out;
         setAttribute(OUT, jspOut);
+        return out;
     } 
     
     private static class TemplateHashModelExEnumeration implements Enumeration {
