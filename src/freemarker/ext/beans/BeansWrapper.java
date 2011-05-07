@@ -113,7 +113,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 public class BeansWrapper implements ObjectWrapper
 {
-    public static final Object CAN_NOT_UNWRAP = new Object();
+    static final Object CAN_NOT_UNWRAP = new Object();
     private static final Class BIGINTEGER_CLASS = java.math.BigInteger.class;
     private static final Class BOOLEAN_CLASS = Boolean.class;
     private static final Class CHARACTER_CLASS = Character.class;
