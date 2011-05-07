@@ -19558,21 +19558,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Log messages doesn't contain line-breaks (CR or LF)
-              anymore, and quote paths and other arbitrary text with Java
-              string literal syntax. This is most noticeable on template
-              processing error entries, which will now quote the exception
-              message. Note that how stack traces (the
-              <literal>Throwable</literal> objects) are logged is still up to
-              the logging framework you are using.</para>
-            </listitem>
-
-            <listitem>
               <para>Added <literal>getSupportsIndexedAccess()</literal> to
               <literal>freemarker.ext.beans.CollectionModel</literal>, so one
               can check if <literal>TemplateSequenceModel.get(int)</literal>
               will work with a particular <literal>CollectionModel</literal>
               instance or not.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When using FreeMarker's JSP support with JSP
+              tags that use
+              <literal>javax.servlet.jsp.PageContext.pushBody</literal> (like
+              some Stripes tags), <literal>"ArrayIndexOutOfBoundsException:
+              -1"</literal> occurred inside
+              <literal>freemarker.ext.jsp.FreeMarkerPageContext.popWriter</literal>.</para>
             </listitem>
 
             <listitem>
@@ -19602,6 +19601,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               didn't result in <literal>null</literal>. Now both unwrapping
               <literal>null</literal> and the custom null-model gives
               <literal>null</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Log messages doesn't contain line-breaks (CR or LF)
+              anymore and quote paths and other arbitrary text with Java
+              string literal syntax that also escapes <literal>&lt;</literal>
+              characters as <literal>\u003C</literal>. These address security
+              concerns related to poor quality log appenders and buggy log
+              readers. This change is mostly noticeable on template processing
+              error entries, which will now quote the exception message. Note
+              that how stack traces (the <literal>Throwable</literal> objects)
+              are logged is still up to the logging framework you are
+              using.</para>
             </listitem>
           </itemizedlist>
         </section>
