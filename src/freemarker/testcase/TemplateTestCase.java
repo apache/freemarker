@@ -89,13 +89,13 @@ import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.ext.jdom.NodeListModel;
 import freemarker.template.Configuration;
-import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
@@ -167,47 +167,16 @@ public class TemplateTestCase extends TestCase {
         else if ("outputdir".equals(param)) {
             setOutputDirectory(value);
         }
-        else if ("output_encoding".equals(param)) {
-            conf.setOutputEncoding(value);
-        }
-        else if ("locale".equals(param)) {
-            String lang = "", country="", variant="";
-            StringTokenizer st = new StringTokenizer(value,"_", false);
-            if (st.hasMoreTokens()) {
-                lang = st.nextToken();
-            }
-            if (st.hasMoreTokens()) {
-                country = st.nextToken();
-            }
-            if (st.hasMoreTokens()){
-                variant = st.nextToken();
-            }
-            if (lang != "") {
-                Locale loc = new Locale(lang, country, variant);
-                conf.setLocale(loc);
-            }
-        }
-        else if ("object_wrapper".equals(param)) {
+        else {
             try {
-                Class cl = Class.forName(value);
-                ObjectWrapper ow = (ObjectWrapper) cl.newInstance();
-                conf.setObjectWrapper(ow);
-            } catch (Exception e) {
-                fail("Error setting object wrapper to " + value + "\n" + e.getMessage());
+                conf.setSetting(param, value);
+            } catch (TemplateException e) {
+                throw new RuntimeException(
+                        "Failed to set setting " +
+                        StringUtil.jQuote(param) + " to " +
+                        StringUtil.jQuote(value) + "; see cause exception.",
+                        e);
             }
-        }
-        else if ("input_encoding".equals(param)) {
-            conf.setDefaultEncoding(value);
-        }
-        else if ("output_encoding".equals(param)) {
-            conf.setOutputEncoding(value);
-        }
-        else if ("strict_syntax".equals(param)) {
-            boolean b = StringUtil.getYesNo(value);
-            conf.setStrictSyntaxMode(b);
-        }
-        else if ("url_escaping_charset".equals(param)) {
-            conf.setURLEscapingCharset(value);
         }
     }
     
