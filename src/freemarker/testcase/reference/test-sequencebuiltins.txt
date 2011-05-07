@@ -104,8 +104,14 @@ true
 true
 true
 true
+true
+true
+true
 
 False:
+false
+false
+false
 false
 false
 false
@@ -120,7 +126,13 @@ Index_of:
 1 = 1
 2 = 2
 6 = 6
+0 = 0
+1 = 1
+2 = 2
 
+-1 = -1
+-1 = -1
+-1 = -1
 -1 = -1
 -1 = -1
 -1 = -1
@@ -135,6 +147,10 @@ Last_index_of:
 1 = 1
 2 = 2
 7 = 7
+-1 = -1
+0 = 0
+1 = 1
+2 = 2
 -1 = -1
 
 Index_of and last_index_of with starting indices
@@ -175,6 +191,56 @@ seq_last_index_of "Susan":
 -1 = -1
 3 = 3
 3 = 3
+
+seq_index_of "a":
+0 = 0
+0 = 0
+0 = 0
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+
+seq_index_of "b":
+1 = 1
+1 = 1
+1 = 1
+1 = 1
+-1 = -1
+-1 = -1
+
+seq_index_of "c":
+2 = 2
+2 = 2
+2 = 2
+2 = 2
+2 = 2
+-1 = -1
+ 
+seq_last_index_of "a":
+-1 = -1
+-1 = -1
+0 = 0
+0 = 0
+0 = 0
+0 = 0
+0 = 0
+
+seq_last_index_of "b":
+-1 = -1
+-1 = -1
+-1 = -1
+1 = 1
+1 = 1
+1 = 1
+
+seq_last_index_of "c":
+-1 = -1
+-1 = -1
+-1 = -1
+-1 = -1
+2 = 2
+2 = 2
 
 Chunk
 -----

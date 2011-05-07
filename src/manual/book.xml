@@ -19495,6 +19495,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>The <literal>sort</literal> and <literal>sort_by</literal>
               built-ins now support sorting boolean values.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>?seq_index_of</literal> and
+              <literal>?seq_last_index_of</literal> now works on collections
+              (<literal>freemarker.template.TemplateCollectionModel</literal>-s)
+              too, not only on sequences
+              (<literal>freemarker.template.TemplateSequenceModel</literal>-s).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: <literal>?seq_contains</literal>,
+              <literal>?seq_index_of</literal> and
+              <literal>?seq_last_index_of</literal> has failed with
+              non-<literal>java.util.List</literal>
+              <literal>java.util.Collection</literal>-s that are wrapped with
+              pure <literal>BeansWrapper</literal> (not the
+              <literal>DefaultObjectWrapper</literal>) as
+              <literal>TemplateSequenceModel</literal>. (See also:
+              <literal>getSupportsIndexedAccess()</literal> below)</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -19545,6 +19565,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               message. Note that how stack traces (the
               <literal>Throwable</literal> objects) are logged is still up to
               the logging framework you are using.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>getSupportsIndexedAccess()</literal> to
+              <literal>freemarker.ext.beans.CollectionModel</literal>, so one
+              can check if <literal>TemplateSequenceModel.get(int)</literal>
+              will work with a particular <literal>CollectionModel</literal>
+              instance or not.</para>
             </listitem>
 
             <listitem>

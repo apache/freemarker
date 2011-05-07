@@ -109,7 +109,8 @@ implements
     throws
         TemplateModelException
     {
-        if(object instanceof List)
+        // Don't forget to keep getSupportsIndexedAccess in sync with this!
+        if (object instanceof List)
         {
             try
             {
@@ -125,6 +126,17 @@ implements
         {
             throw new TemplateModelException("Underlying collection is not a list, it's " + object.getClass().getName());
         }
+    }
+    
+    /**
+     * Tells if {@link #get(int)} will always fail for this object.
+     * As this object implements {@link TemplateSequenceModel},
+     * {@link #get(int)} should always work, but due to a design flaw, for
+     * non-{@link List} wrapped objects {@link #get(int)} will always fail.
+     * This method exists to ease working this problem around. 
+     */
+    public boolean getSupportsIndexedAccess() {
+        return object instanceof List;
     }
     
     public TemplateModelIterator iterator()

@@ -71,8 +71,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -369,11 +371,18 @@ public class TemplateTestCase extends TestCase {
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
-        
         else if (testName.equals("xmlns5")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("test-defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
+        }
+        
+        else if (testName.startsWith("sequence-builtins-with-")) {
+            Set abcSet = new TreeSet();
+            abcSet.add("a");
+            abcSet.add("b");
+            abcSet.add("c");
+            dataModel.put("abcSet", abcSet);
         }
     }
     

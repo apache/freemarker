@@ -93,7 +93,15 @@
    <testcase name="precedence" filename="test-precedence.html"/>
    <testcase name="recover" filename="test-recover.ftl" />
    <testcase name="root" filename="test-root.html" />
-   <testcase name="sequence-builtins" filename="test-sequencebuiltins.txt" />
+   <testcase name="sequence-builtins-with-BeansWrapper" filename="test-sequencebuiltins.txt">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/> 
+   </testcase>
+   <testcase name="sequence-builtins-with-DefaultObjectWrapper" filename="test-sequencebuiltins.txt">
+      <config object_wrapper="freemarker.template.DefaultObjectWrapper"/> 
+   </testcase>
+   <testcase name="sequence-builtins-with-SimpleObjectWrapper" filename="test-sequencebuiltins.txt">
+      <config object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
+   </testcase>
    <testcase name="strictinheader" filename="test-strictinheader.html">
       <config strict_syntax="N"/>
    </testcase>

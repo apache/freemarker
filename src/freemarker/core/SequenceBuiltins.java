@@ -60,6 +60,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import freemarker.ext.beans.CollectionModel;
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
@@ -474,10 +475,17 @@ abstract class SequenceBuiltins {
         TemplateModel _getAsTemplateModel(Environment env)
                 throws TemplateException {
             TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateSequenceModel) {
-                return new BIMethodForSequence((TemplateSequenceModel) model, env);
-            } else if (model instanceof TemplateCollectionModel) {
+            // TemplateCollectionModel has priority because:
+            // - That interface has less expectations; TemplateSequenceModel
+            //   implementations may build a List behind the scenes to satisfy
+            //   the interface.
+            // - BeansWrapper creates some buggy TemplateSequenceModel-s which
+            //   are however properly working TemplateCollectionModel-s. See
+            //   also: isBuggySeqButGoodCollection
+            if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
+            } else if (model instanceof TemplateSequenceModel) {
+                return new BIMethodForSequence((TemplateSequenceModel) model, env);
             } else {
                 throw invalidTypeException(model, target, env, "sequence or collection");
             }
@@ -534,6 +542,7 @@ abstract class SequenceBuiltins {
     }
 
     static class seq_index_ofBI extends BuiltIn {
+        
         private int m_dir;
 
         public seq_index_ofBI(int dir) {
@@ -542,22 +551,41 @@ abstract class SequenceBuiltins {
 
         TemplateModel _getAsTemplateModel(Environment env)
                 throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (!(model instanceof TemplateSequenceModel))
-                throw invalidTypeException(model, target, env, "sequence");
-            return new BIMethod((TemplateSequenceModel) model, env);
+            return new BIMethod(env);
         }
 
         private class BIMethod implements TemplateMethodModelEx {
-            private TemplateSequenceModel m_seq;
-            private Environment m_env;
+            
+            protected final TemplateSequenceModel m_seq;
+            protected final TemplateCollectionModel m_col;
+            protected final Environment m_env;
 
-            private BIMethod(TemplateSequenceModel seq, Environment env) {
-                m_seq = seq;
+            private BIMethod(Environment env)
+                    throws TemplateException {
+                TemplateModel model = target.getAsTemplateModel(env);
+                m_seq = model instanceof TemplateSequenceModel
+                            && !isBuggySeqButGoodCollection(model)
+                        ? (TemplateSequenceModel) model
+                        : null;
+                m_col = model instanceof TemplateCollectionModel
+                        ? (TemplateCollectionModel) model
+                        : null;
+                if (m_seq == null && m_col == null) {
+                    throw invalidTypeException(
+                            model, target, env, "sequence or collection");
+                }
+                
                 m_env = env;
             }
 
-            public Object exec(List args)
+            private boolean isBuggySeqButGoodCollection(
+                    TemplateModel model) {
+                return model instanceof CollectionModel
+                        ? !((CollectionModel) model).getSupportsIndexedAccess()
+                        : false;
+            }
+
+            public final Object exec(List args)
                     throws TemplateModelException {
                 int argcnt = args.size();
                 if (argcnt != 1 && argcnt != 2) {
@@ -565,9 +593,8 @@ abstract class SequenceBuiltins {
                             getBuiltinTemplate() + " expects 1 or 2 arguments.");
                 }
                 
-                int startIndex;
-                int seqSize = m_seq.size();
-                TemplateModel arg = (TemplateModel) args.get(0);
+                TemplateModel target = (TemplateModel) args.get(0);
+                int foundAtIdx;
                 if (argcnt > 1) {
                     Object obj = args.get(1);
                     if (!(obj instanceof TemplateNumberModel)) {
@@ -575,50 +602,117 @@ abstract class SequenceBuiltins {
                                 getBuiltinTemplate()
                                 + "expects a number as its second argument.");
                     }
-                    startIndex = ((TemplateNumberModel) obj).getAsNumber().intValue();
-                    if (m_dir == 1) {
-                        if (startIndex >= seqSize) {
-                            return Constants.MINUS_ONE;
-                        }
-                        if (startIndex < 0) {
-                            startIndex = 0;
-                        }
-                    } else {
-                        if (startIndex >= seqSize) {
-                            startIndex = seqSize - 1;
-                        }
-                        if (startIndex < 0) {
-                            return Constants.MINUS_ONE;
-                        }
+                    int startIndex = ((TemplateNumberModel) obj).getAsNumber().intValue();
+                    // Prefer TemplateCollectionModel over TemplateSequenceModel
+                    // if there's no need for random access:
+                    foundAtIdx = (m_col != null && startIndex == 0 && m_dir == 1)
+                                 || m_seq == null
+                            ? findInCol(target, startIndex)
+                            : findInSeq(target, startIndex);
+                } else {
+                    // Prefer TemplateCollectionModel over TemplateSequenceModel
+                    // if there's no need for random access:
+                    foundAtIdx = (m_col != null && m_dir == 1) || m_seq == null
+                            ? findInCol(target)
+                            : findInSeq(target);
+                }
+                return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
+            }
+
+            private final String getBuiltinTemplate() {
+                return m_dir == 1 ? "?seq_index_of(...)" : "?seq_last_index_of(...)";
+            }
+            
+            public int findInSeq(TemplateModel target)
+            throws TemplateModelException {
+                final int seqSize = m_seq.size();
+                final int actualStartIndex;
+                
+                if (m_dir == 1) {
+                    actualStartIndex = 0;
+                } else {
+                    actualStartIndex = seqSize - 1;
+                }
+            
+                return findInSeq(target, actualStartIndex, seqSize); 
+            }
+            
+            private int findInSeq(TemplateModel target, int startIndex)
+                    throws TemplateModelException {
+                int seqSize = m_seq.size();
+                
+                if (m_dir == 1) {
+                    if (startIndex >= seqSize) {
+                        return -1;
+                    }
+                    if (startIndex < 0) {
+                        startIndex = 0;
                     }
                 } else {
-                    if (m_dir == 1) {
-                        startIndex = 0;
-                    } else {
+                    if (startIndex >= seqSize) {
                         startIndex = seqSize - 1;
+                    }
+                    if (startIndex < 0) {
+                        return -1;
                     }
                 }
                 
+                return findInSeq(target, startIndex, seqSize); 
+            }
+        
+            private int findInSeq(
+                    TemplateModel target, int scanStartIndex, int seqSize)
+                    throws TemplateModelException {
                 if (m_dir == 1) {
-                    for (int i = startIndex; i < seqSize; i++) {
-                        if (modelsEqual(m_seq.get(i), arg, m_env))
-                            return new SimpleNumber(i);
+                    for (int i = scanStartIndex; i < seqSize; i++) {
+                        if (modelsEqual(m_seq.get(i), target, m_env)) return i;
                     }
                 } else {
-                    for (int i = startIndex; i >= 0; i--) {
-                        if (modelsEqual(m_seq.get(i), arg, m_env))
-                            return new SimpleNumber(i);
+                    for (int i = scanStartIndex; i >= 0; i--) {
+                        if (modelsEqual(m_seq.get(i), target, m_env)) return i;
                     }
                 }
-                return Constants.MINUS_ONE;
+                return -1;
+            }
+
+            public int findInCol(TemplateModel target) throws TemplateModelException {
+                return findInCol(target, 0, Integer.MAX_VALUE);
+            }
+
+            protected int findInCol(TemplateModel target, int startIndex)
+                    throws TemplateModelException {
+                if (m_dir == 1) {
+                    return findInCol(target, startIndex, Integer.MAX_VALUE);
+                } else {
+                    return findInCol(target, 0, startIndex);
+                }
             }
             
-            private String getBuiltinTemplate() {
-                    if (m_dir == 1)
-                        return "?seq_indexOf(...)";
-                    else
-                        return "?seq_lastIndexOf(...)";
+            protected int findInCol(TemplateModel target,
+                    final int allowedRangeStart, final int allowedRangeEnd)
+                    throws TemplateModelException {
+                if (allowedRangeEnd < 0) return -1;
+                
+                TemplateModelIterator it = m_col.iterator();
+                
+                int foundAtIdx = -1;  // -1 is the return value for "not found"
+                int idx = 0; 
+                searchItem: while (it.hasNext()) {
+                    if (idx > allowedRangeEnd) break searchItem;
+                    
+                    TemplateModel current = it.next();
+                    if (idx >= allowedRangeStart) {
+                        if (modelsEqual(current, target, m_env)) {
+                            foundAtIdx = idx;
+                            if (m_dir == 1) break searchItem; // "find first"
+                            // Otherwise it's "find last".
+                        }
+                    }
+                    idx++;
+                }
+                return foundAtIdx;
             }
+            
         }
     }
 
