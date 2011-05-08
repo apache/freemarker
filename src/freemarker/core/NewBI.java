@@ -56,12 +56,12 @@ import java.util.List;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.utility.ClassUtil;
 
 /**
  * A built-in that allows us to instantiate an instance of a java class.
@@ -98,7 +98,7 @@ class NewBI extends BuiltIn
             throw new InvalidReferenceException(getStartLocation() 
                 + "\nCould not resolve expression: " + target, env);
         }
-        return new ConstructorFunction(classname, env);
+        return new ConstructorFunction(classname, env, target.getTemplate());
     }
 
     static class ConstructorFunction implements TemplateMethodModelEx {
@@ -106,22 +106,17 @@ class NewBI extends BuiltIn
         private final Class cl;
         private final Environment env;
         
-        public ConstructorFunction(String classname, Environment env) throws TemplateException {
+        public ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
             this.env = env;
-            try {
-                cl = ClassUtil.forName(classname);
-                if (!TM_CLASS.isAssignableFrom(cl)) {
-                    throw new TemplateException("Class " + cl.getName() + " does not implement freemarker.template.TemplateModel", env);
-                }
-                if (BEAN_MODEL_CLASS.isAssignableFrom(cl)) {
-                    throw new TemplateException("Bean Models cannot be instantiated using the ?new built-in", env);
-                }
-                if (JYTHON_MODEL_CLASS != null && JYTHON_MODEL_CLASS.isAssignableFrom(cl)) {
-                    throw new TemplateException("Jython Models cannot be instantiated using the ?new built-in", env);
-                }
-            } 
-            catch (ClassNotFoundException cnfe) {
-                throw new TemplateException(cnfe, env);
+            cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
+            if (!TM_CLASS.isAssignableFrom(cl)) {
+                throw new TemplateException("Class " + cl.getName() + " does not implement freemarker.template.TemplateModel", env);
+            }
+            if (BEAN_MODEL_CLASS.isAssignableFrom(cl)) {
+                throw new TemplateException("Bean Models cannot be instantiated using the ?new built-in", env);
+            }
+            if (JYTHON_MODEL_CLASS != null && JYTHON_MODEL_CLASS.isAssignableFrom(cl)) {
+                throw new TemplateException("Jython Models cannot be instantiated using the ?new built-in", env);
             }
         }
 

@@ -135,4 +135,11 @@
       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
    </testcase>   
    <testcase name="hashconcat" filename="test-hashconcat.ftl"/>
+   <testcase name="test-new-defaultresolver" filename="test-new-defaultresolver.txt" />
+   <testcase name="test-new-unrestricted" filename="test-new-unrestricted.txt">
+      <config new_builtin_class_resolver="unrestricted"/>
+   </testcase>   
+   <testcase name="test-new-safer" filename="test-new-safer.txt">
+      <config new_builtin_class_resolver="safer"/>
+   </testcase>   
 </testcases>

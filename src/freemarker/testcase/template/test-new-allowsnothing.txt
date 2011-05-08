@@ -1,0 +1,5 @@
+<#attempt>
+${"freemarker.testcase.models.NewTestModel"?new("works")}
+<#recover>
+fails
+</#attempt>

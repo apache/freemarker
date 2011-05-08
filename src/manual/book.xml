@@ -19551,6 +19551,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new setting:
+              <literal>Configuration.setNewBuiltinClassResolver(TemplateClassResolver)</literal>,
+              or <literal>new_builtin_class_resolver</literal> property. This
+              allows you to specify how the <link
+              linkend="ref_builtin_new"><literal>new</literal> built-in</link>
+              (like in <literal>"com.example.SomeClass"?new()</literal>)
+              resolves classes and which classes are accessible at all. If you
+              are allowing not-so-much-trusted users to upload templates, you
+              should be definitely interestered; see the Java API docs of
+              <literal>freemarker.core.Configurable.setSetting</literal> and
+              <literal>freemareker.template.Configuration.setNewBuiltinClassResolver</literal>.
+              Otherwise it's still recommended to set this to
+              <literal>TemplateClassResolver.SAFER_RESOLVER</literal> (or
+              <literal>safer</literal> if you are using properties), although
+              that's not 100% backward compatible (see Java API docs) .</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>freemarker.cache.NullCacheStorage</literal>: Setting
               this as the cache storage in <literal>Configuration</literal>

@@ -731,6 +731,7 @@ public class Configuration extends Configurable implements Cloneable {
         } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
             key = DEFAULT_ENCODING_KEY;
         }
+        boolean callSuper = false;
         try {
             if (DEFAULT_ENCODING_KEY.equals(key)) {
                 setDefaultEncoding(value);
@@ -775,9 +776,9 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(key)) {
                 setTemplateUpdateDelay(Integer.parseInt(value));
             } else if (AUTO_INCLUDE_KEY.equals(key)) {
-                setAutoIncludes(new SettingStringParser(value).parseAsList());
+                setAutoIncludes(parseAsList(value));
             } else if (AUTO_IMPORT_KEY.equals(key)) {
-                setAutoImports(new SettingStringParser(value).parseAsImportList());
+                setAutoImports(parseAsImportList(value));
             } else if (TAG_SYNTAX_KEY.equals(key)) {
                 if ("auto_detect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
@@ -789,12 +790,17 @@ public class Configuration extends Configurable implements Cloneable {
                     throw invalidSettingValueException(key, value);
                 }
             } else {
-                super.setSetting(key, value);
+                callSuper = true;
             }
         } catch(Exception e) {
             throw new TemplateException(
-                    "Failed to set setting " + key + " to value " + value,
+                    "Failed to set setting " + 
+                    StringUtil.jQuote(key) + " to value " + StringUtil.jQuote(value) +
+                    "; see cause exception.",
                     e, getEnvironment());
+        }
+        if (callSuper) {
+            super.setSetting(key, value);
         }
     }
     

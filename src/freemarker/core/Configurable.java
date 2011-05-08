@@ -93,7 +93,10 @@ public class Configurable
     public static final String OUTPUT_ENCODING_KEY = "output_encoding";
     public static final String URL_ESCAPING_CHARSET_KEY = "url_escaping_charset";
     public static final String STRICT_BEAN_MODELS = "strict_bean_models";
+    /** @since 2.3.17 */
     public static final String AUTO_FLUSH_KEY = "auto_flush";
+    /** @since 2.3.17 */
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
 
     private static final char COMMA = ',';
     
@@ -118,6 +121,7 @@ public class Configurable
     private String urlEscapingCharset;
     private boolean urlEscapingCharsetSet;
     private Boolean autoFlush;
+    private TemplateClassResolver newBuiltinClassResolver;
     
     public Configurable() {
         parent = null;
@@ -134,6 +138,7 @@ public class Configurable
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
         autoFlush = Boolean.TRUE;
+        newBuiltinClassResolver = TemplateClassResolver.SAFER_RESOLVER;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         
@@ -149,6 +154,7 @@ public class Configurable
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
         properties.setProperty(BOOLEAN_FORMAT_KEY, "true,false");
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
+        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
         // as outputEncoding and urlEscapingCharset defaults to null, 
         // they are not set
         
@@ -503,16 +509,37 @@ public class Configurable
     }
     
     /**
-     * See {@link #setAutoFlush(boolean)}
+     * Sets the {@link TemplateClassResolver} that is used when the
+     * <code>new</code> built-in is called in a template. That is, when
+     * a template contains the <code>"com.example.SomeClassName"?new</code>
+     * expression, this object will be called to resolve the
+     * <code>"com.example.SomeClassName"</code> string to a class. The default
+     * value is {@link TemplateClassResolver#UNRESTRICTED_RESOLVER} in
+     * FreeMarker 2.3.x, and {@link TemplateClassResolver#SAFER_RESOLVER}
+     * starting from FreeMarker 2.4.0. If you allow users to upload templates,
+     * it's important to use a custom restrictive {@link TemplateClassResolver}.
      * 
      * @since 2.3.17
      */
-    public boolean getAutoFlush() {
-        return autoFlush != null 
-            ? autoFlush.booleanValue()
-            : (parent != null ? parent.getAutoFlush() : true);
+    public void setNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
+        if (newBuiltinClassResolver == null) throw new IllegalArgumentException(
+                "Setting \"" + NEW_BUILTIN_CLASS_RESOLVER_KEY + "\" can't be null.");
+        this.newBuiltinClassResolver = newBuiltinClassResolver;
+        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY,
+                newBuiltinClassResolver.getClass().getName());
     }
 
+    /**
+     * Retrieves the {@link TemplateClassResolver} used
+     * to resolve classes when "SomeClassName"?new is called in a template.
+     * 
+     * @since 2.3.17
+     */
+    public TemplateClassResolver getNewBuiltinClassResolver() {
+        return newBuiltinClassResolver != null
+                ? newBuiltinClassResolver : parent.getNewBuiltinClassResolver();
+    }
+    
     /**
      * Sets whether the output {@link Writer} is automatically flushed at
      * the end of {@link Template#process(Object, Writer)} (and its
@@ -533,6 +560,20 @@ public class Configurable
         this.autoFlush = autoFlush ? Boolean.TRUE : Boolean.FALSE;
         properties.setProperty(AUTO_FLUSH_KEY, String.valueOf(autoFlush));
     }
+    
+    /**
+     * See {@link #setAutoFlush(boolean)}
+     * 
+     * @since 2.3.17
+     */
+    public boolean getAutoFlush() {
+        return autoFlush != null 
+            ? autoFlush.booleanValue()
+            : (parent != null ? parent.getAutoFlush() : true);
+    }
+    
+    private static final String ALLOWED_CLASSES = "allowed_classes";
+    private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
     /**
      * Sets a setting by a name and string value.
@@ -576,7 +617,60 @@ public class Configurable
      *   <li><code>"url_escaping_charset"</code>: If this setting is set, then it
      *       overrides the value of the <code>"output_encoding"</code> setting when
      *       FreeMarker does URL encoding.
-     *   <li><code>"auto_flush"</code>: see {@link #setAutoFlush(boolean)}
+     *   <li><code>"auto_flush"</code>: see {@link #setAutoFlush(boolean)}.
+     *       Since 2.3.17.
+     *   <li><code>"new_builtin_class_resolver"</code>:
+     *       see {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
+     *       Since 2.3.17. The value must be one of these (ignore the
+     *       quotation marks):
+     *       <ol>
+     *         <li><code>"unrestricted"</code>:
+     *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
+     *         <li><code>"safer"</code>:
+     *             Use {@link TemplateClassResolver#SAFER_RESOLVER}
+     *         <li><code>"allows_nothing"</code>:
+     *             Use {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}
+     *         <li>Something that contains colon will use
+     *             {@link OptInTemplateClassResolver} and is expected to
+     *             store comma separated values (possibly quoted) segmented
+     *             with <code>"allowed_classes:"</code> and/or
+     *             <code>"trusted_templates:"</code>. Examples of valid values:
+     *             
+     *             <table border="1">
+     *               <tr>
+     *                 <th>Setting value
+     *                 <th>Meaning
+     *               <tr>
+     *                 <td>
+                         <code>allowed_classes: com.example.C1, com.example.C2,
+     *                   trusted_templates: lib/*, safe.ftl</code>                 
+     *                 <td>
+     *                   Only allow instantiating the <code>com.example.C1</code> and
+     *                   <code>com.example.C2</code> classes. But, allow templates
+     *                   within the <code>lib/</code> directory (like
+     *                   <code>lib/foo/bar.ftl</code>) and template <code>safe.ftl</code>
+     *                   (that does not match <code>foo/safe.ftl</code>, only
+     *                   exactly <code>safe.ftl</code>) to instantiate anything
+     *                   that {@link TemplateClassResolver#SAFER_RESOLVER} allows.
+     *               <tr>
+     *                 <td>
+     *                   <code>allowed_classes: com.example.C1, com.example.C2</code>
+     *                 <td>Only allow instantiating the <code>com.example.C1</code> and
+     *                   <code>com.example.C2</code> classes. There are no
+     *                   trusted templates.
+     *               <tr>
+     *                 <td>
+                         <code>trusted_templates: lib/*, safe.ftl</code>                 
+     *                 <td>
+     *                   Do not allow instantiating any classes, except in
+     *                   templates inside <code>lib/</code> or in template 
+     *                   <code>safe.ftl</code>.
+     *             </table>
+     *             For more details see {@link OptInTemplateClassResolver}.
+     *         <li>Otherwise if the value contains dot, it's interpreted as
+     *             a full-qualified class name, and the object will be created
+     *             with its parameterless constructor.
+     *       </ol>
      * </ul>
      * 
      * @param key the name of the setting.
@@ -666,22 +760,59 @@ public class Configurable
             } else if (URL_ESCAPING_CHARSET_KEY.equals(key)) {
                 setURLEscapingCharset(value);
             } else if (STRICT_BEAN_MODELS.equals(key)) {
-		setStrictBeanModels(StringUtil.getYesNo(value));
-	    } else if (AUTO_FLUSH_KEY.equals(key)) {
-		setAutoFlush(StringUtil.getYesNo(value));
-	    } else {
+                setStrictBeanModels(StringUtil.getYesNo(value));
+            } else if (AUTO_FLUSH_KEY.equals(key)) {
+                setAutoFlush(StringUtil.getYesNo(value));
+            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(key)) {
+                if ("unrestricted".equals(value)) {
+                    setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
+                } else if ("safer".equals(value)) {
+                    setNewBuiltinClassResolver(TemplateClassResolver.SAFER_RESOLVER);
+                } else if ("allows_nothing".equals(value)) {
+                    setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
+                } else if (value.indexOf(":") != -1) {
+                    List segments = parseAsSegmentedList(value);
+                    Set allowedClasses = null;
+                    List trustedTemplates = null;
+                    for (int i = 0; i < segments.size(); i++) {
+                        KeyValuePair kv = (KeyValuePair) segments.get(i);
+                        String segmentKey = (String) kv.getKey();
+                        List segmentValue = (List) kv.getValue();
+                        if (segmentKey.equals(ALLOWED_CLASSES)) {
+                            allowedClasses = new HashSet(segmentValue); 
+                        } else if (segmentKey.equals(TRUSTED_TEMPLATES)) {
+                            trustedTemplates = segmentValue;
+                        } else {
+                            throw new ParseException(
+                                    "Unrecognized list segment key: " + StringUtil.jQuote(segmentKey) +
+                                    ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
+                                    TRUSTED_TEMPLATES + "\"", 0, 0);
+                        }
+                    }
+                    setNewBuiltinClassResolver(
+                            new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
+                } else if (value.indexOf('.') == -1) {
+                    setNewBuiltinClassResolver((TemplateClassResolver) ClassUtil.forName(value)
+                            .newInstance());
+                } else {
+                    throw invalidSettingValueException(key, value);
+                }
+            } else {
                 throw unknownSettingException(key);
             }
         } catch(Exception e) {
             throw new TemplateException(
-                    "Failed to set setting " + key + " to value " + value,
+                    "Failed to set setting " + 
+                    StringUtil.jQuote(key) + " to value " + StringUtil.jQuote(value) +
+                    "; see cause exception.",
                     e, getEnvironment());
         }
     }
 
     public void setStrictBeanModels(boolean strict) {
 	if (!(objectWrapper instanceof BeansWrapper)) {
-	    throw new IllegalStateException("Not a beans wrapper");
+	    throw new IllegalStateException("The value of the " + OBJECT_WRAPPER_KEY +
+	            " setting isn't a " + BeansWrapper.class.getName() + ".");
 	}
 	((BeansWrapper) objectWrapper).setStrict(strict);
     }
@@ -871,4 +1002,205 @@ public class Configurable
     {
         if(parent != null) parent.doAutoImportsAndIncludes(env);
     }
+
+    protected ArrayList parseAsList(String text) throws ParseException {
+        return new SettingStringParser(text).parseAsList();
+    }
+
+    protected ArrayList parseAsSegmentedList(String text)
+    throws ParseException {
+        return new SettingStringParser(text).parseAsSegmentedList();
+    }
+    
+    protected HashMap parseAsImportList(String text) throws ParseException {
+        return new SettingStringParser(text).parseAsImportList();
+    }
+    
+    private static class KeyValuePair {
+        private final Object key;
+        private final Object value;
+        
+        KeyValuePair(Object key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
+        
+        Object getKey() {
+            return key;
+        }
+        
+        Object getValue() {
+            return value;
+        }
+    }
+    
+    /**
+     * Helper class for parsing setting values given with string.
+     */
+    private static class SettingStringParser {
+        private String text;
+        private int p;
+        private int ln;
+
+        private SettingStringParser(String text) {
+            this.text = text;
+            this.p = 0;
+            this.ln = text.length();
+        }
+
+        ArrayList parseAsSegmentedList() throws ParseException {
+            ArrayList segments = new ArrayList();
+            ArrayList currentSegment = null;
+            
+            char c;
+            while (true) {
+                c = skipWS();
+                if (c == ' ') break;
+                String item = fetchStringValue();
+                c = skipWS();
+                
+                if (c == ':') {
+                    currentSegment = new ArrayList();
+                    segments.add(new KeyValuePair(item, currentSegment));
+                } else {
+                    if (currentSegment == null) {
+                        throw new ParseException(
+                                "The very first list item must be followed by \":\" so " +
+                                "it will be the key for the following sub-list.",
+                                0, 0);
+                    }
+                    currentSegment.add(item);
+                }
+                
+                if (c == ' ') break;
+                if (c != ',' && c != ':') throw new ParseException(
+                        "Expected \",\" or \":\" or the end of text but " +
+                        "found \"" + c + "\"", 0, 0);
+                p++;
+            }
+            return segments;
+        }
+
+        ArrayList parseAsList() throws ParseException {
+            char c;
+            ArrayList seq = new ArrayList();
+            while (true) {
+                c = skipWS();
+                if (c == ' ') break;
+                seq.add(fetchStringValue());
+                c = skipWS();
+                if (c == ' ') break;
+                if (c != ',') throw new ParseException(
+                        "Expected \",\" or the end of text but " +
+                        "found \"" + c + "\"", 0, 0);
+                p++;
+            }
+            return seq;
+        }
+
+        HashMap parseAsImportList() throws ParseException {
+            char c;
+            HashMap map = new HashMap();
+            while (true) {
+                c = skipWS();
+                if (c == ' ') break;
+                String lib = fetchStringValue();
+
+                c = skipWS();
+                if (c == ' ') throw new ParseException(
+                        "Unexpected end of text: expected \"as\"", 0, 0);
+                String s = fetchKeyword();
+                if (!s.equalsIgnoreCase("as")) throw new ParseException(
+                        "Expected \"as\", but found " + StringUtil.jQuote(s), 0, 0);
+
+                c = skipWS();
+                if (c == ' ') throw new ParseException(
+                        "Unexpected end of text: expected gate hash name", 0, 0);
+                String ns = fetchStringValue();
+                
+                map.put(ns, lib);
+
+                c = skipWS();
+                if (c == ' ') break;
+                if (c != ',') throw new ParseException(
+                        "Expected \",\" or the end of text but "
+                        + "found \"" + c + "\"", 0, 0);
+                p++;
+            }
+            return map;
+        }
+
+        String fetchStringValue() throws ParseException {
+            String w = fetchWord();
+            if (w.startsWith("'") || w.startsWith("\"")) {
+                w = w.substring(1, w.length() - 1);
+            }
+            return StringUtil.FTLStringLiteralDec(w);
+        }
+
+        String fetchKeyword() throws ParseException {
+            String w = fetchWord();
+            if (w.startsWith("'") || w.startsWith("\"")) {
+                throw new ParseException(
+                    "Keyword expected, but a string value found: " + w, 0, 0);
+            }
+            return w;
+        }
+
+        char skipWS() {
+            char c;
+            while (p < ln) {
+                c = text.charAt(p);
+                if (!Character.isWhitespace(c)) return c;
+                p++;
+            }
+            return ' ';
+        }
+
+        private String fetchWord() throws ParseException {
+            if (p == ln) throw new ParseException(
+                    "Unexpeced end of text", 0, 0);
+
+            char c = text.charAt(p);
+            int b = p;
+            if (c == '\'' || c == '"') {
+                boolean escaped = false;
+                char q = c;
+                p++;
+                while (p < ln) {
+                    c = text.charAt(p);
+                    if (!escaped) {
+                        if (c == '\\') {
+                            escaped = true;
+                        } else if (c == q) {
+                            break;
+                        }
+                    } else {
+                        escaped = false;
+                    }
+                    p++;
+                }
+                if (p == ln) {
+                    throw new ParseException("Missing " + q, 0, 0);
+                }
+                p++;
+                return text.substring(b, p);
+            } else {
+                do {
+                    c = text.charAt(p);
+                    if (!(Character.isLetterOrDigit(c)
+                            || c == '/' || c == '\\' || c == '_'
+                            || c == '.' || c == '-' || c == '!'
+                            || c == '*' || c == '?')) break;
+                    p++;
+                } while (p < ln);
+                if (b == p) {
+                    throw new ParseException("Unexpected character: " + c, 0, 0);
+                } else {
+                    return text.substring(b, p);
+                }
+            }
+        }
+    }
+    
 }
