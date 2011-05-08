@@ -11411,6 +11411,30 @@ Green Mouse</programlisting>
             <primary>datetime built-in</primary>
           </indexterm>
 
+          <indexterm>
+            <primary>string to date</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>string to time</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting string to date</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting string to time</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>parsing string as date</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>parsing string as time</primary>
+          </indexterm>
+
           <para>The string converted to a date value. It is recommended to
           specify a parameter that specifies the format. For example:</para>
 
@@ -11924,6 +11948,18 @@ Matching sub-strings:
 
           <indexterm>
             <primary>number built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>string to number</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting string to number</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>parse string as number</primary>
           </indexterm>
 
           <para>The string converted to numerical value. The number must be in
@@ -12828,6 +12864,22 @@ Hungarian people write: 12 345 678,00</programlisting>
             <secondary>date</secondary>
           </indexterm>
 
+          <indexterm>
+            <primary>converting date to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting time to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>time to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>date to string</primary>
+          </indexterm>
+
           <para>This built-in converts a date to a string, with the specified
           formatting. (when the default format dictated by the
           <literal>date_format</literal>, <literal>time_format</literal> and
@@ -12961,7 +13013,7 @@ Tuesday, April 08, 2003, 09:24:44 PM (PDT)</programlisting>
         </section>
 
         <section xml:id="ref_builtin_date_datetype">
-          <title>date, time, datetime</title>
+          <title>date, time, datetime (when used with a date value)</title>
 
           <indexterm>
             <primary>type-casting</primary>
@@ -13776,6 +13828,14 @@ Sorted by name.last:
             <primary>short built-in</primary>
           </indexterm>
 
+          <indexterm>
+            <primary>converting date to long</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>date to long</primary>
+          </indexterm>
+
           <para>Returns a <literal>SimpleNumber</literal> which contains the
           same value as the original variable, but uses
           <literal>java.lang.<replaceable>Type</replaceable></literal> for the
@@ -13784,8 +13844,15 @@ Sorted by name.last:
           problem with automatically choosing the suitable
           <literal>java.lang.*</literal> type. Note that since version 2.3.9
           the unwrapper has been improved substantially, so you will hardly
-          ever need to use these built-ins, except for resolving ambiguity in
-          overloaded method invocation.</para>
+          ever need to use these built-ins to convert between numerical types,
+          except for resolving ambiguity in overloaded method
+          invocation.</para>
+
+          <para>The <literal>long</literal> built-in can also be used with
+          date, time and date-time values to get the value as
+          <literal>java.util.Date.getTime()</literal> would return. This is
+          useful if you have to call a Java method that expects a timestamp as
+          a long. This conversion is not automatic. </para>
         </section>
 
         <section xml:id="ref_builtin_eval">
@@ -19502,6 +19569,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (<literal>freemarker.template.TemplateCollectionModel</literal>-s)
               too, not only on sequences
               (<literal>freemarker.template.TemplateSequenceModel</literal>-s).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>?long</literal> now works for date, date-time and
+              time values, and returns the milliseconds since the epoch (as
+              <literal>java.util.Date.getTime()</literal>). </para>
             </listitem>
 
             <listitem>

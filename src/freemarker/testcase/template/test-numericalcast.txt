@@ -30,6 +30,9 @@
     ${result}?long=${result?long}
 </#list>
 
+?long from date
+    ${"2011-05-08 18:00:15 GMT"?date("yyyy-MM-dd HH:mm:ss z")?long} = 1304877615000
+
 ?float
 <#list testlist as result>
     ${result}?float=${result?float}

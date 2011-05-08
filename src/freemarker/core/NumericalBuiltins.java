@@ -55,6 +55,7 @@ package freemarker.core;
 import freemarker.template.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * A holder for builtins that operate exclusively on TemplateSequenceModels.
@@ -98,12 +99,22 @@ abstract class NumericalBuiltins {
         }
     }
 
-    static class longBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            if (num instanceof Long) {
-                return model;
+    // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
+    static class longBI extends BuiltIn {
+        TemplateModel _getAsTemplateModel(Environment env)
+                throws TemplateException
+        {
+            TemplateModel model = target.getAsTemplateModel(env);
+            if (model instanceof TemplateDateModel) {
+                Date date = EvaluationRules.getDate((TemplateDateModel) model, target, env);
+                return new SimpleNumber(date.getTime());
+            } else {
+                Number num = EvaluationRules.getNumber(model, target, env);
+                if (num instanceof Long) {
+                    return model;
+                }
+                return new SimpleNumber(num.longValue());
             }
-            return new SimpleNumber(num.longValue());
         }
     }
 
