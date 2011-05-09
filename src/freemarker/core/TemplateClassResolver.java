@@ -128,7 +128,7 @@ public interface TemplateClassResolver {
      * 
      * @param className the full-qualified class name
      * @param env the environment in which the template executes
-     * @param template the template from which the operation that require the
+     * @param template the template where the operation that require the
      *        class resolution resides in. This is <code>null</code> if the
      *        call doesn't come from a template.
      *        
