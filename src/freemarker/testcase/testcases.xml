@@ -142,4 +142,15 @@
    <testcase name="test-new-safer" filename="test-new-safer.txt">
       <config new_builtin_class_resolver="safer"/>
    </testcase>   
+   <testcase name="test-new-allowsnothing" filename="test-new-allowsnothing.txt">
+      <config new_builtin_class_resolver="allows_nothing"/>
+   </testcase>   
+   <testcase name="test-new-optin" filename="test-new-optin.txt">
+      <config new_builtin_class_resolver="allowed_classes: freemarker.testcase.models.NewTestModel, trusted_templates: subdir/test-new-optin.txt, subdir/subsub/*"/>
+   </testcase>   
+   <testcase name="test-specialvars" filename="test-specialvars.txt">
+      <config locale="en_US"/>
+      <config output_encoding="utf-8"/>
+      <config url_escaping_charset="iso-8859-1"/>
+   </testcase>   
 </testcases>

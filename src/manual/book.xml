@@ -17435,8 +17435,10 @@ There was no specific handler for node y
         <listitem>
           <para><indexterm>
               <primary>language</primary>
-            </indexterm><literal>language</literal>: Returns the language part
-          of the current value of the locale setting. For example if
+            </indexterm><indexterm>
+              <primary>lang</primary>
+            </indexterm><literal>lang</literal>: Returns the language part of
+          the current value of the locale setting. For example if
           <literal>.locale</literal> is <literal>en_US</literal>, then
           <literal>.lang</literal> is <literal>en</literal>.</para>
         </listitem>
@@ -17481,6 +17483,17 @@ There was no specific handler for node y
           <literal>recurse</literal>, ...etc. directives</link>). Also, it
           initially stores the root node when you use the <link
           linkend="pgui_misc_ant">FreeMarker XML Ant task</link>.</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
+              <primary>now</primary>
+            </indexterm><indexterm>
+              <primary>current date-time</primary>
+            </indexterm><literal>now</literal>: Returns the current date-time.
+          Usage examples: "<literal>Page generated: ${.now}</literal>",
+          "<literal>Today is ${.now?date}</literal>", "<literal>The current
+          time is ${.now?time}</literal>".</para>
         </listitem>
 
         <listitem>
@@ -19559,11 +19572,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>The <literal>sort</literal> and <literal>sort_by</literal>
-              built-ins now support sorting boolean values.</para>
-            </listitem>
-
-            <listitem>
               <para><literal>?seq_index_of</literal> and
               <literal>?seq_last_index_of</literal> now works on collections
               (<literal>freemarker.template.TemplateCollectionModel</literal>-s)
@@ -19574,7 +19582,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><literal>?long</literal> now works for date, date-time and
               time values, and returns the milliseconds since the epoch (as
-              <literal>java.util.Date.getTime()</literal>). </para>
+              <literal>java.util.Date.getTime()</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>New special variable, <literal>now</literal>. This returns
+              the current date-time. Usage examples: "<literal>Page generated:
+              ${.now}</literal>", "<literal>Today is ${.now?date}</literal>",
+              "<literal>The current time is ${.now?time}</literal>".</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>?sort</literal> and <literal>?sort_by</literal>
+              now supports sorting boolean values.</para>
             </listitem>
 
             <listitem>

@@ -52,6 +52,11 @@
 
 package freemarker.core;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import freemarker.template.*;
 
 /**
@@ -75,6 +80,7 @@ final class BuiltinVariable extends Expression {
     static final String ERROR = "error";
     static final String OUTPUT_ENCODING = "output_encoding";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
+    static final String NOW = "now";
 
     private final String name;
 
@@ -93,10 +99,11 @@ final class BuiltinVariable extends Expression {
             && name != NODE
             && name != PASS
             && name != VARS
-	    && name != VERSION
-	    && name != OUTPUT_ENCODING
-	    && name != URL_ESCAPING_CHARSET
-            && name != ERROR)
+            && name != VERSION
+            && name != OUTPUT_ENCODING
+            && name != URL_ESCAPING_CHARSET
+            && name != ERROR
+            && name != NOW)
         {
             throw new ParseException("Unknown built-in variable: " + name, this);
         }
@@ -113,7 +120,8 @@ final class BuiltinVariable extends Expression {
             return env.getGlobalVariables();
         }
         if (name == LOCALS) {
-            return env.getCurrentMacroContext().getLocals();
+            Macro.Context ctx = env.getCurrentMacroContext();
+            return ctx == null ? null : ctx.getLocals();
         }
         if (name == DATA_MODEL) {
             return env.getDataModel();
@@ -149,6 +157,9 @@ final class BuiltinVariable extends Expression {
         }
         if (name == ERROR) {
             return new SimpleScalar(env.getCurrentRecoveredErrorMesssage());
+        }
+        if (name == NOW) {
+            return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
         }
         throw new TemplateException("Invalid built-in variable: " + this, env);
     }
