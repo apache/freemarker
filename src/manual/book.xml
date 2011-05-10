@@ -8262,6 +8262,12 @@ TemplateHashModel roundingModeEnums =
               <td>Logs messages of the <literal>FreemarkerServlet</literal>
               class.</td>
             </tr>
+
+            <tr>
+              <td><literal>freemarker.jsp</literal></td>
+
+              <td>Logs messages of the FreeMarker JSP support.</td>
+            </tr>
           </tbody>
         </informaltable>
 
@@ -13852,7 +13858,7 @@ Sorted by name.last:
           date, time and date-time values to get the value as
           <literal>java.util.Date.getTime()</literal> would return. This is
           useful if you have to call a Java method that expects a timestamp as
-          a long. This conversion is not automatic. </para>
+          a long. This conversion is not automatic.</para>
         </section>
 
         <section xml:id="ref_builtin_eval">
