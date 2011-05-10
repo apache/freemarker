@@ -273,6 +273,7 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <include name="build.xml"/>
         <include name="examples/**"/>
         <include name="LICENSE.txt"/>
+        <include name="NOTICE.txt"/>
         <include name="README.txt"/>
         <include name="src/**"/>
         <include name="examples/**"/>
