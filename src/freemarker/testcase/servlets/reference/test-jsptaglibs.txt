@@ -100,7 +100,4 @@ TestTag2.doEndTag() called here
 TestTag2.doStartTag() called here
 TestTag2.doEndTag() called here
 <!-- Test loading from autodeployed .tld -->
-Executed TestSimpleTag2<!-- Test loading from autodeployed .tld -->
-Executed TestSimpleTag2<!-- Test loading from autodeployed .tld -->
-Executed TestSimpleTag2<!-- Test loading from autodeployed .tld -->
 Executed TestSimpleTag2
