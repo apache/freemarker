@@ -1,78 +1,18 @@
 <!--
-Copyright (c) 2000 Sun Microsystems, Inc.,
-901 San Antonio Road,
-Palo Alto, California 94303, U.S.A.
-All rights reserved.
+ Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-Sun Microsystems, Inc. has intellectual property rights relating to
-technology embodied in the product that is described in this document.
-In particular, and without limitation, these intellectual property
-rights may include one or more of the U.S. patents listed at
-http://www.sun.com/patents and one or more additional patents or
-pending patent applications in the U.S. and in other countries.
+      http://www.apache.org/licenses/LICENSE-2.0
 
-This document and the product to which it pertains are distributed
-under licenses restricting their use, copying, distribution, and
-decompilation.  This document may be reproduced and distributed but may
-not be changed without prior written authorization of Sun and its
-licensors, if any.
-
-Third-party software, including font technology, is copyrighted and
-licensed from Sun suppliers.
-
-Sun,  Sun Microsystems,  the Sun logo,  Java,  JavaServer Pages,  Java
-Naming and Directory Interface,  JDBC,  JDK,  JavaMail and  and
-Enterprise JavaBeans are trademarks or registered trademarks of Sun
-Microsystems, Inc. in the U.S. and other countries.
-
-Federal Acquisitions: Commercial Software - Government Users Subject to
-Standard License Terms and Conditions.
-
-DOCUMENTATION IS PROVIDED "AS IS" AND ALL EXPRESS OR IMPLIED
-CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING ANY IMPLIED
-WARRANTY OF MERCHANTABILITY, FITNESS FOR FOR A PARTICULAR PURPOSE OR
-NON-INFRINGEMENT, ARE DISCLAIMED, EXCEPT TO THE EXTENT THAT SUCH
-DISCLAIMERS ARE HELD TO BE LEGALLY INVALID.
-
-
-_________________________________________________________________________
-
-Copyright (c) 2000 Sun Microsystems, Inc.,
-901 San Antonio Road,
-Palo Alto, California 94303, E'tats-Unis.
-Tous droits re'serve's.
-
-Sun Microsystems, Inc. a les droits de proprie'te' intellectuels
-relatants a` la technologie incorpore'e dans le produit qui est de'crit
-dans ce document. En particulier, et sans la limitation, ces droits de
-proprie'te' intellectuels peuvent inclure un ou plus des brevets
-ame'ricains e'nume're's a` http://www.sun.com/patents et un ou les
-brevets plus supple'mentaires ou les applications de brevet en attente
-dans les E'tats-Unis et dans les autres pays.
-
-Ce produit ou document est prote'ge' par un copyright et distribue'
-avec des licences qui en restreignent l'utilisation, la copie, la
-distribution, et la de'compilation.  Ce documention associe n peut
-e^tre reproduite et distribuer, par quelque moyen que ce soit, sans
-l'autorisation pre'alable et e'crite de Sun et de ses bailleurs de
-licence, le cas e'che'ant.
-
-Le logiciel de'tenu par des tiers, et qui comprend la technologie
-relative aux polices de caracte`res, est prote'ge' par un copyright et
-licencie' par des fournisseurs de Sun.
-
-Sun,  Sun Microsystems,  le logo Sun,  Java,  JavaServer Pages,  Java
-Naming and Directory Interface,  JDBC,  JDK,  JavaMail et  and
-Enterprise JavaBeans sont des marques de fabrique ou des marques
-de'pose'es de Sun Microsystems, Inc. aux E'tats-Unis et dans d'autres
-pays.
-
-LA DOCUMENTATION EST FOURNIE "EN L'E'TAT" ET TOUTES AUTRES CONDITIONS,
-DECLARATIONS ET GARANTIES EXPRESSES OU TACITES SONT FORMELLEMENT
-EXCLUES, DANS LA MESURE AUTORISEE PAR LA LOI APPLICABLE, Y COMPRIS
-NOTAMMENT TOUTE GARANTIE IMPLICITE RELATIVE A LA QUALITE MARCHANDE, A
-L'APTITUDE A UNE UTILISATION PARTICULIERE OU A L'ABSENCE DE
-CONTREFAC,ON.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 -->
 
 <!--
@@ -81,8 +21,8 @@ All Servlet 2.3 deployment descriptors must include a DOCTYPE
 of the following form:
 
   <!DOCTYPE web-app PUBLIC
-	"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-	"http://java.sun.com/dtd/web-app_2_3.dtd">
+    "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 -->
 
@@ -207,9 +147,9 @@ Used in: ejb-local-ref, ejb-ref
 
 Examples:
 
-	<ejb-link>EmployeeRecord</ejb-link>
+    <ejb-link>EmployeeRecord</ejb-link>
 
-	<ejb-link>../products/product.jar#ProductEJB</ejb-link>
+    <ejb-link>../products/product.jar#ProductEJB</ejb-link>
 
 -->
 <!ELEMENT ejb-link (#PCDATA)>
@@ -218,37 +158,37 @@ Examples:
 The ejb-local-ref element is used for the declaration of a reference to
 an enterprise bean's local home. The declaration consists of:
 
-	- an optional description
-	- the EJB reference name used in the code of the web application
-	  that's referencing the enterprise bean
-	- the expected type of the referenced enterprise bean
-	- the expected local home and local interfaces of the referenced
-	  enterprise bean
-	- optional ejb-link information, used to specify the referenced
-	  enterprise bean
+    - an optional description
+    - the EJB reference name used in the code of the web application
+      that's referencing the enterprise bean
+    - the expected type of the referenced enterprise bean
+    - the expected local home and local interfaces of the referenced
+      enterprise bean
+    - optional ejb-link information, used to specify the referenced
+      enterprise bean
 
 Used in: web-app
 -->
 <!ELEMENT ejb-local-ref (description?, ejb-ref-name, ejb-ref-type,
-		local-home, local, ejb-link?)>
+        local-home, local, ejb-link?)>
 
 <!--
 The ejb-ref element is used for the declaration of a reference to
 an enterprise bean's home. The declaration consists of:
 
-	- an optional description
-	- the EJB reference name used in the code of
-	  the web application that's referencing the enterprise bean
-	- the expected type of the referenced enterprise bean
-	- the expected home and remote interfaces of the referenced
-	  enterprise bean
-	- optional ejb-link information, used to specify the referenced
-	  enterprise bean
+    - an optional description
+    - the EJB reference name used in the code of
+      the web application that's referencing the enterprise bean
+    - the expected type of the referenced enterprise bean
+    - the expected home and remote interfaces of the referenced
+      enterprise bean
+    - optional ejb-link information, used to specify the referenced
+      enterprise bean
 
 Used in: web-app
 -->
 <!ELEMENT ejb-ref (description?, ejb-ref-name, ejb-ref-type,
-		home, remote, ejb-link?)>
+        home, remote, ejb-link?)>
 
 <!--
 The ejb-ref-name element contains the name of an EJB reference. The
@@ -272,8 +212,8 @@ referenced enterprise bean.
 
 The ejb-ref-type element must be one of the following:
 
-	<ejb-ref-type>Entity</ejb-ref-type>
-	<ejb-ref-type>Session</ejb-ref-type>
+    <ejb-ref-type>Entity</ejb-ref-type>
+    <ejb-ref-type>Session</ejb-ref-type>
 
 Used in: ejb-local-ref, ejb-ref
 -->
@@ -290,7 +230,7 @@ during deployment.
 env-entry-type)>
 
 <!--
-The env-entry-name element contains the name of a web applications's
+The env-entry-name element contains the name of a web application's
 environment entry.  The name is a JNDI name relative to the
 java:comp/env context.  The name must be unique within a web application.
 
@@ -309,15 +249,15 @@ code.
 
 The following are the legal values of env-entry-type:
 
-	java.lang.Boolean
-	java.lang.Byte
-	java.lang.Character
-	java.lang.String
-	java.lang.Short
-	java.lang.Integer
-	java.lang.Long
-	java.lang.Float
-	java.lang.Double
+    java.lang.Boolean
+    java.lang.Byte
+    java.lang.Character
+    java.lang.String
+    java.lang.Short
+    java.lang.Integer
+    java.lang.Long
+    java.lang.Float
+    java.lang.Double
 
 Used in: env-entry
 -->
@@ -396,7 +336,7 @@ to apply it matches filter-mapping declarations either on servlet-name,
 or on url-pattern for each filter-mapping element, depending on which
 style is used. The order in which filters are invoked is the order in
 which filter-mapping declarations that match a request URI for a
-servlet appear in the list of filter-mapping elements.The filter-name
+servlet appear in the list of filter-mapping elements. The filter-name
 value must be the value of the <filter-name> sub-elements of one of the
 <filter> declarations in the deployment descriptor.
 
@@ -520,7 +460,7 @@ Used in: listener
 
 <!--
 The load-on-startup element indicates that this servlet should be
-loaded (instantiated and have its init() called) on the startup
+loaded (instantiated and have its init() called) on the start-up
 of the web application. The optional contents of
 these element must be an integer indicating the order in which
 the servlet should be loaded. If the value is a negative integer,
@@ -635,8 +575,8 @@ Deployer.
 
 The value of this element must be one of the two following:
 
-	<res-auth>Application</res-auth>
-	<res-auth>Container</res-auth>
+    <res-auth>Application</res-auth>
+    <res-auth>Container</res-auth>
 
 Used in: resource-ref
 -->
@@ -657,8 +597,8 @@ through the given resource manager connection factory reference can be
 shared. The value of this element, if specified, must be one of the
 two following:
 
-	<res-sharing-scope>Shareable</res-sharing-scope>
-	<res-sharing-scope>Unshareable</res-sharing-scope>
+    <res-sharing-scope>Shareable</res-sharing-scope>
+    <res-sharing-scope>Unshareable</res-sharing-scope>
 
 The default value is Shareable.
 
@@ -693,7 +633,7 @@ Example:
 </resource-env-ref>
 -->
 <!ELEMENT resource-env-ref (description?, resource-env-ref-name,
-		resource-env-ref-type)>
+        resource-env-ref-type)>
 
 <!--
 The resource-env-ref-name element specifies the name of a resource
@@ -729,14 +669,14 @@ Used in: web-app
 Example:
 
     <resource-ref>
-	<res-ref-name>jdbc/EmployeeAppDB</res-ref-name>
-	<res-type>javax.sql.DataSource</res-type>
-	<res-auth>Container</res-auth>
-	<res-sharing-scope>Shareable</res-sharing-scope>
+    <res-ref-name>jdbc/EmployeeAppDB</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+    <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
 -->
 <!ELEMENT resource-ref (description?, res-ref-name, res-type, res-auth,
-		res-sharing-scope?)>
+        res-sharing-scope?)>
 
 <!--
 The role-link element is a reference to a defined security role. The
@@ -784,11 +724,11 @@ Used in: web-app
 Example:
 
     <security-role>
-	<description>
-	    This role includes all employees who are authorized
-	    to access the employee service application.
-	</description>
-	<role-name>employee</role-name>
+    <description>
+        This role includes all employees who are authorized
+        to access the employee service application.
+    </description>
+    <role-name>employee</role-name>
     </security-role>
 -->
 <!ELEMENT security-role (description?, role-name)>

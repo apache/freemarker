@@ -1,78 +1,18 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
 <!--
-Copyright 1999 Sun Microsystems, Inc. 901 San Antonio Road,
-Palo Alto, CA  94303, U.S.A.  All rights reserved.
- 
-This product or document is protected by copyright and distributed
-under licenses restricting its use, copying, distribution, and
-decompilation.  No part of this product or documentation may be
-reproduced in any form by any means without prior written authorization
-of Sun and its licensors, if any.  
+ Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
 
-Third party software, including font technology, is copyrighted and 
-licensed from Sun suppliers. 
+      http://www.apache.org/licenses/LICENSE-2.0
 
-Sun, Sun Microsystems, the Sun Logo, Solaris, Java, JavaServer Pages, Java 
-Naming and Directory Interface, JDBC, JDK, JavaMail and Enterprise JavaBeans, 
-are trademarks or registered trademarks of Sun Microsystems, Inc in the U.S. 
-and other countries.
-
-All SPARC trademarks are used under license and are trademarks
-or registered trademarks of SPARC International, Inc.
-in the U.S. and other countries. Products bearing SPARC
-trademarks are based upon an architecture developed by Sun Microsystems, Inc. 
-
-PostScript is a registered trademark of Adobe Systems, Inc. 
-
- 
-Federal Acquisitions: Commercial Software - Government Users Subject to 
-Standard License Terms and Conditions.
-
-
- 
-DOCUMENTATION IS PROVIDED "AS IS" AND ALL EXPRESS OR IMPLIED
-CONDITIONS, REPRESENTATIONS AND WARRANTIES, INCLUDING ANY
-IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE OR NON-INFRINGEMENT, ARE DISCLAIMED, EXCEPT
-TO THE EXTENT THAT SUCH DISCLAIMERS ARE HELD TO BE LEGALLY
-INVALID.
-
-_________________________________________________________________________
-Copyright 1999 Sun Microsystems, Inc., 
-901 San Antonio Road, Palo Alto, CA  94303, Etats-Unis. 
-Tous droits re'serve's.
- 
-
-Ce produit ou document est prote'ge' par un copyright et distribue' avec 
-des licences qui en restreignent l'utilisation, la copie, la distribution,
-et la de'compilation.  Aucune partie de ce produit ou de sa documentation
-associe'e ne peut e^tre reproduite sous aucune forme, par quelque moyen 
-que ce soit, sans l'autorisation pre'alable et e'crite de Sun et de ses 
-bailleurs de licence, s'il y en a.  
-
-Le logiciel de'tenu par des tiers, et qui comprend la technologie 
-relative aux polices de caracte`res, est prote'ge' par un copyright 
-et licencie' par des fournisseurs de Sun.
- 
-Sun, Sun Microsystems, le logo Sun, Solaris, Java, JavaServer Pages, Java 
-Naming and Directory Interface, JDBC, JDK, JavaMail, et Enterprise JavaBeans,  
-sont des marques de fabrique ou des marques de'pose'es de Sun 
-Microsystems, Inc. aux Etats-Unis et dans d'autres pays.
- 
-Toutes les marques SPARC sont utilise'es sous licence et sont
-des marques de fabrique ou des marques de'pose'es de SPARC
-International, Inc. aux Etats-Unis et  dans
-d'autres pays. Les produits portant les marques SPARC sont
-base's sur une architecture de'veloppe'e par Sun Microsystems, Inc.  
-
-Postcript est une marque enregistre'e d'Adobe Systems Inc. 
- 
-LA DOCUMENTATION EST FOURNIE "EN L'ETAT" ET TOUTES AUTRES CONDITIONS,
-DECLARATIONS ET GARANTIES EXPRESSES OU TACITES SONT FORMELLEMENT EXCLUES,
-DANS LA MESURE AUTORISEE PAR LA LOI APPLICABLE, Y COMPRIS NOTAMMENT
-TOUTE GARANTIE IMPLICITE RELATIVE A LA QUALITE MARCHANDE, A L'APTITUDE
-A UNE UTILISATION PARTICULIERE OU A L'ABSENCE DE CONTREFACON.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 -->
 
 <!--
@@ -154,7 +94,7 @@ The param-value element contains the value of a parameter.
 <!--
 The servlet element contains the declarative data of a
 servlet. If a jsp-file is specified and the load-on-startup element is
-present, then the JSP should be precompiled and loaded.
+present, then the JSP should be pre-compiled and loaded.
 -->
 
 <!ELEMENT servlet (icon?, servlet-name, display-name?, description?,
@@ -190,7 +130,7 @@ initialization param of the servlet
 
 <!--
 The load-on-startup element indicates that this servlet should be
-loaded on the startup of the web application. The optional contents of
+loaded on the start-up of the web application. The optional contents of
 these element must be a positive integer indicating the order in which
 the servlet should be loaded. Lower integers are loaded before higher
 integers. If no value is specified, or if the value specified is not a
@@ -569,7 +509,7 @@ application package.
 <!--
 The ID mechanism is to allow tools to easily make tool-specific
 references to the elements of the deployment descriptor. This allows
-tools that produce additional deployment information (i.e information
+tools that produce additional deployment information (i.e. information
 beyond the standard deployment descriptor information) to store the
 non-standard information in a separate file, and easily refer from
 these tools-specific files to the information in the standard web-app

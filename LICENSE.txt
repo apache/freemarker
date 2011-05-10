@@ -44,3 +44,26 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This software consists of voluntary contributions made by many individuals on
 behalf of the Visigoth Software Society. For more information on the Visigoth
 Software Society, please see http://www.visigoths.org/
+
+------------------------------------------------------------------------------
+
+FREEMARKER SUBCOMPONENTS UNDER DIFFERENT LICENSE:
+
+FreeMarker includes a number of subcomponents that are licensed by the Apache
+Software Foundation under the Apache License, Version 2.0. Your use of these
+subcomponents is subject to the terms and conditions of the Apache License,
+Version 2.0. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+The subcomponents under this licence are the following files, which are
+included both in freemarker.jar and in the source code:
+  
+    freemarker/ext/jsp/web-app_2_2.dtd
+    freemarker/ext/jsp/web-app_2_3.dtd
+    freemarker/ext/jsp/web-app_2_4.xsd
+    freemarker/ext/jsp/web-app_2_5.xsd
+    freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
+    freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
+    freemarker/ext/jsp/web-jsptaglibrary_2_0.xsd
+    freemarker/ext/jsp/web-jsptaglibrary_2_1.xsd
