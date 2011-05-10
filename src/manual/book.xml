@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.17</subtitle>
+  <subtitle>For FreeMarker 2.3.17 RC1</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -19569,9 +19569,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Versions</title>
 
       <section xml:id="versions_2_3_17">
-        <title>2.3.17</title>
+        <title>2.3.17 RC1</title>
 
-        <para>Date of release: 2011-05-FIXME</para>
+        <para>Date of release: 2011-05-10</para>
+
+        <para>The final release is expected on the 16th of May. If you are
+        using FreeMarker in development, use this release, and report any
+        problems. Thank you!</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -19713,6 +19717,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Big fixed <link
+              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;aid=3151085&amp;group_id=794&amp;atid=100794">[3151085]</link>:
+              <literal>freemarker.jsp.TaglibFactory</literal> didn't locate
+              tld files properly. This fix gives better compliance with JSP
+              specification for resolving and loading tld files.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: Unwrapping <literal>null</literal> with a
               <literal>BeansWrapper</literal> that had a custom null-model
               didn't result in <literal>null</literal>. Now both unwrapping
@@ -19731,6 +19743,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that how stack traces (the <literal>Throwable</literal> objects)
               are logged is still up to the logging framework you are
               using.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>The DTD-s and XSD-s that are included in
+              <literal>freemarker.jar</literal> under
+              <literal>freemarker/ext/jsp</literal> are now under Apache
+              Software License, Version 2. This is also clarified in the
+              <literal>LICENSE.txt</literal>. Earlier these files had no clear
+              licence terms.</para>
             </listitem>
           </itemizedlist>
         </section>
