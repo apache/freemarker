@@ -19568,7 +19568,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
-      <section xml:id="versions_2_3_17">
+      <section xml:id="versions_2_3_17rc1">
         <title>2.3.17 RC1</title>
 
         <para>Date of release: 2011-05-10</para>
@@ -19757,7 +19757,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>freemarker/ext/jsp</literal> are now under Apache
               Software License, Version 2. This is also clarified in the
               <literal>LICENSE.txt</literal>. Earlier these files had no clear
-              licence terms.</para>
+              license terms.</para>
             </listitem>
           </itemizedlist>
         </section>
