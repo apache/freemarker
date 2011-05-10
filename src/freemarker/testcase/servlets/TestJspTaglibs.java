@@ -62,8 +62,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
@@ -212,8 +214,11 @@ public class TestJspTaglibs extends TestCase {
         }
 
         public Set getResourcePaths(String path) {
-            if(path.equals("/WEB-INF/lib")) {
-                return Collections.singleton("/WEB-INF/lib/taglib-foo.jar");
+            if(path.equals("/WEB-INF")) {
+                return new HashSet(Arrays.asList(new String[] { 
+                    "/WEB-INF/lib/taglib-foo.jar",
+                    "/WEB-INF/fmtesttag2.tld"
+                }));
             }
             else {
                 return Collections.EMPTY_SET;

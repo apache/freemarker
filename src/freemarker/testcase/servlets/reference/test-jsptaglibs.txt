@@ -99,3 +99,8 @@ TestTag2.doEndTag() called here
 <!-- Test loading from non-root-relative URL -->
 TestTag2.doStartTag() called here
 TestTag2.doEndTag() called here
+<!-- Test loading from autodeployed .tld -->
+Executed TestSimpleTag2<!-- Test loading from autodeployed .tld -->
+Executed TestSimpleTag2<!-- Test loading from autodeployed .tld -->
+Executed TestSimpleTag2<!-- Test loading from autodeployed .tld -->
+Executed TestSimpleTag2

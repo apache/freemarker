@@ -52,3 +52,12 @@ bar
 <!-- Test loading from non-root-relative URL -->
 <#assign tl5 = JspTaglibs["WEB-INF/taglib2.jar"]>
 <@tl5.testtag></@>
+<!-- Test loading from autodeployed .tld -->
+<#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld"]>
+<@tl6.simpletag/><!-- Test loading from autodeployed .tld -->
+<#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld"]>
+<@tl6.simpletag/><!-- Test loading from autodeployed .tld -->
+<#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld"]>
+<@tl6.simpletag/><!-- Test loading from autodeployed .tld -->
+<#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld"]>
+<@tl6.simpletag/>
