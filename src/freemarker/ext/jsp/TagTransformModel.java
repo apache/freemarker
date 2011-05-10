@@ -79,7 +79,7 @@ import freemarker.template.TransformControl;
  */
 class TagTransformModel extends JspTagModelBase implements TemplateTransformModel
 {
-    private static final Logger logger = Logger.getLogger("freemarker.servlet");
+    private static final Logger logger = Logger.getLogger("freemarker.jsp");
     
     private final boolean isBodyTag;
     private final boolean isIterationTag;
