@@ -19708,7 +19708,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fixed <link
-              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3033015&amp;group_id=794">[3128073]</link>:
+              xlink:href="https://sourceforge.net/tracker/?func=detail&amp;aid=3128073&amp;group_id=794&amp;atid=100794">[3128073]</link>:
               <literal>HashAdapther.containsKey(...)</literal> returned
               <literal>true</literal> for a key that doesn't exist when
               unwrapping the key has failed. As a side effect of the fix,
