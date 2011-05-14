@@ -10946,307 +10946,324 @@ End book</programlisting>
         <primary>built-in</primary>
       </indexterm>
 
-      <para>Alphabetical index of built-ins:</para>
-
-      <itemizedlist spacing="compact">
-        <listitem>
-          <para><link linkend="ref_builtin_ancestors">ancestors</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_numType">byte</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_c">c</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_cap_first">cap_first</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_capitalize">capitalize</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_rounding">ceiling</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_children">children</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_chop_linebreak">chop_linebreak</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_chunk">chunk</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_contains">contains</link></para>
-        </listitem>
-
-        <listitem>
-          <para>date <link linkend="ref_builtin_date_datetype">for
-          dates</link>, <link linkend="ref_builtin_string_date">for
-          strings</link></para>
-        </listitem>
-
-        <listitem>
-          <para>datetime <link linkend="ref_builtin_date_datetype">for
-          dates</link>, <link linkend="ref_builtin_string_date">for
-          strings</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_numType">double</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_ends_with">ends_with</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_eval">eval</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_first">first</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_rounding">floor</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_groups">groups</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_numType">float</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_has_content">has_content</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_html">html</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_index_of">index_of</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_numType">int</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_interpret">interpret</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_isType">is_...</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_j_string">j_string</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_js_string">js_string</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_keys">keys</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_last">last</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_last_index_of">last_index_of</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_left_pad">left_pad</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_length">length</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_numType">long</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_lower_case">lower_case</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_matches">matches</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_namespace">namespace</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_new">new</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_node_namespace">node_namespace</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_node_name">node_name</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_node_type">node_type</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_number">number</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_parent">parent</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_replace">replace</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_reverse">reverse</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_right_pad">right_pad</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_rounding">round</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_root">root</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_rtf">rtf</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_numType">short</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_size">size</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_sort">sort</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_seq_contains">seq_contains</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_seq_index_of">seq_index_of</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_seq_last_index_of">seq_last_index_of</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_sort_by">sort_by</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_split">split</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_starts_with">starts_with</link></para>
-        </listitem>
-
-        <listitem>
-          <para>string: <link linkend="ref_builtin_string_for_string">for
-          strings</link>, <link linkend="ref_builtin_string_for_number">for
-          numbers</link>, <link linkend="ref_builtin_string_for_boolean">for
-          booleans</link>, <link linkend="ref_builtin_string_for_date">for
-          date/times</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_substring">substring</link></para>
-        </listitem>
-
-        <listitem>
-          <para>time <link linkend="ref_builtin_date_datetype">for
-          dates</link>, <link linkend="ref_builtin_string_date">for
-          strings</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_trim">trim</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_uncap_first">uncap_first</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link
-          linkend="ref_builtin_upper_case">upper_case</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_url">url</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_values">values</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_word_list">word_list</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_xhtml">xhtml</link></para>
-        </listitem>
-
-        <listitem>
-          <para><link linkend="ref_builtin_xml">xml</link></para>
-        </listitem>
-      </itemizedlist>
-
-      <para>If you don't find a built-in here that you have seen in a working
-      template, probably you will find it here: <xref
-      linkend="ref_deprecated" /></para>
+      <section xml:id="ref_builtins_alphaidx">
+        <title>Alphabetical index</title>
+
+        <indexterm>
+          <primary>built-in</primary>
+        </indexterm>
+
+        <itemizedlist spacing="compact">
+          <listitem>
+            <para><link
+            linkend="ref_builtin_ancestors">ancestors</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numType">byte</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_c">c</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_cap_first">cap_first</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_capitalize">capitalize</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_rounding">ceiling</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_children">children</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_chop_linebreak">chop_linebreak</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_chunk">chunk</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_contains">contains</link></para>
+          </listitem>
+
+          <listitem>
+            <para>date <link linkend="ref_builtin_date_datetype">for
+            dates</link>, <link linkend="ref_builtin_string_date">for
+            strings</link></para>
+          </listitem>
+
+          <listitem>
+            <para>datetime <link linkend="ref_builtin_date_datetype">for
+            dates</link>, <link linkend="ref_builtin_string_date">for
+            strings</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numType">double</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_ends_with">ends_with</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_eval">eval</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_first">first</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_rounding">floor</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_groups">groups</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numType">float</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_has_content">has_content</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_html">html</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_index_of">index_of</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numType">int</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_interpret">interpret</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_isType">is_...</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_j_string">j_string</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_js_string">js_string</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_keys">keys</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_last">last</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_last_index_of">last_index_of</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_left_pad">left_pad</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_length">length</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numType">long</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_lower_case">lower_case</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_matches">matches</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_namespace">namespace</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_new">new</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_node_namespace">node_namespace</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_node_name">node_name</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_node_type">node_type</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_number">number</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_parent">parent</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_replace">replace</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_reverse">reverse</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_right_pad">right_pad</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_rounding">round</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_root">root</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_rtf">rtf</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numType">short</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_size">size</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_sort">sort</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_seq_contains">seq_contains</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_seq_index_of">seq_index_of</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_seq_last_index_of">seq_last_index_of</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_sort_by">sort_by</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_split">split</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_starts_with">starts_with</link></para>
+          </listitem>
+
+          <listitem>
+            <para>string: <link linkend="ref_builtin_string_for_string">for
+            strings</link>, <link linkend="ref_builtin_string_for_number">for
+            numbers</link>, <link linkend="ref_builtin_string_for_boolean">for
+            booleans</link>, <link linkend="ref_builtin_string_for_date">for
+            date/times</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_substring">substring</link></para>
+          </listitem>
+
+          <listitem>
+            <para>time <link linkend="ref_builtin_date_datetype">for
+            dates</link>, <link linkend="ref_builtin_string_date">for
+            strings</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_trim">trim</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_uncap_first">uncap_first</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_upper_case">upper_case</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_url">url</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_values">values</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_word_list">word_list</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_xhtml">xhtml</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_xml">xml</link></para>
+          </listitem>
+        </itemizedlist>
+
+        <para>If you don't find a built-in here that you have seen in a
+        working template, probably you will find it here: <xref
+        linkend="ref_deprecated" /></para>
+      </section>
 
       <section xml:id="ref_builtins_string">
         <title>Built-ins for strings</title>
@@ -14124,158 +14141,169 @@ Sorted by name.last:
         <primary>directive</primary>
       </indexterm>
 
-      <para>Alphabetical index of directives:</para>
+      <section xml:id="ref_directive_alphaidx">
+        <title>Alphabetical index</title>
 
-      <itemizedlist spacing="compact">
-        <listitem>
-          <para>break: <link linkend="ref.directive.switch.break">in
-          switch</link>, <link linkend="ref.directive.list.break">in
-          list</link></para>
-        </listitem>
+        <indexterm>
+          <primary>directive</primary>
+        </indexterm>
 
-        <listitem>
-          <para><link linkend="ref.directive.assign">assign</link></para>
-        </listitem>
+        <itemizedlist spacing="compact">
+          <listitem>
+            <para><link linkend="ref.directive.assign">assign</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.attempt">attempt</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.attempt">attempt</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.case">case</link></para>
-        </listitem>
+          <listitem>
+            <para>break: <link linkend="ref.directive.switch.break">in
+            switch</link>, <link linkend="ref.directive.list.break">in
+            list</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.compress">compress</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.case">case</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.default">default</link></para>
-        </listitem>
+          <listitem>
+            <para><link
+            linkend="ref.directive.compress">compress</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.else">else</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.default">default</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.elseif">elseif</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.else">else</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.escape">escape</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.elseif">elseif</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.fallback">fallback</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.escape">escape</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.function">function</link></para>
-        </listitem>
+          <listitem>
+            <para><link
+            linkend="ref.directive.fallback">fallback</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.flush">flush</link></para>
-        </listitem>
+          <listitem>
+            <para><link
+            linkend="ref.directive.function">function</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.ftl">ftl</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.flush">flush</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.global">global</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.ftl">ftl</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.if">if</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.global">global</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.import">import</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.if">if</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.include">include</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.import">import</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.list">list</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.include">include</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.local">local</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.list">list</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.lt">lt</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.local">local</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.macro">macro</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.lt">lt</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.nested">nested</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.macro">macro</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.noescape">noescape</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.nested">nested</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.noescape">noescape</link></para>
-        </listitem>
+          <listitem>
+            <para><link
+            linkend="ref.directive.noescape">noescape</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.nt">nt</link></para>
-        </listitem>
+          <listitem>
+            <para><link
+            linkend="ref.directive.noescape">noescape</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.attempt">recover</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.nt">nt</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.recurse">recurse</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.attempt">recover</link></para>
+          </listitem>
 
-        <listitem>
-          <para>return: <link linkend="ref.directive.macro.return">in
-          macro</link>, <link linkend="ref.directive.function.return">in
-          function</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.recurse">recurse</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.rt">lt</link></para>
-        </listitem>
+          <listitem>
+            <para>return: <link linkend="ref.directive.macro.return">in
+            macro</link>, <link linkend="ref.directive.function.return">in
+            function</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.setting">setting</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.rt">lt</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.stop">stop</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.setting">setting</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.switch">switch</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.stop">stop</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.t">t</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.switch">switch</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.userDefined">User-defined
-          directive (&lt;@...&gt;)</link></para>
-        </listitem>
+          <listitem>
+            <para><link linkend="ref.directive.t">t</link></para>
+          </listitem>
 
-        <listitem>
-          <para><link linkend="ref.directive.visit">visit</link></para>
-        </listitem>
-      </itemizedlist>
+          <listitem>
+            <para><link linkend="ref.directive.userDefined">User-defined
+            directive (&lt;@...&gt;)</link></para>
+          </listitem>
 
-      <para>If you don't find a directive here that you have seen in a working
-      template, probably you will find it in: <xref
-      linkend="ref_deprecated" /></para>
+          <listitem>
+            <para><link linkend="ref.directive.visit">visit</link></para>
+          </listitem>
+        </itemizedlist>
+
+        <para>If you don't find a directive here that you have seen in a
+        working template, probably you will find it in: <xref
+        linkend="ref_deprecated" /></para>
+      </section>
 
       <section xml:id="ref_directive_if">
         <title>if, else, elseif</title>
