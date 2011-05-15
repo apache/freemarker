@@ -14248,11 +14248,6 @@ Sorted by name.last:
           </listitem>
 
           <listitem>
-            <para><link
-            linkend="ref.directive.noescape">noescape</link></para>
-          </listitem>
-
-          <listitem>
             <para><link linkend="ref.directive.nt">nt</link></para>
           </listitem>
 
@@ -14271,7 +14266,7 @@ Sorted by name.last:
           </listitem>
 
           <listitem>
-            <para><link linkend="ref.directive.rt">lt</link></para>
+            <para><link linkend="ref.directive.rt">rt</link></para>
           </listitem>
 
           <listitem>
