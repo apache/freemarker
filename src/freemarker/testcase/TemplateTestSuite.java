@@ -81,7 +81,6 @@ import freemarker.ext.dom.NodeModel;
  */
 public class TemplateTestSuite extends TestSuite {
     
-    private String inputDir, refDir;
     private Map configParams = new LinkedHashMap();
     
     public static TestSuite suite() throws Exception {
