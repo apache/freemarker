@@ -57,17 +57,20 @@ import freemarker.template.*;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
 import freemarker.core.NodeBuiltins.*;
 import freemarker.core.NumericalBuiltins.*;
 import freemarker.core.SequenceBuiltins.*;
 import freemarker.core.StringBuiltins.*;
+import freemarker.core.DateBuiltins.*;
 
 /**
  * The ? operator used to get the
@@ -124,6 +127,54 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_sequence", new is_sequenceBI());
         builtins.put("is_string", new is_stringBI());
         builtins.put("is_transform", new is_transformBI());
+        builtins.put("iso_utc", new iso_tz_BI("iso_utc",
+                /* showOffset = */ true, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+        builtins.put("iso_utc_nz", new iso_tz_BI("iso_utc_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+        builtins.put("iso_utc_ms", new iso_tz_BI("iso_utc_ms",
+                /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+        builtins.put("iso_utc_ms_nz", new iso_tz_BI("iso_utc_ms_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+        builtins.put("iso_utc_m", new iso_tz_BI("iso_utc_m",
+                /* showOffset = */ true, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+        builtins.put("iso_utc_m_nz", new iso_tz_BI("iso_utc_m_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+        builtins.put("iso_utc_h", new iso_tz_BI("iso_utc_h",
+                /* showOffset = */ true, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+        builtins.put("iso_utc_h_nz", new iso_tz_BI("iso_utc_h_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+        builtins.put("iso_local", new iso_tz_BI("iso_local",
+                /* showOffset = */ true, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+        builtins.put("iso_local_nz", new iso_tz_BI("iso_local_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+        builtins.put("iso_local_ms", new iso_tz_BI("iso_local_ms",
+                /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+        builtins.put("iso_local_ms_nz", new iso_tz_BI("iso_local_ms_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+        builtins.put("iso_local_m", new iso_tz_BI("iso_local_m",
+                /* showOffset = */ true, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+        builtins.put("iso_local_m_nz", new iso_tz_BI("iso_local_m_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+        builtins.put("iso_local_h", new iso_tz_BI("iso_local_h",
+                /* showOffset = */ true, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+        builtins.put("iso_local_h_nz", new iso_tz_BI("iso_local_h_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+        builtins.put("iso", new iso_BI("iso",
+                /* showOffset = */ true, DateUtil.ACCURACY_SECONDS));
+        builtins.put("iso_nz", new iso_BI("iso_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_SECONDS));
+        builtins.put("iso_ms", new iso_BI("iso_ms",
+                /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS));
+        builtins.put("iso_ms_nz", new iso_BI("iso_ms_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS));
+        builtins.put("iso_m", new iso_BI("iso_m",
+                /* showOffset = */ true, DateUtil.ACCURACY_MINUTES));
+        builtins.put("iso_m_nz", new iso_BI("iso_m_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_MINUTES));
+        builtins.put("iso_h", new iso_BI("iso_h",
+                /* showOffset = */ true, DateUtil.ACCURACY_HOURS));
+        builtins.put("iso_h_nz", new iso_BI("iso_h_nz",
+                /* showOffset = */ false, DateUtil.ACCURACY_HOURS));
         builtins.put("j_string", new j_stringBI());
         builtins.put("js_string", new js_stringBI());
         builtins.put("keys", new keysBI());
@@ -156,7 +207,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("split", new splitBI());
         builtins.put("starts_with", new starts_withBI());
         builtins.put("string", new stringBI());
-	builtins.put("substring", new substringBI());
+        builtins.put("substring", new substringBI());
         builtins.put("time", new dateBI(TemplateDateModel.TIME));
         builtins.put("trim", new trimBI());
         builtins.put("uncap_first", new uncap_firstBI());
@@ -329,9 +380,18 @@ abstract class BuiltIn extends Expression implements Cloneable {
                     return df.parse(text);
                 }
                 catch(java.text.ParseException e) {
+                    String pattern = null;
+                    if (df instanceof SimpleDateFormat) {
+                        pattern = ((SimpleDateFormat) df).toPattern();
+                    }
                     String mess = "Error: " + getStartLocation()
-                                 + "\nExpecting a date here, found: " + text;
-                    throw new TemplateModelException(mess);
+                                 + "\nThe string doesn't match the expected date/time format. "
+                                 + "The string to parse was: " + StringUtil.jQuote(text)
+                                 + (pattern != null
+                                         ? ". The expected format was: "
+                                           + StringUtil.jQuote(pattern) + "."
+                                         : "");
+                    throw new TemplateModelException(mess, e);
                 }
             }
         }

@@ -68,7 +68,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -352,6 +351,11 @@ public class TemplateTestCase extends TestCase {
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
+        }
+        
+        else if (testName.equals("test-iso8601")) {
+            dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
+            dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
         }
     }
     

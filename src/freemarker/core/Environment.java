@@ -59,6 +59,8 @@ import java.util.*;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.*;
+import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -111,6 +113,12 @@ public final class Environment extends Configurable {
     private DateFormat timeFormat, dateFormat, dateTimeFormat;
     private Map[] dateFormats;
     private NumberFormat cNumberFormat;
+    
+    /**
+     * Used by the "iso_" built-ins to accelerate formatting.
+     * @see #getISOBuiltInCalendar() 
+     */
+    private DateToISO8601CalendarFactory isoBuiltInCalendarFactory;
 
     private Collator collator;
 
@@ -975,6 +983,20 @@ public final class Environment extends Configurable {
             return DateFormat.FULL;
         }
         return -1;
+    }
+    
+
+    /**
+     * Returns the {@link DateUtil.DateToISO8601CalendarFactory} used by the
+     * the "iso_" built-ins. Be careful when using this; it should only by used
+     * with {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean,
+     * int, TimeZone, DateToISO8601CalendarFactory)}.
+     */
+    DateToISO8601CalendarFactory getISOBuiltInCalendar() {
+        if (isoBuiltInCalendarFactory == null) {
+            isoBuiltInCalendarFactory = new DateUtil.TrivialDateToISO8601CalendarFactory();
+        }
+        return isoBuiltInCalendarFactory;
     }
 
     /**
