@@ -189,18 +189,12 @@ abstract class DateBuiltins {
                 
                 TemplateModel tzArgTM = (TemplateModel) args.get(0);
                 TimeZone tzArg; 
-                if (tzArgTM instanceof AdapterTemplateModel) {
-                    Object adaptedObj = ((AdapterTemplateModel) tzArgTM)
-                            .getAdaptedObject(TimeZone.class);
-                    if (!(adaptedObj instanceof TimeZone)) {
-                        throw new TemplateModelException(
-                                "The argument to ?" + biName +
-                                "(...) must be a String or a " +
-                                "java.util.TimeZone but it was a " +
-                                tzArgTM.getClass().getName() + " (a wrapped " +
-                                (adaptedObj != null ? adaptedObj.getClass().getName() : "null") +
-                                 ").");
-                    }
+                Object adaptedObj;
+                if (tzArgTM instanceof AdapterTemplateModel
+                        && (adaptedObj =
+                                ((AdapterTemplateModel) tzArgTM)
+                                .getAdaptedObject(TimeZone.class))
+                            instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;                    
                 } else if (tzArgTM instanceof TemplateScalarModel) {
                     String tzName = ((TemplateScalarModel) tzArgTM).getAsString();

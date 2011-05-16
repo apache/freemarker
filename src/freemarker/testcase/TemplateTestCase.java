@@ -356,6 +356,11 @@ public class TemplateTestCase extends TestCase {
         else if (testName.equals("test-iso8601")) {
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
+            dataModel.put("adaptedToStringScalar", new Object() {
+                public String toString() {
+                    return "GMT+02";
+                }
+            });
         }
     }
     

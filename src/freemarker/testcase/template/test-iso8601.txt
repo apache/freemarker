@@ -1,4 +1,3 @@
-<#setting locale="us">
 <#assign d = "2010-05-15 22:38:05:23 +0200"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
 <#setting time_zone="GMT+02">
 ${d?iso_utc} = 2010-05-15T20:38:05Z
@@ -109,6 +108,7 @@ ${d?time?iso_h_nz("GMT+02")} = 22
 
 ${d?iso(javaUTC)} = 2010-05-15T20:38:05Z
 ${d?iso(javaGMT02)} = 2010-05-15T22:38:05+02
+${d?iso(adaptedToStringScalar)} = 2010-05-15T22:38:05+02
 
 <#attempt>
   ${d?iso("no such zone")}
