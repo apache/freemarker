@@ -54,7 +54,7 @@ ${d?time?iso_local_h_nz} = 22
 <#assign dStrange = "600-01-01 23:59:59:123 +0000"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
 ${dStrange?iso_utc_ms} = 0600-01-01T23:59:59.123Z
 
-<#setting time_zone="GMT+03">
+<#setting time_zone="GMT+03"> <#-- should not mater -->
 ${d?iso("UTC")} = 2010-05-15T20:38:05Z
 ${d?iso_ms("UTC")} = 2010-05-15T20:38:05.023Z
 ${d?iso_m("UTC")} = 2010-05-15T20:38Z
@@ -109,6 +109,28 @@ ${d?time?iso_h_nz("GMT+02")} = 22
 ${d?iso(javaUTC)} = 2010-05-15T20:38:05Z
 ${d?iso(javaGMT02)} = 2010-05-15T22:38:05+02
 ${d?iso(adaptedToStringScalar)} = 2010-05-15T22:38:05+02
+
+<#assign d = "12:00:00:1 +0000"?time("HH:mm:ss:S Z")>
+${d?iso_utc_ms} = 12:00:00.001Z
+<#assign d = "12:00:00:10 +0000"?time("HH:mm:ss:S Z")>
+${d?iso_utc_ms} = 12:00:00.01Z
+<#assign d = "12:00:00:100 +0000"?time("HH:mm:ss:S Z")>
+${d?iso_utc_ms} = 12:00:00.1Z
+<#assign d = "12:00:00:0 +0000"?time("HH:mm:ss:S Z")>
+${d?iso_utc_ms} = 12:00:00Z
+
+<#setting time_zone="GMT+02">
+<#assign d = "2010-05-15"?date("yyyy-MM-dd")>
+${d?iso_local} = 2010-05-15
+${d?iso_utc} = 2010-05-14
+
+<#setting time_zone="GMT+02:30">
+<#assign d = "2010-05-15"?datetime("yyyy-MM-dd")>
+${d?iso_local} = 2010-05-15T00:00:00+02:30
+
+<#setting time_zone="America/New_York">
+${"2010-05-09 20:00 +0000"?datetime("yyyy-MM-dd HH:mm Z")?iso_local} = 2010-05-09T16:00:00-04
+${"2010-01-01 20:00 +0000"?datetime("yyyy-MM-dd HH:mm Z")?iso_local} = 2010-01-01T15:00:00-05
 
 <#attempt>
   ${d?iso("no such zone")}
