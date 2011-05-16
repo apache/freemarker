@@ -11066,6 +11066,11 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_date_iso">iso,
+            iso_...</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_j_string">j_string</link></para>
           </listitem>
 
@@ -11134,6 +11139,11 @@ End book</programlisting>
 
           <listitem>
             <para><link linkend="ref_builtin_number">number</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_numToDate">number_to_date,
+            number_to_datetime, number_to_time</link></para>
           </listitem>
 
           <listitem>
@@ -13115,6 +13125,173 @@ Last updated time: 08:00:54 PM</programlisting>
           these built-ins <link linkend="ref_builtin_string_date">convert
           strings to date variable</link>.</para>
         </section>
+
+        <section xml:id="ref_builtin_date_iso">
+          <title>iso_...</title>
+
+          <indexterm>
+            <primary>type-casting</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting between types</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>iso built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>iso_... built-ins</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>date</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting date to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting time to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>time to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>date to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ISO 8601</primary>
+          </indexterm>
+
+          <para>These built-ins convert a date, time or date-time value to
+          string that follows ISO 8601 "extended" format. This built-in has
+          several variations: <literal>iso_utc</literal>,
+          <literal>iso_local</literal>, <literal>iso_utc_nz</literal>,
+          <literal>iso_local_nz</literal>, <literal>iso_utc_m</literal>,
+          <literal>iso_utc_m_nz</literal>, etc. The name is constructed from
+          the following words in this order, each separated with a
+          <literal>_</literal> from the next:</para>
+
+          <orderedlist>
+            <listitem>
+              <para><literal>iso</literal> (required)</para>
+            </listitem>
+
+            <listitem>
+              <para>Either <literal>utc</literal> or <literal>local</literal>
+              (required (except when it's given with a parameter, but see that
+              later)): Specifies whether you want to print the date according
+              to UTC or according the current time zone. The current time zone
+              is decided by the <literal>time_zone</literal> FreeMarker
+              setting and is normally configured by the programmers outside
+              the templates (but it can also be set in a template, like
+              <literal>&lt;#setting time_zone="America/New_York"&gt;</literal>
+              for example).</para>
+            </listitem>
+
+            <listitem>
+              <para>Either <literal>h</literal> or <literal>m</literal> or
+              <literal>ms</literal> (optional): The accuracy of the time part.
+              When omitted, it defaults to seconds accuracy (like
+              <literal>12:30:18</literal>). <literal>h</literal> means hours
+              accuracy (like <literal>12</literal>), <literal>m</literal>
+              means minutes accuracy (<literal>12:30</literal>), and
+              <literal>ms</literal> means milliseconds accuracy
+              (<literal>12:30:18.25</literal>, where we have 250 ms). Note
+              that when using <literal>ms</literal>, the milliseconds are
+              displayed as fraction seconds (following the standard) and will
+              not have trailing <literal>0</literal>-s. Thus, if the the
+              millisecond part happens to be <literal>0</literal>, the whole
+              fraction second part will be omitted. Also note that the
+              fraction seconds are always separated with a dot (following the
+              Web and XSD conventions), not with comma.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>nz</literal> (optional): When present, the time
+              zone offset (like <literal>+02</literal> or or
+              <literal>-04:30</literal> or <literal>Z</literal>) will not be
+              displayed. Otherwise it will be displayed, except for date-only
+              values.</para>
+            </listitem>
+          </orderedlist>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#assign aDateTime = .now&gt;
+&lt;#assign aDate = aDateTime?date&gt;
+&lt;#assign aTime = aDateTime?time&gt;
+
+Basic formats:
+${aDate?iso_utc}
+${aTime?iso_utc}
+${aDateTime?iso_utc}
+
+Different accuracies:
+${aTime?iso_utc_ms}
+${aDateTime?iso_utc_m}
+
+Local time zone:
+${aDateTime?iso_local}</programlisting>
+
+          <para>A possible output (depends on current time and time
+          zone):</para>
+
+          <programlisting role="output">Basic formats:
+2011-05-16
+21:32:13Z
+2011-05-16T21:32:13Z
+
+Different accuracies:
+21:32:13.868Z
+2011-05-16T21:32Z
+
+Local time zone:
+2011-05-16T23:32:13+02</programlisting>
+
+          <para>There is yet another group of <literal>iso_...</literal>
+          built-in variants, where you omit the <literal>local</literal> or
+          <literal>utc</literal> word from the name and instead specify the
+          time zone as a parameter to the built-in. Example:</para>
+
+          <programlisting role="template">&lt;#assign aDateTime = .now&gt;
+${aDateTime?iso("UTC")}
+${aDateTime?iso("GMT-02:30")}
+${aDateTime?iso("Europe/Rome")}
+
+The usual variations are supported:
+${aDateTime?iso_m("GMT+02")}
+${aDateTime?iso_m_nz("GMT+02")}
+${aDateTime?iso_nz("GMT+02")}</programlisting>
+
+          <para>A possible output (depends on current time and time
+          zone):</para>
+
+          <programlisting role="output">2011-05-16T21:43:58Z
+2011-05-16T19:13:58-02:30
+2011-05-16T23:43:58+02
+
+The usual variations are supported:
+2011-05-16T23:43+02
+2011-05-16T23:43
+2011-05-16T23:43:58</programlisting>
+
+          <para>If the time zone parameter can't be interpreted, the template
+          processing will be terminated with error.</para>
+
+          <para role="forProgrammers">The parameter can be a
+          <literal>java.util.TimeZone</literal> object too (which is possibly
+          the return value of a Java method, or it's in the date-model), not
+          just a string.</para>
+        </section>
       </section>
 
       <section xml:id="ref_builtins_boolean">
@@ -13876,8 +14053,62 @@ Sorted by name.last:
           <para>The <literal>long</literal> built-in can also be used with
           date, time and date-time values to get the value as
           <literal>java.util.Date.getTime()</literal> would return. This is
-          useful if you have to call a Java method that expects a timestamp as
-          a long. This conversion is not automatic.</para>
+          useful if you have to call a Java methods that expect a timestamp as
+          a <literal>long</literal>. This conversion is not automatic.</para>
+        </section>
+
+        <section xml:id="ref_builtin_numToDate">
+          <title>number_to_date, number_to_time, number_to_datetime</title>
+
+          <indexterm>
+            <primary>type-casting</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting between types</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>number_to_date built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>number_to_datetime built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>number_to_time built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting long to date</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>long to date</primary>
+          </indexterm>
+
+          <para>These are used to convert a number (usually a Java
+          <literal>long</literal>) to a date, time or date-time, respectively.
+          This does them same as <literal>new java.util.Date(long)</literal>
+          in Java, that is, the number is interpreted as the milliseconds
+          passed since the epoch. The number can be anything and of any type
+          as far as its value fits into a <literal>long</literal>. If the
+          number isn't a whole number, it will be rounded to whole with
+          half-up rule. This conversion is not automatic.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">${1305575275540?number_to_datetime}
+${1305575275540?number_to_date}
+${1305575275540?number_to_time}</programlisting>
+
+          <para>The output will be something like this (depending on the
+          current locale and time zone):</para>
+
+          <programlisting role="output">May 16, 2011 3:47:55 PM
+May 16, 2011
+3:47:55 PM</programlisting>
         </section>
 
         <section xml:id="ref_builtin_eval">
@@ -19596,7 +19827,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_17rc1">
         <title>2.3.17</title>
 
-        <para>Date of release: 2011-05-16</para>
+        <para>Date of release: 2011-05-17</para>
 
         <para>The final release is expected on the 16th of May. If you are
         using FreeMarker in development, use this release, and report any
@@ -19625,10 +19856,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>long</literal>-s) to date or date-time and time values,
               <literal>?number_to_date</literal>,
               <literal>?number_to_time</literal>,
-              <literal>?number_to_datetime</literal> was added.
-              (Unfortunately, <literal>?date</literal> and like couldn't be
+              <literal>?number_to_datetime</literal> was added. <link
+              linkend="ref_builtin_numToDate">See more here...</link>
+              (Unfortunately, <literal>?date</literal> and like can't be
               extended to support this due to backward compatibility
               issues.)</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-ins to format numbers with ISO 8601 "extended"
+              format regardless of the current date/time formatting settings,
+              and even regardless of the current time zone setting. For
+              example <literal>${myTimeStamp?iso_utc}</literal> will print
+              something like <literal>2010-05-16T23:05:45Z</literal>. <link
+              linkend="ref_builtin_date_iso">See more here...</link></para>
             </listitem>
 
             <listitem>
