@@ -1,0 +1,90 @@
+true == true
+true == true
+
+false == false
+true == true
+
+false == false
+true == true
+
+false == false
+true == true
+
+false == false
+false == false
+false == false
+true == true
+true == true
+true == true
+
+false == false
+false == false
+true == true
+true == true
+true == true
+true == true
+
+
+Lower 'c'-words:
+- coverage
+- considered
+
+Any 'c'-words:
+- Code
+- coverage
+- considered
+
+Lower line-last words:
+- coverage
+
+Any line-last words:
+- coverage
+- BROKEN
+
+Any last words:
+- BROKEN
+
+c-word with follower:
+- "Code without"
+  Groups: "Code without", "Code", "without"
+- "coverage\nis"
+  Groups: "coverage\nis", "coverage", "is"
+- "considered to"
+  Groups: "considered to", "considered", "to"
+
+c-word with follower in the same line:
+- Code without
+- considered to
+
+Lower c-word with follower in the same line:
+- considered to
+
+  Ignored but logged in 2.3: false == false
+  Ignored but logged in 2.3: false == false
+
+FOObar == FOObar
+Foobar == Foobar
+FOObar == FOObar
+FOObarFOO == FOObarFOO
+FOObarfOO == FOObarfOO
+FOObarfOO == FOObarfOO
+Foobar == Foobar
+FOObar == FOObar
+FOObarFOO == FOObarFOO
+FOObarfOO == FOObarfOO
+FOObarfOO == FOObarfOO
+foobar == foobar
+foobar == foobar
+FOObar == FOObar
+FOObarFOO == FOObarFOO
+FOObarfOo == FOObarfOo
+
+  Ignored but logged in 2.3: FOObar
+
+[foo, barxbaaz] == [foo, barxbaaz]
+[foo, barxbaaz] == [foo, barxbaaz]
+[foo, bar, baaz] == [foo, bar, baaz]
+[foo, barxbaaz] == [foo, barxbaaz]
+[foo, bar, baaz] == [foo, bar, baaz]
+[fooXXbarxxbaaz] == [fooXXbarxxbaaz]
+[foo, bar, baaz] == [foo, bar, baaz]

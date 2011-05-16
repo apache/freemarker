@@ -107,7 +107,8 @@
    </testcase>
    <testcase name="string-builtins1" filename="test-stringbuiltins.txt" />
    <testcase name="string-builtins2" filename="test-stringbuiltins2.txt" />
-   <testcase name="string-builtins3" filename="test-stringbimethods.txt" />
+   <testcase name="string-builtins-regexps" filename="string-builtins-regexps.txt" />
+   <testcase name="test-stringbimethods" filename="test-stringbimethods.txt" />
    <testcase name="stringliteral" filename="test-stringliteral.html"/>
    <testcase name="switch-case" filename="test-switch.html" />
    <testcase name="transforms" filename="test-transformation.html"/>

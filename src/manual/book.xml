@@ -11954,8 +11954,8 @@ Matching sub-strings:
 
           <para><literal>matches</literal> accepts an optional 2nd parameter,
           the <link linkend="ref_builtin_string_flags">flags</link>. Note that
-          it does not support flag <literal>r</literal>, because it always
-          uses regular expressions.</para>
+          it does not support flag <literal>f</literal>, and ignores the
+          <literal>r</literal> flag.</para>
         </section>
 
         <section xml:id="ref_builtin_number">
@@ -12448,12 +12448,14 @@ ${x?url}</programlisting>
               <literal>^</literal> and <literal>$</literal> match just after
               or just before, respectively, a line terminator or the end of
               the string. By default these expressions only match at the
-              beginning and the end of the entire string.</para>
+              beginning and the end of the entire string. Note that
+              <literal>^</literal> and <literal>$</literal> doesn't match the
+              line-break character itself. </para>
             </listitem>
 
             <listitem>
-              <para><literal>s</literal>: Enables dotall mode for regular
-              expressions (same as Perl singe-line mode). In dotall mode, the
+              <para><literal>s</literal>: Enables dot-all mode for regular
+              expressions (same as Perl singe-line mode). In dot-all mode, the
               expression <literal>.</literal> matches any character, including
               a line terminator. By default this expression does not match
               line terminators.</para>
@@ -12492,17 +12494,17 @@ rif: foo XYr baar</programlisting>
               <tr>
                 <th>Built-in</th>
 
-                <th><literal>i</literal></th>
+                <th><literal>i</literal> (ignore case)</th>
 
-                <th><literal>r</literal></th>
+                <th><literal>r</literal> (reg. exp.)</th>
 
-                <th><literal>m</literal></th>
+                <th><literal>m</literal> (multi-line mode)</th>
 
-                <th><literal>s</literal></th>
+                <th><literal>s</literal> (dot-all mode)</th>
 
-                <th><literal>c</literal></th>
+                <th><literal>c</literal> (whitesp. and comments)</th>
 
-                <th><literal>f</literal></th>
+                <th><literal>f</literal> (first only)</th>
               </tr>
             </thead>
 
@@ -12544,7 +12546,7 @@ rif: foo XYr baar</programlisting>
 
                 <td>Yes</td>
 
-                <td>No</td>
+                <td>Ignored</td>
 
                 <td>Yes</td>
 
@@ -19592,9 +19594,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Versions</title>
 
       <section xml:id="versions_2_3_17rc1">
-        <title>2.3.17 RC1</title>
+        <title>2.3.17</title>
 
-        <para>Date of release: 2011-05-10</para>
+        <para>Date of release: 2011-05-16</para>
 
         <para>The final release is expected on the 16th of May. If you are
         using FreeMarker in development, use this release, and report any
@@ -19619,15 +19621,34 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>New special variable, <literal>now</literal>. This returns
-              the current date-time. Usage examples: "<literal>Page generated:
-              ${.now}</literal>", "<literal>Today is ${.now?date}</literal>",
-              "<literal>The current time is ${.now?time}</literal>".</para>
+              <para>New <link linkend="ref_specvar">special variable</link>,
+              <literal>now</literal>. This returns the current date-time.
+              Usage examples: "<literal>Page generated: ${.now}</literal>",
+              "<literal>Today is ${.now?date}</literal>", "<literal>The
+              current time is ${.now?time}</literal>".</para>
             </listitem>
 
             <listitem>
               <para><literal>?sort</literal> and <literal>?sort_by</literal>
               now supports sorting boolean values.</para>
+            </listitem>
+
+            <listitem>
+              <para>When using unsupported or unknown <link
+              linkend="ref_builtin_string_flags">string built-in flags</link>,
+              FreeMarker will now <link linkend="pgui_misc_logging">log</link>
+              warnings (maximum 25 times per class-loader, to prevent flooding
+              the log). It's certain that starting from FreeMarker 2.4 these
+              will count as errors.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed <link
+              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3047201&amp;group_id=794">[3047201]</link>:
+              Using regular expressions (like with <literal>?match</literal>)
+              could cause lockup in multi-threaded environment, also memory
+              leakage when using dynamically generated regular
+              expressions.</para>
             </listitem>
 
             <listitem>

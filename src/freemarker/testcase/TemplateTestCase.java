@@ -298,7 +298,7 @@ public class TemplateTestCase extends TestCase {
             dataModel.put("doc", new NodeListModel(doc));
         }
         
-        else if (testName.equals("string-builtins3")) {
+        else if (testName.equals("test-stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
         }
         

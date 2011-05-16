@@ -52,65 +52,169 @@
 
 package freemarker.core;
 
-import java.util.*;
-import java.util.regex.*;
-import freemarker.template.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import freemarker.cache.MruCacheStorage;
+import freemarker.log.Logger;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 
 
 /**
- * This is a first-pass implementation of regular expression support.
- * It is subject to change based on community feedback. 
- * In that sense, use it at your own risk.
- * @version $Id: RegexBuiltins.java,v 1.14 2005/06/01 22:39:07 ddekany Exp $
- * @author Jonathan Revusky
+ * Implementation of built-ins that (might) use regular expressions.
  */
+// TODO: I think that the implementator has neglected that Matcher-s are
+// stateful and hence the result of ?matches can produce glitches if it's
+// accessed while iterated through. (This is a single-thread issue.)
 abstract class RegexBuiltins {
     
-    static HashMap patternLookup = new HashMap();
-    static LinkedList patterns = new LinkedList();
-    static final int PATTERN_CACHE_SIZE=100;
+    private static final Logger logger = Logger.getLogger("freemarker.runtime");
     
-    static Pattern getPattern(String patternString, String flagString) throws TemplateModelException {
-        int flags = 0;
-        String patternKey = patternString + (char) 0 + flagString;
-        Pattern result = (Pattern) patternLookup.get(patternKey);
+    private static volatile boolean flagWarningsEnabled = logger.isWarnEnabled();
+    private static final int MAX_FLAG_WARNINGS_LOGGED = 25;
+    private static final Object flagWarningsCntSync = new Object();
+    private static int flagWarningsCnt;
+    
+    static final MruCacheStorage patternCache = new MruCacheStorage(50, 150);
+
+    // Standard regular expression flags converted to long:
+    private static final long RE_FLAG_CASE_INSENSITIVE = intFlagToLong(Pattern.CASE_INSENSITIVE);
+    private static final long RE_FLAG_MULTILINE = intFlagToLong(Pattern.MULTILINE);
+    private static final long RE_FLAG_COMMENTS = intFlagToLong(Pattern.COMMENTS);
+    private static final long RE_FLAG_DOTALL = intFlagToLong(Pattern.DOTALL);
+    
+    // FreeMarker-specific regular expression flags (using the higher 32 bits):
+    private static final long RE_FLAG_REGEXP = 0x100000000L;
+    private static final long RE_FLAG_FIRST_ONLY = 0x200000000L;
+    
+    static private long intFlagToLong(int flag) {
+        return flag & 0x0000FFFFL;
+    }
+    
+    static Pattern getPattern(String patternString, int flags)
+    throws TemplateModelException {
+        PatternCacheKey patternKey = new PatternCacheKey(patternString, flags);
+        
+        Pattern result;
+        
+        synchronized (patternCache) {
+            result = (Pattern) patternCache.get(patternKey);
+        }
         if (result != null) {
+            logger.debug("RE Cache hit for: " + patternString); //!!T
             return result;
         }
-        if (flagString == null || flagString.length() == 0) {
-            try {
-                result = Pattern.compile(patternString);
-            } catch (PatternSyntaxException e) {
-                throw new TemplateModelException(e);
-            }
+        
+        try {
+            result = Pattern.compile(patternString, flags);
+        } catch (PatternSyntaxException e) {
+            throw new TemplateModelException(e);
         }
-        else {
-            if (flagString.indexOf('i') >=0) {
-                flags = flags | Pattern.CASE_INSENSITIVE;
-            }
-            if (flagString.indexOf('m') >=0) {
-                flags = flags | Pattern.MULTILINE;
-            }
-            if (flagString.indexOf('c') >=0) {
-                flags = flags | Pattern.COMMENTS;
-            }
-            if (flagString.indexOf('s') >=0) {
-                flags = flags | Pattern.DOTALL;
-            }
-            try {
-                result = Pattern.compile(patternString, flags);
-            } catch (PatternSyntaxException e) {
-                throw new TemplateModelException(e);
-            }
-        }
-        patterns.add(patternKey);
-        patternLookup.put(patternKey, result);
-        if (patterns.size() > PATTERN_CACHE_SIZE) {
-            Object first = patterns.removeFirst();
-            patterns.remove(first);
+        logger.debug("RE Cache miss, adding: " + patternString); //!!T
+        synchronized (patternCache) {
+            patternCache.put(patternKey, result);
         }
         return result;
+    }
+    
+    private static class PatternCacheKey {
+        private final String patternString;
+        private final int flags;
+        private final int hashCode;
+        
+        public PatternCacheKey(String patternString, int flags) {
+            this.patternString = patternString;
+            this.flags = flags;
+            hashCode = patternString.hashCode() + 31 * flags;
+        }
+        
+        public boolean equals(Object that) {
+            if (that instanceof PatternCacheKey) {
+                PatternCacheKey thatPCK = (PatternCacheKey) that; 
+                return thatPCK.flags == flags
+                        && thatPCK.patternString.equals(patternString);
+            } else {
+                return false;
+            }
+        }
+
+        public int hashCode() {
+            return hashCode;
+        }
+        
+    }
+    
+    private static long parseFlagString(String flagString) {
+        long flags = 0;
+        for (int i = 0; i < flagString.length(); i++) {
+            char c = flagString.charAt(i);
+            switch (c) {
+                case 'i':
+                    flags |= RE_FLAG_CASE_INSENSITIVE;
+                    break;
+                case 'm':
+                    flags |= RE_FLAG_MULTILINE;
+                    break;
+                case 'c':
+                    flags |= RE_FLAG_COMMENTS;
+                    break;
+                case 's':
+                    flags |= RE_FLAG_DOTALL;
+                    break;
+                case 'r':
+                    flags |= RE_FLAG_REGEXP;
+                    break;
+                case 'f':
+                    flags |= RE_FLAG_FIRST_ONLY;
+                    break;
+                default:
+                    if (flagWarningsEnabled) {
+                        logFlagWarning(
+                                "Unrecognized regular expression flag: "
+                                + StringUtil.jQuote(String.valueOf(c)) + ".");
+                    }
+            }  // switch
+        }
+        return flags;
+    }
+
+    /**
+     * Logs flag warning for a limited number of times. This is used to prevent
+     * log flooding.
+     */
+    private static void logFlagWarning(String message) {
+        if (!flagWarningsEnabled) return;
+        
+        int cnt;
+        synchronized (flagWarningsCntSync) {
+            cnt = flagWarningsCnt;
+            if (cnt < MAX_FLAG_WARNINGS_LOGGED) {
+                flagWarningsCnt++;
+            } else {
+                flagWarningsEnabled = false;
+                return;
+            }
+        }
+        message += " This will be an error in FreeMarker 2.4!";
+        if (cnt + 1 == MAX_FLAG_WARNINGS_LOGGED) {
+            message += " [Will not log more regular expression flag problems until restart!]";
+        }
+        logger.warn(message);
     }
     
     static class matchesBI extends BuiltIn {
@@ -165,8 +269,8 @@ abstract class RegexBuiltins {
   
     static class RegexMatchModel 
     implements TemplateBooleanModel, TemplateCollectionModel, TemplateSequenceModel {
-        Matcher matcher;
-        String input;
+        final Matcher matcher;
+        final String input;
         final boolean matches;
         TemplateSequenceModel groups;
         private ArrayList data;
@@ -273,10 +377,30 @@ abstract class RegexBuiltins {
                 throw new TemplateModelException("Expecting at most two argumnets");
             }
             String patternString = (String) args.get(0);
-            String flagString = (numArgs >1) ? (String) args.get(1) : "";
-            Pattern pattern = getPattern(patternString, flagString);
+            long flags = numArgs > 1 ? parseFlagString((String) args.get(1)) : 0;
+            if ((flags & RE_FLAG_FIRST_ONLY) != 0) {
+                logFlagWarning("?match doesn't support the \"f\" flag.");
+            }
+            Pattern pattern = getPattern(patternString, (int) flags);
             Matcher matcher = pattern.matcher(matchString);
             return new RegexMatchModel(matcher, matchString);
+        }
+    }
+
+    private static void checkNonRegexpFlags(String biName, long flags) {
+        if (!flagWarningsEnabled) return;
+        
+        if ((flags & RE_FLAG_MULTILINE) != 0) {
+            logFlagWarning("?" + biName + " doesn't support the \"m\" flag "
+                    + "without the \"r\" flag.");
+        }
+        if ((flags & RE_FLAG_DOTALL) != 0) {
+            logFlagWarning("?" + biName + " doesn't support the \"s\" flag "
+                    + "without the \"r\" flag.");
+        }
+        if ((flags & RE_FLAG_COMMENTS) != 0) {
+            logFlagWarning("?" + biName + " doesn't support the \"c\" flag "
+                    + "without the \"r\" flag.");
         }
     }
     
@@ -289,26 +413,29 @@ abstract class RegexBuiltins {
 
         public Object exec(List args) throws TemplateModelException {
             int numArgs = args.size();
-            if (numArgs < 2 || numArgs >3 ) {
+            if (numArgs < 2 || numArgs > 3) {
                 throw new TemplateModelException(
                         "?replace(...) needs 2 or 3 arguments.");
             }
-            String first = (String) args.get(0);
-            String second = (String) args.get(1);
-            String flags = numArgs >2 ? (String) args.get(2) : "";
-            boolean caseInsensitive = flags.indexOf('i') >=0;
-            boolean useRegexp = flags.indexOf('r') >=0;
-            boolean firstOnly = flags.indexOf('f') >=0;
-            String result = null;
-            if (!useRegexp) {
-                result = StringUtil.replace(s, first, second, caseInsensitive, firstOnly);
+            String arg1 = (String) args.get(0);
+            String arg2 = (String) args.get(1);
+            long flags = numArgs > 2 ? parseFlagString((String) args.get(2)) : 0;
+            String result;
+            if ((flags & RE_FLAG_REGEXP) == 0) {
+                checkNonRegexpFlags("replace", flags);
+                result = StringUtil.replace(s, arg1, arg2,
+                        (flags & RE_FLAG_CASE_INSENSITIVE) != 0,
+                        (flags & RE_FLAG_FIRST_ONLY) != 0);
             } else {
-                Pattern pattern = getPattern(first, flags);
+                Pattern pattern = getPattern(arg1, (int) flags);
                 Matcher matcher = pattern.matcher(s);
-                result = firstOnly ? matcher.replaceFirst(second) : matcher.replaceAll(second);
+                result = (flags & RE_FLAG_FIRST_ONLY) != 0
+                        ? matcher.replaceFirst(arg2)
+                        : matcher.replaceAll(arg2);
             } 
             return new SimpleScalar(result);
         }
+
     }
     
     static class SplitMethod implements TemplateMethodModel {
@@ -325,14 +452,14 @@ abstract class RegexBuiltins {
                         "?replace(...) needs 1 or 2 arguments.");
             }
             String splitString = (String) args.get(0);
-            String flags = numArgs >1 ? (String) args.get(1) : "";
-            boolean caseInsensitive = flags.indexOf('i') >=0;
-            boolean useRegexp = flags.indexOf('r') >=0;
+            long flags = numArgs > 1 ? parseFlagString((String) args.get(1)) : 0;
             String[] result = null;
-            if (!useRegexp) {
-                result = StringUtil.split(s, splitString, caseInsensitive);
+            if ((flags & RE_FLAG_REGEXP) == 0) {
+                checkNonRegexpFlags("split", flags);
+                result = StringUtil.split(s, splitString,
+                        (flags & RE_FLAG_CASE_INSENSITIVE) != 0);
             } else {
-                Pattern pattern = getPattern(splitString, flags);
+                Pattern pattern = getPattern(splitString, (int) flags);
                 result = pattern.split(s);
             } 
             return ObjectWrapper.DEFAULT_WRAPPER.wrap(result);
