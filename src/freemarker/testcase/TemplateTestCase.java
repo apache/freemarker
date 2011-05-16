@@ -63,6 +63,8 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -361,6 +363,11 @@ public class TemplateTestCase extends TestCase {
                     return "GMT+02";
                 }
             });
+        }
+        
+        else if (testName.equals("test-number-to-date")) {
+          dataModel.put("bigInteger", new BigInteger("1305575275540"));
+          dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
         }
     }
     

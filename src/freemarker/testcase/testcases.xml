@@ -155,4 +155,5 @@
       <config url_escaping_charset="iso-8859-1"/>
    </testcase>   
    <testcase name="test-iso8601" filename="test-iso8601.txt"/>
+   <testcase name="test-number-to-date" filename="test-number-to-date.txt"/>
 </testcases>

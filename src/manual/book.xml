@@ -19621,6 +19621,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>To convert numbers (usually Java
+              <literal>long</literal>-s) to date or date-time and time values,
+              <literal>?number_to_date</literal>,
+              <literal>?number_to_time</literal>,
+              <literal>?number_to_datetime</literal> was added.
+              (Unfortunately, <literal>?date</literal> and like couldn't be
+              extended to support this due to backward compatibility
+              issues.)</para>
+            </listitem>
+
+            <listitem>
               <para>New <link linkend="ref_specvar">special variable</link>,
               <literal>now</literal>. This returns the current date-time.
               Usage examples: "<literal>Page generated: ${.now}</literal>",

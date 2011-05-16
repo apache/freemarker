@@ -52,10 +52,18 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
+
+import freemarker.template.SimpleDate;
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
 
 /**
  * A holder for builtins that operate exclusively on TemplateSequenceModels.
@@ -69,7 +77,9 @@ abstract class NumericalBuiltins {
             TemplateModel model = target.getAsTemplateModel(env);
             return calculateResult(EvaluationRules.getNumber(model, target, env), model);
         }
-        abstract TemplateModel calculateResult(Number num, TemplateModel model);
+        
+        abstract TemplateModel calculateResult(Number num, TemplateModel model)
+        throws TemplateModelException;
     }
 
     static class byteBI extends NumberBuiltIn {
@@ -173,6 +183,72 @@ abstract class NumericalBuiltins {
             } else {
                 return new SimpleScalar(env.getCNumberFormat().format(num));
             }
+        }
+    }
+    
+    private static final BigDecimal BIG_DECIMAL_LONG_MIN = BigDecimal.valueOf(Long.MIN_VALUE);
+    private static final BigDecimal BIG_DECIMAL_LONG_MAX = BigDecimal.valueOf(Long.MAX_VALUE); 
+    private static final BigInteger BIG_INTEGER_LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
+    private static final BigInteger BIG_INTEGER_LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE); 
+    
+    private static final long safeToLong(Number num) throws TemplateModelException {
+        if (num instanceof Double) {
+            double d = Math.round(((Double) num).doubleValue());
+            if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
+                throw new TemplateModelException(
+                        "Number doesn't fit into a 64 bit signed integer (long): "
+                        + d);
+            } else {
+                return (long) d;
+            }
+        } else if (num instanceof Float) {
+            float f = Math.round(((Float) num).floatValue());
+            if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
+                throw new TemplateModelException(
+                        "Number doesn't fit into a 64 bit signed integer (long): "
+                        + f);
+            } else {
+                return (long) f;
+            }
+        } else if (num instanceof BigDecimal) {
+            BigDecimal bd = ((BigDecimal) num).setScale(0, BigDecimal.ROUND_HALF_UP);
+            if (bd.compareTo(BIG_DECIMAL_LONG_MAX) > 0 || bd.compareTo(BIG_DECIMAL_LONG_MIN) < 0) {
+                throw new TemplateModelException(
+                        "Number doesn't fit into a 64 bit signed integer (long): "
+                        + bd);
+            } else {
+                return bd.longValue();
+            }
+        } else if (num instanceof BigInteger) {
+            BigInteger bi = (BigInteger) num;
+            if (bi.compareTo(BIG_INTEGER_LONG_MAX) > 0 || bi.compareTo(BIG_INTEGER_LONG_MIN) < 0) {
+                throw new TemplateModelException(
+                        "Number doesn't fit into a 64 bit signed integer (long): "
+                        + bi);
+            } else {
+                return bi.longValue();
+            }
+        } else if (num instanceof Long || num instanceof Integer
+                || num instanceof Byte || num instanceof Short) {
+            // Should add Atomic* types in 2.4...
+            return num.longValue();
+        } else {
+            throw new TemplateModelException(
+                    "Unsupported number type: " + num.getClass());
+        }
+    }
+    
+    static class number_to_dateBI extends NumberBuiltIn {
+        
+        private final int dateType;
+        
+        number_to_dateBI(int dateType) {
+            this.dateType = dateType;
+        }
+        
+        TemplateModel calculateResult(Number num, TemplateModel model)
+        throws TemplateModelException {
+            return new SimpleDate(new Date(safeToLong(num)), dateType);
         }
     }
     

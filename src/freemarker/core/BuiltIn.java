@@ -190,6 +190,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("node_namespace", new node_namespaceBI());
         builtins.put("node_type", new node_typeBI());
         builtins.put("number", new numberBI());
+        builtins.put("number_to_date", new number_to_dateBI(TemplateDateModel.DATE));
+        builtins.put("number_to_time", new number_to_dateBI(TemplateDateModel.TIME));
+        builtins.put("number_to_datetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         builtins.put("parent", new parentBI());
         builtins.put("replace", new replaceBI());
         builtins.put("reverse", new reverseBI());
