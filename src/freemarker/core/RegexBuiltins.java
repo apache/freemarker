@@ -116,7 +116,6 @@ abstract class RegexBuiltins {
             result = (Pattern) patternCache.get(patternKey);
         }
         if (result != null) {
-            logger.debug("RE Cache hit for: " + patternString); //!!T
             return result;
         }
         
@@ -125,7 +124,6 @@ abstract class RegexBuiltins {
         } catch (PatternSyntaxException e) {
             throw new TemplateModelException(e);
         }
-        logger.debug("RE Cache miss, adding: " + patternString); //!!T
         synchronized (patternCache) {
             patternCache.put(patternKey, result);
         }
