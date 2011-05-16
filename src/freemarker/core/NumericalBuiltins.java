@@ -105,7 +105,8 @@ abstract class NumericalBuiltins {
                 throws TemplateException
         {
             TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateDateModel) {
+            if (!(model instanceof TemplateNumberModel)
+                    && model instanceof TemplateDateModel) {
                 Date date = EvaluationRules.getDate((TemplateDateModel) model, target, env);
                 return new SimpleNumber(date.getTime());
             } else {
