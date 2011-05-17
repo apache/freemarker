@@ -280,6 +280,7 @@ Version: $Id: build.xml,v 1.138.2.4 2006/12/27 16:11:23 szegedia Exp $
         <exclude name="**/CVS/**"/>
         <exclude name="**/*.bak"/>
         <exclude name="**/src/**/*.class" />
+        <exclude name="**/src/**/*.LOCK" />
         <exclude name="**/.nbattrs" />
     </patternset>
 

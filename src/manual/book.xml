@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.17 RC1</subtitle>
+  <subtitle>For FreeMarker 2.3.17</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -14363,6 +14363,19 @@ May 16, 2011
           <para>For more information about how the constructor parameters are
           unwrapped and how overloaded constructor is chosen, read: <xref
           linkend="pgui_misc_beanwrapper" /></para>
+
+          <para>This built-in can be a security concern because the template
+          author can create arbitrary Java objects and then use them, as far
+          as they implement <literal>TemplateModel</literal>. Also the
+          template author can trigger static initialization for classes that
+          don't even implement <literal>TemplateModel</literal>. You can
+          (since 2.3.17) restrict the classes accessible with this built-in
+          using
+          <literal>Configuration.setNewBuiltinClassResolver(TemplateClassResolver)</literal>
+          or the <literal>new_builtin_class_resolver</literal> setting. See
+          the Java API docs for more information. If you are allowing
+          not-so-much-trusted users to upload templates then you should
+          definitely look into this topic.</para>
         </section>
       </section>
     </chapter>
@@ -19824,14 +19837,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
-      <section xml:id="versions_2_3_17rc1">
+      <section xml:id="versions_2_3_17">
         <title>2.3.17</title>
 
         <para>Date of release: 2011-05-17</para>
 
-        <para>The final release is expected on the 16th of May. If you are
-        using FreeMarker in development, use this release, and report any
-        problems. Thank you!</para>
+        <para>It's urgent to update to this version because of a <link
+        linkend="v2317secfix">security fix</link>!</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -19846,7 +19858,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>?long</literal> now works for date, date-time and
+              <para><literal>?long</literal> now works for date, date-time or
               time values, and returns the milliseconds since the epoch (as
               <literal>java.util.Date.getTime()</literal>).</para>
             </listitem>
@@ -19922,6 +19934,51 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para xml:id="v2317secfix"><emphasis>Security fix</emphasis>:
+              Using carefully crafted template names (template paths) that
+              contain code point 0 (<literal>'\u0000'</literal>), it was
+              possible to load files from outside the template root directory
+              like if they were FreeMarker templates. The root of the problem
+              is that the underlying native C/C++ part (which belongs to the
+              Java platform or to the OS) interprets the 0 as the end of the
+              string, while Java (and hence FreeMarker and the Servlet
+              container) doesn't. Thus a path that looked safe for FreeMarker
+              become unsafe on the lower level. The problem is present with
+              all ways of loading templates by name
+              (<literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>,
+              <literal>&lt;#include
+              <replaceable>...</replaceable>&gt;</literal>,
+              <literal>&lt;#import
+              <replaceable>...</replaceable>&gt;</literal>).</para>
+
+              <para>You are not effected if you don't allow users to upload
+              templates and also at least one of these stands:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>In your system users can't provide arbitrary strings
+                  as template names (template paths). For example, if users
+                  are only allowed to visit the URL-s that belong to the MVC
+                  Controller (like they can't visit <literal>*.ftl</literal>)
+                  then they can't suggest arbitrary template names.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The template names are part of the path in the Web
+                  page URL, and your webserver or Servlet container disallows
+                  URL-s that contain <literal>%00</literal>, or terminate the
+                  URL at it before passing it to the servlets.</para>
+                </listitem>
+
+                <listitem>
+                  <para>You are using <literal>FileTemplateLoader</literal>
+                  and linking is not allowed in it (by default it isn't
+                  allowed).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>FreeMarker now can log its messages directly using SLF4J
               or Apache Commons Logging. However, it will not use these logger
               libraries automatically, until 2.4; <link
@@ -19980,6 +20037,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               can check if <literal>TemplateSequenceModel.get(int)</literal>
               will work with a particular <literal>CollectionModel</literal>
               instance or not.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed <link
+              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;aid=2992265&amp;group_id=794&amp;atid=100794">[2992265]</link>:
+              JSP <literal>FreeMarkerPageContext.include</literal> behaved
+              incorrectly.</para>
             </listitem>
 
             <listitem>
