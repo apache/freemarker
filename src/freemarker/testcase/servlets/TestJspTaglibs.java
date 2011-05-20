@@ -216,12 +216,16 @@ public class TestJspTaglibs extends TestCase {
         public Set getResourcePaths(String path) {
             if(path.equals("/WEB-INF")) {
                 return new HashSet(Arrays.asList(new String[] { 
+                    "/WEB-INF/fmtesttag2.tld",
+                    "/WEB-INF/lib/"
+                }));
+            } else if(path.equals("/WEB-INF/lib")) {
+                return new HashSet(Arrays.asList(new String[] { 
                     "/WEB-INF/lib/taglib-foo.jar",
-                    "/WEB-INF/fmtesttag2.tld"
                 }));
             }
             else {
-                return Collections.EMPTY_SET;
+                return null;
             }
         }
 

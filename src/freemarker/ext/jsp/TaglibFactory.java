@@ -349,18 +349,28 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-
     private void addLocationsFromWebApp() throws Exception
     {
-        Set libs = ctx.getResourcePaths("/WEB-INF");
-        for (Iterator iter = libs.iterator(); iter.hasNext();) {
-            String path = (String) iter.next();
-            if(path.startsWith("/WEB-INF/lib/") && (path.endsWith(".jar") || path.endsWith(".zip"))) {
-                addLocationsFromJarFile(path);
-            }
-            else if(path.endsWith(".tld")) {
-                addLocationFromTldFile(path);
-            }
+        Set libs = ctx.getResourcePaths("/WEB-INF/lib");
+        if (libs != null) {
+          for (Iterator iter = libs.iterator(); iter.hasNext();) {
+              String path = (String) iter.next();
+              if(path.endsWith(".jar") || path.endsWith(".zip")) {
+                  addLocationsFromJarFile(path);
+              }
+              else if(path.endsWith(".tld")) {
+                  addLocationFromTldFile(path);
+              }
+          }
+        }
+        libs = ctx.getResourcePaths("/WEB-INF");
+        if (libs != null) {
+          for (Iterator iter = libs.iterator(); iter.hasNext();) {
+              String path = (String) iter.next();
+              if(path.endsWith(".tld")) {
+                  addLocationFromTldFile(path);
+              }
+          }
         }
     }
 
