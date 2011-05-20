@@ -158,7 +158,6 @@ Ant buildfile for 'FreeMarker' application. Compatible with Ant version 1.5.
         <exclude name="freemarker/ext/jython/**"/>
         <exclude name="freemarker/ext/jruby/**"/>
         <exclude name="freemarker/ext/jsp/TaglibFactory.java"/>
-        <exclude name="freemarker/ext/jsp/TaglibFactory.java"/>
         <exclude name="freemarker/ext/jsp/FreeMarkerPageContext1.java"/>
         <exclude name="freemarker/ext/jsp/FreeMarkerPageContext2.java"/>
         <exclude name="freemarker/ext/jsp/FreeMarkerJspFactory2.java"/>
@@ -230,6 +229,7 @@ Ant buildfile for 'FreeMarker' application. Compatible with Ant version 1.5.
     </patternset>
 
     <patternset id="freemarker.compile.jsp1">
+        <include name="freemarker/ext/jsp/TaglibFactory.java"/>
         <include name="freemarker/ext/jsp/FreeMarkerPageContext1.java"/>
     </patternset>
 
