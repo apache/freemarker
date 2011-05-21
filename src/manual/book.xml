@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.17</subtitle>
+  <subtitle>For FreeMarker 2.3.18</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -12460,7 +12460,7 @@ ${x?url}</programlisting>
               the string. By default these expressions only match at the
               beginning and the end of the entire string. Note that
               <literal>^</literal> and <literal>$</literal> doesn't match the
-              line-break character itself. </para>
+              line-break character itself.</para>
             </listitem>
 
             <listitem>
@@ -19837,13 +19837,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
+      <section>
+        <title>2.3.18</title>
+
+        <para>Date of release: 2011-05-21</para>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bugfix <link
+              xlink:href="https://sourceforge.net/tracker/?func=detail&amp;aid=3304568&amp;group_id=794&amp;atid=100794">[3304568]</link>:
+              In 2.3.17 haven't found TLD-s in
+              <literal>WEB-INF\lib\*.jar</literal> (unless they were
+              explicitly pointed in the <literal>web.xml</literal> with a
+              <literal>taglib</literal> element). This was a bug introduced in
+              2.3.17.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_17">
         <title>2.3.17</title>
 
         <para>Date of release: 2011-05-17</para>
 
-        <para>It's urgent to update to this version because of a <link
-        linkend="v2317secfix">security fix</link>!</para>
+        <para>It's possibly urgent to update to this version because of a
+        <link linkend="v2317secfix">security fix</link>!</para>
 
         <section>
           <title>Changes on the FTL side</title>
