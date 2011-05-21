@@ -663,6 +663,10 @@ Ant buildfile for 'FreeMarker' application. Compatible with Ant version 1.5.
     <target depends="compile" name="jar" description="Create the freemarker.jar">
         <jar basedir="${build.classes.dir}" jarfile="${lib.dir}/freemarker.jar">
             <patternset refid="freemarker.jar"/>
+            <metainf dir=".">
+                <include name="LICENSE.txt" />
+                <include name="NOTICE.txt" />
+            </metainf>
             <manifest>
                 <attribute name="Main-Class" value="freemarker.core.CommandLine" />
                 <attribute name="Extension-name" value="FreeMarker" />
