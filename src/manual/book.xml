@@ -18710,7 +18710,7 @@ or
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_check_version">
           <question>
             <para>The documentation writes about feature
             <replaceable>X</replaceable>, but it seems that FreeMarker doesn't
@@ -18915,7 +18915,7 @@ or
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_jsp_custom_tag_syntax">
           <question>
             <para>Why do I get "java.lang.IllegalArgumentException: argument
             type mismatch" when I try to use <replaceable>X</replaceable> JSP
@@ -18995,7 +18995,7 @@ or
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_parameter_unwrapping">
           <question>
             <para>How can I get the parameters to my
             plain-Java-method/<literal>TemplateMethodModelEx</literal>/<literal>TemplateTransformModel</literal>/<literal>TemplateDirectiveModel</literal>
@@ -19054,7 +19054,7 @@ or
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_nonstring_keys">
           <question>
             <para>Why I can't use non-string key in the
             <literal>myMap[myKey]</literal> expression? And what to do
@@ -19369,7 +19369,7 @@ or
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_capture">
           <question>
             <para>How can I use the output of a directive (macro) in
             expressions (as a parameter to another directive)?</para>
@@ -19385,7 +19385,7 @@ or
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_questionmark">
           <question>
             <para>Why do I have ``?''-s in the output instead of character
             <replaceable>X</replaceable>?</para>
@@ -19428,7 +19428,7 @@ t.process(root, out);
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_retrieve_calculated_values">
           <question>
             <para>How to retrieve values calculated in templates after
             template execution done?</para>
@@ -19459,6 +19459,90 @@ myTemplate.process(root, out);</programlisting>
             <programlisting role="unspecified">Environment env = myTemplate.createProcessingEnvironment(root, out);
 env.process();  // process the template
 TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
+          </answer>
+        </qandaentry>
+
+        <qandaentry xml:id="faq_template_uploading_security">
+          <question>
+            <para>Can I allow users to upload templates and what are the
+            security implications?</para>
+          </question>
+
+          <answer>
+            <para>In general you shouldn't allow that, unless those users are
+            system administrators or other trusted personnel. Consider
+            templates as part of the source code just like
+            <literal>*.java</literal> files are. If you still want to allow
+            users to upload templates, here are what to consider:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Denial-of-Service (DoS) attacks: It's trivial to create
+                templates that run practically forever (with a loop), or
+                exhaust memory (by concatenating to a string in a loop).
+                FreeMarker can't enforce CPU or memory usage limits, so this
+                is something that has no solution on the
+                FreeMarker-level.</para>
+              </listitem>
+
+              <listitem>
+                <para>Data-model and wrapping
+                (<literal>Configuration.setObjectWrapper</literal>): By
+                default the data-model gives access to the full public API of
+                the Java objects that you have put into the it (with some
+                exceptions). To avoid that, you have to construct the
+                data-model so that it only exposes the things that are
+                necessary for the template. For that, use
+                <literal>SimpleObjectWrapper</literal> and create the
+                data-model purely from <literal>Map</literal>-s,
+                <literal>List</literal>-s, <literal>Array</literal>-s,
+                <literal>String</literal>-s, <literal>Number</literal>-s,
+                <literal>Boolean</literal>-s and <literal>Date</literal>-s.
+                Or, you can implement your own extremely restrictive
+                <literal>ObjectWrapper</literal>, which for example could
+                expose your POJO-s safely.</para>
+              </listitem>
+
+              <listitem>
+                <para>Template-loader
+                (<literal>Configuration.setTemplateLoader</literal>):
+                Templates may load other templates by name (by path), like
+                <literal>&lt;#include "../secret.txt"&gt;</literal>. To avoid
+                loading sensitive data, you have to use a
+                <literal>TemplateLoader</literal> that double-checks that the
+                file to load is something that should be exposed. FreeMarker
+                tries to prevent the loading of files outside the template
+                root directory regardless of template loader, but depending on
+                the underlying storage mechanism, exploits may exist that
+                FreeMarker can't consider (like, just as an example,
+                <literal>~</literal> jumps to the user directory). Note that
+                <literal>freemarker.cache.FileTemplateLoader</literal> checks
+                the canonical paths, so that's maybe a good candidate for this
+                task, yet, adding a file extension check (file must be
+                <literal>*.ftl</literal>) is maybe a good idea.</para>
+              </listitem>
+
+              <listitem>
+                <para>The <literal>new</literal> built-in
+                (<literal>Configuration.setNewBuiltinClassResolver</literal>,
+                <literal>Environment.setNewBuiltinClassResolver</literal>):
+                It's used in templates like
+                <literal>"com.example.SomeClass"?new()</literal>, and is
+                important for FTL libraries that are partially implemented in
+                Java, but shouldn't be needed in normal templates. While
+                <literal>new</literal> will not instantiate classes that are
+                not <literal>TemplateModel</literal>-s, FreeMarker contains a
+                <literal>TemplateModel</literal> class that can be used to
+                create arbitrary Java objects. Other "dangerous"
+                <literal>TemplateModel</literal>-s can exist in you
+                class-path. Plus, even if a class doesn't implement
+                <literal>TemplateModel</literal>, its static initialization
+                will be run. To avoid these, you should use a
+                <literal>TemplateClassResolver</literal> that restricts the
+                accessible classes (possibly based on which template asks for
+                them).</para>
+              </listitem>
+            </itemizedlist>
           </answer>
         </qandaentry>
 
@@ -19494,25 +19578,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_logging_suppressed">
           <question>
             <para>Why is FreeMarker logging suppressed for my
             application?</para>
           </question>
 
           <answer>
-            <para>It is because FreeMarker does not find any logging system.
-            To fix this, you must make available one of the following logging
-            systems for your application: Avalon
-            (<literal>org.apache.log</literal>), Log4J
-            (<literal>org.apache.log4j</literal>), or use J2SE 1.4 or later
+            <para>It's because FreeMarker does not find any logging system. To
+            fix this, you must make available one of the following logging
+            systems for your application: SLF4J (recommended), Apache Commons
+            Logging, Log4J (<literal>org.apache.log4j</literal>), Avalon
+            (<literal>org.apache.log</literal>), or use J2SE 1.4 or later
             (that contains <literal>java.util.logging</literal>). That is, the
             class-loader used with your application must find one of the
-            mentioned classes.</para>
+            mentioned classes. Until 2.4, if you want to use SLF4J or Commons
+            Logging you need to do some extra steps; <link
+            linkend="pgui_misc_logging">see here...</link></para>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_nice_error_page">
           <question>
             <para><anchor xml:id="misc.faq.niceErrorPage" /> In my Servlet
             based application, how do I show a nice error page instead of a
@@ -19576,7 +19662,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_html_editor_mangles">
           <question>
             <para>I'm using a visual HTML editor that mangles template tags.
             Will you change the template language syntax to accommodate my
@@ -19599,7 +19685,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_speed">
           <question>
             <para>How fast is FreeMarker? Is it true that 2.x is slower than
             1.x (FreeMarker classic)?</para>
@@ -19636,7 +19722,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_list_variables_used">
           <question>
             <para>How can my Java classes ask a template for information about
             its structure (e.g. a list of all the variables)?</para>
@@ -19673,7 +19759,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_compatibility">
           <question>
             <para>Will you ever provide backward compatibility?</para>
           </question>
@@ -19705,7 +19791,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry>
+        <qandaentry xml:id="faq_licence">
           <question>
             <para>If we distribute FreeMarker with our product, do we have to
             release the source code for our product?</para>
@@ -19837,7 +19923,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
-      <section>
+      <section xml:id="versions_2_3_18">
         <title>2.3.18</title>
 
         <para>Date of release: 2011-05-21</para>
@@ -19849,11 +19935,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bugfix <link
               xlink:href="https://sourceforge.net/tracker/?func=detail&amp;aid=3304568&amp;group_id=794&amp;atid=100794">[3304568]</link>:
-              In 2.3.17 haven't found TLD-s in
-              <literal>WEB-INF\lib\*.jar</literal> (unless they were
-              explicitly pointed in the <literal>web.xml</literal> with a
-              <literal>taglib</literal> element). This was a bug introduced in
-              2.3.17.</para>
+              2.3.17 didn't find TLD-s in <literal>WEB-INF\lib\*.jar</literal>
+              unless they were explicitly pointed in the
+              <literal>web.xml</literal> with a <literal>taglib</literal>
+              element. This bug was introduced in 2.3.17.</para>
             </listitem>
           </itemizedlist>
         </section>
