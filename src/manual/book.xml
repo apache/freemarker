@@ -2997,7 +2997,7 @@ ${-1.999?int}</programlisting>
                   <para><literal>html</literal>: The string with all special
                   HTML characters replaced with entity references (E.g.
                   <literal>&lt;</literal> with
-                  <literal>&amp;lt;</literal>)</para>
+                  <literal>&amp;lt;</literal>).</para>
                 </listitem>
 
                 <listitem>
@@ -3583,14 +3583,66 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         (see some advices later), or an error will stop the template
         processing.</para>
 
-        <para>If the interpolation is in a <link
-        linkend="dgui_template_overallstructure"><phrase
-        role="markedText">text</phrase> section</link> (i.e., not in a <link
-        linkend="dgui_template_exp_stringop_interpolation">string literal
-        expression</link>), the string that it will insert will be
-        automatically escaped if an <link
-        linkend="ref.directive.escape"><literal>escape</literal>
-        directive</link> is in effect.</para>
+        <simplesect>
+          <title>Guide for inserting strings; don't forget escaping!</title>
+
+          <para>If the interpolation is in a <link
+          linkend="dgui_template_overallstructure"><phrase
+          role="markedText">text</phrase> section</link> (i.e., not in a <link
+          linkend="dgui_template_exp_stringop_interpolation">string literal
+          expression</link>), the string that it will insert will be
+          automatically escaped if an <link
+          linkend="ref.directive.escape"><literal>escape</literal>
+          directive</link> is in effect. If you are generating HTML it's
+          strongly recommended to utilize this to prevent cross-site-scripting
+          attacks and not-well-formed HTML pages. Here's a quick
+          example:</para>
+
+          <programlisting role="template">&lt;#escape x as x?html&gt;
+  ...
+  &lt;p&gt;Title: ${book.title}&lt;/p&gt;
+  &lt;p&gt;Description: &lt;#noescape&gt;${book.description}&lt;/#noescape&gt;&lt;/p&gt;
+  &lt;h2&gt;Comments:&lt;/h2&gt;
+  &lt;#list comments as comment&gt;
+    &lt;div class="comment"&gt;
+      ${comment}
+    &lt;/div&gt;
+  &lt;/#list&gt;
+  ...
+&lt;/#escape&gt;</programlisting>
+
+          <para>This example shows that when generating HTML you better put
+          the whole template inside the <literal>escape</literal> directive.
+          Thus, if the <literal>book.title</literal> contains
+          <literal>&amp;</literal>, it will be replaced with
+          <literal>&amp;amp;</literal> in the output so the page remains
+          well-formed HTML. If a user comment contains tags like
+          <literal>&lt;iframe&gt;</literal> (or any other element), they will
+          become to <literal>&amp;lt;iframe&amp;gt;</literal> and like,
+          rendering them harmless. But sometimes you really have HTML in the
+          data-model, like let's assume <literal>book.description</literal>
+          above is stored as HTML in the database, in which case you have to
+          neutralize the enclosing <literal>escape</literal> with a
+          <literal>noescape</literal>. Without the enclosing
+          <literal>escape</literal>, the template would look like:</para>
+
+          <programlisting role="template">  ...
+  &lt;p&gt;Title: ${book.title?html}&lt;/p&gt;
+  &lt;p&gt;Description: ${book.description}&lt;/p&gt;
+  &lt;h2&gt;Comments:&lt;/h2&gt;
+  &lt;#list comments as comment&gt;
+    &lt;div class="comment"&gt;
+      ${comment?html}
+    &lt;/div&gt;
+  &lt;/#list&gt;
+  ...</programlisting>
+
+          <para>This does the same as the earlier example, but here you may
+          forget some <literal>?html</literal>-s, which is a security risk. In
+          the earlier example you may forget some
+          <literal>noescape</literal>-s, which gives bad output too, but it's
+          at least no a security risk.</para>
+        </simplesect>
 
         <simplesect>
           <title>Guide for inserting numerical values</title>
