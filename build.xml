@@ -979,7 +979,7 @@ and: http://localhost:8080/fmexamples/servlet/guestbook -->
      ]]></echo>
      
      <jar destfile="build/maven-source-attachment.jar"
-            basedir="src" excludes="freemarker/testcase/**"
+            basedir="src" excludes="freemarker/testcase/**, manual/**"
      />
 
      <artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
