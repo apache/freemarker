@@ -3598,18 +3598,18 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           attacks and not-well-formed HTML pages. Here's a quick
           example:</para>
 
-          <programlisting role="template">&lt;#escape x as x?html&gt;
+          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
   ...
-  &lt;p&gt;Title: ${book.title}&lt;/p&gt;
-  &lt;p&gt;Description: &lt;#noescape&gt;${book.description}&lt;/#noescape&gt;&lt;/p&gt;
+  &lt;p&gt;Title: <emphasis>${</emphasis>book.title<emphasis>}</emphasis>&lt;/p&gt;
+  &lt;p&gt;Description: <emphasis>&lt;#noescape&gt;${</emphasis>book.description<emphasis>}&lt;/#noescape&gt;</emphasis>&lt;/p&gt;
   &lt;h2&gt;Comments:&lt;/h2&gt;
   &lt;#list comments as comment&gt;
     &lt;div class="comment"&gt;
-      ${comment}
+      <emphasis>${</emphasis>comment<emphasis>}</emphasis>
     &lt;/div&gt;
   &lt;/#list&gt;
   ...
-&lt;/#escape&gt;</programlisting>
+<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
 
           <para>This example shows that when generating HTML you better put
           the whole template inside the <literal>escape</literal> directive.
