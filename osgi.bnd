@@ -1,0 +1,42 @@
+# This file is used for creating OSGi bundles with biz.aQute.bnd
+#
+# bnd is a tool that automatically discovers the possible exports and
+# imports by examining the class files, and generates the OSGi meta-info
+# based on that and this file.
+
+-classpath: ${classes.dir}
+-failok: false
+
+Bundle-SymbolicName: ${moduleOrg}.${moduleName}
+Bundle-Version: ${versionForOSGi}
+Bundle-License: BSD-style, see: http://freemarker.org/LICENSE.txt
+Bundle-Vendor: freemarker.org
+
+Include-Resource: META-INF=${classes.dir}/META-INF
+
+Export-Package: !freemarker.testcase.*, freemarker.*;version="${versionForOSGi}"
+# Important:
+# Packages that don't match nor the Export-Package nor the
+# Private-Package mainfest header will be excluded from
+# the .jar file!
+
+Import-Package: !freemarker.*, \
+  javax.xml.*, org.w3c.dom.*, org.xml.sax.*, \
+  *;resolution:="optional"
+# The above makes all imports optional (like org.python, etc.),
+# except those that were explicitly listed (or are inside java.*).
+
+# This is needed for "a.class.from.another.Bundle"?new() to work.
+DynamicImport-Package: *
+
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+
+# Non-OSGi meta:
+Main-Class: freemarker.core.CommandLine
+Extension-name: FreeMarker
+Specification-Title: FreeMarker
+Specification-Version: ${versionForMf}
+Specification-Vendor: freemarker.org
+Implementation-Title: FreeMarker
+Implementation-Version: ${versionForMf}
+Implementation-Vendor: freemarker.org

@@ -1,1032 +1,815 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-Ant buildfile for 'FreeMarker' application. Compatible with Ant version 1.5.
--->
 
 <project basedir="." default="jar" name="freemarker"
-        xmlns:javacc="http://javacc.dev.java.net/"
-        xmlns:docgen="http://freemarker.org/docgen"
+  xmlns:ivy="antlib:org.apache.ivy.ant"
+  xmlns:javacc="http://javacc.dev.java.net/"
+  xmlns:docgen="http://freemarker.org/docgen"
+  xmlns:emma="http://emma.sourceforge.net/emma"
+  xmlns:bnd="http://www.aqute.biz/bnd"
 >
 
-    <property name="libs.location" value="http://freemarker.sourceforge.net/jarsforbuild"/>
-    <property name="repositoryRootDir" value="../../"/>
+  <!-- ================================================================== -->
+  <!-- Properties                                                         -->
+  <!-- ================================================================== -->
 
-    <property file="src/freemarker/version.properties" />
-    <property name="src.dir" value="src"/>
-    <property name="lib.dir" value="lib"/>
-    <property name="examples.dir" value="examples"/>
-    <property name="build.dir" value="build"/>
-    <property name="build.examples.dir" value="build/examples"/>
-    <property name="build.jython-webapp.dir" value="${build.examples.dir}/jython-webapp"/>
-    <property name="build.classes.dir" value="build/classes"/>
-    <property name="build.javacc.dir" value="build/javacc"/>
-    <property name="build.javadoc.dir" value="build/api" />
-    <property name="build.manual.dir" value="build/manual" />
-    <property name="testcase.dir" value="build/testcase"/>
-    <property name="dist.dir" value="build/dist"/>
-    <property name="dist.dir.versioned" value="${dist.dir}/freemarker-${version}"/>
-    <property name="docgen.dir" value="../docgen" />
-    <property name="javadoc.use" value="yes" /> <!-- when tar dir deepth limit is a problem, set to "no" -->
+  <!-- Ivy project coordinates: -->
+  <property name="moduleOrg" value="org.freemarker" />
+  <property name="moduleName" value="freemarker" />
+  <property name="moduleBranch" value="2.4" />
 
-    <property name="freemarker.tar" value="build/freemarker-${version}.tar" />
-    <property name="freemarker.gzip" value="${freemarker.tar}.gz" />
+  <!-- Will be overidden on the server: -->
+  <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
+  
+  <property file="build.properties"/>
 
-    <property name="lib.javarebel-sdk" location="lib/javarebel-sdk.jar"/>
-    <property name="lib.jdom" location="lib/jdom.jar"/>
-    <property name="lib.jaxen" location="lib/jaxen.jar"/>
-    <property name="lib.xalan" location="lib/xalan.jar"/>
-    <property name="lib.saxpath" location="lib/saxpath.jar"/>
-    <property name="lib.log4j" location="lib/log4j.jar"/>
-    <property name="lib.logkit" location="lib/logkit.jar"/>
-    <property name="lib.slf4j" location="lib/slf4j-api.jar"/>
-    <property name="lib.commons-logging" location="lib/commons-logging.jar"/>
-    <property name="lib.xerces" location="lib/xerces.jar"/>
-    <property name="lib.junit" location="lib/junit.jar"/>
-    <property name="lib.dom4j" location="lib/dom4j.jar"/>
-    <property name="lib.struts" location="lib/struts.jar"/>
-    <property name="lib.rhino" location="lib/js.jar"/>
-    <property name="lib.servlet" location="lib/servlet.jar"/>
-    <property name="lib.jsp12" location="lib/jsp-api-1.2.jar"/>
-    <property name="lib.jsp20" location="lib/jsp-api-2.0.jar"/>
-    <property name="lib.jsp21" location="lib/jsp-api-2.1.jar"/>
+  <!-- When boot.classpath is missing, this is the default: -->
+  <property name="boot.classpath" value="${sun.boot.class.path}" />
+  <!-- For checking the correctness of the boot.classpath -->
+  <available classpath="${boot.classpath}"
+    classname="java.lang.Object" ignoresystemclasses="true" 
+    property="boot.classpath.correct"
+  />
+
+  <!-- Set up version/timestamp filters and the version property: -->
+  <tstamp>
+    <format property="timestampNice" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'"
+        timezone="UTC" />
+    <format property="timestampInVersion" pattern="yyyyMMdd'T'HHmmss'Z'"
+        timezone="UTC" />
+  </tstamp>
+  <filter token="timestampInVersion" value="${timestampInVersion}" />
+  <filter token="timestampNice" value="${timestampNice}" />
+  <mkdir dir="build "/>
+  <!-- Copying is needed to substitute the timestamps. -->
+  <copy
+      file="src/main/resources/freemarker/version.properties"
+      tofile="build/version.properties.tmp"
+      filtering="true"
+      overwrite="true"
+  />
+  <property file="build/version.properties.tmp" />
+  <delete file="build/version.properties.tmp" />
+  <filter token="version" value="${version}" />
+  
+  <property name="classes.dir" location="build/classes" />
+  <property name="testClasses.dir" location="build/test-classes" />
+  <property name="dist.dir" value="build/dist/freemarker-${version}" />
+  
+  <!-- ================================================================== -->
+  <!-- Initialization                                                     -->
+  <!-- ================================================================== -->
+   
+  <target name="clean" description="get rid of all generated files">
+    <delete dir="build" />
+    <delete file="src/main/java/freemarker/core/parser/FMParser.java" />
+    <delete file="src/main/java/freemarker/core/parser/FMConstants.java" />
+    <delete file="src/main/java/freemarker/core/parser/FMLexer.java" />
+    <delete file="src/main/java/freemarker/core/parser/LexicalException.java"/>
+    <delete file="src/main/java/freemarker/core/parser/SimpleCharStream.java" />
+    <delete file="src/main/java/freemarker/core/parser/Token.java" />
+    <delete file="src/main/java/freemarker/core/parser/Node.java" />
+  </target>
+
+  <target name="init"
+    description="fetch dependencies if any are missing and create the build directory if necessary"
+  >
+    <condition property="deps.available">
+      <available file=".ivy" />
+    </condition>
+    <antcall target="_autoget-deps" />
     
-    <property name="lib.jython" location="lib/jython.jar"/>
-    <!-- If not overridden, use default -->
-    <property name="boot.class.path" value="${sun.boot.class.path}"/>
-    <!-- Path elements to dependencies -->
-
-    <path id="compile.nojsp.classpath">
-        <pathelement path="${lib.servlet}"/>
-        <pathelement path="${lib.jdom}"/>
-        <pathelement path="${lib.jaxen}"/>
-        <pathelement path="${lib.dom4j}"/>
-        <pathelement path="${lib.saxpath}"/>
-        <pathelement path="${lib.xalan}"/> <!-- Xalan is not included with Sun JRE 1.5! -->
-        <pathelement path="${lib.jython}"/>
-        <pathelement path="${lib.logkit}"/>
-        <pathelement path="${lib.log4j}"/>
-        <pathelement path="${lib.slf4j}"/>
-        <pathelement path="${lib.commons-logging}"/>
-        <pathelement path="${lib.rhino}"/>
-        <pathelement path="${lib.javarebel-sdk}"/>
-        <pathelement path="${java.class.path}"/>
-    </path>
-    
-    <path id="compile.classpath">
-        <path refid="compile.nojsp.classpath"/>
-        <pathelement path="${lib.jsp21}"/>
-    </path>
-
-    <path id="compile.jsp1.classpath">
-        <path refid="compile.nojsp.classpath"/>
-        <pathelement path="${lib.jsp12}"/>
-    </path>
-
-    <path id="compile.jsp2.classpath">
-    <path refid="compile.nojsp.classpath"/>
-    <pathelement path="${lib.jsp20}"/>
-    </path>
-    
-    <path id="compile.classpath.testcases">
-        <pathelement path="${lib.junit}"/>
-        <pathelement path="${lib.jython}"/>
-        <pathelement path="${lib.jdom}"/>
-        <pathelement path="${lib.servlet}"/>
-        <pathelement path="${lib.jsp20}"/>
-    </path>
-
-    <path id="compile.classpath.javadoc">
-        <pathelement path="${lib.xerces}"/>
-        <pathelement path="${lib.jdom}"/>
-        <pathelement path="${lib.dom4j}"/>
-        <pathelement path="${lib.rhino}"/>
-        <pathelement path="${lib.jaxen}"/>
-        <pathelement path="${lib.jython}"/>
-        <pathelement path="${lib.saxpath}"/>
-        <pathelement path="${lib.xalan}"/> <!-- Xalan is not included with Sun JRE 1.5 with the old classname! -->
-        <pathelement path="${lib.servlet}"/>
-        <pathelement path="${lib.jsp21}"/>
-        <pathelement path="${lib.logkit}"/>
-        <pathelement path="${lib.log4j}"/>
-        <pathelement path="${lib.slf4j}"/>
-        <pathelement path="${lib.commons-logging}"/>
-        <pathelement path="${src.dir}"/>
-        <pathelement path="${build.javacc.dir}"/>
-        <pathelement path="${java.class.path}"/>
-    </path>
-
-    <path id="compile.classpath.examples">
-        <pathelement path="${lib.servlet}"/>
-        <pathelement path="${lib.dir}/freemarker.jar"/>
-        <pathelement path="${lib.struts}"/>
-    </path>
-    
-    <path id="full.classpath">
-        <pathelement path="${src.dir}"/>
-        <pathelement path="${build.classes.dir}" />
-        <pathelement path="${lib.servlet}"/>
-        <pathelement path="${lib.jdom}"/>
-        <pathelement path="${lib.jaxen}"/>
-        <pathelement path="${lib.dom4j}"/>
-        <pathelement path="${lib.saxpath}"/>
-        <pathelement path="${lib.xalan}"/> <!-- Xalan is not included with Sun JRE 1.5! -->
-        <pathelement path="${lib.jython}"/>
-        <pathelement path="${lib.logkit}"/>
-        <pathelement path="${lib.log4j}"/>
-        <pathelement path="${lib.slf4j}"/>
-        <pathelement path="${lib.commons-logging}"/>
-        <pathelement path="${java.class.path}"/>
-    </path>
-    
-    
-    <!-- Pattern set for FreeMarker compilation -->
-    <patternset id="freemarker.compile">
-        <include name="freemarker/cache/**"/>
-        <include name="freemarker/debug/**"/>
-        <include name="freemarker/ext/**"/>
-        <include name="freemarker/log/**"/>
-        <include name="freemarker/core/**" />
-        <include name="freemarker/template/**"/>
-        <exclude name="freemarker/core/RegexBuiltins.java"/>
-        <exclude name="freemarker/ext/ant/**"/>
-        <exclude name="freemarker/ext/beans/EnumModels.java"/>
-        <exclude name="freemarker/ext/dom/XalanXPathSupport.java"/>
-        <exclude name="freemarker/ext/dom/SunInternalXalanXPathSupport.java"/>
-        <exclude name="freemarker/ext/dom/JaxenXPathSupport.java"/>
-        <exclude name="freemarker/ext/jdom/NodeListModel.java"/>
-        <exclude name="freemarker/ext/jython/**"/>
-        <exclude name="freemarker/ext/jruby/**"/>
-        <exclude name="freemarker/ext/jsp/TaglibFactory.java"/>
-        <exclude name="freemarker/ext/jsp/FreeMarkerPageContext1.java"/>
-        <exclude name="freemarker/ext/jsp/FreeMarkerPageContext2.java"/>
-        <exclude name="freemarker/ext/jsp/FreeMarkerJspFactory2.java"/>
-        <exclude name="freemarker/ext/rhino/**"/>
-        <exclude name="freemarker/ext/xml/Dom4jNavigator.java"/>
-        <exclude name="freemarker/ext/xml/JdomNavigator.java"/>
-        <exclude name="freemarker/log/AvalonLoggerFactory.java"/>
-        <exclude name="freemarker/log/JDK14LoggerFactory.java"/>
-        <exclude name="freemarker/log/Log4JLoggerFactory.java"/>
-        <exclude name="freemarker/template/utility/JythonRuntime.java"/>
-    </patternset>
-
-    <!-- Pattern set for FreeMarker jar -->
-    <patternset id="freemarker.jar">
-        <include name="freemarker/**"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jdk14">
-        <include name="freemarker/log/JDK14LoggerFactory.java"/>
-        <include name="freemarker/core/RegexBuiltins.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jdk15">
-        <include name="freemarker/ext/beans/EnumModels.java"/>
-        <include name="freemarker/ext/dom/SunInternalXalanXPathSupport.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.xalan">
-        <include name="freemarker/ext/dom/XalanXPathSupport.java"/>
-    </patternset>
-    
-    <patternset id="freemarker.compile.logkit">
-        <include name="freemarker/log/AvalonLoggerFactory.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.log4j">
-        <include name="freemarker/log/Log4JLoggerFactory.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.slf4j">
-        <include name="freemarker/log/SLF4JLoggerFactory.java"/>
-    </patternset>
-    
-    <patternset id="freemarker.compile.commons-logging">
-        <include name="freemarker/log/CommonsLoggingLoggerFactory.java"/>
-    </patternset>
-    
-    <patternset id="freemarker.compile.dom4j">
-        <include name="freemarker/ext/xml/Dom4jNavigator.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jaxen">
-        <include name="freemarker/ext/dom/JaxenXPathSupport.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jdom">
-        <include name="freemarker/ext/jdom/NodeListModel.java"/>
-        <include name="freemarker/ext/xml/JdomNavigator.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jython">
-        <include name="freemarker/ext/ant/**"/>
-        <include name="freemarker/template/utility/JythonRuntime.java"/>
-        <include name="freemarker/ext/jython/**"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.rhino">
-        <include name="freemarker/ext/rhino/**"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jsp1">
-        <include name="freemarker/ext/jsp/TaglibFactory.java"/>
-        <include name="freemarker/ext/jsp/FreeMarkerPageContext1.java"/>
-    </patternset>
-
-    <patternset id="freemarker.compile.jsp2">
-        <include name="freemarker/ext/jsp/FreeMarkerPageContext2.java"/>
-        <include name="freemarker/ext/jsp/FreeMarkerJspFactory2.java"/>
-    </patternset>
-
-    <!-- Pattern set for FreeMarker test case compilation -->
-    <patternset id="freemarker.compile.testcases">
-        <include name="freemarker/testcase/**"/>
-    </patternset>
-
-    <!-- Pattern set for FreeMarker test case test files -->
-    <patternset id="freemarker.testcases">
-        <include name="freemarker/testcase/reference/**"/>
-        <include name="freemarker/testcase/template/**"/>
-        <include name="freemarker/testcase/servlets/reference/**"/>
-        <include name="freemarker/testcase/servlets/template/**"/>
-        <include name="freemarker/testcase/servlets/WEB-INF/**"/>
-        <include name="freemarker/testcase/*.properties"/>
-        <include name="freemarker/testcase/*.xml"/>
-        <include name="freemarker/testcase/models/*.properties"/>
-    </patternset>
-
-    <!-- Pattern set for FreeMarker JavaDoc -->
-    <patternset id="freemarker.javadoc.files">
-        <exclude name="manual/**"/>
-    </patternset>
-
-    <!-- Pattern set for FreeMarker distribution -->
-    <patternset id="freemarker.distribution.src">
-        <include name="build.xml"/>
-        <include name="examples/**"/>
-        <include name="LICENSE.txt"/>
-        <include name="NOTICE.txt"/>
-        <include name="README.txt"/>
-        <include name="src/**"/>
-        <include name="examples/**"/>
-        <exclude name="**/CVS/**"/>
-        <exclude name="**/*.bak"/>
-        <exclude name="**/src/**/*.class" />
-        <exclude name="**/src/**/*.LOCK" />
-        <exclude name="**/.nbattrs" />
-    </patternset>
-
-    <target name="fetchlibs" unless="all.libs.present" description="fetch build dependencies and put them in lib directory">
-        <mkdir dir="lib"/>
-        <echo>Fetching libraries from server.</echo>
-        <get src="${libs.location}/README.txt" dest="lib/README.txt" usetimestamp="true"/>
-        <get src="${libs.location}/ant.jar" dest="lib/ant.jar" usetimestamp="true"/>
-        <get src="${libs.location}/dom4j.jar" dest="lib/dom4j.jar" usetimestamp="true"/>
-        <get src="${libs.location}/emma.jar" dest="lib/emma.jar" usetimestamp="true"/>
-        <get src="${libs.location}/emma_ant.jar" dest="lib/emma_ant.jar" usetimestamp="true"/>
-        <get src="${libs.location}/javacc.jar" dest="lib/javacc.jar" usetimestamp="true"/>
-        <get src="${libs.location}/freemarker-bootstrap.jar" dest="lib/freemarker-bootstrap.jar" usetimestamp="true"/>
-        <get src="${libs.location}/jaxen.jar" dest="lib/jaxen.jar" usetimestamp="true"/>
-        <get src="${libs.location}/javarebel-sdk.jar" dest="lib/javarebel-sdk.jar" usetimestamp="true"/>
-        <get src="${libs.location}/2.3/jdom.jar" dest="lib/jdom.jar" usetimestamp="true"/>
-        <get src="${libs.location}/js.jar" dest="lib/js.jar" usetimestamp="true"/>
-        <get src="${libs.location}/junit.jar" dest="lib/junit.jar" usetimestamp="true"/>
-        <get src="${libs.location}/jython.jar" dest="lib/jython.jar" usetimestamp="true"/>
-        <get src="${libs.location}/log4j.jar" dest="lib/log4j.jar" usetimestamp="true"/>
-        <get src="${libs.location}/2.3/logkit.jar" dest="lib/logkit.jar" usetimestamp="true"/>
-        <get src="${libs.location}/slf4j-api.jar" dest="lib/slf4j-api.jar" usetimestamp="true"/>
-        <get src="${libs.location}/slf4j-jdk14.jar" dest="lib/slf4j-jdk14.jar" usetimestamp="true"/> <!-- Needed only for testing SLF4J: -->
-        <get src="${libs.location}/commons-logging.jar" dest="lib/commons-logging.jar" usetimestamp="true"/>
-        <get src="${libs.location}/saxpath.jar" dest="lib/saxpath.jar" usetimestamp="true"/>
-        <get src="${libs.location}/servlet.jar" dest="lib/servlet.jar" usetimestamp="true"/>
-        <get src="${libs.location}/struts.jar" dest="lib/struts.jar" usetimestamp="true"/>
-        <get src="${libs.location}/jsp-api-1.2.jar" dest="lib/jsp-api-1.2.jar" usetimestamp="true"/>
-        <get src="${libs.location}/jsp-api-2.0.jar" dest="lib/jsp-api-2.0.jar" usetimestamp="true"/>
-        <get src="${libs.location}/jsp-api-2.1.jar" dest="lib/jsp-api-2.1.jar" usetimestamp="true"/>
-        <get src="${libs.location}/xalan.jar" dest="lib/xalan.jar" usetimestamp="true"/>
-    </target>
-
-    <target name="init">
-        <condition property="all.libs.present">
-            <and>
-                <available file="lib/README.txt"/>
-                <available file="lib/ant.jar"/>
-                <available file="lib/dom4j.jar"/>
-                <available file="lib/emma.jar"/>
-                <available file="lib/emma_ant.jar"/>
-                <available file="lib/javacc.jar"/>
-                <available file="lib/freemarker-bootstrap.jar"/>
-                <available file="lib/javarebel-sdk.jar"/>
-                <available file="lib/jaxen.jar"/>
-                <available file="lib/jdom.jar"/>
-                <available file="lib/js.jar"/>
-                <available file="lib/junit.jar"/>
-                <available file="lib/jython.jar"/>
-                <available file="lib/log4j.jar"/>
-                <available file="lib/logkit.jar"/>
-                <available file="lib/slf4j-api.jar"/>
-                <available file="lib/slf4j-jdk14.jar"/>
-                <available file="lib/commons-logging.jar"/>
-                <available file="lib/saxpath.jar"/>
-                <available file="lib/servlet.jar"/>
-                <available file="lib/struts.jar"/>
-                <available file="lib/jsp-api-1.2.jar"/>
-                <available file="lib/jsp-api-2.0.jar"/>
-                <available file="lib/jsp-api-2.1.jar"/>
-                <available file="lib/xalan.jar"/>
-            </and>
-        </condition>
-        <antcall target="fetchlibs"/>
-        <available
-            property="log4j.available"
-            classname="org.apache.log4j.Logger"
-            classpathref="compile.classpath"/>
-        <available
-            property="logkit.available"
-            classname="org.apache.log.Logger"
-            classpathref="compile.classpath"/>
-        <available
-            property="slf4j.available"
-            classname="org.slf4j.Logger"
-            classpathref="compile.classpath"/>
-        <available
-            property="commons-logging.available"
-            classname="org.apache.commons.logging.Log"
-            classpathref="compile.classpath"/>
-        <available
-            property="jdk14.available"
-            classname="java.util.logging.Logger"
-            classpathref="compile.classpath"/>
-        <available
-            property="jdk15.available"
-            classname="java.lang.Enum"
-            classpathref="compile.classpath"/>
-        <available
-            property="jython.available"
-            classname="org.python.core.PyObject"
-            classpathref="compile.classpath"/>
-        <available
-            property="jsp21.available"
-            classname="javax.el.ELResolver"
-            classpathref="compile.classpath"/>
-        <available
-            property="dom4j.available"
-            classname="org.dom4j.Node"
-            classpathref="compile.classpath"/>
-        <available
-            property="jaxen.available"
-            classname="org.jaxen.XPath"
-            classpathref="compile.classpath"/>
-        <available
-            property="jdom.available"
-            classname="org.jdom.Element"
-            classpathref="compile.classpath"/>
-        <available
-            property="rhino.available"
-            classname="org.mozilla.javascript.Scriptable"
-            classpathref="compile.classpath"/>
-        <available
-            property="xalan.available"
-            classname="org.apache.xpath.XPathAPI"
-            classpathref="compile.classpath" />
-    <uptodate property="parser.gen"
-                targetfile="src/freemarker/core/FMParser.jj">
-        <srcfiles dir="src/freemarker/core" includes="FMParser.java" />
+    <mkdir dir="build"/>
+    <uptodate property="parser.uptodate"
+        targetfile="src/main/java/freemarker/core/parser/FMParser.java">
+      <srcfiles dir="src/main/javacc" includes="*.jj" />
     </uptodate>
-    </target>
-    
-    <!-- The build targets begin here -->
-    <target depends="" name="clean" description="Erase the deployment tree">
-        <delete dir="${build.dir}" />
-        <delete file="${lib.dir}/freemarker.jar" />
-        <delete dir="docs"/>
-        <delete file="src/freemarker/core/FMParser.java" />
-        <delete file="src/freemarker/core/FMParserConstants.java" />
-        <delete file="src/freemarker/core/FMParserTokenManager.java" />
-        <delete file="src/freemarker/core/SimpleCharStream.java" />
-        <delete file="src/freemarker/core/Token.java" />
-        <delete file="src/freemarker/core/TokenMgrError.java" />
-        <delete file="/src/freemarker/core/Node.java"/>
-    
-        <!-- Forces up-to-date check (task.@unless condition is false here): -->
-        <antcall target="fetchlibs" />
-    </target>
+  </target>
 
-    <target depends="" name="prepare" description="Create the target directories">
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${lib.dir}"/>
-    </target>
+  <!-- ================================================================= -->
+  <!-- Compilation                                                       -->
+  <!-- ================================================================= -->
+  
+  <target name="javacc" depends="init" unless="parser.uptodate"
+    description="Build the parser from its grammar file"
+  >
+    <ivy:cachepath conf="parser" pathid="ivy.dep" />
+    <taskdef name="generate" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC"
+        uri="http://javacc.dev.java.net/"
+        classpathref="ivy.dep"
+    />
 
-    <target depends="" name="javadoc" description="Build the JavaDoc documentation" >
-        <mkdir dir="${build.javadoc.dir}"/>
-        <delete includeEmptyDirs="yes">
-            <fileset dir="${build.javadoc.dir}" includes="**/*" />
-        </delete>
-        <javadoc author="true"
-                destdir="${build.javadoc.dir}"
-                doctitle="FreeMarker ${version}"
-                packagenames="freemarker.debug, freemarker.template.*, freemarker.core.*, freemarker.ext.*, freemarker.cache.*, freemarker.log.*"
-                sourcepath="${src.dir}"
-                version="true"
-                windowtitle="FreeMarker ${version} API"
-                classpathref="compile.classpath.javadoc"
-                use="${javadoc.use}">
-        </javadoc>
-    </target>
-
-    <target depends="" name="manual" description="Build the Manual" >
-        <taskdef resource="org/freemarker/docgen/antlib.properties"
-            uri="http://freemarker.org/docgen"
-            classpath="${repositoryRootDir}/docgen/build/lib/docgen.jar"
-        />
-        <docgen:transform
-            srcdir="src/manual" destdir="${build.manual.dir}"
-        />
-    </target>
+    <ivy:retrieve conf="parser" pattern="build/javacc.tmp/[artifact].[ext]" />
+    <javacc:generate
+      target="src/main/javacc/FTL.jj"
+      outputdirectory="src/main/java/freemarker/core"
+      javacchome="build/javacc.tmp"
+    />
+    <delete dir="build/javacc.tmp" />
     
-    <target name="javacc"
-        description="Build the JavaCC parser from its grammar file">
-        <taskdef name="generate" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC"
-            uri="http://javacc.dev.java.net/"
-            classpath="lib/javacc.jar"
-        />
-        
-        <!-- mkdir dir="${build.javacc.dir}/freemarker/core"/ -->
-        <copy todir="${build.javacc.dir}/freemarker/core" file="${src.dir}/freemarker/core/ParseException.java" />
-        <javacc:generate
-            target="${src.dir}/freemarker/core/FMParser.jj"
-            outputdirectory="src/freemarker/core"
-            javacchome="lib"
-        />
-        <replace
-            file="src/freemarker/core/FMParser.java"
-            token="private final LookaheadSuccess"
-            value="private static final LookaheadSuccess"
-       />
-       <replace
-            file="src/freemarker/core/FMParserConstants.java"
-            token="public interface FMParserConstants"
-            value="interface FMParserConstants"
-        />
-        <replace
-            file="src/freemarker/core/FMParserTokenManager.java"
-            token="public class FMParserTokenManager"
-            value="class FMParserTokenManager"
-        />
-  <replace
-      file="src/freemarker/core/Token.java"
+    <replace
+      file="src/main/java/freemarker/core/FMParser.java"
+      token="private final LookaheadSuccess"
+      value="private static final LookaheadSuccess"
+    />
+    <replace
+      file="src/main/java/freemarker/core/FMParserConstants.java"
+      token="public interface FMParserConstants"
+      value="interface FMParserConstants"
+    />
+    <replace
+      file="src/main/java/freemarker/core/FMParserTokenManager.java"
+      token="public class FMParserTokenManager"
+      value="class FMParserTokenManager"
+    />
+    <replace
+      file="src/main/java/freemarker/core/Token.java"
       token="public class Token"
       value="class Token"
-  />
-  <replace
-      file="src/freemarker/core/SimpleCharStream.java"
+    />
+    <replace
+      file="src/main/java/freemarker/core/SimpleCharStream.java"
       token="public final class SimpleCharStream"
       value="final class SimpleCharStream"
-      />
-   <replace
-    file="src/freemarker/core/FMParser.java"
-    token="enum"
-    value="ENUM"
     />
-    </target>
+    <replace
+      file="src/main/java/freemarker/core/FMParser.java"
+      token="enum"
+      value="ENUM"
+    />
+  </target>
+   
+  <target name="compile" depends="javacc">
+    <fail unless="boot.classpath.correct"><!--
+      -->The "boot.classpath" property value (${boot.classpath}) <!--
+      -->seems to be an incorrect boot classpath. Please fix it in <!--
+      -->the &lt;projectDir>/build.properties file, or wherever you <!--
+      -->set it.<!--
+    --></fail>
+    <echo level="info">Using boot classpath: ${boot.classpath}</echo>
 
-   <target name="freecc" depends="init" if="parser.gen"
-            description="Build the parser from its grammar file"
-    >
-           <!--condition property="execution.mode" value="-Xint">
-               <and>
-                   <os family="windows"/>
-                   <equals arg1="${ant.java.version}" arg2="1.5"/>
-               </and>
-           </condition-->
-           <property name="execution.mode" value="-Xmixed"/>
-        <java classname="org.visigoths.freecc.Main"
-                classpath="lib/freecc.jar:lib/freemarker-bootstrap.jar"
-                failonerror="true" fork="true"
-        >
-            <jvmarg value="${execution.mode}"/>
-            <arg value="-OUTPUT_DIRECTORY=src/freemarker/core" />
-            <arg value="-JDK_VERSION=1.4" />
-            <arg file="src/freemarker/core/FMParser.jj" />
-            <assertions><enable/></assertions>
-     </java>
-   </target>
+    <mkdir dir="${classes.dir}" />
     
-    <target depends="init, prepare, javacc" name="compile"
-            description="Compile Java source files">
-        <mkdir dir="${build.classes.dir}"/>
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="boot.class.path" source="1.5" target="1.5">
-            <src path="${src.dir}"/>
-            <patternset refid="freemarker.compile"/>
-            <!-- src path="${build.javacc.dir}"/ -->
-            <classpath refid="compile.classpath"/>
-        </javac>
-        <rmic base="${build.classes.dir}" classpathref="compile.classpath"
-          includes="freemarker/debug/impl/Rmi*Impl.class" verify="yes" stubversion="1.2"/>
-        <antcall target="compile-log4j"/>
-        <antcall target="compile-logkit"/>
-        <antcall target="compile-slf4j"/>
-        <antcall target="compile-commons-logging"/>
-        <antcall target="compile-jdk14"/>
-        <antcall target="compile-jdk15"/>
-        <antcall target="compile-jsp1"/>
-        <antcall target="compile-jsp2"/>
-        <antcall target="compile-jython"/>
-        <antcall target="compile-dom4j"/>
-        <antcall target="compile-jdom"/>
-        <antcall target="compile-xalan"/>
-        <antcall target="compile-jaxen"/>
-        <antcall target="compile-rhino"/>
-        <copy toDir="${build.classes.dir}">
-          <fileset
-            dir="${src.dir}"
-            excludes="**/CVS/**,**/*.bak,**/*.java,**/*.jj,**/package.html,freemarker/testcase/**"/>
-        </copy>
-    </target>
-
-    <target name="compile-log4j" if="log4j.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.log4j"/>
-        </javac>
-    </target>
-
-    <target name="compile-logkit" if="logkit.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.logkit"/>
-        </javac>
-    </target>
-
-    <target name="compile-slf4j" if="slf4j.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.slf4j"/>
-        </javac>
-    </target>
-
-    <target name="compile-commons-logging" if="commons-logging.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.commons-logging"/>
-        </javac>
-    </target>
-
-    <target name="compile-jdk14" if="jdk14.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" source="1.4" target="1.4">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.jdk14"/>
-        </javac>
-    </target>
-
-    <target name="compile-jdk15" if="jdk15.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" source="1.5" target="1.5">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.jdk15"/>
-        </javac>
-    </target>
-
-    <target name="compile-jython" if="jython.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.jython"/>
-        </javac>
-    </target>
-
-    <target name="compile-jsp1">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.jsp1.classpath"/>
-            <patternset refid="freemarker.compile.jsp1"/>
-        </javac>
-    </target>
-
-    <target name="compile-jsp2">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.jsp2.classpath"/>
-            <patternset refid="freemarker.compile.jsp2"/>
-        </javac>
-    </target>
-
-    <target name="compile-rhino" if="rhino.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.rhino"/>
-        </javac>
-    </target>
-
-    <target name="compile-dom4j" if="dom4j.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.dom4j"/>
-        </javac>
-    </target>
-
-    <target name="compile-jaxen" if="jaxen.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.jaxen"/>
-        </javac>
-    </target>
-
-    <target name="compile-jdom" if="jdom.available">
-        <javac deprecation="off" destdir="${build.classes.dir}" debug="on" optimize="off" bootclasspath="${boot.class.path}" target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.jdom"/>
-        </javac>
-    </target>
-    
-    <target name="compile-xalan" if="xalan.available">
-        <javac deprecation="off"
-               destdir="${build.classes.dir}"
-               debug="on"
-               optimize="off"
-               target="1.2" source="1.2">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath"/>
-            <patternset refid="freemarker.compile.xalan"/>
-        </javac>
-    </target>
-
-    <target depends="compile" name="jar" description="Create the freemarker.jar">
-        <jar basedir="${build.classes.dir}" jarfile="${lib.dir}/freemarker.jar">
-            <patternset refid="freemarker.jar"/>
-            <metainf dir=".">
-                <include name="LICENSE.txt" />
-                <include name="NOTICE.txt" />
-            </metainf>
-            <manifest>
-                <attribute name="Main-Class" value="freemarker.core.CommandLine" />
-                <attribute name="Extension-name" value="FreeMarker" />
-                <attribute name="Specification-Title" value="FreeMarker" />
-                <attribute name="Specification-Version" value="${versionForMf}" />
-                <attribute name="Specification-Vendor" value="Visigoth Software Society" />
-                <attribute name="Implementation-Title" value="VSS Java FreeMarker" />
-                <attribute name="Implementation-Version" value="${versionForMf}" />
-                <attribute name="Implementation-Vendor" value="Visigoth Software Society" />
-            </manifest>
-       </jar>
-    </target>
-
-    <target depends="compile" name="testcases" description="Build test cases">
-        <mkdir dir="${testcase.dir}"/>
-        <copy toDir="${testcase.dir}">
-            <fileset dir="${build.classes.dir}"/>
-        </copy>
-        <javac deprecation="on" destdir="${testcase.dir}" debug="on" optimize="off">
-            <src path="${src.dir}"/>
-            <classpath refid="compile.classpath.testcases"/>
-            <patternset refid="freemarker.compile.testcases"/>
-        </javac>
-
-        <copy todir="${testcase.dir}">
-            <fileset dir="${src.dir}">
-                <patternset refid="freemarker.testcases"/>
-            </fileset>
-        </copy>
-    </target>
-
-    <target name="test" depends="compile, testcases" description="Run test cases">
-        <junit haltonfailure="off" fork="true">
-            <classpath>
-              <path path="${java.class.path}"/>
-              <path refid="compile.classpath"/>
-              <pathelement path="${lib.junit}"/>
-              <pathelement path="${lib.jdom}"/>
-              <pathelement path="${build.classes.dir}"/>
-              <pathelement path="${testcase.dir}"/>
-            </classpath>
-            <formatter type="plain"/>
-            <formatter type="xml"/>
-
-            <batchtest todir="${testcase.dir}">
-              <fileset dir="${testcase.dir}">
-                <include name="**/*Test.class" />
-                <include name="**/*TestSuite.class" />
-                <exclude name="**/PerformanceTest.class" />
-              </fileset>
-            </batchtest>
-        </junit>
-    </target>
-
+    <!-- Note: the "build" conf includes JSP 1.2 and Servlet 2.3 API-s -->
+    <ivy:cachepath conf="build" pathid="ivy.dep" />
+    <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
+      debug="on" optimize="off" target="1.5" source="1.5"
+      classpathref="ivy.dep"
+      bootclasspath="${boot.classpath}"
+      excludes="
+        freemarker/ext/jsp/,
+        freemarker/ext/servlet/"
+    />
     <!--
-      Reusable task for building example webapps. Invoke with antcall task.
-      Params:
-      - webapp: The directory of the webapp relative to the example directory
+      When Attila has fixed the JSP support:
+      excludes="
+        freemarker/ext/jsp/FreeMarkerPageContext2.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory2.java,
+        freemarker/ext/jsp/SimpleTagDirectiveModel.java,
+        freemarker/ext/jsp/FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
+        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
+        freemarker/testcase/"
     -->
-    <target name="example-general-webapp" depends="init"
-            description="Reusable task for building example webapps. For internal usage only.">
-        <mkdir dir="${build.examples.dir}/${webapp}"/>
-        <copy toDir="${build.examples.dir}/${webapp}">
-          <fileset dir="${examples.dir}/${webapp}" excludes="**/CVS/**,**/*.bak"/>
-        </copy>
-        <javac deprecation="on" destdir="${build.examples.dir}/${webapp}/WEB-INF/classes">
-            <src path="${examples.dir}/${webapp}/WEB-INF/classes"/>
-            <classpath refid="compile.classpath.examples" />
-        </javac>
-        <mkdir dir="${build.examples.dir}/${webapp}/WEB-INF/lib"/>
-        <copy file="lib/freemarker.jar" toDir="${build.examples.dir}/${webapp}/WEB-INF/lib"/>
-    </target>
-
-    <target name="example-webapp1" depends="init" description="Build the example webapps">
-        <antcall target="example-general-webapp">
-          <param name="webapp" value="webapp1"/>
-        </antcall>
-    </target>
-
-    <target name="example-webapp2" depends="init" description="Build the example webapps">
-        <antcall target="example-general-webapp">
-          <param name="webapp" value="webapp2"/>
-        </antcall>
-    </target>
-
-    <target name="example-jsp-webapp" depends="init" description="Build the JSP example webapp">
-        <antcall target="example-general-webapp">
-          <param name="webapp" value="jsp-webapp"/>
-        </antcall>
-    </target>
-
-    <target name="example-struts-webapp" depends="init" description="Build the struts example webapp">
-        <antcall target="example-general-webapp">
-          <param name="webapp" value="struts-webapp"/>
-        </antcall>
-    </target>
-
-    <target name="prepare-jython-webapp">
-        <property name="twit.jar.loc" location="${build.jython-webapp.dir}/WEB-INF/lib/twit.jar"/>
-        <uptodate
-            property="jython-webapp.upToDate"
-          targetfile="${twit.jar.loc}"
-      >
-          <srcfiles dir="examples/jython-webapp/WEB-INF" includes="UpperClassTwitOfTheYearServlet.py"/>
-          <srcfiles dir="${src.dir}" includes="freemarker/ext/servlet/FreemarkerServlet.java"/>
-      </uptodate>
-
-        <mkdir dir="${build.jython-webapp.dir}/WEB-INF/lib"/>
-          <copy toDir="${build.jython-webapp.dir}">
-          <fileset dir="${examples.dir}/jython-webapp" excludes="**/CVS/**,**/*.bak"/>
-        </copy>
-
-        <property name="jythonc" location="${jython.home}/Tools/jythonc/jythonc.py"/>
-        <property name="freemarker.jar.loc" location="lib/freemarker.jar"/>
-        <copy file="lib/freemarker.jar" toDir="${build.jython-webapp.dir}/WEB-INF/lib"/>
-    </target>
-
-    <target name="example-jython-webapp" depends="init, prepare-jython-webapp" if="jython.available" unless="jython-webapp.upToDate"
-            description="Build the Jython Webapp example code">
-        <java fork="true" classname="org.python.util.jython" dir="${build.jython-webapp.dir}/WEB-INF">
-            <classpath>
-              <path  refid="compile.classpath"/>
-              <pathelement location="${freemarker.jar.loc}"/>
-            </classpath>
-            <sysproperty key="python.home" value="${jython.home}"/>
-            <sysproperty key="python.home" value="${jython.home}"/>
-            <arg value="${jythonc}"/>
-            <arg value="--core"/>
-            <arg value="--bean"/>
-            <arg value="${twit.jar.loc}"/>
-            <arg value="UpperClassTwitOfTheYearServlet.py"/>
-        </java>
-
-        <delete dir="${build.jython-webapp.dir}/WEB-INF/jpywork"/>
-        
-    </target>
-
-    <target name="examples"
-        depends="example-webapp1, example-webapp2, example-struts-webapp, example-jsp-webapp, example-jython-webapp"/>
     
-    <target name="fail.logkit" unless="logkit.available">
-      <fail message="Can't build dist because LogKit classes are not available."/>
-    </target>
-
-    <target name="fail.log4j" unless="log4j.available">
-      <fail message="Can't build dist because Log4J classes are not available."/>
-    </target>
-
-    <target name="fail.slf4j" unless="slf4j.available">
-      <fail message="Can't build dist because SLF4J classes are not available."/>
-    </target>
-
-    <target name="fail.commons-logging" unless="commons-logging.available">
-      <fail message="Can't build dist because Apache commons-logging classes are not available."/>
-    </target>
-
-    <target name="fail.jdk14" unless="jdk14.available">
-      <fail message="Can't build dist because JDK 1.4 classes are not available."/>
-    </target>
-
-    <target name="fail.jdk15" unless="jdk15.available">
-      <fail message="Can't build dist because JDK 1.5 classes are not available."/>
-    </target>
-
-   <target name="fail.jython" unless="jython.available">
-      <fail message="Can't build dist because Jython classes are not available."/>
-    </target>
-
-    <target name="fail.jsp21" unless="jsp21.available">
-      <fail message="Can't build dist because JSP 2.1 classes are not available."/>
-    </target>
-
-    <target name="fail.rhino" unless="rhino.available">
-      <fail message="Can't build dist because Rhino classes are not available."/>
-    </target>
-
-    <target name="fail.jaxen" unless="jaxen.available">
-      <fail message="Can't build dist because Jaxen classes are not available."/>
-    </target>
-
-    <target name="fail.xalan" unless="xalan.available">
-      <fail message="Can't build dist because Xalan classes are not available."/>
-    </target>
-
-    <target
-            name="dist"
-            depends="init, fail.logkit, fail.log4j, fail.slf4j, fail.commons-logging, fail.jdk14, fail.jdk15,
-                    fail.jython, fail.jsp21, fail.rhino, fail.jaxen, fail.xalan,
-                    jar, javadoc, manual"
-            description="Build the FreeMarker distribution files">
-        <delete dir="${dist.dir}" />
-        <mkdir dir="${dist.dir}" />
-        <mkdir dir="${dist.dir.versioned}" />
-        <copy todir="${dist.dir.versioned}" includeEmptyDirs="no">
-            <fileset dir=".">
-                <patternset refid="freemarker.distribution.src"/>
-            </fileset>
-        </copy>
-        <replace
-            file="${dist.dir.versioned}/README.txt"
-            token="{version}"
-            value="${version}"
-        />
-
-        <copy todir="${dist.dir.versioned}/lib"  includeEmptyDirs="no">
-          <fileset file="lib/freemarker.jar" />
-        </copy>
-
-        <!-- Generate website pages and copy them to distro -->
-        <ant dir="${repositoryRootDir}site" target="all">
-          <property name="site.offline" value="yes"/>
-        </ant>
-        <copy todir="${dist.dir.versioned}/docs">
-          <fileset dir="${repositoryRootDir}site/build/site"/>
-        </copy>
-        
-        <!-- Copy Manual -->
-        <copy todir="${dist.dir.versioned}/docs/docs" includeEmptyDirs="no">
-            <fileset dir="${build.manual.dir}" />
-        </copy>
-        
-        <!-- Copy javadocs -->
-        <copy todir="${dist.dir.versioned}/docs/docs/api" includeEmptyDirs="no">
-            <fileset dir="${build.javadoc.dir}" />
-        </copy>
-        
-        <antcall target="packdist"/>
-    </target>
+    <!--
+    <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
+    <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
+      debug="on" optimize="off" target="1.5" source="1.5"
+      classpathref="ivy.dep.jsp2.0"
+      bootclasspath="${boot.classpath}"
+      includes="
+        freemarker/ext/servlet/,
+        freemarker/ext/jsp/"
+      excludes="
+        freemarker/ext/jsp/FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
+        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+    />
+    -->
+    <!--
+      When Attila has fixed the JSP support:
+      includes="
+        freemarker/ext/jsp/SimpleTagDirectiveModel.java,
+        freemarker/ext/jsp/FreeMarkerPageContext2.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory2.java"
+    -->
     
-    <target name="packdist">
-        <delete file="${freemarker.tar}" />
-        <tar tarfile="${freemarker.tar}" basedir="${dist.dir}" />
-        <delete file="${freemarker.gzip}" />
-        <gzip zipfile="${freemarker.gzip}" src="${freemarker.tar}" />
-        <delete file="${freemarker.tar}" />
-    </target>
+    <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
+    <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
+      debug="on" optimize="off" target="1.5" source="1.5"
+      classpathref="ivy.dep.jsp2.1"
+      bootclasspath="${boot.classpath}"
+      includes="
+        freemarker/ext/jsp/,
+        freemarker/ext/servlet/"
+      excludes="
+        freemarker/ext/jsp/FreeMarkerPageContext1.java,
+        freemarker/ext/jsp/FreeMarkerPageContext2.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory2.java"
+    />
+    <!--
+      When Attila has fixed the JSP support:
+      includes="
+        freemarker/ext/jsp/FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
+        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+    -->
     
-    <target name="packdocs">
-        <delete file="build/docs.tar" />
-        <tar tarfile="build/docs.tar" basedir="${dist.dir.versioned}/docs" />
-        <delete file="build/docs.tar.gz" />
-        <gzip zipfile="build/docs.tar.gz" src="build/docs.tar" />
-        <delete file="build/docs.tar" />
-    </target>
+    <rmic base="${classes.dir}" classpathref="ivy.dep"
+      includes="src/main/java/freemarker/debug/impl/Rmi*Impl.class"
+      verify="yes" stubversion="1.2"
+    />
+    
+    <!-- We don't have this file in 2.4.X... yet?
+    <copy
+      file="${classes.dir}/freemarker/core/SecureRendererImpl.class"
+      tofile="${classes.dir}/freemarker/core/SecureRendererImpl.clazz"
+    />
+    -->
+    
+    <copy toDir="${classes.dir}">
+      <fileset dir="src/main/resources"
+        excludes="
+          freemarker/version.properties"
+      />
+    </copy>
+    <copy toDir="${classes.dir}" filtering="true" overwrite="true">
+      <fileset dir="src/main/resources"
+        includes="
+          freemarker/version.properties"
+      />
+    </copy>
+    <copy toDir="${classes.dir}/META-INF">
+      <fileset dir="."
+        includes="
+          LICENSE.txt,
+          NOTICE.txt"
+      />
+    </copy>
+  </target>
 
-    <target name="packapidocs">
-        <delete file="build/apidocs.tar" />
-        <tar tarfile="build/apidocs.tar" basedir="build/api" />
-        <delete file="build/apidocs.tar.gz" />
-        <gzip zipfile="build/apidocs.tar.gz" src="build/apidocs.tar" />
-        <delete file="build/apidocs.tar" />
-    </target>
+  <target name="compileTest" depends="compile">
+    <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
+    <javac srcdir="src/test/java" destdir="${testClasses.dir}" deprecation="off" 
+      debug="on" optimize="off" target="1.5" source="1.5"
+      classpathref="ivy.dep.test"
+      bootclasspath="${boot.classpath}"
+    />
+    <copy toDir="${testClasses.dir}">
+      <fileset dir="src/test/resources"
+        excludes=""
+      />
+    </copy>
+  </target>
+   
+   <target name="jar" depends="compile">
+    <ivy:cachepath pathid="ivy.dep" conf="bnd" />
+    <taskdef resource="aQute/bnd/ant/taskdef.properties"
+      uri="http://www.aqute.biz/bnd"
+      classpathref="ivy.dep"
+    />
+  
+    <!-- Hack: This file should be excluded, but I can't explain that to bnd. -->
+    <!-- We don't have this file in 2.4.X... yet?
+    <move
+        file="${classes.dir}/freemarker/core/SecureRendererImpl.class"
+        tofile="build/SecureRendererImpl.class.tmp"
+        preservelastmodified="true" overwrite="true"
+    />
+    -->
+    <bnd:bnd
+        files="osgi.bnd" eclipse="false"
+        output="build/freemarker.jar"
+    />
+    <!-- Revert previous hack... -->
+    <!-- We don't have this file in 2.4.X... yet?
+    <move
+        file="build/SecureRendererImpl.class.tmp"
+        tofile="${classes.dir}/freemarker/core/SecureRendererImpl.class"
+        preservelastmodified="true" overwrite="true"
+    />
+    -->
+    
+    <!-- Needed for Ivy publishing -->
+    <copy todir="build/artifacts" file="build/freemarker.jar" />
+  </target>
 
-<!-- The following ant target builds a war file for the HelloServlet
-and guestbook examples. Once you build the .war file and drop it in
-the appropriate directory, you should be able to see the following
-URL's: http://localhost:8080/fmexamples/servlet/hello
-and: http://localhost:8080/fmexamples/servlet/guestbook -->
+  <!-- ================================================================= -->
+  <!-- Testing                                                           -->
+  <!-- ================================================================= -->
 
-    <target name="war-jython-webapp"
-             depends="example-jython-webapp" if="jython.available">
-        <jar jarfile="fm-jython-example.war" basedir="${build.jython-webapp.dir}" />
-    </target>
+  <target name="test" depends="compileTest" description="Run test cases">
+    <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
+    <taskdef
+      resource="emma_ant.properties" classpathref="ivy.dep.emma"
+      uri="http://emma.sourceforge.net/emma" 
+    />
+    
+    <property name="coverage.dir" location="build/coverage" />
+    <property name="coverage.classes.dir" location="build/coverage/classes" />
+    <mkdir dir="${coverage.classes.dir}" />
+    <property name="coverage.instrumentationfile" location="${coverage.dir}/instrumentation" />
+    <emma:emma enabled="true">
+      <instr 
+        instrpath="${classes.dir}" outdir="${coverage.classes.dir}" 
+        outfile="${coverage.instrumentationfile}" mode="copy">
+        <filter excludes="*_Stub" />
+      </instr>
+    </emma:emma>
+    <copy todir="${coverage.classes.dir}" overwrite="false">
+      <fileset dir="build/classes" />
+      <fileset dir="build/test-classes" />
+    </copy>
+    <property name="coverage.outfile" location="${coverage.dir}/coverage" />
+   
+    <ivy:cachepath conf="test" pathid="ivy.dep.test" />
+    <junit haltonfailure="off" fork="true">
+      <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
+      <classpath>
+        <pathelement path="${coverage.classes.dir}" />
+        <path refid="ivy.dep.emma" />
+        <path refid="ivy.dep.test" />
+      </classpath>
+      <formatter type="plain" />
+      <formatter type="xml" />
+      <batchtest todir="build/junit-reports">
+        <fileset dir="src/test/java">
+          <include name="**/*Test.java" />
+          <include name="**/*TestSuite.java" />
+          <exclude name="**/PerformanceTest.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+   </target>
+  
+  <target name="coverage-report" depends="test">
+    <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
+    <taskdef
+      resource="emma_ant.properties" classpathref="ivy.dep.emma"
+      uri="http://emma.sourceforge.net/emma" 
+    />
+    
+    <property name="coverage.report.dir" location="build/coverage/report" />
+    <mkdir dir="${coverage.report.dir}" />
+    <delete dir="${coverage.report.dir}" />
+    <mkdir dir="${coverage.report.dir}" />
+    <echo message="${coverage.outfile}" />
+    <echo message="${coverage.instrumentationfile}" />
+    <emma:emma enabled="true">
+      <report>
+        <fileset dir="${basedir}">
+          <include name="build/coverage/instrumentation" />
+          <include name="build/coverage/coverage" />
+        </fileset>
+        <sourcepath>
+          <dirset dir="${basedir}">
+            <include name="src/main/java" />
+          </dirset>
+        </sourcepath>
+        <html outfile="${coverage.report.dir}/index.html" />
+        <xml outfile="${coverage.report.dir}/report.xml" />
+      </report>
+    </emma:emma>
+  </target>
 
-    <target depends="clean,
-                    prepare,
-                    javadoc,
-                    jar,
-                    example-webapp1, example-webapp2,
-                    testcases"
+  <!-- ================================================================= -->
+  <!-- Generate docs                                                     -->
+  <!-- ================================================================= -->
 
-            name="all"
-            description="Build everything" />
+  <target depends="javacc" name="javadoc" description="Build the JavaDocs" >
+    <!-- depends="javacc" is needed as its output is referred in the docs. -->
+    <mkdir dir="build/api" />
+    <delete includeEmptyDirs="yes">
+      <fileset dir="build/api" includes="**/*" />
+    </delete>
+    <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep" />
+    <javadoc
+      sourcepath="src/main/java"
+      destdir="build/api"
+      doctitle="FreeMarker ${version}"
+      packagenames="
+        freemarker.debug, freemarker.template.*,
+        freemarker.core.*, freemarker.ext.*,
+        freemarker.cache.*, freemarker.log.*"
+      use="true"
+      version="true"
+      author="true"
+      windowtitle="FreeMarker ${version} API"
+      classpathref="ivy.dep"
+    />
+  </target>
 
+  <target name="manual" depends="init" description="Build the Manual" >
+    <ivy:cachepath conf="manual" pathid="ivy.dep" />
+    <taskdef resource="org/freemarker/docgen/antlib.properties"
+      uri="http://freemarker.org/docgen"
+      classpathref="ivy.dep"
+    />
+    
+    <docgen:transform
+      srcdir="src/manual" destdir="build/manual"
+    />
+  </target>
+
+  
+  <!-- ====================== -->
+  <!-- Distributuion building -->
+  <!-- ====================== -->
+
+  <target name="dist"
+    description="Build the FreeMarker distribution files"
+  >
+    <antcall target="clean" />  <!-- To improve the reliability -->
+    <antcall target="_dist" />
+  </target>
+
+  <target name="_dist"
+    depends="jar, javadoc, manual"
+    description="(Used internally; don't call it)"
+  >
+    <!-- Copy jars and sources and such into the distro -->
+    <delete dir="${dist.dir}" />
+    <mkdir dir="${dist.dir}" />
+    <copy todir="${dist.dir}" includeEmptyDirs="no">
+      <fileset dir=".">
+        <include name="examples/**" />
+        <include name="src/**" />
+        <include name="examples/**" />
+        <exclude name="**/.*/**" />
+        <exclude name="**/.*" />
+        <exclude name="**/*.bak" />
+        <exclude name="**/*.~*" />
+        <include name="build.xml" />
+        <include name="ivy.xml" />
+        <include name="ivysettings.xml" />
+        <include name="*.txt" />
+      </fileset>
+    </copy>
+    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker-${version}.jar" />
+    <replace
+      file="${dist.dir}/README.txt"
+      token="{version}"
+      value="${version}"
+    />
+
+    <!-- Generate website pages and copy them into distro -->
+    <ivy:retrieve conf="site" pattern="build/[artifact].[ext]" />
+    <untar compression="gzip" src="build/site.tar.gz" dest="${dist.dir}/docs" />
+
+    <!-- Copy Manual -->
+    <copy todir="${dist.dir}/docs/docs" includeEmptyDirs="no">
+      <fileset dir="build/manual" />
+    </copy>
+    
+    <!-- Copy javadocs -->
+    <copy todir="${dist.dir}/docs/docs/api" includeEmptyDirs="no">
+      <fileset dir="build/api" />
+    </copy>
+    
+    <!-- Package the distro -->
+    <property name="freemarker.tar" value="build/freemarker-${version}.tar" />
+    <property name="freemarker.gzip" value="${freemarker.tar}.gz" />
+    <delete file="${freemarker.tar}" />
+    <tar tarfile="${freemarker.tar}" basedir="${dist.dir}" />
+    <delete file="${freemarker.gzip}" />
+    <gzip zipfile="${freemarker.gzip}" src="${freemarker.tar}" />
+    <delete file="${freemarker.tar}" />
+  </target>
+  
   <!--
     Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
     into the place that the central Maven2 repository syncs itself with
     periodically. Of course it also uploads the Maven-specific metadata files.
-
+    
     Use this after "dist" (without interleaving "clean").
-
+  
     Note: maven-ant-tasks-x.x.x.jar must be added to ${ANT_HOME}/lib for
-          this to work. Get it here: http://maven.apache.org/download.html
+      this to work. Get it here: http://maven.apache.org/download.html
   -->
   <target name="maven-upload" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
-        <project xmlns="http://maven.apache.org/POM/4.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-          <modelVersion>4.0.0</modelVersion>
-          <groupId>org.freemarker</groupId>
-          <artifactId>freemarker</artifactId>
-          <version>${version}</version>
-          <packaging>jar</packaging>
-          <name>FreeMarker</name>
-          <description>
-            FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
-          </description>
-          <url>http://freemarker.org</url>
-          <licenses>
-            <license>
-              <name>BSD-style license</name>
-              <url>http://freemarker.org/LICENSE.txt</url>
-            </license>
-          </licenses>
-          <scm>
-            <url>http://freemarker.svn.sourceforge.net/viewvc/freemarker/</url>
-            <connection>scm:svn:https://freemarker.svn.sourceforge.net/svnroot/freemarker</connection>
-          </scm>
-          <dependencies>
-            <!-- no required dependencies -->
-          </dependencies>
-        </project>
-     ]]></echo>
-     
-     <jar destfile="build/maven-source-attachment.jar"
-            basedir="src" excludes="freemarker/testcase/**, manual/**"
-     />
+    <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>org.freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>${version}</version>
+        <packaging>jar</packaging>
+        <name>FreeMarker</name>
+        <description>
+        FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
+        </description>
+        <url>http://freemarker.org</url>
+        <licenses>
+        <license>
+          <name>BSD-style license</name>
+          <url>http://freemarker.org/LICENSE.txt</url>
+        </license>
+        </licenses>
+        <scm>
+        <url>http://freemarker.svn.sourceforge.net/viewvc/freemarker/</url>
+        <connection>scm:svn:https://freemarker.svn.sourceforge.net/svnroot/freemarker</connection>
+        </scm>
+        <dependencies>
+        <!-- no required dependencies -->
+        </dependencies>
+      </project>
+    ]]></echo>
+    
+    <jar destfile="build/maven-source-attachment.jar"
+         basedir="src/main/java"
+    />
 
-     <artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
-
-     <input
-          validargs="y,n"
-          addproperty="mavenUpload.answer"
-     >
+    <artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
+   
+    <input
+       validargs="y,n"
+       addproperty="mavenUpload.answer"
+    >
 You are about uploading
-${dist.dir.versioned}/lib/freemarker.jar
+${dist.dir.versioned}/freemarker.jar
 into the Maven central repostiry sync. directory.
 Be sure that's the final (released) variation there,
 and that the version number is correct.
 Proceed? </input>
-     <condition property="mavenUpload.yes">
-        <equals arg1="y" arg2="${mavenUpload.answer}"/>
-     </condition>
-     <fail unless="mavenUpload.yes" message="Task aborted by user." />
-
-     <input
-          message="Enter your SourceForge.net user name: "
-          addproperty="mavenUpload.user"
+    <condition property="mavenUpload.yes">
+      <equals arg1="y" arg2="${mavenUpload.answer}"/>
+    </condition>
+    <fail unless="mavenUpload.yes" message="Task aborted by user." />
+   
+    <input
+      message="Enter your SourceForge.net user name: "
+      addproperty="mavenUpload.user"
     />
-     <input
-          message="Enter your SourceForge.net password (WILL BE DISPLAYED AS YOU TYPE IT!): "
-          addproperty="mavenUpload.password"
+    <input
+      message="Enter your SourceForge.net password (WILL BE DISPLAYED AS YOU TYPE IT!): "
+      addproperty="mavenUpload.password"
     />
-
-     <artifact:deploy file="${dist.dir.versioned}/lib/freemarker.jar">
-        <!-- For testing use something like url="file:///my-test-dir". -->
-        <remoteRepository url="sftp://web.sourceforge.net/home/groups/f/fr/freemarker/htdocs/maven2">
-           <authentication
-             username="${mavenUpload.user},freemarker"
-             password="${mavenUpload.password}"
-          />
-        </remoteRepository>
-        <pom file="build/pom.xml" />
-        <attach file="build/maven-source-attachment.jar" classifier="sources" />
-     </artifact:deploy>
-     
-     <echo>**********************************************</echo>
-     <echo>CLEAR THE SCREEN, NOW! Your password is on it!</echo>
-     <echo>**********************************************</echo>
+   
+    <artifact:deploy file="${dist.dir}/freemarker.jar">
+      <remoteRepository url="sftp://web.sourceforge.net/home/groups/f/fr/freemarker/htdocs/maven2">
+        <authentication
+            username="${mavenUpload.user},freemarker"
+            password="${mavenUpload.password}"
+         />
+      </remoteRepository>
+      <pom file="build/pom.xml" />
+      <attach file="build/maven-source-attachment.jar" classifier="sources" />
+    </artifact:deploy>
+    
+    <echo>**********************************************</echo>
+    <echo>CLEAR THE SCREEN, NOW! Your password is on it!</echo>
+    <echo>**********************************************</echo>
   </target>
 
+  <target name="artifacts" depends="jar"
+    description="Creates the artifacts for Ivy."
+  />
+  
+  
+  <!-- ================================================================== -->
+  <!-- Eclipse                                                            -->
+  <!-- ================================================================== -->
+
+  <property name="eclipseFeatureFileName" value="org.freemarker.freemarker.feature_${versionForOSGi}.jar" />
+  <property name="eclipseSourceFeatureFileName" value="org.freemarker.freemarker.source.feature_${versionForOSGi}.jar" />
+  <property name="eclipsePluginFileName" value="org.freemarker.freemarker_${versionForOSGi}.jar" />
+  <property name="eclipseSourcePluginFileName" value="org.freemarker.freemarker.source_${versionForOSGi}.jar" />
+  
+  <target name="eclipse-update-site" depends="jar">
+    <delete dir="build/eclipse" />
+
+    <!-- Create org.freemarker.freemarker feature: -->
+    
+    <mkdir dir="build/eclipse/freemarker/plugins" />
+    <copy
+        file="build/freemarker.jar"
+        tofile="build/eclipse/freemarker/plugins/org.freemarker.freemarker_${versionForOSGi}.jar"
+    />
+    
+    <mkdir dir="build/eclipse/freemarker/features/tmp" />
+    <echo file="build/eclipse/freemarker/features/tmp/feature.xml"><![CDATA[<?xml version="1.0"?>
+<feature
+    id="org.freemarker.freemarker"
+    label="FreeMarker"
+    version="${versionForOSGi}">
+
+  <description url="http://freemarker.org">
+    Adds barebone FreeMarker as a plug-in (OSGi bundle) to Eclipse.
+  </description>
+
+  <license><!--
+    -->FreeMarker and this plug-in is provided under the terms and conditions <!--
+    -->of a BSD-style license, available at http://freemarker.org/LICENSE.txt.<!--
+  --></license>
+
+  <plugin
+      id="org.freemarker.freemarker"
+      download-size="0"
+      install-size="0"
+      version="${versionForOSGi}"
+      unpack="false"
+  />
+</feature>
+    ]]></echo>
+    <jar
+        basedir="build/eclipse/freemarker/features/tmp"
+        destfile="build/eclipse/freemarker/features/${eclipseFeatureFileName}"
+    />
+    <delete dir="build/eclipse/freemarker/features/tmp" />
+
+    <!-- Create org.freemarker.freemarker.source feature: -->
+    
+    <mkdir dir="build/eclipse/freemarker/plugins" />
+    <jar 
+        basedir="src/main/java" jarfile="build/eclipse/freemarker/plugins/org.freemarker.freemarker.source_${versionForOSGi}.jar" 
+    >
+      <manifest>
+        <attribute name="Bundle-SymbolicName" value="${moduleOrg}.${moduleName}.source" />
+        <attribute name="Bundle-Version" value="${versionForOSGi}" />
+        <attribute name="Bundle-License" value="BSD-style, see: http://freemarker.org/LICENSE.txt" />
+        <attribute name="Bundle-Vendor" value="freemarker.org" />
+        <attribute name="Eclipse-SourceBundle" value='org.freemarker.freemarker;version="${versionForOSGi}";roots:="."' />
+      </manifest>
+    </jar>
+    
+    <mkdir dir="build/eclipse/freemarker/features/tmp" />
+    <echo file="build/eclipse/freemarker/features/tmp/feature.xml"><![CDATA[<?xml version="1.0"?>
+<feature
+    id="org.freemarker.freemarker.source"
+    label="FreeMarker source"
+    version="${versionForOSGi}">
+
+  <description url="http://freemarker.org">
+    Adds source code attachment to the barebone FreeMarker plug-in.
+  </description>
+
+  <license><!--
+    -->FreeMarker and this plug-in is provided under the terms and conditions <!--
+    -->of a BSD-style license, available at http://freemarker.org/LICENSE.txt.<!--
+  --></license>
+
+  <plugin
+      id="org.freemarker.freemarker.source"
+      download-size="0"
+      install-size="0"
+      version="${versionForOSGi}"
+      unpack="false"
+  />
+</feature>
+    ]]></echo>
+    <jar
+        basedir="build/eclipse/freemarker/features/tmp"
+        destfile="build/eclipse/freemarker/features/${eclipseSourceFeatureFileName}"
+    />
+    <delete dir="build/eclipse/freemarker/features/tmp" />
+
+    <!-- Create site: -->
+
+    <echo file="build/eclipse/freemarker/site.xml"><![CDATA[<?xml version="1.0"?>
+<site>
+  <feature url="features/${eclipseFeatureFileName}"
+      id="org.freemarker.freemarker"
+      version="${versionForOSGi}">
+    <category name="core" />
+    <category name="core-with-sources" />
+  </feature>
+  <feature url="features/${eclipseSourceFeatureFileName}"
+      id="org.freemarker.freemarker.source"
+      version="${versionForOSGi}">
+    <category name="core-with-sources" />
+  </feature>
+  <category-def name="core" label="FreeMarker core">
+    <description>
+      Features that are used as dependencies of other products, but do nothing visible themselves.
+    </description>
+  </category-def>
+  <category-def name="core-with-sources" label="FreeMarker core with sources">
+    <description>
+      Features that are used as dependencies of other products, but do nothing visible themselves.
+      Includes source code attachments.
+    </description>
+  </category-def>
+</site>
+    ]]></echo>
+    <echo message="**************************************************************" />
+    <echo message="The new Eclipse update site is created in:" />
+    <echo message="${basedir}/build/eclipse/freemarker" />
+    <echo message="You can use this directory as a local update site in Eclipse," />
+    <echo message="or if you are an admin who makes a release, you should replace" />
+    <echo message="http://freemarker.org/eclipse/freemarker with this directory." />
+    <echo message="**************************************************************" />
+  </target>
+  
+  
+  <!-- ================================================================== -->
+  <!-- Dependency management (keep it exactly identical for all projects) -->
+  <!-- ================================================================== -->
+  
+  <target name="_autoget-deps" unless="deps.available">
+    <antcall target="update-deps" />
+  </target>
+  
+  <target name="update-deps"
+    description="Gets the latest version of the dependencies from the Web"
+  >
+    <echo>Getting dependencies...</echo>
+    <echo>-------------------------------------------------------</echo>
+    <ivy:settings id="remote" url="http://freemarker.org/repos/ivy/ivysettings-remote.xml" />
+    <!-- Build an own repository that will serve us even offline: -->
+    <ivy:retrieve settingsRef="remote" sync="true"
+      ivypattern=".ivy.part/repo/[organisation]/[module]/ivy-[revision].xml"
+      pattern=".ivy.part/repo/[organisation]/[module]/[artifact]-[revision].[ext]"
+    />
+    <echo>-------------------------------------------------------</echo>
+    <echo>*** Successfully acquired dependencies from the Web ***</echo>
+    <echo>Eclipse users: Now right-click on ivy.xml and Resolve! </echo>
+    <echo>-------------------------------------------------------</echo>
+    <!-- Only now that we got all the dependencies will we delete anything. -->
+    <!-- Thus a net or repo outage doesn't left us without the dependencies. -->
+
+    <!-- Save the resolution cache from the soon coming <delete>: -->
+    <move todir=".ivy.part/update-deps-reso-cache">
+      <fileset dir=".ivy/update-deps-reso-cache" />
+    </move>
+    <!-- Drop all the old stuff: -->
+    <delete dir=".ivy" />
+    <!-- And use the new stuff instead: -->
+    <move todir=".ivy">
+      <fileset dir=".ivy.part" />
+    </move>
+  </target>
+
+  <!-- Do NOT call this from 'clean'; offline guys would stuck after that. -->
+  <target name="clean-deps"
+    description="Deletes all dependencies"
+  >
+    <delete dir=".ivy" />
+  </target>
+
+  <target name="publish-override" depends="artifacts"
+    description="Ivy-publishes THIS project locally as an override"
+  >
+    <ivy:resolve />
+    <ivy:publish
+      pubrevision="${moduleBranch}-branch-head"
+      overwrite="true" forcedeliver="true"
+      resolver="freemarker-devel-local-override"
+    >
+      <artifacts pattern="build/artifacts/[artifact].[ext]" />
+    </ivy:publish>
+    <echo>-------------------------------------------------------</echo>
+    <echo>*** Don't forget to `ant unpublish-override` later! ***</echo>
+  </target>
+
+  <target name="unpublish-override"
+    description="Undoes publish-override (made in THIS project)"
+  >
+    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override/${moduleOrg}/${moduleName}" />
+    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override-cache/${moduleOrg}/${moduleName}" />
+  </target>  
+
+  <target name="unpublish-override-all"
+    description="Undoes publish-override-s made in ALL projects"
+  >
+    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override" />
+    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override-cache" />
+  </target>  
+
+  <target name="uninstall"
+    description="Deletes external files created by FreeMarker developement"
+  >
+    <delete dir="${user.home}/.ivy2/freemarker-devel-cache" />
+    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override" />
+    <delete dir="${user.home}/.ivy2/freemarker-devel-local-override-cache " />
+  </target>
+
+  <target name="report-deps"
+    description="Creates a HTML document that summarizes the dependencies."
+  >
+    <mkdir dir="build/deps-report" />
+    <ivy:resolve />
+    <ivy:report todir="build/deps-report" />
+  </target>
+  
+  <!--
+    This meant to be called on the Continuous Integration server, so the
+    integration builds appear in the freemarker.org public Ivy repository.
+    The artifacts must be already built.
+  -->
+  <target name="server-publish-last-build"
+    description="(For the Continuous Integration server only)"
+  >
+    <delete dir="build/dummy-server-ivy-repo" />
+    <ivy:resolve />
+    <ivy:publish
+      pubrevision="${moduleBranch}-branch-head"
+      overwrite="true" forcedeliver="true"
+      resolver="server-publishing-target"
+    >
+      <artifacts pattern="build/artifacts/[artifact].[ext]" />
+    </ivy:publish>
+  </target>
+  
 </project>
