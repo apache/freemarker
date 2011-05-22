@@ -292,9 +292,6 @@
         preservelastmodified="true" overwrite="true"
     />
     -->
-    
-    <!-- Needed for Ivy publishing -->
-    <copy todir="build/artifacts" file="build/freemarker.jar" />
   </target>
 
   <!-- ================================================================= -->
@@ -568,10 +565,6 @@ Proceed? </input>
     <echo>CLEAR THE SCREEN, NOW! Your password is on it!</echo>
     <echo>**********************************************</echo>
   </target>
-
-  <target name="artifacts" depends="jar"
-    description="Creates the artifacts for Ivy."
-  />
   
   
   <!-- ================================================================== -->
@@ -754,16 +747,17 @@ Proceed? </input>
     <delete dir=".ivy" />
   </target>
 
-  <target name="publish-override" depends="artifacts"
+  <target name="publish-override" depends="jar"
     description="Ivy-publishes THIS project locally as an override"
   >
     <ivy:resolve />
     <ivy:publish
       pubrevision="${moduleBranch}-branch-head"
+      artifactspattern="build/[artifact].[ext]"
       overwrite="true" forcedeliver="true"
       resolver="freemarker-devel-local-override"
     >
-      <artifacts pattern="build/artifacts/[artifact].[ext]" />
+      <artifact name="freemarker" type="jar" ext="jar" />
     </ivy:publish>
     <echo>-------------------------------------------------------</echo>
     <echo>*** Don't forget to `ant unpublish-override` later! ***</echo>
@@ -811,10 +805,11 @@ Proceed? </input>
     <ivy:resolve />
     <ivy:publish
       pubrevision="${moduleBranch}-branch-head"
+      artifactspattern="build/[artifact].[ext]"
       overwrite="true" forcedeliver="true"
       resolver="server-publishing-target"
     >
-      <artifacts pattern="build/artifacts/[artifact].[ext]" />
+      <artifact name="freemarker" type="jar" ext="jar" />
     </ivy:publish>
   </target>
   
