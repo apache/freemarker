@@ -10,7 +10,7 @@ import org.python.core.Py;
 import org.python.core.PyDictionary;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
-import org.python.core.PyJavaInstance;
+import org.python.core.PyInstance;
 import org.python.core.PyLong;
 import org.python.core.PyNone;
 import org.python.core.PyObject;
@@ -39,8 +39,8 @@ class JythonModelCache extends ModelCache
     protected TemplateModel create(Object obj) {
         boolean asHash = false;
         boolean asSequence = false;
-        if(obj instanceof PyJavaInstance) {
-            Object jobj = ((PyJavaInstance)obj).__tojava__(java.lang.Object.class);
+        if(obj instanceof PyInstance) {
+            Object jobj = ((PyInstance)obj).__tojava__(java.lang.Object.class);
             // FreeMarker-aware, Jython-wrapped Java objects are left intact 
             if(jobj instanceof TemplateModel) {
                 return (TemplateModel)jobj; 
