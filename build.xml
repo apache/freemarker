@@ -446,6 +446,8 @@
         <include name="build.xml" />
         <include name="ivy.xml" />
         <include name="ivysettings.xml" />
+        <include name="osgi.bnd" />
+        <include name="build.properties.sample" />
         <include name="*.txt" />
       </fileset>
     </copy>
@@ -457,8 +459,8 @@
     />
 
     <!-- Generate website pages and copy them into distro -->
-    <ivy:retrieve conf="site" pattern="build/[artifact].[ext]" />
-    <untar compression="gzip" src="build/site.tar.gz" dest="${dist.dir}/docs" />
+    <ivy:retrieve conf="site" pattern="build/site/[artifact].[ext]" />
+    <untar compression="gzip" src="build/site/site.tar.gz" dest="${dist.dir}/docs" />
 
     <!-- Copy Manual -->
     <copy todir="${dist.dir}/docs/docs" includeEmptyDirs="no">
