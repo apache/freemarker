@@ -10,7 +10,7 @@ Ant buildfile for 'FreeMarker' application. Compatible with Ant version 1.5.
 >
 
     <property name="libs.location" value="http://freemarker.sourceforge.net/jarsforbuild"/>
-    <property name="repositoryRootDir" value="../../../"/>
+    <property name="repositoryRootDir" value="../../"/>
 
     <property file="src/freemarker/version.properties" />
     <property name="src.dir" value="src"/>
