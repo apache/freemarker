@@ -82,13 +82,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import junit.framework.TestCase;
 
-import org.jdom.input.SAXBuilder;
 import org.xml.sax.InputSource;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
-import freemarker.ext.jdom.NodeListModel;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleDate;
@@ -293,11 +291,6 @@ public class TemplateTestCase extends TestCase {
             dataModel.put("self", "self");
             dataModel.put("zero", new Integer(0));
             dataModel.put("data", new MultiModel1());
-        }
-        
-        else if (testName.equals("nodelistmodel")) {
-            org.jdom.Document doc = new SAXBuilder().build(new InputSource(getClass().getResourceAsStream("test-xml.xml")));
-            dataModel.put("doc", new NodeListModel(doc));
         }
         
         else if (testName.equals("test-stringbimethods")) {

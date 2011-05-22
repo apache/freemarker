@@ -73,9 +73,6 @@
    <testcase name="nested" filename="test-nested1.txt" />
    <testcase name="newlines1" filename="test-newlines1.html" />
    <testcase name="newlines2" filename="test-newlines2.html" />
-   <testcase name="nodelistmodel" filename="test-xml.html" >
-       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
-   </testcase>
    <testcase name="noparse" filename="test-noparse.html" />
    <testcase name="number-format" filename="test-numberformat.txt" />
    <testcase name="number-literal" filename="test-numberliteral.html" >

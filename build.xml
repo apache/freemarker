@@ -249,9 +249,12 @@
   </target>
 
   <target name="compileTest" depends="compile">
+    <mkdir dir="${testClasses.dir}" />
+  
     <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
     <javac srcdir="src/test/java" destdir="${testClasses.dir}" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
+      classpath="${classes.dir}"
       classpathref="ivy.dep.test"
       bootclasspath="${boot.classpath}"
     />
@@ -322,6 +325,7 @@
     </copy>
     <property name="coverage.outfile" location="${coverage.dir}/coverage" />
    
+    <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="test" pathid="ivy.dep.test" />
     <junit haltonfailure="off" fork="true">
       <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
@@ -340,9 +344,9 @@
         </fileset>
       </batchtest>
     </junit>
-   </target>
+  </target>
   
-  <target name="coverage-report" depends="test">
+  <target name="test-with-coverage-report" depends="test">
     <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
     <taskdef
       resource="emma_ant.properties" classpathref="ivy.dep.emma"
