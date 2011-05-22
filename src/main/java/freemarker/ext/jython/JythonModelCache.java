@@ -30,10 +30,12 @@ class JythonModelCache extends ModelCache
         this.wrapper = wrapper;
     }
 
+    @Override
     protected boolean isCacheable(Object object) {
         return true;
     }
     
+    @Override
     protected TemplateModel create(Object obj) {
         boolean asHash = false;
         boolean asSequence = false;
@@ -75,7 +77,7 @@ class JythonModelCache extends ModelCache
             return JythonNumberModel.FACTORY.create(obj, wrapper);
         }
         if(obj instanceof PyNone) {
-            return null;
+            return null;  // Should be TemplateModel.JAVA_NULL when that's introducted
         }
         return JythonModel.FACTORY.create(obj, wrapper);
     }

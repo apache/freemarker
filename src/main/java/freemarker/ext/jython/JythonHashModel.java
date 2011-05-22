@@ -137,7 +137,7 @@ implements
         {
             throw new TemplateModelException(e);
         }
-        throw new TemplateModelException("'?keys' is not supported as there is no 'keys' nor 'keySet' attribute on an instance of " + object.__class__.__name__);
+        throw new TemplateModelException("'?keys' is not supported as there is no 'keys' nor 'keySet' attribute on an instance of " + object.getType());
     }
 
     /**
@@ -157,6 +157,6 @@ implements
         {
             throw new TemplateModelException(e);
         }
-        throw new TemplateModelException("'?values' is not supported as there is no 'values' attribute on an instance of " + object.__class__.__name__);
+        throw new TemplateModelException("'?values' is not supported as there is no 'values' attribute on an instance of " + object.getType());
     }
 }
