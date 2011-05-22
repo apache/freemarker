@@ -20006,7 +20006,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added <literal>LICENCE.txt</literal> and
+              <para>Added <literal>LICENSE.txt</literal> and
               <literal>NOTICE.txt</literal> to
               <literal>freemarker.jar</literal> under
               <literal>META-INF</literal>.</para>
