@@ -19516,6 +19516,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <qandaentry xml:id="faq_template_uploading_security">
           <question>
+            <indexterm>
+              <primary>security</primary>
+
+              <secondary>user-provided templates</secondary>
+            </indexterm>
+
             <para>Can I allow users to upload templates and what are the
             security implications?</para>
           </question>
