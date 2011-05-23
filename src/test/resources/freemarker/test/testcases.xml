@@ -1,0 +1,156 @@
+<?xml version="1.0" ?>
+
+<!DOCTYPE testcases [
+  <!ELEMENT testcases (config*, testcase*)>
+  <!ELEMENT testcase (config*)>
+     <!ATTLIST testcase 
+               name CDATA #REQUIRED
+               filename CDATA #REQUIRED
+               class CDATA #IMPLIED
+     >
+  <!ELEMENT config EMPTY>
+     <!ATTLIST config 
+            auto_import CDATA #IMPLIED
+            clear_encoding_map (Y|N) #IMPLIED
+            input_encoding CDATA #IMPLIED
+            locale CDATA #IMPLIED
+            object_wrapper CDATA #IMPLIED
+            output_encoding CDATA #IMPLIED
+            output_dir CDATA #IMPLIED
+            strict_syntax (Y|N) #IMPLIED
+            templatedir CDATA #IMPLIED
+      >
+]>
+
+<testcases>
+   <config templatedir="template"
+           outputdir="reference"
+           input_encoding="UTF-8"
+           output_encoding="UTF-8"
+   />
+   
+   <testcase name="arithmetic" filename="test-arithmetic.html" />
+   <testcase name="bean-maps" filename="test-bean-maps.html"/>
+   <testcase name="beans" filename="test-beans.html">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>
+   <testcase name="boolean" filename="test-boolean.html" />
+   <testcase name="charset-in-header" filename="test-charsetinheader.html">
+      <config clear_encoding_map="Y"/>
+      <config input_encoding="ISO-8859-5"/>
+   </testcase>
+   <testcase name="comment" filename="test-comment.html" />
+   <testcase name="comparisons" filename="test-comparisons.html" />
+   <testcase name="dateformat" filename="test-dateformat.html" />
+   <testcase name="default" filename="test-default.ftl"/>
+   <testcase name="default-xmlns" filename="test-defaultxmlns1.txt">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>
+   <testcase name="encoding-builtins" filename="test-encodingbuiltins.txt" />
+   <testcase name="escapes" filename="test-escapes.txt" />
+   <testcase name="hashliteral" filename="test-hashliteral.html" />
+   <testcase name="identifier" filename="test-identifier.html" >
+      <config strict_syntax="N" />
+   </testcase>
+   <testcase name="import" filename="test-import.txt">
+      <config auto_import="test-import_lib.txt as my"/>
+   </testcase>
+   <testcase name="include" filename="test-include.html" />
+   <testcase name="interpret" filename="test-interpret.html"/>
+   <testcase name="iterators" filename="test-listiterators.html"/>
+   <testcase name="jsptaglibs" filename="test-jsptaglibs.txt" 
+             class="freemarker.test.servlets.TestJspTaglibs"/>
+   <testcase name="lastcharacter" filename="test-lastcharacter.html"/>
+   <testcase name="list" filename="test-extlist.html" />
+   <testcase name="listliteral" filename="test-listliteral.html" />
+   <testcase name="localization" filename="test-local.html" >
+      <config locale="en_AU"/>
+   </testcase>
+   <testcase name="loopvariable" filename="test-loopvar.txt" />
+   <testcase name="macros" filename="test-function.html"/>
+   <testcase name="macros2" filename="test-macro.html"/>
+   <testcase name="multimodels" filename="test-models.html"/>
+   <testcase name="nested" filename="test-nested1.txt" />
+   <testcase name="newlines1" filename="test-newlines1.html" />
+   <testcase name="newlines2" filename="test-newlines2.html" />
+   <testcase name="noparse" filename="test-noparse.html" />
+   <testcase name="number-format" filename="test-numberformat.txt" />
+   <testcase name="number-literal" filename="test-numberliteral.html" >
+      <config locale="fr_FR"/>
+   </testcase>
+   <testcase name="numerical-cast" filename="test-numericalcast.txt" />
+   <testcase name="output-encoding1" filename="test-outputencoding1.txt"/>
+   <testcase name="output-encoding2" filename="test-outputencoding2.txt">
+       <config output_encoding="UTF-16"/>
+   </testcase>
+   <testcase name="output-encoding3" filename="test-outputencoding3.txt">
+       <config output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
+       
+   </testcase>
+   <testcase name="precedence" filename="test-precedence.html"/>
+   <testcase name="recover" filename="test-recover.ftl" />
+   <testcase name="root" filename="test-root.html" />
+   <testcase name="sequence-builtins-with-BeansWrapper" filename="test-sequencebuiltins.txt">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/> 
+   </testcase>
+   <testcase name="sequence-builtins-with-DefaultObjectWrapper" filename="test-sequencebuiltins.txt">
+      <config object_wrapper="freemarker.template.DefaultObjectWrapper"/> 
+   </testcase>
+   <testcase name="sequence-builtins-with-SimpleObjectWrapper" filename="test-sequencebuiltins.txt">
+      <config object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
+   </testcase>
+   <testcase name="strictinheader" filename="test-strictinheader.html">
+      <config strict_syntax="N"/>
+   </testcase>
+   <testcase name="string-builtins1" filename="test-stringbuiltins.txt" />
+   <testcase name="string-builtins2" filename="test-stringbuiltins2.txt" />
+   <testcase name="string-builtins-regexps" filename="string-builtins-regexps.txt" />
+   <testcase name="test-stringbimethods" filename="test-stringbimethods.txt" />
+   <testcase name="stringliteral" filename="test-stringliteral.html"/>
+   <testcase name="switch-case" filename="test-switch.html" />
+   <testcase name="transforms" filename="test-transformation.html"/>
+   <testcase name="type-builtins" filename="test-typebuiltins.txt"/>
+   <testcase name="var-layers" filename="test-varlayers.txt"/>
+   <testcase name="variables" filename="test-variables.html"/>
+   <testcase name="whitespace-trim" filename="test-wstrim.txt"/>
+   <testcase name="wstrip-in-header" filename="test-wsstripinheader.txt"/>
+   <testcase name="xml-fragment" filename="test-xmlfragment.txt">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/> 
+   </testcase>
+   <testcase name="xmlns1" filename="test-xmlns.html">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>
+   <testcase name="xmlns2" filename="test-xmlns.html">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>
+   <testcase name="xmlns3" filename="test-xmlns3.html">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>   
+   <testcase name="xmlns4" filename="test-xmlns4.html">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>   
+   <testcase name="xmlns5" filename="test-xmlns5.txt">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
+   </testcase>   
+   <testcase name="hashconcat" filename="test-hashconcat.ftl"/>
+   <testcase name="test-new-defaultresolver" filename="test-new-defaultresolver.txt" />
+   <testcase name="test-new-unrestricted" filename="test-new-unrestricted.txt">
+      <config new_builtin_class_resolver="unrestricted"/>
+   </testcase>   
+   <testcase name="test-new-safer" filename="test-new-safer.txt">
+      <config new_builtin_class_resolver="safer"/>
+   </testcase>   
+   <testcase name="test-new-allowsnothing" filename="test-new-allowsnothing.txt">
+      <config new_builtin_class_resolver="allows_nothing"/>
+   </testcase>   
+   <testcase name="test-new-optin" filename="test-new-optin.txt">
+      <config new_builtin_class_resolver="allowed_classes: freemarker.test.models.NewTestModel, trusted_templates: subdir/test-new-optin.txt, subdir/subsub/*"/>
+   </testcase>   
+   <testcase name="test-specialvars" filename="test-specialvars.txt">
+      <config locale="en_US"/>
+      <config output_encoding="utf-8"/>
+      <config url_escaping_charset="iso-8859-1"/>
+   </testcase>   
+   <testcase name="test-iso8601" filename="test-iso8601.txt"/>
+   <testcase name="test-number-to-date" filename="test-number-to-date.txt"/>
+</testcases>

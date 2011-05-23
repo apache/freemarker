@@ -14,7 +14,7 @@ Bundle-Vendor: freemarker.org
 
 Include-Resource: META-INF=${classes.dir}/META-INF
 
-Export-Package: !freemarker.testcase.*, freemarker.*;version="${versionForOSGi}"
+Export-Package: !freemarker.test.*, freemarker.*;version="${versionForOSGi}"
 # Important:
 # Packages that don't match nor the Export-Package nor the
 # Private-Package mainfest header will be excluded from

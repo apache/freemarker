@@ -1,0 +1,6 @@
+${"freemarker.test.models.NewTestModel"?new("works")}
+<#attempt>
+${"freemarker.test.models.NewTestModel2"?new("works")}
+<#recover>
+fails
+</#attempt>

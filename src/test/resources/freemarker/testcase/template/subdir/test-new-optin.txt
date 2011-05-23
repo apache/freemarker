@@ -1,8 +1,0 @@
-${"freemarker.testcase.models.NewTestModel"?new("works")}
-<#attempt>
-${"freemarker.testcase.models.NewTestModel2"?new("works")}
-<#recover>
-fails
-</#attempt>
-
-<#include "test-new-optin-2.txt">
