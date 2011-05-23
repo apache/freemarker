@@ -1,0 +1,6 @@
+<root xmlns:x="http://x.com" xmlns:y="http://y.com">
+  <t1>No NS</t1>
+  <x:t2>x NS</x:t2>
+  <y:t3>y NS</y:t3>
+  <t4 xmlns="http://x.com">x NS</t4>
+</root>

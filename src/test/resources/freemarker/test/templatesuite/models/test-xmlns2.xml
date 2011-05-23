@@ -1,0 +1,14 @@
+<eb:book xmlns:eb="http://example.com/eBook">
+  <eb:title>Test Book</eb:title>
+  <eb:chapter>
+    <eb:title>Ch1</eb:title>
+    <eb:para>p1.1</eb:para>
+    <eb:para>p1.2</eb:para>
+    <eb:para>p1.3</eb:para>
+  </eb:chapter>
+  <eb:chapter>
+    <eb:title>Ch2</eb:title>
+    <eb:para>p2.1</eb:para>
+    <eb:para>p2.2</eb:para>
+  </eb:chapter>
+</eb:book>

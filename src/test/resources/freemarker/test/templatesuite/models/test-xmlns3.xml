@@ -1,0 +1,14 @@
+<book xmlns:x="http://x" xmlns:y="http://y">
+  <x:title>Test Book</x:title>
+  <chapter>
+    <y:title>Ch1</y:title>
+    <para>p1.1</para>
+    <para>p1.2</para>
+    <para>p1.3</para>
+  </chapter>
+  <x:chapter>
+    <y:title>Ch2</y:title>
+    <x:para>p2.1</x:para>
+    <y:para>p2.2</y:para>
+  </x:chapter>
+</book>

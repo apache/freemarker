@@ -281,7 +281,7 @@ public class TemplateTestCase extends TestCase {
         }
     
         else if (testName.equals("default-xmlns")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("test-defaultxmlns1.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
@@ -313,29 +313,29 @@ public class TemplateTestCase extends TestCase {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
             DocumentBuilder db = f.newDocumentBuilder();
-            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("test-xmlfragment.xml")));
+            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/test-xmlfragment.xml")));
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
         }
         
         else if (testName.equals("xmlns1")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("test-xmlns.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
         else if (testName.equals("xmlns2")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("test-xmlns2.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns2.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
         else if (testName.equals("xmlns3") || testName.equals("xmlns4")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("test-xmlns3.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns3.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         else if (testName.equals("xmlns5")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("test-defaultxmlns1.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
