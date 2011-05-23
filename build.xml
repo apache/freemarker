@@ -55,39 +55,38 @@
   <property name="testClasses.dir" location="build/test-classes" />
   <property name="dist.dir" value="build/dist/freemarker-${version}" />
   
+  
   <!-- ================================================================== -->
   <!-- Initialization                                                     -->
   <!-- ================================================================== -->
-   
+
+  
   <target name="clean" description="get rid of all generated files">
     <delete dir="build" />
-    <delete file="src/main/java/freemarker/core/parser/FMParser.java" />
-    <delete file="src/main/java/freemarker/core/parser/FMConstants.java" />
-    <delete file="src/main/java/freemarker/core/parser/FMLexer.java" />
-    <delete file="src/main/java/freemarker/core/parser/LexicalException.java"/>
-    <delete file="src/main/java/freemarker/core/parser/SimpleCharStream.java" />
-    <delete file="src/main/java/freemarker/core/parser/Token.java" />
-    <delete file="src/main/java/freemarker/core/parser/Node.java" />
+    <delete file="src/main/java/freemarker/core/FMParser.java" />
+    <delete file="src/main/java/freemarker/core/FMConstants.java" />
+    <delete file="src/main/java/freemarker/core/FMLexer.java" />
+    <delete file="src/main/java/freemarker/core/LexicalException.java"/>
+    <delete file="src/main/java/freemarker/core/SimpleCharStream.java" />
+    <delete file="src/main/java/freemarker/core/Token.java" />
+    <delete file="src/main/java/freemarker/core/Node.java" />
   </target>
 
-  <target name="init"
+  <condition property="deps.available">
+    <available file=".ivy" />
+  </condition>
+  
+  <target name="init" depends="_autoget-deps"
     description="fetch dependencies if any are missing and create the build directory if necessary"
   >
-    <condition property="deps.available">
-      <available file=".ivy" />
-    </condition>
-    <antcall target="_autoget-deps" />
-    
     <mkdir dir="build"/>
-    <uptodate property="parser.uptodate"
-        targetfile="src/main/java/freemarker/core/parser/FMParser.java">
-      <srcfiles dir="src/main/javacc" includes="*.jj" />
-    </uptodate>
   </target>
 
+  
   <!-- ================================================================= -->
   <!-- Compilation                                                       -->
   <!-- ================================================================= -->
+
   
   <target name="javacc" depends="init" unless="parser.uptodate"
     description="Build the parser from its grammar file"
@@ -153,6 +152,7 @@
     <ivy:cachepath conf="build" pathid="ivy.dep" />
     <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
+      includeantruntime="false"
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath}"
       excludes="
@@ -175,6 +175,7 @@
     <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
     <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
+      includeantruntime="false"
       classpathref="ivy.dep.jsp2.0"
       bootclasspath="${boot.classpath}"
       includes="
@@ -197,6 +198,7 @@
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
+      includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath}"
       includes="
@@ -254,6 +256,7 @@
     <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
     <javac srcdir="src/test/java" destdir="${testClasses.dir}" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
+      includeantruntime="false"
       classpath="${classes.dir}"
       classpathref="ivy.dep.test"
       bootclasspath="${boot.classpath}"
@@ -759,6 +762,7 @@ Proceed? </input>
     >
       <artifact name="freemarker" type="jar" ext="jar" />
     </ivy:publish>
+    <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
     <echo>-------------------------------------------------------</echo>
     <echo>*** Don't forget to `ant unpublish-override` later! ***</echo>
   </target>
@@ -811,6 +815,7 @@ Proceed? </input>
     >
       <artifact name="freemarker" type="jar" ext="jar" />
     </ivy:publish>
+    <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
   </target>
   
 </project>

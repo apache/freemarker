@@ -84,7 +84,7 @@
     <dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="build.jsp2.1->default" />
 
     <!-- test -->
-    <dependency org="junit" name="junit" rev="3.7" conf="build.test->default; test->default" />
+    <dependency org="junit" name="junit" rev="3.7" conf="build.test->default" />
     
     <!-- docs -->
     <dependency org="org.freemarker" name="docgen" rev="1.0-branch-head" conf="manual->default" changing="true" />
@@ -102,8 +102,9 @@
     <!-- bnd -->
     <dependency org="biz.aQute" name="bnd" rev="0.0.401" conf="bnd->default" />
     
-    <!-- As the test runs on Ant... but Ivy 2.0.0 ignores this for some reason. -->
+    <!-- As the tests surely run on Ant, it's a provided dependency. -->
     <exclude org="ant" module="ant" conf="test" />
+    <exclude org="ant" module="ant" conf="emma" />
     
     <!-- Ensure that JSP 1.2 support is compiled againt 1.2, not higher, etc., so: -->
     <conflict org="javax.servlet.jsp" module="jsp-api" manager="strict" />
