@@ -1,4 +1,4 @@
-package freemarker.testcase;
+package freemarker.cache;
 
 import java.io.IOException;
 import java.io.Reader;

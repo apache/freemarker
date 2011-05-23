@@ -1,4 +1,4 @@
-package freemarker.testcase;
+package freemarker.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;

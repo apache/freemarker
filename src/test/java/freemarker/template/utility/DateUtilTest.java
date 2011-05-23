@@ -1,4 +1,4 @@
-package freemarker.testcase;
+package freemarker.template.utility;
 
 import java.text.DateFormat;
 import java.text.ParseException;
