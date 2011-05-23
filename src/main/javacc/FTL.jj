@@ -54,8 +54,6 @@ options
 {
    STATIC=false;
    UNICODE_INPUT=true;
-   LEXER_CLASS="FMParserTokenManager";
-   CONSTANTS_CLASS="FMParserConstants";
 //   DEBUG_TOKEN_MANAGER=true;
 //   DEBUG_PARSER=true;
 }
