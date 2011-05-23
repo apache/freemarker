@@ -1,0 +1,12 @@
+${"freemarker.test.templatesuite.models.NewTestModel"?new("works")}
+<#attempt>
+${"freemarker.test.templatesuite.models.NewTestModel2"?new("works")}
+<#recover>
+fails
+</#attempt>
+
+<#include "subdir/test-new-optin.txt">
+
+<#include "subdir/test-new-optin-2.txt">
+
+<#include "subdir/subsub/test-new-optin.txt">

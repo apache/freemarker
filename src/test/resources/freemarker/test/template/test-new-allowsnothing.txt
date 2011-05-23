@@ -1,5 +1,0 @@
-<#attempt>
-${"freemarker.test.models.NewTestModel"?new("works")}
-<#recover>
-fails
-</#attempt>

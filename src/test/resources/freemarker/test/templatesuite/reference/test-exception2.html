@@ -1,0 +1,29 @@
+<html>
+<head>
+<title>FreeMarker: Exception Test</title>
+</head>
+<body>
+
+<p>A simple test follows:</p>
+
+<p>Hello, world! <br />
+<!-- Template Error: Couldn't get value of variable test: Couldn't read string value of test: freemarker.template.TemplateModelException: Throwing from ExceptionModel!
+	at freemarker.test.templatesuite.models.ExceptionModel.getAsString(ExceptionModel.java:42)
+	at freemarker.template.expression.Variable.getValue(Variable.java:69)
+	at freemarker.template.instruction.VariableInstruction.process(VariableInstruction.java:55)
+	at freemarker.template.compiler.TemplateArrayList.process(TemplateArrayList.java:69)
+	at freemarker.template.Template.process(Template.java:226)
+	at freemarker.test.TestException2.runTest(TestException2.java:83)
+	at junit.framework.TestCase.runBare(TestCase.java:140)
+	at junit.framework.TestResult$1.protect(TestResult.java:106)
+	at junit.framework.TestResult.runProtected(TestResult.java:124)
+	at junit.framework.TestResult.run(TestResult.java:109)
+	at junit.framework.TestCase.run(TestCase.java:131)
+	at junit.framework.TestSuite.runTest(TestSuite.java:173)
+	at junit.framework.TestSuite.run(TestSuite.java:168)
+	at junit.swingui.TestRunner$17.run(TestRunner.java:644)
+ -->
+</p>
+
+</body>
+</html>
