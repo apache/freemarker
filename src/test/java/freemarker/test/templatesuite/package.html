@@ -1,0 +1,24 @@
+<html>
+<head>
+</head>
+<body>
+
+<p>JUnit test-suite that processes FreeMarker templates and compare their
+output to reference files.</p>
+
+<p>To add a test-case, go to
+<tt>src/test/resources/freemarker/test/templatesuite/</tt> and inside that
+directory:</p>
+<ol>
+  <li>Add a template to under <tt>templates/</tt> with whatever meaningful
+      file name</li>
+  <li>Add the expected output to <tt>references/</tt> with exactly the same
+      file name</li>
+  <li>Add a new <tt>testcase</tt> elemen to <tt>testcases.xml</tt></li>
+  <li>If you want to add items to the data-model or do something else special,
+      modify the <tt>setUp()</tt> method in
+      <tt>src/test/java/freemarker/test/templatesuite/TemplateTestCase.java</tt>
+      </li>
+</ol>
+</body>
+</html>

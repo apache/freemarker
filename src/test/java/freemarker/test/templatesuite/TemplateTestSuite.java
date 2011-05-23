@@ -158,9 +158,6 @@ public class TemplateTestSuite extends TestSuite {
         TemplateTestCase result = new TemplateTestCase(name, filename);
         for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
             Map.Entry entry = (Map.Entry) it.next();
-            String key = entry.getKey().toString();
-            String value = entry.getValue().toString();
-            System.out.println("Setting " + key +  " to " + value);
             result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());
         }
         NodeList configs = e.getElementsByTagName("config");

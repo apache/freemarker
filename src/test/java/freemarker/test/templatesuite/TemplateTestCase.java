@@ -109,15 +109,13 @@ import freemarker.test.templatesuite.models.MultiModel1;
 
 public class TemplateTestCase extends TestCase {
     
-    Template template;
-    HashMap dataModel = new HashMap();
+    private Template template;
+    private HashMap dataModel = new HashMap();
     
-    String filename, testName;
-    String inputDir = "template";
-    String referenceDir = "reference";
-    File outputDir;
+    private String filename, testName;
+    private File outputDir;
     
-    Configuration conf = new Configuration();
+    private Configuration conf = new Configuration();
     
     public TemplateTestCase(String name, String filename) {
         super(name);
@@ -130,14 +128,12 @@ public class TemplateTestCase extends TestCase {
         File parent = new File(url.getFile()).getParentFile();
         File dir = new File(parent, dirname);
         conf.setDirectoryForTemplateLoading(dir);
-        System.out.println("Setting loading directory as: " + dir);
     }
     
-    public void setOutputDirectory(String dirname) {
+    public void setReferenceDirectory(String dirname) {
         URL url = getClass().getResource("TemplateTestCase.class");
         File parent = new File(url.getFile()).getParentFile();
         this.outputDir = new File(parent, dirname);
-        System.out.println("Setting reference directory as: " + outputDir);
     }
 
     public void setConfigParam(String param, String value) throws IOException {
@@ -163,8 +159,8 @@ public class TemplateTestCase extends TestCase {
         else if ("input_encoding".equals(param)) {
             conf.setDefaultEncoding(value);
         }
-        else if ("outputdir".equals(param)) {
-            setOutputDirectory(value);
+        else if ("referencedir".equals(param)) {
+            setReferenceDirectory(value);
         }
         else {
             try {
@@ -239,10 +235,7 @@ public class TemplateTestCase extends TestCase {
             tmap.put(objKey, "objValue");
             dataModel.put("map", tmap);
             dataModel.put("objKey", objKey);
-            dataModel.put("obj", TestCase.class.getClassLoader().loadClass(
-                    "freemarker.test.templatesuite.models.BeanTestClass").newInstance());
-                    // Why reflection: The target class is excluded from Eclipse
-                    // build-path as it uses Java 5.
+            dataModel.put("obj", new freemarker.test.templatesuite.models.BeanTestClass());
             dataModel.put("resourceBundle", new ResourceBundleModel(ResourceBundle.getBundle("freemarker.test.templatesuite.models.BeansTestResources"), BeansWrapper.getDefaultInstance()));
             dataModel.put("date", new GregorianCalendar(1974, 10, 14).getTime());
             dataModel.put("statics", BeansWrapper.getDefaultInstance().getStaticModels());

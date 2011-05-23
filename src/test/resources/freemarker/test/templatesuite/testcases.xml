@@ -23,8 +23,8 @@
 ]>
 
 <testcases>
-   <config templatedir="template"
-           outputdir="reference"
+   <config templatedir="templates"
+           referencedir="references"
            input_encoding="UTF-8"
            output_encoding="UTF-8"
    />
