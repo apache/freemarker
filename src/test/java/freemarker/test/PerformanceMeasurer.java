@@ -78,9 +78,8 @@ import freemarker.template.TemplateScalarModel;
  * It is meant to run inside a profiler to identify potential bottlenecks.
  * It can process either into a local file, or into a special /dev/null
  * style output stream.
- * @version $Id: PerformanceTest.java,v 1.18 2004/11/28 12:58:34 ddekany Exp $
  */
-public class PerformanceTest
+public class PerformanceMeasurer
 {
     public static void main(String[] args)
     throws
@@ -89,8 +88,8 @@ public class PerformanceTest
         Configuration config = new Configuration();
         // config.setDebugMode(false);
         config.setClassicCompatible(false);
-        config.setClassForTemplateLoading(PerformanceTest.class, "/freemarker/testcase");
-        Template template = config.getTemplate("PerformanceTest.fm");
+        config.setClassForTemplateLoading(PerformanceMeasurer.class, "/freemarker/test");
+        Template template = config.getTemplate("PerformanceMeasurer.fm");
         boolean toFile = args.length > 0 && args[0].equals("file");
         File f = File.createTempFile("fmPerfTest", ".txt");
         f.deleteOnExit();

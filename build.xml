@@ -296,7 +296,6 @@
         <fileset dir="src/test/java">
           <include name="**/*Test.java" />
           <include name="**/*TestSuite.java" />
-          <exclude name="**/PerformanceTest.java" />
         </fileset>
       </batchtest>
     </junit>
