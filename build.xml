@@ -156,44 +156,10 @@
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath}"
       excludes="
-        freemarker/ext/jsp/,
-        freemarker/ext/servlet/"
-    />
-    <!--
-      When Attila has fixed the JSP support:
-      excludes="
-        freemarker/ext/jsp/FreeMarkerPageContext2.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory2.java,
-        freemarker/ext/jsp/SimpleTagDirectiveModel.java,
-        freemarker/ext/jsp/FreeMarkerPageContext21.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory21.java,
-        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
-        freemarker/testcase/"
-    -->
-    
-    <!--
-    <ivy:cachepath conf="build.jsp2.0" pathid="ivy.dep.jsp2.0" />
-    <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5"
-      includeantruntime="false"
-      classpathref="ivy.dep.jsp2.0"
-      bootclasspath="${boot.classpath}"
-      includes="
-        freemarker/ext/servlet/,
-        freemarker/ext/jsp/"
-      excludes="
         freemarker/ext/jsp/FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
     />
-    -->
-    <!--
-      When Attila has fixed the JSP support:
-      includes="
-        freemarker/ext/jsp/SimpleTagDirectiveModel.java,
-        freemarker/ext/jsp/FreeMarkerPageContext2.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory2.java"
-    -->
     
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
@@ -202,20 +168,10 @@
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath}"
       includes="
-        freemarker/ext/jsp/,
-        freemarker/ext/servlet/"
-      excludes="
-        freemarker/ext/jsp/FreeMarkerPageContext1.java,
-        freemarker/ext/jsp/FreeMarkerPageContext2.java,
-        freemarker/ext/jsp/FreeMarkerJspFactory2.java"
-    />
-    <!--
-      When Attila has fixed the JSP support:
-      includes="
         freemarker/ext/jsp/FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
-    -->
+    />
     
     <rmic base="${classes.dir}" classpathref="ivy.dep"
       includes="src/main/java/freemarker/debug/impl/Rmi*Impl.class"

@@ -25,8 +25,9 @@ import freemarker.log.Logger;
 import freemarker.template.utility.ClassUtil;
 
 /**
+ * Required JSP 2.1!
+ *
  * @author Attila Szegedi
- * @version $Id: $
  */
 class FreeMarkerJspApplicationContext implements JspApplicationContext
 {

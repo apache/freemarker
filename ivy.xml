@@ -20,11 +20,8 @@
     <conf name="build.base" extends="default" visibility="private"
         description="for building FreeMarker without dependencies that has multiple versions"
     />
-    <conf name="build" extends="build.jsp1.2"
+    <conf name="build" extends="build.jsp2.0"
         description="for building FreeMarker with default dependencies"
-    />
-    <conf name="build.jsp1.2" extends="build.base"
-        description="for building FreeMarker with JSP 1.2 support"
     />
     <conf name="build.jsp2.0" extends="build.base"
         description="for building FreeMarker with JSP 2.0 support"
@@ -76,8 +73,6 @@
     <dependency org="xalan" name="xalan" rev="2.7.0" conf="build.base->default" />
     <dependency org="javax.script" name="script-api" rev="1.0" conf="build.base->default" />
     <dependency org="org.zeroturnaround" name="javarebel-sdk" rev="1.2.2" conf="build.base->default" />
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="1.2" conf="build.jsp1.2->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.3" conf="build.jsp1.2->default" />
     <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default" />
     <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default" />
     <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />
