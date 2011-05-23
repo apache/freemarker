@@ -1,4 +1,4 @@
-package freemarker.testcase;
+package freemarker.template.utility;
 
 import freemarker.template.utility.StringUtil;
 import junit.framework.TestCase;
