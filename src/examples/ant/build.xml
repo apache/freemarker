@@ -1,27 +1,16 @@
-<?xml version="1.0"?>
-
 <project name="FreeMarker-FAQ" default="generate" basedir=".">
-    <taskdef
-            name="freemarker"
-            classname="freemarker.ext.ant.FreemarkerXmlTask">
-        <classpath>
-            <fileset dir="../../lib">
-                <include name="*.jar" />
-            </fileset>
-        </classpath>
-    
-    </taskdef>
+  <taskdef
+      name="freemarker"
+      classname="freemarker.ext.ant.FreemarkerXmlTask"
+      classpath="lib/freemarker.jar" />
 
-    <target name="generate">
-        
-        <mkdir dir="html" />
-        
-        <freemarker
-                basedir="xml"
-                destdir="html"
-                includes="**/*.xml"
-                template="faq2html.ftl"
-        />
-    </target>
+  <target name="generate">
+    <mkdir dir="html" />
+    <freemarker
+        basedir="src/xml"
+        destdir="out"
+        includes="**/*.xml"
+        template="src/template/faq2html.ftl" />
+  </target>
     
 </project>

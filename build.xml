@@ -6,6 +6,7 @@
   xmlns:docgen="http://freemarker.org/docgen"
   xmlns:emma="http://emma.sourceforge.net/emma"
   xmlns:bnd="http://www.aqute.biz/bnd"
+  xmlns:u="http://freemarker.org/util"
 >
 
   <!-- ================================================================== -->
@@ -29,7 +30,19 @@
     classname="java.lang.Object" ignoresystemclasses="true" 
     property="boot.classpath.correct"
   />
-
+  
+  <condition property="example.freemarker.jar.location"
+    value="freemarker.jar" else="build/freemarker.jar">
+    <and>
+      <available  file="freemarker.jar" />
+      <not>
+        <available  file="build/freemarker.jar" />
+      </not>
+    </and>
+  </condition>
+  
+  <available file="lib/struts" property="struts.available" />
+  
   <!-- Set up version/timestamp filters and the version property: -->
   <tstamp>
     <format property="timestampNice" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -379,7 +392,69 @@
     />
   </target>
 
+  <!-- ====================== -->
+  <!-- Examples               -->
+  <!-- ====================== -->
+
+  <macrodef name="buildExampleWebapp" uri="http://freemarker.org/util">
+    <attribute name="exampleName" />
+    <sequential>
+      <mkdir dir="build/examples/@{exampleName}/WEB-INF/classes" />
+      <ivy:cachepath conf="example.@{exampleName}" pathid="ivy.dep" />
+      <javac
+        srcdir="src/examples/@{exampleName}/WEB-INF/classes"
+        destdir="build/examples/@{exampleName}/WEB-INF/classes"
+        deprecation="off" debug="on" optimize="off" target="1.5" source="1.5"
+        includeantruntime="false"
+        classpathref="ivy.dep"
+        bootclasspath="${boot.classpath}"
+      >
+        <classpath>
+          <pathelement path="${ivy.dep}" />
+          <pathelement location="${example.freemarker.jar.location}" />
+          <fileset dir="lib/struts" erroronmissingdir="false">
+            <include name="*.jar" />
+          </fileset>
+        </classpath>
+      </javac>
+      <copy toDir="build/examples/@{exampleName}">
+        <fileset dir="src/examples/@{exampleName}" excludes="**/*.java" />
+      </copy>
+      <copy file="${example.freemarker.jar.location}"
+        todir="build/examples/@{exampleName}/WEB-INF/lib" />
+      <echo message="*** Example built: build/examples/@{exampleName} ***" />
+    </sequential>
+  </macrodef>
   
+  <target name="example-webapp1" depends="init">
+    <u:buildExampleWebapp examplename="webapp1" />
+  </target>
+
+  <target name="example-webapp2" depends="init">
+    <u:buildExampleWebapp examplename="webapp2" />
+  </target>
+
+  <target name="example-struts-webapp" depends="init">
+    <fail unless="struts.available"><!--
+      -->You have to copy the Struts 1.1 jar-s to <!--
+      -->lib/struts to build this example!<!--
+    --></fail>
+    <copy todir="build/examples/struts-webapp/WEB-INF/lib">
+      <fileset dir="lib/struts" />
+    </copy>
+    <u:buildExampleWebapp examplename="struts-webapp" />
+  </target>
+  
+  <target name="example-ant" depends="init">
+    <mkdir dir="build/examples/ant" />
+    <copy toDir="build/examples/ant">
+      <fileset dir="src/examples/ant" />
+    </copy>
+    <copy file="${example.freemarker.jar.location}"
+      todir="build/examples/ant/lib" />
+    <echo message="*** Example built: build/examples/ant ***" />
+  </target>
+
   <!-- ====================== -->
   <!-- Distributuion building -->
   <!-- ====================== -->
@@ -401,6 +476,7 @@
     <copy todir="${dist.dir}" includeEmptyDirs="no">
       <fileset dir=".">
         <include name="src/**" />
+        <include name="examples/**" />
         <exclude name="**/.*/**" />
         <exclude name="**/.*" />
         <exclude name="**/*.bak" />
