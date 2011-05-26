@@ -63,13 +63,6 @@
   
   <target name="clean" description="get rid of all generated files">
     <delete dir="build" />
-    <delete file="src/main/java/freemarker/core/FMParser.java" />
-    <delete file="src/main/java/freemarker/core/FMConstants.java" />
-    <delete file="src/main/java/freemarker/core/FMLexer.java" />
-    <delete file="src/main/java/freemarker/core/LexicalException.java"/>
-    <delete file="src/main/java/freemarker/core/SimpleCharStream.java" />
-    <delete file="src/main/java/freemarker/core/Token.java" />
-    <delete file="src/main/java/freemarker/core/Node.java" />
   </target>
 
   <condition property="deps.available">
@@ -93,47 +86,58 @@
   >
     <ivy:cachepath conf="parser" pathid="ivy.dep" />
     <taskdef name="generate" classname="org.apache.tools.ant.taskdefs.optional.javacc.JavaCC"
-        uri="http://javacc.dev.java.net/"
-        classpathref="ivy.dep"
+      uri="http://javacc.dev.java.net/"
+      classpathref="ivy.dep"
+    />
+    
+    <property name="_javaccOutputDir"
+      value="build/generated-sources/java/freemarker/core/"
     />
 
-    <ivy:retrieve conf="parser" pattern="build/javacc.tmp/[artifact].[ext]" />
+    <mkdir dir="build/generated-sources/java/freemarker/core" />
+    <ivy:retrieve conf="parser" pattern="build/javacc-home.tmp/[artifact].[ext]" />
     <javacc:generate
       target="src/main/javacc/FTL.jj"
-      outputdirectory="src/main/java/freemarker/core"
-      javacchome="build/javacc.tmp"
+      outputdirectory="${_javaccOutputDir}"
+      javacchome="build/javacc-home.tmp"
     />
-    <delete dir="build/javacc.tmp" />
+    <delete dir="build/javacc-home.tmp" />
     
     <replace
-      file="src/main/java/freemarker/core/FMParser.java"
+      file="${_javaccOutputDir}/FMParser.java"
       token="private final LookaheadSuccess"
       value="private static final LookaheadSuccess"
     />
     <replace
-      file="src/main/java/freemarker/core/FMParserConstants.java"
+      file="${_javaccOutputDir}/FMParserConstants.java"
       token="public interface FMParserConstants"
       value="interface FMParserConstants"
     />
     <replace
-      file="src/main/java/freemarker/core/FMParserTokenManager.java"
+      file="${_javaccOutputDir}/FMParserTokenManager.java"
       token="public class FMParserTokenManager"
       value="class FMParserTokenManager"
     />
     <replace
-      file="src/main/java/freemarker/core/Token.java"
+      file="${_javaccOutputDir}/Token.java"
       token="public class Token"
       value="class Token"
     />
     <replace
-      file="src/main/java/freemarker/core/SimpleCharStream.java"
+      file="${_javaccOutputDir}/SimpleCharStream.java"
       token="public final class SimpleCharStream"
       value="final class SimpleCharStream"
     />
     <replace
-      file="src/main/java/freemarker/core/FMParser.java"
+      file="${_javaccOutputDir}/FMParser.java"
       token="enum"
       value="ENUM"
+    />
+    
+    <!-- As we have a modified version in src/main/java: -->
+    <move 
+      file="${_javaccOutputDir}/ParseException.java"
+      tofile="${_javaccOutputDir}/ParseException.java.ignore"
     />
   </target>
    
@@ -148,9 +152,9 @@
 
     <mkdir dir="${classes.dir}" />
     
-    <!-- Note: the "build" conf includes JSP 1.2 and Servlet 2.3 API-s -->
+    <!-- Note: the "build" conf includes the JSP 2.0 and Servlet 2.4 API-s -->
     <ivy:cachepath conf="build" pathid="ivy.dep" />
-    <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
+    <javac destdir="${classes.dir}" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
       includeantruntime="false"
       classpathref="ivy.dep"
@@ -159,7 +163,12 @@
         freemarker/ext/jsp/FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
-    />
+    >
+      <src>
+        <pathelement location="src/main/java" />
+        <pathelement location="build/generated-sources" />
+      </src>
+    </javac>
     
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
