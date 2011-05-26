@@ -37,7 +37,7 @@ open docs/index.html.
 Installing
 ----------
 
-No real installation needed. Simply copy lib/freemarker.jar to a
+No real installation is needed. Simply copy freemarker.jar to a
 location where your Java application's ClassLoader will find it. For
 example, if you use FreeMarker in a web application, you probably want
 to put freemarker.jar into the WEB-INF/lib directory of your web
