@@ -400,9 +400,7 @@
     <mkdir dir="${dist.dir}" />
     <copy todir="${dist.dir}" includeEmptyDirs="no">
       <fileset dir=".">
-        <include name="examples/**" />
         <include name="src/**" />
-        <include name="examples/**" />
         <exclude name="**/.*/**" />
         <exclude name="**/.*" />
         <exclude name="**/*.bak" />
