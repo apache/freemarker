@@ -22,6 +22,9 @@
   <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
   
   <property file="build.properties"/>
+  <condition property="has.explicit.boot.classpath">
+    <isset property="boot.classpath"/>
+  </condition>
 
   <!-- When boot.classpath is missing, this is the default: -->
   <property name="boot.classpath" value="${sun.boot.class.path}" />
@@ -462,6 +465,10 @@
   <target name="dist"
     description="Build the FreeMarker distribution files"
   >
+    <fail
+      unless="has.explicit.boot.classpath"
+      message="boot.classpath must be set in build.properties for dist!"
+    />
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
   </target>
