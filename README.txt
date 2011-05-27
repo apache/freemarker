@@ -1,8 +1,13 @@
-This is the README.txt file comes with the FreeMarker {version}
-distribution.
+===============================================================================
 
-For the latest version of FreeMarker visit the FreeMarker homepage:
-http://freemarker.org/ (mirror: http://freemarker.sourceforge.net/)
+ FreeMarker {version}
+
+ For the latest version or to report bugs visit:
+
+ http://freemarker.org/
+ Mirror: http://freemarker.sourceforge.net/
+
+===============================================================================
 
 
 What is FreeMarker?
