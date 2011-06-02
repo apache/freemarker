@@ -67,8 +67,6 @@
   <delete file="build/version.properties.tmp" />
   <filter token="version" value="${version}" />
   
-  <property name="classes.dir" location="build/classes" />
-  <property name="testClasses.dir" location="build/test-classes" />
   <property name="dist.dir" value="build/dist/freemarker-${version}" />
   
   
@@ -110,7 +108,7 @@
       value="build/generated-sources/java/freemarker/core/"
     />
 
-    <mkdir dir="build/generated-sources/java/freemarker/core" />
+    <mkdir dir="${_javaccOutputDir}" />
     <ivy:retrieve conf="parser" pattern="build/javacc-home.tmp/[artifact].[ext]" />
     <javacc:generate
       target="src/main/javacc/FTL.jj"
@@ -166,11 +164,11 @@
     --></fail>
     <echo level="info">Using boot classpath: ${boot.classpath}</echo>
 
-    <mkdir dir="${classes.dir}" />
+    <mkdir dir="build/classes" />
     
     <!-- Note: the "build" conf includes the JSP 2.0 and Servlet 2.4 API-s -->
     <ivy:cachepath conf="build" pathid="ivy.dep" />
-    <javac destdir="${classes.dir}" deprecation="off" 
+    <javac destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
       includeantruntime="false"
       classpathref="ivy.dep"
@@ -187,7 +185,7 @@
     </javac>
     
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
-    <javac srcdir="src/main/java" destdir="${classes.dir}" deprecation="off" 
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
@@ -198,31 +196,31 @@
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
     />
     
-    <rmic base="${classes.dir}" classpathref="ivy.dep"
+    <rmic base="build/classes" classpathref="ivy.dep"
       includes="src/main/java/freemarker/debug/impl/Rmi*Impl.class"
       verify="yes" stubversion="1.2"
     />
     
     <!-- We don't have this file in 2.4.X... yet?
     <copy
-      file="${classes.dir}/freemarker/core/SecureRendererImpl.class"
-      tofile="${classes.dir}/freemarker/core/SecureRendererImpl.clazz"
+      file="build/classes/freemarker/core/SecureRendererImpl.class"
+      tofile="build/classes/freemarker/core/SecureRendererImpl.clazz"
     />
     -->
     
-    <copy toDir="${classes.dir}">
+    <copy toDir="build/classes">
       <fileset dir="src/main/resources"
         excludes="
           freemarker/version.properties"
       />
     </copy>
-    <copy toDir="${classes.dir}" filtering="true" overwrite="true">
+    <copy toDir="build/classes" filtering="true" overwrite="true">
       <fileset dir="src/main/resources"
         includes="
           freemarker/version.properties"
       />
     </copy>
-    <copy toDir="${classes.dir}/META-INF">
+    <copy toDir="build/classes/META-INF">
       <fileset dir="."
         includes="
           LICENSE.txt,
@@ -232,17 +230,17 @@
   </target>
 
   <target name="compileTest" depends="compile">
-    <mkdir dir="${testClasses.dir}" />
+    <mkdir dir="build/test-classes" />
   
     <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
-    <javac srcdir="src/test/java" destdir="${testClasses.dir}" deprecation="off" 
+    <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5"
       includeantruntime="false"
-      classpath="${classes.dir}"
+      classpath="build/classes"
       classpathref="ivy.dep.test"
       bootclasspath="${boot.classpath}"
     />
-    <copy toDir="${testClasses.dir}">
+    <copy toDir="build/test-classes">
       <fileset dir="src/test/resources"
         excludes=""
       />
@@ -259,7 +257,7 @@
     <!-- Hack: This file should be excluded, but I can't explain that to bnd. -->
     <!-- We don't have this file in 2.4.X... yet?
     <move
-        file="${classes.dir}/freemarker/core/SecureRendererImpl.class"
+        file="build/classes/freemarker/core/SecureRendererImpl.class"
         tofile="build/SecureRendererImpl.class.tmp"
         preservelastmodified="true" overwrite="true"
     />
@@ -272,7 +270,7 @@
     <!-- We don't have this file in 2.4.X... yet?
     <move
         file="build/SecureRendererImpl.class.tmp"
-        tofile="${classes.dir}/freemarker/core/SecureRendererImpl.class"
+        tofile="build/classes/freemarker/core/SecureRendererImpl.class"
         preservelastmodified="true" overwrite="true"
     />
     -->
@@ -295,7 +293,7 @@
     <property name="coverage.instrumentationfile" location="${coverage.dir}/instrumentation" />
     <emma:emma enabled="true">
       <instr 
-        instrpath="${classes.dir}" outdir="${coverage.classes.dir}" 
+        instrpath="build/classes" outdir="${coverage.classes.dir}" 
         outfile="${coverage.instrumentationfile}" mode="copy">
         <filter excludes="*_Stub" />
       </instr>
