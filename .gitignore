@@ -1,3 +1,4 @@
 /.ivy/
+/.bin/
 /build/
 /build.properties
