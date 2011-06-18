@@ -4,7 +4,7 @@
 # imports by examining the class files, and generates the OSGi meta-info
 # based on that and this file.
 
--classpath: ${classes.dir}
+-classpath: build/classes
 -failok: false
 
 Bundle-SymbolicName: ${moduleOrg}.${moduleName}
@@ -12,7 +12,7 @@ Bundle-Version: ${versionForOSGi}
 Bundle-License: BSD-style, see: http://freemarker.org/LICENSE.txt
 Bundle-Vendor: freemarker.org
 
-Include-Resource: META-INF=${classes.dir}/META-INF
+Include-Resource: META-INF=build/classes/META-INF
 
 Export-Package: !freemarker.test.*, freemarker.*;version="${versionForOSGi}"
 # Important:
