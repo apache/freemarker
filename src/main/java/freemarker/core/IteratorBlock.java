@@ -104,7 +104,7 @@ final class IteratorBlock extends TemplateElement {
 
     public String getCanonicalForm() {
         if (isForEach) {
-            StringBuffer buf = new StringBuffer("<#foreach ");
+            StringBuilder buf = new StringBuilder("<#foreach ");
             buf.append(indexName);
             buf.append(" in ");
             buf.append(listExpression.getCanonicalForm());
@@ -116,7 +116,7 @@ final class IteratorBlock extends TemplateElement {
             return buf.toString();
         }
         else {
-            StringBuffer buf = new StringBuffer("<#list ");
+            StringBuilder buf = new StringBuilder("<#list ");
             buf.append(listExpression.getCanonicalForm());
             buf.append(" as ");
             buf.append(indexName);

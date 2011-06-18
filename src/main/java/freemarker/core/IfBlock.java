@@ -87,7 +87,7 @@ final class IfBlock extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = 0; i<nestedElements.size(); i++) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
             buf.append(cblock.getCanonicalForm());

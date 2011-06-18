@@ -71,7 +71,7 @@ public class JythonRuntime extends PythonInterpreter
     public Writer getWriter(final Writer out,
                             final Map args)
     {
-        final StringBuffer buf = new StringBuffer();
+        final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
         return new Writer() {
             public void write(char cbuf[], int off, int len) {

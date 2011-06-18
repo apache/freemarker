@@ -497,7 +497,7 @@ public class Template extends Configurable {
         --beginColumn;
         --endColumn;
         --endLine;
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = beginLine ; i<=endLine; i++) {
             if (i < lines.size()) {
                 buf.append(lines.get(i));
@@ -516,7 +516,7 @@ public class Template extends Configurable {
      */
     private class LineTableBuilder extends FilterReader {
 
-        StringBuffer lineBuf = new StringBuffer();
+        StringBuilder lineBuf = new StringBuilder();
         int lastChar;
 
         /**

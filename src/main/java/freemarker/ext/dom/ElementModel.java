@@ -107,7 +107,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 return new SimpleScalar(nodeOutputter.getClosingTag((Element) node));
             }
             if (key.equals("@@attributes_markup")) {
-                StringBuffer buf = new StringBuffer();
+                StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node.getAttributes(), buf);
                 return new SimpleScalar(buf.toString().trim());

@@ -127,7 +127,7 @@ public class TemplateTestSuite extends TestSuite {
     }
     
     String getTextInElement(Element e) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         NodeList children = e.getChildNodes();
         for(int i=0; i<children.getLength(); i++) {
             Node n = children.item(i);

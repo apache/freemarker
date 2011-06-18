@@ -110,7 +110,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     public String getCanonicalForm() {
         String directiveName = isFunction ? "function" : "macro";
-        StringBuffer buf = new StringBuffer("<#");
+        StringBuilder buf = new StringBuilder("<#");
         buf.append(directiveName);
         buf.append(' ');
         buf.append(name);

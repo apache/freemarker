@@ -102,7 +102,7 @@ public class Execute implements freemarker.template.TemplateMethodModel {
      */
     public Object exec (List arguments) throws TemplateModelException {
         String aExecute;
-        StringBuffer    aOutputBuffer = new StringBuffer();
+        StringBuilder    aOutputBuffer = new StringBuilder();
 
         if( arguments.size() < 1 ) {
             throw new TemplateModelException( "Need an argument to execute" );

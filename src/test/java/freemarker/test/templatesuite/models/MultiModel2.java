@@ -79,7 +79,7 @@ public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
      * @return the <tt>TemplateModel</tt> produced by the method, or null.
      */
     public Object exec(List arguments) {
-        StringBuffer  aResults = new StringBuffer( "Arguments are:<br />" );
+        StringBuilder  aResults = new StringBuilder( "Arguments are:<br />" );
         Iterator    iList = arguments.iterator();
 
         while( iList.hasNext() ) {

@@ -125,7 +125,7 @@ public final class LibraryLoad extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#import ");
+        StringBuilder buf = new StringBuilder("<#import ");
         buf.append(templateName);
         buf.append(" as ");
         buf.append(namespace);

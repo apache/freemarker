@@ -239,7 +239,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             String locationInfo = "Error on line " + tok.beginLine + ", column " + tok.beginColumn + ", in template " + templateName + "\n";
-            StringBuffer buf = new StringBuffer("Found " + key + ", expecting one of: ");
+            StringBuilder buf = new StringBuilder("Found " + key + ", expecting one of: ");
             for (Iterator it= builtins.keySet().iterator(); it.hasNext();) {
                 if (it.hasNext()) {
                     buf.append(" ");

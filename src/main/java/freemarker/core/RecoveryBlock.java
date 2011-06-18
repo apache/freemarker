@@ -69,7 +69,7 @@ final class RecoveryBlock extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#recover>");
+        StringBuilder buf = new StringBuilder("<#recover>");
         if (nestedBlock != null) {
             buf.append(nestedBlock.getCanonicalForm());            
         }

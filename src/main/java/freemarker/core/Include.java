@@ -170,7 +170,7 @@ final class Include extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#include ");
+        StringBuilder buf = new StringBuilder("<#include ");
         buf.append(includedTemplateName);
         if (encoding != null) {
             buf.append(" encoding=\"");

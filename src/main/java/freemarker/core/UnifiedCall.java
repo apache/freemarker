@@ -142,7 +142,7 @@ final class UnifiedCall extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<@");
+        StringBuilder buf = new StringBuilder("<@");
         buf.append(nameExp.getCanonicalForm());
         if (positionalArgs != null) {
             for (int i=0; i<positionalArgs.size(); i++) {

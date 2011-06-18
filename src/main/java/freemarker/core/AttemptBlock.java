@@ -74,7 +74,7 @@ final class AttemptBlock extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#attempt>");
+        StringBuilder buf = new StringBuilder("<#attempt>");
         if (attemptBlock != null) {
             buf.append(attemptBlock.getCanonicalForm());            
         }

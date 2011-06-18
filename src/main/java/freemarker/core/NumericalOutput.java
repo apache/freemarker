@@ -116,7 +116,7 @@ final class NumericalOutput extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("#{");
+        StringBuilder buf = new StringBuilder("#{");
         buf.append(expression.getCanonicalForm());
         if (hasFormat) {
             buf.append(" ; ");

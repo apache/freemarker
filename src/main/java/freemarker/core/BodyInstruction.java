@@ -94,7 +94,7 @@ final class BodyInstruction extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#nested");
+        StringBuilder buf = new StringBuilder("<#nested");
         if (bodyParameters != null) {
             for (int i = 0; i<bodyParameters.size(); i++) {
                 buf.append(' ');

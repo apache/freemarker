@@ -134,7 +134,7 @@ public class CaptureOutput implements TemplateTransformModel {
             throw new TemplateModelException("'var' or 'local' or 'global' parameter evaluates to null string");
         }
 
-        final StringBuffer buf = new StringBuffer();
+        final StringBuilder buf = new StringBuilder();
         final Environment env = Environment.getCurrentEnvironment();
         final boolean localVar = local;
         final boolean globalVar = global;
