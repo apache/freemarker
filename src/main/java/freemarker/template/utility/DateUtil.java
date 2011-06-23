@@ -143,8 +143,11 @@ public class DateUtil {
     
     /**
      * Format a date, time or date+time with one of the ISO 8601 extended
-     * formats. Examples of possible outputs: {@code "2005-11-27T15:30:00+02"},
-     * {@code "2005-11-27"}, {@code "15:30:00Z"}.
+     * formats. Examples of possible outputs:
+     * {@code "2005-11-27T15:30:00+02:00"}, {@code "2005-11-27"},
+     * {@code "15:30:00Z"}. Note the {@code ":00"} in the time zone offset;
+     * this is not required by ISO 8601, but included for compatibility with
+     * the XML Schema date/time formats.
      * 
      * This method is thread-safe.
      * 
@@ -308,13 +311,11 @@ public class DateUtil {
                 } else {
                     res[dstIdx++] = positive ? '+' : '-';
                     dstIdx = append00(res, dstIdx, offH);
-                    if (offM != 0 || offS != 0) {
+                    res[dstIdx++] = ':';
+                    dstIdx = append00(res, dstIdx, offM);
+                    if (offS != 0) {
                         res[dstIdx++] = ':';
-                        dstIdx = append00(res, dstIdx, offM);
-                        if (offS != 0) {
-                            res[dstIdx++] = ':';
-                            dstIdx = append00(res, dstIdx, offS);
-                        }
+                        dstIdx = append00(res, dstIdx, offS);
                     }
                 }
             }

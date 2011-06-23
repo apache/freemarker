@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.18</subtitle>
+  <subtitle>For FreeMarker 2.3.19</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -13263,16 +13263,19 @@ Last updated time: 08:00:54 PM</programlisting>
               not have trailing <literal>0</literal>-s. Thus, if the the
               millisecond part happens to be <literal>0</literal>, the whole
               fraction second part will be omitted. Also note that the
-              fraction seconds are always separated with a dot (following the
-              Web and XSD conventions), not with comma.</para>
+              fraction seconds are always separated with a dot , not with
+              comma (to follow the Web conventions and the XML Schema
+              date/time format).</para>
             </listitem>
 
             <listitem>
               <para><literal>nz</literal> (optional): When present, the time
-              zone offset (like <literal>+02</literal> or or
+              zone offset (like <literal>+02:00</literal> or or
               <literal>-04:30</literal> or <literal>Z</literal>) will not be
               displayed. Otherwise it will be displayed, except for date-only
-              values.</para>
+              values (as dates with zone offset doesn't appear in ISO
+              8601:2004). Since FreeMarker 2.3.19, the offset always contains
+              the minutes for XML Schema date/time format compliance.</para>
             </listitem>
           </orderedlist>
 
@@ -13307,7 +13310,7 @@ Different accuracies:
 2011-05-16T21:32Z
 
 Local time zone:
-2011-05-16T23:32:13+02</programlisting>
+2011-05-16T23:32:13+02:00</programlisting>
 
           <para>There is yet another group of <literal>iso_...</literal>
           built-in variants, where you omit the <literal>local</literal> or
@@ -13329,10 +13332,10 @@ ${aDateTime?iso_nz("GMT+02")}</programlisting>
 
           <programlisting role="output">2011-05-16T21:43:58Z
 2011-05-16T19:13:58-02:30
-2011-05-16T23:43:58+02
+2011-05-16T23:43:58+02:00
 
 The usual variations are supported:
-2011-05-16T23:43+02
+2011-05-16T23:43+02:00
 2011-05-16T23:43
 2011-05-16T23:43:58</programlisting>
 
@@ -13341,7 +13344,7 @@ The usual variations are supported:
 
           <para role="forProgrammers">The parameter can be a
           <literal>java.util.TimeZone</literal> object too (which is possibly
-          the return value of a Java method, or it's in the date-model), not
+          the return value of a Java method, or it's in the data-model), not
           just a string.</para>
         </section>
       </section>
@@ -19980,6 +19983,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Versions</title>
+
+      <section xml:id="versions_2_3_19">
+        <title>2.3.19</title>
+
+        <para>Date of release: FIXME</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><emphasis>Attention</emphasis>: The output of <link
+              linkend="ref_builtin_date_iso">ISO 8601 date/time formatting
+              built-ins</link>, introduced in 2.3.17, was slightly changed.
+              From now on, the time zone offset, when it's displayed and it
+              isn't <literal>Z</literal>, always includes the minutes. For
+              example, <literal>15:30:15+02</literal> becomes to
+              <literal>15:30:15+02:00</literal> in the template output. Both
+              formats are valid according to ISO 8601 (so anything that
+              expects ISO 8601 date/times should continue working), but only
+              the last format complies with the XML Schema date/time formats,
+              hence this change.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_18">
         <title>2.3.18</title>

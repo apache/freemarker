@@ -113,10 +113,10 @@ public class DateUtilTest extends TestCase {
                     "Can't get time zone for Europe/Rome!");
         }
         assertEquals(
-                "2010-05-09T22:00:00+02",
+                "2010-05-09T22:00:00+02:00",
                 dateToISO8601DateTimeString(dsum, tzRome));
         assertEquals(
-                "2010-01-01T21:00:00+01",
+                "2010-01-01T21:00:00+01:00",
                 dateToISO8601DateTimeString(dwin, tzRome));
         assertEquals(
                 "2010-05-09",
@@ -125,10 +125,10 @@ public class DateUtilTest extends TestCase {
                 "2010-01-01",
                 dateToISO8601DateString(dwin, tzRome));
         assertEquals(
-                "22:00:00+02",
+                "22:00:00+02:00",
                 dateToISO8601TimeString(dsum, tzRome));
         assertEquals(
-                "21:00:00+01",
+                "21:00:00+01:00",
                 dateToISO8601TimeString(dwin, tzRome));
         
         TimeZone tzNY = TimeZone.getTimeZone("America/New_York");
@@ -137,10 +137,10 @@ public class DateUtilTest extends TestCase {
                     "Can't get time zone for America/New_York!");
         }
         assertEquals(
-                "2010-05-09T16:00:00-04",
+                "2010-05-09T16:00:00-04:00",
                 dateToISO8601DateTimeString(dsum, tzNY));
         assertEquals(
-                "2010-01-01T15:00:00-05",
+                "2010-01-01T15:00:00-05:00",
                 dateToISO8601DateTimeString(dwin, tzNY));
         assertEquals(
                 "2010-05-09",
@@ -149,10 +149,10 @@ public class DateUtilTest extends TestCase {
                 "2010-01-01",
                 dateToISO8601DateString(dwin, tzNY));
         assertEquals(
-                "16:00:00-04",
+                "16:00:00-04:00",
                 dateToISO8601TimeString(dsum, tzNY));
         assertEquals(
-                "15:00:00-05",
+                "15:00:00-05:00",
                 dateToISO8601TimeString(dwin, tzNY));
         
         TimeZone tzFixed = TimeZone.getTimeZone("GMT+02:30");
@@ -195,7 +195,7 @@ public class DateUtilTest extends TestCase {
         TimeZone gmt1 = DateUtil.getTimeZone("GMT+01"); 
         tf.setTimeZone(gmt1);
         assertEquals("01:00:00", tf.format(t)); 
-        assertEquals("01:00:00+01",
+        assertEquals("01:00:00+01:00",
                 dateToISO8601TimeString(t, gmt1));
     }
     
