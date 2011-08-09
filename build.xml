@@ -169,7 +169,7 @@
     <!-- Note: the "build" conf includes the JSP 2.0 and Servlet 2.4 API-s -->
     <ivy:cachepath conf="build" pathid="ivy.dep" />
     <javac destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5"
+      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath}"
@@ -186,7 +186,7 @@
     
     <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
     <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5"
+      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath}"
@@ -234,7 +234,7 @@
   
     <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5"
+      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
       classpathref="ivy.dep.test"
@@ -406,6 +406,7 @@
         srcdir="src/examples/@{exampleName}/WEB-INF/classes"
         destdir="build/examples/@{exampleName}/WEB-INF/classes"
         deprecation="off" debug="on" optimize="off" target="1.5" source="1.5"
+        encoding="utf-8"
         includeantruntime="false"
         classpathref="ivy.dep"
         bootclasspath="${boot.classpath}"

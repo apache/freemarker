@@ -13,7 +13,7 @@ import java.util.Locale;
  *            if "fr".equals(lang)
  *               return "oui";
  *            else if "de".equals(lang)
- *               return "sí";
+ *               return "sÃ­";
  *            else
  *               return "yes";
  *        }  
