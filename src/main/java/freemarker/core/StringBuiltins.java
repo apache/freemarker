@@ -194,7 +194,7 @@ abstract class StringBuiltins {
     			public Object exec(java.util.List args) throws TemplateModelException {
     				int argCount = args.size(), left=0, right=0;
     				if (argCount != 1 && argCount != 2) {
-    					throw new TemplateModelException("Error: +getStartLocation() + \nExpecting 1 or 2 numerical arguments here");
+    					throw new TemplateModelException("Error: " + getStartLocation() + "\nExpecting 1 or 2 numerical arguments here");
     				}
    					try {
    						TemplateNumberModel tnm = (TemplateNumberModel) args.get(0);
