@@ -1229,8 +1229,8 @@ public class BeansWrapper implements ObjectWrapper
                     if(readMethod != publicReadMethod) {
                         ipd = new IndexedPropertyDescriptor(
                                 ipd.getName(), ipd.getReadMethod(),
-                                ipd.getWriteMethod(), publicReadMethod,
-                                ipd.getIndexedWriteMethod());
+                                null, publicReadMethod,
+                                null);
                     }
                     classMap.put(ipd.getName(), ipd);
                     getArgTypes(classMap).put(publicReadMethod,
@@ -1240,8 +1240,7 @@ public class BeansWrapper implements ObjectWrapper
                     logger.warn("Failed creating a publicly-accessible " +
                             "property descriptor for " + clazz.getName() +
                             " indexed property " + pd.getName() +
-                            ", read method " + publicReadMethod +
-                            ", write method " + ipd.getIndexedWriteMethod(),
+                            ", read method " + publicReadMethod,
                             e);
                 }
             }
@@ -1253,7 +1252,7 @@ public class BeansWrapper implements ObjectWrapper
                 try {
                     if(readMethod != publicReadMethod) {
                         pd = new PropertyDescriptor(pd.getName(),
-                                publicReadMethod, pd.getWriteMethod());
+                                publicReadMethod, null);
                         pd.setReadMethod(publicReadMethod);
                     }
                     classMap.put(pd.getName(), pd);
@@ -1262,8 +1261,7 @@ public class BeansWrapper implements ObjectWrapper
                     logger.warn("Failed creating a publicly-accessible " +
                             "property descriptor for " + clazz.getName() +
                             " property " + pd.getName() + ", read method " +
-                            publicReadMethod + ", write method " +
-                            pd.getWriteMethod(), e);
+                            publicReadMethod, e);
                 }
             }
         }
