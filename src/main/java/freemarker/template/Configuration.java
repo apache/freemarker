@@ -88,10 +88,10 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
+    public static final String EMULATE_2_3_PARSER_BUGS = "emulate_2_3_parser_bugs";
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
-
 
     private static Configuration defaultConfig = new Configuration();
     private static String cachedVersion;
@@ -392,6 +392,19 @@ public class Configuration extends Configurable implements Cloneable {
         return strictSyntax;
     }
 
+    /**
+     * Was used for setting whether the parser bugs of 2.3 should be emulated for backward
+     * compatibility; only <code>false</code> is supported now.
+     */
+    public void setEmulate23ParserBugs(boolean b) {
+        if (!b) throw new IllegalArgumentException(
+                "emulate23ParserBugs == true is not supported in FreeMarker 2.4.0 and later.");
+    }
+
+    public boolean getEmulate23ParserBugs() {
+        return false;
+    }    
+    
     /**
      * Sets whether the FTL parser will try to remove
      * superfluous white-space around certain FTL tags.
@@ -716,6 +729,8 @@ public class Configuration extends Configurable implements Cloneable {
      *   <li><code>"tag_syntax"</code>: Must be one of:
      *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
      *       <code>"square_bracket"</code>.
+     *   <li><code>"emulate_23_parser_bugs"</code>: must be <code>"false"</code> starting from
+     *       FreeMarker 2.4.0.
      * </ul>
      *
      * @param key the name of the setting.
@@ -789,6 +804,8 @@ public class Configuration extends Configurable implements Cloneable {
                 } else {
                     throw invalidSettingValueException(key, value);
                 }
+            } else if (EMULATE_2_3_PARSER_BUGS.equals(key)) {
+                setEmulate23ParserBugs(StringUtil.getYesNo(value));
             } else {
                 callSuper = true;
             }

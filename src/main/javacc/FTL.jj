@@ -107,8 +107,12 @@ public class FMParser {
       token_source.templateName = templateName;
       this.stripWhitespace = stripWhitespace;
   }
-  
+
   public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
+      this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax, false);
+  }
+  
+  public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax, boolean emulate23ParserBugs) {
       this(template, reader, strictEscapeSyntax, stripWhitespace);
       switch (tagSyntax) {
           case Configuration.AUTO_DETECT_TAG_SYNTAX : 
@@ -122,6 +126,8 @@ public class FMParser {
 	     break;
 	  default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
       }
+      if (emulate23ParserBugs) throw new IllegalArgumentException(
+                "emulate23ParserBugs == true is not supported in FreeMarker 2.4.0 and later.");
   }
   
   public FMParser(String template) {
@@ -332,15 +338,16 @@ TOKEN_MGR_DECLS :
  boolean strictEscapeSyntax, 
          onlyTextOutput, 
          altDirectiveSyntax,
-	 autodetectTagSyntax,
+         autodetectTagSyntax,
          directiveSyntaxEstablished,
-	 inInvocation;
+         inInvocation;
  String templateName;
 
  
  // This method checks if we are in a strict mode where all
- // FreeMarker directives must start with <#
-
+ // FreeMarker directives must start with <#. It also handles
+ // tag syntax detection. If you update this logic, take a look
+ // at the UNKNOWN_DIRECTIVE token too.
  private void strictSyntaxCheck(Token tok, int newLexState) {
      if (onlyTextOutput) {
         tok.kind = PRINTABLE_CHARS;
@@ -595,27 +602,27 @@ TOKEN:
     |
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
-       if (!directiveSyntaxEstablished) {
+       char firstChar = matchedToken.image.charAt(0);
+       
+       if (!directiveSyntaxEstablished && autodetectTagSyntax) {           altDirectiveSyntax = (firstChar == '[');
+           directiveSyntaxEstablished = true;
+       }
+       
+       if (firstChar == '<' && altDirectiveSyntax) {
            matchedToken.kind = PRINTABLE_CHARS;
-       } else {
-           char firstChar = matchedToken.image.charAt(0);
-           if (firstChar == '<' && altDirectiveSyntax) {
-              matchedToken.kind = PRINTABLE_CHARS;
-           } else if (firstChar == '[' && !altDirectiveSyntax) {
-              matchedToken.kind = PRINTABLE_CHARS;
-           }
-           else if (strictEscapeSyntax) {
-             String s = matchedToken.image;
-             int index = s.indexOf('#');
-             s = s.substring(index);
-             String msg = "Unknown directive: " 
-             + s
-             + " on line: " + matchedToken.beginLine
-             + ", column: " + matchedToken.beginColumn +1
-             + ", in template: " + templateName;
-             throw new TokenMgrError(msg, TokenMgrError.LEXICAL_ERROR);
-           }
-       } 
+       } else if (firstChar == '[' && !altDirectiveSyntax) {
+           matchedToken.kind = PRINTABLE_CHARS;
+       } else if (strictEscapeSyntax) {
+           String s = matchedToken.image;
+           int index = s.indexOf('#');
+           s = s.substring(index);
+           String msg = "Unknown directive: " 
+           + s
+           + " on line: " + matchedToken.beginLine
+           + ", column: " + matchedToken.beginColumn +1
+           + ", in template: " + templateName;
+           throw new TokenMgrError(msg, TokenMgrError.LEXICAL_ERROR);
+       }
     }
 }
 

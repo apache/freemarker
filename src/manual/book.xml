@@ -20006,6 +20006,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               the last format complies with the XML Schema date/time formats,
               hence this change.</para>
             </listitem>
+
+            <listitem>
+              <para>Bugfix: Wrong <literal>#</literal> tags were printed as
+              static text instead of causing parsing error if there was no
+              correct <literal>#</literal> tag earlier in the same template.
+              Since fixing this would not be 100% backward compatible, the old
+              behavior has remained, unless you set the
+              <literal>emulate_2_3_parser_bugs</literal>
+              (<literal>Configuration.setEmulate23ParserBugs(boolean)</literal>)
+              to <literal>false</literal>. Doing so is recommended, as
+              <literal>false</literal> will be the default starting from
+              2.4.0.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
