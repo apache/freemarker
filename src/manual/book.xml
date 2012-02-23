@@ -20021,6 +20021,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
           </itemizedlist>
         </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>Configuration</literal> has new methods:
+              <literal>removeTemplateFromCache(...)</literal>. This will
+              remove the given template for the given locale from the cache,
+              so it will be re-loaded regardless of the template update delay
+              when it's next time requested.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>BeansWrapper</literal> ignores setter methods
+              from now when introspecting classes. They weren't used anyway,
+              so sometimes they caused
+              "<literal>java.beans.IntrospectionException</literal>: type
+              mismatch between read and write methods" errors.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed <link
+              xlink:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3325103&amp;group_id=794&amp;atid=100794">[3325103]</link>:
+              <literal>TemplateException</literal>-s and
+              <literal>ParseException</literal>-s are now serializable.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
       </section>
 
       <section xml:id="versions_2_3_18">
@@ -20145,28 +20174,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>DefaultObjectWrapper</literal>) as
               <literal>TemplateSequenceModel</literal>. (See also:
               <literal>getSupportsIndexedAccess()</literal> below)</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Changes on the Java side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para><literal>Configuration</literal> has new methods:
-              <literal>removeTemplateFromCache(...)</literal>. This will
-              remove the given template for the given locale from the cache,
-              so it will be re-loaded regardless of the template update delay
-              when it's next time requested.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>BeansWrapper</literal> ignores setter methods
-              from now when introspecting classes. They weren't used anyway,
-              yet sometimes they caused
-              "<literal>java.beans.IntrospectionException</literal>: type
-              mismatch between read and write methods" errors.</para>
             </listitem>
           </itemizedlist>
         </section>

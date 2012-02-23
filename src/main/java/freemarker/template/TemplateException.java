@@ -84,7 +84,7 @@ public class TemplateException extends Exception {
     
     /** The underlying cause of this exception, if any */
     private final Exception causeException;
-    private final Environment env;
+    private final transient Environment env;
     private final String ftlInstructionStack;
 
 
@@ -189,7 +189,8 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * @return the execution environment in which the exception occurred
+     * @return the execution environment in which the exception occurred.
+     *    <tt>null</tt> if the exception was deserialized. 
      */
     public Environment getEnvironment() {
         return env;
