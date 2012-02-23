@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Locale;
 
+import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
+import freemarker.template.Configuration;
 import junit.framework.TestCase;
 
 public class TemplateCacheTest extends TestCase
@@ -94,8 +96,6 @@ public class TemplateCacheTest extends TestCase
         public void closeTemplateSource(Object templateSource)
                 throws IOException
         {
-            // TODO Auto-generated method stub
-            
         }
 
         public Object findTemplateSource(String name) throws IOException
@@ -110,16 +110,79 @@ public class TemplateCacheTest extends TestCase
 
         public long getLastModified(Object templateSource)
         {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public Reader getReader(Object templateSource, String encoding)
                 throws IOException
         {
-            // TODO Auto-generated method stub
             return null;
         }
         
     }
+    
+    public void testManualRemovalPlain() throws IOException {
+        Configuration cfg = new Configuration();
+        StringTemplateLoader loader = new StringTemplateLoader();
+        cfg.setTemplateLoader(loader);
+        cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
+        
+        loader.putTemplate("1.ftl", "1 v1");
+        loader.putTemplate("2.ftl", "2 v1");
+        assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); 
+        assertEquals("2 v1", cfg.getTemplate("2.ftl").toString());
+        
+        loader.putTemplate("1.ftl", "1 v2");
+        loader.putTemplate("2.ftl", "2 v2");
+        assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); // no change 
+        assertEquals("2 v1", cfg.getTemplate("2.ftl").toString()); // no change
+        
+        cfg.removeTemplateFromCache("1.ftl");
+        assertEquals("1 v2", cfg.getTemplate("1.ftl").toString()); // changed 
+        assertEquals("2 v1", cfg.getTemplate("2.ftl").toString());
+        
+        cfg.removeTemplateFromCache("2.ftl");
+        assertEquals("1 v2", cfg.getTemplate("1.ftl").toString()); 
+        assertEquals("2 v2", cfg.getTemplate("2.ftl").toString()); // changed
+    }
+
+    public void testManualRemovalI18ed() throws IOException {
+        Configuration cfg = new Configuration();
+        cfg.setLocale(Locale.US);
+        StringTemplateLoader loader = new StringTemplateLoader();
+        cfg.setTemplateLoader(loader);
+        cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
+        
+        loader.putTemplate("1_en_US.ftl", "1_en_US v1");
+        loader.putTemplate("1_en.ftl", "1_en v1");
+        loader.putTemplate("1.ftl", "1 v1");
+        
+        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+        
+        loader.putTemplate("1_en_US.ftl", "1_en_US v2");
+        loader.putTemplate("1_en.ftl", "1_en v2");
+        loader.putTemplate("1.ftl", "1 v2");
+        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+        
+        cfg.removeTemplateFromCache("1.ftl");
+        assertEquals("1_en_US v2", cfg.getTemplate("1.ftl").toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+        assertEquals("1 v2", cfg.getTemplate("1.ftl", Locale.ITALY).toString());
+        
+        cfg.removeTemplateFromCache("1.ftl", Locale.GERMANY);
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        assertEquals("1 v2", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+
+        cfg.removeTemplateFromCache("1.ftl", Locale.CANADA);
+        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
+        
+        cfg.removeTemplateFromCache("1.ftl", Locale.UK);
+        assertEquals("1_en v2", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+    }
+    
 }

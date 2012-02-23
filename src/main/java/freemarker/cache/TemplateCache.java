@@ -92,11 +92,8 @@ public class TemplateCache
     private static final char SLASH = '/';
     private static final Logger logger = Logger.getLogger("freemarker.cache");
 
-    private final TemplateLoader mainLoader;
-        /** DD: [noFallback]
-        , 
-        fallbackTemplateLoader = new ClassTemplateLoader(TemplateCache.class, "/");
-        */
+    private final TemplateLoader templateLoader;
+    
     /** Here we keep our cached templates */
     private final CacheStorage storage;
     private final boolean isStorageConcurrent;
@@ -144,7 +141,7 @@ public class TemplateCache
      */
     public TemplateCache(TemplateLoader loader, CacheStorage storage)
     {
-        this.mainLoader = loader;
+        this.templateLoader = loader;
         this.storage = storage;
         if(storage == null) 
         {
@@ -167,7 +164,7 @@ public class TemplateCache
 
     public TemplateLoader getTemplateLoader()
     {
-        return mainLoader;
+        return templateLoader;
     }
     
     public CacheStorage getCacheStorage()
@@ -234,14 +231,9 @@ public class TemplateCache
             return null;
         }
         Template result = null;
-        if (mainLoader != null) {
-            result = getTemplate(mainLoader, name, locale, encoding, parse);
+        if (templateLoader != null) {
+            result = getTemplate(templateLoader, name, locale, encoding, parse);
         }
-        /** DD: [noFallback]
-        if (result == null && name.toLowerCase().endsWith(".ftl")) {
-            result = getTemplate(fallbackTemplateLoader, name, locale, encoding, parse);
-        }
-        */
         return result;
     }    
     
@@ -250,9 +242,7 @@ public class TemplateCache
     {
         boolean debug = logger.isDebugEnabled();
         String debugName = debug
-                ? StringUtil.jQuoteNoXSS(name) + "["
-                        + StringUtil.jQuoteNoXSS(locale) + "," + encoding
-                        + (parse ? ",parsed] " : ",unparsed] ")
+                ? buildDebugName(name, locale, encoding, parse)
                 : null;
         TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
         
@@ -274,7 +264,7 @@ public class TemplateCache
                 // If we're within the refresh delay, return the cached copy
                 if (now - cachedTemplate.lastChecked < delay) {
                     if(debug) {
-                        logger.debug(debugName + "cached copy not yet stale; using cached.");
+                        logger.debug(debugName + " cached copy not yet stale; using cached.");
                     }
                     // Can be null, indicating a cached negative lookup
                     Object t = cachedTemplate.templateOrException;
@@ -302,7 +292,7 @@ public class TemplateCache
                 // Template source was removed
                 if (newlyFoundSource == null) {
                     if(debug) {
-                        logger.debug(debugName + "no source found.");
+                        logger.debug(debugName + " no source found.");
                     } 
                     storeNegativeLookup(tk, cachedTemplate, null);
                     return null;
@@ -315,7 +305,7 @@ public class TemplateCache
                 boolean sourceEquals = newlyFoundSource.equals(cachedTemplate.source);
                 if(lastModifiedNotChanged && sourceEquals) {
                     if(debug) {
-                        logger.debug(debugName + "using cached since " + 
+                        logger.debug(debugName + " using cached since " + 
                                 newlyFoundSource + " didn't change.");
                     }
                     storeCached(tk, cachedTemplate);
@@ -540,11 +530,58 @@ public class TemplateCache
     {
         synchronized (storage) {
             storage.clear();
-            if(mainLoader instanceof StatefulTemplateLoader) {
-                ((StatefulTemplateLoader)mainLoader).resetState();
+            if(templateLoader instanceof StatefulTemplateLoader) {
+                ((StatefulTemplateLoader)templateLoader).resetState();
             }
         }
     }
+    
+    /**
+     * Removes an entry from the cache, hence forcing the re-loading of it when
+     * it's next time requested. It doesn't delete the template file itself.
+     * This is to give the application finer control over cache updating than
+     * {@link #setDelay(long)} alone does.
+     * 
+     * For the meaning of the parameters, see
+     * {@link #getTemplate(String, Locale, String, boolean)}.
+     */
+    public void removeTemplate(
+            String name, Locale locale, String encoding, boolean parse)
+    throws IOException {
+        if (name == null) {
+            throw new IllegalArgumentException("Argument \"name\" can't be null");
+        }
+        if (locale == null) {
+            throw new IllegalArgumentException("Argument \"locale\" can't be null");
+        }
+        if (encoding == null) {
+            throw new IllegalArgumentException("Argument \"encoding\" can't be null");
+        }
+        name = normalizeName(name);
+        if(name != null && templateLoader != null) {
+            boolean debug = logger.isDebugEnabled();
+            String debugName = debug
+                    ? buildDebugName(name, locale, encoding, parse)
+                    : null;
+            TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
+            
+            if(isStorageConcurrent) {
+                storage.remove(tk);
+            } else {
+                synchronized(storage) {
+                    storage.remove(tk);
+                }
+            }
+            logger.debug(debugName + " was removed from the cache, if it was there");
+        }
+    }
+
+    private String buildDebugName(String name, Locale locale, String encoding,
+            boolean parse) {
+        return StringUtil.jQuoteNoXSS(name) + "["
+                + StringUtil.jQuoteNoXSS(locale) + "," + encoding
+                + (parse ? ",parsed] " : ",unparsed]");
+    }    
 
     public static String getFullTemplatePath(Environment env, String parentTemplateDir, String templateNameString)
     {
@@ -606,7 +643,7 @@ public class TemplateCache
         // Shortcut in case there is no acquisition
         if(asterisk == -1)
         {
-            return mainLoader.findTemplateSource(path);
+            return templateLoader.findTemplateSource(path);
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
@@ -641,7 +678,7 @@ public class TemplateCache
                 logger.debug("Trying to find template source "
                         + StringUtil.jQuoteNoXSS(fullPath));
             }
-            Object templateSource = mainLoader.findTemplateSource(fullPath);
+            Object templateSource = templateLoader.findTemplateSource(fullPath);
             if(templateSource != null)
             {
                 return templateSource;

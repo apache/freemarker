@@ -52,12 +52,40 @@
 
 package freemarker.template;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-import freemarker.cache.*;
-import freemarker.core.*;
-import freemarker.template.utility.*;
+import freemarker.cache.CacheStorage;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MruCacheStorage;
+import freemarker.cache.SoftCacheStorage;
+import freemarker.cache.TemplateCache;
+import freemarker.cache.TemplateLoader;
+import freemarker.core.Configurable;
+import freemarker.core.Environment;
+import freemarker.core.ParseException;
+import freemarker.template.utility.CaptureOutput;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.HtmlEscape;
+import freemarker.template.utility.NormalizeNewlines;
+import freemarker.template.utility.SecurityUtilities;
+import freemarker.template.utility.StandardCompress;
+import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.XmlEscape;
 
 /**
  * Main entry point into the FreeMarker API, this class encapsulates the 
@@ -655,6 +683,50 @@ public class Configuration extends Configurable implements Cloneable {
         variables.clear();
         loadBuiltInSharedVariables();
     }
+    
+    /**
+     * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
+     */
+    public void removeTemplateFromCache(String name) throws IOException {
+        Locale loc = getLocale();
+        removeTemplateFromCache(name, loc, getEncoding(loc), true);
+    }
+
+    /**
+     * Equivalent to <tt>removeTemplateFromCache(name, locale, thisCfg.getEncoding(locale), true)</tt>.
+     */
+    public void removeTemplateFromCache(String name, Locale locale) throws IOException {
+        removeTemplateFromCache(name, locale, getEncoding(locale), true);
+    }
+
+    /**
+     * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), encoding, true)</tt>.
+     */
+    public void removeTemplateFromCache(String name, String encoding) throws IOException {
+        removeTemplateFromCache(name, getLocale(), encoding, true);
+    }
+
+    /**
+     * Equivalent to <tt>removeTemplateFromCache(name, locale, encoding, true)</tt>.
+     */
+    public void removeTemplateFromCache(String name, Locale locale, String encoding) throws IOException {
+        removeTemplateFromCache(name, locale, encoding, true);
+    }
+    
+    /**
+     * Removes a template from the template cache, hence forcing the re-loading
+     * of it when it's next time requested. This is to give the application
+     * finer control over cache updating than {@link #setTemplateUpdateDelay(int)}
+     * alone does.
+     * 
+     * For the meaning of the parameters, see
+     * {@link #getTemplate(String, Locale, String, boolean)}.
+     */
+    public void removeTemplateFromCache(
+            String name, Locale locale, String encoding, boolean parse)
+    throws IOException {
+        cache.removeTemplate(name, locale, encoding, parse);
+    }    
     
     /**
      * Removes all entries from the template cache, thus forcing reloading of templates
