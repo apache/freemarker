@@ -20160,6 +20160,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               so it will be re-loaded regardless of the template update delay
               when it's next time requested.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>BeansWrapper</literal> ignores setter methods
+              from now when introspecting classes. They weren't used anyway,
+              yet sometimes they caused
+              "<literal>java.beans.IntrospectionException</literal>: type
+              mismatch between read and write methods" errors.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
