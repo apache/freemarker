@@ -108,7 +108,9 @@
    <testcase name="test-stringbimethods" filename="test-stringbimethods.txt" />
    <testcase name="stringliteral" filename="test-stringliteral.html"/>
    <testcase name="switch-case" filename="test-switch.html" />
-   <testcase name="transforms" filename="test-transformation.html"/>
+   <testcase name="transforms" filename="test-transformation.html">
+      <config new_builtin_class_resolver="unrestricted" />
+   </testcase>
    <testcase name="type-builtins" filename="test-typebuiltins.txt"/>
    <testcase name="var-layers" filename="test-varlayers.txt"/>
    <testcase name="variables" filename="test-variables.html"/>

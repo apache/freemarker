@@ -20037,9 +20037,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para><literal>BeansWrapper</literal> ignores setter methods
               from now when introspecting classes. They weren't used anyway,
-              so sometimes they caused
+              so they unnecessarily caused
               "<literal>java.beans.IntrospectionException</literal>: type
               mismatch between read and write methods" errors.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateClassResolver.SAFER_RESOLVER</literal>
+              now disallows creating
+              <literal>freemarker.template.utility.JythonRuntime</literal> and
+              <literal>freemarker.template.utility.Execute</literal>. This
+              change affects the behavior of the <link
+              linkend="ref_builtin_new"><literal>new</literal> built-in</link>
+              if FreeMarker was configured to use
+              <literal>SAFER_RESOLVER</literal>, which is not the default
+              until 2.4 and is hence improbable.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed <link
+              xlink:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=1837697&amp;group_id=794&amp;atid=100794">[1837697]</link>
+              <link
+              xlink:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=2831150&amp;group_id=794&amp;atid=100794">[2831150]</link>
+              <link
+              xlink:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3039096&amp;group_id=794&amp;atid=100794">[3039096]</link>
+              <link
+              xlink:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=3165425&amp;group_id=794&amp;atid=100794">[3165425]</link>:
+              Jython support now works with Jython 2.2 and 2.5.</para>
             </listitem>
 
             <listitem>
@@ -20264,7 +20288,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (like in <literal>"com.example.SomeClass"?new()</literal>)
               resolves classes and which classes are accessible at all. If you
               are allowing not-so-much-trusted users to upload templates, you
-              should be definitely interestered; see the Java API docs of
+              should be definitely interested; see the Java API docs of
               <literal>freemarker.core.Configurable.setSetting</literal> and
               <literal>freemareker.template.Configuration.setNewBuiltinClassResolver</literal>.
               Otherwise it's still recommended to set this to
