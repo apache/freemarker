@@ -123,6 +123,7 @@ public class TemplateCacheTest extends TestCase
     
     public void testManualRemovalPlain() throws IOException {
         Configuration cfg = new Configuration();
+        cfg.setCacheStorage(new StrongCacheStorage());
         StringTemplateLoader loader = new StringTemplateLoader();
         cfg.setTemplateLoader(loader);
         cfg.setTemplateUpdateDelay(Integer.MAX_VALUE);
@@ -148,6 +149,7 @@ public class TemplateCacheTest extends TestCase
 
     public void testManualRemovalI18ed() throws IOException {
         Configuration cfg = new Configuration();
+        cfg.setCacheStorage(new StrongCacheStorage());
         cfg.setLocale(Locale.US);
         StringTemplateLoader loader = new StringTemplateLoader();
         cfg.setTemplateLoader(loader);
@@ -184,5 +186,24 @@ public class TemplateCacheTest extends TestCase
         cfg.removeTemplateFromCache("1.ftl", Locale.UK);
         assertEquals("1_en v2", cfg.getTemplate("1.ftl", Locale.UK).toString());        
     }
-    
+
+    public void testZeroUpdateDelay() throws IOException {
+        Configuration cfg = new Configuration();
+        cfg.setLocale(Locale.US);
+        cfg.setCacheStorage(new StrongCacheStorage());
+        StringTemplateLoader loader = new StringTemplateLoader();
+        cfg.setTemplateLoader(loader);
+        cfg.setTemplateUpdateDelay(0);
+        for (int i = 1; i <= 3; i++) {
+            loader.putTemplate("t.ftl", "v" + i, i);
+            assertEquals("v" + i, cfg.getTemplate("t.ftl").toString());
+        }
+        
+        loader.putTemplate("t.ftl", "v10", 10);
+        assertEquals("v10", cfg.getTemplate("t.ftl").toString());
+        loader.putTemplate("t.ftl", "v11", 10); // same time stamp, different content
+        assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
+        assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
+    }
+
 }
