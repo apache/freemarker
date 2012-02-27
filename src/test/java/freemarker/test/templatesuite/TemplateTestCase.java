@@ -105,6 +105,7 @@ import freemarker.test.templatesuite.models.BooleanHash2;
 import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.MultiModel1;
+import freemarker.test.templatesuite.models.VarArgTestModel;
 
 
 public class TemplateTestCase extends TestCase {
@@ -354,6 +355,10 @@ public class TemplateTestCase extends TestCase {
         else if (testName.equals("test-number-to-date")) {
           dataModel.put("bigInteger", new BigInteger("1305575275540"));
           dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
+        }
+        
+        else if (testName.equals("test-varargs")) {
+          dataModel.put("m", new VarArgTestModel());
         }
     }
     

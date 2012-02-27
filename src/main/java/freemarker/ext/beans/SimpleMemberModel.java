@@ -59,6 +59,7 @@ import java.util.List;
 
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.StringUtil;
 
 /**
  * This class is used for constructors and as a base for non-overloaded methods
@@ -81,91 +82,107 @@ class SimpleMemberModel
         if(arguments == null) {
             arguments = Collections.EMPTY_LIST;
         }
-        boolean varArg = MethodUtilities.isVarArgs(member);
-        int typeLen = argTypes.length;
-        if(varArg) {
-            if(typeLen - 1 > arguments.size()) {
+        boolean isVarArg = MethodUtilities.isVarArgs(member);
+        int typesLen = argTypes.length;
+        if(isVarArg) {
+            if(typesLen - 1 > arguments.size()) {
                 throw new TemplateModelException("Method " + member + 
-                        " takes at least " + (typeLen - 1) + 
-                        " arguments");
+                        " takes at least " + (typesLen - 1) + 
+                        " arguments, " + arguments.size() + " was given.");
             }
         }
-        else if(typeLen != arguments.size()) {
+        else if(typesLen != arguments.size()) {
             throw new TemplateModelException("Method " + member + 
-                    " takes exactly " + typeLen + " arguments");
+                    " takes exactly " + typesLen + " arguments, " +
+                    arguments.size() + " was given.");
         }
          
-        Object[] args = unwrapArguments(arguments, argTypes, wrapper);
-        if(args != null) {
-            BeansWrapper.coerceBigDecimals(argTypes, args);
-            if(varArg && shouldPackVarArgs(args)) {
-                args = packVarArgs(args, argTypes);
-            }
-        }
+        Object[] args = unwrapArguments(arguments, argTypes, isVarArg, wrapper);
         return args;
     }
 
-    static Object[] unwrapArguments(List arguments, Class[] argTypes, BeansWrapper w) 
-    throws TemplateModelException
-    {
-        if(arguments == null) {
-            return null;
-        }
-        int argsLen = arguments.size();
-        int typeLen = argTypes.length;
-        Object[] args = new Object[argsLen];
-        int min = Math.min(argsLen, typeLen);
-        Iterator it = arguments.iterator();
-        for (int i = 0; i < min; i++) {
-            args[i] = unwrapArgument((TemplateModel)it.next(), argTypes[i], w);
-        }
-        for (int i = min; i < argsLen; i++) {
-            args[i] = unwrapArgument((TemplateModel)it.next(), argTypes[min - 1], w);
-        }
-        return args;
-    }
-
-    private static Object unwrapArgument(TemplateModel model, Class type, BeansWrapper w) 
+    static Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
+            BeansWrapper w) 
     throws TemplateModelException {
-        Object val = w.unwrapInternal(model, type);
-        if(val == BeansWrapper.CAN_NOT_UNWRAP) {
-            throw new TemplateModelException("Can not unwrap argument " +
-                    model + " to " + type.getName());
+        if(args == null) return null;
+        
+        int typesLen = argTypes.length;
+        int argsLen = args.size();
+        
+        Object[] unwrappedArgs = new Object[typesLen];
+        
+        // Unwrap arguments:
+        Iterator it = args.iterator();
+        int normalArgCnt = isVarargs ? typesLen - 1 : typesLen; 
+        int argIdx = 0;
+        while (argIdx < normalArgCnt) {
+            Class argType = argTypes[argIdx];
+            TemplateModel argVal = (TemplateModel) it.next();
+            Object unwrappedArgVal = w.unwrapInternal(argVal, argType);
+            if(unwrappedArgVal == BeansWrapper.CAN_NOT_UNWRAP) {
+                throw createArgumentTypeMismarchException(argIdx, argVal, argType);
+            }
+            
+            unwrappedArgs[argIdx++] = unwrappedArgVal;
         }
-        return val;
-    }
-    
-    private boolean shouldPackVarArgs(Object[] args) {
-        int l = args.length;
-        if(l == argTypes.length) {
-            //assert l > 0; // varArg methods must have at least one declared arg
-            Object lastArg = args[l - 1];
-            if(lastArg == null || argTypes[l - 1].getComponentType().isInstance(lastArg)) {
-                return false;
+        if (isVarargs) {
+            // The last argType, which is the vararg type, wasn't processed yet.
+            
+            Class varargType = argTypes[typesLen - 1];
+            Class varargItemType = varargType.getComponentType();
+            if (!it.hasNext()) {
+                unwrappedArgs[argIdx++] = Array.newInstance(varargItemType, 0);
+            } else {
+                TemplateModel argVal = (TemplateModel) it.next();
+                
+                Object unwrappedArgVal;
+                // We first try to treat the last argument as a vararg *array*.
+                // This is consistent to what OverloadedVarArgMethod does.
+                if (argsLen - argIdx == 1
+                        && (unwrappedArgVal = w.unwrapInternal(argVal, varargType))
+                            != BeansWrapper.CAN_NOT_UNWRAP) {
+                    // It was a vararg array.
+                    unwrappedArgs[argIdx++] = unwrappedArgVal;
+                } else {
+                    // It wasn't a vararg array, so we assume it's a vararg
+                    // array *item*, possibly followed by further ones.
+                    int varargArrayLen = argsLen - argIdx;
+                    Object varargArray = Array.newInstance(varargItemType, varargArrayLen);
+                    for (int varargIdx = 0; varargIdx < varargArrayLen; varargIdx++) {
+                        TemplateModel varargVal = (TemplateModel) (varargIdx == 0 ? argVal : it.next());
+                        Object unwrappedVarargVal = w.unwrapInternal(varargVal, varargItemType);
+                        if(unwrappedVarargVal == BeansWrapper.CAN_NOT_UNWRAP) {
+                            throw createArgumentTypeMismarchException(
+                                    argIdx + varargIdx, varargVal, varargItemType);
+                        }
+                        
+                        if (unwrappedVarargVal == null && varargItemType.isPrimitive()) {
+                            throw createArgumentTypeMismarchException(
+                                    argIdx + varargIdx, unwrappedVarargVal, varargItemType);
+                        }
+                        Array.set(varargArray, varargIdx, unwrappedVarargVal);
+                    }
+                    unwrappedArgs[argIdx++] = varargArray;
+                }
             }
         }
-        return true;
-    }
-    
-    static Object[] packVarArgs(Object[] args, Class[] argTypes)
-    {
-        int argsLen = args.length;
-        int typeLen = argTypes.length;
-        int fixArgsLen = typeLen - 1;
-        Object varArray = Array.newInstance(argTypes[fixArgsLen], 
-                argsLen - fixArgsLen);
-        for (int i = fixArgsLen; i < argsLen; i++) {
-            Array.set(varArray, i - fixArgsLen, args[i]);
-        }
-        if(argsLen != typeLen) {
-            Object[] newArgs = new Object[typeLen];
-            System.arraycopy(args, 0, newArgs, 0, fixArgsLen);
-            args = newArgs;
-        }
-        args[fixArgsLen] = varArray;
-        return args;
+        
+        return unwrappedArgs;
     }
 
+    private static TemplateModelException createArgumentTypeMismarchException(
+            int argIdx, Object argVal, Class targetType) {
+        return new TemplateModelException(
+                "Argument type mismatch; can not unwrap argument #"
+                + (argIdx + 1)
+                + " (" + (argVal == null
+                        ? "value: null"
+                        : "class: " + argVal.getClass().getName()
+                          + ", toString: " + StringUtil.jQuote(argVal))
+                + ") to "
+                + targetType);
+    }
+    
     protected Member getMember() {
         return member;
     }

@@ -20055,6 +20055,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: Calling varargs methods now indeed works.
+              (Earlier it only worked for overloaded methods.)</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed <link
               xlink:href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=1837697&amp;group_id=794&amp;atid=100794">[1837697]</link>
               <link

@@ -155,4 +155,5 @@
    </testcase>   
    <testcase name="test-iso8601" filename="test-iso8601.txt"/>
    <testcase name="test-number-to-date" filename="test-number-to-date.txt"/>
+   <testcase name="test-varargs" filename="test-varargs.txt"/>
 </testcases>
