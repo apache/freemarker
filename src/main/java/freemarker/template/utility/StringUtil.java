@@ -1429,4 +1429,40 @@ public class StringUtil {
         return res.toString();
     }
     
+    /**
+     * Converts a version number string to an integer for easy comparison.
+     * The version number must start with numbers separated with
+     * dots. There can be any number of such dot-separated numbers, but only
+     * the first three will be considered. After the numbers arbitrary text can
+     * follow, and will be ignored.
+     * 
+     * The string will be trimmed before interpretation.
+     * 
+     * @return major * 1000000 + minor * 1000 + micro
+     */
+    public static int versionStringToInt(String version) {
+        version = version.trim();
+        
+        int[] parts = new int[3];
+        int partIdx = 0;
+        boolean valid = false;
+        for (int i = 0; i < version.length(); i++) {
+            char c = version.charAt(i);
+            if (c >= '0' && c <= '9') {
+                parts[partIdx] = parts[partIdx] * 10 + (c - '0');
+                valid = true;
+            } else {
+                if (c == '.') {
+                    if (partIdx == 2) break; else partIdx++;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (!valid) throw new IllegalArgumentException(
+                "A version number string " + jQuote(version)
+                + " must start with a number.");
+        return parts[0] * 1000000 + parts[1] * 1000 + parts[2];
+    }
+    
 }
