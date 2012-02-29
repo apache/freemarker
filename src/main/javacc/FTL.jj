@@ -109,10 +109,10 @@ public class FMParser {
   }
 
   public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
-      this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax, false);
+      this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax, Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
   }
   
-  public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax, boolean emulate23ParserBugs) {
+  public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax, int incompatibleChanges) {
       this(template, reader, strictEscapeSyntax, stripWhitespace);
       switch (tagSyntax) {
           case Configuration.AUTO_DETECT_TAG_SYNTAX : 
@@ -126,8 +126,9 @@ public class FMParser {
              break;
           default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
       }
-      if (emulate23ParserBugs) throw new IllegalArgumentException(
-                "emulate23ParserBugs == true is not supported in FreeMarker 2.4.0 and later.");
+      if (incompatibleChanges < 2004000) throw new IllegalArgumentException(
+                "incompatibleChanges < 2004000 is not supported in FreeMarker 2.4.0 and later.");
+      token_source.incompatibleChanges = incompatibleChanges;      
   }
   
   public FMParser(String template) {
@@ -341,6 +342,7 @@ TOKEN_MGR_DECLS :
          autodetectTagSyntax,
          directiveSyntaxEstablished,
          inInvocation;
+ int incompatibleChanges;         
  String templateName;
 
  

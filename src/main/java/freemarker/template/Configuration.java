@@ -96,7 +96,7 @@ import freemarker.template.utility.XmlEscape;
  * template loading mechanism by using the {@link #setTemplateLoader(TemplateLoader)}
  * method.
  *
- * This object is <em>not synchronized</em>. Thus, the settings must not be changed
+ * <p>This object is <em>not synchronized</em>. Thus, the settings must not be changed
  * after you have started to access the object from multiple threads. If you use multiple
  * threads, set everything directly after you have instantiated the <code>Configuration</code>
  * object, and don't change the settings anymore.
@@ -116,14 +116,19 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
-    public static final String EMULATE_2_3_PARSER_BUGS = "emulate_2_3_parser_bugs";
+    public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
+    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = "2.4.0"; 
+    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = StringUtil.versionStringToInt(DEFAULT_INCOMPATIBLE_ENHANCEMENTS); 
+    
     private static Configuration defaultConfig = new Configuration();
     private static String cachedVersion;
     private boolean strictSyntax = true, localizedLookup = true, whitespaceStripping = true;
+    private String incompatibleEnhancements = DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
+    private int parsedIncompatibleEnhancements = PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
@@ -421,17 +426,58 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Was used for setting whether the parser bugs of 2.3 should be emulated for backward
-     * compatibility; only <code>false</code> is supported now.
+     * Sets which of the <em>slightly</em> non-backward compatible
+     * bugfixes/enhancements should be enabled. The setting value is the
+     * FreeMarker release version number where the enhancements
+     * to enable were already present. The default is 2.3.0 in 2.3.x, 2.4.0 on
+     * 2.4.x, and so on, thus by default compatibility with the latest x.y.0
+     * release is kept with new releases. If you develop a new application with,
+     * for example, 2.3.25 and you need the non-backward compatible enhancements,
+     * you should set this to 2.3.25. Thus if you later update FreeMarker to a
+     * higher 2.3.x version, you will still only have the incompatible changes
+     * that you have tested your application with.
+     * 
+     * <p>This setting doesn't affect non-backward
+     * compatible security fixes; they are always enabled. This setting also
+     * doesn't affect enhancements where there's a significant chance of
+     * breaking existing applications.
+     * 
+     * <p>Using this setting is a good way of preparing for the next minor
+     * (2nd) version number increase. When that happens, not only the default
+     * value of this setting changes, but it's possible that older values become
+     * unsupported.
+     * 
+     * <p>Currently affected fixes/enhancements:
+     * <ul>
+     *   <li>
+     *     2.3.19: Bug fix: Wrong # tags were printed as static text instead of
+     *     causing parsing error if there was no correct # tag earlier in the
+     *     same template.
+     *   </li>
+     * </ul>
      */
-    public void setEmulate23ParserBugs(boolean b) {
-        if (!b) throw new IllegalArgumentException(
-                "emulate23ParserBugs == true is not supported in FreeMarker 2.4.0 and later.");
+    public void setIncompatibleEnhancements(String version) {
+        int n = StringUtil.versionStringToInt(version);
+        if (n < 2004000) {
+            throw new IllegalArgumentException(
+                    "Incompatible_enhancements < 2.4.0 aren't supported anymore");
+        }
+        parsedIncompatibleEnhancements = n;
+        incompatibleEnhancements = version;
+    }
+    
+    public String getIncompatibleEnhancements() {
+        return incompatibleEnhancements;
     }
 
-    public boolean getEmulate23ParserBugs() {
-        return false;
-    }    
+    /**
+     * Same as {@link #getIncompatibleEnhancements()}, but returns the version
+     * as an <tt>int</tt>, according to
+     * {@link StringUtil#versionStringToInt(String)}. 
+     */
+    public int getParsedIncompatibleEnhancements() {
+        return parsedIncompatibleEnhancements;
+    }
     
     /**
      * Sets whether the FTL parser will try to remove
@@ -801,8 +847,9 @@ public class Configuration extends Configurable implements Cloneable {
      *   <li><code>"tag_syntax"</code>: Must be one of:
      *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
      *       <code>"square_bracket"</code>.
-     *   <li><code>"emulate_23_parser_bugs"</code>: must be <code>"false"</code> starting from
-     *       FreeMarker 2.4.0.
+     *   <li><code>"incompatible_enhancements"</code>: The FreeMarker version
+     *       number where the desired enhancements were already implemented.
+     *       See: {@link #setIncompatibleEnhancements(String)}.
      * </ul>
      *
      * @param key the name of the setting.
@@ -876,8 +923,8 @@ public class Configuration extends Configurable implements Cloneable {
                 } else {
                     throw invalidSettingValueException(key, value);
                 }
-            } else if (EMULATE_2_3_PARSER_BUGS.equals(key)) {
-                setEmulate23ParserBugs(StringUtil.getYesNo(value));
+            } else if (INCOMPATIBLE_ENHANCEMENTS.equals(key)) {
+                setIncompatibleEnhancements(value);
             } else {
                 callSuper = true;
             }
@@ -892,7 +939,6 @@ public class Configuration extends Configurable implements Cloneable {
             super.setSetting(key, value);
         }
     }
-    
     
     /**
      * Add an auto-imported template.

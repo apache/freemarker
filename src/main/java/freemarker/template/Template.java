@@ -164,7 +164,8 @@ public class Template extends Configurable {
                 FMParser parser = new FMParser(this, ltb,
                         getConfiguration().getStrictSyntaxMode(),
                         getConfiguration().getWhitespaceStripping(),
-                        getConfiguration().getTagSyntax());
+                        getConfiguration().getTagSyntax(),
+                        getConfiguration().getParsedIncompatibleEnhancements());
                 this.rootElement = parser.Root();
             }
             catch (TokenMgrError exc) {

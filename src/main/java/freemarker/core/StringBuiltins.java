@@ -167,6 +167,7 @@ abstract class StringBuiltins {
                     new StringReader("(" + s + ")"), target.beginLine, 
                     target.beginColumn, s.length() + 2);
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
+            token_source.incompatibleChanges = env.getConfiguration().getParsedIncompatibleEnhancements();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
             FMParser parser = new FMParser(token_source);
             parser.template = getTemplate();
