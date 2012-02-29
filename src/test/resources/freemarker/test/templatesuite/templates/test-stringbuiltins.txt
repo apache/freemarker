@@ -65,6 +65,16 @@ ${c?eval}
 [${"a"?j_string}] = [a]
 [${"a\\'x'\nb"?j_string}] = [a\\'x'\nb]
 [${"\x1\x1A\x20"?j_string}] = [\u0001\u001a ]
+
 [${"a"?js_string}] = [a]
 [${"a\\'x'\nb"?js_string}] = [a\\\'x\'\nb]
 [${"\x1\x1A\x20"?js_string}] = [\x01\x1A ]
+
+[${"a"?json_string}] = [a]
+[${"a\\'x'\nb"?json_string}] = [a\\'x'\nb]
+[${"\x1\x1A\x20"?json_string}] = [\u0001\u001A ]
+[${"\n\r\t\f\b\""?json_string}] = [\n\r\t\f\b\"]
+[${"/"?json_string}] = [/]
+[${"a/b"?json_string}] = [a/b]
+[${"</script>"?json_string}] = [<\/script>]
+[${"]]>"?json_string}] = []]\u003E]

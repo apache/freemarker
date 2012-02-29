@@ -177,6 +177,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
                 /* showOffset = */ false, DateUtil.ACCURACY_HOURS));
         builtins.put("j_string", new j_stringBI());
         builtins.put("js_string", new js_stringBI());
+        builtins.put("json_string", new json_stringBI());
         builtins.put("keys", new keysBI());
         builtins.put("last_index_of", new last_index_ofBI());
         builtins.put("last", new lastBI());

@@ -97,6 +97,12 @@ abstract class StringBuiltins {
         }
     }
 
+    static class json_stringBI extends StringBuiltIn {
+        TemplateModel calculateResult(String s, Environment env) {
+            return new SimpleScalar(StringUtil.jsonStringEnc(s));
+        }
+    }
+
     static class cap_firstBI extends StringBuiltIn {
         TemplateModel calculateResult(String s, Environment env) {
             int i = 0;

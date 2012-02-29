@@ -867,9 +867,9 @@ public class StringUtil {
      * string literals, so it is safe to insert the value into a string literal.
      * The resulting string will not be quoted.
      * 
-     * <p>In additional, all characters under UCS code point 0x20, that has no
-     * dedicated escape sequence in Java language, will be replaced with UNICODE
-     * escape (<tt>\<!-- -->u<i>XXXX</i></tt>).
+     * <p>All characters under UCS code point 0x20 will be escaped.
+     * Where they have no dedicated escape sequence in Java, they will
+     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
      * 
      * @see #jQuote(String)
      */ 
@@ -925,9 +925,11 @@ public class StringUtil {
      * 
      * <p>It escapes both <tt>'</tt> and <tt>"</tt>.
      * In additional it escapes <tt>></tt> as <tt>\></tt> (to avoid
-     * <tt>&lt;/script></tt>). Furthermore, all characters under UCS code point
-     * 0x20, that has no dedicated escape sequence in JavaScript language, will
-     * be replaced with hexadecimal escape (<tt>\x<i>XX</i></tt>). 
+     * <tt>&lt;/script></tt>).
+     * 
+     * <p>All characters under UCS code point 0x20 will be escaped.
+     * Where they have no dedicated escape sequence in JavaScript, they will
+     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
      */ 
     public static String javaScriptStringEnc(String s) {
         int ln = s.length();
@@ -979,6 +981,78 @@ public class StringUtil {
         return s;
     }
 
+    /**
+     * Escapes a <code>String</code> according the JSON string literal
+     * escaping rules. The resulting string will <em>not</em> be quoted;
+     * the caller have to ensure that they are there in the final output.
+     * 
+     * <p>Beware, it doesn't escape <tt>'</tt>, as JSON string must be delimited with
+     * <tt>"</tt>, and JSON has no <tt>\'</tt> escape either!
+     * 
+     * <p>It will escape <tt>/</tt> as <tt>\/</tt> if it's after <tt>&lt;</tt>,
+     * to avoid <tt>&lt;/script></tt>.
+     * 
+     * <p>It will escape <tt>></tt> as <tt>\</tt><tt>u003E</tt> if it's after
+     * <tt>]]</tt>, to avoid closing a CDATA section.
+     * 
+     * <p>All characters under UCS code point 0x20 will be escaped.
+     * Where they have no dedicated escape sequence in JSON, they will
+     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
+     */
+    public static String jsonStringEnc(String s) {
+        int ln = s.length();
+        for (int i = 0; i < ln; i++) {
+            char c = s.charAt(i);
+            if (c == '"' || c == '\\' || c < 0x20
+                    || (c == '/' && i > 0 && s.charAt(i -1) == '<')
+                    || (c == '>' && i > 1
+                        && s.charAt(i - 1) == ']' && s.charAt(i - 2) == ']')) {
+                StringBuilder b = new StringBuilder(ln + 4);
+                b.append(s.substring(0, i));
+                while (true) {
+                    if (c == '"') {
+                        b.append("\\\"");
+                    } else if (c == '\\') {
+                        b.append("\\\\");
+                    } else if (c == '/' && i > 0 && s.charAt(i -1) == '<') {
+                        b.append("\\/");
+                    } else if (c == '>' && i > 1
+                            && s.charAt(i - 1) == ']' && s.charAt(i - 2) == ']') {
+                        b.append("\\u003E");
+                    } else if (c < 0x20) {
+                        if (c == '\n') {
+                            b.append("\\n");
+                        } else if (c == '\r') {
+                            b.append("\\r");
+                        } else if (c == '\f') {
+                            b.append("\\f");
+                        } else if (c == '\b') {
+                            b.append("\\b");
+                        } else if (c == '\t') {
+                            b.append("\\t");
+                        } else {
+                            b.append("\\u00");
+                            int x = c / 0x10;
+                            b.append((char)
+                                    (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                            x = c & 0xF;
+                            b.append((char)
+                                    (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                        }
+                    } else {
+                        b.append(c);
+                    }
+                    i++;
+                    if (i >= ln) {
+                        return b.toString();
+                    }
+                    c = s.charAt(i);
+                }
+            } // if has to be escaped
+        } // for each characters
+        return s;
+    }
+    
     /**
      * Parses a name-value pair list, where the pairs are separated with comma,
      * and the name and value is separated with colon.

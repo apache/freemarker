@@ -11674,11 +11674,16 @@ ${test3}</programlisting>
           </indexterm>
 
           <para>Escapes the string with the escaping rules of Java language
-          string literals, so it is safe to insert the value into a string
-          literal. In additional, all characters under <link
-          linkend="gloss.UCS">UCS</link> code point 0x20, that has no
-          dedicated escape sequence in Java language, will be replaced with
-          UNICODE escape
+          string literals, so it's safe to insert the value into a string
+          literal. Note that it will <emphasis>not</emphasis> add quotation
+          marks around the inserted value; you meant to use this
+          <emphasis>inside</emphasis> the string literal.</para>
+
+          <para>All characters under <link linkend="gloss.UCS">UCS</link> code
+          point 0x20 will be escaped. When they have no dedicated escape
+          sequence in the Java language (like <literal>\n</literal>,
+          <literal>\t</literal>, etc.), they will be replaced with a UNICODE
+          escape
           (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
 
           <para>Example:</para>
@@ -11699,19 +11704,23 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           </indexterm>
 
           <para>Escapes the string with the escaping rules of JavaScript
-          language string literals, so it is safe to insert the value into a
-          string literal. Both quotation mark (<literal>"</literal>) and
+          language string literals, so it's safe to insert the value into a
+          string literal. Note that it will <emphasis>not</emphasis> add
+          quotation marks around the inserted value; you meant to use this
+          <emphasis>inside</emphasis> the string literal.</para>
+
+          <para>Both quotation mark (<literal>"</literal>) and
           apostrophe-quoate (<literal>'</literal>) are escaped. Starting from
           FreeMarker 2.3.1, it also escapes <literal>&gt;</literal> as
           <literal>\&gt;</literal> (to avoid
-          <literal>&lt;/script&gt;</literal>). Furthermore, all characters
-          under <link linkend="gloss.UCS">UCS</link> code point 0x20, that has
-          no dedicated escape sequence in JavaScript language, will be
-          replaced with hexadecimal escape
-          (<literal>\x<replaceable>XX</replaceable></literal>). (Of course,
-          according the JavaScript language string literal syntax, backslash
-          (<literal>\</literal>) will be escaped too, line-feed will be
-          escaped as <literal>\n</literal>, ...etc.)</para>
+          <literal>&lt;/script&gt;</literal>).</para>
+
+          <para>All characters under <link linkend="gloss.UCS">UCS</link> code
+          point 0x20 will be escaped. When they have no dedicated escape
+          sequence in JavaScript (like <literal>\n</literal>,
+          <literal>\t</literal>, etc.), they will be replaced with a UNICODE
+          escape
+          (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
 
           <para>Example:</para>
 
@@ -11725,6 +11734,36 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <programlisting role="output">&lt;script&gt;
   alert("Welcome Big Joe\'s \"right hand\"!");
 &lt;/script&gt;</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_json_string">
+          <title>json_string</title>
+
+          <indexterm>
+            <primary>json_string built-in</primary>
+          </indexterm>
+
+          <para>Escapes the string with the escaping rules of JSON language
+          string literals, so it's safe to insert the value into a string
+          literal. Note that it will <emphasis>not</emphasis> add quotation
+          marks around the inserted value; you meant to use this
+          <emphasis>inside</emphasis> the string literal.</para>
+
+          <para>This will not escape <literal>'</literal> characters, since
+          JSON strings must be quoted with <literal>"</literal>. It will,
+          however escape the <literal>/</literal> (slash) characters as
+          <literal>\/</literal> where they occur directly after a
+          <literal>&lt;</literal>, to avoid <literal>&lt;/script&gt;</literal>
+          and such. It will also escape the <literal>&gt;</literal> characters
+          as <literal>\u003E</literal> where they occur directly after
+          <literal>]]</literal>, to avoid exiting an XML
+          <literal>CDATA</literal> section.</para>
+
+          <para>All characters under <link linkend="gloss.UCS">UCS</link> code
+          point 0x20 will be escaped. When they have no dedicated escape
+          sequence in JSON (like <literal>\n</literal>, <literal>\t</literal>,
+          etc.), they will be replaced with a UNICODE escape
+          (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
         </section>
 
         <section xml:id="ref_builtin_last_index_of">
@@ -19987,7 +20026,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_19">
         <title>2.3.19</title>
 
-        <para>Date of release: FIXME</para>
+        <para>Date of release: 2012-02-29</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -20005,6 +20044,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               expects ISO 8601 date/times should continue working), but only
               the last format complies with the XML Schema date/time formats,
               hence this change.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in for escaping inside JSON string literals:
+              <link
+              linkend="ref_builtin_json_string"><literal>json_string</literal></link>.
+              </para>
             </listitem>
 
             <listitem>
