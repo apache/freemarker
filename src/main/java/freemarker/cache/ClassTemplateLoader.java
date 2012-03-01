@@ -140,7 +140,32 @@ public class ClassTemplateLoader extends URLTemplateLoader
 
     protected URL getURL(String name)
     {
-        return loaderClass.getResource(path + name);
+        String fullPath = path + name;
+        
+        // Block java.net.URLClassLoader exploits:
+        if (path.equals("/") && !isSchemeless(fullPath)) {
+            return null;
+        }
+        
+        return loaderClass.getResource(fullPath);
+    }
+    
+    private static boolean isSchemeless(String fullPath) {
+        int i = 0;
+        int ln = fullPath.length();
+        
+        // Skip a single initial /, as things like "/file:/..." might work:
+        if (i < ln && fullPath.charAt(i) == '/') i++;
+        
+        // Check if there's no ":" earlier than a '/', as the URLClassLoader
+        // could interpret that as an URL scheme:
+        while (i < ln) {
+            char c = fullPath.charAt(i);
+            if (c == '/') return true;
+            if (c == ':') return false;
+            i++;
+        }
+        return true;
     }
 
     private void setFields(Class loaderClass, String path) {

@@ -703,12 +703,8 @@ public class TemplateCache
     }
     
     private static String normalizeName(String name) {
-        int cppIdx = name.indexOf("://"); 
-        if (cppIdx > 0) {
-            int zIdx = name.indexOf(0);
-            if (zIdx != -1 && zIdx < cppIdx) return null;
-            return name;
-        }
+        // Disallow 0 for security reasons.
+        if (name.indexOf(0) != -1) return null;
 
         for(;;) {
             int parentDirPathLoc = name.indexOf(PARENT_DIR_PATH);
