@@ -8459,13 +8459,29 @@ TemplateHashModel roundingModeEnums =
 &lt;servlet-mapping&gt;
   &lt;servlet-name&gt;freemarker&lt;/servlet-name&gt;
   &lt;url-pattern&gt;<emphasis>*.ftl</emphasis>&lt;/url-pattern&gt;
-&lt;/servlet-mapping&gt;</programlisting>
+&lt;/servlet-mapping&gt;
 
-          <para>That's all. After this, you can use FTL files
-          (<literal>*.ftl</literal>) in the same manner as JSP
-          (<literal>*.jsp</literal>) files. (Of course you can choose another
-          extension besides <literal>ftl</literal>; it is just the
-          convention)</para>
+<replaceable>...</replaceable>
+
+&lt;!--
+  Prevent the visiting of MVC Views from outside the servlet container.
+  RequestDispatcher.forward/include should and will still work.
+  Removing this may open security holes!
+--&gt;
+&lt;security-constraint&gt;
+  &lt;web-resource-collection&gt;
+    &lt;web-resource-name&gt;FreeMarker MVC Views&lt;/web-resource-name&gt;
+    &lt;url-pattern&gt;*.ftl&lt;/url-pattern&gt;
+  &lt;/web-resource-collection&gt;
+  &lt;auth-constraint&gt;
+    &lt;!-- Nobody is allowed to visit these --&gt;
+  &lt;/auth-constraint&gt;
+&lt;/security-constraint&gt;</programlisting>
+
+          <para>After this, you can use FTL files (<literal>*.ftl</literal>)
+          in the same manner as JSP (<literal>*.jsp</literal>) files. (Of
+          course you can choose another extension besides
+          <literal>ftl</literal>; it is just the convention)</para>
 
           <note>
             <para>How does it work? Let's examine how JSP-s work. Many servlet
@@ -20028,6 +20044,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: 2012-02-29</para>
 
+        <para>Don't miss the <link linkend="v2319secfix">security related
+        changes</link>, they may affect your application!</para>
+
         <section>
           <title>Changes on the FTL side</title>
 
@@ -20059,11 +20078,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               correct <literal>#</literal> tag earlier in the same template.
               Since fixing this would not be 100% backward compatible, the old
               behavior has remained, unless you set the
-              <literal>emulate_2_3_parser_bugs</literal>
-              (<literal>Configuration.setEmulate23ParserBugs(boolean)</literal>)
-              to <literal>false</literal>. Doing so is recommended, as
-              <literal>false</literal> will be the default starting from
-              2.4.0.</para>
+              <literal>incompatible_enhancements</literal> setting
+              (<literal>Configuration.setIncompatibleEnhancements(String)</literal>)
+              to <literal>"2.3.19"</literal> or higher.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -20072,6 +20089,84 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para xml:id="v2319secfix"><emphasis>Attention</emphasis>: This
+              release contains two important security workarounds that
+              unavoidably make it obvious how some applications can be
+              exploited. <emphasis>FreeMarker can't solve these issues on all
+              configurations, so please read the details instead of just
+              updating FreeMarker!</emphasis> Also, these changes are not 100%
+              backward compatible in theory, however it's not probable that
+              they will break anything. The two changes are:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>The character with character code 0
+                  (<literal>\u0000</literal>) is not allowed in template paths
+                  anymore. When a path contains it, FreeMarker behaves as if
+                  the template was not found.</para>
+
+                  <para>This is to fix the security problem where a template
+                  path like <literal>"secret.txt\u0000.ftl"</literal> is used
+                  to bypass extension filtering in an application. FreeMarker
+                  itself doesn't care about the extension, but some
+                  applications decide based on the extension if they will
+                  delegate a path to FreeMarker. When they do with such a
+                  path, the C/C++ implementation behind the storage mechanism
+                  may sees the path as <literal>"secret.txt"</literal> as the
+                  0 terminates the string in C/C++, and thus load a non-FTL
+                  file as a template, returning the file contents to the
+                  attacker.</para>
+
+                  <para>Note that some HTTP servers, notably Tomcat and Apache
+                  will block URL-s containing 0, but some others, like Jetty,
+                  doesn't. </para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>ClassTemplateLoader</literal>, when it's
+                  created with base path <literal>"/"</literal> (like with
+                  <literal>new ClassTemplateLoader(someClass, "/")</literal>),
+                  will not allow template paths that contain colon earlier
+                  than any <literal>/</literal>, and will act like if the
+                  template was not found in such case.</para>
+
+                  <para>This is to fix the security problem where a template
+                  path like <literal>"file:/etc/secret"</literal> or
+                  <literal>"http://example.com/malware.ftl"</literal> is
+                  interpreted as a full URL by a
+                  <literal>java.net.URLClassLoader</literal> in the
+                  class-loader hierarchy. This is a quirk (or bug) of
+                  <literal>java.net.URLClassLoader</literal>.</para>
+
+                  <para>Beware, some frameworks use their own
+                  <literal>TemplateLoader</literal> implementations, and if
+                  those are vulnerable, they will remain so after updating
+                  FreeMarker too! Note that this exploit only works if the
+                  class-loader hierarchy contains an
+                  <literal>URLClassLoader</literal> and the class-loader is
+                  used to load templates without adding any prefix before the
+                  template path (other than <literal>"/"</literal>).</para>
+                </listitem>
+              </itemizedlist>
+
+              <para>These security issues mostly affect applications where the
+              user (the visitor) can supply arbitrary template paths. This is
+              not the case with properly built MVC applications, as there only
+              the Controller can be addressed directly, and it's the
+              Controller who specifies the template paths. But MVC
+              applications based on <link
+              linkend="pgui_misc_servlet_model2">JSP Model-2</link> often
+              expose the MVC Views as URL-s ending with
+              <literal>.ftl</literal>, thus allowing the user to give
+              arbitrary paths to FreeMarker. Such applications should be
+              secured with a <literal>security-constratint</literal> in
+              <literal>web.xml</literal> as shown in the <link
+              linkend="pgui_misc_servlet_model2">related Manual
+              section</link>. This should be done regardless of the current
+              security fixes.</para>
+            </listitem>
+
             <listitem>
               <para><literal>Configuration</literal> has new methods:
               <literal>removeTemplateFromCache(...)</literal>. This will
