@@ -20118,9 +20118,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   file as a template, returning the file contents to the
                   attacker.</para>
 
-                  <para>Note that some HTTP servers, notably Tomcat and Apache
-                  will block URL-s containing 0, but some others, like Jetty,
-                  doesn't. </para>
+                  <para>Note that some HTTP servers, notably Tomcat and the
+                  Apache HTTP Server blocks URL-s where the URL contains 0
+                  (<literal>%00</literal>) outside the query string, thus this
+                  wasn't exploitable there through such Web URL-s. Some other
+                  HTTP servers however, like Jetty, doesn't block such
+                  URL-s.</para>
                 </listitem>
 
                 <listitem>
@@ -20136,8 +20139,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>"http://example.com/malware.ftl"</literal> is
                   interpreted as a full URL by a
                   <literal>java.net.URLClassLoader</literal> in the
-                  class-loader hierarchy. This is a quirk (or bug) of
-                  <literal>java.net.URLClassLoader</literal>.</para>
+                  class-loader hierarchy, and thus allow loading files from
+                  these URL-s as templates. This is a quirk (or bug) of
+                  <literal>java.net.URLClassLoader</literal>, thus this
+                  problem only exists on systems that use such
+                  class-loaders.</para>
 
                   <para>Beware, some frameworks use their own
                   <literal>TemplateLoader</literal> implementations, and if
@@ -20150,21 +20156,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>These security issues mostly affect applications where the
-              user (the visitor) can supply arbitrary template paths. This is
-              not the case with properly built MVC applications, as there only
-              the Controller can be addressed directly, and it's the
-              Controller who specifies the template paths. But MVC
-              applications based on <link
-              linkend="pgui_misc_servlet_model2">JSP Model-2</link> often
-              expose the MVC Views as URL-s ending with
-              <literal>.ftl</literal>, thus allowing the user to give
+              <para>These security issues mostly only affect applications
+              <emphasis>where the user (the visitor) can supply arbitrary
+              template paths to the application</emphasis>. This is not the
+              case with properly built MVC applications, as there only the MVC
+              Controller can be addressed directly, and it's the Controller
+              that specifies the template paths. But legacy MVC applications
+              based on <link linkend="pgui_misc_servlet_model2">JSP
+              Model-2</link> often expose the MVC Views as public URL-s ending
+              with <literal>.ftl</literal>, thus allowing the user to give
               arbitrary paths to FreeMarker. Such applications should be
               secured with a <literal>security-constratint</literal> in
               <literal>web.xml</literal> as shown in the <link
               linkend="pgui_misc_servlet_model2">related Manual
               section</link>. This should be done regardless of the current
               security fixes.</para>
+
+              <para>In general, you should not allow users to specify
+              arbitrary template paths, or if you do allow that, you should be
+              extra careful with the <literal>TemplateLoader</literal>
+              used.</para>
             </listitem>
 
             <listitem>
