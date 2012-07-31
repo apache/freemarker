@@ -44,7 +44,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="figures/overview.png"></imagedata>
+          <imagedata fileref="figures/overview.png"/>
         </imageobject>
       </mediaobject>
 
@@ -71,15 +71,15 @@
 
       <itemizedlist>
         <listitem>
-          <para>designer, then you should read the <xref linkend="dgui" /> and
-          then you can look into the <xref linkend="ref" /> on an as-needed
+          <para>designer, then you should read the <xref linkend="dgui"/> and
+          then you can look into the <xref linkend="ref"/> on an as-needed
           basis for more specific details.</para>
         </listitem>
 
         <listitem>
-          <para>programmer, then you should read the <xref linkend="dgui" />
-          guide first, then the <xref linkend="pgui" /> and then you can look
-          into the <xref linkend="ref" /> on an as-needed basis for more
+          <para>programmer, then you should read the <xref linkend="dgui"/>
+          guide first, then the <xref linkend="pgui"/> and then you can look
+          into the <xref linkend="ref"/> on an as-needed basis for more
           specific details.</para>
         </listitem>
       </itemizedlist>
@@ -144,15 +144,15 @@
 
       <para>For the latest version of FreeMarker and to subscribe to the
       <emphasis>mailing lists</emphasis> visit the FreeMarker homepage: <olink
-      targetdoc="homepage"><phrase role="homepage"></phrase></olink></para>
+      targetdoc="homepage"><phrase role="homepage"/></olink></para>
 
       <para>If you <emphasis>need help</emphasis> or you have
       <emphasis>suggestions</emphasis>, use the mailing lists (mail archives
       can be searched without subscription) or the Web based forums. If you
       want to <emphasis>report a bug</emphasis>, use the Web based bug
       tracker, or the mailing lists. To find all of these visit <olink
-      targetdoc="homepage"><phrase role="homepage"></phrase></olink>. Also,
-      note that we have a <link linkend="app_faq">FAQ</link> and <link
+      targetdoc="homepage"><phrase role="homepage"/></olink>. Also, note that
+      we have a <link linkend="app_faq">FAQ</link> and <link
       linkend="alphaidx">index</link>; use them.</para>
     </section>
 
@@ -278,7 +278,7 @@
         from Java objects, but let that be the problem of the Java
         programmers.)</para>
 
-        <para>Compare this with what you seen in the template earlier:
+        <para>Compare this with what you saw in the template earlier:
         <literal>${user}</literal> and
         <literal>${latestProduct.name}</literal>. As an analogy, the data
         model is something like the file system of computers: the root and
@@ -341,15 +341,15 @@
         <literal>whatnot</literal>) are called <emphasis
         role="term">hashes</emphasis>. Hashes store other variables (the so
         called <anchor
-        xml:id="topic.dataModel.subVar" /><emphasis>subvariables</emphasis>)
-        by a lookup name (e.g., "animals", "mouse" or "price").</para>
+        xml:id="topic.dataModel.subVar"/><emphasis>subvariables</emphasis>) by
+        a lookup name (e.g., "animals", "mouse" or "price").</para>
 
         <para>The variables that store a single value
         (<literal>size</literal>, <literal>price</literal>,
         <literal>test</literal> and <literal>because</literal>) are called
         <emphasis role="term">scalars</emphasis>.</para>
 
-        <para><anchor xml:id="topic.qStart.accessVariables" />When you want to
+        <para><anchor xml:id="topic.qStart.accessVariables"/>When you want to
         use a subvariable in a template, you specify its path from the root,
         and separate the steps with dots. To access the
         <literal>price</literal> of a <literal>mouse</literal>, you start from
@@ -830,7 +830,7 @@ All Rights Reserved.
 
         <note>
           <para>It is assumed that you have already read the <xref
-          linkend="dgui_quickstart" /> chapter.</para>
+          linkend="dgui_quickstart"/> chapter.</para>
         </note>
 
         <para>Understanding the concept of values and types is crucial for the
@@ -1066,7 +1066,7 @@ brown</programlisting>
         <section xml:id="dgui_datamodel_scalar">
           <title>Scalars</title>
 
-          <anchor xml:id="topic.designer.scalarVariable" />
+          <anchor xml:id="topic.designer.scalarVariable"/>
 
           <para>These are the basic, simple kind of values. They can
           be:</para>
@@ -1260,7 +1260,7 @@ brown</programlisting>
           <section xml:id="dgui_datamodel_method">
             <title>Methods and functions</title>
 
-            <anchor xml:id="topic.designer.methodVariable" />
+            <anchor xml:id="topic.designer.methodVariable"/>
 
             <indexterm>
               <primary>method</primary>
@@ -1450,7 +1450,7 @@ The average of the price of a python and an elephant is:
 
       <note>
         <para>It is assumed that you have already read the <xref
-        linkend="dgui_quickstart" /> and the <xref linkend="dgui_datamodel" />
+        linkend="dgui_quickstart"/> and the <xref linkend="dgui_datamodel"/>
         chapter.</para>
       </note>
 
@@ -1597,7 +1597,7 @@ The average of the price of a python and an elephant is:
           <primary>#</primary>
         </indexterm>
 
-        <anchor xml:id="term.designer.directive" />
+        <anchor xml:id="term.designer.directive"/>
 
         <remark>Note that the Expressions chapter depends on this chapter, and
         Interpolations chapter depends on Expressions chapter. Thus Directives
@@ -1699,8 +1699,8 @@ The average of the price of a python and an elephant is:
         name.</para>
 
         <para>The complete list and description of all directives can be found
-        in the <xref linkend="ref_directives" /> (but I recommend that you
-        look at the chapter about expressions first).</para>
+        in the <xref linkend="ref_directives"/> (but I recommend that you look
+        at the chapter about expressions first).</para>
 
         <note>
           <para>FreeMarker can be configured to use <literal>[</literal> and
@@ -1709,7 +1709,7 @@ The average of the price of a python and an elephant is:
           <literal>[#if user == "Big
           Joe"]<replaceable>...</replaceable>[/#if]</literal>. For more
           information read: <xref
-          linkend="dgui_misc_alternativesyntax" />.</para>
+          linkend="dgui_misc_alternativesyntax"/>.</para>
         </note>
 
         <note>
@@ -1718,7 +1718,7 @@ The average of the price of a python and an elephant is:
           == "Big
           Joe"&gt;<replaceable>...</replaceable>&lt;/if&gt;</literal>).
           However we don't recommend the usage of this mode. For more
-          information read: <xref linkend="ref_depr_oldsyntax" /></para>
+          information read: <xref linkend="ref_depr_oldsyntax"/></para>
         </note>
       </section>
 
@@ -2007,7 +2007,7 @@ this is a backslash: \</programlisting>
               expressions.</para>
             </note>
 
-            <anchor xml:id="topic.escapeSequence" />
+            <anchor xml:id="topic.escapeSequence"/>
 
             <indexterm>
               <primary>escape sequences</primary>
@@ -4033,7 +4033,7 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
 
           <para>A very important aspect of macro parameters is that they are
           local variables. For more information about local variables please
-          read: <xref linkend="dgui_misc_var" /></para>
+          read: <xref linkend="dgui_misc_var"/></para>
         </section>
 
         <section>
@@ -4166,7 +4166,7 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
 
           <para>Predefined directives like <literal>list</literal> can use
           so-called loop variables; you should read <xref
-          linkend="dgui_misc_var" /> to understand loop variables.</para>
+          linkend="dgui_misc_var"/> to understand loop variables.</para>
 
           <para>User-defined directives can also have loop variables. For
           example, let's extend the <literal>do_thrice</literal> directive of
@@ -4271,8 +4271,8 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           directive</link>.</para>
 
           <para>Also, you may interested in namespaces: <xref
-          linkend="dgui_misc_namespace" />. Namespaces help you to organize
-          and reuse your commonly used macros.</para>
+          linkend="dgui_misc_namespace"/>. Namespaces help you to organize and
+          reuse your commonly used macros.</para>
         </section>
       </section>
 
@@ -4444,7 +4444,7 @@ ${user}          &lt;#-- prints: Joe Hider --&gt;
 ${.globals.user} &lt;#-- prints: Big Joe --&gt;</programlisting>
 
         <para>For information about syntax of variables please read: <xref
-        linkend="dgui_template_exp" /></para>
+        linkend="dgui_template_exp"/></para>
       </section>
 
       <section xml:id="dgui_misc_namespace">
@@ -5112,7 +5112,7 @@ That's all.</programlisting>
       <title>Getting Started</title>
 
       <para>Note that, if you are new to FreeMarker, you should read at least
-      the <xref linkend="dgui_quickstart" /> before this chapter.</para>
+      the <xref linkend="dgui_quickstart"/> before this chapter.</para>
 
       <section xml:id="pgui_quickstart_createconfiguration">
         <title>Create a configuration instance</title>
@@ -5424,7 +5424,7 @@ public class Test {
         interface. Note that a class can implement multiple
         <literal>TemplateModel</literal> interfaces; this is why FTL variables
         can have multiple types (see: <xref
-        linkend="dgui_datamodel_basics" />)</para>
+        linkend="dgui_datamodel_basics"/>)</para>
 
         <para>Note that a trivial implementation of these interfaces is
         provided with the <literal>freemarker.template</literal> package. For
@@ -6598,13 +6598,13 @@ cfg.setSharedVariable("company", "Foo Inc.");  // Using ObjectWrapper.DEFAULT_WR
         settings for this example):</para>
 
         <informaltable border="1">
-          <col align="left" />
+          <col align="left"/>
 
-          <col align="center" span="6" />
+          <col align="center" span="6"/>
 
           <thead>
             <tr>
-              <th></th>
+              <th/>
 
               <th>Setting A</th>
 
@@ -7351,12 +7351,12 @@ c</programlisting>
           <itemizedlist>
             <listitem>
               <para>Handling missing/null variables: <xref
-              linkend="dgui_template_exp_missing" /></para>
+              linkend="dgui_template_exp_missing"/></para>
             </listitem>
 
             <listitem>
               <para>Surviving malfunctioning ``portlets'' and such expendable
-              page sections: <xref linkend="ref_directive_attempt" /></para>
+              page sections: <xref linkend="ref_directive_attempt"/></para>
             </listitem>
           </itemizedlist>
         </section>
@@ -7628,7 +7628,7 @@ env.process();</programlisting>
         for a single <literal>Template.process</literal> call to store the
         runtime state of processing), so you don't modify data that are
         possibly used by multiple threads. For more information read: <xref
-        linkend="pgui_misc_var" /></para>
+        linkend="pgui_misc_var"/></para>
       </section>
 
       <section xml:id="pgui_misc_beanwrapper">
@@ -8338,7 +8338,7 @@ TemplateHashModel roundingModeEnums =
       <section xml:id="pgui_misc_servlet">
         <title>Using FreeMarker with servlets</title>
 
-        <anchor xml:id="topic.servlet" />
+        <anchor xml:id="topic.servlet"/>
 
         <indexterm>
           <primary>Servlet</primary>
@@ -8396,7 +8396,7 @@ TemplateHashModel roundingModeEnums =
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="figures/model2sketch.png"></imagedata>
+              <imagedata fileref="figures/model2sketch.png"/>
             </imageobject>
           </mediaobject>
 
@@ -8499,9 +8499,9 @@ TemplateHashModel roundingModeEnums =
             will be called to generate the page.</para>
           </note>
 
-          <para><anchor xml:id="topic.servlet.scopeAttr" />For example,
-          instead of this JSP file (note that it heavily uses Struts tag-libs
-          to save designers from embedded Java monsters):</para>
+          <para><anchor xml:id="topic.servlet.scopeAttr"/>For example, instead
+          of this JSP file (note that it heavily uses Struts tag-libs to save
+          designers from embedded Java monsters):</para>
 
           <programlisting role="template">&lt;%@ taglib uri="/WEB-INF/struts-bean.tld" prefix="bean" %&gt;
 &lt;%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %&gt;
@@ -8933,7 +8933,7 @@ grant codeBase "file:/path/to/freemarker.jar"
           model. To support this, a new XML wrapper package was introduced,
           <literal>freemarker.ext.dom</literal>. For new usage, we encourage
           you to use that. It is documented in the part <xref
-          linkend="xgui" />.</para>
+          linkend="xgui"/>.</para>
         </note>
 
         <para>The class <literal>freemarker.ext.xml.NodeListModel</literal>
@@ -9495,7 +9495,7 @@ grant codeBase "file:/path/to/freemarker.jar"
 
         <para>We will use this XML document for the examples:</para>
 
-        <anchor xml:id="misc.example.bookXml" />
+        <anchor xml:id="misc.example.bookXml"/>
 
         <programlisting role="unspecified">&lt;book&gt;
   &lt;title&gt;Test Book&lt;/title&gt;
@@ -10228,7 +10228,7 @@ Test Book</programlisting>
         you can use them as string variables (for programmers: they implement
         <literal>TemplateScalarModel</literal>).</para>
 
-        <anchor xml:id="misc.xguiTable" />
+        <anchor xml:id="misc.xguiTable"/>
 
         <informaltable border="1">
           <thead>
@@ -10747,7 +10747,7 @@ End book</programlisting>
         <para>Here it is the template that transforms the XML to complete
         HTML:</para>
 
-        <anchor xml:id="misc.example.declarativeBookProcessor" />
+        <anchor xml:id="misc.example.declarativeBookProcessor"/>
 
         <programlisting role="template">&lt;#recurse doc&gt;
 
@@ -10819,7 +10819,7 @@ End book</programlisting>
         whitespace in the output by using the <link
         linkend="ref_directive_t">trim directives</link>, as
         <literal>&lt;#t&gt;</literal>. See also: <xref
-        linkend="dgui_misc_whitespace" /></para>
+        linkend="dgui_misc_whitespace"/></para>
 
         <para>You may say that the FTL that did it with imperative approach
         was much shorter. That's true, but the example XML uses a very simple
@@ -11340,7 +11340,7 @@ End book</programlisting>
 
         <para>If you don't find a built-in here that you have seen in a
         working template, probably you will find it here: <xref
-        linkend="ref_deprecated" /></para>
+        linkend="ref_deprecated"/></para>
       </section>
 
       <section xml:id="ref_builtins_string">
@@ -14472,7 +14472,7 @@ May 16, 2011
 
           <para>For more information about how the constructor parameters are
           unwrapped and how overloaded constructor is chosen, read: <xref
-          linkend="pgui_misc_beanwrapper" /></para>
+          linkend="pgui_misc_beanwrapper"/></para>
 
           <para>This built-in can be a security concern because the template
           author can create arbitrary Java objects and then use them, as far
@@ -14653,17 +14653,17 @@ May 16, 2011
 
         <para>If you don't find a directive here that you have seen in a
         working template, probably you will find it in: <xref
-        linkend="ref_deprecated" /></para>
+        linkend="ref_deprecated"/></para>
       </section>
 
       <section xml:id="ref_directive_if">
         <title>if, else, elseif</title>
 
-        <anchor xml:id="ref.directive.if" />
+        <anchor xml:id="ref.directive.if"/>
 
-        <anchor xml:id="ref.directive.else" />
+        <anchor xml:id="ref.directive.else"/>
 
-        <anchor xml:id="ref.directive.elseif" />
+        <anchor xml:id="ref.directive.elseif"/>
 
         <indexterm>
           <primary>if directive</primary>
@@ -14762,7 +14762,7 @@ May 16, 2011
 &lt;/#if&gt;</programlisting>
 
           <para>To see more about boolean expressions, see: <xref
-          linkend="dgui_template_exp" />.</para>
+          linkend="dgui_template_exp"/>.</para>
 
           <para>You can nest <literal>if</literal> directives (of
           course):</para>
@@ -14794,13 +14794,13 @@ May 16, 2011
       <section xml:id="ref_directive_switch">
         <title>switch, case, default, break</title>
 
-        <anchor xml:id="ref.directive.switch" />
+        <anchor xml:id="ref.directive.switch"/>
 
-        <anchor xml:id="ref.directive.case" />
+        <anchor xml:id="ref.directive.case"/>
 
-        <anchor xml:id="ref.directive.default" />
+        <anchor xml:id="ref.directive.default"/>
 
-        <anchor xml:id="ref.directive.switch.break" />
+        <anchor xml:id="ref.directive.switch.break"/>
 
         <indexterm>
           <primary>switch directive</primary>
@@ -14916,7 +14916,7 @@ May 16, 2011
       <section xml:id="ref_directive_list">
         <title>list, break</title>
 
-        <anchor xml:id="ref.directive.list" />
+        <anchor xml:id="ref.directive.list"/>
 
         <indexterm>
           <primary>list directive</primary>
@@ -15019,7 +15019,7 @@ May 16, 2011
           <para>Note that the above example will not work as you may expected
           if <literal>x</literal> is 0, as then it will print 0 and -1.</para>
 
-          <anchor xml:id="ref.directive.list.break" />
+          <anchor xml:id="ref.directive.list.break"/>
 
           <para>You can leave the <literal>list</literal> loop before it
           passes the last subvariable of the sequence with the
@@ -15054,7 +15054,7 @@ May 16, 2011
       <section xml:id="ref_directive_include">
         <title>include</title>
 
-        <anchor xml:id="ref.directive.include" />
+        <anchor xml:id="ref.directive.include"/>
 
         <indexterm>
           <primary>include directive</primary>
@@ -15394,7 +15394,7 @@ All rights reserved.</emphasis></programlisting>
       <section xml:id="ref_directive_import">
         <title>import</title>
 
-        <anchor xml:id="ref.directive.import" />
+        <anchor xml:id="ref.directive.import"/>
 
         <indexterm>
           <primary>import directive</primary>
@@ -15485,14 +15485,14 @@ All rights reserved.</emphasis></programlisting>
           <literal>Configuration</literal>.</phrase></para>
 
           <para>If you are new to namespaces, you should read: <xref
-          linkend="dgui_misc_namespace" /></para>
+          linkend="dgui_misc_namespace"/></para>
         </section>
       </section>
 
       <section xml:id="ref_directive_noparse">
         <title>noparse</title>
 
-        <anchor xml:id="ref.directive.noparse" />
+        <anchor xml:id="ref.directive.noparse"/>
 
         <indexterm>
           <primary>noparse directive</primary>
@@ -15541,7 +15541,7 @@ All rights reserved.</emphasis></programlisting>
       <section xml:id="ref_directive_compress">
         <title>compress</title>
 
-        <anchor xml:id="ref.directive.compress" />
+        <anchor xml:id="ref.directive.compress"/>
 
         <indexterm>
           <primary>compress directive</primary>
@@ -15599,9 +15599,9 @@ I said, test only)</programlisting>
       <section xml:id="ref_directive_escape">
         <title>escape, noescape</title>
 
-        <anchor xml:id="ref.directive.escape" />
+        <anchor xml:id="ref.directive.escape"/>
 
-        <anchor xml:id="ref.directive.noescape" />
+        <anchor xml:id="ref.directive.noescape"/>
 
         <indexterm>
           <primary>escape directive</primary>
@@ -15754,7 +15754,7 @@ m2: &amp;lt;test&amp;gt;</programlisting>
       <section xml:id="ref_directive_assign">
         <title>assign</title>
 
-        <anchor xml:id="ref.directive.assign" />
+        <anchor xml:id="ref.directive.assign"/>
 
         <indexterm>
           <primary>assign directive</primary>
@@ -15816,7 +15816,7 @@ or
           <literal>some_hash</literal>).</para>
 
           <para>For more information about variables, read this: <xref
-          linkend="dgui_misc_var" /></para>
+          linkend="dgui_misc_var"/></para>
 
           <para>Example: variable <literal>seasons</literal> will store a
           sequence:</para>
@@ -15887,7 +15887,7 @@ ${x}</programlisting>
       <section xml:id="ref_directive_global">
         <title>global</title>
 
-        <anchor xml:id="ref.directive.global" />
+        <anchor xml:id="ref.directive.global"/>
 
         <indexterm>
           <primary>global directive</primary>
@@ -15965,7 +15965,7 @@ or
       <section xml:id="ref_directive_local">
         <title>local</title>
 
-        <anchor xml:id="ref.directive.local" />
+        <anchor xml:id="ref.directive.local"/>
 
         <indexterm>
           <primary>local directive</primary>
@@ -16013,14 +16013,14 @@ or
           only works inside macro definitions and function definitons.</para>
 
           <para>For more information about variables, read this: <xref
-          linkend="dgui_misc_var" /></para>
+          linkend="dgui_misc_var"/></para>
         </section>
       </section>
 
       <section xml:id="ref_directive_setting">
         <title>setting</title>
 
-        <anchor xml:id="ref.directive.setting" />
+        <anchor xml:id="ref.directive.setting"/>
 
         <indexterm>
           <primary>setting directive</primary>
@@ -16057,7 +16057,7 @@ or
           and does not touch the template itself. The initial value of
           settings is set by the programmer <phrase
           role="forProgrammers">(see: <xref
-          linkend="pgui_config_settings" />)</phrase>.</para>
+          linkend="pgui_config_settings"/>)</phrase>.</para>
 
           <para>The supported settings are:</para>
 
@@ -16206,7 +16206,7 @@ ${1.2}</programlisting>
       <section xml:id="ref_directive_userDefined">
         <title>User-defined directive (&lt;@...&gt;)</title>
 
-        <anchor xml:id="ref.directive.userDefined" />
+        <anchor xml:id="ref.directive.userDefined"/>
 
         <indexterm>
           <primary>user-defined directive</primary>
@@ -16427,7 +16427,7 @@ Or all above but with positional parameter passing (<link
       <section xml:id="ref_directive_macro">
         <title>macro, nested, return</title>
 
-        <anchor xml:id="ref.directive.macro" />
+        <anchor xml:id="ref.directive.macro"/>
 
         <indexterm>
           <primary>macro directive</primary>
@@ -16638,7 +16638,7 @@ Or all above but with positional parameter passing (<link
           <section>
             <title>nested</title>
 
-            <anchor xml:id="ref.directive.nested" />
+            <anchor xml:id="ref.directive.nested"/>
 
             <para>The <literal>nested</literal> directive executes the
             template fragment between the start-tag and end-tags of the
@@ -16707,7 +16707,7 @@ Or all above but with positional parameter passing (<link
           <section>
             <title>return</title>
 
-            <anchor xml:id="ref.directive.macro.return" />
+            <anchor xml:id="ref.directive.macro.return"/>
 
             <para>With the <literal>return</literal> directive, you can leave
             a macro or function definition body anywhere. Example:</para>
@@ -16730,9 +16730,9 @@ Or all above but with positional parameter passing (<link
       <section xml:id="ref_directive_function">
         <title>function, return</title>
 
-        <anchor xml:id="ref.directive.function" />
+        <anchor xml:id="ref.directive.function"/>
 
-        <anchor xml:id="ref.directive.function.return" />
+        <anchor xml:id="ref.directive.function.return"/>
 
         <indexterm>
           <primary>function directive</primary>
@@ -16855,7 +16855,7 @@ N/A</programlisting>
       <section xml:id="ref_directive_flush">
         <title>flush</title>
 
-        <anchor xml:id="ref.directive.flush" />
+        <anchor xml:id="ref.directive.flush"/>
 
         <indexterm>
           <primary>flush directive</primary>
@@ -16895,7 +16895,7 @@ N/A</programlisting>
       <section xml:id="ref_directive_stop">
         <title>stop</title>
 
-        <anchor xml:id="ref.directive.stop" />
+        <anchor xml:id="ref.directive.stop"/>
 
         <indexterm>
           <primary>stop directive</primary>
@@ -16936,7 +16936,7 @@ or
       <section xml:id="ref_directive_ftl">
         <title>ftl</title>
 
-        <anchor xml:id="ref.directive.ftl" />
+        <anchor xml:id="ref.directive.ftl"/>
 
         <indexterm>
           <primary>ftl directive</primary>
@@ -17067,7 +17067,7 @@ or
               setting to <literal>true</literal> for this:
               <literal>config.setStrictSyntaxMode(true);</literal>)</phrase>
               For more information read: <xref
-              linkend="ref_depr_oldsyntax" /></para>
+              linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -17147,11 +17147,11 @@ or
       <section xml:id="ref_directive_t">
         <title>t, lt, rt</title>
 
-        <anchor xml:id="ref.directive.t" />
+        <anchor xml:id="ref.directive.t"/>
 
-        <anchor xml:id="ref.directive.lt" />
+        <anchor xml:id="ref.directive.lt"/>
 
-        <anchor xml:id="ref.directive.rt" />
+        <anchor xml:id="ref.directive.rt"/>
 
         <indexterm>
           <primary>t directive</primary>
@@ -17269,7 +17269,7 @@ or
       <section xml:id="ref_directive_nt">
         <title>nt</title>
 
-        <anchor xml:id="ref.directive.nt" />
+        <anchor xml:id="ref.directive.nt"/>
 
         <indexterm>
           <primary>nt directive</primary>
@@ -17314,7 +17314,7 @@ or
       <section xml:id="ref_directive_attempt">
         <title>attempt, recover</title>
 
-        <anchor xml:id="ref.directive.attempt" />
+        <anchor xml:id="ref.directive.attempt"/>
 
         <indexterm>
           <primary>attempt directive</primary>
@@ -17472,7 +17472,7 @@ Primary content continued</programlisting>
       <section xml:id="ref_directive_visit">
         <title>visit, recurse, fallback</title>
 
-        <anchor xml:id="ref.directive.visit" />
+        <anchor xml:id="ref.directive.visit"/>
 
         <indexterm>
           <primary>visit directive</primary>
@@ -17675,7 +17675,7 @@ Done.</programlisting>
             user-defined directive to handle the node, then
             <literal>visit</literal> stops template processing with error.
             Some XML specific node types have special handling in this regard;
-            see: <xref linkend="xgui_declarative_details" />. Example:</para>
+            see: <xref linkend="xgui_declarative_details"/>. Example:</para>
 
             <programlisting role="template">&lt;#-- Assume that nodeWithNameX?node_name is "x" --&gt;
 &lt;#visit nodeWithNameX&gt;
@@ -17703,7 +17703,7 @@ There was no specific handler for node y
           <section>
             <title>Recurse</title>
 
-            <anchor xml:id="ref.directive.recurse" />
+            <anchor xml:id="ref.directive.recurse"/>
 
             <para>The <literal>&lt;#recurse&gt;</literal> directive is really
             syntactic sugar. It visits all children nodes of the node (and not
@@ -17732,7 +17732,7 @@ There was no specific handler for node y
           <section>
             <title>Fallback</title>
 
-            <anchor xml:id="ref.directive.fallback" />
+            <anchor xml:id="ref.directive.fallback"/>
 
             <para>As you could learn earlier, in the documentation of the
             <literal>visit</literal> directive, the user-defined directive
@@ -18139,9 +18139,9 @@ There was no specific handler for node y
       <section xml:id="ref_depr_oldmacro">
         <title>Old-style macro and call directives</title>
 
-        <anchor xml:id="ref.directive.oldmacro" />
+        <anchor xml:id="ref.directive.oldmacro"/>
 
-        <anchor xml:id="ref.directive.call" />
+        <anchor xml:id="ref.directive.call"/>
 
         <section>
           <title>Synopsis</title>
@@ -18270,7 +18270,7 @@ There was no specific handler for node y
       <section xml:id="ref_depr_transform">
         <title>Transform directive</title>
 
-        <anchor xml:id="ref.directive.transform" />
+        <anchor xml:id="ref.directive.transform"/>
 
         <indexterm>
           <primary>transform directive</primary>
@@ -18369,7 +18369,7 @@ some test
           most transforms in the
           <literal>freemarker.template.utility</literal> package. For more
           information see: <xref
-          linkend="pgui_config_sharedvariables" /></phrase></para>
+          linkend="pgui_config_sharedvariables"/></phrase></para>
         </section>
       </section>
 
@@ -18695,7 +18695,7 @@ or
             </itemizedlist>
 
             <para>You may read this if you are considering replacing JSP with
-            FreeMarker: <xref linkend="pgui_misc_servlet_model2" /></para>
+            FreeMarker: <xref linkend="pgui_misc_servlet_model2"/></para>
           </answer>
         </qandaentry>
 
@@ -19551,10 +19551,10 @@ t.process(root, out);
 
             <para>When you use <literal>&lt;#assign x = "foo"&gt;</literal>,
             then you do not actually modify the data-model (since that is
-            read-only, see: <xref linkend="pgui_misc_multithreading" />), but
+            read-only, see: <xref linkend="pgui_misc_multithreading"/>), but
             create the <literal>x</literal> variable in the runtime <link
             linkend="gloss.environment">environment</link> of the processing
-            (see <xref linkend="pgui_misc_var" />). The problem is that this
+            (see <xref linkend="pgui_misc_var"/>). The problem is that this
             runtime environment will be discarded when
             <literal>Template.process</literal> returns, as it was created for
             a single <literal>Template.process</literal> call:</para>
@@ -19716,7 +19716,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <qandaentry xml:id="faq_nice_error_page">
           <question>
-            <para><anchor xml:id="misc.faq.niceErrorPage" /> In my Servlet
+            <para><anchor xml:id="misc.faq.niceErrorPage"/> In my Servlet
             based application, how do I show a nice error page instead of a
             stack trace when error occurs during template processing?</para>
           </question>
@@ -20068,8 +20068,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>New built-in for escaping inside JSON string literals:
               <link
-              linkend="ref_builtin_json_string"><literal>json_string</literal></link>.
-              </para>
+              linkend="ref_builtin_json_string"><literal>json_string</literal></link>.</para>
             </listitem>
 
             <listitem>
@@ -22306,7 +22305,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               between two non-outputting elements, such as macro definitions,
               assignments, imports, or property settings, is now ignored. More
               information: <xref
-              linkend="dgui_misc_whitespace_stripping" /></para>
+              linkend="dgui_misc_whitespace_stripping"/></para>
             </listitem>
 
             <listitem>
@@ -22483,7 +22482,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               is removed in these cases as well.) Also, top-level white-space
               that separates macro definitions and/or assignments is now
               ignored. More information: <xref
-              linkend="dgui_misc_whitespace_stripping" /></para>
+              linkend="dgui_misc_whitespace_stripping"/></para>
             </listitem>
 
             <listitem>
@@ -23170,7 +23169,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 white-space is removed in these cases as well.) Also,
                 top-level white-space that separates macro definitions and/or
                 assignments is now ignored. More information: <xref
-                linkend="dgui_misc_whitespace_stripping" /></para>
+                linkend="dgui_misc_whitespace_stripping"/></para>
               </listitem>
 
               <listitem>
@@ -23212,7 +23211,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <para>Many XML related changes. Some of them are incompatible
                 with the previous preview releases! For a more detailed
                 explanation of how XML related features now work, see: <xref
-                linkend="xgui" /></para>
+                linkend="xgui"/></para>
 
                 <itemizedlist>
                   <listitem>
@@ -23587,7 +23586,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <listitem>
                 <para>XML processing: Better documentation. Especially, note:
-                <xref linkend="xgui" /></para>
+                <xref linkend="xgui"/></para>
               </listitem>
 
               <listitem>
@@ -24012,8 +24011,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>New scalar type: date. For more information read: <xref
-              linkend="dgui_datamodel_scalar" />, <xref
-              linkend="dgui_datamodel_scalar" />, <link
+              linkend="dgui_datamodel_scalar"/>, <xref
+              linkend="dgui_datamodel_scalar"/>, <link
               linkend="dgui_template_valueinserion_universal_date">interpolation</link>,
               <link linkend="ref_builtin_string_for_date">?string built-in for
               dates</link></para>
@@ -24028,7 +24027,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>New <literal>TemplateModel</literal> subinterface:
               <literal>TemplateDateModel</literal>. For more information read
-              <xref linkend="pgui_datamodel_scalar" /></para>
+              <xref linkend="pgui_datamodel_scalar"/></para>
             </listitem>
 
             <listitem>
@@ -24180,7 +24179,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               will be the the default syntax starting from some of the later
               releases anyway. We plan to release a conversion tool for
               converting old templates. For more information please read:
-              <xref linkend="ref_depr_oldsyntax" /></para>
+              <xref linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -24213,7 +24212,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               and <literal>?</literal> are reserved. Also, the template loader
               must not want paths starting with <literal>/</literal>. For more
               information please read: <xref
-              linkend="pgui_config_templateloading" /></para>
+              linkend="pgui_config_templateloading"/></para>
             </listitem>
 
             <listitem>
@@ -24241,7 +24240,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               you have a macro called <literal>sect</literal>, you may call it
               via <literal>&lt;@sect title="Blah" style="modern"&gt;Blah
               blah...&lt;/@sect&gt;</literal>. For more information read:
-              <xref linkend="dgui_misc_userdefdir" /></para>
+              <xref linkend="dgui_misc_userdefdir"/></para>
             </listitem>
 
             <listitem>
@@ -24262,7 +24261,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               collections you want to use in the same template. This is
               extremely important if FreeMarker users want to share their
               macro/transform collections. For more information read: <xref
-              linkend="dgui_misc_namespace" /></para>
+              linkend="dgui_misc_namespace"/></para>
             </listitem>
 
             <listitem>
@@ -24298,7 +24297,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               FreeMarker tags and comments, like the indentation spaces
               before- and line-break after <literal>&lt;#if ...&gt;</literal>
               tags. For more information read: <xref
-              linkend="dgui_misc_whitespace_stripping" /></para>
+              linkend="dgui_misc_whitespace_stripping"/></para>
             </listitem>
 
             <listitem>
@@ -24442,7 +24441,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               ...</replaceable>&gt;</literal> instead of
               <literal>&lt;/<replaceable>directive
               ...</replaceable>&gt;</literal>. For more info read: <xref
-              linkend="ref_depr_oldsyntax" /></para>
+              linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -24474,7 +24473,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Arbitrary JSP custom tags can be used as FreeMarker
               transforms in <literal>FreemarkerServlet</literal>-driven
               templates. More information: <xref
-              linkend="pgui_misc_servlet" /></para>
+              linkend="pgui_misc_servlet"/></para>
             </listitem>
 
             <listitem>
@@ -24541,7 +24540,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               ships with two implementations:
               <literal>SoftCacheStorage</literal> and
               <literal>StrongCacheStorage</literal>. For more information
-              read: <xref linkend="pgui_config_templateloading" /></para>
+              read: <xref linkend="pgui_config_templateloading"/></para>
             </listitem>
 
             <listitem>
@@ -24794,7 +24793,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 ships with two implementations:
                 <literal>SoftCacheStorage</literal> and
                 <literal>StrongCacheStorage</literal>. For more information
-                read: <xref linkend="pgui_config_templateloading" /></para>
+                read: <xref linkend="pgui_config_templateloading"/></para>
               </listitem>
 
               <listitem>
@@ -25427,7 +25426,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Local and global variables. More info: <xref
-              linkend="dgui_misc_var" /></para>
+              linkend="dgui_misc_var"/></para>
 
               <itemizedlist>
                 <listitem>
@@ -25470,7 +25469,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Strict syntax mode: Allows you to generate arbitrary SGML
               (XML) without worrying about clashes with FreeMarker directives.
               For more information read: <xref
-              linkend="ref_depr_oldsyntax" /></para>
+              linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -25574,7 +25573,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               settings, as well as commonly used variables that you want to
               have available from any template. Also it encapsulates the
               template cache and can be used to load templates. For more
-              information read <xref linkend="pgui_config" />.</para>
+              information read <xref linkend="pgui_config"/>.</para>
             </listitem>
 
             <listitem>
@@ -25595,7 +25594,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para><literal>TemplateBooleanModel</literal> introduced: Only
               objects that implements this interface can be used as a boolean
               in true/false conditions. More info: <xref
-              linkend="pgui_datamodel_scalar" /></para>
+              linkend="pgui_datamodel_scalar"/></para>
             </listitem>
 
             <listitem>
@@ -25626,7 +25625,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateTransformModel</literal> interface. More
                   flexible, and does not impose output holding. More
                   information: <xref
-                  linkend="pgui_datamodel_directive" /></para>
+                  linkend="pgui_datamodel_directive"/></para>
                 </listitem>
 
                 <listitem>
@@ -25648,7 +25647,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   the
                   <literal>freemarker.template.utility.HtmlEscape</literal>
                   transform. More information: <xref
-                  linkend="pgui_config_sharedvariables" /></para>
+                  linkend="pgui_config_sharedvariables"/></para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -25679,7 +25678,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Logging: FreeMarker logs certain events (runtime errors
               for example). For more information read <xref
-              linkend="pgui_misc_logging" />.</para>
+              linkend="pgui_misc_logging"/>.</para>
             </listitem>
 
             <listitem>
@@ -26065,7 +26064,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               string, <literal>myString?upper_case</literal> puts the string
               all in capital letters, and <literal>myHash?keys</literal>
               provides a sequence containing the keys in the hash. See <xref
-              linkend="ref_builtins" /> for list of all available
+              linkend="ref_builtins"/> for list of all available
               built-ins.</para>
             </listitem>
 
@@ -26617,9 +26616,9 @@ included both in freemarker.jar and in the source code:
         linkend="gloss.template">templates</link>. They are invoked by <link
         linkend="gloss.FTLTag">FTL tags</link>.</para>
 
-        <glossseealso otherterm="gloss.predefinedDirective"></glossseealso>
+        <glossseealso otherterm="gloss.predefinedDirective"/>
 
-        <glossseealso otherterm="gloss.userDefinedDirective"></glossseealso>
+        <glossseealso otherterm="gloss.userDefinedDirective"/>
       </glossdef>
     </glossentry>
 
@@ -26642,7 +26641,7 @@ included both in freemarker.jar and in the source code:
         following content is not under the element. Example:
         <literal>&lt;/body&gt;</literal>.</para>
 
-        <glossseealso otherterm="gloss.startTag"></glossseealso>
+        <glossseealso otherterm="gloss.startTag"/>
       </glossdef>
     </glossentry>
 
@@ -26693,7 +26692,7 @@ included both in freemarker.jar and in the source code:
     <glossentry>
       <glossterm>FTL</glossterm>
 
-      <glosssee otherterm="gloss.FTL"></glosssee>
+      <glosssee otherterm="gloss.FTL"/>
     </glossentry>
 
     <glossentry xml:id="gloss.FTLTag">
@@ -26722,7 +26721,7 @@ included both in freemarker.jar and in the source code:
         <para>A variable that acts as a container that stores subvariables
         that can be retrieved via a string that is a lookup name.</para>
 
-        <glossseealso otherterm="gloss.sequenceVariable"></glossseealso>
+        <glossseealso otherterm="gloss.sequenceVariable"/>
       </glossdef>
     </glossentry>
 
@@ -26823,7 +26822,7 @@ included both in freemarker.jar and in the source code:
         Example of predefined directives: <literal>if</literal>,
         <literal>list</literal>, <literal>include</literal></para>
 
-        <glossseealso otherterm="gloss.userDefinedDirective"></glossseealso>
+        <glossseealso otherterm="gloss.userDefinedDirective"/>
       </glossdef>
     </glossentry>
 
@@ -26846,7 +26845,7 @@ included both in freemarker.jar and in the source code:
         index, where the index of the very first object is 0, the index of the
         second objects is 1, the index of the third object is 2, etc.</para>
 
-        <glossseealso otherterm="gloss.hashVariable"></glossseealso>
+        <glossseealso otherterm="gloss.hashVariable"/>
       </glossdef>
     </glossentry>
 
@@ -26871,7 +26870,7 @@ included both in freemarker.jar and in the source code:
     <glossentry>
       <glossterm>SGML</glossterm>
 
-      <glosssee otherterm="gloss.SGML"></glosssee>
+      <glosssee otherterm="gloss.SGML"/>
     </glossentry>
 
     <glossentry xml:id="gloss.SGML">
@@ -26905,9 +26904,9 @@ included both in freemarker.jar and in the source code:
         Examples of tags: <literal>&lt;body bgcolor=black&gt;</literal>,
         <literal>&lt;/body&gt;</literal></para>
 
-        <glossseealso otherterm="gloss.startTag"></glossseealso>
+        <glossseealso otherterm="gloss.startTag"/>
 
-        <glossseealso otherterm="gloss.endTag"></glossseealso>
+        <glossseealso otherterm="gloss.endTag"/>
       </glossdef>
     </glossentry>
 
@@ -26981,7 +26980,7 @@ included both in freemarker.jar and in the source code:
         pull-down menu generation directives, HTML form handling
         directives.</para>
 
-        <glossseealso otherterm="gloss.predefinedDirective"></glossseealso>
+        <glossseealso otherterm="gloss.predefinedDirective"/>
       </glossdef>
     </glossentry>
 
@@ -26998,7 +26997,7 @@ included both in freemarker.jar and in the source code:
         UCS is that we can specify any character with a unique number, not
         mater what the platform or the language is.</para>
 
-        <glossseealso otherterm="gloss.unicode"></glossseealso>
+        <glossseealso otherterm="gloss.unicode"/>
       </glossdef>
     </glossentry>
 
@@ -27024,14 +27023,14 @@ included both in freemarker.jar and in the source code:
         space, tab (horizontal and vertical), line breaks (CR and LF), form
         feed.</para>
 
-        <glossseealso otherterm="gloss.lineBreak"></glossseealso>
+        <glossseealso otherterm="gloss.lineBreak"/>
       </glossdef>
     </glossentry>
 
     <glossentry>
       <glossterm>XML</glossterm>
 
-      <glosssee otherterm="gloss.XML"></glosssee>
+      <glosssee otherterm="gloss.XML"/>
     </glossentry>
 
     <glossentry xml:id="gloss.attribute">
@@ -27051,7 +27050,7 @@ included both in freemarker.jar and in the source code:
         text='green'&gt;</literal>), while in HTML it is optional for certain
         values.</para>
 
-        <glossseealso otherterm="gloss.startTag"></glossseealso>
+        <glossseealso otherterm="gloss.startTag"/>
       </glossdef>
     </glossentry>
 
