@@ -14896,9 +14896,9 @@ May 16, 2011
           <literal>&lt;#default&gt;</literal> tag. Example:</para>
 
           <programlisting role="template">&lt;#switch x&gt;
-  &lt;#case x = 1&gt;
+  &lt;#case 1&gt;
     1
-  &lt;#case x = 2&gt;
+  &lt;#case 2&gt;
     2
   &lt;#default&gt;
     d
