@@ -979,9 +979,7 @@ public class BeansWrapper implements ObjectWrapper
                 enumModels.removeIntrospectionInfo(clazz);
             }
             cachedClassNames.remove(clazz.getName());
-            synchronized(this) {
-                modelCache.clearCache();
-            }
+            modelCache.clearCache();
         }
     }
 
@@ -998,10 +996,7 @@ public class BeansWrapper implements ObjectWrapper
             // Class reload detected, throw away caches
             classCache.clear();
             cachedClassNames = new HashSet();
-            synchronized(this)
-            {
-                modelCache.clearCache();
-            }
+            modelCache.clearCache();
             staticModels.clearCache();
             if(enumModels != null) {
                 enumModels.clearCache();
