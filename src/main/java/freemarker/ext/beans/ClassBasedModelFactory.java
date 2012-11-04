@@ -74,23 +74,35 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     }
 
     public TemplateModel get(String key) throws TemplateModelException {
+        TemplateModel model;
         synchronized(cache) {
-            TemplateModel model = (TemplateModel)cache.get(key);
-            if(model == null) {
-                try {
-                    Class clazz = ClassUtil.forName(key);
-                    model = createModel(clazz);
-                    // This is called so that we trigger the
-                    // class-reloading detector. If there was a class reload,
-                    // the wrapper will in turn call our clearCache method.
-                    wrapper.introspectClass(clazz);
-                } catch(Exception e) {
-                    throw new TemplateModelException(e);
-                }
-                cache.put(key, model);
-            }
-            return model;
+            model = (TemplateModel)cache.get(key);
         }
+        if(model == null) {
+            try {
+                Class clazz = ClassUtil.forName(key);
+                
+                // This is called so that we trigger the
+                // class-reloading detector. If clazz is a reloaded class,
+                // the wrapper will in turn call our clearCache method.
+                // IMPORTANT! Do NOT call introspectClass inside
+                // synchronized(cache), or else a dead-lock can occur
+                // (see sf.net bug tracker ID 3519805)!
+                wrapper.introspectClass(clazz);
+                
+                synchronized(cache) {
+                    model = (TemplateModel) cache.get(key);
+                    if (model == null) {
+                        model = createModel(clazz);
+                        cache.put(key, model);
+                    }
+                }
+            } catch(Exception e) {
+                throw new TemplateModelException(e);
+            }
+        }
+        
+        return model;
     }
     
     void clearCache() {

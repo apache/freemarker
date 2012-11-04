@@ -20045,6 +20045,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
+      <section>
+        <title>2.3.30</title>
+
+        <para>Date of release: [FIXME]</para>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bugfix [<link
+              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3519805&amp;group_id=794">3519805</link>]:
+              There was a small chance for a deadlock when class-reloading was
+              detected.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_19">
         <title>2.3.19</title>
 
