@@ -10035,6 +10035,12 @@ Test Book</programlisting>
             is needed.)</para>
           </note>
 
+          <note>
+            <para>Don't use the sample XML from the previous section, where
+            <literal>title</literal> is an attribute; that applies only to
+            that section.</para>
+          </note>
+
           <para>If a hash key used with a node variable can't be interpreted
           otherwise (see the <link linkend="xgui_imperative_formal">next
           section</link> for the precise definition), then it will by
@@ -10043,7 +10049,8 @@ Test Book</programlisting>
           xlink:href="http://www.w3.org/TR/xpath">http://www.w3.org/TR/xpath</link>.</para>
 
           <para>For example, here we list the <literal>para</literal> elements
-          of the chapter with title ``Ch1'':</para>
+          of the chapter with <literal>title</literal> element (not
+          attribute!) content "Ch1'':</para>
 
           <programlisting role="template">&lt;#list doc["book/chapter[title='Ch1']/para"] as p&gt;
   &lt;p&gt;${p}
