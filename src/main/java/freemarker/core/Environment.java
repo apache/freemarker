@@ -987,7 +987,7 @@ public final class Environment extends Configurable {
     
 
     /**
-     * Returns the {@link DateUtil.DateToISO8601CalendarFactory} used by the
+     * Returns the {@link DateToISO8601CalendarFactory} used by the
      * the "iso_" built-ins. Be careful when using this; it should only by used
      * with {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean,
      * int, TimeZone, DateToISO8601CalendarFactory)}.

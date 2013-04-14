@@ -61,7 +61,6 @@ import java.util.List;
  * 
  * @author Attila Szegedi
  * @version $Id: $
- * @param 
  */
 final class ClassString
 {
