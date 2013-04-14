@@ -84,6 +84,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import freemarker.core.ConcurrentMapFactory;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -163,12 +164,28 @@ public class BeansWrapper implements ObjectWrapper
      */
     private static final BeansWrapper INSTANCE = new BeansWrapper();
 
-    // Cache of hash maps that contain already discovered properties and methods
-    // for a specified class. Each key is a Class, each value is a hash map. In
-    // that hash map, each key is a property/method name, each value is a
-    // MethodDescriptor or a PropertyDescriptor assigned to that property/method.
-    private final Map classCache = new HashMap();
-    private Set cachedClassNames = new HashSet();
+    /**
+     * Used for synchronization by {@link #genericClassIntrospectionCache},
+     * {@link #staticModels} and {@link #enumModels} (and by any similar future
+     * fields). The primary goal of using a common monitor is to prevent
+     * deadlocks when these objects call each other.
+     */
+    private final Object sharedClassIntrospectionCacheLock = new Object();
+    
+    /**
+     * This is called the "generic" class introspection cache because when the
+     * public API simply says "introspection cache" it refers to the sum of all
+     * caches. The other less generic caches are in {@link #staticModels}
+     * and {@link #enumModels}.
+     */
+    private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache
+            = ConcurrentMapFactory.newMaybeConcurrentHashMap();
+    private final boolean isGenericClassIntrospectionCacheConcurrentMap
+            = ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
+    private final Set/*<String>*/ genericClassIntrospectionCacheClassNames
+            = new HashSet();
+    private final Set/*<Class>*/ genericClassIntrospectionsInProgress
+            = new HashSet();
 
     private final StaticModels staticModels = new StaticModels(this);
     private final ClassBasedModelFactory enumModels = createEnumModels(this);
@@ -918,9 +935,7 @@ public class BeansWrapper implements ObjectWrapper
     {
         try
         {
-            introspectClass(clazz);
-            Map classInfo = (Map)classCache.get(clazz);
-            Object ctors = classInfo.get(CONSTRUCTORS);
+            Object ctors = getClassIntrospectionData(clazz).get(CONSTRUCTORS);
             if(ctors == null)
             {
                 throw new TemplateModelException("Class " + clazz.getName() + 
@@ -959,68 +974,128 @@ public class BeansWrapper implements ObjectWrapper
                     "Could not create instance of class " + clazz.getName(), e);
         }
     }
-    
-    void introspectClass(Class clazz)
-    {
-        synchronized(classCache)
-        {
-            if(!classCache.containsKey(clazz))
-            {
-                introspectClassInternal(clazz);
+
+    /**
+     * Gets the class introspection data from {@link #genericClassIntrospectionCache},
+     * automatically creating the genericClassIntrospectionCache entry if it's missing.
+     * 
+     * @return A {@link Map} where each key is a property/method name, each
+     *     value is a {@link MethodDescriptor} or a {@link PropertyDescriptor}
+     *     assigned to that property/method.
+     */
+    Map getClassIntrospectionData(Class clazz) {
+        if (isGenericClassIntrospectionCacheConcurrentMap) {
+            Map introspData = (Map) genericClassIntrospectionCache.get(clazz);
+            if (introspData != null) return introspData;
+        }
+        
+        String className;
+        synchronized (sharedClassIntrospectionCacheLock) {
+            Map introspData = (Map) genericClassIntrospectionCache.get(clazz);
+            if (introspData != null) return introspData;
+            
+            className = clazz.getName();
+            if (genericClassIntrospectionCacheClassNames.contains(className)) {
+                onSameNameClassesDetected(className);
+            }
+            
+            while (introspData == null
+                    && genericClassIntrospectionsInProgress.contains(clazz)) {
+                // Another thread is already introspecting this class;
+                // waiting for its result.
+                try {
+                    sharedClassIntrospectionCacheLock.wait();
+                    introspData = (Map) genericClassIntrospectionCache.get(clazz);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(
+                            "Class inrospection data lookup aborded: " + e);
+                }
+            }
+            if (introspData != null) return introspData;
+            
+            // This will be the thread that introspects this class.
+            genericClassIntrospectionsInProgress.add(clazz);
+        }
+        try {
+            Map introspData = createClassIntrospectionData(clazz);
+            synchronized (sharedClassIntrospectionCacheLock) {
+                genericClassIntrospectionCache.put(clazz, introspData);
+                genericClassIntrospectionCacheClassNames.add(className);
+            }
+            return introspData;
+        } finally {
+            synchronized (sharedClassIntrospectionCacheLock) {
+                genericClassIntrospectionsInProgress.remove(clazz);
+                sharedClassIntrospectionCacheLock.notifyAll();
             }
         }
     }
     
-    void removeIntrospectionInfo(Class clazz) {
-        synchronized(classCache) {
-            classCache.remove(clazz);
-            staticModels.removeIntrospectionInfo(clazz);
-            if(enumModels != null) {
-                enumModels.removeIntrospectionInfo(clazz);
-            }
-            cachedClassNames.remove(clazz.getName());
-            modelCache.clearCache();
+    /**
+     * Removes the introspection data for a class from the cache.
+     * Use this if you know that a class is not used anymore in templates.
+     * If the class will be still used, the cache entry will be silently
+     * re-created, so this isn't a dangerous operation.
+     * 
+     * @since 2.3.20
+     */
+    public void removeFromClassIntrospectionCache(Class clazz) {
+        synchronized (sharedClassIntrospectionCacheLock) {
+            removeFromGenericClassIntrospectionCache(clazz);
+            staticModels.removeFromCache(clazz);
+            if (enumModels != null) enumModels.removeFromCache(clazz);
         }
     }
 
-    private void introspectClassInternal(Class clazz)
-    {
-        String className = clazz.getName();
-        if(cachedClassNames.contains(className))
-        {
-            if(logger.isInfoEnabled())
-            {
-                logger.info("Detected a reloaded class [" + className + 
-                        "]. Clearing BeansWrapper caches.");
-            }
-            // Class reload detected, throw away caches
-            classCache.clear();
-            cachedClassNames = new HashSet();
-            modelCache.clearCache();
+    /**
+     * Removes all class introspection data from the cache.
+     * Use this if you want to free up memory on the expense of recreating
+     * the cache entries for the classes that will be used later in templates.
+     * 
+     * @since 2.3.20
+     */
+    public void clearClassIntrospecitonCache() {
+        synchronized (sharedClassIntrospectionCacheLock) {
+            clearGenericClassIntrospectionCache();
             staticModels.clearCache();
-            if(enumModels != null) {
-                enumModels.clearCache();
-            }
+            if (enumModels != null) enumModels.clearCache();
         }
-        classCache.put(clazz, populateClassMap(clazz));
-        cachedClassNames.add(className);
+    }
+    
+    void onSameNameClassesDetected(String className) {
+        // TODO: This behavior should be pluggable, as in environments where
+        // some classes are often reloaded or multiple versions of the
+        // same class is normal (OSGi), this will drop the cache contents
+        // too often. 
+        if(logger.isInfoEnabled()) {
+            logger.info(
+                    "Detected multiple classes with the same name, \"" + className + 
+                    "\". Assuming it was a class-reloading. Clearing BeansWrapper " +
+                    "caches to release old data.");
+        }
+        clearClassIntrospecitonCache();
+    }
+    
+    Object getSharedClassIntrospectionCacheLock() {
+        return sharedClassIntrospectionCacheLock;
     }
 
-    Map getClassKeyMap(Class clazz)
-    {
-        Map map;
-        synchronized(classCache)
-        {
-            map = (Map)classCache.get(clazz);
-            if(map == null)
-            {
-                introspectClassInternal(clazz);
-                map = (Map)classCache.get(clazz);
-            }
+    private void removeFromGenericClassIntrospectionCache(Class clazz) {
+        synchronized (sharedClassIntrospectionCacheLock) {
+            genericClassIntrospectionCache.remove(clazz);
+            genericClassIntrospectionCacheClassNames.remove(clazz.getName());
+            modelCache.clearCache();
         }
-        return map;
     }
-
+    
+    private void clearGenericClassIntrospectionCache() {
+        synchronized (sharedClassIntrospectionCacheLock) {
+            genericClassIntrospectionCache.clear();
+            genericClassIntrospectionCacheClassNames.clear();
+            modelCache.clearCache();
+        }
+    }
+    
     /**
      * Returns the number of introspected methods/properties that should
      * be available via the TemplateHashModel interface. Affected by the
@@ -1029,7 +1104,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     int keyCount(Class clazz)
     {
-        Map map = getClassKeyMap(clazz);
+        Map map = getClassIntrospectionData(clazz);
         int count = map.size();
         if (map.containsKey(CONSTRUCTORS))
             count--;
@@ -1048,7 +1123,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     Set keySet(Class clazz)
     {
-        Set set = new HashSet(getClassKeyMap(clazz).keySet());
+        Set set = new HashSet(getClassIntrospectionData(clazz).keySet());
         set.remove(CONSTRUCTORS);
         set.remove(GENERIC_GET_KEY);
         set.remove(ARGTYPES);
@@ -1061,157 +1136,121 @@ public class BeansWrapper implements ObjectWrapper
      * that is not accessible, replaces it with appropriate accessible method
      * from a superclass or interface.
      */
-    private Map populateClassMap(Class clazz)
+    private Map createClassIntrospectionData(Class clazz)
     {
-        // Populate first from bean info
-        Map map = populateClassMapWithBeanInfo(clazz);
-        // Next add constructors
-        try
-        {
-            Constructor[] ctors = clazz.getConstructors();
-            if(ctors.length == 1)
-            {
-                Constructor ctor = ctors[0];
-                map.put(CONSTRUCTORS, new SimpleMemberModel(ctor, ctor.getParameterTypes()));
-            }
-            else if(ctors.length > 1)
-            {
-                MethodMap ctorMap = new MethodMap("<init>", this);
-                for (int i = 0; i < ctors.length; i++)
-                {
-                    ctorMap.addMember(ctors[i]);
-                }
-                map.put(CONSTRUCTORS, ctorMap);
-            }
-        }
-        catch(SecurityException e)
-        {
-            logger.warn("Canont discover constructors for class " + 
-                    clazz.getName(), e);
-        }
-        switch(map.size())
-        {
-            case 0:
-            {
-                map = Collections12.EMPTY_MAP;
-                break; 
-            }
-            case 1:
-            {
-                Map.Entry e = (Map.Entry)map.entrySet().iterator().next();
-                map = Collections12.singletonMap(e.getKey(), e.getValue());
-                break;
-            }
-        }
-        return map;
-    }
+        final Map introspData = new HashMap();
 
-    private Map populateClassMapWithBeanInfo(Class clazz)
-    {
-        Map classMap = new HashMap();
-        if(exposeFields)
-        {
-            Field[] fields = clazz.getFields();
-            for (int i = 0; i < fields.length; i++)
-            {
-                Field field = fields[i];
-                if((field.getModifiers() & Modifier.STATIC) == 0)
-                {
-                    classMap.put(field.getName(), field);
-                }
-            }
-        }
-        Map accessibleMethods = discoverAccessibleMethods(clazz);
-        Method genericGet = getFirstAccessibleMethod(
-                MethodSignature.GET_STRING_SIGNATURE, accessibleMethods);
-        if(genericGet == null)
-        {
-            genericGet = getFirstAccessibleMethod(
-                    MethodSignature.GET_OBJECT_SIGNATURE, accessibleMethods);
-        }
-        if(genericGet != null)
-        {
-            classMap.put(GENERIC_GET_KEY, genericGet);
-        }
-        if(exposureLevel == EXPOSE_NOTHING)
-        {
-            return classMap;
+        if (exposeFields) {
+            addFieldsToClassIntrospectionData(introspData, clazz);
         }
         
-        try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-            PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
-            MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
-
-            for(int i = pda.length - 1; i >= 0; --i) {
-                populateClassMapWithPropertyDescriptor(
-                        pda[i], clazz, accessibleMethods,
-                        classMap);
+        final Map accessibleMethods = discoverAccessibleMethods(clazz);
+        
+        addGenericGetToClassIntrospectionData(introspData, accessibleMethods);
+        
+        if(exposureLevel != EXPOSE_NOTHING) {
+            try {
+                addBeanInfoToClassInrospectionData(introspData, clazz, accessibleMethods);
+            } catch(IntrospectionException e) {
+                logger.warn("Couldn't properly perform introspection for class " + 
+                        clazz, e);
+                introspData.clear();  // FIXME NBC: Don't drop everything here. 
             }
-            if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
+        }
+        
+        addConstructorsToClassIntrospectionData(introspData, clazz);
+        
+        if (introspData.size() > 1) {
+            return introspData;
+        } else if (introspData.size() == 0) {
+            return Collections12.EMPTY_MAP;
+        } else { // map.size() == 1
+            Map.Entry e = (Map.Entry)introspData.entrySet().iterator().next();
+            return Collections12.singletonMap(e.getKey(), e.getValue()); 
+        }
+    }
+
+    private void addFieldsToClassIntrospectionData(Map introspData, Class clazz)
+            throws SecurityException {
+        Field[] fields = clazz.getFields();
+        for (int i = 0; i < fields.length; i++)
+        {
+            Field field = fields[i];
+            if((field.getModifiers() & Modifier.STATIC) == 0)
             {
-                MethodAppearanceDecision decision = new MethodAppearanceDecision();  
-                for(int i = mda.length - 1; i >= 0; --i)
+                introspData.put(field.getName(), field);
+            }
+        }
+    }
+
+    private void addBeanInfoToClassInrospectionData(Map introspData, Class clazz,
+            Map accessibleMethods) throws IntrospectionException {
+        BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+        PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
+        MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
+
+        for(int i = pda.length - 1; i >= 0; --i) {
+            addPropertyDescriptorToClassIntrospectionData(
+                    pda[i], clazz, accessibleMethods,
+                    introspData);
+        }
+        if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
+        {
+            MethodAppearanceDecision decision = new MethodAppearanceDecision();  
+            for(int i = mda.length - 1; i >= 0; --i)
+            {
+                MethodDescriptor md = mda[i];
+                Method publicMethod = getAccessibleMethod(
+                        md.getMethod(), accessibleMethods);
+                if(publicMethod != null && isSafeMethod(publicMethod))
                 {
-                    MethodDescriptor md = mda[i];
-                    Method publicMethod = getAccessibleMethod(
-                            md.getMethod(), accessibleMethods);
-                    if(publicMethod != null && isSafeMethod(publicMethod))
+                    decision.setDefaults(publicMethod);
+                    finetuneMethodAppearance(clazz, publicMethod, decision);
+                    
+                    PropertyDescriptor propDesc = decision.getExposeAsProperty();
+                    if (propDesc != null
+                            && !(introspData.get(propDesc.getName())
+                                    instanceof PropertyDescriptor))
                     {
-                        decision.setDefaults(publicMethod);
-                        finetuneMethodAppearance(clazz, publicMethod, decision);
-                        
-                        PropertyDescriptor propDesc = decision.getExposeAsProperty();
-                        if (propDesc != null
-                                && !(classMap.get(propDesc.getName())
-                                        instanceof PropertyDescriptor))
+                        addPropertyDescriptorToClassIntrospectionData(
+                                propDesc, clazz, accessibleMethods,
+                                introspData);
+                    }
+                    
+                    String methodKey = decision.getExposeMethodAs();
+                    if (methodKey != null)
+                    {
+                        Object previous = introspData.get(methodKey);
+                        if(previous instanceof Method)
                         {
-                            populateClassMapWithPropertyDescriptor(
-                                    propDesc, clazz, accessibleMethods,
-                                    classMap);
+                            // Overloaded method - replace method with a method map
+                            MethodMap methodMap = new MethodMap(methodKey, this);
+                            methodMap.addMember((Method)previous);
+                            methodMap.addMember(publicMethod);
+                            introspData.put(methodKey, methodMap);
+                            // remove parameter type information
+                            getArgTypes(introspData).remove(previous);
                         }
-                        
-                        String methodKey = decision.getExposeMethodAs();
-                        if (methodKey != null)
+                        else if(previous instanceof MethodMap)
                         {
-                            Object previous = classMap.get(methodKey);
-                            if(previous instanceof Method)
-                            {
-                                // Overloaded method - replace method with a method map
-                                MethodMap methodMap = new MethodMap(methodKey, this);
-                                methodMap.addMember((Method)previous);
-                                methodMap.addMember(publicMethod);
-                                classMap.put(methodKey, methodMap);
-                                // remove parameter type information
-                                getArgTypes(classMap).remove(previous);
-                            }
-                            else if(previous instanceof MethodMap)
-                            {
-                                // Already overloaded method - add new overload
-                                ((MethodMap)previous).addMember(publicMethod);
-                            }
-                            else if (decision.getMethodShadowsProperty()
-                                    || !(previous instanceof PropertyDescriptor))
-                            {
-                                // Simple method (this far)
-                                classMap.put(methodKey, publicMethod);
-                                getArgTypes(classMap).put(publicMethod, 
-                                        publicMethod.getParameterTypes());
-                            }
+                            // Already overloaded method - add new overload
+                            ((MethodMap)previous).addMember(publicMethod);
+                        }
+                        else if (decision.getMethodShadowsProperty()
+                                || !(previous instanceof PropertyDescriptor))
+                        {
+                            // Simple method (this far)
+                            introspData.put(methodKey, publicMethod);
+                            getArgTypes(introspData).put(publicMethod, 
+                                    publicMethod.getParameterTypes());
                         }
                     }
                 }
             }
-            return classMap;
-        }
-        catch(IntrospectionException e) {
-            logger.warn("Couldn't properly perform introspection for class " + 
-                    clazz, e);
-            return new HashMap();
         }
     }
 
-    private void populateClassMapWithPropertyDescriptor(PropertyDescriptor pd,
+    private void addPropertyDescriptorToClassIntrospectionData(PropertyDescriptor pd,
             Class clazz, Map accessibleMethods, Map classMap) {
         if(pd instanceof IndexedPropertyDescriptor) {
             IndexedPropertyDescriptor ipd = 
@@ -1261,7 +1300,49 @@ public class BeansWrapper implements ObjectWrapper
             }
         }
     }
+
+    private void addGenericGetToClassIntrospectionData(Map introspData,
+            Map accessibleMethods) {
+        Method genericGet = getFirstAccessibleMethod(
+                MethodSignature.GET_STRING_SIGNATURE, accessibleMethods);
+        if(genericGet == null)
+        {
+            genericGet = getFirstAccessibleMethod(
+                    MethodSignature.GET_OBJECT_SIGNATURE, accessibleMethods);
+        }
+        if(genericGet != null)
+        {
+            introspData.put(GENERIC_GET_KEY, genericGet);
+        }
+    }
     
+    private void addConstructorsToClassIntrospectionData(final Map introspData,
+            Class clazz) {
+        try
+        {
+            Constructor[] ctors = clazz.getConstructors();
+            if(ctors.length == 1)
+            {
+                Constructor ctor = ctors[0];
+                introspData.put(CONSTRUCTORS, new SimpleMemberModel(ctor, ctor.getParameterTypes()));
+            }
+            else if(ctors.length > 1)
+            {
+                MethodMap ctorMap = new MethodMap("<init>", this);
+                for (int i = 0; i < ctors.length; i++)
+                {
+                    ctorMap.addMember(ctors[i]);
+                }
+                introspData.put(CONSTRUCTORS, ctorMap);
+            }
+        }
+        catch(SecurityException e)
+        {
+            logger.warn("Canont discover constructors for class " + 
+                    clazz.getName(), e);
+        }
+    }
+
     /**
      * <b>Experimental method; subject to change!</b>
      * Override this to tweak certain aspects of how methods appear in the

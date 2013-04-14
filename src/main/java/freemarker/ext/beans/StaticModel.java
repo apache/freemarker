@@ -207,9 +207,11 @@ final class StaticModel implements TemplateHashModelEx
                     {
                         if(obj != null)
                         {
-                            logger.info("Overwriting value [" + obj + "] for " +
-                                    " key '" + name + "' with [" + method + 
-                                    "] in static model for " + clazz.getName());
+                            if (logger.isInfoEnabled()) {
+                                logger.info("Overwriting value [" + obj + "] for " +
+                                        " key '" + name + "' with [" + method + 
+                                        "] in static model for " + clazz.getName());
+                            }
                         }
                         map.put(name, method);
                     }

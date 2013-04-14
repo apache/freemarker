@@ -52,9 +52,11 @@
 
 package freemarker.ext.beans;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import freemarker.core.ConcurrentMapFactory;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -63,56 +65,95 @@ import freemarker.template.utility.ClassUtil;
 /**
  * Base class for hash models keyed by Java class names. 
  * @author Attila Szegedi
- * @version $Id: ClassBasedModelFactory.java,v 1.1.2.2 2006/11/12 10:23:02 szegedia Exp $
  */
 abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final BeansWrapper wrapper;
-    private final Map cache = new HashMap();
+    
+    private final Map/*<String,TemplateModel>*/ cache
+            = ConcurrentMapFactory.newMaybeConcurrentHashMap();
+    private final boolean isCacheConcurrentMap
+            = ConcurrentMapFactory.isConcurrent(cache);
+    private final Set classIntrospectionsInProgress = new HashSet();
     
     protected ClassBasedModelFactory(BeansWrapper wrapper) {
         this.wrapper = wrapper;
     }
 
     public TemplateModel get(String key) throws TemplateModelException {
-        TemplateModel model;
-        synchronized(cache) {
-            model = (TemplateModel)cache.get(key);
-        }
-        if(model == null) {
-            try {
-                Class clazz = ClassUtil.forName(key);
-                
-                // This is called so that we trigger the
-                // class-reloading detector. If clazz is a reloaded class,
-                // the wrapper will in turn call our clearCache method.
-                // IMPORTANT! Do NOT call introspectClass inside
-                // synchronized(cache), or else a dead-lock can occur
-                // (see sf.net bug tracker ID 3519805)!
-                wrapper.introspectClass(clazz);
-                
-                synchronized(cache) {
-                    model = (TemplateModel) cache.get(key);
-                    if (model == null) {
-                        model = createModel(clazz);
-                        cache.put(key, model);
-                    }
-                }
-            } catch(Exception e) {
+        try {
+            return getInternal(key);
+        } catch(Exception e) {
+            if (e instanceof TemplateModelException) {
+                throw (TemplateModelException) e;
+            } else {
                 throw new TemplateModelException(e);
             }
         }
+    }
+
+    private TemplateModel getInternal(String key) throws TemplateModelException, ClassNotFoundException {
+        if (isCacheConcurrentMap) {
+            TemplateModel model = (TemplateModel) cache.get(key);
+            if (model != null) return model;
+        }
         
-        return model;
+        final Object sharedLock = wrapper.getSharedClassIntrospectionCacheLock();
+        synchronized (sharedLock) {
+            TemplateModel model = (TemplateModel) cache.get(key);
+            if (model != null) return model;
+            
+            while (model == null
+                    && classIntrospectionsInProgress.contains(key)) {
+                // Another thread is already introspecting this class;
+                // waiting for its result.
+                try {
+                    sharedLock.wait();
+                    model = (TemplateModel) cache.get(key);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(
+                            "Class inrospection data lookup aborded: " + e);
+                }
+            }
+            if (model != null) return model;
+            
+            // This will be the thread that introspects this class.
+            classIntrospectionsInProgress.add(key);
+        }
+        try {
+            final Class clazz = ClassUtil.forName(key);
+            
+            // This is called so that we trigger the
+            // class-reloading detector. If clazz is a reloaded class,
+            // the wrapper will in turn call our clearCache method.
+            // TODO: Why do we check it now and only now?
+            wrapper.getClassIntrospectionData(clazz);
+            
+            TemplateModel model = createModel(clazz);
+            // Warning: model will be null if the class is not good for the subclass.
+            // For example, EnumModels#createModel returns null if clazz is not an enum.
+            
+            if (model != null) {
+                synchronized (sharedLock) {
+                    cache.put(key, model);
+                }
+            }
+            return model;
+        } finally {
+            synchronized (sharedLock) {
+                classIntrospectionsInProgress.remove(key);
+                sharedLock.notifyAll();
+            }
+        }
     }
     
     void clearCache() {
-        synchronized(cache) {
+        synchronized(wrapper.getSharedClassIntrospectionCacheLock()) {
             cache.clear();
         }
     }
     
-    void removeIntrospectionInfo(Class clazz) {
-        synchronized(cache) {
+    void removeFromCache(Class clazz) {
+        synchronized(wrapper.getSharedClassIntrospectionCacheLock()) {
             cache.remove(clazz.getName());
         }
     }
@@ -127,4 +168,5 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     protected BeansWrapper getWrapper() {
         return wrapper;
     }
+    
 }

@@ -42,7 +42,7 @@ class JavaRebelIntegration
                 ReloaderFactory.getInstance().removeClassReloadListener(this);
             }
             else if(eventType == ClassEventListener.EVENT_RELOADED) {
-                wrapper.removeIntrospectionInfo(klass);
+                wrapper.removeFromClassIntrospectionCache(klass);
             }
         }
     }

@@ -134,10 +134,9 @@ implements
     {
         this.object = object;
         this.wrapper = wrapper;
-        if (object == null) {
-            return;
+        if (object != null) {
+            wrapper.getClassIntrospectionData(object.getClass());
         }
-        wrapper.introspectClass(object.getClass());
     }
 
     /**
@@ -171,7 +170,7 @@ implements
         TemplateModelException
     {
         Class clazz = object.getClass();
-        Map classInfo = wrapper.getClassKeyMap(clazz);
+        Map classInfo = wrapper.getClassIntrospectionData(clazz);
         TemplateModel retval = null;
         
         try
@@ -238,7 +237,7 @@ implements
      */
     
     protected boolean hasPlainGetMethod() {
-    	return wrapper.getClassKeyMap(object.getClass()).get(BeansWrapper.GENERIC_GET_KEY) != null;
+    	return wrapper.getClassIntrospectionData(object.getClass()).get(BeansWrapper.GENERIC_GET_KEY) != null;
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map classInfo)
