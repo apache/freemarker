@@ -21,7 +21,7 @@
  *    Alternately, this acknowledgement may appear in the software itself,
  *    if and wherever such third-party acknowledgements normally appear.
  *
- * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the
+ * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the 
  *    project contributors may be used to endorse or promote products derived
  *    from this software without prior written permission. For written
  *    permission, please contact visigoths@visigoths.org.
@@ -140,24 +140,24 @@ public class BeansWrapper implements ObjectWrapper
         }
         ITERABLE_CLASS = iterable;
     }
-
+    
     // When this property is true, some things are stricter. This is mostly to
     // catch anomalous things in development that can otherwise be valid situations
     // for our users.
     private static final boolean DEVELOPMENT = "true".equals(SecurityUtilities.getSystemProperty("freemarker.development"));
-
+    
     private static final Constructor ENUMS_MODEL_CTOR = enumsModelCtor();
 
     private static final Logger logger = Logger.getLogger("freemarker.beans");
-
+    
     private static final Set UNSAFE_METHODS = createUnsafeMethodsSet();
-
+    
     static final Object GENERIC_GET_KEY = new Object();
     private static final Object CONSTRUCTORS = new Object();
     private static final Object ARGTYPES = new Object();
 
     private static final boolean javaRebelAvailable = isJavaRebelAvailable();
-
+    
     /**
      * The default instance of BeansWrapper
      */
@@ -174,7 +174,7 @@ public class BeansWrapper implements ObjectWrapper
     private final ClassBasedModelFactory enumModels = createEnumModels(this);
 
     private final ModelCache modelCache = new BeansModelCache(this);
-
+    
     private final BooleanModel FALSE = new BooleanModel(Boolean.FALSE, this);
     private final BooleanModel TRUE = new BooleanModel(Boolean.TRUE, this);
 
@@ -183,20 +183,20 @@ public class BeansWrapper implements ObjectWrapper
      * wrapped objects are exposed to the template.
      */
     public static final int EXPOSE_ALL = 0;
-
+    
     /**
      * At this level of exposure, all methods and properties of the wrapped
      * objects are exposed to the template except methods that are deemed
      * not safe. The not safe methods are java.lang.Object methods wait() and
      * notify(), java.lang.Class methods getClassLoader() and newInstance(),
      * java.lang.reflect.Method and java.lang.reflect.Constructor invoke() and
-     * newInstance() methods, all java.lang.reflect.Field set methods, all
-     * java.lang.Thread and java.lang.ThreadGroup methods that can change its
+     * newInstance() methods, all java.lang.reflect.Field set methods, all 
+     * java.lang.Thread and java.lang.ThreadGroup methods that can change its 
      * state, as well as the usual suspects in java.lang.System and
      * java.lang.Runtime.
      */
     public static final int EXPOSE_SAFE = 1;
-
+    
     /**
      * At this level of exposure, only property getters are exposed.
      * Additionally, property getters that map to unsafe methods are not
@@ -208,7 +208,7 @@ public class BeansWrapper implements ObjectWrapper
      * At this level of exposure, no bean properties and methods are exposed.
      * Only map items, resource bundle items, and objects retrieved through
      * the generic get method (on objects of classes that have a generic get
-     * method) can be retrieved through the hash interface. You might want to
+     * method) can be retrieved through the hash interface. You might want to 
      * call {@link #setMethodsShadowItems(boolean)} with <tt>false</tt> value to
      * speed up map item retrieval.
      */
@@ -223,7 +223,7 @@ public class BeansWrapper implements ObjectWrapper
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper;
     private boolean strict = false;
-
+    
     /**
      * Creates a new instance of BeansWrapper. The newly created instance
      * will use the null reference as its null object, it will use
@@ -235,18 +235,18 @@ public class BeansWrapper implements ObjectWrapper
             JavaRebelIntegration.registerWrapper(this);
         }
     }
-
+    
     /**
      * @see #setStrict(boolean)
      */
     public boolean isStrict() {
     	return strict;
     }
-
+    
     /**
      * Specifies if an attempt to read a bean property that doesn't exist in the
      * wrapped object should throw an {@link InvalidPropertyException}.
-     *
+     * 
      * <p>If this property is <tt>false</tt> (the default) then an attempt to read
      * a missing bean property is the same as reading an existing bean property whose
      * value is <tt>null</tt>. The template can't tell the difference, and thus always
@@ -330,19 +330,19 @@ public class BeansWrapper implements ObjectWrapper
         }
         this.exposureLevel = exposureLevel;
     }
-
+    
     int getExposureLevel()
     {
         return exposureLevel;
     }
-
+    
     /**
-     * Controls whether public instance fields of classes are exposed to
+     * Controls whether public instance fields of classes are exposed to 
      * templates.
-     * @param exposeFields if set to true, public instance fields of classes
+     * @param exposeFields if set to true, public instance fields of classes 
      * that do not have a property getter defined can be accessed directly by
-     * their name. If there is a property getter for a property of the same
-     * name as the field (i.e. getter "getFoo()" and field "foo"), then
+     * their name. If there is a property getter for a property of the same 
+     * name as the field (i.e. getter "getFoo()" and field "foo"), then 
      * referring to "foo" in template invokes the getter. If set to false, no
      * access to public instance fields of classes is given. Default is false.
      */
@@ -350,9 +350,9 @@ public class BeansWrapper implements ObjectWrapper
     {
         this.exposeFields = exposeFields;
     }
-
+    
     /**
-     * Returns whether exposure of public instance fields of classes is
+     * Returns whether exposure of public instance fields of classes is 
      * enabled. See {@link #setExposeFields(boolean)} for details.
      * @return true if public instance fields are exposed, false otherwise.
      */
@@ -360,7 +360,7 @@ public class BeansWrapper implements ObjectWrapper
     {
         return exposeFields;
     }
-
+    
     /**
      * Sets whether methods shadow items in beans. When true (this is the
      * default value), <code>${object.name}</code> will first try to locate
@@ -375,16 +375,16 @@ public class BeansWrapper implements ObjectWrapper
     {
         this.methodsShadowItems = methodsShadowItems;
     }
-
+    
     boolean isMethodsShadowItems()
     {
         return methodsShadowItems;
     }
-
+    
     /**
      * Sets the default date type to use for date models that result from
      * a plain <tt>java.util.Date</tt> instead of <tt>java.sql.Date</tt> or
-     * <tt>java.sql.Time</tt> or <tt>java.sql.Timestamp</tt>. Default value is
+     * <tt>java.sql.Time</tt> or <tt>java.sql.Timestamp</tt>. Default value is 
      * {@link TemplateDateModel#UNKNOWN}.
      * @param defaultDateType the new default date type.
      */
@@ -400,7 +400,7 @@ public class BeansWrapper implements ObjectWrapper
     protected int getDefaultDateType() {
         return defaultDateType;
     }
-
+    
     /**
      * Sets whether this wrapper caches model instances. Default is false.
      * When set to true, calling {@link #wrap(Object)} multiple times for
@@ -411,24 +411,24 @@ public class BeansWrapper implements ObjectWrapper
     {
         modelCache.setUseCache(useCache);
     }
-
+    
     /**
      * Sets the null model. This model is returned from the
-     * {@link #wrap(Object)} method whenever the underlying object
-     * reference is null. It defaults to null reference, which is dealt
-     * with quite strictly on engine level, however you can substitute an
-     * arbitrary (perhaps more lenient) model, such as
+     * {@link #wrap(Object)} method whenever the underlying object 
+     * reference is null. It defaults to null reference, which is dealt 
+     * with quite strictly on engine level, however you can substitute an 
+     * arbitrary (perhaps more lenient) model, such as 
      * {@link freemarker.template.TemplateScalarModel#EMPTY_STRING}.
      */
     public void setNullModel(TemplateModel nullModel)
     {
         this.nullModel = nullModel;
     }
-
+    
     /**
      * Returns the default instance of the wrapper. This instance is used
      * when you construct various bean models without explicitly specifying
-     * a wrapper. It is also returned by
+     * a wrapper. It is also returned by 
      * {@link freemarker.template.ObjectWrapper#BEANS_WRAPPER}
      * and this is the sole instance that is used by the JSP adapter.
      * You can modify the properties of the default instance (caching,
@@ -448,8 +448,8 @@ public class BeansWrapper implements ObjectWrapper
      * <li>if the object is null, returns the {@link #setNullModel(TemplateModel) null model},</li>
      * <li>if the object is a Number returns a {@link NumberModel} for it,</li>
      * <li>if the object is a Date returns a {@link DateModel} for it,</li>
-     * <li>if the object is a Boolean returns
-     * {@link freemarker.template.TemplateBooleanModel#TRUE} or
+     * <li>if the object is a Boolean returns 
+     * {@link freemarker.template.TemplateBooleanModel#TRUE} or 
      * {@link freemarker.template.TemplateBooleanModel#FALSE}</li>
      * <li>if the object is already a TemplateModel, returns it unchanged,</li>
      * <li>if the object is an array, returns a {@link ArrayModel} for it
@@ -470,7 +470,7 @@ public class BeansWrapper implements ObjectWrapper
 
     /**
      * @deprecated override {@link #getModelFactory(Class)} instead. Using this
-     * method will now bypass wrapper caching (if it is enabled) and always
+     * method will now bypass wrapper caching (if it is enabled) and always 
      * result in creation of a new wrapper. This method will be removed in 2.4
      * @param object
      * @param factory
@@ -482,19 +482,19 @@ public class BeansWrapper implements ObjectWrapper
 
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return ((Boolean)object).booleanValue() ? TRUE : FALSE;
+            return ((Boolean)object).booleanValue() ? TRUE : FALSE; 
         }
     };
 
     private static final ModelFactory ITERATOR_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new IteratorModel((Iterator)object, (BeansWrapper)wrapper);
+            return new IteratorModel((Iterator)object, (BeansWrapper)wrapper); 
         }
     };
 
     private static final ModelFactory ENUMERATION_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new EnumerationModel((Enumeration)object, (BeansWrapper)wrapper);
+            return new EnumerationModel((Enumeration)object, (BeansWrapper)wrapper); 
         }
     };
 
@@ -511,7 +511,7 @@ public class BeansWrapper implements ObjectWrapper
         if(Date.class.isAssignableFrom(clazz)) {
             return DateModel.FACTORY;
         }
-        if(Boolean.class == clazz) { // Boolean is final
+        if(Boolean.class == clazz) { // Boolean is final 
             return BOOLEAN_FACTORY;
         }
         if(ResourceBundle.class.isAssignableFrom(clazz)) {
@@ -534,11 +534,11 @@ public class BeansWrapper implements ObjectWrapper
      * method is the inverse of the {@link #wrap(Object)} method. In addition
      * it will unwrap arbitrary {@link TemplateNumberModel} instances into
      * a number, arbitrary {@link TemplateDateModel} instances into a date,
-     * {@link TemplateScalarModel} instances into a String, arbitrary
-     * {@link TemplateBooleanModel} instances into a Boolean, arbitrary
-     * {@link TemplateHashModel} instances into a Map, arbitrary
-     * {@link TemplateSequenceModel} into a List, and arbitrary
-     * {@link TemplateCollectionModel} into a Set. All other objects are
+     * {@link TemplateScalarModel} instances into a String, arbitrary 
+     * {@link TemplateBooleanModel} instances into a Boolean, arbitrary 
+     * {@link TemplateHashModel} instances into a Map, arbitrary 
+     * {@link TemplateSequenceModel} into a List, and arbitrary 
+     * {@link TemplateCollectionModel} into a Set. All other objects are 
      * returned unchanged.
      * @throws TemplateModelException if an attempted unwrapping fails.
      */
@@ -546,10 +546,10 @@ public class BeansWrapper implements ObjectWrapper
     {
         return unwrap(model, OBJECT_CLASS);
     }
-
+    
     /**
-     * Attempts to unwrap a model into an object of the desired class.
-     * Generally, this method is the inverse of the {@link #wrap(Object)}
+     * Attempts to unwrap a model into an object of the desired class. 
+     * Generally, this method is the inverse of the {@link #wrap(Object)} 
      * method. It recognizes a wide range of hint classes - all Java built-in
      * primitives, primitive wrappers, numbers, dates, sets, lists, maps, and
      * native arrays.
@@ -558,33 +558,33 @@ public class BeansWrapper implements ObjectWrapper
      * @return the unwrapped result of the desired class
      * @throws TemplateModelException if an attempted unwrapping fails.
      */
-    public Object unwrap(TemplateModel model, Class hint)
+    public Object unwrap(TemplateModel model, Class hint) 
     throws TemplateModelException
     {
         final Object obj = unwrapInternal(model, hint);
         if(obj == CAN_NOT_UNWRAP) {
-          throw new TemplateModelException("Can not unwrap model of type " +
+          throw new TemplateModelException("Can not unwrap model of type " + 
               model.getClass().getName() + " to type " + hint.getName());
         }
         return obj;
     }
-
-    Object unwrapInternal(TemplateModel model, Class hint)
+    
+    Object unwrapInternal(TemplateModel model, Class hint) 
     throws TemplateModelException
     {
         return unwrap(model, hint, null);
     }
 
-    private Object unwrap(TemplateModel model, Class hint, Map recursionStops)
+    private Object unwrap(TemplateModel model, Class hint, Map recursionStops) 
     throws TemplateModelException
     {
         if(model == null || model == nullModel) {
             return null;
         }
-
+        
         boolean isBoolean = Boolean.TYPE == hint;
         boolean isChar = Character.TYPE == hint;
-
+        
         // This is for transparent interop with other wrappers (and ourselves)
         // Passing the hint allows i.e. a Jython-aware method that declares a
         // PyObject as its argument to receive a PyObject from a JythonModel
@@ -595,8 +595,8 @@ public class BeansWrapper implements ObjectWrapper
             if(hint.isInstance(adapted)) {
                 return adapted;
             }
-            // Attempt numeric conversion
-            if(adapted instanceof Number && ((hint.isPrimitive() && !isChar &&
+            // Attempt numeric conversion 
+            if(adapted instanceof Number && ((hint.isPrimitive() && !isChar && 
                     !isBoolean) || NUMBER_CLASS.isAssignableFrom(hint))) {
                 Number number = convertUnwrappedNumber(hint,
                         (Number)adapted);
@@ -605,14 +605,14 @@ public class BeansWrapper implements ObjectWrapper
                 }
             }
         }
-
+        
         if(model instanceof WrapperTemplateModel) {
             Object wrapped = ((WrapperTemplateModel)model).getWrappedObject();
             if(hint.isInstance(wrapped)) {
                 return wrapped;
             }
-            // Attempt numeric conversion
-            if(wrapped instanceof Number && ((hint.isPrimitive() && !isChar &&
+            // Attempt numeric conversion 
+            if(wrapped instanceof Number && ((hint.isPrimitive() && !isChar && 
                     !isBoolean) || NUMBER_CLASS.isAssignableFrom(hint))) {
                 Number number = convertUnwrappedNumber(hint,
                         (Number)wrapped);
@@ -621,7 +621,7 @@ public class BeansWrapper implements ObjectWrapper
                 }
             }
         }
-
+        
         // Translation of generic template models to POJOs. First give priority
         // to various model interfaces based on the hint class. This helps us
         // select the appropriate interface in multi-interface models when we
@@ -636,20 +636,20 @@ public class BeansWrapper implements ObjectWrapper
         }
 
         // Primitive numeric types & Number.class and its subclasses
-        if((hint.isPrimitive() && !isChar && !isBoolean)
+        if((hint.isPrimitive() && !isChar && !isBoolean) 
                 || NUMBER_CLASS.isAssignableFrom(hint)) {
             if(model instanceof TemplateNumberModel) {
-                Number number = convertUnwrappedNumber(hint,
+                Number number = convertUnwrappedNumber(hint, 
                         ((TemplateNumberModel)model).getAsNumber());
                 if(number != null) {
                     return number;
                 }
             }
         }
-
+        
         if(isBoolean || BOOLEAN_CLASS == hint) {
             if(model instanceof TemplateBooleanModel) {
-                return ((TemplateBooleanModel)model).getAsBoolean()
+                return ((TemplateBooleanModel)model).getAsBoolean() 
                 ? Boolean.TRUE : Boolean.FALSE;
             }
             // Boolean is final, no other conversion will work
@@ -661,30 +661,30 @@ public class BeansWrapper implements ObjectWrapper
                 return new HashAdapter((TemplateHashModel)model, this);
             }
         }
-
+        
         if(LIST_CLASS == hint) {
             if(model instanceof TemplateSequenceModel) {
                 return new SequenceAdapter((TemplateSequenceModel)model, this);
             }
         }
-
+        
         if(SET_CLASS == hint) {
             if(model instanceof TemplateCollectionModel) {
                 return new SetAdapter((TemplateCollectionModel)model, this);
             }
         }
-
-        if(COLLECTION_CLASS == hint
+        
+        if(COLLECTION_CLASS == hint 
                 || ITERABLE_CLASS == hint) {
             if(model instanceof TemplateCollectionModel) {
-                return new CollectionAdapter((TemplateCollectionModel)model,
+                return new CollectionAdapter((TemplateCollectionModel)model, 
                         this);
             }
             if(model instanceof TemplateSequenceModel) {
                 return new SequenceAdapter((TemplateSequenceModel)model, this);
             }
         }
-
+        
         // TemplateSequenceModels can be converted to arrays
         if(hint.isArray()) {
             if(model instanceof TemplateSequenceModel) {
@@ -694,7 +694,7 @@ public class BeansWrapper implements ObjectWrapper
                         return retval;
                     }
                 } else {
-                    recursionStops =
+                    recursionStops = 
                         new IdentityHashMap();
                 }
                 TemplateSequenceModel seq = (TemplateSequenceModel)model;
@@ -704,7 +704,7 @@ public class BeansWrapper implements ObjectWrapper
                 try {
                     int size = seq.size();
                     for (int i = 0; i < size; i++) {
-                        Object val = unwrap(seq.get(i), componentType,
+                        Object val = unwrap(seq.get(i), componentType, 
                                 recursionStops);
                         if(val == CAN_NOT_UNWRAP) {
                             return CAN_NOT_UNWRAP;
@@ -719,7 +719,7 @@ public class BeansWrapper implements ObjectWrapper
             // array classes are final, no other conversion will work
             return CAN_NOT_UNWRAP;
         }
-
+        
         // Allow one-char strings to be coerced to characters
         if(isChar || hint == CHARACTER_CLASS) {
             if(model instanceof TemplateScalarModel) {
@@ -740,11 +740,11 @@ public class BeansWrapper implements ObjectWrapper
                 }
             }
         }
-
+        
         // Translation of generic template models to POJOs. Since hint was of
-        // no help initially, now use an admittedly arbitrary order of
+        // no help initially, now use an admittedly arbitrary order of 
         // interfaces. Note we still test for isInstance and isAssignableFrom
-        // to guarantee we return a compatible value.
+        // to guarantee we return a compatible value. 
         if(model instanceof TemplateNumberModel) {
             Number number = ((TemplateNumberModel)model).getAsNumber();
             if(hint.isInstance(number)) {
@@ -757,66 +757,66 @@ public class BeansWrapper implements ObjectWrapper
                 return date;
             }
         }
-        if(model instanceof TemplateScalarModel &&
+        if(model instanceof TemplateScalarModel && 
                 hint.isAssignableFrom(STRING_CLASS)) {
             return ((TemplateScalarModel)model).getAsString();
         }
-        if(model instanceof TemplateBooleanModel &&
+        if(model instanceof TemplateBooleanModel && 
                 hint.isAssignableFrom(BOOLEAN_CLASS)) {
-            return ((TemplateBooleanModel)model).getAsBoolean()
+            return ((TemplateBooleanModel)model).getAsBoolean() 
             ? Boolean.TRUE : Boolean.FALSE;
         }
         if(model instanceof TemplateHashModel && hint.isAssignableFrom(
                 HASHADAPTER_CLASS)) {
             return new HashAdapter((TemplateHashModel)model, this);
         }
-        if(model instanceof TemplateSequenceModel
+        if(model instanceof TemplateSequenceModel 
                 && hint.isAssignableFrom(SEQUENCEADAPTER_CLASS)) {
             return new SequenceAdapter((TemplateSequenceModel)model, this);
         }
-        if(model instanceof TemplateCollectionModel &&
+        if(model instanceof TemplateCollectionModel && 
                 hint.isAssignableFrom(SETADAPTER_CLASS)) {
             return new SetAdapter((TemplateCollectionModel)model, this);
         }
 
-        // Last ditch effort - is maybe the model itself instance of the
+        // Last ditch effort - is maybe the model itself instance of the 
         // required type?
         if(hint.isInstance(model)) {
             return model;
         }
-
+        
         return CAN_NOT_UNWRAP;
     }
 
     private static Number convertUnwrappedNumber(Class hint, Number number)
     {
         if(hint == Integer.TYPE || hint == Integer.class) {
-            return number instanceof Integer ? (Integer)number :
+            return number instanceof Integer ? (Integer)number : 
                 new Integer(number.intValue());
         }
         if(hint == Long.TYPE || hint == Long.class) {
-            return number instanceof Long ? (Long)number :
+            return number instanceof Long ? (Long)number : 
                 new Long(number.longValue());
         }
         if(hint == Float.TYPE || hint == Float.class) {
-            return number instanceof Float ? (Float)number :
+            return number instanceof Float ? (Float)number : 
                 new Float(number.floatValue());
         }
-        if(hint == Double.TYPE
+        if(hint == Double.TYPE 
                 || hint == Double.class) {
-            return number instanceof Double ? (Double)number :
+            return number instanceof Double ? (Double)number : 
                 new Double(number.doubleValue());
         }
         if(hint == Byte.TYPE || hint == Byte.class) {
-            return number instanceof Byte ? (Byte)number :
+            return number instanceof Byte ? (Byte)number : 
                 new Byte(number.byteValue());
         }
         if(hint == Short.TYPE || hint == Short.class) {
-            return number instanceof Short ? (Short)number :
+            return number instanceof Short ? (Short)number : 
                 new Short(number.shortValue());
         }
         if(hint == BigInteger.class) {
-            return number instanceof BigInteger ? number :
+            return number instanceof BigInteger ? number : 
                 new BigInteger(number.toString());
         }
         if(hint == BigDecimal.class) {
@@ -827,31 +827,31 @@ public class BeansWrapper implements ObjectWrapper
                 return new BigDecimal((BigInteger)number);
             }
             if(number instanceof Long) {
-                // Because we can't represent long accurately as a
+                // Because we can't represent long accurately as a 
                 // double
                 return new BigDecimal(number.toString());
             }
             return new BigDecimal(number.doubleValue());
         }
-        // Handle nonstandard Number subclasses as well as directly
+        // Handle nonstandard Number subclasses as well as directly 
         // java.lang.Number too
         if(hint.isInstance(number)) {
             return number;
         }
         return null;
     }
-
+    
     /**
      * Invokes the specified method, wrapping the return value. The specialty
      * of this method is that if the return value is null, and the return type
      * of the invoked method is void, {@link TemplateModel#NOTHING} is returned.
      * @param object the object to invoke the method on
-     * @param method the method to invoke
+     * @param method the method to invoke 
      * @param args the arguments to the method
      * @return the wrapped return value of the method.
      * @throws InvocationTargetException if the invoked method threw an exception
      * @throws IllegalAccessException if the method can't be invoked due to an
-     * access restriction.
+     * access restriction. 
      * @throws TemplateModelException if the return value couldn't be wrapped
      * (this can happen if the wrapper has an outer identity or is subclassed,
      * and the outer identity or the subclass throws an exception. Plain
@@ -864,10 +864,10 @@ public class BeansWrapper implements ObjectWrapper
         TemplateModelException
     {
         Object retval = method.invoke(object, args);
-        return
-            method.getReturnType() == Void.TYPE
+        return 
+            method.getReturnType() == Void.TYPE 
             ? TemplateModel.NOTHING
-            : getOuterIdentity().wrap(retval);
+            : getOuterIdentity().wrap(retval); 
     }
 
    /**
@@ -877,7 +877,7 @@ public class BeansWrapper implements ObjectWrapper
      * class, get the element of this hash with the fully qualified class name.
      * For example, if you place this hash model inside the root data model
      * under name "statics", you can use i.e. <code>statics["java.lang.
-     * System"]. currentTimeMillis()</code> to call the {@link
+     * System"]. currentTimeMillis()</code> to call the {@link 
      * java.lang.System#currentTimeMillis()} method.
      * @return a hash model whose keys are fully qualified class names, and
      * that returns hash models whose elements are the static models of the
@@ -887,21 +887,21 @@ public class BeansWrapper implements ObjectWrapper
     {
         return staticModels;
     }
-
-
+    
+    
     /**
      * Returns a hash model that represents the so-called class enum models.
      * Every class' enum model is itself a hash through which you can access
      * enum value declared by the specified class, assuming that class is an
      * enumeration. To obtain an enum model for a class, get the element of this
-     * hash with the fully qualified class name. For example, if you place this
-     * hash model inside the root data model under name "enums", you can use
-     * i.e. <code>statics["java.math.RoundingMode"].UP</code> to access the
+     * hash with the fully qualified class name. For example, if you place this 
+     * hash model inside the root data model under name "enums", you can use 
+     * i.e. <code>statics["java.math.RoundingMode"].UP</code> to access the 
      * {@link java.math.RoundingMode#UP} value.
      * @return a hash model whose keys are fully qualified class names, and
      * that returns hash models whose elements are the enum models of the
      * classes.
-     * @throws UnsupportedOperationException if this method is invoked on a
+     * @throws UnsupportedOperationException if this method is invoked on a 
      * pre-1.5 JRE, as Java enums aren't supported there.
      */
     public TemplateHashModel getEnumModels() {
@@ -923,7 +923,7 @@ public class BeansWrapper implements ObjectWrapper
             Object ctors = classInfo.get(CONSTRUCTORS);
             if(ctors == null)
             {
-                throw new TemplateModelException("Class " + clazz.getName() +
+                throw new TemplateModelException("Class " + clazz.getName() + 
                         " has no public constructors.");
             }
             Constructor ctor = null;
@@ -936,8 +936,8 @@ public class BeansWrapper implements ObjectWrapper
             }
             else if(ctors instanceof MethodMap)
             {
-                MethodMap methodMap = (MethodMap)ctors;
-                MemberAndArguments maa =
+                MethodMap methodMap = (MethodMap)ctors; 
+                MemberAndArguments maa = 
                     methodMap.getMemberAndArguments(arguments);
                 objargs = maa.getArgs();
                 ctor = (Constructor)maa.getMember();
@@ -959,7 +959,7 @@ public class BeansWrapper implements ObjectWrapper
                     "Could not create instance of class " + clazz.getName(), e);
         }
     }
-
+    
     void introspectClass(Class clazz)
     {
         synchronized(classCache)
@@ -970,7 +970,7 @@ public class BeansWrapper implements ObjectWrapper
             }
         }
     }
-
+    
     void removeIntrospectionInfo(Class clazz) {
         synchronized(classCache) {
             classCache.remove(clazz);
@@ -990,7 +990,7 @@ public class BeansWrapper implements ObjectWrapper
         {
             if(logger.isInfoEnabled())
             {
-                logger.info("Detected a reloaded class [" + className +
+                logger.info("Detected a reloaded class [" + className + 
                         "]. Clearing BeansWrapper caches.");
             }
             // Class reload detected, throw away caches
@@ -1054,7 +1054,7 @@ public class BeansWrapper implements ObjectWrapper
         set.remove(ARGTYPES);
         return set;
     }
-
+    
     /**
      * Populates a map with property and method descriptors for a specified
      * class. If any property or method descriptors specifies a read method
@@ -1086,7 +1086,7 @@ public class BeansWrapper implements ObjectWrapper
         }
         catch(SecurityException e)
         {
-            logger.warn("Canont discover constructors for class " +
+            logger.warn("Canont discover constructors for class " + 
                     clazz.getName(), e);
         }
         switch(map.size())
@@ -1094,7 +1094,7 @@ public class BeansWrapper implements ObjectWrapper
             case 0:
             {
                 map = Collections12.EMPTY_MAP;
-                break;
+                break; 
             }
             case 1:
             {
@@ -1137,7 +1137,7 @@ public class BeansWrapper implements ObjectWrapper
         {
             return classMap;
         }
-
+        
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
             PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
@@ -1150,7 +1150,7 @@ public class BeansWrapper implements ObjectWrapper
             }
             if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
             {
-                MethodAppearanceDecision decision = new MethodAppearanceDecision();
+                MethodAppearanceDecision decision = new MethodAppearanceDecision();  
                 for(int i = mda.length - 1; i >= 0; --i)
                 {
                     MethodDescriptor md = mda[i];
@@ -1160,7 +1160,7 @@ public class BeansWrapper implements ObjectWrapper
                     {
                         decision.setDefaults(publicMethod);
                         finetuneMethodAppearance(clazz, publicMethod, decision);
-
+                        
                         PropertyDescriptor propDesc = decision.getExposeAsProperty();
                         if (propDesc != null
                                 && !(classMap.get(propDesc.getName())
@@ -1170,7 +1170,7 @@ public class BeansWrapper implements ObjectWrapper
                                     propDesc, clazz, accessibleMethods,
                                     classMap);
                         }
-
+                        
                         String methodKey = decision.getExposeMethodAs();
                         if (methodKey != null)
                         {
@@ -1195,7 +1195,7 @@ public class BeansWrapper implements ObjectWrapper
                             {
                                 // Simple method (this far)
                                 classMap.put(methodKey, publicMethod);
-                                getArgTypes(classMap).put(publicMethod,
+                                getArgTypes(classMap).put(publicMethod, 
                                         publicMethod.getParameterTypes());
                             }
                         }
@@ -1205,7 +1205,7 @@ public class BeansWrapper implements ObjectWrapper
             return classMap;
         }
         catch(IntrospectionException e) {
-            logger.warn("Couldn't properly perform introspection for class " +
+            logger.warn("Couldn't properly perform introspection for class " + 
                     clazz, e);
             return new HashMap();
         }
@@ -1214,28 +1214,28 @@ public class BeansWrapper implements ObjectWrapper
     private void populateClassMapWithPropertyDescriptor(PropertyDescriptor pd,
             Class clazz, Map accessibleMethods, Map classMap) {
         if(pd instanceof IndexedPropertyDescriptor) {
-            IndexedPropertyDescriptor ipd =
+            IndexedPropertyDescriptor ipd = 
                 (IndexedPropertyDescriptor)pd;
             Method readMethod = ipd.getIndexedReadMethod();
-            Method publicReadMethod = getAccessibleMethod(readMethod,
+            Method publicReadMethod = getAccessibleMethod(readMethod, 
                     accessibleMethods);
             if(publicReadMethod != null && isSafeMethod(publicReadMethod)) {
                 try {
                     if(readMethod != publicReadMethod) {
                         ipd = new IndexedPropertyDescriptor(
-                                ipd.getName(), ipd.getReadMethod(),
-                                null, publicReadMethod,
+                                ipd.getName(), ipd.getReadMethod(), 
+                                null, publicReadMethod, 
                                 null);
                     }
                     classMap.put(ipd.getName(), ipd);
-                    getArgTypes(classMap).put(publicReadMethod,
+                    getArgTypes(classMap).put(publicReadMethod, 
                             publicReadMethod.getParameterTypes());
                 }
                 catch(IntrospectionException e) {
                     logger.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() +
-                            " indexed property " + pd.getName() +
-                            ", read method " + publicReadMethod,
+                            "property descriptor for " + clazz.getName() + 
+                            " indexed property " + pd.getName() + 
+                            ", read method " + publicReadMethod, 
                             e);
                 }
             }
@@ -1246,7 +1246,7 @@ public class BeansWrapper implements ObjectWrapper
             if(publicReadMethod != null && isSafeMethod(publicReadMethod)) {
                 try {
                     if(readMethod != publicReadMethod) {
-                        pd = new PropertyDescriptor(pd.getName(),
+                        pd = new PropertyDescriptor(pd.getName(), 
                                 publicReadMethod, null);
                         pd.setReadMethod(publicReadMethod);
                     }
@@ -1254,14 +1254,14 @@ public class BeansWrapper implements ObjectWrapper
                 }
                 catch(IntrospectionException e) {
                     logger.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() +
-                            " property " + pd.getName() + ", read method " +
+                            "property descriptor for " + clazz.getName() + 
+                            " property " + pd.getName() + ", read method " + 
                             publicReadMethod, e);
                 }
             }
         }
     }
-
+    
     /**
      * <b>Experimental method; subject to change!</b>
      * Override this to tweak certain aspects of how methods appear in the
@@ -1305,11 +1305,11 @@ public class BeansWrapper implements ObjectWrapper
      *     <tt>myObject.foo</tt> will return the method itself instead
      *     of the property value, which is often undesirable.
      * </ul>
-     *
+     * 
      * <p>Note that you can expose a Java method both as a method and as a
      * JavaBean property on the same time, however you have to chose different
-     * names for them to prevent shadowing.
-     *
+     * names for them to prevent shadowing. 
+     * 
      * @param decision Stores how the parameter method will be exposed in the
      *   data-model after {@link #finetuneMethodAppearance} returns.
      *   This is initialized so that it reflects the default
@@ -1328,7 +1328,7 @@ public class BeansWrapper implements ObjectWrapper
         }
         return argTypes;
     }
-
+    
     static Class[] getArgTypes(Map classMap, AccessibleObject methodOrCtor) {
         return (Class[])((Map)classMap.get(ARGTYPES)).get(methodOrCtor);
     }
@@ -1361,17 +1361,17 @@ public class BeansWrapper implements ObjectWrapper
         }
         return null;
     }
-
+    
     boolean isSafeMethod(Method method)
     {
         return exposureLevel < EXPOSE_SAFE || !UNSAFE_METHODS.contains(method);
     }
-
+    
     /**
      * Retrieves mapping of methods to accessible methods for a class.
-     * In case the class is not public, retrieves methods with same
-     * signature as its public methods from public superclasses and
-     * interfaces (if they exist). Basically upcasts every method to the
+     * In case the class is not public, retrieves methods with same 
+     * signature as its public methods from public superclasses and 
+     * interfaces (if they exist). Basically upcasts every method to the 
      * nearest accessible method.
      */
     private static Map discoverAccessibleMethods(Class clazz)
@@ -1380,7 +1380,7 @@ public class BeansWrapper implements ObjectWrapper
         discoverAccessibleMethods(clazz, map);
         return map;
     }
-
+    
     private static void discoverAccessibleMethods(Class clazz, Map map)
     {
         if(Modifier.isPublic(clazz.getModifiers()))
@@ -1392,12 +1392,12 @@ public class BeansWrapper implements ObjectWrapper
                 {
                     Method method = methods[i];
                     MethodSignature sig = new MethodSignature(method);
-                    // Contrary to intuition, a class can actually have several
+                    // Contrary to intuition, a class can actually have several 
                     // different methods with same signature *but* different
                     // return types. These can't be constructed using Java the
-                    // language, as this is illegal on source code level, but
-                    // the compiler can emit synthetic methods as part of
-                    // generic type reification that will have same signature
+                    // language, as this is illegal on source code level, but 
+                    // the compiler can emit synthetic methods as part of 
+                    // generic type reification that will have same signature 
                     // yet different return type than an existing explicitly
                     // declared method. Consider:
                     // public interface I<T> { T m(); }
@@ -1414,10 +1414,10 @@ public class BeansWrapper implements ObjectWrapper
             }
             catch(SecurityException e)
             {
-                logger.warn("Could not discover accessible methods of class " +
-                        clazz.getName() +
+                logger.warn("Could not discover accessible methods of class " + 
+                        clazz.getName() + 
                         ", attemping superclasses/interfaces.", e);
-                // Fall through and attempt to discover superclass/interface
+                // Fall through and attempt to discover superclass/interface 
                 // methods
             }
         }
@@ -1436,25 +1436,25 @@ public class BeansWrapper implements ObjectWrapper
 
     private static final class MethodSignature
     {
-        private static final MethodSignature GET_STRING_SIGNATURE =
+        private static final MethodSignature GET_STRING_SIGNATURE = 
             new MethodSignature("get", new Class[] { STRING_CLASS });
-        private static final MethodSignature GET_OBJECT_SIGNATURE =
+        private static final MethodSignature GET_OBJECT_SIGNATURE = 
             new MethodSignature("get", new Class[] { OBJECT_CLASS });
 
         private final String name;
         private final Class[] args;
-
+        
         private MethodSignature(String name, Class[] args)
         {
             this.name = name;
             this.args = args;
         }
-
+        
         MethodSignature(Method method)
         {
             this(method.getName(), method.getParameterTypes());
         }
-
+        
         public boolean equals(Object o)
         {
             if(o instanceof MethodSignature)
@@ -1464,13 +1464,13 @@ public class BeansWrapper implements ObjectWrapper
             }
             return false;
         }
-
+        
         public int hashCode()
         {
             return name.hashCode() ^ args.length;
         }
     }
-
+    
     private static final Set createUnsafeMethodsSet()
     {
         Properties props = new Properties();
@@ -1516,7 +1516,7 @@ public class BeansWrapper implements ObjectWrapper
         }
         return Collections.EMPTY_SET;
     }
-
+                                                                           
     private static Method parseMethodSpec(String methodSpec, Map primClasses)
     throws
         ClassNotFoundException,
@@ -1576,7 +1576,7 @@ public class BeansWrapper implements ObjectWrapper
                     }
                     else {
                         throw new IllegalArgumentException("Expected method or "
-                                + " constructor; callable is " +
+                                + " constructor; callable is " + 
                                 callable.getClass().getName());
                     }
                 }
@@ -1584,7 +1584,7 @@ public class BeansWrapper implements ObjectWrapper
             }
         }
     }
-
+    
     /**
      * Converts any {@link BigDecimal}s in the passed array to the type of
      * the corresponding formal argument of the method.
@@ -1610,7 +1610,7 @@ public class BeansWrapper implements ObjectWrapper
             }
         }
     }
-
+    
     public static Object coerceBigDecimal(BigDecimal bd, Class formalType) {
         // int is expected in most situations, so we check it first
         if(formalType == Integer.TYPE || formalType == Integer.class) {
@@ -1649,7 +1649,7 @@ public class BeansWrapper implements ObjectWrapper
             return null;
         }
     }
-
+    
     private static Constructor enumsModelCtor() {
         try {
             // Check if Enums are available on this platform
@@ -1665,7 +1665,7 @@ public class BeansWrapper implements ObjectWrapper
         }
     }
 
-
+    
     private static boolean isJavaRebelAvailable() {
         try {
             JavaRebelIntegration.testAvailability();
@@ -1675,7 +1675,7 @@ public class BeansWrapper implements ObjectWrapper
             return false;
         }
     }
-
+    
     /**
      * <b>Experimental class; subject to change!</b>
      * Used for {@link #finetuneMethodAppearance} as output parameter; see there.
@@ -1684,33 +1684,33 @@ public class BeansWrapper implements ObjectWrapper
         private PropertyDescriptor exposeAsProperty;
         private String exposeMethodAs;
         private boolean methodShadowsProperty;
-
+        
         void setDefaults(Method m) {
             exposeAsProperty = null;
             exposeMethodAs = m.getName();
             methodShadowsProperty = true;
         }
-
+        
         public PropertyDescriptor getExposeAsProperty() {
             return exposeAsProperty;
         }
-
+        
         public void setExposeAsProperty(PropertyDescriptor exposeAsProperty) {
             this.exposeAsProperty = exposeAsProperty;
         }
-
+        
         public String getExposeMethodAs() {
             return exposeMethodAs;
         }
-
+        
         public void setExposeMethodAs(String exposeAsMethod) {
             this.exposeMethodAs = exposeAsMethod;
         }
-
+        
         public boolean getMethodShadowsProperty() {
             return methodShadowsProperty;
         }
-
+        
         public void setMethodShadowsProperty(boolean shadowEarlierProperty) {
             this.methodShadowsProperty = shadowEarlierProperty;
         }
