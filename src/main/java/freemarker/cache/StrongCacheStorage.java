@@ -54,6 +54,8 @@ package freemarker.cache;
 
 import java.util.Map;
 
+import freemarker.core.ConcurrentMapFactory;
+
 /**
  * Strong cache storage is a cache storage that simply wraps a {@link Map}.
  * It holds a strong reference to all objects it was passed, therefore prevents
@@ -68,7 +70,7 @@ import java.util.Map;
  */
 public class StrongCacheStorage implements ConcurrentCacheStorage
 {
-    private final Map map = ConcurrentMapFactory.createMap();
+    private final Map map = ConcurrentMapFactory.newMaybeConcurrentHashMap();
 
     /**
      * Returns true if the underlying Map is a {@code ConcurrentMap}.
