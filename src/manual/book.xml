@@ -20053,7 +20053,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Versions</title>
 
       <section>
-        <title>2.3.30</title>
+        <title>2.3.20</title>
 
         <para>Date of release: [FIXME]</para>
 
@@ -20062,10 +20062,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Bugfix [<link
-              xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3519805&amp;group_id=794">3519805</link>]:
-              There was a small chance for a deadlock when class-reloading was
-              detected.</para>
+              <para><literal>BeansWrapper</literal> introspection cache
+              improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added public API to <literal>BeansWrapper</literal>
+                  for clearing the class cache:
+                  <literal>clearClassIntrospecitonCache()</literal>,
+                  <literal>removeFromClassIntrospectionCache(Class)</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para>Significantly improved multi-core performance:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Uses <literal>ConcurrentHashMap</literal> when
+                      running on Java 5 or later.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>The cache won't block readers while introspecting
+                      a class after a cache miss</para>
+                    </listitem>
+
+                    <listitem>
+                      <para> If multiple threads need to introspect the same
+                      class that's not in the cache yet, only one of them will
+                      do it, the others will wait for its results.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
+                  <para>Bugfix [<link
+                  xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3519805&amp;group_id=794">3519805</link>]:
+                  There was a small chance of deadlock when class-reloading
+                  was detected. The locking logic was refactored to prevent
+                  such oversights in the future.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The internal package-visible
+                  <literal>freemarker.ext.beans</literal> API was slightly
+                  changed as the result of internal cleanup. Nobody but the
+                  FreeMarker developers should define classes in that package,
+                  so it shouldn't break anything. But if somebody did some
+                  in-house hacks there, re-compile to see if it still
+                  works.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
