@@ -20088,7 +20088,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     </listitem>
 
                     <listitem>
-                      <para> If multiple threads need to introspect the same
+                      <para>If multiple threads need to introspect the same
                       class that's not in the cache yet, only one of them will
                       do it, the others will wait for its results.</para>
                     </listitem>
@@ -20113,6 +20113,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   works.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added new method to <literal>Configuration</literal>:
+              <literal>CacheStorage getCacheStorage()</literal></para>
             </listitem>
           </itemizedlist>
         </section>
