@@ -67,6 +67,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
 
@@ -137,7 +138,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     private TemplateCache cache;
     private HashMap variables = new HashMap();
-    private HashMap encodingMap = new HashMap();
+    private Map encodingMap = new ConcurrentHashMap();
     private Map autoImportMap = new HashMap();
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList();
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
