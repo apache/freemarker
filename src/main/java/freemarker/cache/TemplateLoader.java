@@ -55,22 +55,29 @@ package freemarker.cache;
 import java.io.IOException;
 import java.io.Reader;
 
+import freemarker.template.Configuration;
+
 /**
- * A template loader is an object that can find the source stream for a 
- * template, can retrieve its time of last modification as well as the stream
- * itself. A template loader is plugged into the {@link TemplateCache} to
- * provide concrete loading of the templates.
- * The implementations can be coded in a non-threadsafe manner as the natural
- * user of the template loader, {@link TemplateCache} does the necessary
- * synchronization.
- * @author Attila Szegedi, szegedia at freemail dot hu
- * @version $Id: TemplateLoader.java,v 1.18 2004/03/01 01:13:30 ddekany Exp $
+ * FreeMarker loads template "files" through objects that implement this interface,
+ * thus the templates need not be real files, and can come from any kind of data source
+ * (like classpath, servlet context, database, etc). While FreeMarker provides a few
+ * {@link TemplateLoader} implementations out-of-the-box, it's normal for embedding
+ * frameworks to use their own implementations.
+ * 
+ * To set the {@link TemplateLoader} used by FreeMaker, use
+ * {@link Configuration#setTemplateLoader(TemplateLoader)}.
+ * 
+ * Implementations of this interface should be thread-safe.
+ * 
+ * For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
+ * the {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly
+ * by the {@link TemplateCache}, and templates are get via the {@link TemplateCache} API-s.
  */
-public interface TemplateLoader
-{
+public interface TemplateLoader {
+	
     /**
      * Finds the object that acts as the source of the template with the
-     * given name. This method is called by the TemplateCache when a template
+     * given name. This method is called by the {@link TemplateCache} when a template
      * is requested, before calling either {@link #getLastModified(Object)} or
      * {@link #getReader(Object, String)}.
      *
@@ -85,13 +92,13 @@ public interface TemplateLoader
      * tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
      * typical mistake of Windows users).
      * The passed names are always considered relative to some loader-defined root
-     * location (often reffered as the "template root direcotry"), and will never start with
+     * location (often referred as the "template root directory"), and will never start with
      * a slash, nor will they contain a path component consisting of either a single or a double
      * dot -- these are all resolved by the template cache before passing the name to the
      * loader. As a side effect, paths that trivially reach outside template root directory,
      * such as <tt>../my.ftl</tt>, will be rejected by the template cache, so they never
      * reach the template loader. Note again, that if the path uses backslash as path separator
-     * instead of slash as (the template loader should not accept that), the normalisation will
+     * instead of slash as (the template loader should not accept that), the normalization will
      * not properly happen, as FreeMarker (the cache) recognizes only the slashes as separators.
      *
      * @return an object representing the template source, which can be

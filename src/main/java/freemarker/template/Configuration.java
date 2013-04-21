@@ -68,6 +68,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.servlet.ServletContext;
+
 import freemarker.cache.CacheStorage;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
@@ -75,6 +77,7 @@ import freemarker.cache.MruCacheStorage;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
@@ -90,11 +93,12 @@ import freemarker.template.utility.XmlEscape;
 /**
  * Main entry point into the FreeMarker API, this class encapsulates the 
  * various configuration parameters with which FreeMarker is run, as well
- * as serves as a central template loading and caching point. Note that
- * this class uses a default strategy for loading 
- * and caching templates. You can plug in a replacement
- * template loading mechanism by using the {@link #setTemplateLoader(TemplateLoader)}
- * method.
+ * as serves as a central template loading and caching point.
+ * 
+ * Note that this class uses a default strategy for loading and caching templates.
+ * The default template loader is deprecated, so you should plug in a replacement
+ * template loading mechanism with {@link #setTemplateLoader(TemplateLoader)}.
+ * The caching strategy can be replaced with {@link #setCacheStorage(CacheStorage)}.
  *
  * <p>This object is <em>not synchronized</em>. Thus, the settings must not be changed
  * after you have started to access the object from multiple threads. If you use multiple
@@ -299,15 +303,23 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Sets a template loader that is used to look up and load templates.
-     * By providing your own template loader, you can customize the way
-     * templates are loaded. Several convenience methods in this class already
-     * allow you to install commonly used loaders:
+     * Sets a {@link TemplateLoader} that is used to look up and load templates.
+     * By providing your own {@link TemplateLoader} implementation, you can
+     * customize the way templates are loaded.
+     * 
+     * Several convenience methods in this class exists tp install commonly used
+     * loaders:
      * {@link #setClassForTemplateLoading(Class, String)}, 
      * {@link #setDirectoryForTemplateLoading(File)}, and
-     * {@link #setServletContextForTemplateLoading(Object, String)}. By default,
-     * a multi-loader is used that first tries to load a template from the file
-     * in the current directory, then from a resource on the classpath.
+     * {@link #setServletContextForTemplateLoading(Object, String)}.
+     * 
+     * You should always set the template loader instead of relying on the default value.
+     * The a default value is there only for backward compatibility, and it will be probably
+     * removed in the future. The default value is a multi-loader that first tries to load a
+     * template from the file in the current directory, then from a resource on the classpath.
+     * 
+     * Note that setting the template loader will re-create the template cache, so
+     * all its content will be lost.
      */
     public synchronized void setTemplateLoader(TemplateLoader loader) {
         createTemplateCache(loader, cache.getCacheStorage());
@@ -342,7 +354,12 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Set the explicit directory from which to load templates.
+     * Sets the file system directory from which to load templates.
+     * This is equivalent to {@code setTemplateLoader(new FileTemplateLoader(dir))},
+     * so see {@link FileTemplateLoader#FileTemplateLoader(File)} for more details.
+     * 
+     * Note that FreeMarker can load templates from non-file-system sources too. 
+     * See {@link #setTemplateLoader(TemplateLoader)} from more details.
      */
     public void setDirectoryForTemplateLoading(File dir) throws IOException {
         TemplateLoader tl = getTemplateLoader();
@@ -355,46 +372,58 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the servlet context from which to load templates
-     * @param sctxt the ServletContext object. Note that the type is <code>Object</code>
-     *        to prevent class loading errors when user who uses FreeMarker not for
-     *        servlets has no javax.servlet in the CLASSPATH.
+     * Sets the servlet context from which to load templates.
+     * This is equivalent to {@code setTemplateLoader(new WebappTemplateLoader(sctxt, path))}
+     * or {@code setTemplateLoader(new WebappTemplateLoader(sctxt))} if {@code path} was
+     * {@code null}, so see {@link WebappTemplateLoader} for more details.
+     * 
+     * @param servletContext the {@link ServletContext} object. (The declared type is {@link Object}
+     *        to prevent class loading error when using FreeMarker in an environment where
+     *        there's no servlet classes available.)
      * @param path the path relative to the ServletContext.
-     * If this path is absolute, it is taken to be relative
-     * to the server's URL, i.e. http://myserver.com/
-     * and if the path is relative, it is taken to be 
-     * relative to the web app context, i.e.
-     * http://myserver.context.com/mywebappcontext/
+     *
+     * @see #setTemplateLoader(TemplateLoader)
      */
-    public void setServletContextForTemplateLoading(Object sctxt, String path) {
+    public void setServletContextForTemplateLoading(Object servletContext, String path) {
         try {
+            // Don't introduce linking-time dependency on servlets
+            final Class webappTemplateLoaderClass = ClassUtil.forName("freemarker.cache.WebappTemplateLoader");
+            
+            // Don't introduce linking-time dependency on servlets
+            final Class servletContextClass = ClassUtil.forName("javax.servlet.ServletContext");
+            
+            final Class[] constructorParamTypes;
+            final Object[] constructorParams;
             if (path == null) {
-                setTemplateLoader( (TemplateLoader)
-                        ClassUtil.forName("freemarker.cache.WebappTemplateLoader")
-                            .getConstructor(new Class[]{ClassUtil.forName("javax.servlet.ServletContext")})
-                                    .newInstance(new Object[]{sctxt}) );
+                constructorParamTypes = new Class[] { servletContextClass };
+                constructorParams = new Object[] { servletContext };
+            } else {
+                constructorParamTypes = new Class[] { servletContextClass, String.class };
+                constructorParams = new Object[] { servletContext, path };
             }
-            else {
-                setTemplateLoader( (TemplateLoader)
-                        ClassUtil.forName("freemarker.cache.WebappTemplateLoader")
-                            .getConstructor(new Class[]{ClassUtil.forName("javax.servlet.ServletContext"), String.class})
-                                    .newInstance(new Object[]{sctxt, path}) );
-            }
+            
+            setTemplateLoader( (TemplateLoader)
+                    webappTemplateLoaderClass
+                            .getConstructor(constructorParamTypes)
+                                    .newInstance(constructorParams));
         } catch (Exception exc) {
             throw new RuntimeException("Internal FreeMarker error: " + exc);
         }
     }
-
+    
     /**
-     * Sets a class relative to which we do the 
-     * Class.getResource() call to load templates.
+     * Sets a class relative to which we do the Class.getResource() call to load templates.
+     * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix))},
+     * so see {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
+     * 
+     * @see #setTemplateLoader(TemplateLoader)
      */
     public void setClassForTemplateLoading(Class clazz, String pathPrefix) {
         setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix));
     }
 
     /**
-     * Set the time in seconds that must elapse before checking whether there is a newer
+     * Sets the time in seconds that must elapse before checking whether there is a newer
      * version of a template file.
      * This method is thread-safe and can be called while the engine works.
      */
@@ -1008,7 +1037,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * set the list of automatically included templates.
+     * Sets the list of automatically included templates.
      * Note that all previous auto-includes are removed.
      */
     public synchronized void setAutoIncludes(List templateNames) {
