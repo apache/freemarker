@@ -348,9 +348,19 @@ public class Configuration extends Configurable implements Cloneable {
      * objects is significant but most templates are used rarely, using a
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
      * all, use {@link freemarker.cache.NullCacheStorage} (you can't use <tt>null</tt>).
+     * 
+     * Note that setting the cache storage will re-create the template cache, so
+     * all its content will be lost.
      */
     public synchronized void setCacheStorage(CacheStorage storage) {
         createTemplateCache(cache.getTemplateLoader(), storage);
+    }
+    
+    /**
+     * Returns the {@link CacheStorage} currently in use.
+     */
+    public synchronized CacheStorage getCacheStorage() {
+        return cache.getCacheStorage();
     }
     
     /**
