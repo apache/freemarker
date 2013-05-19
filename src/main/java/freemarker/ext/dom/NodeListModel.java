@@ -135,7 +135,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel {
             || key.equals("@@nested_markup") 
             || key.equals("@@text"))
         {
-            StringBuilder result = new StringBuilder();
+            StringBuffer result = new StringBuffer();
             for (int i=0; i<size(); i++) {
                 NodeModel nm = (NodeModel) get(i);
                 TemplateScalarModel textModel = (TemplateScalarModel) nm.get(key);

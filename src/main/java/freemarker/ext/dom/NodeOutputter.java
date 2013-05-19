@@ -113,7 +113,7 @@ class NodeOutputter {
     }
     
     private void constructNamespaceDecl() {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         if (explicitDefaultNSPrefix) {
             buf.append(" xmlns=\"");
             buf.append(defaultNS);
@@ -154,7 +154,7 @@ class NodeOutputter {
         this.namespaceDecl = buf.toString();
     }
     
-    private void outputQualifiedName(Node n, StringBuilder buf) {
+    private void outputQualifiedName(Node n, StringBuffer buf) {
         String nsURI = n.getNamespaceURI();
         if (nsURI == null || nsURI.length() == 0) {
             buf.append(n.getNodeName());
@@ -173,7 +173,7 @@ class NodeOutputter {
         }
     }
     
-    void outputContent(Node n, StringBuilder buf) {
+    void outputContent(Node n, StringBuffer buf) {
         switch(n.getNodeType()) {
             case Node.ATTRIBUTE_NODE: {
                 if (((Attr) n).getSpecified()) {
@@ -252,13 +252,13 @@ class NodeOutputter {
         }
     }
 
-    void outputContent(NodeList nodes, StringBuilder buf) {
+    void outputContent(NodeList nodes, StringBuffer buf) {
         for(int i = 0; i < nodes.getLength(); ++i) {
             outputContent(nodes.item(i), buf);
         }
     }
     
-    void outputContent(NamedNodeMap nodes, StringBuilder buf) {
+    void outputContent(NamedNodeMap nodes, StringBuffer buf) {
         for(int i = 0; i < nodes.getLength(); ++i) {
             Node n = nodes.item(i);
             if (n.getNodeType() != Node.ATTRIBUTE_NODE 
@@ -270,7 +270,7 @@ class NodeOutputter {
     }
     
     String getOpeningTag(Element element) {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         buf.append('<');
         outputQualifiedName(element, buf);
         buf.append(namespaceDecl);
@@ -280,7 +280,7 @@ class NodeOutputter {
     }
     
     String getClosingTag(Element element) {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         buf.append("</");
         outputQualifiedName(element, buf);
         buf.append('>');

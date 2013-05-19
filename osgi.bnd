@@ -20,16 +20,19 @@ Export-Package: !freemarker.test.*, freemarker.*;version="${versionForOSGi}"
 # Private-Package mainfest header will be excluded from
 # the .jar file!
 
-Import-Package: !freemarker.*, \
-  javax.xml.*, org.w3c.dom.*, org.xml.sax.*, \
-  *;resolution:="optional"
+Import-Package: !freemarker.*, *;resolution:="optional"
 # The above makes all imports optional (like org.python, etc.),
 # except those that were explicitly listed (or are inside java.*).
+# Thus, even when the Java platfrom includes a package, it won't
+# be automatically imported, unless bnd generates the import statement
+# for them. Thus, when J2SE-1.5 becomes a requirement, these should be
+# added to the above list, as then they won't be optional anymore:
+#   javax.xml.*, org.w3c.dom.*, org.xml.sax.*.
 
 # This is needed for "a.class.from.another.Bundle"?new() to work.
 DynamicImport-Package: *
 
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: J2SE-1.2, J2SE-1.3, J2SE-1.4, J2SE-1.5, J2SE-1.6, J2SE-1.7, J2SE-1.8
 
 # Non-OSGi meta:
 Main-Class: freemarker.core.CommandLine

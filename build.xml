@@ -16,22 +16,47 @@
   <!-- Ivy project coordinates: -->
   <property name="moduleOrg" value="org.freemarker" />
   <property name="moduleName" value="freemarker" />
-  <property name="moduleBranch" value="2.4" />
+  <property name="moduleBranch" value="2.3" />
 
-  <!-- Will be overidden on the server: -->
+  <!-- Will be overidden on the Continous Integration server: -->
   <property name="server.ivy.repo.root" value="${basedir}/build/dummy-server-ivy-repo" />
   
   <property file="build.properties"/>
-  <condition property="has.explicit.boot.classpath">
-    <isset property="boot.classpath"/>
+  <condition property="has.explicit.boot.classpath.j2se1.2">
+    <isset property="boot.classpath.j2se1.2"/>
+  </condition>
+  <condition property="has.explicit.boot.classpath.j2se1.4">
+    <isset property="boot.classpath.j2se1.4"/>
+  </condition>
+  <condition property="has.explicit.boot.classpath.j2se1.5">
+    <isset property="boot.classpath.j2se1.5"/>
+  </condition>
+  <condition property="has.all.explicit.boot.classpaths">
+    <and>
+      <isset property="has.explicit.boot.classpath.j2se1.2"/>
+      <isset property="has.explicit.boot.classpath.j2se1.4"/>
+      <isset property="has.explicit.boot.classpath.j2se1.5"/>
+    </and>
   </condition>
 
-  <!-- When boot.classpath is missing, this is the default: -->
-  <property name="boot.classpath" value="${sun.boot.class.path}" />
-  <!-- For checking the correctness of the boot.classpath -->
-  <available classpath="${boot.classpath}"
+  <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
+  <!-- Note: Target "dist" doesn't allow using these. -->
+  <property name="boot.classpath.j2se1.2" value="${sun.boot.class.path}" />
+  <property name="boot.classpath.j2se1.4" value="${sun.boot.class.path}" />
+  <property name="boot.classpath.j2se1.5" value="${sun.boot.class.path}" />
+  
+  <!-- For checking the correctness of the boot.classpath.j2se* -->
+  <available classpath="${boot.classpath.j2se1.2}"
     classname="java.lang.Object" ignoresystemclasses="true" 
-    property="boot.classpath.correct"
+    property="boot.classpath.j2se1.2.correct"
+  />
+  <available classpath="${boot.classpath.j2se1.4}"
+    classname="java.lang.Object" ignoresystemclasses="true" 
+    property="boot.classpath.j2se1.4.correct"
+  />
+  <available classpath="${boot.classpath.j2se1.5}"
+    classname="java.lang.Object" ignoresystemclasses="true" 
+    property="boot.classpath.j2se1.5.correct"
   />
   
   <condition property="example.freemarker.jar.location"
@@ -156,44 +181,147 @@
   </target>
    
   <target name="compile" depends="javacc">
-    <fail unless="boot.classpath.correct"><!--
-      -->The "boot.classpath" property value (${boot.classpath}) <!--
+    <fail unless="boot.classpath.j2se1.2.correct"><!--
+      -->The "boot.classpath.j2se1.2" property value (${boot.classpath.j2se1.2}) <!--
       -->seems to be an incorrect boot classpath. Please fix it in <!--
       -->the &lt;projectDir>/build.properties file, or wherever you <!--
       -->set it.<!--
     --></fail>
-    <echo level="info">Using boot classpath: ${boot.classpath}</echo>
+    <fail unless="boot.classpath.j2se1.4.correct"><!--
+      -->The "boot.classpath.j2se1.4" property value (${boot.classpath.j2se1.4}) <!--
+      -->seems to be an incorrect boot classpath. Please fix it in <!--
+      -->the &lt;projectDir>/build.properties file, or wherever you <!--
+      -->set it.<!--
+    --></fail>
+    <fail unless="boot.classpath.j2se1.5.correct"><!--
+      -->The "boot.classpath.j2se1.5" property value (${boot.classpath.j2se1.5}) <!--
+      -->seems to be an incorrect boot classpath. Please fix it in <!--
+      -->the &lt;projectDir>/build.properties file, or wherever you <!--
+      -->set it.<!--
+    --></fail>
+    <echo level="info">Using boot classpaths: 1.2: ${boot.classpath.j2se1.2}; 1.4: ${boot.classpath.j2se1.4}; 1.5: ${boot.classpath.j2se1.5}</echo>
 
     <mkdir dir="build/classes" />
     
-    <!-- Note: the "build" conf includes the JSP 2.0 and Servlet 2.4 API-s -->
+    <!-- Note: the "build" conf includes the JSP 2.0 and Servlet 2.4 API-s. -->
+    <!-- But it doesn't include other API-s that has multiple versions to compile against. -->
     <ivy:cachepath conf="build" pathid="ivy.dep" />
     <javac destdir="build/classes" deprecation="off" 
-      debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
+      debug="on" optimize="off" target="1.2" source="1.2" encoding="utf-8"
       includeantruntime="false"
       classpathref="ivy.dep"
-      bootclasspath="${boot.classpath}"
+      bootclasspath="${boot.classpath.j2se1.2}"
       excludes="
+        freemarker/log/JDK14LoggerFactory.java,
+        freemarker/core/RegexBuiltins.java,
+        freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java,
+        
+        freemarker/ext/beans/EnumModels.java,
+        freemarker/ext/dom/SunInternalXalanXPathSupport.java,
+        
+        freemarker/ext/jsp/TaglibFactory.java,
+        freemarker/ext/jsp/FreeMarkerPageContext1.java,
         freemarker/ext/jsp/FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
-        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+        freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
+        
+        freemarker/ext/jython/**,
+        freemarker/template/utility/JythonRuntime.java,
+        freemarker/ext/ant/**"
     >
       <src>
         <pathelement location="src/main/java" />
         <pathelement location="build/generated-sources" />
       </src>
     </javac>
+
+    <rmic
+      base="build/classes" includes="freemarker/debug/impl/Rmi*Impl.class"
+      classpathref="ivy.dep"
+      verify="yes" stubversion="1.2"
+    />
     
-    <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
+    <ivy:cachepath conf="build.j2se1.4" pathid="ivy.dep.j2se1.4" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.4" source="1.4" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep.j2se1.4"
+      bootclasspath="${boot.classpath.j2se1.4}"
+      includes="
+        freemarker/log/JDK14LoggerFactory.java,
+        freemarker/core/RegexBuiltins.java,
+        freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java"
+    />
+
+    <ivy:cachepath conf="build.j2se1.5" pathid="ivy.dep.j2se1.5" />
     <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
+      classpathref="ivy.dep.j2se1.5"
+      bootclasspath="${boot.classpath.j2se1.5}"
+      includes="
+        freemarker/ext/beans/EnumModels.java,
+        freemarker/ext/dom/SunInternalXalanXPathSupport.java"
+    />
+    
+    <ivy:cachepath conf="build.jsp1.2" pathid="ivy.dep.jsp1.2" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.2" source="1.2" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep.jsp1.2"
+      bootclasspath="${boot.classpath.j2se1.2}"
+      includes="
+        freemarker/ext/jsp/TaglibFactory.java,
+        freemarker/ext/jsp/FreeMarkerPageContext1.java"
+    />
+    
+    <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
+    
+    <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep.jsp2.1" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.2" source="1.2" encoding="utf-8"
+      includeantruntime="false"
       classpathref="ivy.dep.jsp2.1"
-      bootclasspath="${boot.classpath}"
+      bootclasspath="${boot.classpath.j2se1.2}"
       includes="
         freemarker/ext/jsp/FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
+    />
+
+    <ivy:cachepath conf="build.jython2.0" pathid="ivy.dep.jython2.0" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.2" source="1.2" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep.jython2.0"
+      bootclasspath="${boot.classpath.j2se1.2}"
+      includes="
+        freemarker/ext/ant/**,
+        freemarker/template/utility/JythonRuntime.java,
+        freemarker/ext/jython/**"
+      excludes="
+        freemarker/ext/jython/Jython22VersionAdapter.java,
+        freemarker/ext/jython/Jython25VersionAdapter.java"
+    />
+    
+    <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.2" source="1.2" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep.jython2.2"
+      bootclasspath="${boot.classpath.j2se1.2}"
+      includes="
+        freemarker/ext/jython/Jython22VersionAdapter.java"
+    />
+    
+    <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
+    <javac srcdir="src/main/java" destdir="build/classes" deprecation="off" 
+      debug="on" optimize="off" target="1.2" source="1.2" encoding="utf-8"
+      includeantruntime="false"
+      classpathref="ivy.dep.jython2.5"
+      bootclasspath="${boot.classpath.j2se1.5}"
+      includes="
+        freemarker/ext/jython/Jython25VersionAdapter.java"
     />
     
     <rmic base="build/classes" classpathref="ivy.dep"
@@ -238,7 +366,7 @@
       includeantruntime="false"
       classpath="build/classes"
       classpathref="ivy.dep.test"
-      bootclasspath="${boot.classpath}"
+      bootclasspath="${boot.classpath.j2se1.5}"
     />
     <copy toDir="build/test-classes">
       <fileset dir="src/test/resources"
@@ -365,7 +493,8 @@
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
     </delete>
-    <ivy:cachepath conf="build.jsp2.1" pathid="ivy.dep" />
+    <!-- conf="IDE": as that has to contain all depedencies -->
+    <ivy:cachepath conf="IDE" pathid="ivy.dep" />
     <javadoc
       sourcepath="src/main/java"
       destdir="build/api"
@@ -378,6 +507,7 @@
       version="true"
       author="true"
       windowtitle="FreeMarker ${version} API"
+      classpath="build/classes"
       classpathref="ivy.dep"
     />
   </target>
@@ -406,11 +536,11 @@
       <javac
         srcdir="src/examples/@{exampleName}/WEB-INF/classes"
         destdir="build/examples/@{exampleName}/WEB-INF/classes"
-        deprecation="off" debug="on" optimize="off" target="1.5" source="1.5"
+        deprecation="off" debug="on" optimize="off" target="1.2" source="1.2"
         encoding="utf-8"
         includeantruntime="false"
         classpathref="ivy.dep"
-        bootclasspath="${boot.classpath}"
+        bootclasspath="${boot.classpath.j2se1.2}"
       >
         <classpath>
           <pathelement path="${ivy.dep}" />
@@ -466,8 +596,8 @@
     description="Build the FreeMarker distribution files"
   >
     <fail
-      unless="has.explicit.boot.classpath"
-      message="boot.classpath must be set in build.properties for dist!"
+      unless="has.all.explicit.boot.classpaths"
+      message="All boot.classpath properties must be set in build.properties for dist!"
     />
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
@@ -496,7 +626,7 @@
         <include name="*.txt" />
       </fileset>
     </copy>
-    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker-${version}.jar" />
+    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />
     <replace
       file="${dist.dir}/README.txt"
       token="{version}"

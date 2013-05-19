@@ -124,7 +124,7 @@ implements
             }
             else
             {
-                StringBuilder buf = new StringBuilder();
+                StringBuffer buf = new StringBuffer();
                 Object[] args = maa.getArgs();
                 for(int i = 0; i < args.length; ++i)
                 {

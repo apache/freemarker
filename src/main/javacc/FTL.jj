@@ -54,6 +54,8 @@ options
 {
    STATIC=false;
    UNICODE_INPUT=true;
+   LEXER_CLASS="FMParserTokenManager";
+   CONSTANTS_CLASS="FMParserConstants";
 //   DEBUG_TOKEN_MANAGER=true;
 //   DEBUG_PARSER=true;
 }
@@ -116,19 +118,17 @@ public class FMParser {
       this(template, reader, strictEscapeSyntax, stripWhitespace);
       switch (tagSyntax) {
           case Configuration.AUTO_DETECT_TAG_SYNTAX : 
-             token_source.autodetectTagSyntax = true;
-             break;
-          case Configuration.ANGLE_BRACKET_TAG_SYNTAX :
-             token_source.altDirectiveSyntax = false;
-             break;
-          case Configuration.SQUARE_BRACKET_TAG_SYNTAX :
-             token_source.altDirectiveSyntax = true;
-             break;
-          default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
+	     token_source.autodetectTagSyntax = true;
+	     break;
+	  case Configuration.ANGLE_BRACKET_TAG_SYNTAX :
+	     token_source.altDirectiveSyntax = false;
+	     break;
+	  case Configuration.SQUARE_BRACKET_TAG_SYNTAX :
+	     token_source.altDirectiveSyntax = true;
+	     break;
+	  default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
       }
-      if (incompatibleChanges < 2004000) throw new IllegalArgumentException(
-                "incompatibleChanges < 2004000 is not supported in FreeMarker 2.4.0 and later.");
-      token_source.incompatibleChanges = incompatibleChanges;      
+      token_source.incompatibleChanges = incompatibleChanges; 
   }
   
   public FMParser(String template) {
@@ -341,13 +341,13 @@ TOKEN_MGR_DECLS :
          altDirectiveSyntax,
          autodetectTagSyntax,
          directiveSyntaxEstablished,
-         inInvocation;
- int incompatibleChanges;         
+		 inInvocation;
+ int incompatibleChanges;
  String templateName;
 
  
  // This method checks if we are in a strict mode where all
- // FreeMarker directives must start with <#. It also handles
+ // FreeMarker directives must start with <#. It also handled
  // tag syntax detection. If you update this logic, take a look
  // at the UNKNOWN_DIRECTIVE token too.
  private void strictSyntaxCheck(Token tok, int newLexState) {
@@ -428,7 +428,7 @@ TOKEN_MGR_DECLS :
            ++charsRead;
            if (!Character.isWhitespace(c)) {
               input_stream.backup(charsRead);
-              return;
+	      return;
            } else if (c=='\r') {
               char next = input_stream.readChar();
               ++charsRead;
@@ -448,8 +448,8 @@ TOKEN_MGR_DECLS :
  private void ftlHeader(Token matchedToken) {
        if (!directiveSyntaxEstablished) {
            altDirectiveSyntax = matchedToken.image.charAt(0) == '[';
-           directiveSyntaxEstablished = true;
-           autodetectTagSyntax = false;
+	   directiveSyntaxEstablished = true;
+	   autodetectTagSyntax = false;
        }
        String img = matchedToken.image;
        char firstChar = img.charAt(0);
@@ -604,26 +604,29 @@ TOKEN:
     |
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
-        char firstChar = matchedToken.image.charAt(0);
-        
-        if (!directiveSyntaxEstablished && autodetectTagSyntax) {            altDirectiveSyntax = (firstChar == '[');
-            directiveSyntaxEstablished = true;
-        }
-        
-        if (firstChar == '<' && altDirectiveSyntax) {
+        if (!directiveSyntaxEstablished && incompatibleChanges < 2003019) {
             matchedToken.kind = PRINTABLE_CHARS;
-        } else if (firstChar == '[' && !altDirectiveSyntax) {
-            matchedToken.kind = PRINTABLE_CHARS;
-        } else if (strictEscapeSyntax) {
-            String s = matchedToken.image;
-            int index = s.indexOf('#');
-            s = s.substring(index);
-            String msg = "Unknown directive: " 
-            + s
-            + " on line: " + matchedToken.beginLine
-            + ", column: " + matchedToken.beginColumn +1
-            + ", in template: " + templateName;
-            throw new TokenMgrError(msg, TokenMgrError.LEXICAL_ERROR);
+        } else {			char firstChar = matchedToken.image.charAt(0);
+			
+			if (!directiveSyntaxEstablished && autodetectTagSyntax) {			    altDirectiveSyntax = (firstChar == '[');
+			    directiveSyntaxEstablished = true;
+			}
+			
+			if (firstChar == '<' && altDirectiveSyntax) {
+			    matchedToken.kind = PRINTABLE_CHARS;
+			} else if (firstChar == '[' && !altDirectiveSyntax) {
+			    matchedToken.kind = PRINTABLE_CHARS;
+			} else if (strictEscapeSyntax) {
+			    String s = matchedToken.image;
+			    int index = s.indexOf('#');
+			    s = s.substring(index);
+			    String msg = "Unknown directive: " 
+			    + s
+			    + " on line: " + matchedToken.beginLine
+			    + ", column: " + matchedToken.beginColumn +1
+			    + ", in template: " + templateName;
+			    throw new TokenMgrError(msg, TokenMgrError.LEXICAL_ERROR);
+			}
         }
     }
 }
@@ -755,7 +758,7 @@ TOKEN:
   {
      --parenthesisNesting;
      if (parenthesisNesting == 0) {
-         if (inInvocation) SwitchTo(NAMED_PARAMETER_EXPRESSION);
+	 if (inInvocation) SwitchTo(NAMED_PARAMETER_EXPRESSION);
          else SwitchTo(FM_EXPRESSION);
      }
   }
@@ -856,10 +859,10 @@ TOKEN:
     <TERSE_COMMENT_END : "-->" | "--]">
     {
         if (noparseTag.equals("-->")) {
-           boolean squareBracket = matchedToken.image.endsWith("]");
-           if ((altDirectiveSyntax && squareBracket) || (!altDirectiveSyntax && !squareBracket))
-              SwitchTo(DEFAULT);
-        }
+	   boolean squareBracket = matchedToken.image.endsWith("]");
+	   if ((altDirectiveSyntax && squareBracket) || (!altDirectiveSyntax && !squareBracket))
+	      SwitchTo(DEFAULT);
+	}
     }
     |
     <MAYBE_END :
@@ -938,7 +941,7 @@ Expression PrimaryExpression() :
                 |<OPEN_PAREN>
                 |<BUILT_IN>
                 |<EXCLAM>
-                 |<TERMINATING_EXCLAM>
+		 |<TERMINATING_EXCLAM>
                 |<EXISTS>)
       exp=AddSubExpression(exp)
   )*
@@ -1133,7 +1136,7 @@ Expression EqualityExpression() :
 {
    lhs=RelationalExpression() {result = lhs;}
    [
-            LOOKAHEAD(<NOT_EQUALS>|<EQUALS>|<DOUBLE_EQUALS>)
+   	 LOOKAHEAD(<NOT_EQUALS>|<EQUALS>|<DOUBLE_EQUALS>)
      (
       t=<NOT_EQUALS> 
       |
@@ -1929,8 +1932,8 @@ FallbackInstruction FallBack() :
    {
       if (!inMacro) {
           throw new ParseException(getErrorStart(tok)
-                                   + "\nCannot fall back "
-                                   + " outside a macro.",
+	                           + "\nCannot fall back "
+				   + " outside a macro.",
                                    tok.beginLine, tok.beginColumn);
       
       }
@@ -2053,9 +2056,9 @@ TemplateElement Nested() :
    {
        if (!inMacro) {
           throw new ParseException(getErrorStart(t)
-                                   + "\nCannot use a "
-                                   + t.image
-                                   + " instruction outside a macro.",
+	                           + "\nCannot use a "
+				   + t.image
+				   + " instruction outside a macro.",
                                    t.beginLine, t.beginColumn);
        }
        return result;
@@ -2199,25 +2202,25 @@ Include Include() :
     start=<_INCLUDE>
     nameExp=Expression()
     [<SEMICOLON>]
-        (
-            att=<ID>
-            <EQUALS>
-            exp=Expression()
-            {
-               String attString = att.image;
-               if (attString.equalsIgnoreCase("parse")) {
-                  parseExp = exp;
-               }
-               else if (attString.equalsIgnoreCase("encoding")) {
-                  encodingExp = exp;
-               }
-               else {
-                   String msg = getErrorStart(att)
-                         + "\nexpecting parse= or encoding= to be specified.";
-                   throw new ParseException(msg, att.beginLine, att.beginColumn);
-               }
-            }
-        )*
+    (
+	  att=<ID>
+	  <EQUALS>
+	  exp=Expression()
+	  {
+	     String attString = att.image;
+	     if (attString.equalsIgnoreCase("parse")) {
+	        parseExp = exp;
+	     }
+	     else if (attString.equalsIgnoreCase("encoding")) {
+	        encodingExp = exp;
+	     }
+	     else {
+	         String msg = getErrorStart(att)
+	               + "\nexpecting parse= or encoding= to be specified.";
+	         throw new ParseException(msg, att.beginLine, att.beginColumn);
+	     }
+	  }
+	)*
     end=LooseDirectiveEnd()
     {
        Include result = new Include(template, nameExp, encodingExp, parseExp);
@@ -2282,14 +2285,14 @@ Macro Macro() :
           [<ELLIPSIS> { isCatchAll = true; }]
           [
             <EQUALS>
-                  defValue=Expression()
+          	defValue=Expression()
             {
               defNames.add(arg.image);
-              hasDefaults = true;
+	      hasDefaults = true;
             }
           ]
           [<COMMA>]
-          {
+	  {
           if (catchAll != null) {
               throw new ParseException(getErrorStart(arg)
                 + "\nThere may only be one \"catch-all\" parameter in a macro declaration, "
@@ -2312,7 +2315,7 @@ Macro Macro() :
               }
               args.put(arg.image, defValue);
           }
-          }
+	  }
     )*
     [<CLOSE_PAREN>]
     <DIRECTIVE_END>
@@ -2364,8 +2367,8 @@ TemplateElement UnifiedMacroTransform() :
     exp=Expression()
     {
         if (exp instanceof Identifier || (exp instanceof Dot && ((Dot) exp).onlyHasIdentifiers())) {
-           directiveName = exp.getCanonicalForm();
-        }
+	   directiveName = exp.getCanonicalForm();
+	}
     }
     [<TERMINATING_WHITESPACE>]
     (
@@ -2389,21 +2392,21 @@ TemplateElement UnifiedMacroTransform() :
       |
       (
         <DIRECTIVE_END>
-        nestedBlock=OptionalBlock()
-        end=<UNIFIED_CALL_END>
-        {
-           String s = end.image.substring(3);
-           s = s.substring(0, s.length() -1).trim();
-           if (s.length() >0 && !s.equals(directiveName)) {
+	nestedBlock=OptionalBlock()
+	end=<UNIFIED_CALL_END>
+	{
+	   String s = end.image.substring(3);
+	   s = s.substring(0, s.length() -1).trim();
+	   if (s.length() >0 && !s.equals(directiveName)) {
               String msg = getErrorStart(end);
-              if (directiveName == null) {
+	      if (directiveName == null) {
                     throw new ParseException(msg + "\nExpecting </@>", end.beginLine, end.beginColumn);
-              }
-              else {
-                  throw new ParseException(msg + "\nExpecting </@> or </@" + directiveName + ">", end.beginLine, end.beginColumn);
-              }
-           }
-        }
+	      }
+	      else {
+	          throw new ParseException(msg + "\nExpecting </@> or </@" + directiveName + ">", end.beginLine, end.beginColumn);
+	      }
+	   }
+	}
       )
     )
     {
@@ -2430,11 +2433,11 @@ TemplateElement Call() :
        |
        (
           [
-            LOOKAHEAD(<OPEN_PAREN>)
-               <OPEN_PAREN>
-          ]
-          positionalArgs=PositionalArgs()
-          [<CLOSE_PAREN>]
+	    LOOKAHEAD(<OPEN_PAREN>)
+	       <OPEN_PAREN>
+	  ]
+	  positionalArgs=PositionalArgs()
+	  [<CLOSE_PAREN>]
        )
     )
     end=LooseDirectiveEnd()
@@ -2464,8 +2467,8 @@ HashMap NamedArgs() :
      <EQUALS>
      {
          token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
-         token_source.inInvocation = true;
-     }             
+	 token_source.inInvocation = true;
+     }	     
      exp=Expression()
      {
         result.put(t.image, exp);
@@ -2584,13 +2587,13 @@ SwitchBlock Switch() :
      caseIns=Case()
      {
         if (caseIns.isDefault) {
-           if (defaultFound) {
+	   if (defaultFound) {
                 String msg = getErrorStart(start)
                             + "\nYou can only have one default case in a switch statement";
                 throw new ParseException(msg, start.beginLine, start.beginColumn);
-           }
-           defaultFound = true;
-        }
+	   }
+	   defaultFound = true;
+	}
         switchBlock.addCase(caseIns);
      }
    )*
@@ -2800,7 +2803,7 @@ TextBlock PCData() :
       (
          {prevToken = t;}         
          t=<WHITESPACE>
-         |
+	 |
          t=<PRINTABLE_CHARS>
          |
          t=<FALSE_ALERT>
@@ -2871,7 +2874,7 @@ TemplateElement Content() :
     {
         contentNesting--;
         nodes.setLocation(template, begin, elem);
-        return nodes;
+	return nodes;
     }
 }
 
@@ -2955,7 +2958,7 @@ void HeaderElement() :
                                          + "\nUnderlying cause: " + 
                                          e.getMessage(), exp);
              }
-             String vs = null;
+	     String vs = null;
              if (value instanceof TemplateScalarModel) {
                 try {
                    vs = ((TemplateScalarModel) exp).getAsString();

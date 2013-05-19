@@ -43,7 +43,13 @@ public class TagSyntaxVariationsTest extends TestCase {
 
     public final void test()
             throws TemplateException, IOException {
-        Configuration cfg = new Configuration();
+        Configuration cfgBuggy = new Configuration();
+        // Default on 2.3.x: cfgBuggy.setEmulate23ParserBugs(true);
+        // Default on 2.3.x: cfgBuggy.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
+        
+        Configuration cfgFixed = new Configuration();
+        cfgFixed.setIncompatibleEnhancements("2.3.19");
+        // Default on 2.3.x: cfgFixed.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
 
         // Permutations 
         for (int ifOrAssign = 0; ifOrAssign < 2; ifOrAssign++) {
@@ -53,7 +59,10 @@ public class TagSyntaxVariationsTest extends TestCase {
             
             // Permutations 
             for (int angOrSqu = 0; angOrSqu < 2; angOrSqu++) {
-                cfg.setTagSyntax(angOrSqu == 0
+                cfgBuggy.setTagSyntax(angOrSqu == 0
+                        ? Configuration.ANGLE_BRACKET_TAG_SYNTAX
+                        : Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+                cfgFixed.setTagSyntax(angOrSqu == 0
                         ? Configuration.ANGLE_BRACKET_TAG_SYNTAX
                         : Configuration.SQUARE_BRACKET_TAG_SYNTAX);
                 
@@ -63,7 +72,10 @@ public class TagSyntaxVariationsTest extends TestCase {
                 String wrong_xxx = angOrSqu == 0 ? WRONG_ANG : WRONG_SQU;
                 String wrongc_xxx = angOrSqu == 0 ? WRONGC_ANG : WRONGC_SQU;
                 
-                test(cfg,
+                test(cfgBuggy,
+                        dir_xxx + cust_xxx,
+                        dir_out + CUST_OUT);
+                test(cfgFixed,
                         dir_xxx + cust_xxx,
                         dir_out + CUST_OUT);
                 
@@ -71,33 +83,61 @@ public class TagSyntaxVariationsTest extends TestCase {
                 for (int wrongOrWrongc = 0; wrongOrWrongc < 2; wrongOrWrongc++) {
                     String wrongx_xxx = wrongOrWrongc == 0 ? wrong_xxx : wrongc_xxx;
                     
-                    test(cfg,
+                    // Bug: initial unknown # tags are treated as static text
+                    test(cfgBuggy,
+                            wrongx_xxx + dir_xxx,
+                            wrongx_xxx + dir_out);
+                    test(cfgFixed,
                             wrongx_xxx + dir_xxx,
                             null);
     
-                    test(cfg,
+                    // Bug: same as above
+                    test(cfgBuggy,
+                            wrongx_xxx + wrongx_xxx + dir_xxx,
+                            wrongx_xxx + wrongx_xxx + dir_out);
+                    
+                    test(cfgBuggy,
+                            dir_xxx + wrongx_xxx,
+                            null);
+                    test(cfgFixed,
                             dir_xxx + wrongx_xxx,
                             null);
                     
-                    test(cfg,
+                    test(cfgBuggy,
+                            hdr_xxx + wrongx_xxx,
+                            null);
+                    test(cfgFixed,
                             hdr_xxx + wrongx_xxx,
                             null);
                     
-                    test(cfg,
+                    test(cfgBuggy,
+                            cust_xxx + wrongx_xxx + dir_xxx,
+                            null);
+                    test(cfgFixed,
                             cust_xxx + wrongx_xxx + dir_xxx,
                             null);
                 } // for wrongc
             } // for squ
             
-            cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+            cfgBuggy.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+            cfgFixed.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
             for (int perm = 0; perm < 4; perm++) {
                 // All 4 permutations
                 String wrong_xxx = (perm & 1) == 0 ? WRONG_ANG : WRONG_SQU;
                 String dir_xxx = (perm & 2) == 0 ? dir_ang : dir_squ;
                 
-                test(cfg,
+                // Bug: Auto-detection ignores unknown # tags
+                test(cfgBuggy,
+                        wrong_xxx + dir_xxx,
+                        wrong_xxx + dir_out);
+                test(cfgFixed,
                         wrong_xxx + dir_xxx,
                         null);
+                
+                // Bug: same as above
+                test(cfgBuggy,
+                        wrong_xxx + wrong_xxx + dir_xxx,
+                        wrong_xxx + wrong_xxx + dir_out);
             } // for perm
     
             // Permutations 
@@ -108,23 +148,38 @@ public class TagSyntaxVariationsTest extends TestCase {
                 String dir_xxx = angOrSquStart == 0 ? dir_ang : dir_squ;
                 String dir_yyy = angOrSquStart != 0 ? dir_ang : dir_squ;
                 
-                test(cfg,
+                test(cfgBuggy,
+                        cust_xxx + wrong_yyy + dir_xxx,
+                        CUST_OUT + wrong_yyy + dir_out);
+                test(cfgFixed,
                         cust_xxx + wrong_yyy + dir_xxx,
                         CUST_OUT + wrong_yyy + dir_out);
                 
-                test(cfg,
+                test(cfgBuggy,
+                        hdr_xxx + wrong_yyy + dir_xxx,
+                        wrong_yyy + dir_out);
+                test(cfgFixed,
                         hdr_xxx + wrong_yyy + dir_xxx,
                         wrong_yyy + dir_out);
                 
-                test(cfg,
+                test(cfgBuggy,
+                        cust_xxx + wrong_yyy + dir_yyy,
+                        CUST_OUT + wrong_yyy + dir_yyy);
+                test(cfgFixed,
                         cust_xxx + wrong_yyy + dir_yyy,
                         CUST_OUT + wrong_yyy + dir_yyy);
                 
-                test(cfg,
+                test(cfgBuggy,
+                        hdr_xxx + wrong_yyy + dir_yyy,
+                        wrong_yyy + dir_yyy);
+                test(cfgFixed,
                         hdr_xxx + wrong_yyy + dir_yyy,
                         wrong_yyy + dir_yyy);
                 
-                test(cfg,
+                test(cfgBuggy,
+                        dir_xxx + wrong_yyy + dir_yyy,
+                        dir_out + wrong_yyy + dir_yyy);
+                test(cfgFixed,
                         dir_xxx + wrong_yyy + dir_yyy,
                         dir_out + wrong_yyy + dir_yyy);
             } // for squStart

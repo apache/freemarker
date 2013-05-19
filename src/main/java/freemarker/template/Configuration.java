@@ -67,7 +67,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
 
@@ -79,6 +78,7 @@ import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
+import freemarker.core.ConcurrentMapFactory;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
@@ -125,8 +125,8 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
-
-    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = "2.4.0"; 
+    
+    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = "2.3.0"; // [2.4] 
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = StringUtil.versionStringToInt(DEFAULT_INCOMPATIBLE_ENHANCEMENTS); 
     
     private static Configuration defaultConfig = new Configuration();
@@ -138,7 +138,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     private TemplateCache cache;
     private HashMap variables = new HashMap();
-    private Map encodingMap = new ConcurrentHashMap();
+    private Map encodingMap = ConcurrentMapFactory.newThreadSafeMap();
     private Map autoImportMap = new HashMap();
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList();
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
@@ -334,6 +334,7 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setConfiguration(this);
         cache.setLocalizedLookup(localizedLookup);
     }
+    
     /**
      * @return the template loader that is used to look up and load templates.
      * @see #setTemplateLoader
@@ -363,7 +364,7 @@ public class Configuration extends Configurable implements Cloneable {
     public synchronized CacheStorage getCacheStorage() {
         return cache.getCacheStorage();
     }
-    
+
     /**
      * Sets the file system directory from which to load templates.
      * This is equivalent to {@code setTemplateLoader(new FileTemplateLoader(dir))},
@@ -421,7 +422,7 @@ public class Configuration extends Configurable implements Cloneable {
             throw new RuntimeException("Internal FreeMarker error: " + exc);
         }
     }
-    
+
     /**
      * Sets a class relative to which we do the Class.getResource() call to load templates.
      * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix))},
@@ -495,21 +496,18 @@ public class Configuration extends Configurable implements Cloneable {
      *     same template.
      *   </li>
      * </ul>
+     *
+     * @since 2.3.19
      */
     public void setIncompatibleEnhancements(String version) {
-        int n = StringUtil.versionStringToInt(version);
-        if (n < 2004000) {
-            throw new IllegalArgumentException(
-                    "Incompatible_enhancements < 2.4.0 aren't supported anymore");
-        }
-        parsedIncompatibleEnhancements = n;
+        parsedIncompatibleEnhancements = StringUtil.versionStringToInt(version);
         incompatibleEnhancements = version;
     }
-    
+
     public String getIncompatibleEnhancements() {
         return incompatibleEnhancements;
     }
-
+    
     /**
      * Same as {@link #getIncompatibleEnhancements()}, but returns the version
      * as an <tt>int</tt>, according to
@@ -771,6 +769,15 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
+     * Removes all entries from the template cache, thus forcing reloading of templates
+     * on subsequent <code>getTemplate</code> calls.
+     * This method is thread-safe and can be called while the engine works.
+     */
+    public void clearTemplateCache() {
+        cache.clear();
+    }
+    
+    /**
      * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
      */
     public void removeTemplateFromCache(String name) throws IOException {
@@ -813,15 +820,6 @@ public class Configuration extends Configurable implements Cloneable {
     throws IOException {
         cache.removeTemplate(name, locale, encoding, parse);
     }    
-    
-    /**
-     * Removes all entries from the template cache, thus forcing reloading of templates
-     * on subsequent <code>getTemplate</code> calls.
-     * This method is thread-safe and can be called while the engine works.
-     */
-    public void clearTemplateCache() {
-        cache.clear();
-    }
     
     /**
      * Returns if localized template lookup is enabled or not.

@@ -111,7 +111,7 @@ abstract class StringBuiltins {
                 i++;
             }
             if (i < ln) {
-                StringBuilder b = new StringBuilder(s);
+                StringBuffer b = new StringBuffer(s);
                 b.setCharAt(i, Character.toUpperCase(s.charAt(i)));
                 s = b.toString();
             }
@@ -127,7 +127,7 @@ abstract class StringBuiltins {
                 i++;
             }
             if (i < ln) {
-                StringBuilder b = new StringBuilder(s);
+                StringBuffer b = new StringBuffer(s);
                 b.setCharAt(i, Character.toLowerCase(s.charAt(i)));
                 s = b.toString();
             }

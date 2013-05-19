@@ -88,7 +88,7 @@ final class NumericalOutput extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        Number num = EvaluationRules.getNumber(expression, env);
+        Number num = EvaluationUtil.getNumber(expression, env);
         
         FormatHolder fmth = formatCache;  // atomic sampling
         if (fmth == null || !fmth.locale.equals(env.getLocale())) {
@@ -116,7 +116,7 @@ final class NumericalOutput extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder("#{");
+        StringBuffer buf = new StringBuffer("#{");
         buf.append(expression.getCanonicalForm());
         if (hasFormat) {
             buf.append(" ; ");

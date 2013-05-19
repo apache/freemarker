@@ -1,5 +1,6 @@
 package freemarker.core;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,15 @@ public class ConcurrentMapFactory {
             throw new UndeclaredThrowableException(e);
         }
     }
+    
+    /**
+     * Returns an instance of the "best" thread-safe {@link Map} available in
+     * the current runtime environment.   
+     */
+	public static Map newThreadSafeMap() {
+		Map map = newMaybeConcurrentHashMap();
+		return isConcurrent(map) ? map : Collections.synchronizedMap(map); 
+	}
 
     static public boolean concurrentMapsAvailable() {
         return concurrentMapClass != null;
@@ -54,4 +64,5 @@ public class ConcurrentMapFactory {
             return HashMap.class;
         }
     }
+    
 }

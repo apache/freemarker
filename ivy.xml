@@ -14,7 +14,7 @@
     <conf name="default" extends="runtime" />
     
     <conf name="runtime"
-        description="for using FreeMarker under J2SE 1.5+ (no optional dependecies included)"
+        description="for using FreeMarker under J2SE 1.2+ (no optional dependecies included)"
     />
 
     <conf name="build.base" extends="default" visibility="private"
@@ -23,6 +23,17 @@
     <conf name="build" extends="build.jsp2.0"
         description="for building FreeMarker with default dependencies"
     />
+
+    <conf name="build.j2se1.4" extends="build.base"
+        description="for building FreeMarker parts that require J2SE 1.4"
+    />
+    <conf name="build.j2se1.5" extends="build.base"
+        description="for building FreeMarker parts that require J2SE 5"
+    />
+
+    <conf name="build.jsp1.2" extends="build.base"
+        description="for building FreeMarker with JSP 1.2 support"
+    />
     <conf name="build.jsp2.0" extends="build.base"
         description="for building FreeMarker with JSP 2.0 support"
     />
@@ -30,10 +41,20 @@
         description="for building FreeMarker with JSP 2.1 support"
     />
 
-    <conf name="build.test" extends="build.jsp2.1"
+    <conf name="build.jython2.0" extends="build.base"
+        description="for building FreeMarker with Jython 2.0 support"
+    />
+    <conf name="build.jython2.2" extends="build.base"
+        description="for building FreeMarker with Jython 2.2 support"
+    />
+    <conf name="build.jython2.5" extends="build.base"
+        description="for building FreeMarker with Jython 2.5 support"
+    />
+    
+    <conf name="build.test" extends="build.jsp2.1, build.jython2.5"
         description="for building FreeMarker testsuite"
     />
-    <conf name="test" extends="build.jsp2.1"
+    <conf name="test" extends="build.jsp2.1, build.jython2.5"
         description="for running FreeMarker testsuite"
     />
 
@@ -47,7 +68,7 @@
     
     <conf name="manual" description="for generating the manual with Docgen" />
     
-    <conf name="site" description="for integrating website inot a distro" />
+    <conf name="site" description="for integrating website into a distro" />
     
     <conf name="emma" description="for generating EMMA reports" />
     
@@ -63,49 +84,78 @@
   </publications>
   <dependencies>
     <!-- build -->
-    <dependency org="ant" name="ant" rev="1.6.5" conf="build.base->default" />
-    <dependency org="org.visigoths" name="cavalry" rev="1.0" conf="build.base->default" />
+    
+    <dependency org="xml-apis" name="xml-apis" rev="1.3.04" conf="build.base->default" /> <!-- as it wasn't part of J2SE 1.2 -->
     <dependency org="jaxen" name="jaxen" rev="1.0-FCS" conf="build.base->default" />
-    <dependency org="org.jruby" name="jruby" rev="1.0" conf="build.base->default" />
-    <dependency org="org.python" name="jython" rev="2.2.1" conf="build.base->default" />
+    <dependency org="saxpath" name="saxpath" rev="1.0-FCS" conf="build.base->default" />
+    <dependency org="xalan" name="xalan" rev="2.7.0" conf="build.base->default">
+      <!-- The lowerst supported xml-apis version is an explicit dependency; prevent eviction: -->
+      <exclude org="xml-apis" module="xml-apis" />
+    </dependency>
+    <dependency org="dom4j" name="dom4j" rev="1.3" conf="build.base->default" /> <!-- legacy -->
+    <dependency org="org.jdom" name="jdom" rev="1.0-beta8-dev" conf="build.base->default" /> <!-- legacy -->
+
+    <dependency org="ant" name="ant" rev="1.6.5" conf="build.base->default">
+      <!-- The lowerst supported xml-apis version is an explicit dependency; prevent eviction: -->
+      <exclude org="xml-apis" module="xml-apis" />
+    </dependency>
+    
+    <dependency org="javax.servlet.jsp" name="jsp-api" rev="1.2" conf="build.jsp1.2->default" />
+    <dependency org="javax.servlet" name="servlet-api" rev="2.3" conf="build.jsp1.2->default" />
+    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default; example.struts-webapp->default" />
+    <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default; example.servlet->default" />
+    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />
+    <dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="build.jsp2.1->default" />
+    
+    <dependency org="rhino" name="js" rev="1.6R1" conf="build.base->default" />
+
+    <dependency org="org.python" name="jython" rev="2.0.0" conf="build.jython2.0->default" />
+    <dependency org="org.python" name="jython" rev="2.2.1" conf="build.jython2.2->default" />
+    <dependency org="org.python" name="jython" rev="2.5.0" conf="build.jython2.5->default" />
+    
     <dependency org="log4j" name="log4j" rev="1.2.6" conf="build.base->default" />
     <dependency org="avalon-logkit" name="avalon-logkit" rev="2.0" conf="build.base->default" />
     <dependency org="org.slf4j" name="slf4j-api" rev="1.6.1" conf="build.base->default" />
     <dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="build.base->default" />
-    <dependency org="saxpath" name="saxpath" rev="1.0-FCS" conf="build.base->default" />
-    <dependency org="rhino" name="js" rev="1.6R1" conf="build.base->default" />
-    <dependency org="xalan" name="xalan" rev="2.7.0" conf="build.base->default" />
-    <dependency org="javax.script" name="script-api" rev="1.0" conf="build.base->default" />
+    
     <dependency org="org.zeroturnaround" name="javarebel-sdk" rev="1.2.2" conf="build.base->default" />
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default;example.struts-webapp->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default;example.servlet->default" />
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="build.jsp2.1->default" />
 
+    <!--dependency org="javax.script" name="script-api" rev="1.0" conf="build.base->default" /-->
+    <!--dependency org="org.visigoths" name="cavalry" rev="1.0" conf="build.base->default" /-->
+    
     <!-- test -->
-    <dependency org="junit" name="junit" rev="3.7" conf="build.test->default" />
+    
+    <!-- Note: Ant doesn't contain junit.jar anymore, so we add it to conf "test" too. -->
+    <dependency org="junit" name="junit" rev="3.7" conf="build.test->default; test->default" />
     
     <!-- docs -->
+    
     <dependency org="org.freemarker" name="docgen" rev="1.0-branch-head" conf="manual->default" changing="true" />
     
     <!-- website -->
+    
     <dependency org="org.freemarker" name="site" rev="1.0-branch-head" conf="site->default" changing="true" />
     
     <!-- EMMA -->
+    
     <dependency org="emma" name="emma" rev="2.0.5312" conf="emma->default" />
     <dependency org="emma" name="emma_ant" rev="2.0.5312" conf="emma->default" />
     
     <!-- parser -->
+    
     <dependency org="net.java.dev.javacc" name="javacc" rev="3.2" conf="parser->default" />
     
     <!-- bnd -->
-    <dependency org="biz.aQute" name="bnd" rev="0.0.401" conf="bnd->default" />
+    
+    <dependency org="biz.aQute" name="bnd" rev="1.50.0" conf="bnd->default" />
     
     <!-- As the tests surely run on Ant, it's a provided dependency. -->
+    
     <exclude org="ant" module="ant" conf="test" />
     <exclude org="ant" module="ant" conf="emma" />
     
     <!-- Ensure that JSP versions don't accidentally hide each-other -->
+    
     <conflict org="javax.servlet.jsp" module="jsp-api" manager="strict" />
     
   </dependencies>

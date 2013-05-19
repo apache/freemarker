@@ -80,10 +80,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         } catch (Exception e) {}
         try {
             JYTHON_OBJ_CLASS = Class.forName("org.python.core.PyObject");
-            JYTHON_WRAPPER = freemarker.ext.jython.JythonWrapper.INSTANCE;
+            JYTHON_WRAPPER = (ObjectWrapper) Class.forName(
+                    "freemarker.ext.jython.JythonWrapper")
+                    .getField("INSTANCE").get(null);
         } catch (Exception e) {}
     }
-    
 
     public TemplateModel wrap(Object obj) throws TemplateModelException {
         if (obj == null) {

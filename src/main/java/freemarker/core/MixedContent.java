@@ -94,7 +94,7 @@ final class MixedContent extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         for (int i = 0; i<nestedElements.size(); i++) {
             TemplateElement element = (TemplateElement) nestedElements.get(i);
             buf.append(element.getCanonicalForm());

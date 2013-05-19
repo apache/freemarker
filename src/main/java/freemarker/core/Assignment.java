@@ -128,7 +128,7 @@ final class Assignment extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         if (!(parent instanceof AssignmentInstruction)) {
             if (scope == LOCAL) {
                 buf.append("<#local ");

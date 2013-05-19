@@ -104,7 +104,7 @@ final class TransformBlock extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder("<#transform ");
+        StringBuffer buf = new StringBuffer("<#transform ");
         buf.append(transformExpression);
         if (namedArgs != null) {
             for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {

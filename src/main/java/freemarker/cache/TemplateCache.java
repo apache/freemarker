@@ -613,7 +613,7 @@ public class TemplateCache
             String prefix = lastDot == -1 ? name : name.substring(0, lastDot);
             String suffix = lastDot == -1 ? "" : name.substring(lastDot);
             String localeName = LOCALE_SEPARATOR + locale.toString();
-            StringBuilder buf = new StringBuilder(name.length() + localeName.length());
+            StringBuffer buf = new StringBuffer(name.length() + localeName.length());
             buf.append(prefix);
             for (;;)
             {
@@ -667,7 +667,7 @@ public class TemplateCache
         {
             resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
         }
-        StringBuilder buf = new StringBuilder(path.length()).append(basePath);
+        StringBuffer buf = new StringBuffer(path.length()).append(basePath);
         int l = basePath.length();
         boolean debug = logger.isDebugEnabled();
         for(;;)
@@ -694,7 +694,7 @@ public class TemplateCache
 
     private String concatPath(List path, int from, int to)
     {
-        StringBuilder buf = new StringBuilder((to - from) * 16);
+        StringBuffer buf = new StringBuffer((to - from) * 16);
         for(int i = from; i < to; ++i)
         {
             buf.append(path.get(i)).append('/');

@@ -82,7 +82,7 @@ final class Case extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         if (isDefault) {
             buf.append("<#default>");
         }

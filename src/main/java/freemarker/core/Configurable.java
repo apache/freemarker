@@ -138,7 +138,7 @@ public class Configurable
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
         autoFlush = Boolean.TRUE;
-        newBuiltinClassResolver = TemplateClassResolver.SAFER_RESOLVER;
+        newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         

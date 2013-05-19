@@ -95,7 +95,7 @@ final class AssignmentInstruction extends TemplateElement {
         else if (scope == Assignment.NAMESPACE) {
             tag = "<#assign ";
         }
-        StringBuilder buf = new StringBuilder(tag);
+        StringBuffer buf = new StringBuffer(tag);
         for (int i = 0; i<nestedElements.size(); i++) {
             Assignment ass = (Assignment) nestedElements.get(i);
             buf.append(ass.getCanonicalForm());

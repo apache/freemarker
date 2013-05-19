@@ -87,7 +87,7 @@ import freemarker.template.utility.OptimizerUtil;
 /**
  * An object wrapper that wraps Jython objects into FreeMarker template models
  * and vice versa.
- * @version $Id: JythonWrapper.java,v 1.25 2005/10/04 12:08:25 revusky Exp $
+ * @version $Id: JythonWrapper.java,v 1.23.2.1 2005/10/04 16:18:08 revusky Exp $
  * @author Attila Szegedi
  */
 public class JythonWrapper implements ObjectWrapper
@@ -219,8 +219,6 @@ public class JythonWrapper implements ObjectWrapper
     private class TemplateModelToJythonAdapter extends PyObject 
     implements TemplateModelAdapter 
     {
-        private static final long serialVersionUID = -1713827832521799105L;
-
         private final TemplateModel model;
         
         TemplateModelToJythonAdapter(TemplateModel model)

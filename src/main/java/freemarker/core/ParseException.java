@@ -234,7 +234,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
       Token nextToken = currentToken.next;
       int kind = nextToken.kind;
       if (kind == EOF) {
-          StringBuilder buf = new StringBuilder("Unexpected end of file reached.\n");
+          StringBuffer buf = new StringBuffer("Unexpected end of file reached.\n");
           for (int i = 0; i<expectedTokenSequences.length; i++) {
               int[] sequence = expectedTokenSequences[i];
               switch (sequence[0]) {
@@ -293,7 +293,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
    * string literal.
    */
   protected String add_escapes(String str) {
-      StringBuilder retval = new StringBuilder();
+      StringBuffer retval = new StringBuffer();
       char ch;
       for (int i = 0; i < str.length(); i++) {
         switch (str.charAt(i))

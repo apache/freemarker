@@ -60,13 +60,17 @@ import freemarker.template.utility.ClassUtil;
 /**
  * The FreeMarker logging facility. This is a polymorphic implementation
  * that will use whatever logging package it can find on the system:
- * SLF4J, Apache Commons Logging, Apache Log4J, Apache Avalon LogKit,
- * <tt>java.util.logging</tt> (in this order). If it fails to find any of the
- * above, logging will be suppressed and a short notice will be printed to
- * <tt>System.err</tt>.
+ * Apache Log4J, Apache Avalon LogKit, <tt>java.util.logging</tt> (in this
+ * order). If it fails to find any of the above, logging will be suppressed
+ * and a short notice will be printed to <tt>System.err</tt>.
  *
  * <p>You can use the {@link #selectLoggerLibrary(int)} static method to force
  * use of a specific logger package, or to turn off logging.
+ * 
+ * <p>SLF4J or Apache Commons Logging are supported (since FreeMarker 2.3.17)
+ * and recommended, but are never selected automatically (until FreeMarker 2.4)
+ * due to backward compatibility constraints; you have to  select them
+ * explicitly with {@link #selectLoggerLibrary(int)}.
  * 
  * @author Attila Szegedi
  */
@@ -124,6 +128,7 @@ public abstract class Logger
         "java.util.logging.Logger", "JDK14",
         "org.apache.log.Logger",    "Avalon",
         "org.apache.log4j.Logger",  "Log4J",
+        /* In 2.3.x this two is skipped by LIBRARY_AUTO: */
         "org.apache.commons.logging.Log",  "CommonsLogging",
         "org.slf4j.Logger",  "SLF4J",
     };
@@ -291,6 +296,9 @@ public abstract class Logger
         {
             for(int i = LIBINIT.length / 2 - 1; i > 0; --i)
             {
+            	// For backward-compatibility we skip these in 2.3.x:
+            	if (i == LIBRARY_SLF4J || i == LIBRARY_COMMONS) continue;
+            	
                 try
                 {
                     return createFactory(i);

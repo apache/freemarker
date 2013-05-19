@@ -43,4 +43,9 @@ public class UndeclaredThrowableException extends RuntimeException
     public Throwable getUndeclaredThrowable() {
         return t;
     }
+    
+    public Throwable getCause() {
+    	return t;
+    }
+    
 }

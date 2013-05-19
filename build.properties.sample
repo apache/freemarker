@@ -1,4 +1,5 @@
-# Should point to the rt.jar of J2SE 1.5.
-# You may comment this property out, but for releases it should be set,
-# so J2SE 1.5 incompatibilities will cause compilation-time errors.
-boot.classpath=C:/Program Files (x86)/Java/jdk1.5.0_16/jre/lib/rt.jar
+# Copy this file to "build.properties" before editing!
+# These propeties should point to the rt.jar-s of the respective J2SE versions:
+boot.classpath.j2se1.2=C:/Program Files (x86)/Java/jdk1.2.2/jre/lib/rt.jar
+boot.classpath.j2se1.4=C:/Program Files (x86)/Java/jdk1.4.0/jre/lib/rt.jar
+boot.classpath.j2se1.5=C:/Program Files (x86)/Java/jdk1.5.0_16/jre/lib/rt.jar

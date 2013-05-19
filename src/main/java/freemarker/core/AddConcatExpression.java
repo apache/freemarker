@@ -78,8 +78,8 @@ final class AddConcatExpression extends Expression {
         TemplateModel rightModel = right.getAsTemplateModel(env);
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel)
         {
-            Number first = EvaluationRules.getNumber((TemplateNumberModel) leftModel, left, env);
-            Number second = EvaluationRules.getNumber((TemplateNumberModel) rightModel, right, env);
+            Number first = EvaluationUtil.getNumber((TemplateNumberModel) leftModel, left, env);
+            Number second = EvaluationUtil.getNumber((TemplateNumberModel) rightModel, right, env);
             ArithmeticEngine ae =
                 env != null
                     ? env.getArithmeticEngine()

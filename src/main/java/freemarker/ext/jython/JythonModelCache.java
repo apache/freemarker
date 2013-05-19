@@ -10,7 +10,6 @@ import org.python.core.Py;
 import org.python.core.PyDictionary;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
-import org.python.core.PyInstance;
 import org.python.core.PyLong;
 import org.python.core.PyNone;
 import org.python.core.PyObject;
@@ -30,17 +29,16 @@ class JythonModelCache extends ModelCache
         this.wrapper = wrapper;
     }
 
-    @Override
     protected boolean isCacheable(Object object) {
         return true;
     }
     
-    @Override
     protected TemplateModel create(Object obj) {
         boolean asHash = false;
         boolean asSequence = false;
-        if(obj instanceof PyInstance) {
-            Object jobj = ((PyInstance)obj).__tojava__(java.lang.Object.class);
+        JythonVersionAdapter versionAdapter = JythonVersionAdapter.getInstance();
+        if(versionAdapter.isPyInstance(obj)) {
+            Object jobj = versionAdapter.pyInstanceToJava(obj);
             // FreeMarker-aware, Jython-wrapped Java objects are left intact 
             if(jobj instanceof TemplateModel) {
                 return (TemplateModel)jobj; 
@@ -77,7 +75,7 @@ class JythonModelCache extends ModelCache
             return JythonNumberModel.FACTORY.create(obj, wrapper);
         }
         if(obj instanceof PyNone) {
-            return null;  // Should be TemplateModel.JAVA_NULL when that's introducted
+            return null;
         }
         return JythonModel.FACTORY.create(obj, wrapper);
     }

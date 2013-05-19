@@ -65,41 +65,36 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
-//import freemarker.ext.xml.NodeListModel;
+import freemarker.ext.xml.NodeListModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.*;
 
 
 /**
- * <p>This is a simple <a href="http://jakarta.apache.org/ant/" target="_top">Ant</a>
- * task for transforming XML documents using FreeMarker templates. It wraps the XML
- * document using {@link freemarker.ext.dom.NodeModel}, which means that the templat
- * will see the XML document as descrtibed in <b>the XML Processing Guide in
- * the FreeMarker Manual</b>. It will read a set of XML documents, and pass them
- * to the template for processing, building the corresponding output files in
- * the destination directory (one file per XML).</p>
- * <p>It makes the following variables available to the template
- * (in the data-model):</p>
+ * <p>This is an <a href="http://jakarta.apache.org/ant/" target="_top">Ant</a> task for transforming
+ * XML documents using FreeMarker templates. It uses the adapter class
+ * {@link NodeListModel}. It will read a set of XML documents, and pass them to
+ * the template for processing, building the corresponding output files in the
+ * destination directory.</p>
+ * <p>It makes the following variables available to the template in the data model:</p>
  * <ul>
- * <li>The special FreeMarker varaible <tt>.node</tt>: Initially it's the root
- *    of the DOM tree (the "document") of the currently processed XML file. But
- *    as it is described in the FreeMarker Manual, <tt>.node</tt> variable may
- *    stores another node when executing <tt>#visit</tt>/<tt>#recurse</tt></li>
+ * <li><tt>document</tt>: <em>Deprecated!</em> The DOM tree of the currently processed XML file wrapped
+      with the legacy {@link freemarker.ext.xml.NodeListModel}.
+      For new projects you should use the <tt>.node</tt> instead, which initially
+      contains the DOM Document wrapped with {@link freemarker.ext.dom.NodeModel}.</li>
  * <li><tt>properties</tt>: a {@link freemarker.template.SimpleHash} containing
- * properties of the project that executes the task. That is, you can read
- * the properties in the template like <tt>properties.myProperty</tt>
- * or <tt>properties["myProperty"]<tt>.</li>
- * <li><tt>userProperties</tt>: again, a {@link freemarker.template.SimpleHash}
- * containing user properties of the project that executes the task</li>
+ * properties of the project that executes the task</li>
+ * <li><tt>userProperties</tt>: a {@link freemarker.template.SimpleHash} containing
+ * user properties of the project that executes the task</li>
  * <li><tt>project</tt>: the DOM tree of the XML file specified by the
  * <tt>projectfile</tt>. It will not be available if you didn't specify the
  * <tt>projectfile</tt> attribute.</li>
  * <li>further custom models can be instantiated and made available to the 
  * templates using the <tt>models</tt> attribute.</li>
  * </ul>
- * 
- * <p>This Ant task supports the following attributes:</p>
+ * <p>It supports the following attributes:</p>
  * <table border="1" cellpadding="2" cellspacing="0">
  *   <tr>
  *     <th valign="top" align="left">Attribute</th>
@@ -205,7 +200,7 @@ import freemarker.template.*;
  *   </tr>
  * </table>
  * 
- * <p>This Ant task supports the following nesed elements:</p>
+ * <p>It supports the following nesed elements:</p>
  * <table border="1" cellpadding="2" cellspacing="0">
  *   <tr>
  *     <th valign="top" align="left">Element</th>
@@ -250,12 +245,10 @@ import freemarker.template.*;
  *   </tr>
  * </table>
  * 
- * <p><b>Note:</b> If you need a more feature-rich XML transformer task, you may
- * use <a href="http://fmpp.sourceforge.net">FMPP</a>.</p>
- * 
  * @author Attila Szegedi
  * @author Jonathan Revusky, jon@revusky.com
- * @version $Id: FreemarkerXmlTask.java,v 1.58 2004/11/11 20:34:35 ddekany Exp $
+ * @deprecated <a href="http://fmpp.sourceforge.net">FMPP</a> is a more complete solution.
+ * @version $Id: FreemarkerXmlTask.java,v 1.58.2.1 2006/04/26 11:07:58 revusky Exp $
  */
 public class FreemarkerXmlTask
 extends
@@ -309,13 +302,12 @@ extends
     /** the default output extension is .html */
     private String extension = ".html";
 
-//    private String encoding = SecurityUtilities.getSystemProperty("file.encoding");
-    private String encoding = "ISO-8859-1";
+    private String encoding = SecurityUtilities.getSystemProperty("file.encoding");
     private String templateEncoding = encoding;
     private boolean validation = false;
 
     private String models = "";
-    private final Map<String, Object> modelsMap = new HashMap<String, Object>();
+    private final Map modelsMap = new HashMap();
     
     
     
@@ -544,17 +536,17 @@ extends
                 
                 if (projectTemplate == null && projectFile != null) {
                     Document doc = builder.parse(projectFile);
-//                    projectTemplate = new NodeListModel(builder.parse(projectFile));
+                    projectTemplate = new NodeListModel(builder.parse(projectFile));
                     projectNode = NodeModel.wrap(doc);
                 }
 
                 // Build the file DOM
                 Document docNode = builder.parse(inFile);
                 
-//                TemplateModel document = new NodeListModel(docNode);
+                TemplateModel document = new NodeListModel(docNode);
                 TemplateNodeModel docNodeModel = NodeModel.wrap(docNode);
-                HashMap<String, Object> root = new HashMap<String, Object>();
-//                root.put("document", document);
+                HashMap root = new HashMap();
+                root.put("document", document);
                 insertDefaults(root);
 
                 // Process the template and write out
@@ -566,7 +558,7 @@ extends
                         throw new BuildException("No template file specified in build script or in XML file");
                     }
                     if (prepareModel != null) {
-                        Map<String, Object> vars = new HashMap<String, Object>();
+                        Map vars = new HashMap();
                         vars.put("model", root);
                         vars.put("doc", docNode);
                         if (projectNode != null) {
@@ -577,7 +569,7 @@ extends
                     freemarker.core.Environment env = parsedTemplate.createProcessingEnvironment(root, writer);
                     env.setCurrentVisitorNode(docNodeModel);
                     if (prepareEnvironment != null) {
-                        Map<String, Object> vars = new HashMap<String, Object>();
+                        Map vars = new HashMap();
                         vars.put("env", env);
                         vars.put("doc", docNode);
                         if (projectNode != null) {
@@ -602,14 +594,18 @@ extends
             Throwable rootCause = spe;
             if (spe.getException() != null)
                 rootCause = spe.getException();
-            log("XML parsing error in " + (inFile == null ? "unknown" : inFile.getAbsolutePath()), Project.MSG_ERR);
+            log("XML parsing error in " + inFile.getAbsolutePath(), Project.MSG_ERR);
             log("Line number " + spe.getLineNumber());
             log("Column number " + spe.getColumnNumber());
             throw new BuildException(rootCause, getLocation());
         }
         catch (Throwable e)
         {
-            if (outFile != null ) outFile.delete();
+            if (outFile != null ) {
+                if(!outFile.delete() && outFile.exists()) {
+                    log("Failed to delete " + outFile, Project.MSG_WARN);
+                }
+            }
             e.printStackTrace();
             throw new BuildException(e, getLocation());
         }
@@ -675,26 +671,27 @@ extends
     private static TemplateModel wrapMap(Map table)
     {
         SimpleHash model = new SimpleHash();
-        for (Object entry : table.entrySet())
+        for (Iterator it = table.entrySet().iterator(); it.hasNext();)
         {
-            Map.Entry mentry = (Map.Entry)entry;
-            model.put(String.valueOf(mentry.getKey()), new SimpleScalar(String.valueOf(mentry.getValue())));
+            Map.Entry entry = (Map.Entry)it.next();
+            model.put(String.valueOf(entry.getKey()), new SimpleScalar(String.valueOf(entry.getValue())));
         }
         return model;
     }
 
-    protected void insertDefaults(Map<String, Object> root) 
+    protected void insertDefaults(Map root) 
     {
         root.put("properties", propertiesTemplate);
         root.put("userProperties", userPropertiesTemplate);
-        root.put("project_node", projectNode);
         if (projectTemplate != null) {
             root.put("project", projectTemplate);
+            root.put("project_node", projectNode);
         }
         if(modelsMap.size() > 0)
         {
-            for (Map.Entry<String, Object> entry : modelsMap.entrySet())
+            for (Iterator it = modelsMap.entrySet().iterator(); it.hasNext();)
             {
+                Map.Entry entry = (Map.Entry) it.next();
                 root.put(entry.getKey(), entry.getValue());
             }
         }

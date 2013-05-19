@@ -129,7 +129,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             return s;
         }
         java.util.StringTokenizer st = new java.util.StringTokenizer(s, "\"", true);
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         while (st.hasMoreTokens()) {
             String tok = st.nextToken();
             if (tok.equals("\"")) {

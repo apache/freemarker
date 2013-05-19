@@ -144,7 +144,7 @@ final class Include extends TemplateElement {
                 }
             }
             if (tm instanceof TemplateScalarModel) {
-                parse = getYesNo(EvaluationRules.getString((TemplateScalarModel)tm, parseExp, env));
+                parse = getYesNo(EvaluationUtil.getString((TemplateScalarModel)tm, parseExp, env));
             }
             else {
                 parse = parseExp.isTrue(env);
@@ -170,7 +170,7 @@ final class Include extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder("<#include ");
+        StringBuffer buf = new StringBuffer("<#include ");
         buf.append(includedTemplateName);
         if (encoding != null) {
             buf.append(" encoding=\"");

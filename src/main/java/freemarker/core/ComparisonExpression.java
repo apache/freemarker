@@ -122,8 +122,8 @@ final class ComparisonExpression extends BooleanExpression {
         assertNonNull(rtm, right, env);
         int comp = 0;
         if(ltm instanceof TemplateNumberModel && rtm instanceof TemplateNumberModel) { 
-            Number first = EvaluationRules.getNumber((TemplateNumberModel)ltm, left, env);
-            Number second = EvaluationRules.getNumber((TemplateNumberModel)rtm, right, env);
+            Number first = EvaluationUtil.getNumber((TemplateNumberModel)ltm, left, env);
+            Number second = EvaluationUtil.getNumber((TemplateNumberModel)rtm, right, env);
             ArithmeticEngine ae = 
                 env != null 
                     ? env.getArithmeticEngine()
@@ -152,16 +152,16 @@ final class ComparisonExpression extends BooleanExpression {
                     "Right date is of UNKNOWN type, and can not be compared.", env);
             }
             
-            Date first = EvaluationRules.getDate(ltdm, left, env);
-            Date second = EvaluationRules.getDate(rtdm, right, env);
+            Date first = EvaluationUtil.getDate(ltdm, left, env);
+            Date second = EvaluationUtil.getDate(rtdm, right, env);
             comp = first.compareTo(second);
         }
         else if(ltm instanceof TemplateScalarModel && rtm instanceof TemplateScalarModel) {
             if(operation != EQUALS && operation != NOT_EQUALS) {
                 throw new TemplateException("Can not use operator " + opString + " on string values.", env);
             }
-            String first = EvaluationRules.getString((TemplateScalarModel)ltm, left, env);
-            String second = EvaluationRules.getString((TemplateScalarModel)rtm, right, env);
+            String first = EvaluationUtil.getString((TemplateScalarModel)ltm, left, env);
+            String second = EvaluationUtil.getString((TemplateScalarModel)rtm, right, env);
             comp = env.getCollator().compare(first, second);
         }
         else if(ltm instanceof TemplateBooleanModel && rtm instanceof TemplateBooleanModel) {

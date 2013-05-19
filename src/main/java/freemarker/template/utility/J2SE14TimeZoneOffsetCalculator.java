@@ -21,7 +21,7 @@
  *    Alternately, this acknowledgement may appear in the software itself,
  *    if and wherever such third-party acknowledgements normally appear.
  *
- * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the 
+ * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the
  *    project contributors may be used to endorse or promote products derived
  *    from this software without prior written permission. For written
  *    permission, please contact visigoths@visigoths.org.
@@ -50,82 +50,18 @@
  * http://www.visigoths.org/
  */
 
-package freemarker.core;
+package freemarker.template.utility;
 
 import java.util.Date;
-import freemarker.template.*;
+import java.util.TimeZone;
 
-/**
- * @version 1.0
- * @author Attila Szegedi
- */
-class EvaluationRules
-{
-    private EvaluationRules()
-    {
-    }
-    
-    static String getString(TemplateScalarModel model, Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        String value = model.getAsString();
-        if(value == null)
-        {
-            if(env.isClassicCompatible())
-            {
-                return "";
-            }
-            else
-            {
-                throw new TemplateException(expr + " evaluated to null string.", env);
-            }
-        }
-        return value;
+import freemarker.template.utility.DateUtil.TimeZoneOffsetCalculator;
+
+class J2SE14TimeZoneOffsetCalculator implements
+        TimeZoneOffsetCalculator {
+
+    public int getOffset(TimeZone tz, Date date) {
+        return tz.getOffset(date.getTime());
     }
 
-    static Number getNumber(Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        TemplateModel model = expr.getAsTemplateModel(env);
-        return getNumber(model, expr, env);
-    }
-
-    static Number getNumber(TemplateModel model, Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        if(model instanceof TemplateNumberModel)
-        {
-            return getNumber((TemplateNumberModel)model, expr, env);
-        }
-        else if(model == null) {
-            throw new InvalidReferenceException(expr + " is undefined.", env);
-        }
-        else
-        {
-            throw new NonNumericalException(expr + " is not a number, it is " + model.getClass().getName(), env);
-        }
-    }
-
-    static Number getNumber(TemplateNumberModel model, Expression expr, Environment env)
-        throws TemplateModelException, TemplateException
-    {
-        Number value = model.getAsNumber();
-        if(value == null) {
-            throw new TemplateException(expr + " evaluated to null number.", env);
-        }
-        return value;
-    }
-
-    static Date getDate(TemplateDateModel model, Expression expr, Environment env)
-        throws TemplateModelException, TemplateException
-    {
-        Date value = model.getAsDate();
-        if(value == null) {
-            throw new TemplateException(expr + " evaluated to null date.", env);
-        }
-        return value;
-    }
 }

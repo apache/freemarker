@@ -471,21 +471,23 @@ abstract class SequenceBuiltins {
         }
     }
 
+    private static boolean isBuggySeqButGoodCollection(
+            TemplateModel model) {
+        return model instanceof CollectionModel
+                ? !((CollectionModel) model).getSupportsIndexedAccess()
+                : false;
+    }
+    
     static class seq_containsBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env)
                 throws TemplateException {
             TemplateModel model = target.getAsTemplateModel(env);
-            // TemplateCollectionModel has priority because:
-            // - That interface has less expectations; TemplateSequenceModel
-            //   implementations may build a List behind the scenes to satisfy
-            //   the interface.
-            // - BeansWrapper creates some buggy TemplateSequenceModel-s which
-            //   are however properly working TemplateCollectionModel-s. See
-            //   also: isBuggySeqButGoodCollection
-            if (model instanceof TemplateCollectionModel) {
-                return new BIMethodForCollection((TemplateCollectionModel) model, env);
-            } else if (model instanceof TemplateSequenceModel) {
+            // In 2.3.x only, we prefer TemplateSequenceModel for
+            // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
+            if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
                 return new BIMethodForSequence((TemplateSequenceModel) model, env);
+            } else if (model instanceof TemplateCollectionModel) {
+                return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
                 throw invalidTypeException(model, target, env, "sequence or collection");
             }
@@ -567,7 +569,14 @@ abstract class SequenceBuiltins {
                             && !isBuggySeqButGoodCollection(model)
                         ? (TemplateSequenceModel) model
                         : null;
-                m_col = model instanceof TemplateCollectionModel
+                // In 2.3.x only, we deny the possibility of collection
+                // access if there's sequence access. This is so to minimize
+                // the change of compatibility issues; without this, objects
+                // that implement both the sequence and collection interfaces
+                // would suddenly start using the collection interface, and if
+                // that's buggy that would surface now, breaking the application
+                // that despite its bugs has worked earlier.
+                m_col = m_seq == null && model instanceof TemplateCollectionModel
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
@@ -576,13 +585,6 @@ abstract class SequenceBuiltins {
                 }
                 
                 m_env = env;
-            }
-
-            private boolean isBuggySeqButGoodCollection(
-                    TemplateModel model) {
-                return model instanceof CollectionModel
-                        ? !((CollectionModel) model).getSupportsIndexedAccess()
-                        : false;
             }
 
             public final Object exec(List args)
@@ -603,18 +605,17 @@ abstract class SequenceBuiltins {
                                 + "expects a number as its second argument.");
                     }
                     int startIndex = ((TemplateNumberModel) obj).getAsNumber().intValue();
-                    // Prefer TemplateCollectionModel over TemplateSequenceModel
-                    // if there's no need for random access:
-                    foundAtIdx = (m_col != null && startIndex == 0 && m_dir == 1)
-                                 || m_seq == null
-                            ? findInCol(target, startIndex)
-                            : findInSeq(target, startIndex);
+                    // In 2.3.x only, we prefer TemplateSequenceModel for
+                    // backward compatibility:
+                    foundAtIdx = m_seq != null
+                            ? findInSeq(target, startIndex)
+                            : findInCol(target, startIndex);
                 } else {
-                    // Prefer TemplateCollectionModel over TemplateSequenceModel
-                    // if there's no need for random access:
-                    foundAtIdx = (m_col != null && m_dir == 1) || m_seq == null
-                            ? findInCol(target)
-                            : findInSeq(target);
+                    // In 2.3.x only, we prefer TemplateSequenceModel for
+                    // backward compatibility:
+                    foundAtIdx = m_seq != null
+                            ? findInSeq(target)
+                            : findInCol(target);
                 }
                 return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
             }

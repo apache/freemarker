@@ -73,7 +73,7 @@ final class HashLiteral extends Expression {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder("{");
+        StringBuffer buf = new StringBuffer("{");
         for (int i = 0; i < size; i++) {
             Expression key = (Expression) keys.get(i);
             Expression value = (Expression) values.get(i);

@@ -82,7 +82,7 @@ final class ConditionalBlock extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         if (condition == null) {
             buf.append("<#else");
         }

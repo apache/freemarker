@@ -116,7 +116,7 @@ final class MethodCall extends Expression {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         buf.append(target.getCanonicalForm());
         buf.append("(");
         String list = arguments.getCanonicalForm();

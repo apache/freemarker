@@ -61,5 +61,9 @@ included both in freemarker.jar and in the source code:
   
     freemarker/ext/jsp/web-app_2_2.dtd
     freemarker/ext/jsp/web-app_2_3.dtd
+    freemarker/ext/jsp/web-app_2_4.xsd
+    freemarker/ext/jsp/web-app_2_5.xsd
     freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
     freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
+    freemarker/ext/jsp/web-jsptaglibrary_2_0.xsd
+    freemarker/ext/jsp/web-jsptaglibrary_2_1.xsd

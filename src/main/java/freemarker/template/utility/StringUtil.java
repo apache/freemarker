@@ -106,8 +106,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                StringBuffer b =
+                        new StringBuffer(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
@@ -149,8 +149,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '>' || c == '&' || c == '"') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                StringBuffer b =
+                        new StringBuffer(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
@@ -191,8 +191,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '<' || c == '&' || c == '"') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                StringBuffer b =
+                        new StringBuffer(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '&': b.append("&amp;"); break;
@@ -237,8 +237,8 @@ public class StringUtil {
                             && s.charAt(i - 1) == ']'
                             && s.charAt(i - 2) == ']')
                     || c == '&') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                StringBuffer b =
+                        new StringBuffer(s.substring(0, i));
                 switch (c) {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
@@ -284,8 +284,8 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '\\' || c == '{' || c == '}') {
-                StringBuilder b =
-                        new StringBuilder(s.substring(0, i));
+                StringBuffer b =
+                        new StringBuffer(s.substring(0, i));
                 switch (c) {
                     case '\\': b.append("\\\\"); break;
                     case '{': b.append("\\{"); break;
@@ -335,7 +335,7 @@ public class StringUtil {
             return s;
         }
 
-        StringBuilder b = new StringBuilder(ln + ln / 3 + 2);
+        StringBuffer b = new StringBuffer(ln + ln / 3 + 2);
         b.append(s.substring(0, i));
 
         int encstart = i;
@@ -403,7 +403,7 @@ public class StringUtil {
 
     public static String FTLStringLiteralEnc(String s)
     {
-        StringBuilder buf = null;
+        StringBuffer buf = null;
         int l = s.length();
         int el = ESCAPES.length;
         for(int i = 0; i < l; i++)
@@ -424,7 +424,7 @@ public class StringUtil {
                     case 1:
                     {
                         if (buf == null) {
-                            buf = new StringBuilder(s.length() + 3);
+                            buf = new StringBuffer(s.length() + 3);
                             buf.append(s.substring(0, i));
                         }
                         // hex encoding for characters below 0x20
@@ -439,7 +439,7 @@ public class StringUtil {
                     default:
                     {
                         if (buf == null) {
-                            buf = new StringBuilder(s.length() + 2);
+                            buf = new StringBuffer(s.length() + 2);
                             buf.append(s.substring(0, i));
                         }
                         buf.append('\\');
@@ -482,7 +482,7 @@ public class StringUtil {
 
         int lidx = s.length() - 1;
         int bidx = 0;
-        StringBuilder buf = new StringBuilder(lidx);
+        StringBuffer buf = new StringBuffer(lidx);
         do {
             buf.append(s.substring(bidx, idx));
             if (idx >= lidx) {
@@ -599,7 +599,7 @@ public class StringUtil {
 
     public static String capitalize(String s) {
         StringTokenizer st = new StringTokenizer(s, " \t\r\n", true);
-        StringBuilder buf = new StringBuilder(s.length());
+        StringBuffer buf = new StringBuffer(s.length());
         while (st.hasMoreTokens()) {
             String tok = st.nextToken();
             buf.append(tok.substring(0, 1).toUpperCase());
@@ -702,7 +702,7 @@ public class StringUtil {
                                   boolean caseInsensitive,
                                   boolean firstOnly) 
     {
-        StringBuilder buf;
+        StringBuffer buf;
         int tln;
         int oln = oldsub.length();
         
@@ -715,7 +715,7 @@ public class StringUtil {
                     return newsub + text;
                 } else {
                     tln = text.length();
-                    buf = new StringBuilder(tln + (tln + 1) * nln);
+                    buf = new StringBuffer(tln + (tln + 1) * nln);
                     buf.append(newsub);
                     for (int i = 0; i < tln; i++) {
                         buf.append(text.charAt(i));
@@ -733,7 +733,7 @@ public class StringUtil {
             }
             int b = 0;
             tln = text.length();
-            buf = new StringBuilder(
+            buf = new StringBuffer(
                     tln + Math.max(newsub.length() - oln, 0) * 3);
             do {
                 buf.append(text.substring(b, e));
@@ -774,7 +774,7 @@ public class StringUtil {
             return "null";
         }
         int ln = s.length();
-        StringBuilder b = new StringBuilder(ln + 4);
+        StringBuffer b = new StringBuffer(ln + 4);
         b.append('"');
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
@@ -826,7 +826,7 @@ public class StringUtil {
             return "null";
         }
         int ln = s.length();
-        StringBuilder b = new StringBuilder(ln + 4);
+        StringBuffer b = new StringBuffer(ln + 4);
         b.append('"');
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
@@ -878,7 +878,7 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '"' || c == '\\' || c < 0x20) {
-                StringBuilder b = new StringBuilder(ln + 4);
+                StringBuffer b = new StringBuffer(ln + 4);
                 b.append(s.substring(0, i));
                 while (true) {
                     if (c == '"') {
@@ -936,7 +936,7 @@ public class StringUtil {
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
             if (c == '"' || c == '\'' || c == '\\' || c == '>' || c < 0x20) {
-                StringBuilder b = new StringBuilder(ln + 4);
+                StringBuffer b = new StringBuffer(ln + 4);
                 b.append(s.substring(0, i));
                 while (true) {
                     if (c == '"') {
@@ -1007,7 +1007,7 @@ public class StringUtil {
                     || (c == '/' && i > 0 && s.charAt(i -1) == '<')
                     || (c == '>' && i > 1
                         && s.charAt(i - 1) == ']' && s.charAt(i - 2) == ']')) {
-                StringBuilder b = new StringBuilder(ln + 4);
+                StringBuffer b = new StringBuffer(ln + 4);
                 b.append(s.substring(0, i));
                 while (true) {
                     if (c == '"') {
@@ -1052,7 +1052,7 @@ public class StringUtil {
         } // for each characters
         return s;
     }
-    
+
     /**
      * Parses a name-value pair list, where the pairs are separated with comma,
      * and the name and value is separated with colon.
@@ -1290,7 +1290,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuilder res = new StringBuilder(minLength);
+        StringBuffer res = new StringBuffer(minLength);
         
         int dif = minLength - ln;
         for (int i = 0; i < dif; i++) {
@@ -1319,7 +1319,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuilder res = new StringBuilder(minLength);
+        StringBuffer res = new StringBuffer(minLength);
 
         int dif = minLength - ln;
         int fln = filling.length();
@@ -1368,7 +1368,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuilder res = new StringBuilder(minLength);
+        StringBuffer res = new StringBuffer(minLength);
 
         res.append(s);
         
@@ -1399,7 +1399,7 @@ public class StringUtil {
             return s;
         }
         
-        StringBuilder res = new StringBuilder(minLength);
+        StringBuffer res = new StringBuffer(minLength);
 
         res.append(s);
 

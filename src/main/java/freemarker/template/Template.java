@@ -498,7 +498,7 @@ public class Template extends Configurable {
         --beginColumn;
         --endColumn;
         --endLine;
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         for (int i = beginLine ; i<=endLine; i++) {
             if (i < lines.size()) {
                 buf.append(lines.get(i));
@@ -517,7 +517,7 @@ public class Template extends Configurable {
      */
     private class LineTableBuilder extends FilterReader {
 
-        StringBuilder lineBuf = new StringBuilder();
+        StringBuffer lineBuf = new StringBuffer();
         int lastChar;
 
         /**
@@ -673,7 +673,7 @@ public class Template extends Configurable {
     /**
      * @return an array of the {@link TemplateElement}s containing the given 
      * column and line numbers.
-     * @param column the column
+     * @param column the column     
      * @param line the line
      */
     public List containingElements(int column, int line) {

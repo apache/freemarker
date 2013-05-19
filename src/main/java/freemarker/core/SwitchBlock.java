@@ -116,7 +116,7 @@ final class SwitchBlock extends TemplateElement {
     }
 
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder("<#switch ");
+        StringBuffer buf = new StringBuffer("<#switch ");
         buf.append(testExpression.getCanonicalForm());
         buf.append(">");
         for (int i = 0; i<nestedElements.size(); i++) {

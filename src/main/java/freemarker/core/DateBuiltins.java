@@ -79,7 +79,7 @@ abstract class DateBuiltins {
             TemplateModel model = target.getAsTemplateModel(env);
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel tdm = (TemplateDateModel) model;
-                return calculateResult(EvaluationRules.getDate(tdm, target, env), tdm.getDateType(), env);
+                return calculateResult(EvaluationUtil.getDate(tdm, target, env), tdm.getDateType(), env);
             } else {
                 if(model == null) {
                     throw new InvalidReferenceException(target + " is undefined.", env);

@@ -240,7 +240,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             String locationInfo = "Error on line " + tok.beginLine + ", column " + tok.beginColumn + ", in template " + templateName + "\n";
-            StringBuilder buf = new StringBuilder("Found " + key + ", expecting one of: ");
+            StringBuffer buf = new StringBuffer("Found " + key + ", expecting one of: ");
             for (Iterator it= builtins.keySet().iterator(); it.hasNext();) {
                 if (it.hasNext()) {
                     buf.append(" ");
@@ -407,12 +407,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvaluationRules.getNumber((TemplateNumberModel)model, target, env), env);
+                return new NumberFormatter(EvaluationUtil.getNumber((TemplateNumberModel)model, target, env), env);
             }
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
                 int dateType = dm.getDateType();
-                return new DateFormatter(EvaluationRules.getDate(dm, target, env), dateType, env);
+                return new DateFormatter(EvaluationUtil.getDate(dm, target, env), dateType, env);
             }
             if (model instanceof SimpleScalar) {
                 return model;
