@@ -52,7 +52,11 @@
 
 package freemarker.core;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import freemarker.template.*;
+import freemarker.template.utility.DateUtil;
 
 /**
  * FreeMarker command-line utility, the Main-Class of <tt>freemarker.jar</tt>.
@@ -65,7 +69,16 @@ public class CommandLine {
     public static void main(String[] args) {
         System.out.println();
         System.out.print("FreeMarker version ");
-        System.out.println(Configuration.getVersionNumber());
+        System.out.print(Configuration.getVersionNumber());
+        if (!Configuration.getVersionNumber().endsWith("Z")) {
+	        System.out.print(" (built on ");
+	        System.out.print(DateUtil.dateToISO8601String(
+	        		Configuration.getBuildDate(),
+	        		true, true, true, DateUtil.ACCURACY_SECONDS,
+	        		DateUtil.UTC,
+	        		new DateUtil.TrivialDateToISO8601CalendarFactory()));
+	        System.out.print(")");
+        }
         System.out.println();
         System.out.println("Copyright (c) 2003 The Visigoth Software Society.");
         System.out.println("All rights reserved.");

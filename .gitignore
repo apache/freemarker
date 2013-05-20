@@ -2,3 +2,5 @@
 /.bin/
 /build/
 /build.properties
+
+src/manual/book.xml~

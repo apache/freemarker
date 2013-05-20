@@ -56,7 +56,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -130,7 +132,8 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = StringUtil.versionStringToInt(DEFAULT_INCOMPATIBLE_ENHANCEMENTS); 
     
     private static Configuration defaultConfig = new Configuration();
-    private static String cachedVersion;
+    private static String versionNumber;
+    private static Date buildDate;
     private boolean strictSyntax = true, localizedLookup = true, whitespaceStripping = true;
     private String incompatibleEnhancements = DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
     private int parsedIncompatibleEnhancements = PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
@@ -1103,10 +1106,21 @@ public class Configuration extends Configurable implements Cloneable {
      * </ul>
      */
     public static String getVersionNumber() {
-        if (cachedVersion != null) {
-            return cachedVersion;
+        if (versionNumber == null) {
+            loadVersionProperties();
         }
-        try {
+        return versionNumber;
+    }
+
+    public static Date getBuildDate() {
+        if (buildDate == null) {
+            loadVersionProperties();
+        }
+        return buildDate;
+    }
+    
+	private static void loadVersionProperties() {
+		try {
             Properties vp = new Properties();
             InputStream ins = Configuration.class.getClassLoader()
                     .getResourceAsStream("freemarker/version.properties");
@@ -1118,15 +1132,28 @@ public class Configuration extends Configurable implements Cloneable {
                 } finally {
                     ins.close();
                 }
-                String v = vp.getProperty("version");
-                if (v == null) {
-                    throw new RuntimeException("Version file is corrupt: version key is missing.");
+                
+                String s = vp.getProperty("version");
+                if (s == null) {
+                    throw new RuntimeException("Version file is corrupt: \"version\" key is missing.");
                 }
-                cachedVersion = v;
+                versionNumber = s;
+                
+                s = vp.getProperty("buildTimestamp");
+                if (s == null) {
+                    throw new RuntimeException("Version file is corrupt: \"buildTimestamp\" key is missing.");
+                }
+                if (s.endsWith("Z")) {
+                	s = s.substring(0, s.length() - 1) + "+0000";
+                }
+                try {
+					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(s);
+				} catch (java.text.ParseException e) {
+                    throw new RuntimeException("Version file is corrupt: \"buildTimestamp\" couldn't be parsed: " + e);
+				}
             }
-            return cachedVersion;
         } catch (IOException e) {
             throw new RuntimeException("Failed to load version file: " + e);
         }
-    }
+	}
 }
