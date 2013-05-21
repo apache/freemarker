@@ -100,7 +100,7 @@ class OverloadedVarArgMethod extends OverloadedMethod
                 return newargs;
             }
             else {
-                Object val = w.unwrap((TemplateModel)modelArgs.get(fixArgCount), varArgType);
+                Object val = w.unwrapInternal((TemplateModel)modelArgs.get(fixArgCount), varArgType);
                 if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                     return null;
                 }
