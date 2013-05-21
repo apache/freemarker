@@ -133,7 +133,9 @@ implements
      * As this object implements {@link TemplateSequenceModel},
      * {@link #get(int)} should always work, but due to a design flaw, for
      * non-{@link List} wrapped objects {@link #get(int)} will always fail.
-     * This method exists to ease working this problem around. 
+     * This method exists to ease working this problem around.
+     * 
+     * @since 2.3.17 
      */
     public boolean getSupportsIndexedAccess() {
         return object instanceof List;

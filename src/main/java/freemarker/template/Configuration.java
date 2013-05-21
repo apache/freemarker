@@ -787,6 +787,7 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
+     * @since 2.3.19
      */
     public void removeTemplateFromCache(String name) throws IOException {
         Locale loc = getLocale();
@@ -795,6 +796,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     /**
      * Equivalent to <tt>removeTemplateFromCache(name, locale, thisCfg.getEncoding(locale), true)</tt>.
+     * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, Locale locale) throws IOException {
         removeTemplateFromCache(name, locale, getEncoding(locale), true);
@@ -802,6 +804,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     /**
      * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), encoding, true)</tt>.
+     * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, String encoding) throws IOException {
         removeTemplateFromCache(name, getLocale(), encoding, true);
@@ -809,6 +812,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     /**
      * Equivalent to <tt>removeTemplateFromCache(name, locale, encoding, true)</tt>.
+     * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, Locale locale, String encoding) throws IOException {
         removeTemplateFromCache(name, locale, encoding, true);
@@ -822,6 +826,8 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * For the meaning of the parameters, see
      * {@link #getTemplate(String, Locale, String, boolean)}.
+     * 
+     * @since 2.3.19
      */
     public void removeTemplateFromCache(
             String name, Locale locale, String encoding, boolean parse)
