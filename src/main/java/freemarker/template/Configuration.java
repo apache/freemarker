@@ -366,6 +366,8 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Returns the {@link CacheStorage} currently in use.
+     * 
+     * @since 2.3.20
      */
     public synchronized CacheStorage getCacheStorage() {
         return cache.getCacheStorage();
