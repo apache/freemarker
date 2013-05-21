@@ -20121,6 +20121,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>In experimental status only, but
+              <literal>freemarker.jar</literal> is now an OSGi bundle (see
+              <literal>freemarker.jar/META-INF/MANIFEST.MF</literal>).
+              Depending on user feedback, the bundle description can change in
+              the future.</para>
+            </listitem>
+
+            <listitem>
               <para>Version and build information changes:</para>
 
               <itemizedlist>
