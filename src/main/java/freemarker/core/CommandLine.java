@@ -80,6 +80,10 @@ public class CommandLine {
 	        System.out.print(")");
         }
         System.out.println();
+        
+        System.out.print("Google App Engine complian variant: ");
+        System.out.println(Configuration.isGAECompliant() ? "Yes" : "No");
+        System.out.println();
         System.out.println("Copyright (c) 2003 The Visigoth Software Society.");
         System.out.println("All rights reserved.");
         System.out.println();

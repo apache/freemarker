@@ -132,8 +132,11 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = StringUtil.versionStringToInt(DEFAULT_INCOMPATIBLE_ENHANCEMENTS); 
     
     private static Configuration defaultConfig = new Configuration();
+    
     private static String versionNumber;
     private static Date buildDate;
+    private static Boolean gaeCompliant;
+    
     private boolean strictSyntax = true, localizedLookup = true, whitespaceStripping = true;
     private String incompatibleEnhancements = DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
     private int parsedIncompatibleEnhancements = PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
@@ -1112,11 +1115,26 @@ public class Configuration extends Configurable implements Cloneable {
         return versionNumber;
     }
 
+    /**
+     * Returns the date on which the current binary (the JAR) was built.
+     * @since 2.3.20 
+     */
     public static Date getBuildDate() {
         if (buildDate == null) {
             loadVersionProperties();
         }
         return buildDate;
+    }
+
+    /**
+     * Returns if this is Google App Engine compliant variation.
+     * @since 2.3.20 
+     */
+    public static boolean isGAECompliant() {
+        if (gaeCompliant == null) {
+            loadVersionProperties();
+        }
+        return gaeCompliant.booleanValue();
     }
     
 	private static void loadVersionProperties() {
@@ -1133,27 +1151,31 @@ public class Configuration extends Configurable implements Cloneable {
                     ins.close();
                 }
                 
-                String s = vp.getProperty("version");
-                if (s == null) {
-                    throw new RuntimeException("Version file is corrupt: \"version\" key is missing.");
-                }
-                versionNumber = s;
+                versionNumber = getRequiredVersionProperty(vp, "version");
                 
-                s = vp.getProperty("buildTimestamp");
-                if (s == null) {
-                    throw new RuntimeException("Version file is corrupt: \"buildTimestamp\" key is missing.");
-                }
-                if (s.endsWith("Z")) {
-                	s = s.substring(0, s.length() - 1) + "+0000";
+                String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                if (buildDateStr.endsWith("Z")) {
+                	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
                 }
                 try {
-					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(s);
+					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
 				} catch (java.text.ParseException e) {
                     throw new RuntimeException("Version file is corrupt: \"buildTimestamp\" couldn't be parsed: " + e);
 				}
+                
+                gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load version file: " + e);
         }
+	}
+
+	private static String getRequiredVersionProperty(Properties vp, String properyName) {
+		String s = vp.getProperty(properyName);
+		if (s == null) {
+		    throw new RuntimeException(
+		    		"Version file is corrupt: \"" + properyName + "\" property is missing.");
+		}
+		return s;
 	}
 }

@@ -20121,9 +20121,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added new static method to
-              <literal>Configuration</literal> to query build date:
-              <literal>getBuildDate()</literal></para>
+              <para>Version and build information changes:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>The form of the nightly build version numbers has
+                  changed to Maven/JSR 277 compliant. What earlier was
+                  <literal>2.3.20mod</literal> is now something like
+                  <literal>2.3.21-nightly_20130605T130506Z</literal> (note how
+                  the last points to the target release version instead of the
+                  last release version).</para>
+                </listitem>
+
+                <listitem>
+                  <para>The form of the Release Candidate and Preview version
+                  numbers where changed to Maven/JSP 277 compliant:
+                  <literal>2.4pre2</literal> is now
+                  <literal>2.4.0-pre02</literal>, <literal>2.4rc1</literal> is
+                  now <literal>2.4-rc01</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new static method to
+                  <literal>Configuration</literal> to query build date:
+                  <literal>getBuildDate()</literal>. This is also printed by
+                  the main command line class.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
