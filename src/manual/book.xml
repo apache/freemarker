@@ -20026,27 +20026,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <primary>build</primary>
       </indexterm>
 
-      <para>If you want to modify the source code and rebuild
-      <literal>freemarker.jar</literal>, you need <link
-      xlink:href="http://ant.apache.org/">Ant</link> 1.6.1 (or newer) and JDK
-      5 (or newer). If these are satisfied, just run Ant from the root
-      directory of the distribution, and it will create the new
-      <literal>freemarker.jar</literal>. Note that for the very first build
-      you must be on-line, because the build task will download a lot of
-      required dependencies (about 20 MB) into the <literal>lib</literal>
-      subdirectory of distribution root directory.</para>
+      <para>You need Apache Ant and Ivy installed. (As of this writing it was
+      tested with Ant 1.8.1 and Ivy 2.3.0.)</para>
 
-      <para>Maybe you should check the new jar file against our test suite.
-      This is done by running Ant with <literal>test</literal> target (go to
-      the root directory of the distribution, and issue "ant test"). If the
-      test fails, read the resulting <literal>.txt</literal> file in the
-      <literal>build/testcase</literal> directory for more details.</para>
+      <para>If you need to ensure compliance with certain J2SE versions, copy
+      <literal>build.properties.sample</literal> into
+      <literal>build.properties</literal>, and edit it accordingly.</para>
 
-      <para>Note that building a full distribution, which includes the
-      FreeMarker Manual and the off-line Web site, is not possible purely from
-      the source code that is included with the distribution. You will have to
-      check out the "docgen" and "site" sub-projects from the SVN repository
-      of FreeMarker for that.</para>
+      <para>To build <literal>freemarker.jar</literal>, just issue
+      <literal>ant</literal> in the project root directory, and it should
+      download all dependencies automatically and build
+      <literal>freemarker.jar</literal>.</para>
+
+      <para>If later you change the dependencies in
+      <literal>ivy.xml</literal>, or otherwise want to re-download some of
+      them, it will not happen automatically anymore. You have to issue
+      <literal>ant update-deps</literal> for that.</para>
+
+      <para>For development under Eclipse, you will need IvyDE installed. You
+      are advised to use the Eclipse project files included (otherwise set up
+      IvyDE to use the "IDE" configuration and the included
+      <literal>ivysettings.xml</literal>). Note that IvyDE will not find the
+      dependencies until ant <literal>update-deps</literal> has run once,
+      because it uses the mini-repository built by that Ant task. If you
+      change the dependencies in <literal>ivy.xml</literal>, you will have to
+      run <literal>ant update-deps</literal> again, and only after that tell
+      IvyDE to resolve the dependencies.</para>
     </appendix>
 
     <appendix xml:id="app_versions">
@@ -20156,6 +20161,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   the main command line class.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>FreeMarker development has moved to GitHub (<link
+              xlink:href="???">https://github.com/freemarker/freemarker</link>),
+              and switched to an Ivy-based build.</para>
             </listitem>
           </itemizedlist>
         </section>

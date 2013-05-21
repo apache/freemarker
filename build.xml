@@ -611,19 +611,18 @@
     <delete dir="${dist.dir}" />
     <mkdir dir="${dist.dir}" />
     <copy todir="${dist.dir}" includeEmptyDirs="no">
-      <fileset dir=".">
-        <include name="src/**" />
-        <include name="examples/**" />
-        <exclude name="**/.*/**" />
-        <exclude name="**/.*" />
+      <fileset dir="." defaultexcludes="no">
         <exclude name="**/*.bak" />
         <exclude name="**/*.~*" />
-        <include name="build.xml" />
-        <include name="ivy.xml" />
-        <include name="ivysettings.xml" />
-        <include name="osgi.bnd" />
-        <include name="build.properties.sample" />
+        <include name="src/**" />
+        <include name="examples/**" />
+        <include name=".settings/**" />
+        <include name="*.xml" />
+        <include name="*.sample" />
         <include name="*.txt" />
+        <include name="osgi.bnd" />
+        <include name=".classpath" />
+        <include name=".project" />
       </fileset>
     </copy>
     <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />

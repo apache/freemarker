@@ -26,6 +26,7 @@ Licensing
 ---------
 
 FreeMarker is licensed under a liberal BSD-style open source license. 
+
 This software is OSI Certified Open Source Software.
 OSI Certified is a certification mark of the Open Source Initiative.
 
@@ -47,6 +48,39 @@ location where your Java application's ClassLoader will find it. For
 example, if you use FreeMarker in a web application, you probably want
 to put freemarker.jar into the WEB-INF/lib directory of your web
 application.
+
+FreeMarker has no required dependencies. It has several optional
+dependencies, but usually you don't have to deal with them, because if
+you are using an optional feature that's certainly because your
+application already uses the related library.
+
+
+Building
+--------
+
+You need Apache Ant and Ivy installed. (As of this writing it was
+tested with Ant 1.8.1 and Ivy 2.3.0.)
+
+If you need to ensure compliance with certain J2SE versions, copy
+build.properties.sample into build.properties, and edit it
+accordingly.
+
+To build freemarker.jar, just issue "ant" in the project root
+directory, and it should download all dependencies automatically and
+build freemarker.jar.
+
+If later you change the dependencies in ivy.xml, or otherwise want to
+re-download some of them, it will not happen automatically anymore.
+You have to issue "ant update-deps" for that.
+
+For development under Eclipse, you will need IvyDE installed. You are
+advised to use the Eclipse project files included (otherwise set up
+IvyDE to use the "IDE" configuration and the included
+ivysettings.xml). Note that IvyDE will not find the dependencies until
+"ant update-deps" has run once, because it uses the mini-repository
+built by that Ant task. If you change the dependencies in ivy.xml, you
+will have to run "ant update-deps" again, and only after that tell
+IvyDE to resolve the dependencies.
 
 
 History

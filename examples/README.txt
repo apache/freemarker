@@ -1,1 +1,0 @@
-The examples are in the src/examples directory.
