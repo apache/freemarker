@@ -5,7 +5,7 @@
   <!ELEMENT testcase (config*)>
      <!ATTLIST testcase 
                name CDATA #REQUIRED
-               filename CDATA #REQUIRED
+               filename CDATA #IMPLIED
                class CDATA #IMPLIED
      >
   <!ELEMENT config EMPTY>
@@ -18,7 +18,10 @@
             output_encoding CDATA #IMPLIED
             output_dir CDATA #IMPLIED
             strict_syntax (Y|N) #IMPLIED
+            new_builtin_class_resolver CDATA #IMPLIED
+            url_escaping_charset CDATA #IMPLIED
             templatedir CDATA #IMPLIED
+            referencedir CDATA #IMPLIED
       >
 ]>
 
@@ -104,8 +107,8 @@
    </testcase>
    <testcase name="string-builtins1" filename="test-stringbuiltins.txt" />
    <testcase name="string-builtins2" filename="test-stringbuiltins2.txt" />
-   <testcase name="string-builtins-regexps" filename="string-builtins-regexps.txt" />
-   <testcase name="test-stringbimethods" filename="test-stringbimethods.txt" />
+   <testcase name="string-builtins-regexps" />
+   <testcase name="test-stringbimethods" />
    <testcase name="stringliteral" filename="test-stringliteral.html"/>
    <testcase name="switch-case" filename="test-switch.html" />
    <testcase name="transforms" filename="test-transformation.html"/>
@@ -133,25 +136,25 @@
       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
    </testcase>   
    <testcase name="hashconcat" filename="test-hashconcat.ftl"/>
-   <testcase name="test-new-defaultresolver" filename="test-new-defaultresolver.txt" />
-   <testcase name="test-new-unrestricted" filename="test-new-unrestricted.txt">
+   <testcase name="test-new-defaultresolver" />
+   <testcase name="test-new-unrestricted">
       <config new_builtin_class_resolver="unrestricted"/>
    </testcase>   
-   <testcase name="test-new-safer" filename="test-new-safer.txt">
+   <testcase name="test-new-safer">
       <config new_builtin_class_resolver="safer"/>
    </testcase>   
-   <testcase name="test-new-allowsnothing" filename="test-new-allowsnothing.txt">
+   <testcase name="test-new-allowsnothing">
       <config new_builtin_class_resolver="allows_nothing"/>
    </testcase>   
-   <testcase name="test-new-optin" filename="test-new-optin.txt">
+   <testcase name="test-new-optin">
       <config new_builtin_class_resolver="allowed_classes: freemarker.test.templatesuite.models.NewTestModel, trusted_templates: subdir/test-new-optin.txt, subdir/subsub/*"/>
    </testcase>   
-   <testcase name="test-specialvars" filename="test-specialvars.txt">
+   <testcase name="test-specialvars">
       <config locale="en_US"/>
       <config output_encoding="utf-8"/>
       <config url_escaping_charset="iso-8859-1"/>
    </testcase>   
-   <testcase name="test-iso8601" filename="test-iso8601.txt"/>
-   <testcase name="test-number-to-date" filename="test-number-to-date.txt"/>
-   <testcase name="test-varargs" filename="test-varargs.txt"/>
+   <testcase name="test-iso8601" />
+   <testcase name="test-number-to-date" />
+   <testcase name="test-varargs" />
 </testcases>

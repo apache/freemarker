@@ -72,6 +72,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import freemarker.ext.dom.NodeModel;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Test suite for FreeMarker. The suite conforms to interface expected by
@@ -147,33 +148,36 @@ public class TemplateTestSuite extends TestSuite {
      * takes two strings as parameters.
      */
     TestCase createTestCaseFromNode(Element e) throws Exception {
-        String filename = e.getAttribute("filename");
-        String name = e.getAttribute("name");
-        String classname = e.getAttribute("class");
-        if (classname != null && classname.length() >0) {
+        String name = StringUtil.emptyToNull(e.getAttribute("name"));
+        if (name == null) throw new Exception("Invalid XML: the \"name\" attribute is mandatory.");
+        
+        String filename = StringUtil.emptyToNull(e.getAttribute("filename"));
+        if (filename == null) filename = name + ".txt";
+        
+        String classname = StringUtil.emptyToNull(e.getAttribute("class"));
+        
+        if (classname != null) {
             Class cl = Class.forName(classname);
             Constructor cons = cl.getConstructor(new Class[] {String.class, String.class});
             return (TestCase) cons.newInstance(new Object [] {name, filename});
-        } 
-        TemplateTestCase result = new TemplateTestCase(name, filename);
-        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry) it.next();
-            result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());
+        } else { 
+	        TemplateTestCase result = new TemplateTestCase(name, filename);
+	        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
+	            Map.Entry entry = (Map.Entry) it.next();
+	            result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());
+	        }
+	        NodeList configs = e.getElementsByTagName("config");
+	        for (int i=0; i<configs.getLength(); i++)  {
+	            NamedNodeMap atts = configs.item(i).getAttributes();
+	            for (int j=0; j<atts.getLength(); j++) {
+	                Attr att = (Attr) atts.item(j);
+	                result.setConfigParam(att.getName(), att.getValue());
+	            }
+	        }
+	        return result;
         }
-        NodeList configs = e.getElementsByTagName("config");
-        for (int i=0; i<configs.getLength(); i++)  {
-            NamedNodeMap atts = configs.item(i).getAttributes();
-            for (int j=0; j<atts.getLength(); j++) {
-                Attr att = (Attr) atts.item(j);
-                result.setConfigParam(att.getName(), att.getValue());
-            }
-        }
-        return result;
     }
     
-    
-    
-
     public static void main (String[] args) throws Exception {
         
         junit.textui.TestRunner.run(new TemplateTestSuite());

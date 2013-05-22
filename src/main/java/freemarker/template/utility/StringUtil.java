@@ -757,6 +757,15 @@ public class StringUtil {
     }
 
     /**
+     * Converts a 0-length string to null, leaves the string as is otherwise.
+     * @param s maybe {@code null}.
+     */
+    public static String emptyToNull(String s) {
+    	if (s == null) return null;
+    	return s.length() == 0 ? null : s;
+    }
+    
+    /**
      * Converts the parameter with <code>toString</code> (if not
      * <code>null</code>)and passes it to {@link #jQuote(String)}. 
      */
