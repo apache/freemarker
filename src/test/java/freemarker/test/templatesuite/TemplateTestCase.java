@@ -105,6 +105,7 @@ import freemarker.test.templatesuite.models.BooleanHash2;
 import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.MultiModel1;
+import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.VarArgTestModel;
 
 
@@ -275,7 +276,7 @@ public class TemplateTestCase extends TestCase {
         }
     
         else if (testName.equals("default-xmlns")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-defaultxmlns1.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
@@ -287,7 +288,7 @@ public class TemplateTestCase extends TestCase {
             dataModel.put("data", new MultiModel1());
         }
         
-        else if (testName.equals("test-stringbimethods")) {
+        else if (testName.equals("stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
         }
         
@@ -307,29 +308,29 @@ public class TemplateTestCase extends TestCase {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
             DocumentBuilder db = f.newDocumentBuilder();
-            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/test-xmlfragment.xml")));
+            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/xmlfragment.xml")));
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
         }
         
         else if (testName.equals("xmlns1")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
         else if (testName.equals("xmlns2")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns2.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns2.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
         else if (testName.equals("xmlns3") || testName.equals("xmlns4")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns3.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns3.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         else if (testName.equals("xmlns5")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-defaultxmlns1.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
@@ -342,7 +343,7 @@ public class TemplateTestCase extends TestCase {
             dataModel.put("abcSet", abcSet);
         }
         
-        else if (testName.equals("test-iso8601")) {
+        else if (testName.equals("iso8601")) {
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
             dataModel.put("adaptedToStringScalar", new Object() {
@@ -352,13 +353,17 @@ public class TemplateTestCase extends TestCase {
             });
         }
         
-        else if (testName.equals("test-number-to-date")) {
+        else if (testName.equals("number-to-date")) {
           dataModel.put("bigInteger", new BigInteger("1305575275540"));
           dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
         }
         
-        else if (testName.equals("test-varargs")) {
+        else if (testName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
+        }
+        
+        else if (testName.equals("method-overloading")) {
+          dataModel.put("obj", new OverloadedMethods());
         }
     }
     

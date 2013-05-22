@@ -5,8 +5,8 @@ ${"freemarker.test.templatesuite.models.NewTestModel2"?new("works")}
 fails
 </#attempt>
 
-<#include "subdir/test-new-optin.txt">
+<#include "subdir/new-optin.txt">
 
-<#include "subdir/test-new-optin-2.txt">
+<#include "subdir/new-optin-2.txt">
 
-<#include "subdir/subsub/test-new-optin.txt">
+<#include "subdir/subsub/new-optin.txt">

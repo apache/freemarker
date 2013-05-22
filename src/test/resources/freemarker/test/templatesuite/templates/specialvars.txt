@@ -12,7 +12,7 @@ ${.locale} == en_US
 <#assign works = .main>
 <#assign works = .node!>
 ${.output_encoding?lower_case} == utf-8
-${.template_name} == test-specialvars.txt
+${.template_name} == specialvars.txt
 ${.url_escaping_charset?lower_case} == iso-8859-1
 <#assign foo = "x">
 ${.vars['foo']} == x

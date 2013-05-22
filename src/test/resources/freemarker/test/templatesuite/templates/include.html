@@ -13,19 +13,19 @@ ${message}
 </#if>
 
 <p>Test normal includes:</p>
-<#include "test-included.html">
+<#include "included.html">
 
 ${foo}
 ${nestedMessage}
 
 <p>Test unparsed includes:</p>
-<#include "test-included.html" parse=false>
+<#include "included.html" parse=false>
 <@twice>
 Kilroy
 </@twice>
 
 <p>Test subdir includes:</p>
-<#include "subdir/test-include-subdir.html">
+<#include "subdir/include-subdir.html">
 </body>
 </html>
 
