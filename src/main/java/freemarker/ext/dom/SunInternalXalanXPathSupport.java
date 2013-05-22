@@ -72,13 +72,12 @@ class SunInternalXalanXPathSupport implements XPathSupport {
     
     private XPathContext xpathContext = new XPathContext();
         
-    /* I don't recommend Jaxen...
     private static final String ERRMSG_RECOMMEND_JAXEN
             = "(Note that there is no such restriction if you "
                     + "configure FreeMarker to use Jaxen instead of Xalan.)";
-    */
+
     private static final String ERRMSG_EMPTY_NODE_SET
-            = "Cannot perform an XPath query against an empty node set."; /* " + ERRMSG_RECOMMEND_JAXEN;*/
+            = "Cannot perform an XPath query against an empty node set." + ERRMSG_RECOMMEND_JAXEN;
     
     synchronized public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
         if (!(context instanceof Node)) {
@@ -88,7 +87,7 @@ class SunInternalXalanXPathSupport implements XPathSupport {
                     if (cnt != 0) {
                         throw new TemplateModelException(
                                 "Cannot perform an XPath query against a node set of " + cnt
-                                + " nodes. Expecting a single node."/* " + ERRMSG_RECOMMEND_JAXEN*/);
+                                + " nodes. Expecting a single node." + ERRMSG_RECOMMEND_JAXEN);
                     } else {
                         throw new TemplateModelException(ERRMSG_EMPTY_NODE_SET);
                     }
