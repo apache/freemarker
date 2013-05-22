@@ -71,13 +71,13 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * This class is public to work around Google App Engine Java compliance 
- * issues. Do not use it explicitly.
- * @version $Id: DomNavigator.java,v 1.8 2003/09/02 09:54:59 szegedia Exp $ 
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * @author Attila Szegedi
  */
-public class DomNavigator extends Navigator {
-    public DomNavigator() {
+public class Internal_DomNavigator extends Navigator {
+    public Internal_DomNavigator() {
     } 
 
     void getAsString(Object node, StringWriter sw) {

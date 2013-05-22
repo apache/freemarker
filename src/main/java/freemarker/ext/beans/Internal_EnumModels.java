@@ -58,14 +58,14 @@ import java.util.Map;
 import freemarker.template.TemplateModel;
 
 /**
- * This class is public to work around Google App Engine Java compliance 
- * issues. Do not use it explicitly. 
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ *  
  * @author Attila Szegedi
- * @version $Id: EnumModels.java,v 1.1.2.3 2007/02/08 14:53:27 szegedia Exp $
  */
-public class EnumModels extends ClassBasedModelFactory {
+public class Internal_EnumModels extends ClassBasedModelFactory {
 
-    public EnumModels(BeansWrapper wrapper) {
+    public Internal_EnumModels(BeansWrapper wrapper) {
         super(wrapper);
     }
     

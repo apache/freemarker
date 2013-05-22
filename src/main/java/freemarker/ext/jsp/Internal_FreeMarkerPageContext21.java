@@ -16,13 +16,15 @@ import freemarker.log.Logger;
 import freemarker.template.TemplateModelException;
 
 /**
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * Implementation of PageContext that contains JSP 2.0 and JSP 2.1 specific 
- * methods. This class is public to work around Google App Engine Java 
- * compliance issues. Do not use it explicitly.
+ * methods.
+ * 
  * @author Attila Szegedi
- * @version $Id: FreeMarkerPageContext2.java,v 1.1 2005/06/11 12:13:39 szegedia Exp $
  */
-public class FreeMarkerPageContext21 extends FreeMarkerPageContext {
+public class Internal_FreeMarkerPageContext21 extends FreeMarkerPageContext {
     private static final Logger logger = Logger.getLogger("freemarker.jsp");
 
     static {
@@ -33,7 +35,7 @@ public class FreeMarkerPageContext21 extends FreeMarkerPageContext {
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 
-    public FreeMarkerPageContext21() throws TemplateModelException {
+    public Internal_FreeMarkerPageContext21() throws TemplateModelException {
         super();
     }
 

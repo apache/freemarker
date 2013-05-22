@@ -75,15 +75,15 @@ import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 
 /**
- * This class is public to work around Google App Engine Java compliance 
- * issues. Do not use it explicitly.
- * @version $Id: JdomNavigator.java,v 1.3.4.2 2006/11/14 10:42:54 szegedia Exp $ 
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * @author Attila Szegedi
  */
-public class JdomNavigator extends Navigator {
+public class Internal_JdomNavigator extends Navigator {
     private static final XMLOutputter OUTPUT = new XMLOutputter();
     
-    public JdomNavigator() {
+    public Internal_JdomNavigator() {
     } 
 
     void getAsString(Object node, StringWriter sw)

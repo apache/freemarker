@@ -55,9 +55,10 @@ package freemarker.ext.xml;
 import org.jaxen.NamespaceContext;
 
 /**
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * @author Attila Szegedi
- * @version $Id: $
  */
-class JaxenNamespaces extends Namespaces implements NamespaceContext
-{
+public class Internal_JaxenNamespaces extends Namespaces implements NamespaceContext {
 }

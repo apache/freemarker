@@ -4,9 +4,12 @@ import org.python.core.PyJavaInstance;
 import org.python.core.PyObject;
 
 /**
- * {@link JythonVersionAdapter} for Jython 2.0 and 2.1.
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
+ * {@link JythonVersionAdapter} for Jython 2.2.
  */
-public class Jython20And21VersionAdapter extends JythonVersionAdapter {
+public class Internal_Jython22VersionAdapter extends JythonVersionAdapter {
 
     public boolean isPyInstance(Object obj) {
         return obj instanceof PyJavaInstance;
@@ -17,7 +20,7 @@ public class Jython20And21VersionAdapter extends JythonVersionAdapter {
     }
 
     public String getPythonClassName(PyObject pyObject) {
-        return pyObject.__class__.__name__;
+        return pyObject.getType().getFullName();
     }
 
 }

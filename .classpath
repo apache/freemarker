@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="freemarker/ext/dom/SunInternalXalanXPathSupport.java|freemarker/ext/jsp/FreeMarkerJspFactory2.java|freemarker/ext/jsp/FreeMarkerPageContext1.java|freemarker/ext/jsp/FreeMarkerPageContext2.java|freemarker/ext/jython/Jython20And21VersionAdapter.java|freemarker/ext/jython/Jython22VersionAdapter.java" kind="src" path="src/main/java"/>
+	<classpathentry excluding="freemarker/ext/dom/SunInternalXalanXPathSupport.java|freemarker/ext/jsp/FreeMarkerJspFactory2.java|freemarker/ext/jsp/Internal_FreeMarkerPageContext1.java|freemarker/ext/jsp/Internal_FreeMarkerPageContext2.java|freemarker/ext/jython/Internal_Jython20And21VersionAdapter.java|freemarker/ext/jython/Internal_Jython22VersionAdapter.java" kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/test/resources"/>

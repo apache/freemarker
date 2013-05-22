@@ -162,7 +162,9 @@ implements
     private Namespaces createNamespaces() {
         if(useJaxenNamespaces) {
             try {
-                return new JaxenNamespaces();
+            	return (Namespaces)
+            			Class.forName("freemarker.ext.xml.Internal_JaxenNamespaces")
+            			.newInstance();
             }
             catch(Throwable t) {
                 useJaxenNamespaces = false;
@@ -542,7 +544,7 @@ implements
     
     private static Navigator getNavigator(String navType) {
         try {
-            return (Navigator) ClassUtil.forName("freemarker.ext.xml." + 
+            return (Navigator) ClassUtil.forName("freemarker.ext.xml.Internal_" + 
                     navType + "Navigator").newInstance();
         }
         catch(Throwable t) {

@@ -216,12 +216,12 @@
         freemarker/core/RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java,
         
-        freemarker/ext/beans/EnumModels.java,
+        freemarker/ext/beans/Internal_EnumModels.java,
         freemarker/ext/dom/SunInternalXalanXPathSupport.java,
         
         freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/FreeMarkerPageContext1.java,
-        freemarker/ext/jsp/FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/Internal_FreeMarkerPageContext1.java,
+        freemarker/ext/jsp/Internal_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
         
@@ -260,7 +260,7 @@
       classpathref="ivy.dep.j2se1.5"
       bootclasspath="${boot.classpath.j2se1.5}"
       includes="
-        freemarker/ext/beans/EnumModels.java,
+        freemarker/ext/beans/Internal_EnumModels.java,
         freemarker/ext/dom/SunInternalXalanXPathSupport.java"
     />
     
@@ -272,7 +272,7 @@
       bootclasspath="${boot.classpath.j2se1.2}"
       includes="
         freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/FreeMarkerPageContext1.java"
+        freemarker/ext/jsp/Internal_FreeMarkerPageContext1.java"
     />
     
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
@@ -284,7 +284,7 @@
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath.j2se1.2}"
       includes="
-        freemarker/ext/jsp/FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/Internal_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
     />
@@ -300,8 +300,8 @@
         freemarker/template/utility/JythonRuntime.java,
         freemarker/ext/jython/**"
       excludes="
-        freemarker/ext/jython/Jython22VersionAdapter.java,
-        freemarker/ext/jython/Jython25VersionAdapter.java"
+        freemarker/ext/jython/Internal_Jython22VersionAdapter.java,
+        freemarker/ext/jython/Internal_Jython25VersionAdapter.java"
     />
     
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
@@ -311,7 +311,7 @@
       classpathref="ivy.dep.jython2.2"
       bootclasspath="${boot.classpath.j2se1.2}"
       includes="
-        freemarker/ext/jython/Jython22VersionAdapter.java"
+        freemarker/ext/jython/Internal_Jython22VersionAdapter.java"
     />
     
     <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
@@ -321,7 +321,7 @@
       classpathref="ivy.dep.jython2.5"
       bootclasspath="${boot.classpath.j2se1.5}"
       includes="
-        freemarker/ext/jython/Jython25VersionAdapter.java"
+        freemarker/ext/jython/Internal_Jython25VersionAdapter.java"
     />
     
     <rmic base="build/classes" classpathref="ivy.dep"
@@ -493,10 +493,17 @@
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
     </delete>
+    <!-- javadoc with <fileset> has bugs, so we create a filtered copy: -->
+    <copy todir="build/javadoc-sources">
+      <fileset dir="src/main/java">
+        <exclude name="**/Internal_*.java" />
+        <exclude name="**/SunInternalXalanXPathSupport.java" />
+      </fileset>
+    </copy>
     <!-- conf="IDE": as that has to contain all depedencies -->
     <ivy:cachepath conf="IDE" pathid="ivy.dep" />
     <javadoc
-      sourcepath="src/main/java"
+      sourcepath="build/javadoc-sources"
       destdir="build/api"
       doctitle="FreeMarker ${version}"
       packagenames="
@@ -510,6 +517,7 @@
       classpath="build/classes"
       classpathref="ivy.dep"
     />
+    <delete dir="build/javadoc-sources" />
   </target>
 
   <target name="manual" depends="init" description="Build the Manual" >

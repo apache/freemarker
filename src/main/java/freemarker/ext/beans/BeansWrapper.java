@@ -924,7 +924,7 @@ public class BeansWrapper implements ObjectWrapper
     public TemplateHashModel getEnumModels() {
         if(enumModels == null) {
             throw new UnsupportedOperationException(
-                    "Enums not supported on pre-1.5 JRE");
+                    "Enums not supported before J2SE 5.");
         }
         return enumModels;
     }
@@ -1737,7 +1737,7 @@ public class BeansWrapper implements ObjectWrapper
             Class.forName("java.lang.Enum");
             // If they are, return the appropriate constructor for enum models
             return Class.forName(
-                "freemarker.ext.beans.EnumModels").getDeclaredConstructor(
+                "freemarker.ext.beans.Internal_EnumModels").getDeclaredConstructor(
                         new Class[] { BeansWrapper.class });
         }
         catch(Exception e) {

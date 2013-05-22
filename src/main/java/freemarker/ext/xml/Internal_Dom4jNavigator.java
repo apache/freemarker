@@ -71,14 +71,14 @@ import org.jaxen.NamespaceContext;
 import org.jaxen.dom4j.Dom4jXPath;
 
 /**
- * This class is public to work around Google App Engine Java compliance 
- * issues. Do not use it explicitly.
- * @version $Id: Dom4jNavigator.java,v 1.3 2003/01/31 11:39:17 szegedia Exp $ 
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ *  
  * @author Attila Szegedi
  */
-public class Dom4jNavigator extends Navigator {
+public class Internal_Dom4jNavigator extends Navigator {
 
-    public Dom4jNavigator() {
+    public Internal_Dom4jNavigator() {
     } 
 
     void getAsString(Object node, StringWriter sw) {

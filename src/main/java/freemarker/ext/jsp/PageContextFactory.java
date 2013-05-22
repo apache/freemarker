@@ -18,15 +18,15 @@ class PageContextFactory {
         try {
             try {
                 PageContext.class.getMethod("getELContext", (Class[]) null);
-                return Class.forName("freemarker.ext.jsp.FreeMarkerPageContext21");
+                return Class.forName("freemarker.ext.jsp.Internal_FreeMarkerPageContext21");
             }
             catch(NoSuchMethodException e1) {
                 try {
                     PageContext.class.getMethod("getExpressionEvaluator", (Class[]) null);
-                    return Class.forName("freemarker.ext.jsp.FreeMarkerPageContext2");
+                    return Class.forName("freemarker.ext.jsp.Internal_FreeMarkerPageContext2");
                 }
                 catch(NoSuchMethodException e2) {
-                    return Class.forName("freemarker.ext.jsp.FreeMarkerPageContext1");
+                    return Class.forName("freemarker.ext.jsp.Internal_FreeMarkerPageContext1");
                 }
             }
         }

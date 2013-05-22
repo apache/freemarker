@@ -4,9 +4,12 @@ import org.python.core.PyInstance;
 import org.python.core.PyObject;
 
 /**
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * {@link JythonVersionAdapter} for Jython 2.5.
  */
-public class Jython25VersionAdapter extends JythonVersionAdapter {
+public class Internal_Jython25VersionAdapter extends JythonVersionAdapter {
 
     public boolean isPyInstance(Object obj) {
         return obj instanceof PyInstance;

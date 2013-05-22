@@ -12,13 +12,14 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 /**
- * Implementation of PageContext that contains JSP 2.0 specific methods. This 
- * class is public to work around Google App Engine Java compliance issues. Do 
- * not use it explicitly.
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
+ * Implementation of PageContext that contains JSP 2.0 specific methods.
+ * 
  * @author Attila Szegedi
- * @version $Id: FreeMarkerPageContext2.java,v 1.1.2.1 2006/07/08 14:45:34 ddekany Exp $
  */
-public class FreeMarkerPageContext2 extends FreeMarkerPageContext {
+public class Internal_FreeMarkerPageContext2 extends FreeMarkerPageContext {
     private static final Logger logger = Logger.getLogger("freemarker.jsp");
 
     static {
@@ -29,7 +30,7 @@ public class FreeMarkerPageContext2 extends FreeMarkerPageContext {
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 
-    public FreeMarkerPageContext2() throws TemplateModelException {
+    public Internal_FreeMarkerPageContext2() throws TemplateModelException {
         super();
     }
 
