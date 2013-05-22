@@ -54,7 +54,7 @@ package freemarker.core;
 
 import java.util.*;
 import java.io.IOException;
-
+import javax.swing.tree.TreeNode;
 import freemarker.template.*;
 import freemarker.template.utility.Collections12;
 
@@ -63,7 +63,7 @@ import freemarker.template.utility.Collections12;
  * tree representation of the template necessarily 
  * descend from this abstract class.
  */
-abstract public class TemplateElement extends TemplateObject {
+abstract public class TemplateElement extends TemplateObject implements TreeNode {
 
     TemplateElement parent;
 
@@ -126,7 +126,7 @@ abstract public class TemplateElement extends TemplateObject {
         return !isLeaf();
     }
 
-    public int getIndex(TemplateElement node) {
+    public int getIndex(TreeNode node) {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getIndex(node);
         }
@@ -167,7 +167,7 @@ abstract public class TemplateElement extends TemplateObject {
         return Collections.enumeration(Collections.EMPTY_LIST);
     }
 
-    public TemplateElement getChildAt(int index) {
+    public TreeNode getChildAt(int index) {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getChildAt(index);
         }
@@ -178,7 +178,7 @@ abstract public class TemplateElement extends TemplateObject {
             throw new ArrayIndexOutOfBoundsException("invalid index");
         }
         else if (nestedElements != null) {
-            return(TemplateElement) nestedElements.get(index);
+            return(TreeNode) nestedElements.get(index);
         }
         throw new ArrayIndexOutOfBoundsException("element has no children");
     }
@@ -205,7 +205,7 @@ abstract public class TemplateElement extends TemplateObject {
         }
     }
     
-    public TemplateElement getParent() {
+    public TreeNode getParent() {
         return parent;
     }
 

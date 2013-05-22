@@ -67,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.tree.TreePath;
+
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
@@ -671,12 +673,11 @@ public class Template extends Configurable {
     }
     
     /**
-     * @return an array of the {@link TemplateElement}s containing the given 
-     * column and line numbers.
-     * @param column the column     
+     * @return an array of the elements containing the given column and line numbers.
+     * @param column the column
      * @param line the line
      */
-    public List containingElements(int column, int line) {
+    public TreePath containingElements(int column, int line) {
         ArrayList elements = new ArrayList();
         TemplateElement element = rootElement;
 mainloop:
@@ -694,11 +695,10 @@ mainloop:
         if (elements == null || elements.isEmpty()) {
             return null;
         }
-        return elements;
+        return new TreePath(elements.toArray());
     }
 
     static public class WrongEncodingException extends ParseException {
-        private static final long serialVersionUID = 1L;
 
         public String specifiedEncoding;
 

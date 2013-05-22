@@ -52,41 +52,18 @@
 
 package freemarker.core;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
 import freemarker.template.*;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 
-/**
- * Allows exposure of a FreeMarker template's AST as a Swing tree.
- * @author Attila Szegedi
- * @version $Id: $
- */
-public class FreeMarkerTree extends JTree {
-    private static final long serialVersionUID = 1L;
+abstract public class FreeMarkerTree extends JTree {
 
-    private final Map nodeMap = new HashMap();
-    
     public FreeMarkerTree(Template template) {
-        setTemplate(template);
-    }
-
-    private TreeNode getNode(TemplateElement element) {
-        TreeNode n = (TreeNode)nodeMap.get(element);
-        if(n != null) {
-            return n;
-        }
-        n = new TemplateElementTreeNode(element);
-        nodeMap.put(element, n);
-        return n;
+        super(template.getRootTreeNode());
     }
 
     public void setTemplate(Template template) {
-        this.setModel(new DefaultTreeModel(getNode(template.getRootTreeNode())));
+        this.setModel(new DefaultTreeModel(template.getRootTreeNode()));
         this.invalidate();
     }
 
@@ -95,54 +72,9 @@ public class FreeMarkerTree extends JTree {
                                      boolean expanded, boolean leaf, int row,
                                      boolean hasFocus) 
     {
-        // FIX THIS
         if (value instanceof TemplateElement) {
             return ((TemplateElement) value).getDescription();
         }
         return value.toString();
-    }
-    
-    private class TemplateElementTreeNode implements TreeNode {
-        private final TemplateElement element;
-        
-        TemplateElementTreeNode(TemplateElement element) {
-            this.element = element;
-        }
-
-        public Enumeration children() {
-            final Enumeration e = element.children();
-            return new Enumeration() {
-                public boolean hasMoreElements() {
-                    return e.hasMoreElements();
-                }
-                public Object nextElement() {
-                    return getNode((TemplateElement)e.nextElement());
-                }
-            };
-        }
-
-        public boolean getAllowsChildren() {
-            return element.getAllowsChildren();
-        }
-
-        public TreeNode getChildAt(int childIndex) {
-            return getNode(element.getChildAt(childIndex));
-        }
-
-        public int getChildCount() {
-            return element.getChildCount();
-        }
-
-        public int getIndex(TreeNode node) {
-            return element.getIndex(((TemplateElementTreeNode)node).element);
-        }
-
-        public TreeNode getParent() {
-            return getNode(element.getParent());
-        }
-
-        public boolean isLeaf() {
-            return element.isLeaf();
-        }
     }
 }
