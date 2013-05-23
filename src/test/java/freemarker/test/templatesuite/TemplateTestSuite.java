@@ -57,6 +57,7 @@ import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,12 +76,21 @@ import freemarker.ext.dom.NodeModel;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Test suite for FreeMarker. The suite conforms to interface expected by
- * <a href="http://junit.sourceforge.net/" target="_top">JUnit</a>.
- *
- * @version $Id: TemplateTestSuite.java,v 1.8 2005/06/11 15:18:26 revusky Exp $
+ * Test suite where the test cases are defined in testcases.xml, and usually process
+ * templates and compare their output with the expected output.
+ * 
+ * If you only want to run certain tests, you can specify a regular expression for
+ * the test name in the {@link #TEST_FILTER_PROPERTY_NAME} system property.
  */
 public class TemplateTestSuite extends TestSuite {
+    
+    public static final String CONFIGURATION_XML_FILE_NAME = "testcases.xml";
+
+    /**
+     * When setting this system property, only the tests whose name matches the
+     * given regular expression will be executed.
+     */
+    public static final String TEST_FILTER_PROPERTY_NAME = "freemareker.templateTestSuite.testFilter";
     
     private Map configParams = new LinkedHashMap();
     
@@ -94,15 +104,21 @@ public class TemplateTestSuite extends TestSuite {
     }
     
     void readConfig() throws Exception {
-        java.net.URL url = TemplateTestSuite.class.getResource("testcases.xml");
+        java.net.URL url = TemplateTestSuite.class.getResource(CONFIGURATION_XML_FILE_NAME);
         File f = new File(url.getFile());
         readConfig(f);
     }
     
     /**
-     * Read the testcase configurations file and build up the test suite
+     * Read the test case configurations file and build up the test suite.
      */
     public void readConfig(File f) throws Exception {
+        String filterStr = System.getProperty(TEST_FILTER_PROPERTY_NAME);
+        Pattern filter = filterStr != null ? Pattern.compile(filterStr) : null;
+        if (filter != null) {
+            System.out.println("Note: " + TEST_FILTER_PROPERTY_NAME + " is " + StringUtil.jQuote(filter));
+        }
+        
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         //dbf.setValidating(true);
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -120,8 +136,8 @@ public class TemplateTestSuite extends TestSuite {
                     }
                 }
                 if (n.getNodeName().equals("testcase")) {
-                    TestCase tc = createTestCaseFromNode((Element) n);
-                    addTest(tc);
+                    TestCase tc = createTestCaseFromNode((Element) n, filter);
+                    if (tc != null) addTest(tc);
                 }
             }
         }
@@ -141,15 +157,20 @@ public class TemplateTestSuite extends TestSuite {
     }
     
     /**
-     * Takes as in put the dom node that specifies the testcase
-     * and instantiates a testcase. If class is not specified,
-     * it uses the TemplateTestCase class. If the class is specified,
-     * it must be a TestCase class and have a constructor that 
-     * takes two strings as parameters.
+     * Takes as input the DOM node that specifies the test case
+     * and instantiates a {@link TestCase} or {@code null} if the test is
+     * filtered out. If the class is not specified by the DOM node,
+     * it defaults to {@link TemplateTestCase} class. If the class is specified,
+     * it must extend {@link TestCase} and have a constructor that 
+     * takes two {@link String}-s as parameters, the test name and the template
+     * file name.
+     * 
+     * @param filter 
      */
-    TestCase createTestCaseFromNode(Element e) throws Exception {
+    private TestCase createTestCaseFromNode(Element e, Pattern filter) throws Exception {
         String name = StringUtil.emptyToNull(e.getAttribute("name"));
         if (name == null) throw new Exception("Invalid XML: the \"name\" attribute is mandatory.");
+        if (filter != null && !filter.matcher(name).matches()) return null;
         
         String filename = StringUtil.emptyToNull(e.getAttribute("filename"));
         if (filename == null) filename = name + ".txt";
@@ -179,7 +200,6 @@ public class TemplateTestSuite extends TestSuite {
     }
     
     public static void main (String[] args) throws Exception {
-        
         junit.textui.TestRunner.run(new TemplateTestSuite());
 //       junit.swingui.TestRunner.run (TemplateTestSuite.class);
 //        junit.awtui.TestRunner.run (TemplateTestSuite.class);
