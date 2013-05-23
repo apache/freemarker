@@ -70,7 +70,10 @@ public class CommandLine {
         System.out.println();
         System.out.print("FreeMarker version ");
         System.out.print(Configuration.getVersionNumber());
-        if (!Configuration.getVersionNumber().endsWith("Z")) {
+        
+        /* If the version number doesn't already contain the build date and it's known, print it: */
+        if (!Configuration.getVersionNumber().endsWith("Z")
+        		&& Configuration.getBuildDate() != null) {
 	        System.out.print(" (built on ");
 	        System.out.print(DateUtil.dateToISO8601String(
 	        		Configuration.getBuildDate(),

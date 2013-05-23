@@ -133,6 +133,7 @@ public class Configuration extends Configurable implements Cloneable {
     
     private static Configuration defaultConfig = new Configuration();
     
+    private static boolean versionPropertiesLoaded;
     private static String versionNumber;
     private static Date buildDate;
     private static Boolean gaeCompliant;
@@ -1117,20 +1118,17 @@ public class Configuration extends Configurable implements Cloneable {
      * </ul>
      */
     public static String getVersionNumber() {
-        if (versionNumber == null) {
-            loadVersionProperties();
-        }
+        if (!versionPropertiesLoaded) loadVersionProperties();
         return versionNumber;
     }
 
     /**
      * Returns the date on which the current binary (the JAR) was built.
+     * {@code null} if the information is not avilable (like when it was built with Eclipse).
      * @since 2.3.20 
      */
     public static Date getBuildDate() {
-        if (buildDate == null) {
-            loadVersionProperties();
-        }
+        if (!versionPropertiesLoaded) loadVersionProperties();
         return buildDate;
     }
 
@@ -1139,9 +1137,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @since 2.3.20 
      */
     public static boolean isGAECompliant() {
-        if (gaeCompliant == null) {
-            loadVersionProperties();
-        }
+        if (!versionPropertiesLoaded) loadVersionProperties();
         return gaeCompliant.booleanValue();
     }
     
@@ -1168,11 +1164,14 @@ public class Configuration extends Configurable implements Cloneable {
                 try {
 					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
 				} catch (java.text.ParseException e) {
-                    throw new RuntimeException("Version file is corrupt: \"buildTimestamp\" couldn't be parsed: " + e);
+					buildDate = null;
 				}
                 
                 gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                
+                versionPropertiesLoaded = true;
             }
+            
         } catch (IOException e) {
             throw new RuntimeException("Failed to load version file: " + e);
         }
