@@ -56,6 +56,7 @@ package freemarker.ext.dom;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -170,7 +171,21 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     {
         DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
         if (errorHandler != null) builder.setErrorHandler(errorHandler);
-        Document doc = builder.parse(is);
+        final Document doc;
+        try {
+        	doc = builder.parse(is);
+        } catch (MalformedURLException e) {
+    		// This typical error has an error message that is hard to understand, so let's translate it:
+        	if (is.getSystemId() == null && is.getCharacterStream() == null && is.getByteStream() == null) {
+        		throw new MalformedURLException(
+        				"The SAX InputSource has systemId == null && characterStream == null && byteStream == null. "
+        				+ "This is often because it was created with a null InputStream or Reader, which is often because "
+        				+ "the XML file it should point to was not found. "
+        				+ "(The original exception was: " + e + ")");
+        	} else {
+        		throw e;
+        	}
+        }
         if (removeComments && removePIs) {
             simplify(doc);
         } else {
