@@ -112,7 +112,7 @@ public class FMParser {
       this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax, Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
   }
   
-  public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax, int incompatibleChanges) {
+  public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax, int incompatibleImprovements) {
       this(template, reader, strictEscapeSyntax, stripWhitespace);
       switch (tagSyntax) {
           case Configuration.AUTO_DETECT_TAG_SYNTAX : 
@@ -126,7 +126,7 @@ public class FMParser {
 	     break;
 	  default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
       }
-      token_source.incompatibleChanges = incompatibleChanges; 
+      token_source.incompatibleImprovements = incompatibleImprovements; 
   }
   
   public FMParser(String template) {
@@ -340,7 +340,7 @@ TOKEN_MGR_DECLS :
          autodetectTagSyntax,
          directiveSyntaxEstablished,
 		 inInvocation;
- int incompatibleChanges;
+ int incompatibleImprovements;
  String templateName;
 
  
@@ -602,7 +602,7 @@ TOKEN:
     |
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
-        if (!directiveSyntaxEstablished && incompatibleChanges < 2003019) {
+        if (!directiveSyntaxEstablished && incompatibleImprovements < 2003019) {
             matchedToken.kind = PRINTABLE_CHARS;
         } else {			char firstChar = matchedToken.image.charAt(0);
 			

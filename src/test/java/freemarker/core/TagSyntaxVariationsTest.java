@@ -8,6 +8,7 @@ import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 import junit.framework.TestCase;
 
@@ -48,7 +49,7 @@ public class TagSyntaxVariationsTest extends TestCase {
         // Default on 2.3.x: cfgBuggy.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
         
         Configuration cfgFixed = new Configuration();
-        cfgFixed.setIncompatibleEnhancements("2.3.19");
+        cfgFixed.setIncompatibleImprovements(new Version(2, 3, 19));
         // Default on 2.3.x: cfgFixed.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
 
         // Permutations 

@@ -123,24 +123,29 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
+    public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
+    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
     
-    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = "2.3.0"; // [2.4] 
-    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = StringUtil.versionStringToInt(DEFAULT_INCOMPATIBLE_ENHANCEMENTS); 
+    /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = new Version(2, 3, 0);
+    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
+    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
     private static Configuration defaultConfig = new Configuration();
     
     private static boolean versionPropertiesLoaded;
+    /** @deprecated Use {@link #version} instead. */
     private static String versionNumber;
-    private static Date buildDate;
-    private static Boolean gaeCompliant;
+    private static Version version;
     
     private boolean strictSyntax = true, localizedLookup = true, whitespaceStripping = true;
-    private String incompatibleEnhancements = DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
-    private int parsedIncompatibleEnhancements = PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
+    private Version incompatibleImprovements = DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
@@ -476,26 +481,21 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets which of the <em>slightly</em> non-backward compatible
-     * bugfixes/enhancements should be enabled. The setting value is the
-     * FreeMarker release version number where the enhancements
-     * to enable were already present. The default is 2.3.0 in 2.3.x, 2.4.0 on
-     * 2.4.x, and so on, thus by default compatibility with the latest x.y.0
-     * release is kept with new releases. If you develop a new application with,
-     * for example, 2.3.25 and you need the non-backward compatible enhancements,
-     * you should set this to 2.3.25. Thus if you later update FreeMarker to a
-     * higher 2.3.x version, you will still only have the incompatible changes
-     * that you have tested your application with.
+     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
+     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
+     * active be default, as that would break backward-compatibility).
      * 
-     * <p>This setting doesn't affect non-backward
-     * compatible security fixes; they are always enabled. This setting also
-     * doesn't affect enhancements where there's a significant chance of
-     * breaking existing applications.
+     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading freemkarer.jar under an existing
+     * application. But if you develop a new application with, say, 2.3.25, it's probably a good idea to set this from
+     * 2.3.0 to 2.3.25. (Note that if you later update FreeMarker to a higher 2.3.x version, you will still only have
+     * the incompatible changes that you have tested your application with.) As far as the 1st and 2nd version number
+     * remains, these changes are usually not substantial anyway.
      * 
-     * <p>Using this setting is a good way of preparing for the next minor
-     * (2nd) version number increase. When that happens, not only the default
-     * value of this setting changes, but it's possible that older values become
-     * unsupported.
+     * <p>This setting may doesn't affect some important non-backward compatible security fixes; they are always
+     * enabled.
+     * 
+     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
+     * increases. When that happens, it's possible that some old behavior become unsupported.
      * 
      * <p>Currently affected fixes/enhancements:
      * <ul>
@@ -506,24 +506,35 @@ public class Configuration extends Configurable implements Cloneable {
      *   </li>
      * </ul>
      *
-     * @since 2.3.19
+     * @since 2.3.20
      */
-    public void setIncompatibleEnhancements(String version) {
-        parsedIncompatibleEnhancements = StringUtil.versionStringToInt(version);
-        incompatibleEnhancements = version;
+    public void setIncompatibleImprovements(Version version) {
+        incompatibleImprovements = version;
     }
 
-    public String getIncompatibleEnhancements() {
-        return incompatibleEnhancements;
+    public Version getIncompatibleImprovements() {
+        return incompatibleImprovements;
     }
     
     /**
-     * Same as {@link #getIncompatibleEnhancements()}, but returns the version
-     * as an <tt>int</tt>, according to
-     * {@link StringUtil#versionStringToInt(String)}. 
+     * @deprecated Use {@link #setIncompatibleImprovements(Version)} instead.
+     */
+    public void setIncompatibleEnhancements(String version) {
+        setIncompatibleImprovements(new Version(version));
+    }
+    
+    /**
+     * @deprecated Use {@link #getIncompatibleImprovements()} instead.
+     */
+    public String getIncompatibleEnhancements() {
+        return incompatibleImprovements.toString();
+    }
+    
+    /**
+     * @deprecated Use {@link #getIncompatibleImprovements()} instead.
      */
     public int getParsedIncompatibleEnhancements() {
-        return parsedIncompatibleEnhancements;
+        return getIncompatibleImprovements().intValue();
     }
     
     /**
@@ -900,9 +911,11 @@ public class Configuration extends Configurable implements Cloneable {
      *   <li><code>"tag_syntax"</code>: Must be one of:
      *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
      *       <code>"square_bracket"</code>.
-     *   <li><code>"incompatible_enhancements"</code>: The FreeMarker version
-     *       number where the desired enhancements were already implemented.
-     *       See: {@link #setIncompatibleEnhancements(String)}.
+     *   <li><code>"incompatible_improvements"</code>: The FreeMarker version
+     *       where the desired non-backward-compatible improvements were already available.
+     *       See: {@link #setIncompatibleImprovements(Version)}.
+     *   <li><code>"incompatible_enhancements"</code>: Deprecated, use <code>"incompatible_improvements"</code>
+     *       instead. See: {@link #setIncompatibleEnhancements(String)}.
      * </ul>
      *
      * @param key the name of the setting.
@@ -976,6 +989,8 @@ public class Configuration extends Configurable implements Cloneable {
                 } else {
                     throw invalidSettingValueException(key, value);
                 }
+            } else if (INCOMPATIBLE_IMPROVEMENTS.equals(key)) {
+                setIncompatibleImprovements(new Version(value));
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(key)) {
                 setIncompatibleEnhancements(value);
             } else {
@@ -1087,58 +1102,45 @@ public class Configuration extends Configurable implements Cloneable {
 
     /**
      * Returns FreeMarker version number string. 
-     * Examples of possible return values:
-     * <code>"2.2.5"</code>, <code>"2.3pre13"</code>,
-     * <code>"2.3pre13mod"</code>, <code>"2.3rc1"</code>, <code>"2.3"</code>,
-     * <code>"3.0"</code>.
-     *
-     * <p>Notes on FreeMarker version numbering rules:
-     * <ul>
-     *   <li>"pre" and "rc" (lowercase!) means "preview" and "release
-     *       candidate" respectively. It is must be followed with a
-     *       number (as "1" for the first release candidate).
-     *   <li>The "mod" after the version number indicates that it's an
-     *       unreleased modified version of the released version.
-     *       After releases, the nighly builds are such releases. E.g.
-     *       the nightly build after releasing "2.2.1" but before releasing
-     *       "2.2.2" is "2.2.1mod".
-     *   <li>The 2nd version number must be present, and maybe 0,
-     *       as in "3.0".
-     *   <li>The 3rd version number is never 0. E.g. the version
-     *       number string for the first release of the 2.2 series
-     *       is "2.2", and NOT "2.2.0". 
-     *   <li>When only the 3rd version number increases
-     *       (2.2 -> 2.2.1, 2.2.1 -> 2.2.2 etc.), 100% backward compatiblity
-     *       with the previous version MUST be kept.
-     *       This means that <tt>freemarker.jar</tt> can be replaced in an
-     *       application without risk (as far as the application doesn't depend
-     *       on the presence of a FreeMarker bug).
-     *       Note that backward compatibility restrictions do not apply for
-     *       preview releases.
-     * </ul>
+     * 
+     * @deprecated Use {@link #getVersion()} instead.
      */
     public static String getVersionNumber() {
         if (!versionPropertiesLoaded) loadVersionProperties();
         return versionNumber;
     }
-
+    
     /**
-     * Returns the date on which the current binary (the JAR) was built.
-     * {@code null} if the information is not avilable (like when it was built with Eclipse).
-     * @since 2.3.20 
-     */
-    public static Date getBuildDate() {
+     * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers.
+     * 
+     * On FreeMarker version numbering rules:
+     * <ul>
+     *   <li>For final/stable releases the version number is like major.minor.micro, like 2.3.19. (Historically,
+     *       when micro was 0 the version strings was like major.minor instead of the proper major.minor.0, but that's
+     *       not like that anymore.)
+     *   <li>When only the micro version is increased, compatibility with previous versions with the same
+     *       major.minor is kept. Thus <tt>freemarker.jar</tt> can be replaced in an existing application without
+     *       breaking it.</li>
+     *   <li>For non-final/unstable versions (that almost nobody uses), the format is:
+     *       <ul>
+     *         <li>Starting from 2.3.20: major.minor.micro-extraInfo, like
+     *             2.3.20-nightly_20130506T123456Z, 2.4.0-RC01. The major.minor.micro
+     *             always indicates the target we move towards, so 2.3.20-nightly or 2.3.20-M01 is
+     *             after 2.3.19 and will eventually become to 2.3.20. "PRE", "M" and "RC" (uppercase!) means
+     *             "preview", "milestone" and "release candidate" respectively, and is always followed by a 2 digit
+     *             0-padded counter, like M03 is the 3rd milestone release of a given major.minor.micro.</li> 
+     *         <li>Before 2.3.20: The extraInfo wasn't preceded by a "-".
+     *             Instead of "nightly" there was "mod", where the major.minor.micro part has indicated where
+     *             are we coming from, so 2.3.19mod (read as: 2.3.19 modified) was after 2.3.19 but before 2.3.20.
+     *             Also, "pre" and "rc" was lowercase, and was followd by a number without 0-padding.</li>
+     *       </ul>
+     * </ul>
+     * 
+     * @since 2.3.20
+     */ 
+    public static Version getVersion() {
         if (!versionPropertiesLoaded) loadVersionProperties();
-        return buildDate;
-    }
-
-    /**
-     * Returns if this is Google App Engine compliant variation.
-     * @since 2.3.20 
-     */
-    public static boolean isGAECompliant() {
-        if (!versionPropertiesLoaded) loadVersionProperties();
-        return gaeCompliant.booleanValue();
+        return version;
     }
     
 	private static void loadVersionProperties() {
@@ -1155,19 +1157,25 @@ public class Configuration extends Configurable implements Cloneable {
                     ins.close();
                 }
                 
-                versionNumber = getRequiredVersionProperty(vp, "version");
+                String versionString  = getRequiredVersionProperty(vp, "version");
+                versionNumber = versionString;
                 
-                String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
-                if (buildDateStr.endsWith("Z")) {
-                	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                Date buildDate;
+                {
+                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                    if (buildDateStr.endsWith("Z")) {
+                    	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                    }
+                    try {
+    					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
+    				} catch (java.text.ParseException e) {
+    					buildDate = null;
+    				}
                 }
-                try {
-					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-				} catch (java.text.ParseException e) {
-					buildDate = null;
-				}
                 
-                gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                
+                version = new Version(versionString, gaeCompliant, buildDate);
                 
                 versionPropertiesLoaded = true;
             }

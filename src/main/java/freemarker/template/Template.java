@@ -165,7 +165,7 @@ public class Template extends Configurable {
                         getConfiguration().getStrictSyntaxMode(),
                         getConfiguration().getWhitespaceStripping(),
                         getConfiguration().getTagSyntax(),
-                        getConfiguration().getParsedIncompatibleEnhancements());
+                        getConfiguration().getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
             }
             catch (TokenMgrError exc) {

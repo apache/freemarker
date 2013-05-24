@@ -52,10 +52,8 @@
 
 package freemarker.core;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.Version;
 import freemarker.template.utility.DateUtil;
 
 /**
@@ -67,16 +65,18 @@ import freemarker.template.utility.DateUtil;
 public class CommandLine {
     
     public static void main(String[] args) {
+        Version ver = Configuration.getVersion();
+        
         System.out.println();
         System.out.print("FreeMarker version ");
-        System.out.print(Configuration.getVersionNumber());
+        System.out.print(ver);
         
         /* If the version number doesn't already contain the build date and it's known, print it: */
-        if (!Configuration.getVersionNumber().endsWith("Z")
-        		&& Configuration.getBuildDate() != null) {
+        if (!ver.toString().endsWith("Z")
+        		&& ver.getBuildDate() != null) {
 	        System.out.print(" (built on ");
 	        System.out.print(DateUtil.dateToISO8601String(
-	        		Configuration.getBuildDate(),
+	        		ver.getBuildDate(),
 	        		true, true, true, DateUtil.ACCURACY_SECONDS,
 	        		DateUtil.UTC,
 	        		new DateUtil.TrivialDateToISO8601CalendarFactory()));
@@ -84,8 +84,11 @@ public class CommandLine {
         }
         System.out.println();
         
-        System.out.print("Google App Engine complian variant: ");
-        System.out.println(Configuration.isGAECompliant() ? "Yes" : "No");
+        if (ver.isGAECompliant() != null) {
+            System.out.print("Google App Engine complian variant: ");
+            System.out.println(ver.isGAECompliant().booleanValue() ? "Yes" : "No");
+        }
+        
         System.out.println();
         System.out.println("Copyright (c) 2003 The Visigoth Software Society.");
         System.out.println("All rights reserved.");

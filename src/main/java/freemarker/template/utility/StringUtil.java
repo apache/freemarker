@@ -61,6 +61,7 @@ import java.util.StringTokenizer;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.template.Template;
+import freemarker.template.Version;
 
 /**
  *  Some text related utilities.
@@ -1450,28 +1451,7 @@ public class StringUtil {
      * @return major * 1000000 + minor * 1000 + micro
      */
     public static int versionStringToInt(String version) {
-        version = version.trim();
-        
-        int[] parts = new int[3];
-        int partIdx = 0;
-        boolean valid = false;
-        for (int i = 0; i < version.length(); i++) {
-            char c = version.charAt(i);
-            if (c >= '0' && c <= '9') {
-                parts[partIdx] = parts[partIdx] * 10 + (c - '0');
-                valid = true;
-            } else {
-                if (c == '.') {
-                    if (partIdx == 2) break; else partIdx++;
-                } else {
-                    break;
-                }
-            }
-        }
-        if (!valid) throw new IllegalArgumentException(
-                "A version number string " + jQuote(version)
-                + " must start with a number.");
-        return parts[0] * 1000000 + parts[1] * 1000 + parts[2];
+        return new Version(version).intValue();
     }
     
 }
