@@ -518,6 +518,14 @@
       classpathref="ivy.dep"
     />
     <delete dir="build/javadoc-sources" />
+    
+    <available file="build/api/resources/titlebar.gif" property="titlebar.found"/>
+    <fail unless="titlebar.found"><!--
+    -->build/api/resources/titlebar.gif doesn't exist, which probably means <!--
+    -->that the API documentaton was generated with JDK 6 or earlier. Ensure <!--
+    -->that Ant uses JDK 7 or later (you may need to set JAVA_HOME), as the <!--
+    -->HTML output was significantly improved with JDK 7.<!--
+    --></fail>
   </target>
 
   <target name="manual" depends="init" description="Build the Manual" >
@@ -1018,5 +1026,5 @@ Proceed? </input>
         zipfile="archive/freemarker-git-${tstamp}.tar.bz2" />
     <delete file="archive/freemarker-git-${tstamp}.tar" />
   </target>
-
+    
 </project>
