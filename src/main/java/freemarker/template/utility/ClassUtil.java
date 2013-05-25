@@ -87,4 +87,34 @@ public class ClassUtil
         // Fall back to default class loader 
         return Class.forName(className);
     }
+    
+    /**
+     * Returns a class name without "java.lang." and "java.util." prefix; useful for printing class names in error
+     * messages.
+     * 
+     * @param pClass can be {@code null}, in which case the method returns {@code null}.
+     */
+    public static String getShortClassName(Class pClass) {
+        if (pClass == null) return null;
+        
+        String cn = pClass.getName();
+        if (cn.startsWith("java.lang.") || cn.startsWith("java.util.")) {
+            return cn.substring(10);
+        } else {
+            return cn;
+        }
+    }
+    
+    /**
+     * {@link #getShortClassName(Class)} called with {@code object.getClass()}, but returns the class name
+     * {@code Null} for a {@code null} value.
+     */
+    public static String getShortClassNameOfObject(Object obj) {
+        if (obj == null) {
+            return "Null";
+        } else {
+            return ClassUtil.getShortClassName(obj.getClass());
+        }
+    }
+    
 }

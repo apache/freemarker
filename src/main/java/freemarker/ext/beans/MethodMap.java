@@ -53,19 +53,27 @@
 package freemarker.ext.beans;
 
 import java.lang.reflect.Member;
+import java.util.Iterator;
 import java.util.List;
 
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.Constants;
+import freemarker.template.utility.StringUtil;
 
+/**
+ * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
+ * and constructors.
+ */
 class MethodMap
 {
-    private final String name;
+    private final String methodName;
     private final BeansWrapper wrapper;
     private final OverloadedMethod fixArgMethod = new OverloadedFixArgMethod();
     private OverloadedMethod varArgMethod;
     
-    MethodMap(String name, BeansWrapper wrapper) {
-        this.name = name;
+    MethodMap(String methodName, BeansWrapper wrapper) {
+        this.methodName = methodName;
         this.wrapper = wrapper;
     }
     
@@ -91,14 +99,82 @@ class MethodMap
                 memberAndArguments = varArgMethod.getMemberAndArguments(arguments, wrapper);
             }
             if(memberAndArguments == OverloadedMethod.NO_SUCH_METHOD) {
-                throw new TemplateModelException("No signature of method " + 
-                        name + " matches the arguments");
+                throw new TemplateModelException(
+                        "No variaton of overloaded method \"" + methodName
+                        + "\" is compatbile with the actual types in the argument list, "
+                        + argumentsToTypeListString(arguments)
+                        + ". The overloaded method variations are: " + memberListToString());
             }
         }
         if(memberAndArguments == OverloadedMethod.AMBIGUOUS_METHOD) {
-            throw new TemplateModelException("Multiple signatures of method " + 
-                    name + " match the arguments");
+            throw new TemplateModelException(
+                    "Multiple variatons of overloaded method \"" + 
+                    methodName + "\" is compatbile with the actual types in the argument list, "
+                    + argumentsToTypeListString(arguments)
+                    + ". The overloaded method variations are: " + memberListToString());
         }
         return (MemberAndArguments)memberAndArguments;
     }
+    
+    /** 
+     * To be used in error messages.
+     */
+    private String argumentsToTypeListString(List arguments) {
+        StringBuffer sb = new StringBuffer();
+        sb.append('(');
+        for (int i = 0; i < arguments.size(); i++) {
+            if (i != 0) sb.append(", ");
+            sb.append(ClassUtil.getShortClassNameOfObject(arguments.get(i)));
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+    
+    public String memberListToString() {
+        Iterator fixArgMethods = fixArgMethod.getMembers();
+        Iterator varArgMethods = varArgMethod != null ? varArgMethod.getMembers() : null;
+        
+        boolean hasMethods = fixArgMethods.hasNext() || (varArgMethods != null && varArgMethods.hasNext()); 
+        if (hasMethods) {
+            StringBuffer sb = new StringBuffer();
+            while (fixArgMethods.hasNext()) {
+                if (sb.length() != 0) sb.append(", ");
+                sb.append(methodOrConstructorToString((Member) fixArgMethods.next()));
+            }
+            if (varArgMethods != null) {
+                while (varArgMethods.hasNext()) {
+                    if (sb.length() != 0) sb.append(", ");
+                    sb.append(methodOrConstructorToString((Member) varArgMethods.next()));
+                }
+            }
+            return sb.toString();
+        } else {
+            return "No members";
+        }
+    }
+
+    /**
+     * Method description for parameter list error messages.
+     */
+    private String methodOrConstructorToString(Member member) {
+        StringBuffer sb = new StringBuffer();
+        
+        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
+        if (className != null) {
+            sb.append(className);
+            sb.append('.');
+        }
+        sb.append(member.getName());
+
+        sb.append('(');
+        Class[] paramTypes = MethodUtilities.getParameterTypes(member);
+        for (int i = 0; i < paramTypes.length; i++) {
+            if (i != 0) sb.append(", ");
+            sb.append(ClassUtil.getShortClassName(paramTypes[i]));
+        }
+        sb.append(')');
+        
+        return sb.toString();
+    }
+    
 }

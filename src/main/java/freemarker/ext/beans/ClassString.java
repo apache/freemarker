@@ -259,57 +259,49 @@ final class ClassString
         // Check for boxing with widening primitive conversion. Note that 
         // actual parameters are never primitives.
         if(formal.isPrimitive()) {
-            if(formal == Boolean.TYPE)
+            if(formal == Boolean.TYPE) {
                 return actual == Boolean.class;
-            if(formal == Character.TYPE)
+            } else if (formal == Double.TYPE && 
+                    (actual == Double.class || actual == Float.class || 
+                     actual == Long.class || actual == Integer.class || 
+                     actual == Short.class || actual == Byte.class)) {
+                 return true;
+            } else if (formal == Integer.TYPE && 
+                    (actual == Integer.class || actual == Short.class || 
+                     actual == Byte.class)) {
+                 return true;
+            } else if (formal == Long.TYPE && 
+                    (actual == Long.class || actual == Integer.class || 
+                     actual == Short.class || actual == Byte.class)) {
+                 return true;
+            } else if (formal == Float.TYPE && 
+                    (actual == Float.class || actual == Long.class || 
+                     actual == Integer.class || actual == Short.class || 
+                     actual == Byte.class)) {
+                 return true;
+            } else if (formal == Character.TYPE) {
                 return actual == Character.class;
-            if(formal == Byte.TYPE && actual == Byte.class)
+            } else if(formal == Byte.TYPE && actual == Byte.class) {
                 return true;
-            if(formal == Short.TYPE &&
-               (actual == Short.class || actual == Byte.class))
+            } else if(formal == Short.TYPE &&
+               (actual == Short.class || actual == Byte.class)) {
                 return true;
-            if(formal == Integer.TYPE && 
-               (actual == Integer.class || actual == Short.class || 
-                actual == Byte.class))
+            } else if (BIGDECIMAL_CLASS.isAssignableFrom(actual) && isNumerical(formal)) {
+                // Special case for BigDecimals as we deem BigDecimal to be
+                // convertible to any numeric type - either object or primitive.
+                // This can actually cause us trouble as this is a narrowing 
+                // conversion, not widening. 
                 return true;
-            if(formal == Long.TYPE && 
-               (actual == Long.class || actual == Integer.class || 
-                actual == Short.class || actual == Byte.class))
-                return true;
-            if(formal == Float.TYPE && 
-               (actual == Float.class || actual == Long.class || 
-                actual == Integer.class || actual == Short.class || 
-                actual == Byte.class))
-                return true;
-            if(formal == Double.TYPE && 
-               (actual == Double.class || actual == Float.class || 
-                actual == Long.class || actual == Integer.class || 
-                actual == Short.class || actual == Byte.class))
-                return true; 
-            // Special case for BigDecimals as we deem BigDecimal to be
-            // convertible to any numeric type - either object or primitive.
-            // This can actually cause us trouble as this is a narrowing 
-            // conversion, not widening. 
-            return isBigDecimalConvertible(formal, actual);
+            } else {
+                return false;
+            }
         }
         return false;
     }
     
-    private static boolean isBigDecimalConvertible(Class formal, Class actual)
-    {
-        // BigDecimal 
-        if(BIGDECIMAL_CLASS.isAssignableFrom(actual))
-        {
-            if(NUMBER_CLASS.isAssignableFrom(formal))
-            {
-                return true;
-            }
-            if(formal.isPrimitive() && 
-               formal != Boolean.TYPE && formal != Character.TYPE)
-            {
-               return true;
-            }
-        }
-        return false;
+    private static boolean isNumerical(Class type) {
+        return NUMBER_CLASS.isAssignableFrom(type)
+                || type.isPrimitive() && type != Boolean.TYPE && type != Character.TYPE;
     }
+    
 }

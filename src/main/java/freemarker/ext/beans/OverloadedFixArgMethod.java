@@ -80,20 +80,20 @@ class OverloadedFixArgMethod extends OverloadedMethod
             // null is treated as empty args
             arguments = Collections.EMPTY_LIST;
         }
-        int l = arguments.size();
-	Class[][] marshalTypes = getMarshalTypes();
-        if(marshalTypes.length <= l) {
+        final int argCount = arguments.size();
+        final Class[][] marshalTypes = getMarshalTypes();
+        if(marshalTypes.length <= argCount) {
             return NO_SUCH_METHOD;
         }
-        Class[] types = marshalTypes[l];
+        Class[] types = marshalTypes[argCount];
         if(types == null) {
             return NO_SUCH_METHOD;
         }
         //assert types.length == l;
         // Marshal the arguments
-        Object[] args = new Object[l];
+        Object[] args = new Object[argCount];
         Iterator it = arguments.iterator();
-        for(int i = 0; i < l; ++i) {
+        for(int i = 0; i < argCount; ++i) {
             Object obj = w.unwrapInternal((TemplateModel)it.next(), types[i]);
             if(obj == BeansWrapper.CAN_NOT_UNWRAP) {
                 return NO_SUCH_METHOD;
@@ -103,10 +103,11 @@ class OverloadedFixArgMethod extends OverloadedMethod
         
         Object objMember = getMemberForArgs(args, false);
         if(objMember instanceof Member) {
-            Member member = (Member)objMember;
+            Member member = (Member) objMember;
             BeansWrapper.coerceBigDecimals(getSignature(member), args);
             return new MemberAndArguments(member, args);
+        } else {
+            return objMember; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
         }
-        return objMember; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
     }
 }

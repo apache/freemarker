@@ -63,6 +63,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A class that will wrap a reflected method call into a
@@ -122,13 +123,17 @@ public final class SimpleMethodModel extends SimpleMemberModel
             }
             if((getMember().getModifiers() & Modifier.STATIC) != 0)
             {
-                throw new TemplateModelException("Method " + getMember() + 
-                        " threw an exception", e);
+                throw new TemplateModelException("Method " + StringUtil.jQuote(getMember()) + 
+                        " threw an exception; see cause exception", e);
             }
             else
             {
-                throw new TemplateModelException("Method " + getMember() + 
-                        " threw an exception when invoked on " + object, e);
+                throw new TemplateModelException(
+                        "Method " + StringUtil.jQuote(getMember()) + 
+                        " threw an exception when invoked on "
+                        + object.getClass().getName() + " object "
+                        + StringUtil.jQuote(object) + "; see cause exception",
+                        e);
             }
         }
     }

@@ -53,6 +53,7 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Member;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,57 +69,54 @@ abstract class OverloadedMethod {
     static final Object AMBIGUOUS_METHOD = new Object();
     static final Object[] EMPTY_ARGS = new Object[0];
 
-    private Class[][] marshalTypes;
+    private Class[/*number of args*/][/*arg index*/] marshalTypes;
     // TODO: make it not concurrent
     private final Map selectorCache = new HashMap();
-    private final List members = new LinkedList();
-    private final Map signatures = new HashMap();
+    private final List/*<Constructor|Method>*/ members = new LinkedList();
+    private final Map/*<Constructor|Method, Class[]>*/ signatures = new HashMap();
     
     void addMember(Member member) {
         members.add(member);
 
         Class[] argTypes = MethodUtilities.getParameterTypes(member);
-        int l = argTypes.length;
+        final int argCount = argTypes.length;
         signatures.put(member, argTypes.clone());
+        
         onAddSignature(member, argTypes);
-        if(marshalTypes == null) {
-            marshalTypes = new Class[l + 1][];
-            marshalTypes[l] = argTypes;
-            updateSignature(l);
-        }
-        else if(marshalTypes.length <= l) {
-            Class[][] newMarshalTypes = new Class[l + 1][];
+        
+        if (marshalTypes == null) {
+            marshalTypes = new Class[argCount + 1][];
+            marshalTypes[argCount] = argTypes;
+        } else if (marshalTypes.length <= argCount) {
+            Class[][] newMarshalTypes = new Class[argCount + 1][];
             System.arraycopy(marshalTypes, 0, newMarshalTypes, 0, marshalTypes.length);
             marshalTypes = newMarshalTypes;
-            marshalTypes[l] = argTypes;
-            updateSignature(l);
-        }
-        else {
-            Class[] oldTypes = marshalTypes[l]; 
-            if(oldTypes == null) {
-                marshalTypes[l] = argTypes;
-            }
-            else {
-                for(int i = 0; i < oldTypes.length; ++i) {
-                    oldTypes[i] = MethodUtilities.getMostSpecificCommonType(oldTypes[i], argTypes[i]);
+            marshalTypes[argCount] = argTypes;
+        } else {
+            Class[] oldArgTypes = marshalTypes[argCount]; 
+            if (oldArgTypes == null) {
+                marshalTypes[argCount] = argTypes;
+            } else {
+                for(int i = 0; i < oldArgTypes.length; ++i) {
+                    oldArgTypes[i] = MethodUtilities.getMostSpecificCommonType(oldArgTypes[i], argTypes[i]);
                 }
             }
-            updateSignature(l);
         }
+        updateSignature(argCount);
 
-        afterSignatureAdded(l);
+        afterSignatureAdded(argCount);
     }
     
     Class[] getSignature(Member member) {
-        return (Class[])signatures.get(member);
+        return (Class[]) signatures.get(member);
     }
     
     Class[][] getMarshalTypes() {
-	return marshalTypes;
+        return marshalTypes;
     }
     
     Object getMemberForArgs(Object[] args, boolean varArg) {
-	ClassString argTypes = new ClassString(args);
+        ClassString argTypes = new ClassString(args);
         Object objMember;
         synchronized(selectorCache) {
             objMember = selectorCache.get(argTypes);
@@ -127,9 +125,13 @@ abstract class OverloadedMethod {
                 selectorCache.put(argTypes, objMember);
             }
         }
-	return objMember;
+        return objMember;
     }
-
+    
+    Iterator/*<Constructor|Method>*/ getMembers() {
+        return members.iterator();
+    }
+    
     abstract void onAddSignature(Member member, Class[] argTypes);
     abstract void updateSignature(int l);
     abstract void afterSignatureAdded(int l);
