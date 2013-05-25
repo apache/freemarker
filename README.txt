@@ -5,7 +5,7 @@
  For the latest version or to report bugs visit:
 
  http://freemarker.org/
- Mirror: http://freemarker.sourceforge.net/
+ (Mirror: http://freemarker.sourceforge.net/)
 
 ===============================================================================
 
@@ -13,13 +13,14 @@
 What is FreeMarker?
 -------------------
 
-FreeMarker is a Java tool to generate text output based on templates.
-It is designed to be practical as a template engine to generate web
-pages and particularly for servlet-based page production that follows
-the MVC (Model View Controller) pattern. That is, you can separate the
-work of Java programmers and website designers - Java programmers
-needn't know how to design nice websites, and website designers needn't
-know Java programming.
+FreeMarker is a "template engine"; a generic tool to generate text
+output (anything from HTML to auto generated source code) based on
+templates. It's a Java package, a class library for Java programmers.
+It's not an application for end-users in itself, but something that
+programmers can embed into their products. FreeMarker is designed to
+be practical for the generation of HTML Web pages, particularly by
+servlet-based applications following the MVC (Model View Controller)
+pattern.
 
 
 Licensing
@@ -39,15 +40,25 @@ Documentation
 Documentation is available in the docs directory of this distribution;
 open docs/index.html.
 
+Or, online: http://freemarker.org/docs/
+(Mirror: http://freemarker.sourceforge.net/docs/)
+
 
 Installing
 ----------
 
-No real installation is needed. Simply copy freemarker.jar to a
-location where your Java application's ClassLoader will find it. For
-example, if you use FreeMarker in a web application, you probably want
-to put freemarker.jar into the WEB-INF/lib directory of your web
-application.
+If you are using Maven, just add this dependency:
+
+  <dependency>
+    <groupId>org.freemarker</groupId>
+    <artifactId>freemarker</artifactId>
+    <version>{version}</version>
+  </dependency>
+
+Otherwise simply copy freemarker.jar to a location where your Java
+application's ClassLoader will find it. For example, if you are using
+FreeMarker in a web application, you probably want to put
+freemarker.jar into the WEB-INF/lib directory of your web application.
 
 FreeMarker has no required dependencies. It has several optional
 dependencies, but usually you don't have to deal with them, because if
@@ -83,13 +94,12 @@ will have to run "ant update-deps" again, and only after that tell
 IvyDE to resolve the dependencies.
 
 
-History
--------
+Change log
+----------
 
 See:
 docs/docs/app_versions.html
 
-Or online:
+Or, online:
 http://freemarker.org/docs/app_versions.html
-Mirror:
-http://freemarker.sourceforge.net/docs/app_versions.html
+(Mirror: http://freemarker.sourceforge.net/docs/app_versions.html)
