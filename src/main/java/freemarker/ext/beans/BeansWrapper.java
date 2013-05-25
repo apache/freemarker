@@ -91,6 +91,7 @@ import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -101,6 +102,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility.SecurityUtilities;
@@ -240,6 +242,7 @@ public class BeansWrapper implements ObjectWrapper
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper;
     private boolean strict = false;
+    private Version overloadedMethodSelection;
     
     /**
      * Creates a new instance of BeansWrapper. The newly created instance
@@ -334,6 +337,30 @@ public class BeansWrapper implements ObjectWrapper
         return simpleMapWrapper;
     }
 
+    /**
+     * Tells which non-backward-compatible overloaded method selection fixes to apply;
+     * see {@link #setOverloadedMethodSelection(Version)}.
+     */
+    public Version getOverloadedMethodSelection() {
+        return overloadedMethodSelection;
+    }
+
+    /**
+     * Sets which non-backward-compatible overloaded method selection fixes to apply.
+     * This has similar logic as {@link Configuration#setIncompatibleImprovements(Version)},
+     * but only applies to this aspect.
+     * 
+     * Currently significant values:
+     * <ul>
+     *   <li>2.3.20: Fixes problem where a null actual parameter value was treated as if its class was {@link Object},
+     *       and hence only matched methods where the formal type was {@link Object} too. The correct behavior is
+     *       the opposite: the class of null (which doesn't actually exist in Java) is the subclass of all classes.</li>
+     * </ul>
+     */
+    public void setOverloadedMethodSelection(Version version) {
+        overloadedMethodSelection = version;
+    }
+    
     /**
      * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
      * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
@@ -880,6 +907,8 @@ public class BeansWrapper implements ObjectWrapper
         IllegalAccessException,
         TemplateModelException
     {
+        // TODO: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
+        // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
         return 
             method.getReturnType() == Void.TYPE 
