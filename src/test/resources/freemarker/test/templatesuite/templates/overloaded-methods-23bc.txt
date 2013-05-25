@@ -1,0 +1,38 @@
+[#ftl]
+[#assign m = {"a": 1, "b": 2}]
+[#assign ls = [1, 2]]
+${obj.oneArg(null)} == oneArg<Object>(null)
+${obj.oneArg("s")} == oneArg<String>("s")
+[#attempt]${obj.oneArg(true)} == oneArg<boolean>(true)[#recover]ambiguous[/#attempt] == ambiguous (should be oneArg<boolean>)
+${obj.oneArg(ls)} == oneArg<List>([1, 2])
+${obj.oneArg(m)} == oneArg<Map>({"a": 1, "b": 2})
+
+${obj.oneArg2(m)} == oneArg2<Map>({"a": 1, "b": 2})
+${obj.oneArg2(ls)} == oneArg2<List>([1, 2])
+[#attempt]${obj.oneArg2(null)} == ?[#recover]no such method[/#attempt] == no such method (should be ambiguous)
+
+[#attempt]${obj.oneArg3(null)} == ?[#recover]no such method[/#attempt] == no such method (should be oneArg3<List>(null))
+
+${obj.notOverloaded(ls)} == notOverloaded<List>([1, 2])
+${obj.notOverloaded(null)} == notOverloaded<List>(null)
+
+${obj.varargsIssue1(m, [])} == varargsIssue1<Map, List>({"a": 1, "b": 2}, []) 
+${obj.varargsIssue1(m, null)} == varargsIssue1<Object...>({"a": 1, "b": 2}, null) (should be varargsIssue1<Map, List>)
+
+${obj.varargsIssue2("s", m)} == varargsIssue2<String, Map>("s", {"a": 1, "b": 2})
+${obj.varargsIssue2("s", ls)} == varargsIssue2<String, List>("s", [1, 2])
+${obj.varargsIssue2("s", null)} == varargsIssue2<Object...>("s", null) (should be an error?)
+
+${obj.numberIssue1(1)} == numberIssue1<int>(1)
+${obj.numberIssue1(0.5)} == numberIssue1<int>(0) (should be numberIssue1<float>(0.5))
+${obj.numberIssue1(0.5?float)} == numberIssue1<float>(0.5)
+[#attempt]${obj.numberIssue1(0.5?double)}[#recover]no such method[/#attempt] == no such method
+[#attempt]${obj.numberIssue1(null)}[#recover]not possible[/#attempt] == not possible
+
+[#attempt]${obj.numberIssue2(1)}[#recover]ambiguous[/#attempt] == ambiguous
+[#attempt]${obj.numberIssue2(0.5)}[#recover]ambiguous[/#attempt] == ambiguous (should be numberIssue2<BigDecimal>(0.5))
+[#attempt]${obj.numberIssue2(null)}[#recover]no such method[/#attempt] == no such method (should be numberIssue2<BigDecimal>(null))
+
+${obj.numberIssue3(0.5)} == numberIssue3<int>(0) (should be numberIssue1<double>(0.5))
+${obj.numberIssue3(0.5?double)} == numberIssue3<double>(0.5)
+${obj.numberIssue3(0.5?float)} == numberIssue3<double>(0.5)

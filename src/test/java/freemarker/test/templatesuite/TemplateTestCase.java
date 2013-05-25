@@ -362,7 +362,7 @@ public class TemplateTestCase extends TestCase {
           dataModel.put("m", new VarArgTestModel());
         }
         
-        else if (testName.equals("method-overloading")) {
+        else if (testName.startsWith("overloaded-methods")) {
           dataModel.put("obj", new OverloadedMethods());
         }
     }

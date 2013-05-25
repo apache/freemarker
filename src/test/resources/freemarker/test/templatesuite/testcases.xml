@@ -157,4 +157,5 @@
    <testcase name="iso8601" />
    <testcase name="number-to-date" />
    <testcase name="varargs" />
+   <testcase name="overloaded-methods-23bc" />
 </testcases>
