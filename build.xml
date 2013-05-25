@@ -999,5 +999,24 @@ Proceed? </input>
     </ivy:publish>
     <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
   </target>
-  
+
+  <target name="archive" depends=""
+    description='Archives project with Git repo into the "archive" directory.'
+  >
+    <mkdir dir="archive" />
+    <tstamp>
+      <format property="tstamp" pattern="yyyyMMdd-HHmm" />
+    </tstamp>
+    <delete file="archive/freemarker-git-${tstamp}.tar" />
+    <delete file="archive/freemarker-git-${tstamp}.tar.bz2" />
+    <tar tarfile="archive/freemarker-git-${tstamp}.tar"
+      basedir="."
+      longfile="gnu"
+      excludes="build/** .build/** .bin/** .ivy/**  archive/**"
+    />
+    <bzip2 src="archive/freemarker-git-${tstamp}.tar"
+        zipfile="archive/freemarker-git-${tstamp}.tar.bz2" />
+    <delete file="archive/freemarker-git-${tstamp}.tar" />
+  </target>
+
 </project>
