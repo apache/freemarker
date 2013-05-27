@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -107,6 +108,8 @@ import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.VarArgTestModel;
+import freemarker.test.utility.AssertEqualsDirective;
+import freemarker.test.utility.AssertFailsDirective;
 
 
 public class TemplateTestCase extends TestCase {
@@ -185,6 +188,9 @@ public class TemplateTestCase extends TestCase {
      */
     
     public void setUp() throws Exception {
+        dataModel.put("assertEquals", new AssertEqualsDirective());
+        dataModel.put("assertFails", new AssertFailsDirective());
+        
         dataModel.put("message", "Hello, world!");
         
         if (testName.equals("bean-maps")) {
@@ -341,6 +347,12 @@ public class TemplateTestCase extends TestCase {
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
+            
+            List listWithNull = new ArrayList();
+            listWithNull.add("a");
+            listWithNull.add(null);
+            listWithNull.add("c");
+            dataModel.put("listWithNull", listWithNull);
         }
         
         else if (testName.equals("iso8601")) {
@@ -362,7 +374,7 @@ public class TemplateTestCase extends TestCase {
           dataModel.put("m", new VarArgTestModel());
         }
         
-        else if (testName.startsWith("overloaded-methods")) {
+        else if (testName.startsWith("overloaded-methods-")) {
           dataModel.put("obj", new OverloadedMethods());
         }
     }
