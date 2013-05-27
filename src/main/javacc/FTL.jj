@@ -134,8 +134,11 @@ public class FMParser {
   }
   
   private String getErrorStart(Token t) {
-      return "Error in template: " + template.getName()
-            + "\non line " + t.beginLine + ", column " + t.beginColumn;
+      return getErrorStart(t.beginLine, t.beginColumn, template != null ? template.getName() : null);
+  }
+
+  static String getErrorStart(int beginLine, int beginColumn, String templateName) {
+      return "Error " + MessageUtil.formatLocationForSimpleParsingError(templateName, beginLine, beginColumn);
   }
 
   /**
@@ -144,10 +147,9 @@ public class FMParser {
    */
   private void notStringLiteral(Expression exp, String expected) throws ParseException {
       if (exp instanceof StringLiteral) {
-         String msg = "Error " + exp.getStartLocation()
-                     + "\nFound string literal: " + exp
-                     + "\nExpecting: " + expected;
-         throw new ParseException(msg, exp);
+         throw new ParseException(
+                     "Found string literal: " + exp + "\nExpecting: " + expected,
+                     exp);
       }
   }
 
@@ -157,10 +159,9 @@ public class FMParser {
    */
   private void notNumberLiteral(Expression exp, String expected) throws ParseException {
       if (exp instanceof NumberLiteral) {
-         String msg = "Error " + exp.getStartLocation()
-                     + "\nFound number literal: " + exp.getCanonicalForm()
-                     + "\nExpecting " + expected;
-         throw new ParseException(msg, exp);
+         throw new ParseException(
+                     "Found number literal: " + exp.getCanonicalForm() + "\nExpecting " + expected,
+                     exp);
       }
   }
 
@@ -170,10 +171,7 @@ public class FMParser {
    */
   private void notBooleanLiteral(Expression exp, String expected) throws ParseException {
       if (exp instanceof BooleanLiteral) {
-         String msg = "Error " + exp.getStartLocation()
-                     + "\nFound: " + exp.getCanonicalForm()
-                     + "\nExpecting " + expected;
-         throw new ParseException(msg, exp);
+         throw new ParseException("Found: " + exp.getCanonicalForm() + "\nExpecting " + expected, exp);
       }
   }
 
@@ -183,10 +181,9 @@ public class FMParser {
    */
   private void notHashLiteral(Expression exp, String expected) throws ParseException {
         if (exp instanceof HashLiteral) {
-         String msg = "Error " + exp.getStartLocation()
-                     + "\nFound hash literal: " + exp.getCanonicalForm()
-                     + "\nExpecting " + expected;
-         throw new ParseException(msg, exp);
+         throw new ParseException(
+                     "Found hash literal: " + exp.getCanonicalForm() + "\nExpecting " + expected,
+                     exp);
       }
   }
 
@@ -199,10 +196,9 @@ public class FMParser {
       throws ParseException
   {
         if (exp instanceof ListLiteral) {
-         String msg = "Error " + exp.getStartLocation()
-                     + "\nFound list literal: " + exp.getCanonicalForm()
-                     + "\nExpecting " + expected;
-         throw new ParseException(msg, exp);
+         throw new ParseException(
+         	    "Found list literal: " + exp.getCanonicalForm() + "\nExpecting " + expected,
+                exp);
       }
   }
   /**
@@ -221,10 +217,10 @@ public class FMParser {
    * not a string.
    */
   private void stringLiteralOnly(Expression exp) throws ParseException {
-      notNumberLiteral(exp, "number");
-      notListLiteral(exp, "number");
-      notHashLiteral(exp, "number");
-      notBooleanLiteral(exp, "number");
+      notNumberLiteral(exp, "string");
+      notListLiteral(exp, "string");
+      notHashLiteral(exp, "string");
+      notBooleanLiteral(exp, "string");
   }
 
   /**
@@ -252,8 +248,8 @@ public class FMParser {
       } catch (Exception e) {
          throw new ParseException(e.getMessage() 
                                   + "\nCould not evaluate expression: "
-                                  + exp.getCanonicalForm()
-                                  + exp.getStartLocation(), exp);
+                                  + exp.getCanonicalForm(),
+                                  exp);
       }
       if (tm instanceof TemplateBooleanModel) {
           try {
@@ -266,11 +262,11 @@ public class FMParser {
               return StringUtil.getYesNo(((TemplateScalarModel) tm).getAsString());
           } catch (Exception e) {
               throw new ParseException(e.getMessage()
-                                       + "\nExpecting yes/no, found: " + exp.getCanonicalForm()
-                                       + exp.getStartLocation(), exp);
+                                       + "\nExpecting boolean (true/false), found: " + exp.getCanonicalForm(),
+                                       exp);
           }
       }
-      throw new ParseException("Expecting boolean (yes/no) parameter" + exp.getStartLocation(), exp);
+      throw new ParseException("Expecting boolean (true/false) parameter", exp);
   }
 }
 
@@ -618,12 +614,8 @@ TOKEN:
 			    String s = matchedToken.image;
 			    int index = s.indexOf('#');
 			    s = s.substring(index);
-			    String msg = "Unknown directive: " 
-			    + s
-			    + " on line: " + matchedToken.beginLine
-			    + ", column: " + matchedToken.beginColumn +1
-			    + ", in template: " + templateName;
-			    throw new TokenMgrError(msg, TokenMgrError.LEXICAL_ERROR);
+			    throw new TokenMgrError(
+			      		"Unknown directive: " + s, TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
 			}
         }
     }
@@ -1478,9 +1470,7 @@ Expression DotVariable(Expression exp) :
         )
         {
             if (!Character.isLetter(t.image.charAt(0))) {
-                String msg = getErrorStart(t)
-                            + "\n" + t.image + " is not a valid identifier.";
-                throw new ParseException(msg, t.beginLine, t.beginColumn);
+                throw new ParseException(t.image + " is not a valid identifier.", template, t);
             }
         }
      )
@@ -1679,15 +1669,15 @@ NumericalOutput NumericalOutput() :
                 if (type != '-') {
                     switch (type) {
                     case 'm':
-                       if (minFrac != -1) throw new ParseException("invalid formatting string", fmt.beginLine, fmt.beginColumn);
+                       if (minFrac != -1) throw new ParseException("Invalid formatting string", template, fmt);
                        minFrac = Integer.parseInt(token);
                        break;
                     case 'M':
-                       if (maxFrac != -1) throw new ParseException("invalid formatting string", fmt.beginLine, fmt.beginColumn);
+                       if (maxFrac != -1) throw new ParseException("Invalid formatting string", template, fmt);
                        maxFrac = Integer.parseInt(token);
                        break;
                     default:
-                       throw new ParseException();
+                       throw new ParseException("Invalid formatting string", template, fmt);
                     }
                     type = '-';
                 } else if (token.equals("m")) {
@@ -1699,38 +1689,26 @@ NumericalOutput NumericalOutput() :
                 }
              }
              catch (ParseException e) {
-                String msg = getErrorStart(fmt)
-                      + "\nInvalid format specifier "
-                      + fmt.image;
-                throw new ParseException(msg, fmt.beginLine, fmt.beginColumn);
+                throw new ParseException("Invalid format specifier " + fmt.image, template, fmt);
              }
              catch (NumberFormatException e) {
-                String msg = getErrorStart(fmt)
-                      + "\nInvalid number in the format specifier "
-                      + fmt.image;
-                throw new ParseException(msg, fmt.beginLine, fmt.beginColumn);
+                throw new ParseException("Invalid number in the format specifier " + fmt.image, template, fmt);
              }
          }
 
          if (maxFrac == -1) {
             if (minFrac == -1) {
-               String msg = getErrorStart(fmt)
-                     + "\nInvalid format specification, at least one of m and M must be specified!";
-               throw new ParseException(msg, fmt.beginLine, fmt.beginColumn);
+               throw new ParseException("Invalid format specification, at least one of m and M must be specified!", template, fmt);
             }
             maxFrac = minFrac;
          } else if (minFrac == -1) {
             minFrac = 0;
          }
          if (minFrac > maxFrac) {
-            String msg = getErrorStart(fmt)
-                  + "\nInvalid format specification, min cannot be greater than max!";
-            throw new ParseException(msg, fmt.beginLine, fmt.beginColumn);
+            throw new ParseException("Invalid format specification, min cannot be greater than max!", template, fmt);
          }
          if (minFrac > 50 || maxFrac > 50) {// sanity check
-               String msg = getErrorStart(fmt)
-               + "\nCannot specify more than 50 fraction digits";
-             throw new ParseException(msg, fmt.beginLine, fmt.beginColumn);
+             throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
          }
          result = new NumericalOutput(exp, minFrac, maxFrac);
       } else {  // if format != null
@@ -1929,11 +1907,7 @@ FallbackInstruction FallBack() :
    tok=<FALLBACK>
    {
       if (!inMacro) {
-          throw new ParseException(getErrorStart(tok)
-	                           + "\nCannot fall back "
-				   + " outside a macro.",
-                                   tok.beginLine, tok.beginColumn);
-      
+          throw new ParseException("Cannot fall back outside a macro.", template, tok);
       }
       FallbackInstruction result = new FallbackInstruction();
       result.setLocation(template, tok, tok);
@@ -1953,10 +1927,7 @@ BreakInstruction Break() :
     {
        if (loopNesting < 1 && switchNesting <1)
        {
-          String msg = getErrorStart(start) + "\n"
-                       + start.image
-                       + " occurred outside a loop or a switch block.";
-          throw new ParseException(msg, start.beginLine, start.beginColumn);
+          throw new ParseException(start.image + " occurred outside a loop or a switch block.", template, start);
        }
        BreakInstruction result = new BreakInstruction();
        result.setLocation(template, start, start);
@@ -1982,23 +1953,17 @@ ReturnInstruction Return() :
    {
       if (inMacro) {
          if (exp != null) {
-            String msg = getErrorStart(start) 
-                         + "\nA macro cannot return a value";
-            throw new ParseException(msg, start.beginLine, start.beginColumn);
+            throw new ParseException("A macro cannot return a value", template, start);
          }
       }
       else if (inFunction) {
          if (exp == null) {
-            String msg = getErrorStart(start) 
-                         + "\nA function must return a value";
-            throw new ParseException(msg, start.beginLine, start.beginColumn);
+            throw new ParseException("A function must return a value", template, start);
          }
       }
       else {
          if (exp == null) {
-            String msg = getErrorStart(start) 
-                         + "\nA return instruction can only occur inside a macro of function";
-            throw new ParseException(msg, start.beginLine, start.beginColumn);
+            throw new ParseException("A return instruction can only occur inside a macro or function", template, start);
          }
       }
       ReturnInstruction result = new ReturnInstruction(exp);
@@ -2053,11 +2018,7 @@ TemplateElement Nested() :
    )
    {
        if (!inMacro) {
-          throw new ParseException(getErrorStart(t)
-	                           + "\nCannot use a "
-				   + t.image
-				   + " instruction outside a macro.",
-                                   t.beginLine, t.beginColumn);
+          throw new ParseException("Cannot use a " + t.image + " instruction outside a macro.", template, t);
        }
        return result;
    }
@@ -2119,9 +2080,7 @@ TemplateElement Assign() :
       {
           scope = Assignment.LOCAL;
           if (!inMacro && !inFunction) {
-             String msg = getErrorStart(start)
-                          + "\nLocal variable assigned outside a macro.";
-             throw new ParseException(msg, start.beginLine, start.beginColumn);
+             throw new ParseException("Local variable assigned outside a macro.", template, start);
           }
       }
     )
@@ -2154,7 +2113,9 @@ TemplateElement Assign() :
        )*
        [
           id=<IN>
-          nsExp=Expression() {if (scope != Assignment.NAMESPACE) throw new ParseException(getErrorStart(id) + "\nCannot assign to namespace here.", id.beginLine, id.beginColumn);}
+          nsExp=Expression() {
+             if (scope != Assignment.NAMESPACE) throw new ParseException("Cannot assign to namespace here.", template, id);
+          }
        ]
        end=LooseDirectiveEnd()
        {
@@ -2171,16 +2132,18 @@ TemplateElement Assign() :
     (
        [
           id=<IN>
-          nsExp=Expression() {if (scope != Assignment.NAMESPACE) throw new ParseException(getErrorStart(id) + "\nCannot assign to namespace here.", id.beginLine, id.beginColumn);}
+          nsExp=Expression() {
+             if (scope != Assignment.NAMESPACE) throw new ParseException("Cannot assign to namespace here.", template, id);
+          }
        ]
        <DIRECTIVE_END>
        block=OptionalBlock()
        (
-          end=<END_LOCAL> {if (scope != Assignment.LOCAL) throw new ParseException(getErrorStart(end) + "\nMismatched assignment tags.", end.beginLine, end.beginColumn);}
+          end=<END_LOCAL> {if (scope != Assignment.LOCAL) throw new ParseException("Mismatched assignment tags.", template, end);}
           |
-          end=<END_ASSIGN> {if (scope != Assignment.NAMESPACE) throw new ParseException(getErrorStart(end) + "\nMismatched assignment tags.", end.beginLine, end.beginColumn);}
+          end=<END_ASSIGN> {if (scope != Assignment.NAMESPACE) throw new ParseException("Mismatched assignment tags.", template, end);}
           |
-          end=<END_GLOBAL> {if (scope != Assignment.GLOBAL) throw new ParseException(getErrorStart(end) + "\nMismatched assignment tags", end.beginLine, end.beginColumn);}
+          end=<END_GLOBAL> {if (scope != Assignment.GLOBAL) throw new ParseException("Mismatched assignment tags", template, end);}
        )
        {
           BlockAssignment ba = new BlockAssignment(block, varName, scope, nsExp);
@@ -2213,9 +2176,7 @@ Include Include() :
 	        encodingExp = exp;
 	     }
 	     else {
-	         String msg = getErrorStart(att)
-	               + "\nexpecting parse= or encoding= to be specified.";
-	         throw new ParseException(msg, att.beginLine, att.beginColumn);
+	         throw new ParseException("Expecting parse= or encoding= to be specified.", template, att);
 	     }
 	  }
 	)*
@@ -2268,8 +2229,7 @@ Macro Macro() :
     )
     {
        if (inMacro || inFunction) {
-         throw new ParseException(getErrorStart(start)
-                     + "\nMacros cannot be nested.", start.beginLine, start.endLine);
+         throw new ParseException("Macros cannot be nested.", template, start);
        }
        if (isFunction) inFunction = true; else inMacro = true;
     }
@@ -2292,24 +2252,24 @@ Macro Macro() :
           [<COMMA>]
 	  {
           if (catchAll != null) {
-              throw new ParseException(getErrorStart(arg)
-                + "\nThere may only be one \"catch-all\" parameter in a macro declaration, "
-                + "and it must be the last parameter.", arg.beginLine, arg.endLine);
+              throw new ParseException(
+                "There may only be one \"catch-all\" parameter in a macro declaration, and it must be the last parameter.",
+                template, arg);
           }
           if (isCatchAll) {
               if (defValue != null) {
-                  throw new ParseException(getErrorStart(arg)
-                    + "\n\"Catch-all\" macro parameter may not have a default value.",
-                    arg.beginLine, arg.endLine);
+                  throw new ParseException(
+                    "\"Catch-all\" macro parameter may not have a default value.",
+                    template, arg);
               }
               catchAll = arg.image;
           } else {
               argNames.add(arg.image);
               if (hasDefaults && defValue == null) {
-                  throw new ParseException(getErrorStart(arg)
-                    + "\nIn a macro declaration, parameters without a default value "
+                  throw new ParseException(
+                    "In a macro declaration, parameters without a default value "
                     + "must all occur before the parameters with default values.",
-                    arg.beginLine, arg.endLine);
+                    template, arg);
               }
               args.put(arg.image, defValue);
           }
@@ -2319,9 +2279,9 @@ Macro Macro() :
     <DIRECTIVE_END>
     block=OptionalBlock()
     (
-        end=<END_MACRO> { if(isFunction) throw new ParseException(getErrorStart(start) + "\nExpected function end tag here.", start.beginLine, start.endLine); }
+        end=<END_MACRO> { if(isFunction) throw new ParseException("Expected function end tag here.", template, start); }
         |
-        end=<END_FUNCTION> { if(!isFunction) throw new ParseException(getErrorStart(start) + "\nExpected macro end tag here.", start.beginLine, start.endLine); }
+        end=<END_FUNCTION> { if(!isFunction) throw new ParseException("Expected macro end tag here.", template, start); }
     )
     {
        inMacro = inFunction = false;
@@ -2396,12 +2356,11 @@ TemplateElement UnifiedMacroTransform() :
 	   String s = end.image.substring(3);
 	   s = s.substring(0, s.length() -1).trim();
 	   if (s.length() >0 && !s.equals(directiveName)) {
-              String msg = getErrorStart(end);
 	      if (directiveName == null) {
-                    throw new ParseException(msg + "\nExpecting </@>", end.beginLine, end.beginColumn);
+                    throw new ParseException("Expecting </@>", template, end);
 	      }
 	      else {
-	          throw new ParseException(msg + "\nExpecting </@> or </@" + directiveName + ">", end.beginLine, end.beginColumn);
+	          throw new ParseException("Expecting </@> or </@" + directiveName + ">", template, end);
 	      }
 	   }
 	}
@@ -2586,9 +2545,7 @@ SwitchBlock Switch() :
      {
         if (caseIns.isDefault) {
 	   if (defaultFound) {
-                String msg = getErrorStart(start)
-                            + "\nYou can only have one default case in a switch statement";
-                throw new ParseException(msg, start.beginLine, start.beginColumn);
+                throw new ParseException("You can only have one default case in a switch statement", template, start);
 	   }
 	   defaultFound = true;
 	}
@@ -2663,9 +2620,7 @@ NoEscapeBlock NoEscape() :
     start=<NOESCAPE>
     {
         if(escapes.isEmpty()) {
-                String msg = getErrorStart(start)
-                                  + "\nnoescape with no matching escape encountered.";
-            throw new ParseException(msg, start.beginLine, start.beginColumn);
+            throw new ParseException("noescape with no matching escape encountered.", template, start);
         }
         Object escape = escapes.removeFirst();
     }
@@ -2952,9 +2907,9 @@ void HeaderElement() :
              } catch (Exception e) {
                 throw new ParseException("Could not evaluate expression: " 
                                          + exp.getCanonicalForm() + " " 
-                                         + exp.getStartLocation()
                                          + "\nUnderlying cause: " + 
-                                         e.getMessage(), exp);
+                                         e.getMessage(),
+                                         exp);
              }
 	     String vs = null;
              if (value instanceof TemplateScalarModel) {
@@ -2965,8 +2920,7 @@ void HeaderElement() :
              if (template != null) {
                  if (ks.equalsIgnoreCase("encoding")) {
                      if (vs == null) {
-                        throw new ParseException("expecting encoding string here: " 
-                                                 + exp.getStartLocation(), exp);
+                        throw new ParseException("Expecting an encoding string.", exp);
                      }
                      String encoding = template.getEncoding();
                      if (encoding != null && !encoding.equals(vs)) {
@@ -2984,7 +2938,7 @@ void HeaderElement() :
                  }
                  else if (ks.equalsIgnoreCase("ns_prefixes")) {
                      if (!(value instanceof TemplateHashModelEx)) {
-                         throw new ParseException("Expecting a hash of prefixes to namespace URI's here. " + exp.getStartLocation(), exp);
+                         throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);
                      }
                      TemplateHashModelEx prefixMap = (TemplateHashModelEx) value;
                      try {
@@ -2993,13 +2947,13 @@ void HeaderElement() :
                              String prefix = ((TemplateScalarModel) it.next()).getAsString();
                              TemplateModel valueModel = prefixMap.get(prefix);
                              if (!(valueModel instanceof TemplateScalarModel)) {
-                                 throw new ParseException("Non-string value in prefix to namespace hash. " + exp.getStartLocation(), exp);
+                                 throw new ParseException("Non-string value in prefix to namespace hash.", exp);
                              }
                              String nsURI = ((TemplateScalarModel) valueModel).getAsString();
                              try {
                                  template.addPrefixNSMapping(prefix, nsURI);
                              } catch (IllegalArgumentException iae) {
-                                 throw new ParseException(iae.getMessage() + " " + exp.getStartLocation(), exp);
+                                 throw new ParseException(iae.getMessage(), exp);
                              }
                          }
                      } catch (TemplateModelException tme) {
@@ -3007,7 +2961,7 @@ void HeaderElement() :
                  }
                  else if (ks.equalsIgnoreCase("attributes")) {
                      if (!(value instanceof TemplateHashModelEx)) {
-                         throw new ParseException("Expecting a hash of attribute names to values here. " + exp.getStartLocation(), exp);
+                         throw new ParseException("Expecting a hash of attribute names to values.", exp);
                      }
                      TemplateHashModelEx attributeMap = (TemplateHashModelEx) value;
                      try {
@@ -3022,7 +2976,7 @@ void HeaderElement() :
                  }
                  else {
                      throw new ParseException("Unknown FTL header parameter: " + key.image,
-                                               key.beginLine, key.beginColumn);
+                                               template, key);
                  }
              }
           }

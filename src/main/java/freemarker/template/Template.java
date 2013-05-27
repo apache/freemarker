@@ -169,7 +169,13 @@ public class Template extends Configurable {
                 this.rootElement = parser.Root();
             }
             catch (TokenMgrError exc) {
-                throw new ParseException("Token manager error: " + exc, 0, 0);
+                // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
+                // to ParseException
+                throw new ParseException(exc.getDetail(),
+                        this,
+                        exc.getLineNumber() != null ? exc.getLineNumber().intValue() : 0,
+                        exc.getColumnNumber() != null ? exc.getColumnNumber().intValue() : 0,
+                        exc);
             }
         }
         catch(ParseException e) {

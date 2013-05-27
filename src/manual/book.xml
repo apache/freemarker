@@ -20138,8 +20138,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Error messages become more helpful at many places,
+              <para>Error messages become more helpful at some places,
               especially for those new to FreeMarker.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed bug where <literal>ParseException</literal> has
+              contained 0 as line and column number for lexical errors. This
+              was a problem for IDE-s which had to extract the location from
+              the error message when this problem has occurred. Note that
+              parsing error message format was slightly changed (and made
+              consistent among parsing errors).</para>
             </listitem>
 
             <listitem>

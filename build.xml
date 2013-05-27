@@ -178,6 +178,10 @@
       file="${_javaccOutputDir}/ParseException.java"
       tofile="${_javaccOutputDir}/ParseException.java.ignore"
     />
+    <move 
+      file="${_javaccOutputDir}/TokenMgrError.java"
+      tofile="${_javaccOutputDir}/TokenMgrError.java.ignore"
+    />
   </target>
    
   <target name="compile" depends="javacc">

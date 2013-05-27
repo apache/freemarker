@@ -126,9 +126,9 @@ public abstract class TemplateObject {
                 "The following has evaluated to null or missing " + exp.getStartLocation() + ":\n" + exp
                 + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
                 + " with myOptionalVar!myDefault, or use "
-                + EvaluationUtil.encloseAsTag(exp, "#if myOptionalVar??", false) + "when-present"
-                + EvaluationUtil.encloseAsTag(exp, "#else", false) + "when-missing"
-                + EvaluationUtil.encloseAsTag(exp, "#if", true) + ".)",
+                + MessageUtil.encloseAsTag(exp, "#if myOptionalVar??", false) + "when-present"
+                + MessageUtil.encloseAsTag(exp, "#else", false) + "when-missing"
+                + MessageUtil.encloseAsTag(exp, "#if", true) + ".)",
                 env);
         }
     }
@@ -147,7 +147,7 @@ public abstract class TemplateObject {
         assertNonNull(model, exp, env);
         return new TemplateException(
             "Expected " + expected + " value, but the following evaluated instead to " 
-            + EvaluationUtil.getTypeDescriptionForDebugging(model) + " "
+            + MessageUtil.getFTLTypeName(model) + " "
             + exp.getStartLocation()
             + ":\n" + exp
             + (hint == null ? "" : "\n(Hint: " + hint + ")"),
@@ -159,57 +159,27 @@ public abstract class TemplateObject {
      * where in the template source, this object is.
      */
     public String getStartLocation() {
-        String templateName = template != null
-                ? "template " + StringUtil.jQuote(template.getName())
-                : "nameless template";
-        return "on line " 
-              + beginLine 
-              + ", column " 
-              + beginColumn
-              + " in "
-              + templateName;
+        return MessageUtil.formatLocationForEvaluationError(template, beginLine, beginColumn);
     }
 
     /**
-     * Same as {@link #getStartLocation}, but quotes the template name with
-     * {@link StringUtil#jQuoteNoXSS(String)}. If the template name is unknown,
-     * it uses <code>"input"</code> as the template name without quotation
-     * marks.  
+     * As of 2.3.20. the same as {@link #getStartLocation}. Meant to be used where there's a risk of XSS
+     * when viewing error messages.
      */
     public String getStartLocationQuoted() {
-        String templateName = template != null ? StringUtil.jQuoteNoXSS(template.getName()) : "input";
-        return "on line " 
-              + beginLine 
-              + ", column " 
-              + beginColumn
-              + " in "
-              + templateName;
+        return getStartLocation();
     }
 
     public String getEndLocation() {
-        String templateName = template != null ? template.getName() : "input";
-        return "on line " 
-              + endLine
-              + ", column "
-              + endColumn
-              + " in "
-              + templateName;
+        return MessageUtil.formatLocationForEvaluationError(template, endLine, endColumn);
     }
 
     /**
-     * Same as {@link #getStartLocation}, but quotes the template name with
-     * {@link StringUtil#jQuoteNoXSS(String)}. If the template name is unknown,
-     * it uses <code>"input"</code> as the template name without quotation
-     * marks.  
+     * As of 2.3.20. the same as {@link #getEndLocation}. Meant to be used where there's a risk of XSS
+     * when viewing error messages.
      */
     public String getEndLocationQuoted() {
-        String templateName = template != null ? StringUtil.jQuoteNoXSS(template.getName()) : "input";
-        return "on line " 
-              + endLine
-              + ", column "
-              + endColumn
-              + " in "
-              + templateName;
+        return getEndLocation();
     }
     
     public final String getSource() {

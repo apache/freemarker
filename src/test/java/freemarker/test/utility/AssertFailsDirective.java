@@ -3,7 +3,6 @@ package freemarker.test.utility;
 import java.io.IOException;
 import java.util.Map;
 
-import junit.framework.AssertionFailedError;
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;

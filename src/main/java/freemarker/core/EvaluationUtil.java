@@ -54,7 +54,6 @@ package freemarker.core;
 
 import java.util.Date;
 
-import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
@@ -62,6 +61,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Internally used static utilities for evaluation expressions.
@@ -354,8 +354,8 @@ class EvaluationUtil
             }
             throw new TemplateException(
                     "The only legal comparisons are between two numbers, two strings, or two dates/times.\n"
-                    + "Left hand operand is a(n) " + getTypeDescriptionForDebugging(leftValue) + ".\n"
-                    + "Right hand operand is a(n) " + getTypeDescriptionForDebugging(rightValue) + ".\n",
+                    + "Left hand operand is a(n) " + MessageUtil.getFTLTypeName(leftValue) + ".\n"
+                    + "Right hand operand is a(n) " + MessageUtil.getFTLTypeName(rightValue) + ".\n",
                     env);
         }
 
@@ -384,28 +384,6 @@ class EvaluationUtil
                 default: return "???";
             }
         }
-    }
-    
-    /**
-     * Returns the type description as it should be used in type-related error messages.
-     * TODO: When this is complete and proven, move it to Environment. 
-     */
-    static String getTypeDescriptionForDebugging(TemplateModel tm) {
-        if (tm == null) {
-            return "Null";
-        } else {
-            //TODO: This is not understandable for users:
-            return tm.getClass().getName();
-        }
-    }
-
-    static String encloseAsTag(Expression exp, String tagContent, boolean closeTag) {
-        return encloseAsTag(exp != null ? exp.getTemplate() : null, tagContent, closeTag);
-    }
-    
-    static String encloseAsTag(Template t, String tagContent, boolean closeTag) {
-        // TODO: detect the tag syntax of the template
-        return (closeTag ? "</" : "<") + tagContent + ">";
     }
     
 }
