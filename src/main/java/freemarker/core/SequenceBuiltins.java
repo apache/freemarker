@@ -509,7 +509,7 @@ abstract class SequenceBuiltins {
                 TemplateModel arg = (TemplateModel) args.get(0);
                 int size = m_seq.size();
                 for (int i = 0; i < size; i++) {
-                    if (modelsEqual(m_seq.get(i), arg, m_env))
+                    if (modelsEqual(i, m_seq.get(i), arg, m_env))
                         return TemplateBooleanModel.TRUE;
                 }
                 return TemplateBooleanModel.FALSE;
@@ -532,9 +532,11 @@ abstract class SequenceBuiltins {
                     throw new TemplateModelException("?seq_contains(...) expects one argument.");
                 TemplateModel arg = (TemplateModel) args.get(0);
                 TemplateModelIterator it = m_coll.iterator();
+                int idx = 0;
                 while (it.hasNext()) {
-                    if (modelsEqual(it.next(), arg, m_env))
+                    if (modelsEqual(idx, it.next(), arg, m_env))
                         return TemplateBooleanModel.TRUE;
+                    idx++;
                 }
                 return TemplateBooleanModel.FALSE;
             }
@@ -666,11 +668,11 @@ abstract class SequenceBuiltins {
                     throws TemplateModelException {
                 if (m_dir == 1) {
                     for (int i = scanStartIndex; i < seqSize; i++) {
-                        if (modelsEqual(m_seq.get(i), target, m_env)) return i;
+                        if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
                     }
                 } else {
                     for (int i = scanStartIndex; i >= 0; i--) {
-                        if (modelsEqual(m_seq.get(i), target, m_env)) return i;
+                        if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
                     }
                 }
                 return -1;
@@ -703,7 +705,7 @@ abstract class SequenceBuiltins {
                     
                     TemplateModel current = it.next();
                     if (idx >= allowedRangeStart) {
-                        if (modelsEqual(current, target, m_env)) {
+                        if (modelsEqual(idx, current, target, m_env)) {
                             foundAtIdx = idx;
                             if (m_dir == 1) break searchItem; // "find first"
                             // Otherwise it's "find last".
@@ -818,65 +820,23 @@ abstract class SequenceBuiltins {
      * WARNING! This algorithm is duplication of ComparisonExpression.isTrue(...).
      * Thus, if you update this method, then you have to update that too!
      */
-    public static boolean modelsEqual(TemplateModel model1, TemplateModel model2,
-                                Environment env)
+    public static boolean modelsEqual(
+            int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
+            Environment env)
             throws TemplateModelException {
-        if (env.isClassicCompatible()) {
-            if (model1 == null) {
-                model1 = TemplateScalarModel.EMPTY_STRING;
-            }
-            if (model2 == null) {
-                model2 = TemplateScalarModel.EMPTY_STRING;
-            }
+        try {
+            return EvaluationUtil.compare(
+                    seqItem, null,
+                    EvaluationUtil.CMP_OP_EQUALS, null,
+                    searchedItem, null,
+                    true, true, true, // The last one is true to emulate an old bug for BC 
+                    env);
+        } catch (TemplateException ex) {
+            throw new TemplateModelException(
+                    "Error when comparing sequence item at index " + seqItemIndex + " to the searched item: "
+                    + ex.getMessage(),
+                    ex);
         }
-
-        int comp = -1;
-        if(model1 instanceof TemplateNumberModel && model2 instanceof TemplateNumberModel) {
-            Number first = ((TemplateNumberModel) model1).getAsNumber();
-            Number second = ((TemplateNumberModel) model2).getAsNumber();
-            ArithmeticEngine ae = env.getArithmeticEngine();
-            try {
-                comp = ae.compareNumbers(first, second);
-            } catch (TemplateException ex) {
-                throw new TemplateModelException(ex);
-            }
-        }
-        else if(model1 instanceof TemplateDateModel && model2 instanceof TemplateDateModel) {
-            TemplateDateModel ltdm = (TemplateDateModel)model1;
-            TemplateDateModel rtdm = (TemplateDateModel)model2;
-            int ltype = ltdm.getDateType();
-            int rtype = rtdm.getDateType();
-            if(ltype != rtype) {
-                throw new TemplateModelException(
-                    "Can not compare dates of different type. Left date is of "
-                    + TemplateDateModel.TYPE_NAMES.get(ltype)
-                    + " type, right date is of "
-                    + TemplateDateModel.TYPE_NAMES.get(rtype) + " type.");
-            }
-            if(ltype == TemplateDateModel.UNKNOWN) {
-                throw new TemplateModelException(
-                    "Left date is of UNKNOWN type, and can not be compared.");
-            }
-            if(rtype == TemplateDateModel.UNKNOWN) {
-                throw new TemplateModelException(
-                    "Right date is of UNKNOWN type, and can not be compared.");
-            }
-            Date first = ltdm.getAsDate();
-            Date second = rtdm.getAsDate();
-            comp = first.compareTo(second);
-        }
-        else if(model1 instanceof TemplateScalarModel && model2 instanceof TemplateScalarModel) {
-            String first = ((TemplateScalarModel) model1).getAsString();
-            String second = ((TemplateScalarModel) model2).getAsString();
-            comp = env.getCollator().compare(first, second);
-        }
-        else if(model1 instanceof TemplateBooleanModel && model2 instanceof TemplateBooleanModel) {
-            boolean first = ((TemplateBooleanModel)model1).getAsBoolean();
-            boolean second = ((TemplateBooleanModel)model2).getAsBoolean();
-            comp = (first ? 1 : 0) - (second ? 1 : 0);
-        }
-
-        return (comp == 0);
     }
     
 }

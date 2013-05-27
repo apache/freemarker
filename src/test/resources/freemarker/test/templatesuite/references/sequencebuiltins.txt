@@ -242,6 +242,22 @@ seq_last_index_of "c":
 2 = 2
 2 = 2
 
+Sequence builtins ignoring nulls
+--------------------------------
+
+true = true
+2 = 2
+0 = 0
+
+These should throw exception, but for BC they don't:
+false = false
+-1 = -1
+-1 = -1
+
+Sequence built-ins failing on date-type mismatch
+------------------------------------------------
+
+
 Chunk
 -----
 

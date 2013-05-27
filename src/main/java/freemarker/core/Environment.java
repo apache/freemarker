@@ -749,6 +749,56 @@ public final class Environment extends Configurable {
         }
         return collator;
     }
+    
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator.
+     */
+    public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_EQUALS, rightValue, this);
+    }
+
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator, except that if the two types
+     *     are incompatible, they are treated as non-equal instead of throwing an exception. Comparing dates of
+     *     different types (date-only VS time-only VS date-time) will still throw an exception, however.
+     */
+    public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvaluationUtil.compareLenient(leftValue, EvaluationUtil.CMP_OP_EQUALS, rightValue, this);
+    }
+    
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     */
+    public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_LESS_THAN, rightValue, this);
+    }
+
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     */
+    public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
+    }
+    
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL ">" operator.
+     */
+    public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_GREATER_THAN, rightValue, this);
+    }
+
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL ">=" operator.
+     */
+    public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
+    }
 
     public void setOut(Writer out) {
         this.out = out;

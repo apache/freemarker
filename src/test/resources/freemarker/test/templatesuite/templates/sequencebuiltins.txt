@@ -262,6 +262,28 @@ seq_last_index_of "c":
 2 = ${abcSet?seq_last_index_of("c", 2)}
 2 = ${abcSet?seq_last_index_of("c", 3)}
 
+Sequence builtins ignoring nulls
+--------------------------------
+
+true = ${listWithNull?seq_contains('c')?string}
+2 = ${listWithNull?seq_index_of('c')}
+0 = ${listWithNull?seq_last_index_of('a')}
+
+These should throw exception, but for BC they don't:
+false = ${listWithNull?seq_contains(noSuchVar)?string}
+-1 = ${listWithNull?seq_index_of(noSuchVar)}
+-1 = ${listWithNull?seq_last_index_of(noSuchVar)}
+
+Sequence built-ins failing on date-type mismatch
+------------------------------------------------
+
+<#assign x = ['1992-02-21'?date('yyyy-MM-dd'), 'foo']>
+<@assertEquals actual=x?seq_index_of('foo') expected=1 />
+<@assertEquals actual=x?seq_index_of('1992-02-21'?date('yyyy-MM-dd')) expected=0 />
+<@assertFails message="dates of different types">
+  0 = ${x?seq_index_of('1992-02-21 00:00:00'?datetime('yyyy-MM-dd HH:mm:ss'))}
+</@>
+
 Chunk
 -----
 
