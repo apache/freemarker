@@ -179,8 +179,8 @@ public class TemplateTestSuite extends TestSuite {
         
         if (classname != null) {
             Class cl = Class.forName(classname);
-            Constructor cons = cl.getConstructor(new Class[] {String.class, String.class, Boolean.class});
-            return (TestCase) cons.newInstance(new Object [] {name, filename});
+            Constructor cons = cl.getConstructor(new Class[] {String.class, String.class, boolean.class});
+            return (TestCase) cons.newInstance(new Object [] {name, filename, Boolean.valueOf(noOutput)});
         } else { 
 	        TemplateTestCase result = new TemplateTestCase(name, filename, noOutput);
 	        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {

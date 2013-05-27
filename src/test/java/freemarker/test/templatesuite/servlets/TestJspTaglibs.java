@@ -101,7 +101,7 @@ public class TestJspTaglibs extends TestCase {
         super(name);
     }
     
-    public TestJspTaglibs(String name, String filename) {
+    public TestJspTaglibs(String name, String filename, boolean noOutput) {
         super(name);
     }
 
