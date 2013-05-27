@@ -100,6 +100,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.templatesuite.models.BooleanHash1;
 import freemarker.test.templatesuite.models.BooleanHash2;
@@ -117,15 +118,17 @@ public class TemplateTestCase extends TestCase {
     private Template template;
     private HashMap dataModel = new HashMap();
     
-    private String filename, testName;
+    private final String filename, testName;
+    private final boolean noOutput;
     private File outputDir;
     
     private Configuration conf = new Configuration();
     
-    public TemplateTestCase(String name, String filename) {
+    public TemplateTestCase(String name, String filename, boolean noOutput) {
         super(name);
-        this.filename = filename;
         this.testName = name;
+        this.filename = filename;
+        this.noOutput = noOutput;
     }
     
     public void setTemplateDirectory(String dirname) throws IOException {
@@ -384,43 +387,50 @@ public class TemplateTestCase extends TestCase {
             template = conf.getTemplate(filename);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
+            e.printStackTrace(new PrintWriter(sw));
             fail("Could not load template " + filename + "\n" + sw.toString());
         }
-        File refFile = new File (outputDir, filename);
-        File outFile = new File (outputDir, filename+".out");
-        Writer out = null;
-        String encoding = conf.getOutputEncoding();
-        if (encoding == null) encoding = "UTF-8";
-        try {
-            out = new OutputStreamWriter(new FileOutputStream(outFile), 
-                    encoding);
-        } catch (IOException ioe) {
-            fail("Cannot write to file: " + outFile + "\n" + ioe.getMessage());
+        
+        File refFile = noOutput ? null : new File (outputDir, filename);
+        File outFile = noOutput ? null : new File (outputDir, filename+".out");
+        String encoding = conf.getOutputEncoding() != null ? conf.getOutputEncoding() : "UTF-8";
+        
+        Writer out;
+        if (outFile == null) {
+            out = NullWriter.INSTANCE;
+        } else {
+            try {
+                out = new OutputStreamWriter(new FileOutputStream(outFile), encoding);
+            } catch (IOException ioe) {
+                fail("Cannot write to file: " + outFile + "\n" + ioe.getMessage());
+                out = null;  // never reached
+            }
         }
+        
         try {
             template.process(dataModel, out);
             out.close();
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
+            e.printStackTrace(new PrintWriter(sw));
             fail("Could not process template " + filename + "\n" + sw.toString());
         }
-        try {
-            Reader ref = new InputStreamReader(new FileInputStream(refFile), 
-                    encoding);
-            Reader output = new InputStreamReader(new FileInputStream(outFile), 
-                    encoding);
-            System.out.println(outFile);
-            compare(ref, output);
-            outFile.delete();
-        } catch (IOException e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            fail("Error comparing files " + refFile + " and " + outFile + "\n" + sw.toString());
+        
+        if (outFile != null) {
+            try {
+                Reader ref = new InputStreamReader(new FileInputStream(refFile), 
+                        encoding);
+                Reader output = new InputStreamReader(new FileInputStream(outFile), 
+                        encoding);
+                System.out.println(outFile);
+                compare(ref, output);
+                outFile.delete();
+            } catch (IOException e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                fail("Error comparing files " + refFile + " and " + outFile + "\n" + sw.toString());
+            }
         }
     }
 

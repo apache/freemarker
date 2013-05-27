@@ -36,22 +36,29 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
         }
         
         if (body != null) {
+            boolean blockFailed;
             try {
                 body.render(NullWriter.INSTANCE);
-                throw new AssertionFailedError("Block should have failed.");
+                blockFailed = false;
             } catch (Throwable e) {
+                blockFailed = true;
                 if (message != null && e.getMessage().indexOf(message) == -1) {
                     throw new AssertationFailedInTemplateException(
-                            "The exception message " + StringUtil.jQuote(e.getMessage())
-                            + " doesn't contain " + StringUtil.jQuote(message) + ".",
+                            "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(e.getMessage())
+                            + "\ndoesn't contain:\n" + StringUtil.jQuote(message) + ".",
                             env);
                 }
                 if (exception != null && e.getClass().getName().indexOf(exception) == -1) {
                     throw new AssertationFailedInTemplateException(
-                            "The exception class name " + StringUtil.jQuote(e.getClass().getName())
+                            "Failure is not like expected. The exception class name " + StringUtil.jQuote(e.getClass().getName())
                             + " doesn't contain " + StringUtil.jQuote(message) + ".",
                             env);
                 }
+            }
+            if (!blockFailed) {
+                throw new AssertationFailedInTemplateException(
+                        "Block was expected to fail, but it didn't.",
+                        env);
             }
         }
     }

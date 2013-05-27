@@ -161,11 +161,8 @@ public class TemplateTestSuite extends TestSuite {
      * and instantiates a {@link TestCase} or {@code null} if the test is
      * filtered out. If the class is not specified by the DOM node,
      * it defaults to {@link TemplateTestCase} class. If the class is specified,
-     * it must extend {@link TestCase} and have a constructor that 
-     * takes two {@link String}-s as parameters, the test name and the template
-     * file name.
-     * 
-     * @param filter 
+     * it must extend {@link TestCase} and have a constructor with the same parameters as of
+     * {@link TemplateTestCase#TemplateTestCase(String, String, boolean)}.
      */
     private TestCase createTestCaseFromNode(Element e, Pattern filter) throws Exception {
         String name = StringUtil.emptyToNull(e.getAttribute("name"));
@@ -174,15 +171,18 @@ public class TemplateTestSuite extends TestSuite {
         
         String filename = StringUtil.emptyToNull(e.getAttribute("filename"));
         if (filename == null) filename = name + ".txt";
+
+        String noOutputStr = StringUtil.emptyToNull(e.getAttribute("nooutput"));
+        boolean noOutput = noOutputStr == null ? false : StringUtil.getYesNo(noOutputStr);
         
         String classname = StringUtil.emptyToNull(e.getAttribute("class"));
         
         if (classname != null) {
             Class cl = Class.forName(classname);
-            Constructor cons = cl.getConstructor(new Class[] {String.class, String.class});
+            Constructor cons = cl.getConstructor(new Class[] {String.class, String.class, Boolean.class});
             return (TestCase) cons.newInstance(new Object [] {name, filename});
         } else { 
-	        TemplateTestCase result = new TemplateTestCase(name, filename);
+	        TemplateTestCase result = new TemplateTestCase(name, filename, noOutput);
 	        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
 	            Map.Entry entry = (Map.Entry) it.next();
 	            result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());
