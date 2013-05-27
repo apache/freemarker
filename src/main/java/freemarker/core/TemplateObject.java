@@ -123,28 +123,45 @@ public abstract class TemplateObject {
     static void assertNonNull(TemplateModel model, Expression exp, Environment env) throws InvalidReferenceException {
         if (model == null) {
             throw new InvalidReferenceException(
-                "Expression " + exp + " is undefined " +
-                exp.getStartLocation() + ".", env);
+                "The following has evaluated to null or missing " + exp.getStartLocation() + ":\n" + exp
+                + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
+                + " with myOptionalVar!myDefault, or use "
+                + EvaluationUtil.encloseAsTag(exp, "#if myOptionalVar??", false) + "when-present"
+                + EvaluationUtil.encloseAsTag(exp, "#else", false) + "when-missing"
+                + EvaluationUtil.encloseAsTag(exp, "#if", true) + ".)",
+                env);
         }
     }
 
     static TemplateException invalidTypeException(TemplateModel model, Expression exp, Environment env, String expected)
+    throws TemplateException {
+        return invalidTypeException(model, exp, env, expected, null);
+    }
+    
+    static TemplateException invalidTypeException(
+            TemplateModel model, Expression exp, Environment env, String expected,
+            String hint)
     throws
         TemplateException
     {
         assertNonNull(model, exp, env);
         return new TemplateException(
-            "Expected " + expected + ". " + 
-            exp + " evaluated instead to " + 
-            model.getClass().getName() + " " +
-            exp.getStartLocation() + ".", env);
+            "Expected " + expected + " value, but the following evaluated instead to " 
+            + EvaluationUtil.getTypeDescriptionForDebugging(model) + " "
+            + exp.getStartLocation()
+            + ":\n" + exp
+            + (hint == null ? "" : "\n(Hint: " + hint + ")"),
+            env);
     }
+    
     /**
      * Returns a string that indicates
      * where in the template source, this object is.
      */
     public String getStartLocation() {
-        String templateName = template != null ? template.getName() : "input";
+        String templateName = template != null
+                ? "template " + StringUtil.jQuote(template.getName())
+                : "nameless template";
         return "on line " 
               + beginLine 
               + ", column " 

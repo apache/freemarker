@@ -959,8 +959,15 @@ abstract class BuiltIn extends Expression implements Cloneable {
             TemplateModel model = target.getAsTemplateModel(env);
             if (model instanceof TemplateScalarModel) {
                 return new BIMethod(((TemplateScalarModel) model).getAsString());
+            } else {
+                throw invalidTypeException(
+                        model, target, env, "string",
+                        model instanceof TemplateSequenceModel || model instanceof TemplateCollectionModel
+                                ? "To find items in sequences/collections (lists and such) you need to use "
+                                + "\"?seq_contains\" instead."
+                                : null
+                );
             }
-            throw invalidTypeException(model, target, env, "string");
         }
 
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1002,8 +1009,15 @@ abstract class BuiltIn extends Expression implements Cloneable {
             TemplateModel model = target.getAsTemplateModel(env);
             if (model instanceof TemplateScalarModel) {
                 return new BIMethod(((TemplateScalarModel) model).getAsString());
+            } else {
+                throw invalidTypeException(
+                        model, target, env, "string",
+                        model instanceof TemplateSequenceModel || model instanceof TemplateCollectionModel
+                            ? "To find items in sequences/collections (lists and such) you need to use "
+                              + "\"?seq_index_of\" instead."
+                            : null
+                );
             }
-            throw invalidTypeException(model, target, env, "string");
         }
         
         private static class BIMethod implements TemplateMethodModelEx {
