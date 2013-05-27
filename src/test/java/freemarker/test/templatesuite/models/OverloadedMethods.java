@@ -53,6 +53,14 @@ public class OverloadedMethods {
     public String oneArg3(List a1) {
         return methodCallToStr("oneArg3<List>", a1);
     }
+    
+    public String oneArg4(Integer a1) {
+        return methodCallToStr("oneArg4<Integer>", a1);
+    }
+
+    public String oneArg4(int a1) {
+        return methodCallToStr("oneArg4<int>", Integer.valueOf(a1));
+    }
 
     public String notOverloaded(List a1) {
         return methodCallToStr("notOverloaded<List>", a1);
