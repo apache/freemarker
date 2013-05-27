@@ -52,14 +52,13 @@
 
 package freemarker.ext.beans;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.util.Iterator;
 import java.util.List;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Constants;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
@@ -67,13 +66,11 @@ import freemarker.template.utility.StringUtil;
  */
 class MethodMap
 {
-    private final String methodName;
     private final BeansWrapper wrapper;
     private final OverloadedMethod fixArgMethod = new OverloadedFixArgMethod();
     private OverloadedMethod varArgMethod;
     
-    MethodMap(String methodName, BeansWrapper wrapper) {
-        this.methodName = methodName;
+    MethodMap(BeansWrapper wrapper) {
         this.wrapper = wrapper;
     }
     
@@ -100,34 +97,18 @@ class MethodMap
             }
             if(memberAndArguments == OverloadedMethod.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
-                        "No variaton of overloaded method \"" + methodName
-                        + "\" is compatbile with the actual types in the argument list, "
-                        + argumentsToTypeListString(arguments)
-                        + ". The overloaded method variations are: " + memberListToString());
+                        "No compatible overloaded variation was found for the signature deducated from the actual " +
+                        "parameter values: " + getDeducedCallSignature(arguments)
+                        + ". The available overloaded variations are: " + memberListToString());
             }
         }
         if(memberAndArguments == OverloadedMethod.AMBIGUOUS_METHOD) {
             throw new TemplateModelException(
-                    "Multiple variatons of overloaded method \"" + 
-                    methodName + "\" is compatbile with the actual types in the argument list, "
-                    + argumentsToTypeListString(arguments)
-                    + ". The overloaded method variations are: " + memberListToString());
+                    "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
+                    "parameter values: " + getDeducedCallSignature(arguments)
+                    + ". The available overloaded variations are (including non-matching): " + memberListToString());
         }
         return (MemberAndArguments)memberAndArguments;
-    }
-    
-    /** 
-     * To be used in error messages.
-     */
-    private String argumentsToTypeListString(List arguments) {
-        StringBuffer sb = new StringBuffer();
-        sb.append('(');
-        for (int i = 0; i < arguments.size(); i++) {
-            if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getShortClassNameOfObject(arguments.get(i)));
-        }
-        sb.append(')');
-        return sb.toString();
     }
     
     public String memberListToString() {
@@ -152,9 +133,49 @@ class MethodMap
             return "No members";
         }
     }
+    
+    /**
+     * The description of the signature deduced from the method/constructor call, used in error messages.
+     */
+    public String getDeducedCallSignature(List arguments) {
+        final Member firstMember;
+        Iterator fixArgMethods = fixArgMethod.getMembers();
+        if (fixArgMethods.hasNext()) {
+            firstMember = (Member) fixArgMethods.next();
+        } else {
+            Iterator varArgMethods = varArgMethod != null ? varArgMethod.getMembers() : null;
+            if (varArgMethods != null && varArgMethods.hasNext()) {
+                firstMember = (Member) varArgMethods.next();
+            } else {
+                firstMember = null;
+            }
+        }
+        
+        StringBuffer sb = new StringBuffer();
+        if (firstMember != null) {
+            if (firstMember instanceof Constructor) {
+                sb.append("constructor ");
+            } else {
+                sb.append("method ");
+            }
+            sb.append(firstMember.getName());
+        } else {
+            sb.append("???");
+        }
+        
+        sb.append('(');
+        for (int i = 0; i < arguments.size(); i++) {
+            if (i != 0) sb.append(", ");
+            sb.append(ClassUtil.getShortClassNameOfObject(arguments.get(i)));
+        }
+        sb.append(')');
+        
+        return sb.toString();
+        
+    }
 
     /**
-     * Method description for parameter list error messages.
+     * Detailed method/constructor description for parameter list error messages.
      */
     private String methodOrConstructorToString(Member member) {
         StringBuffer sb = new StringBuffer();

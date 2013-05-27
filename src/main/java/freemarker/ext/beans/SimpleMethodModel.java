@@ -132,7 +132,7 @@ public final class SimpleMethodModel extends SimpleMemberModel
                         "Method " + StringUtil.jQuote(getMember()) + 
                         " threw an exception when invoked on "
                         + object.getClass().getName() + " object "
-                        + StringUtil.jQuote(object) + "; see cause exception",
+                        + StringUtil.jQuote(object) + ". See cause exception.",
                         e);
             }
         }
@@ -144,9 +144,13 @@ public final class SimpleMethodModel extends SimpleMemberModel
                 new SimpleNumber(new Integer(index))));
     }
 
-    public int size() throws TemplateModelException
-    {
-        throw new TemplateModelException("?size is unsupported for: " + getClass().getName());
+    public int size() throws TemplateModelException {
+        throw new TemplateModelException(
+                "Getting the number of items or enumerating the items is not supported on this method+sequence value.\n"
+                + "("
+                + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
+                + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."
+                + ")");
     }
     
     public String toString() {

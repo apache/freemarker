@@ -193,7 +193,7 @@ final class StaticModel implements TemplateHashModelEx
                     Object obj = map.get(name);
                     if (obj instanceof Method)
                     {
-                        MethodMap methodMap = new MethodMap(name, wrapper);
+                        MethodMap methodMap = new MethodMap(wrapper);
                         methodMap.addMember((Method) obj);
                         methodMap.addMember(method);
                         map.put(name, methodMap);

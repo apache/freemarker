@@ -1253,7 +1253,7 @@ public class BeansWrapper implements ObjectWrapper
                         if(previous instanceof Method)
                         {
                             // Overloaded method - replace method with a method map
-                            MethodMap methodMap = new MethodMap(methodKey, this);
+                            MethodMap methodMap = new MethodMap(this);
                             methodMap.addMember((Method)previous);
                             methodMap.addMember(publicMethod);
                             introspData.put(methodKey, methodMap);
@@ -1357,7 +1357,7 @@ public class BeansWrapper implements ObjectWrapper
             }
             else if(ctors.length > 1)
             {
-                MethodMap ctorMap = new MethodMap("<init>", this);
+                MethodMap ctorMap = new MethodMap(this);
                 for (int i = 0; i < ctors.length; i++)
                 {
                     ctorMap.addMember(ctors[i]);
