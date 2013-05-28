@@ -85,8 +85,11 @@ abstract class DateBuiltins {
                     throw new InvalidReferenceException(target + " is undefined.", env);
                 }
                 throw new NonDateException(
-                        target + " should be a date, time, or date+time, but it's a(n) "
-                        + model.getClass().getName(), env);                
+                        "Error " + target.getStartLocation() + ":\n"
+                        + "Expected a date (date or time or date-time), but this evaluted to a value of type "
+                        + MessageUtil.getFTLTypeName(model) + ":\n"
+                        + target,
+                        env);                
             }
         }
 

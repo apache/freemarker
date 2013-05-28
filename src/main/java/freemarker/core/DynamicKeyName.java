@@ -104,11 +104,13 @@ final class DynamicKeyName extends Expression {
     {
         if (targetModel instanceof TemplateSequenceModel) {
             TemplateSequenceModel tsm = (TemplateSequenceModel) targetModel;
-            int size = Integer.MAX_VALUE;
+            int size;
             try {
                 size = tsm.size();
-            } catch (Exception e) {}
-            return index<size ? tsm.get(index) : null;
+            } catch (Exception e) {
+                size = Integer.MAX_VALUE;
+            }
+            return index < size ? tsm.get(index) : null;
         } 
         
         try
@@ -122,7 +124,8 @@ final class DynamicKeyName extends Expression {
         }
         catch(NonStringException e)
         {
-            throw invalidTypeException(targetModel, target, env, "number, sequence, or string");
+            throw invalidTypeException(targetModel, target, env,
+                    "sequence or string (or something that's implicitly convertible to string)");
         }
     }
 

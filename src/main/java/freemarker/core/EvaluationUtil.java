@@ -124,7 +124,12 @@ class EvaluationUtil
         }
         else
         {
-            throw new NonNumericalException(expr + " is not a number, it is " + model.getClass().getName(), env);
+            throw new NonNumericalException(
+                    "Error " + expr.getStartLocation() + ":\n"
+                    + "Expected a number, but this evaluated to a value of type "
+                    + MessageUtil.getFTLTypeName(model) + ":\n"
+                    + expr,
+                    env);
         }
     }
 

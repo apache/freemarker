@@ -67,12 +67,16 @@ final class UnaryPlusMinusExpression extends Expression {
     
     TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
         TemplateNumberModel targetModel = null;
+        TemplateModel tm = target.getAsTemplateModel(env);
         try {
-            targetModel = (TemplateNumberModel) target.getAsTemplateModel(env);
+            targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {
-            String msg = "Error " + getStartLocation();
-            msg += "\nExpression " + target + " is not numerical.";
-            throw new NonNumericalException(msg, env);
+            throw new NonNumericalException(
+                    "Error " + getStartLocation() + ":\n"
+                    + "Expected a number, but this evaluated to a value of type "
+                    + MessageUtil.getFTLTypeName(tm) + ":\n"
+                    + target,
+                    env);
         }
         if (!isMinus) {
             return targetModel;

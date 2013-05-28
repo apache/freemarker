@@ -453,8 +453,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
                     if (df instanceof SimpleDateFormat) {
                         pattern = ((SimpleDateFormat) df).toPattern();
                     }
-                    String mess = "Error: " + getStartLocation()
-                                 + "\nThe string doesn't match the expected date/time format. "
+                    String mess = "Error: " + getStartLocation() + ":\n"
+                                 + "The string doesn't match the expected date/time format. "
                                  + "The string to parse was: " + StringUtil.jQuote(text)
                                  + (pattern != null
                                          ? ". The expected format was: "

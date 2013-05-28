@@ -88,10 +88,14 @@ final class ArithmeticExpression extends Expression {
         if (!bothNumbers) {
             String msg = "Error " + getStartLocation();
             if (!leftIsNumber) {
-                msg += "\nExpression " + left + " is not numerical";
+                msg += ":\nExpected a number, but this evaluated to value s of type "
+                        + MessageUtil.getFTLTypeName(leftModel) + ":\n"
+                        + left;
             }
             if (!rightIsNumber) {
-                msg += "\nExpression " + right + " is not numerical";
+                msg += ":\nExpected a number, but this evaluated to value of type "
+                       + MessageUtil.getFTLTypeName(rightModel) + ":\n"
+                       + right;
             }
             throw new NonNumericalException(msg, env);
         }

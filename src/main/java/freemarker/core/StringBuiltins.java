@@ -193,9 +193,10 @@ abstract class StringBuiltins {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));
             }
             catch(NumberFormatException nfe) {
-                String mess = "Error: " + getStartLocation()
-                             + "\nExpecting a number here, found: " + s;
-                throw new NonNumericalException(mess, env);
+                throw new NonNumericalException(
+                        "Error " + getStartLocation() + ":\n"
+                        + "Can't convert this string to number: " + StringUtil.jQuote(s),
+                        env);
             }
         }
     }

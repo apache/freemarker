@@ -118,11 +118,11 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(referentModel, exp, env);
         
         String msg = "Error " + exp.getStartLocation()
-                     +"\nExpecting a string, " 
+                     +"\nExpected a string (or a value of type implicitly convertible to string: " 
                      + (env.isClassicCompatible() ? "boolean, " : "" )
-                     + "date or number here, Expression " + exp 
-                     + " is instead a " 
-                     + referentModel.getClass().getName();
+                     + "date or number), but this evaluated to a value of type "
+                     + MessageUtil.getFTLTypeName(referentModel) + ":\n"
+                     + exp;
         throw new NonStringException(msg, env);
     }
 
