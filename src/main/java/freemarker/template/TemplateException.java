@@ -86,6 +86,9 @@ public class TemplateException extends Exception {
     private final Exception causeException;
     private final transient Environment env;
     private final String ftlInstructionStack;
+    
+    private final Object lock = new Object();
+    private ThreadLocal messageWasAlreadyPrintedForThisTrace;
 
 
     /**
@@ -197,46 +200,68 @@ public class TemplateException extends Exception {
     }
 
     public void printStackTrace(java.io.PrintStream ps) {
-        PrintWriter pw = new PrintWriter(new OutputStreamWriter(ps), true);
-        printStackTrace(pw);
-        pw.flush();
+        synchronized (ps) {
+            PrintWriter pw = new PrintWriter(new OutputStreamWriter(ps), true);
+            printStackTrace(pw);
+            pw.flush();
+        }
     }
 
     public void printStackTrace(PrintWriter pw) {
-        pw.println();
-        pw.println(getMessage());
-        if (ftlInstructionStack != null && ftlInstructionStack.length() != 0) {
-            pw.println("The problematic instruction:");
-            pw.println(ftlInstructionStack);
-        }
-        pw.println("Java backtrace for programmers:");
-        pw.println("----------");
-        super.printStackTrace(pw);
-        if (BEFORE_1_4 && causeException != null) {
-            pw.println("Underlying cause: ");
-            causeException.printStackTrace(pw);
-        }
-        
-        // Dirty hack to fight with stupid ServletException class whose
-        // getCause() method doesn't work properly. Also an aid for pre-J2xE 1.4
-        // users.
-        try {
-            // Reflection is used to prevent dependency on Servlet classes.
-            Method m = causeException.getClass().getMethod("getRootCause", EMPTY_CLASS_ARRAY);
-            Throwable rootCause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
-            if (rootCause != null) {
-                Throwable j14Cause = null;
-                if (!BEFORE_1_4) {
-                    m = causeException.getClass().getMethod("getCause", EMPTY_CLASS_ARRAY);
-                    j14Cause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
-                }
-                if (j14Cause == null) {
-                    pw.println("ServletException root cause: ");
-                    rootCause.printStackTrace(pw);
-                }
+        synchronized (pw) {
+            pw.println(getMessage());
+            if (ftlInstructionStack != null && ftlInstructionStack.length() != 0) {
+                pw.println();
+                pw.println("The problematic instruction:");
+                pw.println(ftlInstructionStack);
             }
-        } catch (Throwable exc) {
-            ; // ignore
+            pw.println("Java backtrace for programmers:");
+            pw.println("----------");
+            synchronized (lock) {
+                if (messageWasAlreadyPrintedForThisTrace == null) {
+                    messageWasAlreadyPrintedForThisTrace = new ThreadLocal();
+                }
+                messageWasAlreadyPrintedForThisTrace.set(Boolean.TRUE);
+            }
+            try {
+                super.printStackTrace(pw);
+            } finally {
+                messageWasAlreadyPrintedForThisTrace.set(Boolean.FALSE);
+            }
+            if (BEFORE_1_4 && causeException != null) {
+                pw.println("Underlying cause: ");
+                causeException.printStackTrace(pw);
+            }
+            
+            // Dirty hack to fight with stupid ServletException class whose
+            // getCause() method doesn't work properly. Also an aid for pre-J2xE 1.4
+            // users.
+            try {
+                // Reflection is used to prevent dependency on Servlet classes.
+                Method m = causeException.getClass().getMethod("getRootCause", EMPTY_CLASS_ARRAY);
+                Throwable rootCause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
+                if (rootCause != null) {
+                    Throwable j14Cause = null;
+                    if (!BEFORE_1_4) {
+                        m = causeException.getClass().getMethod("getCause", EMPTY_CLASS_ARRAY);
+                        j14Cause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
+                    }
+                    if (j14Cause == null) {
+                        pw.println("ServletException root cause: ");
+                        rootCause.printStackTrace(pw);
+                    }
+                }
+            } catch (Throwable exc) {
+                ; // ignore
+            }
+        }
+    }
+    
+    public String getMessage() {
+        if (messageWasAlreadyPrintedForThisTrace != null && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
+            return "[... Exception message was already printed; see it above ...]";
+        } else {
+            return super.getMessage();
         }
     }
     
