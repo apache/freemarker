@@ -74,8 +74,7 @@ import java.util.*;
 public class FMParser {
 
 // Necessary for adding macros and setting location info.
-  Template template;
-  private String templateName;
+  private Template template;
 
 // variables that keep track of whether we are in a loop or a switch.
   private int loopNesting, switchNesting;
@@ -90,7 +89,9 @@ public class FMParser {
       SimpleCharStream scs = new SimpleCharStream(new StringReader(s), 1, 1, s.length());
       FMParserTokenManager token_source = new FMParserTokenManager(scs);
       token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
-      return new FMParser(token_source);
+      FMParser parser = new FMParser(token_source);
+      token_source.setParser(parser);
+      return parser;
   }
   
   /**
@@ -101,10 +102,9 @@ public class FMParser {
    */
   public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
       this(reader);
-      this.template = template;
+      setTemplate(template);
+      token_source.setParser(this);
       token_source.strictEscapeSyntax = strictEscapeSyntax;
-      this.templateName = template != null ? template.getName() : "";
-      token_source.templateName = templateName;
       this.stripWhitespace = stripWhitespace;
   }
 
@@ -119,10 +119,10 @@ public class FMParser {
 	     token_source.autodetectTagSyntax = true;
 	     break;
 	  case Configuration.ANGLE_BRACKET_TAG_SYNTAX :
-	     token_source.altDirectiveSyntax = false;
+	     token_source.squBracTagSyntax = false;
 	     break;
 	  case Configuration.SQUARE_BRACKET_TAG_SYNTAX :
-	     token_source.altDirectiveSyntax = true;
+	     token_source.squBracTagSyntax = true;
 	     break;
 	  default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
       }
@@ -132,15 +132,23 @@ public class FMParser {
   public FMParser(String template) {
       this(null, new StringReader(template), true, true);
   }
-  
-  private String getErrorStart(Token t) {
-      return getErrorStart(t.beginLine, t.beginColumn, template != null ? template.getName() : null);
+
+  void setTemplate(Template template)  {      this.template = template;
   }
 
-  static String getErrorStart(int beginLine, int beginColumn, String templateName) {
-      return "Error " + MessageUtil.formatLocationForSimpleParsingError(templateName, beginLine, beginColumn);
-  }
+  Template getTemplate()  {
+      return template;  }
 
+ /**
+  * Don't use it, unless you are developing FreeMarker itself.
+  */
+ public int internal_getLastTagSyntax()
+ {
+     return token_source.squBracTagSyntax
+             ? Configuration.SQUARE_BRACKET_TAG_SYNTAX
+             : Configuration.ANGLE_BRACKET_TAG_SYNTAX;     
+ }
+    
   /**
    * Throw an exception if the expression passed in is a String
    * Literal
@@ -326,22 +334,27 @@ TOKEN_MGR_DECLS :
     a hash literal and the one used to
     close a ${
  */
+ private FMParser parser;
  private int hashLiteralNesting;
  private int parenthesisNesting;
  private int bracketNesting;
  private boolean inFTLHeader;
  boolean strictEscapeSyntax, 
          onlyTextOutput, 
-         altDirectiveSyntax,
+         squBracTagSyntax,
          autodetectTagSyntax,
          directiveSyntaxEstablished,
 		 inInvocation;
  int incompatibleImprovements;
- String templateName;
 
- 
+ void setParser(FMParser parser) {     this.parser = parser;
+ }
+
+ Template getTemplate() {	return parser != null ? parser.getTemplate() : null;
+ }
+  
  // This method checks if we are in a strict mode where all
- // FreeMarker directives must start with <#. It also handled
+ // FreeMarker directives must start with <#. It also handles
  // tag syntax detection. If you update this logic, take a look
  // at the UNKNOWN_DIRECTIVE token too.
  private void strictSyntaxCheck(Token tok, int newLexState) {
@@ -351,9 +364,9 @@ TOKEN_MGR_DECLS :
      }
      char firstChar = tok.image.charAt(0);
      if (autodetectTagSyntax && !directiveSyntaxEstablished) {
-         altDirectiveSyntax = (firstChar == '[');
+         squBracTagSyntax = (firstChar == '[');
      }
-     if ((firstChar == '[' && !altDirectiveSyntax) || (firstChar == '<' && altDirectiveSyntax)) {
+     if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
         tok.kind = PRINTABLE_CHARS;
         return;
      }
@@ -361,7 +374,7 @@ TOKEN_MGR_DECLS :
         SwitchTo(newLexState);
         return;
      }
-     if (!altDirectiveSyntax) {
+     if (!squBracTagSyntax) {
          if (!tok.image.startsWith("<#") && !tok.image.startsWith("</#")) {
             tok.kind = PRINTABLE_CHARS;
             return;
@@ -374,13 +387,13 @@ TOKEN_MGR_DECLS :
  private void unifiedCall(Token tok) {
      char firstChar = tok.image.charAt(0);
      if (autodetectTagSyntax && !directiveSyntaxEstablished) {
-         altDirectiveSyntax = (firstChar == '[');
+         squBracTagSyntax = (firstChar == '[');
      }
-     if (altDirectiveSyntax && firstChar == '<') {
+     if (squBracTagSyntax && firstChar == '<') {
         tok.kind = PRINTABLE_CHARS;
         return;
      } 
-     if (!altDirectiveSyntax && firstChar == '[') {
+     if (!squBracTagSyntax && firstChar == '[') {
         tok.kind = PRINTABLE_CHARS;
         return;
      }
@@ -390,11 +403,11 @@ TOKEN_MGR_DECLS :
  
  private void unifiedCallEnd(Token tok) {
      char firstChar = tok.image.charAt(0);
-     if (altDirectiveSyntax && firstChar == '<') {
+     if (squBracTagSyntax && firstChar == '<') {
         tok.kind = PRINTABLE_CHARS;
         return;
      } 
-     if (!altDirectiveSyntax && firstChar == '[') {
+     if (!squBracTagSyntax && firstChar == '[') {
         tok.kind = PRINTABLE_CHARS;
         return;
      }
@@ -441,14 +454,14 @@ TOKEN_MGR_DECLS :
  
  private void ftlHeader(Token matchedToken) {
        if (!directiveSyntaxEstablished) {
-           altDirectiveSyntax = matchedToken.image.charAt(0) == '[';
+           squBracTagSyntax = matchedToken.image.charAt(0) == '[';
 	   directiveSyntaxEstablished = true;
 	   autodetectTagSyntax = false;
        }
        String img = matchedToken.image;
        char firstChar = img.charAt(0);
        char lastChar = img.charAt(img.length() -1);
-       if ((firstChar == '[' && !altDirectiveSyntax) || (firstChar == '<' && altDirectiveSyntax)) {
+       if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
           matchedToken.kind = PRINTABLE_CHARS;
        } 
        if (matchedToken.kind != PRINTABLE_CHARS) {
@@ -602,20 +615,40 @@ TOKEN:
             matchedToken.kind = PRINTABLE_CHARS;
         } else {			char firstChar = matchedToken.image.charAt(0);
 			
-			if (!directiveSyntaxEstablished && autodetectTagSyntax) {			    altDirectiveSyntax = (firstChar == '[');
+			if (!directiveSyntaxEstablished && autodetectTagSyntax) {			    squBracTagSyntax = (firstChar == '[');
 			    directiveSyntaxEstablished = true;
 			}
 			
-			if (firstChar == '<' && altDirectiveSyntax) {
+			if (firstChar == '<' && squBracTagSyntax) {
 			    matchedToken.kind = PRINTABLE_CHARS;
-			} else if (firstChar == '[' && !altDirectiveSyntax) {
+			} else if (firstChar == '[' && !squBracTagSyntax) {
 			    matchedToken.kind = PRINTABLE_CHARS;
 			} else if (strictEscapeSyntax) {
 			    String s = matchedToken.image;
 			    int index = s.indexOf('#');
 			    s = s.substring(index);
+			    
+			    String hint = null;
+			    if (!s.toLowerCase().equals(s))			    {
+			        hint = "Directive names are all-lower-case.";			    }
+			    else if (s.equals("#set"))			    {			        hint = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
+			    }
+			    else if (s.equals("#else_if")) hint = "Use #elseif.";
+			    else if (s.equals("#no_escape")) hint = "Use #noescape instead.";
+			    else if (s.equals("#method")) hint = "Use #function instead.";
+			    else if (s.equals("#head") || s.equals("#template") || s.equals("#fm")) hint = "You may meant #ftl.";
+			    else if (s.equals("#try") || s.equals("#atempt")) hint = "You may meant #attempt.";
+			    else if (s.equals("#for") || s.equals("#each") || s.equals("#iterate") || s.equals("#iterator"))			    {			        hint = "You may meant #list "
+			               + "(http://freemarker.org/docs/ref_directive_list.html).";
+			    }
+			    else
+			    {			        hint = "Check the Directive Reference in the manual: "
+			      		   + "http://freemarker.org/docs/ref_directive_alphaidx.html. If the name is there, "
+			      		   + "check the version; you are using FreeMarker " + Configuration.getVersion() +")";
+			    }
 			    throw new TokenMgrError(
-			      		"Unknown directive: " + s, TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
+			      		"Unknown directive: " + s + (hint != null ? "\n(Hint: " + hint + ")" : ""),
+			      		TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
 			}
         }
     }
@@ -816,7 +849,7 @@ TOKEN:
     {
         if (inFTLHeader) eatNewline();
         inFTLHeader = false;
-        if (altDirectiveSyntax) {
+        if (squBracTagSyntax) {
             matchedToken.kind = NATURAL_GT;
         } else {
             SwitchTo(DEFAULT);
@@ -850,7 +883,7 @@ TOKEN:
     {
         if (noparseTag.equals("-->")) {
 	   boolean squareBracket = matchedToken.image.endsWith("]");
-	   if ((altDirectiveSyntax && squareBracket) || (!altDirectiveSyntax && !squareBracket))
+	   if ((squBracTagSyntax && squareBracket) || (!squBracTagSyntax && !squareBracket))
 	      SwitchTo(DEFAULT);
 	}
     }
@@ -1433,7 +1466,7 @@ Expression BuiltIn(Expression exp) :
    {
        BuiltIn result = null;
        try {
-           result = BuiltIn.newBuiltIn(exp, t.image, t, templateName);
+           result = BuiltIn.newBuiltIn(exp, t.image);
        } catch (ParseException pe) {
            pe.lineNumber = t.beginLine;
            pe.columnNumber = t.beginColumn;

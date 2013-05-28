@@ -52,25 +52,82 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core.DateBuiltins.iso_BI;
+import freemarker.core.DateBuiltins.iso_tz_BI;
+import freemarker.core.NodeBuiltins.ancestorsBI;
+import freemarker.core.NodeBuiltins.childrenBI;
+import freemarker.core.NodeBuiltins.node_nameBI;
+import freemarker.core.NodeBuiltins.node_namespaceBI;
+import freemarker.core.NodeBuiltins.node_typeBI;
+import freemarker.core.NodeBuiltins.parentBI;
+import freemarker.core.NodeBuiltins.rootBI;
+import freemarker.core.NumericalBuiltins.byteBI;
+import freemarker.core.NumericalBuiltins.cBI;
+import freemarker.core.NumericalBuiltins.ceilingBI;
+import freemarker.core.NumericalBuiltins.doubleBI;
+import freemarker.core.NumericalBuiltins.floatBI;
+import freemarker.core.NumericalBuiltins.floorBI;
+import freemarker.core.NumericalBuiltins.intBI;
+import freemarker.core.NumericalBuiltins.longBI;
+import freemarker.core.NumericalBuiltins.number_to_dateBI;
+import freemarker.core.NumericalBuiltins.roundBI;
+import freemarker.core.NumericalBuiltins.shortBI;
+import freemarker.core.SequenceBuiltins.chunkBI;
+import freemarker.core.SequenceBuiltins.firstBI;
+import freemarker.core.SequenceBuiltins.lastBI;
+import freemarker.core.SequenceBuiltins.reverseBI;
+import freemarker.core.SequenceBuiltins.seq_containsBI;
+import freemarker.core.SequenceBuiltins.seq_index_ofBI;
+import freemarker.core.SequenceBuiltins.sortBI;
+import freemarker.core.SequenceBuiltins.sort_byBI;
+import freemarker.core.StringBuiltins.StringBuiltIn;
+import freemarker.core.StringBuiltins.cap_firstBI;
+import freemarker.core.StringBuiltins.capitalizeBI;
+import freemarker.core.StringBuiltins.chop_linebreakBI;
+import freemarker.core.StringBuiltins.evalBI;
+import freemarker.core.StringBuiltins.j_stringBI;
+import freemarker.core.StringBuiltins.js_stringBI;
+import freemarker.core.StringBuiltins.json_stringBI;
+import freemarker.core.StringBuiltins.lower_caseBI;
+import freemarker.core.StringBuiltins.numberBI;
+import freemarker.core.StringBuiltins.substringBI;
+import freemarker.core.StringBuiltins.uncap_firstBI;
+import freemarker.core.StringBuiltins.upper_caseBI;
+import freemarker.core.StringBuiltins.word_listBI;
+import freemarker.template.Configuration;
+import freemarker.template.SimpleDate;
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTransformModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
-import freemarker.core.NodeBuiltins.*;
-import freemarker.core.NumericalBuiltins.*;
-import freemarker.core.SequenceBuiltins.*;
-import freemarker.core.StringBuiltins.*;
-import freemarker.core.DateBuiltins.*;
 
 /**
  * The ? operator used to get the
@@ -236,23 +293,31 @@ abstract class BuiltIn extends Expression implements Cloneable {
         return ClassUtil.forName(className).newInstance();
     }
     
-    static BuiltIn newBuiltIn(Expression target, String key, Token tok, String templateName) throws ParseException {
+    static BuiltIn newBuiltIn(Expression target, String key) throws ParseException {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
-            String locationInfo = "Error on line " + tok.beginLine + ", column " + tok.beginColumn + ", in template " + templateName + "\n";
-            StringBuffer buf = new StringBuffer("Found " + key + ", expecting one of: ");
-            for (Iterator it= builtins.keySet().iterator(); it.hasNext();) {
-                if (it.hasNext()) {
-                    buf.append(" ");
-                } else {
-                    buf.append( " or ");
+            StringBuffer buf = new StringBuffer(
+                    "Unknown built-in: " + StringUtil.jQuote(key) + ".\n"
+                    + "About the supported built-ins see: http://freemarker.org/docs/ref_builtins.html\n" 
+                    + "The alphabetical list of built-ins (as of FreeMarker " + Configuration.getVersion() + "):");
+            List names = new ArrayList(builtins.keySet().size());
+            names.addAll(builtins.keySet());
+            Collections.sort(names);
+            char lastLetter = 0;
+            for (Iterator it = names.iterator(); it.hasNext();) {
+                String name = (String) it.next();
+                char firstChar = name.charAt(0);
+                if (firstChar != lastLetter) {
+                    lastLetter = firstChar;
+                    buf.append('\n');
                 }
-                buf.append(it.next());
+                buf.append(name);
+                
                 if (it.hasNext()) {
                     buf.append(", ");
                 }
             }
-            throw new ParseException(locationInfo + buf, target);
+            throw new ParseException(buf.toString(), target);
         }
         try {
             bi = (BuiltIn) bi.clone();

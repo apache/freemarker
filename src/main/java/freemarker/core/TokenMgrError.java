@@ -52,6 +52,8 @@
 
 package freemarker.core;
 
+import freemarker.template.Template;
+
 /**
  * Exception thrown on lower (lexical) level parsing errors.
  * 
@@ -224,6 +226,13 @@ public class TokenMgrError extends Error
    
    public String getDetail() {
        return detail;
+   }
+
+   public ParseException toParseException(Template template) {
+       return new ParseException(getDetail(),
+               template,
+               getLineNumber() != null ? getLineNumber().intValue() : 0,
+               getColumnNumber() != null ? getColumnNumber().intValue() : 0);
    }
    
 }

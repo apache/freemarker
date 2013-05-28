@@ -110,19 +110,28 @@ class Interpret extends BuiltIn
         }
         String templateSource = sourceExpr.getStringValue(env);
         Template parentTemplate = env.getTemplate();
+        
+        final Template interpretedTemplate;
         try
         {
-            Template template = new Template(parentTemplate.getName() + "$" + id, new StringReader(templateSource), parentTemplate.getConfiguration());
-            template.setLocale(env.getLocale());
-            return new TemplateProcessorModel(template);
+            interpretedTemplate = new Template(
+                    (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
+                    new StringReader(templateSource),
+                    parentTemplate.getConfiguration());
         }
         catch(IOException e)
         {
-            throw new TemplateException("", e, env);
+            throw new TemplateException(
+                    "Error " + getStartLocation() + ":\n"
+                    + "\"?interpret\" has failed with this parsing error:\n" + e.getMessage(),
+                    e, env);
         }
+        
+        interpretedTemplate.setLocale(env.getLocale());
+        return new TemplateProcessorModel(interpretedTemplate);
     }
 
-    private static class TemplateProcessorModel
+    private class TemplateProcessorModel
     implements
         TemplateTransformModel
     {
@@ -140,21 +149,13 @@ class Interpret extends BuiltIn
                 Environment env = Environment.getCurrentEnvironment();
                 env.include(template);
             }
-            catch(TemplateModelException e)
-            {
-                throw e;
-            }
-            catch(IOException e)
-            {
-                throw e;
-            }
-            catch(RuntimeException e)
-            {
-                throw e;
-            }
             catch(Exception e)
             {
-                throw new TemplateModelException(e);
+                throw new TemplateModelException(
+                        "Error " + getStartLocation() + ":\n"
+                        + "Interpreted template has stopped with error:\n"
+                        + e.getMessage(),
+                        e);
             }
     
             return new Writer(out)

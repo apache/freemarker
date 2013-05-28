@@ -113,11 +113,16 @@ import freemarker.debug.impl.DebuggerService;
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
+    
+    /** This is only non-null during parsing. It's used internally to make some information available through the
+     *  Template API-s earlier than the parsing was finished. */
+    private transient FMParser parser;
 
     private Map macros = new HashMap();
     private List imports = new Vector();
     private TemplateElement rootElement;
     private String encoding, defaultNS;
+    private int actualTagSyntax;
     private final String name;
     private final ArrayList lines = new ArrayList();
     private Map prefixToNamespaceURILookup = new HashMap();
@@ -161,21 +166,21 @@ public class Template extends Configurable {
         LineTableBuilder ltb = new LineTableBuilder(reader);
         try {
             try {
-                FMParser parser = new FMParser(this, ltb,
+                parser = new FMParser(this, ltb,
                         getConfiguration().getStrictSyntaxMode(),
                         getConfiguration().getWhitespaceStripping(),
                         getConfiguration().getTagSyntax(),
                         getConfiguration().getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
+                this.actualTagSyntax = parser.internal_getLastTagSyntax();
             }
             catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
-                throw new ParseException(exc.getDetail(),
-                        this,
-                        exc.getLineNumber() != null ? exc.getLineNumber().intValue() : 0,
-                        exc.getColumnNumber() != null ? exc.getColumnNumber().intValue() : 0,
-                        exc);
+                throw exc.toParseException(this);
+            }
+            finally {
+                parser = null;
             }
         }
         catch(ParseException e) {
@@ -419,11 +424,12 @@ public class Template extends Configurable {
 
 
     /**
-     * The path of the template file relative to the directory what you use to store the templates.
-     * For example, if the real path of template is <tt>"/www/templates/community/forum.fm"</tt>,
+     * The path of the template "file" relatively to the "directory" that you use to store the templates, or
+     * possibly {@code null} for non-stored templates.
+     * For example, if the real path of template is <tt>"/www/templates/forum/main.fm"</tt>,
      * and you use "<tt>"/www/templates"</tt> as
      * {@link Configuration#setDirectoryForTemplateLoading "directoryForTemplateLoading"},
-     * then <tt>name</tt> should be <tt>"community/forum.fm"</tt>. The <tt>name</tt> is used for example when you
+     * then <tt>name</tt> should be <tt>"forum/main.fm"</tt>. The <tt>name</tt> is used for example when you
      * use <tt>&lt;include ...></tt> and you give a path that is relative to the current
      * template, or in error messages when FreeMarker logs an error while it processes the template.
      */
@@ -453,6 +459,15 @@ public class Template extends Configurable {
      */
     public String getEncoding() {
         return this.encoding;
+    }
+
+    /**
+     * Returns the tag syntax the parser has chosen for this template: {@link Configuration#SQUARE_BRACKET_TAG_SYNTAX}
+     * or {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax couldn't be determined (like because there was
+     * no tags in the template), this returns whatever the default is in the current configuration.
+     */
+    public int getActualTagSyntax() {
+        return actualTagSyntax;
     }
 
     /**

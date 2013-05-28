@@ -70,7 +70,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.onlyTextOutput = true;
             FMParser parser = new FMParser(token_source);
-            parser.template = getTemplate();
+            parser.setTemplate(getTemplate());
             try {
                 interpolatedOutput = parser.FreeMarkerText();
             }

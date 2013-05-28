@@ -144,6 +144,13 @@ public class ParseException extends java.io.IOException implements FMParserConst
   /**
    * @since 2.3.20
    */
+  public ParseException(String details, Template template, int lineNumber, int columnNumber) {
+      this(details, template, lineNumber, columnNumber, null);      
+  }
+  
+  /**
+   * @since 2.3.20
+   */
   public ParseException(String details, Template template, int lineNumber, int columnNumber, Throwable cause) {
       this(details,
               template == null ? null : template.getName(),

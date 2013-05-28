@@ -53,7 +53,6 @@
 package freemarker.core;
 
 import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Objects that represent instructions or expressions
@@ -123,7 +122,8 @@ public abstract class TemplateObject {
     static void assertNonNull(TemplateModel model, Expression exp, Environment env) throws InvalidReferenceException {
         if (model == null) {
             throw new InvalidReferenceException(
-                "The following has evaluated to null or missing " + exp.getStartLocation() + ":\n" + exp
+                "Error " + exp.getStartLocation() + ":\n"
+                + "The following has evaluated to null or missing:\n" + exp
                 + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
                 + " with myOptionalVar!myDefault, or use "
                 + MessageUtil.encloseAsTag(exp, "#if myOptionalVar??", false) + "when-present"

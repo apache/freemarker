@@ -1,5 +1,6 @@
 package freemarker.core;
 
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.StringUtil;
@@ -49,7 +50,10 @@ class MessageUtil {
 
     static String encloseAsTag(Template t, String tagContent, boolean closeTag) {
         // TODO: detect the tag syntax of the template
-        return (closeTag ? "</" : "<") + tagContent + ">";
+        return t.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX
+                ? (closeTag ? "[/" : "[") + tagContent + "]"
+                : (closeTag ? "</" : "<") + tagContent + ">";
+                
     }
 
     static String encloseAsTag(Expression exp, String tagContent, boolean closeTag) {

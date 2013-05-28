@@ -170,10 +170,14 @@ abstract class StringBuiltins {
             token_source.incompatibleImprovements = env.getConfiguration().getIncompatibleImprovements().intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
             FMParser parser = new FMParser(token_source);
-            parser.template = getTemplate();
+            parser.setTemplate(getTemplate());
             Expression exp = null;
             try {
-                exp = parser.Expression();
+                try {
+                    exp = parser.Expression();
+                } catch (TokenMgrError e) {
+                    throw e.toParseException(getTemplate());
+                }
             } catch (ParseException pe) {
                 pe.setTemplateName(getTemplate().getName());
                 throw new TemplateException(pe, env);

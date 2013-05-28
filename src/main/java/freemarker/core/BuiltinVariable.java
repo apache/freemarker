@@ -52,12 +52,16 @@
 
 package freemarker.core;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.SimpleDate;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * A reference to a built-in identifier, such as .root

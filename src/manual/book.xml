@@ -20138,8 +20138,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Error messages become more helpful at some places,
-              especially for those new to FreeMarker.</para>
+              <para>Error messages become more helpful in several cases,
+              especially for user who are not very experienced with
+              FreeMarker.</para>
             </listitem>
 
             <listitem>
@@ -20158,6 +20159,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               Depending on user feedback, the bundle description can change in
               the future. So please give feedback, especially if you are an
               OSGi expert.</para>
+            </listitem>
+
+            <listitem>
+              <para>New <literal>Template</literal> method,
+              <literal>getActualTagSyntax()</literal>: Tells if the template
+              is using traditional or square-bracket syntax (this can be the
+              result of auto-detection).</para>
             </listitem>
 
             <listitem>
