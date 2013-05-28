@@ -148,11 +148,12 @@ public class TemplateException extends Exception {
     }
 
     private static String getDescription(String description, Exception cause)  {
-        if(description != null) {
+        if(description != null && description.length() != 0) {
             return description;
         }
         if(cause != null) {
-            return cause.getClass().getName() + ": " + cause.getMessage();
+            return "No error description was specified for this error; low-level message: "
+                    + cause.getClass().getName() + ": " + cause.getMessage();
         }
         return "No error message";
     }

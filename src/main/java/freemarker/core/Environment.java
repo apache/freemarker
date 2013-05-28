@@ -1238,7 +1238,7 @@ public final class Environment extends Configurable {
             pw.print("==> ");
             TemplateElement prev = (TemplateElement) iter.previous();
             pw.print(prev.getDescription());
-            pw.print(" [");
+            pw.print("  [");
             pw.print(prev.getStartLocation());
             pw.println("]");
         }

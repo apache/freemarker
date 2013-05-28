@@ -146,10 +146,10 @@ public abstract class TemplateObject {
     {
         assertNonNull(model, exp, env);
         return new TemplateException(
-            "Expected " + expected + " value, but the following evaluated instead to " 
-            + MessageUtil.getFTLTypeName(model) + " "
-            + exp.getStartLocation()
-            + ":\n" + exp
+            "Error " + exp.getStartLocation() + ":\n"
+            + "Expected " + expected + " value, but the following evaluated instead to " 
+            + MessageUtil.getFTLTypeName(model) + ":\n"
+            + exp
             + (hint == null ? "" : "\n(Hint: " + hint + ")"),
             env);
     }
