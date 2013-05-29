@@ -58,6 +58,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -107,6 +108,10 @@ public final class SimpleMethodModel extends SimpleMemberModel
         {
             return wrapper.invokeMethod(object, (Method)getMember(), 
                     unwrapArguments(arguments, wrapper));
+        }
+        catch(TemplateModelException e)
+        {
+            throw e;
         }
         catch(Exception e)
         {

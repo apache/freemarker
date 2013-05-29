@@ -59,6 +59,7 @@ import java.util.List;
 
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -157,8 +158,10 @@ class SimpleMemberModel
                         }
                         
                         if (unwrappedVarargVal == null && varargItemType.isPrimitive()) {
-                            throw createArgumentTypeMismarchException(
-                                    argIdx + varargIdx, unwrappedVarargVal, varargItemType);
+                            throw new TemplateModelException(
+                                    "Argument type mismatch; argument #" + (argIdx + varargIdx + 1)
+                                    + " is null, which can't be converted to primitive type " + varargItemType
+                                    + ".");
                         }
                         Array.set(varargArray, varargIdx, unwrappedVarargVal);
                     }
@@ -171,16 +174,11 @@ class SimpleMemberModel
     }
 
     private static TemplateModelException createArgumentTypeMismarchException(
-            int argIdx, Object argVal, Class targetType) {
+            int argIdx, TemplateModel argVal, Class targetType) {
         return new TemplateModelException(
-                "Argument type mismatch; can not unwrap argument #"
-                + (argIdx + 1)
-                + " (" + (argVal == null
-                        ? "value: null"
-                        : "class: " + argVal.getClass().getName()
-                          + ", toString: " + StringUtil.jQuote(argVal))
-                + ") to "
-                + targetType);
+                "Argument type mismatch; can't convert (unwrap) argument #" + (argIdx + 1)
+                + " value of type " + ClassUtil.getFTLTypeDescription(argVal)
+                + " to " + ClassUtil.getShortClassName(targetType) + ".");
     }
     
     protected Member getMember() {
