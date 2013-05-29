@@ -61,9 +61,10 @@ import java.util.List;
 import freemarker.core.Environment;
 
 /**
- * Objects that act as methods in a template data model must implement this 
- * interface.
- * @version $Id: TemplateMethodModel.java,v 1.11 2003/09/22 23:56:54 revusky Exp $
+ * Objects that act as methods in a template data-model must implement this interface.
+ * 
+ * @deprecated Use {@link TemplateMethodModelEx} instead. This interface is from the old times when the only kind of
+ *    value you could pass in was string.
  */
 public interface TemplateMethodModel extends TemplateModel {
 

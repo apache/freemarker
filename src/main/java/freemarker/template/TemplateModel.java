@@ -53,15 +53,19 @@
 package freemarker.template;
 
 /**
- * <p>This is a marker interface that indicates that an object
+ * This is a marker interface that indicates that an object
  * can be put in a template's data model.
  * 
- * @see TemplateHashModel
- * @see TemplateSequenceModel
- * @see TemplateCollectionModel
  * @see TemplateScalarModel
  * @see TemplateNumberModel
- * @see TemplateTransformModel
+ * @see TemplateBooleanModel
+ * @see TemplateDateModel
+ * @see TemplateHashModel
+ * @see TemplateHashModelEx
+ * @see TemplateSequenceModel
+ * @see TemplateCollectionModel
+ * @see TemplateDirectiveModel
+ * @see TemplateMethodModelEx
  *
  * @version $Id: TemplateModel.java,v 1.19 2003/01/12 23:40:21 revusky Exp $
  */

@@ -53,12 +53,9 @@
 package freemarker.template;
 
 /**
- * String values in a template data model must implement this interface.
- * (Actually, the name of this interface should be
- * <code>TemplateStringModel</code>. The bad name was inherited from the
- * ancient times, when there was only 1 kind of scalars in FreeMarker.)
- *
- * @version $Id: TemplateScalarModel.java,v 1.18 2004/11/28 12:58:33 ddekany Exp $
+ * String values in the data-model must implement this interface.
+ * (The name of this interface should be {@code TemplateStringModel}. The bad name was inherited from the
+ * ancient times, when there was only 1 kind of scalar in FreeMarker.)
  */
 public interface TemplateScalarModel extends TemplateModel {
 
@@ -68,12 +65,10 @@ public interface TemplateScalarModel extends TemplateModel {
     public TemplateModel EMPTY_STRING = new SimpleScalar("");
 
     /**
-     * Returns the string representation of this model. In general, avoid
-     * returning null. In compatibility mode the engine will convert
-     * null into empty string, however in normal mode it will
-     * throw an exception if you return null from this method.
+     * Returns the string representation of this model. Don't return {@code null}. In classic-compatible
+     * mode the engine will convert {@code null} into empty string, but in the default mode returning {@code null} will
+     * cause an exception.
      */
     public String getAsString() throws TemplateModelException;
-
 
 }
