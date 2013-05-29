@@ -60,6 +60,7 @@ import java.util.StringTokenizer;
 
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
 
@@ -1452,6 +1453,19 @@ public class StringUtil {
      */
     public static int versionStringToInt(String version) {
         return new Version(version).intValue();
+    }
+
+    /**
+     * Makes {@code "&lt;#foo bar>"} or {@code "[#foo bar]"} from {@code "#foo bar"}, depending on the template syntax.
+     * Mostly useful for showing examples in error messages.
+     * 
+     * @since 2.4
+     */
+    public static String encloseAsTag(Template t, String tagContent) {
+        return t.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX
+                ? "[" + tagContent + "]"
+                : "<" + tagContent + ">";
+                
     }
     
 }

@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.*;
+import freemarker.template.utility.ClassUtil;
 
 /**
  * An operator for arithmetic operations. Note that the + operator
@@ -89,12 +90,12 @@ final class ArithmeticExpression extends Expression {
             String msg = "Error " + getStartLocation();
             if (!leftIsNumber) {
                 msg += ":\nExpected a number, but this evaluated to value s of type "
-                        + MessageUtil.getFTLTypeName(leftModel) + ":\n"
+                        + ClassUtil.getFTLTypeDescription(leftModel) + ":\n"
                         + left;
             }
             if (!rightIsNumber) {
                 msg += ":\nExpected a number, but this evaluated to value of type "
-                       + MessageUtil.getFTLTypeName(rightModel) + ":\n"
+                       + ClassUtil.getFTLTypeDescription(rightModel) + ":\n"
                        + right;
             }
             throw new NonNumericalException(msg, env);

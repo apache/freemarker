@@ -64,6 +64,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UnrecognizedTimeZoneException;
@@ -87,7 +88,7 @@ abstract class DateBuiltins {
                 throw new NonDateException(
                         "Error " + target.getStartLocation() + ":\n"
                         + "Expected a date (date or time or date-time), but this evaluted to a value of type "
-                        + MessageUtil.getFTLTypeName(model) + ":\n"
+                        + ClassUtil.getFTLTypeDescription(model) + ":\n"
                         + target,
                         env);                
             }

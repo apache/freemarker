@@ -20169,6 +20169,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added some utility methods that are useful for generating
+              error messages in custom directives:
+              <literal>ClassUtil.getFTLTypeDescription(TemplateModel)</literal>,
+              <literal>getShortClassName</literal>,
+              <literal>getShortClassNameOfObject</literal>,
+              <literal>StringUtil.encloseAsTag</literal></para>
+            </listitem>
+
+            <listitem>
               <para>Version and build information changes:</para>
 
               <itemizedlist>

@@ -53,6 +53,8 @@
 package freemarker.core;
 
 import freemarker.template.*;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Objects that represent instructions or expressions
@@ -126,9 +128,9 @@ public abstract class TemplateObject {
                 + "The following has evaluated to null or missing:\n" + exp
                 + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
                 + " with myOptionalVar!myDefault, or use "
-                + MessageUtil.encloseAsTag(exp, "#if myOptionalVar??", false) + "when-present"
-                + MessageUtil.encloseAsTag(exp, "#else", false) + "when-missing"
-                + MessageUtil.encloseAsTag(exp, "#if", true) + ".)",
+                + StringUtil.encloseAsTag(exp.getTemplate(), "#if myOptionalVar??") + "when-present"
+                + StringUtil.encloseAsTag(exp.getTemplate(), "#else") + "when-missing"
+                + StringUtil.encloseAsTag(exp.getTemplate(), "/#if") + ".)",
                 env);
         }
     }
@@ -148,7 +150,7 @@ public abstract class TemplateObject {
         return new TemplateException(
             "Error " + exp.getStartLocation() + ":\n"
             + "Expected a value of type " + expected + ", but this evaluated to a value of type " 
-            + MessageUtil.getFTLTypeName(model) + ":\n"
+            + ClassUtil.getFTLTypeDescription(model) + ":\n"
             + exp
             + (hint == null ? "" : "\n(Hint: " + hint + ")"),
             env);

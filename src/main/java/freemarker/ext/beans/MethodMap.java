@@ -57,6 +57,7 @@ import java.lang.reflect.Member;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 
@@ -105,13 +106,13 @@ class MethodMap
         if(memberAndArguments == OverloadedMethod.AMBIGUOUS_METHOD) {
             throw new TemplateModelException(
                     "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
-                    "parameter values: " + getDeducedCallSignature(arguments)
-                    + ". The available overloaded variations are (including non-matching): " + memberListToString());
+                    "parameter values:\n" + getDeducedCallSignature(arguments)
+                    + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
         }
         return (MemberAndArguments)memberAndArguments;
     }
     
-    public String memberListToString() {
+    private String memberListToString() {
         Iterator fixArgMethods = fixArgMethod.getMembers();
         Iterator varArgMethods = varArgMethod != null ? varArgMethod.getMembers() : null;
         
@@ -119,12 +120,12 @@ class MethodMap
         if (hasMethods) {
             StringBuffer sb = new StringBuffer();
             while (fixArgMethods.hasNext()) {
-                if (sb.length() != 0) sb.append(", ");
+                if (sb.length() != 0) sb.append(",\n");
                 sb.append(methodOrConstructorToString((Member) fixArgMethods.next()));
             }
             if (varArgMethods != null) {
                 while (varArgMethods.hasNext()) {
-                    if (sb.length() != 0) sb.append(", ");
+                    if (sb.length() != 0) sb.append(",\n");
                     sb.append(methodOrConstructorToString((Member) varArgMethods.next()));
                 }
             }
@@ -137,7 +138,7 @@ class MethodMap
     /**
      * The description of the signature deduced from the method/constructor call, used in error messages.
      */
-    public String getDeducedCallSignature(List arguments) {
+    private String getDeducedCallSignature(List arguments) {
         final Member firstMember;
         Iterator fixArgMethods = fixArgMethod.getMembers();
         if (fixArgMethods.hasNext()) {
@@ -166,7 +167,7 @@ class MethodMap
         sb.append('(');
         for (int i = 0; i < arguments.size(); i++) {
             if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getShortClassNameOfObject(arguments.get(i)));
+            sb.append(ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i)));
         }
         sb.append(')');
         

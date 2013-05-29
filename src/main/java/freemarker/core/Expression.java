@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.*;
+import freemarker.template.utility.ClassUtil;
 import freemarker.ext.beans.BeanModel;
 
 /**
@@ -121,7 +122,7 @@ abstract public class Expression extends TemplateObject {
                      +"\nExpected a string (or a value of type implicitly convertible to string: " 
                      + (env.isClassicCompatible() ? "boolean, " : "" )
                      + "date or number), but this evaluated to a value of type "
-                     + MessageUtil.getFTLTypeName(referentModel) + ":\n"
+                     + ClassUtil.getFTLTypeDescription(referentModel) + ":\n"
                      + exp;
         throw new NonStringException(msg, env);
     }

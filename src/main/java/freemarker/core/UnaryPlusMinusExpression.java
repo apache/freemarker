@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.*;
+import freemarker.template.utility.ClassUtil;
 
 final class UnaryPlusMinusExpression extends Expression {
 
@@ -74,7 +75,7 @@ final class UnaryPlusMinusExpression extends Expression {
             throw new NonNumericalException(
                     "Error " + getStartLocation() + ":\n"
                     + "Expected a number, but this evaluated to a value of type "
-                    + MessageUtil.getFTLTypeName(tm) + ":\n"
+                    + ClassUtil.getFTLTypeDescription(tm) + ":\n"
                     + target,
                     env);
         }

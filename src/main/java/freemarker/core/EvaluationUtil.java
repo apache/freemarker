@@ -61,6 +61,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.ClassUtil;
 
 /**
  * Internally used static utilities for evaluation expressions.
@@ -127,7 +128,7 @@ class EvaluationUtil
             throw new NonNumericalException(
                     "Error " + expr.getStartLocation() + ":\n"
                     + "Expected a number, but this evaluated to a value of type "
-                    + MessageUtil.getFTLTypeName(model) + ":\n"
+                    + ClassUtil.getFTLTypeDescription(model) + ":\n"
                     + expr,
                     env);
         }
@@ -358,8 +359,8 @@ class EvaluationUtil
             }
             throw new TemplateException(
                     "The only legal comparisons are between two numbers, two strings, or two dates/times.\n"
-                    + "Left hand operand is a(n) " + MessageUtil.getFTLTypeName(leftValue) + ".\n"
-                    + "Right hand operand is a(n) " + MessageUtil.getFTLTypeName(rightValue) + ".\n",
+                    + "Left hand operand is a(n) " + ClassUtil.getFTLTypeDescription(leftValue) + ".\n"
+                    + "Right hand operand is a(n) " + ClassUtil.getFTLTypeDescription(rightValue) + ".\n",
                     env);
         }
 
