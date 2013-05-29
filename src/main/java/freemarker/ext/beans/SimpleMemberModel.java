@@ -123,6 +123,9 @@ class SimpleMemberModel
             if(unwrappedArgVal == BeansWrapper.CAN_NOT_UNWRAP) {
                 throw createArgumentTypeMismarchException(argIdx, argVal, argType);
             }
+            if (unwrappedArgVal == null && argType.isPrimitive()) {
+                throw createNullToPrimitiveArgumentException(argIdx, argType); 
+            }
             
             unwrappedArgs[argIdx++] = unwrappedArgVal;
         }
@@ -158,10 +161,7 @@ class SimpleMemberModel
                         }
                         
                         if (unwrappedVarargVal == null && varargItemType.isPrimitive()) {
-                            throw new TemplateModelException(
-                                    "Argument type mismatch; argument #" + (argIdx + varargIdx + 1)
-                                    + " is null, which can't be converted to primitive type " + varargItemType
-                                    + ".");
+                            throw createNullToPrimitiveArgumentException(argIdx + varargIdx, varargItemType); 
                         }
                         Array.set(varargArray, varargIdx, unwrappedVarargVal);
                     }
@@ -179,6 +179,14 @@ class SimpleMemberModel
                 "Argument type mismatch; can't convert (unwrap) argument #" + (argIdx + 1)
                 + " value of type " + ClassUtil.getFTLTypeDescription(argVal)
                 + " to " + ClassUtil.getShortClassName(targetType) + ".");
+    }
+
+    private static TemplateModelException createNullToPrimitiveArgumentException(
+            int argIdx, Class targetType) {
+        return new TemplateModelException(
+                "Argument type mismatch; argument #" + (argIdx + 1)
+                + " is null, which can't be converted to primitive type " + targetType
+                + ".");
     }
     
     protected Member getMember() {
