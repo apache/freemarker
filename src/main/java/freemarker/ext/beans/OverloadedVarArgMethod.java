@@ -141,7 +141,7 @@ class OverloadedVarargMethods extends OverloadedMethodsSubset
     }
 
     void updateSignature(int l) {
-	Class[][] marshalTypes = getUnwrappingTargetTypes();
+	Class[][] marshalTypes = getUnwrappingArgTypesByArgCount();
 	Class[] newTypes = marshalTypes[l];
         // First vararg marshal type spec with less parameters than the 
         // current spec influences the types of the current marshal spec.
@@ -165,7 +165,7 @@ class OverloadedVarargMethods extends OverloadedMethodsSubset
     void afterSignatureAdded(int l) {
 	// Since this member is vararg, its types influence the types in all
         // type specs longer than itself.
-	Class[][] marshalTypes = getUnwrappingTargetTypes();
+	Class[][] marshalTypes = getUnwrappingArgTypesByArgCount();
         Class[] newTypes = marshalTypes[l];
         for(int i = l + 1; i < marshalTypes.length; ++i) {
             Class[] existingTypes = marshalTypes[i];
@@ -208,49 +208,49 @@ class OverloadedVarargMethods extends OverloadedMethodsSubset
         types[l1] = types[l1].getComponentType();
     }
     
-    Object getMemberAndArguments(List arguments, BeansWrapper w) 
+    Object getMemberAndArguments(List tmArgs, BeansWrapper w) 
     throws TemplateModelException {
-        if(arguments == null) {
+        if(tmArgs == null) {
             // null is treated as empty args
-            arguments = Collections.EMPTY_LIST;
+            tmArgs = Collections.EMPTY_LIST;
         }
-        int l = arguments.size();
-	Class[][] marshalTypes = getUnwrappingTargetTypes();
-        Object[] args = new Object[l];
+        int l = tmArgs.size();
+        Class[][] unwrappingArgTypesByArgCount = getUnwrappingArgTypesByArgCount();
+        Object[] pojoArgs = new Object[l];
         // Starting from args.length + 1 as we must try to match against a case
         // where all specified args are fixargs, and the vararg portion 
         // contains zero args
-outer:  for(int j = Math.min(l + 1, marshalTypes.length - 1); j >= 0; --j) {
-            Class[] types = marshalTypes[j];
-            if(types == null) {
+        outer:  for(int j = Math.min(l + 1, unwrappingArgTypesByArgCount.length - 1); j >= 0; --j) {
+            Class[] unwarappingArgTypes = unwrappingArgTypesByArgCount[j];
+            if(unwarappingArgTypes == null) {
                 if(j == 0) {
                     return NO_SUCH_METHOD;
                 }
                 continue;
             }
             // Try to marshal the arguments
-            Iterator it = arguments.iterator();
+            Iterator it = tmArgs.iterator();
             for(int i = 0; i < l; ++i) {
-                Object dst = w.unwrapInternal((TemplateModel)it.next(), i < j ? types[i] : types[j - 1]);
-                if(dst == BeansWrapper.CAN_NOT_UNWRAP) {
+                Object pojo = w.unwrapInternal((TemplateModel)it.next(), i < j ? unwarappingArgTypes[i] : unwarappingArgTypes[j - 1]);
+                if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                     continue outer;
                 }
-                if(dst != args[i]) {
-                    args[i] = dst;
+                if(pojo != pojoArgs[i]) {
+                    pojoArgs[i] = pojo;
                 }
             }
             break;
         }
         
-        Object objMember = getMemberForArgs(args, true);
+        Object objMember = getMemberForArgs(pojoArgs, true);
         if(objMember instanceof Member) {
             Member member = (Member)objMember;
-            args = ((ArgumentPacker)argPackers.get(member)).packArgs(args, arguments, w);
-            if(args == null) {
+            pojoArgs = ((ArgumentPacker)argPackers.get(member)).packArgs(pojoArgs, tmArgs, w);
+            if(pojoArgs == null) {
                 return NO_SUCH_METHOD;
             }
-            BeansWrapper.coerceBigDecimals(getSignature(member), args);
-            return new MemberAndArguments(member, args);
+            BeansWrapper.coerceBigDecimals(getSignature(member), pojoArgs);
+            return new MemberAndArguments(member, pojoArgs);
         }
         return objMember; // either NOT_FOUND or AMBIGUOUS
     }

@@ -68,6 +68,13 @@ class MethodUtilities
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
     
+    // DD: This method is broken. It gives different result depending on the order of the argument values. Like
+    // getMostSpecificCommonType(int.class, Integer.class) gives Object.class, but
+    // getMostSpecificCommonType(Integer.class, int.class) gives Integer.class. And this actually influences the
+    // overloaded method mechanism, because the order of the values depends on the order in which the Java reflection
+    // API returns the methods, and that order "randomly" changes depending on factors like the J2SE version (5 VS 6).
+    // I don't dare to fix this, because I don't want a FreeMarker update to break any apps that even if out of sheer
+    // luck, but happen to work...
     static Class getMostSpecificCommonType(Class c1, Class c2) {
         if(c1 == c2) {
             return c1;
@@ -81,6 +88,8 @@ class MethodUtilities
             else if(c2 == Long.TYPE) c2 = Long.class;
             else if(c2 == Double.TYPE) c2 = Double.class;
         }
+        // DD: This appears to be wrong to me... What if c1.isPrimitive? A non-primitive is never assignable to a
+        //     primitive, or the other way around.
         Set a1 = getAssignables(c1, c2);
         Set a2 = getAssignables(c2, c1);
         a1.retainAll(a2);

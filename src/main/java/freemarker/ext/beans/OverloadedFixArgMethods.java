@@ -73,38 +73,38 @@ class OverloadedFixArgMethods extends OverloadedMethodsSubset
     void afterSignatureAdded(int l) {
     };
 
-    Object getMemberAndArguments(List arguments, BeansWrapper w) 
+    Object getMemberAndArguments(List tmArgs, BeansWrapper w) 
     throws TemplateModelException {
-        if(arguments == null) {
+        if(tmArgs == null) {
             // null is treated as empty args
-            arguments = Collections.EMPTY_LIST;
+            tmArgs = Collections.EMPTY_LIST;
         }
-        final int argCount = arguments.size();
-        final Class[][] unwrappingTargetTypes = getUnwrappingTargetTypes();
-        if(unwrappingTargetTypes.length <= argCount) {
+        final int argCount = tmArgs.size();
+        final Class[][] unwrappingArgTypesByArgCount = getUnwrappingArgTypesByArgCount();
+        if(unwrappingArgTypesByArgCount.length <= argCount) {
             return NO_SUCH_METHOD;
         }
-        Class[] types = unwrappingTargetTypes[argCount];
-        if(types == null) {
+        Class[] unwarppingArgumentTypes = unwrappingArgTypesByArgCount[argCount];
+        if(unwarppingArgumentTypes == null) {
             return NO_SUCH_METHOD;
         }
         //assert types.length == l;
         // Marshal the arguments
-        Object[] args = new Object[argCount];
-        Iterator it = arguments.iterator();
+        Object[] pojoArgs = new Object[argCount];
+        Iterator it = tmArgs.iterator();
         for(int i = 0; i < argCount; ++i) {
-            Object obj = w.unwrapInternal((TemplateModel)it.next(), types[i]);
-            if(obj == BeansWrapper.CAN_NOT_UNWRAP) {
+            Object pojo = w.unwrapInternal((TemplateModel)it.next(), unwarppingArgumentTypes[i]);
+            if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                 return NO_SUCH_METHOD;
             }
-            args[i] = obj;
+            pojoArgs[i] = pojo;
         }
         
-        Object objMember = getMemberForArgs(args, false);
+        Object objMember = getMemberForArgs(pojoArgs, false);
         if(objMember instanceof Member) {
             Member member = (Member) objMember;
-            BeansWrapper.coerceBigDecimals(getSignature(member), args);
-            return new MemberAndArguments(member, args);
+            BeansWrapper.coerceBigDecimals(getSignature(member), pojoArgs);
+            return new MemberAndArguments(member, pojoArgs);
         } else {
             return objMember; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
         }

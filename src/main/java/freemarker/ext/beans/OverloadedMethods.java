@@ -89,24 +89,24 @@ final class OverloadedMethods
         }
     }
     
-    MemberAndArguments getMemberAndArguments(List arguments) 
+    MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
     throws TemplateModelException {
-        Object memberAndArguments = fixArgMethods.getMemberAndArguments(arguments, wrapper);
+        Object memberAndArguments = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
         if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
             if(varargMethods != null) {
-                memberAndArguments = varargMethods.getMemberAndArguments(arguments, wrapper);
+                memberAndArguments = varargMethods.getMemberAndArguments(tmArgs, wrapper);
             }
             if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
-                        "parameter values:\n" + getDeducedCallSignature(arguments)
+                        "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are:\n" + memberListToString());
             }
         }
         if(memberAndArguments == OverloadedMethodsSubset.AMBIGUOUS_METHOD) {
             throw new TemplateModelException(
                     "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
-                    "parameter values:\n" + getDeducedCallSignature(arguments)
+                    "parameter values:\n" + getDeducedCallSignature(tmArgs)
                     + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
         }
         return (MemberAndArguments)memberAndArguments;

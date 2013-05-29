@@ -69,7 +69,7 @@ abstract class OverloadedMethodsSubset {
     static final Object AMBIGUOUS_METHOD = new Object();
     static final Object[] EMPTY_ARGS = new Object[0];
 
-    private Class[/*number of args*/][/*arg index*/] marshalTypes;
+    private Class[/*number of args*/][/*arg index*/] unwrappingArgTypesByArgCount;
     // TODO: make it not concurrent
     private final Map selectorCache = new HashMap();
     private final List/*<Constructor|Method>*/ members = new LinkedList();
@@ -84,21 +84,24 @@ abstract class OverloadedMethodsSubset {
         
         onAddSignature(member, argTypes);
         
-        if (marshalTypes == null) {
-            marshalTypes = new Class[argCount + 1][];
-            marshalTypes[argCount] = argTypes;
-        } else if (marshalTypes.length <= argCount) {
-            Class[][] newMarshalTypes = new Class[argCount + 1][];
-            System.arraycopy(marshalTypes, 0, newMarshalTypes, 0, marshalTypes.length);
-            marshalTypes = newMarshalTypes;
-            marshalTypes[argCount] = argTypes;
+        if (unwrappingArgTypesByArgCount == null) {
+            unwrappingArgTypesByArgCount = new Class[argCount + 1][];
+            unwrappingArgTypesByArgCount[argCount] = argTypes;
+        } else if (unwrappingArgTypesByArgCount.length <= argCount) {
+            Class[][] newUnwrappingArgTypesByArgCount = new Class[argCount + 1][];
+            System.arraycopy(unwrappingArgTypesByArgCount, 0, newUnwrappingArgTypesByArgCount, 0, unwrappingArgTypesByArgCount.length);
+            unwrappingArgTypesByArgCount = newUnwrappingArgTypesByArgCount;
+            unwrappingArgTypesByArgCount[argCount] = argTypes;
         } else {
-            Class[] oldArgTypes = marshalTypes[argCount]; 
-            if (oldArgTypes == null) {
-                marshalTypes[argCount] = argTypes;
+            Class[] oldUnwrappingArgTypes = unwrappingArgTypesByArgCount[argCount]; 
+            if (oldUnwrappingArgTypes == null) {
+                unwrappingArgTypesByArgCount[argCount] = argTypes;
             } else {
-                for(int i = 0; i < oldArgTypes.length; ++i) {
-                    oldArgTypes[i] = MethodUtilities.getMostSpecificCommonType(oldArgTypes[i], argTypes[i]);
+                for(int i = 0; i < oldUnwrappingArgTypes.length; ++i) {
+                    // DD: This can't be right. We suddenly unwrap to a different type, if a new overloaded
+                    //     method was added (and hence the most specific common type might changed), which is possibly
+                    //     irrelevant.
+                    oldUnwrappingArgTypes[i] = MethodUtilities.getMostSpecificCommonType(oldUnwrappingArgTypes[i], argTypes[i]);
                 }
             }
         }
@@ -111,8 +114,8 @@ abstract class OverloadedMethodsSubset {
         return (Class[]) signatures.get(member);
     }
     
-    Class[][] getUnwrappingTargetTypes() {
-        return marshalTypes;
+    Class[][] getUnwrappingArgTypesByArgCount() {
+        return unwrappingArgTypesByArgCount;
     }
     
     Object getMemberForArgs(Object[] args, boolean varArg) {
@@ -136,6 +139,6 @@ abstract class OverloadedMethodsSubset {
     abstract void updateSignature(int l);
     abstract void afterSignatureAdded(int l);
     
-    abstract Object getMemberAndArguments(List arguments, 
+    abstract Object getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
             BeansWrapper w) throws TemplateModelException;
 }
