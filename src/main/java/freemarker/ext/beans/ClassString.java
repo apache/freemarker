@@ -114,7 +114,7 @@ final class ClassString
     {
         LinkedList applicables = getApplicables(methods, varArg);
         if(applicables.isEmpty()) {
-            return OverloadedMethod.NO_SUCH_METHOD;
+            return OverloadedMethodsSubset.NO_SUCH_METHOD;
         }
         if(applicables.size() == 1) {
             return applicables.getFirst();
@@ -146,7 +146,7 @@ final class ClassString
             }
         }
         if(maximals.size() > 1) {
-            return OverloadedMethod.AMBIGUOUS_METHOD;
+            return OverloadedMethodsSubset.AMBIGUOUS_METHOD;
         }
         return maximals.getFirst();
     }

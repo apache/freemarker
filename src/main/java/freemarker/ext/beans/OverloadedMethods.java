@@ -65,13 +65,13 @@ import freemarker.template.utility.ClassUtil;
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
  * and constructors.
  */
-class MethodMap
+final class OverloadedMethods
 {
     private final BeansWrapper wrapper;
-    private final OverloadedMethod fixArgMethod = new OverloadedFixArgMethod();
-    private OverloadedMethod varArgMethod;
+    private final OverloadedMethodsSubset fixArgMethods = new OverloadedFixArgMethods();
+    private OverloadedMethodsSubset varargMethods;
     
-    MethodMap(BeansWrapper wrapper) {
+    OverloadedMethods(BeansWrapper wrapper) {
         this.wrapper = wrapper;
     }
     
@@ -80,30 +80,30 @@ class MethodMap
     }
     
     void addMember(Member member) {
-        fixArgMethod.addMember(member);
+        fixArgMethods.addMember(member);
         if(MethodUtilities.isVarArgs(member)) {
-            if(varArgMethod == null) {
-                varArgMethod = new OverloadedVarArgMethod();
+            if(varargMethods == null) {
+                varargMethods = new OverloadedVarargMethods();
             }
-            varArgMethod.addMember(member);
+            varargMethods.addMember(member);
         }
     }
     
     MemberAndArguments getMemberAndArguments(List arguments) 
     throws TemplateModelException {
-        Object memberAndArguments = fixArgMethod.getMemberAndArguments(arguments, wrapper);
-        if(memberAndArguments == OverloadedMethod.NO_SUCH_METHOD) {
-            if(varArgMethod != null) {
-                memberAndArguments = varArgMethod.getMemberAndArguments(arguments, wrapper);
+        Object memberAndArguments = fixArgMethods.getMemberAndArguments(arguments, wrapper);
+        if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
+            if(varargMethods != null) {
+                memberAndArguments = varargMethods.getMemberAndArguments(arguments, wrapper);
             }
-            if(memberAndArguments == OverloadedMethod.NO_SUCH_METHOD) {
+            if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
-                        "parameter values: " + getDeducedCallSignature(arguments)
-                        + ". The available overloaded variations are: " + memberListToString());
+                        "parameter values:\n" + getDeducedCallSignature(arguments)
+                        + "\nThe available overloaded variations are:\n" + memberListToString());
             }
         }
-        if(memberAndArguments == OverloadedMethod.AMBIGUOUS_METHOD) {
+        if(memberAndArguments == OverloadedMethodsSubset.AMBIGUOUS_METHOD) {
             throw new TemplateModelException(
                     "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
                     "parameter values:\n" + getDeducedCallSignature(arguments)
@@ -113,20 +113,21 @@ class MethodMap
     }
     
     private String memberListToString() {
-        Iterator fixArgMethods = fixArgMethod.getMembers();
-        Iterator varArgMethods = varArgMethod != null ? varArgMethod.getMembers() : null;
+        Iterator fixArgMethodsIter = fixArgMethods.getMembers();
+        Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMembers() : null;
         
-        boolean hasMethods = fixArgMethods.hasNext() || (varArgMethods != null && varArgMethods.hasNext()); 
+        boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
         if (hasMethods) {
             StringBuffer sb = new StringBuffer();
-            while (fixArgMethods.hasNext()) {
+            while (fixArgMethodsIter.hasNext()) {
                 if (sb.length() != 0) sb.append(",\n");
-                sb.append(methodOrConstructorToString((Member) fixArgMethods.next()));
+                sb.append("    ");
+                sb.append(methodOrConstructorToString((Member) fixArgMethodsIter.next()));
             }
-            if (varArgMethods != null) {
-                while (varArgMethods.hasNext()) {
+            if (varargMethodsIter != null) {
+                while (varargMethodsIter.hasNext()) {
                     if (sb.length() != 0) sb.append(",\n");
-                    sb.append(methodOrConstructorToString((Member) varArgMethods.next()));
+                    sb.append(methodOrConstructorToString((Member) varargMethodsIter.next()));
                 }
             }
             return sb.toString();
@@ -140,11 +141,11 @@ class MethodMap
      */
     private String getDeducedCallSignature(List arguments) {
         final Member firstMember;
-        Iterator fixArgMethods = fixArgMethod.getMembers();
-        if (fixArgMethods.hasNext()) {
-            firstMember = (Member) fixArgMethods.next();
+        Iterator fixArgMethodsIter = fixArgMethods.getMembers();
+        if (fixArgMethodsIter.hasNext()) {
+            firstMember = (Member) fixArgMethodsIter.next();
         } else {
-            Iterator varArgMethods = varArgMethod != null ? varArgMethod.getMembers() : null;
+            Iterator varArgMethods = varargMethods != null ? varargMethods.getMembers() : null;
             if (varArgMethods != null && varArgMethods.hasNext()) {
                 firstMember = (Member) varArgMethods.next();
             } else {

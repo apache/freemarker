@@ -66,7 +66,7 @@ import freemarker.template.TemplateModelException;
  * @author Attila Szegedi
  * @version $Id: $
  */
-class OverloadedVarArgMethod extends OverloadedMethod
+class OverloadedVarargMethods extends OverloadedMethodsSubset
 {
     private static final Map canoncialArgPackers = new HashMap();
     
@@ -141,7 +141,7 @@ class OverloadedVarArgMethod extends OverloadedMethod
     }
 
     void updateSignature(int l) {
-	Class[][] marshalTypes = getMarshalTypes();
+	Class[][] marshalTypes = getUnwrappingTargetTypes();
 	Class[] newTypes = marshalTypes[l];
         // First vararg marshal type spec with less parameters than the 
         // current spec influences the types of the current marshal spec.
@@ -165,7 +165,7 @@ class OverloadedVarArgMethod extends OverloadedMethod
     void afterSignatureAdded(int l) {
 	// Since this member is vararg, its types influence the types in all
         // type specs longer than itself.
-	Class[][] marshalTypes = getMarshalTypes();
+	Class[][] marshalTypes = getUnwrappingTargetTypes();
         Class[] newTypes = marshalTypes[l];
         for(int i = l + 1; i < marshalTypes.length; ++i) {
             Class[] existingTypes = marshalTypes[i];
@@ -215,7 +215,7 @@ class OverloadedVarArgMethod extends OverloadedMethod
             arguments = Collections.EMPTY_LIST;
         }
         int l = arguments.size();
-	Class[][] marshalTypes = getMarshalTypes();
+	Class[][] marshalTypes = getUnwrappingTargetTypes();
         Object[] args = new Object[l];
         // Starting from args.length + 1 as we must try to match against a case
         // where all specified args are fixargs, and the vararg portion 

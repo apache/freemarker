@@ -287,10 +287,10 @@ implements
             retval = member = new SimpleMethodModel(object, method, 
                     BeansWrapper.getArgTypes(classInfo, method), wrapper);
         }
-        else if(desc instanceof MethodMap)
+        else if(desc instanceof OverloadedMethods)
         {
             retval = member = 
-                new OverloadedMethodModel(object, (MethodMap)desc);
+                new OverloadedMethodsModel(object, (OverloadedMethods)desc);
         }
         
         // If new cacheable member was created, cache it

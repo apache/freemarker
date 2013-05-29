@@ -978,11 +978,11 @@ public class BeansWrapper implements ObjectWrapper
                 ctor = (Constructor)smm.getMember();
                 objargs = smm.unwrapArguments(arguments, this);
             }
-            else if(ctors instanceof MethodMap)
+            else if(ctors instanceof OverloadedMethods)
             {
-                MethodMap methodMap = (MethodMap)ctors; 
+                OverloadedMethods overloadedConstructors = (OverloadedMethods) ctors; 
                 MemberAndArguments maa = 
-                    methodMap.getMemberAndArguments(arguments);
+                    overloadedConstructors.getMemberAndArguments(arguments);
                 objargs = maa.getArgs();
                 ctor = (Constructor)maa.getMember();
             }
@@ -1253,17 +1253,17 @@ public class BeansWrapper implements ObjectWrapper
                         if(previous instanceof Method)
                         {
                             // Overloaded method - replace method with a method map
-                            MethodMap methodMap = new MethodMap(this);
-                            methodMap.addMember((Method)previous);
-                            methodMap.addMember(publicMethod);
-                            introspData.put(methodKey, methodMap);
+                            OverloadedMethods overloadedMethods = new OverloadedMethods(this);
+                            overloadedMethods.addMember((Method)previous);
+                            overloadedMethods.addMember(publicMethod);
+                            introspData.put(methodKey, overloadedMethods);
                             // remove parameter type information
                             getArgTypes(introspData).remove(previous);
                         }
-                        else if(previous instanceof MethodMap)
+                        else if(previous instanceof OverloadedMethods)
                         {
                             // Already overloaded method - add new overload
-                            ((MethodMap)previous).addMember(publicMethod);
+                            ((OverloadedMethods)previous).addMember(publicMethod);
                         }
                         else if (decision.getMethodShadowsProperty()
                                 || !(previous instanceof PropertyDescriptor))
@@ -1357,7 +1357,7 @@ public class BeansWrapper implements ObjectWrapper
             }
             else if(ctors.length > 1)
             {
-                MethodMap ctorMap = new MethodMap(this);
+                OverloadedMethods ctorMap = new OverloadedMethods(this);
                 for (int i = 0; i < ctors.length; i++)
                 {
                     ctorMap.addMember(ctors[i]);

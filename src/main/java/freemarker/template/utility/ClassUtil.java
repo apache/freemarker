@@ -64,6 +64,8 @@ import freemarker.ext.beans.EnumerationModel;
 import freemarker.ext.beans.IteratorModel;
 import freemarker.ext.beans.MapModel;
 import freemarker.ext.beans.NumberModel;
+import freemarker.ext.beans.OverloadedMethodsModel;
+import freemarker.ext.beans.SimpleMethodModel;
 import freemarker.ext.beans.StringModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
@@ -73,6 +75,7 @@ import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
@@ -200,6 +203,8 @@ public class ClassUtil
                 return TemplateBooleanModel.class;
             } else if (tm instanceof DateModel) {
                 return TemplateDateModel.class;
+            } else if (tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel) {
+                return TemplateMethodModelEx.class;
             } else if (tm instanceof StringModel) {
                 Object wrapped = ((BeanModel) tm).getWrappedObject();
                 return wrapped instanceof String

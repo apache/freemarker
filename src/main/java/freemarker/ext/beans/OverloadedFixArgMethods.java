@@ -52,90 +52,61 @@
 package freemarker.ext.beans;
 
 import java.lang.reflect.Member;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
-abstract class OverloadedMethod {
-    static final Object NO_SUCH_METHOD = new Object();
-    static final Object AMBIGUOUS_METHOD = new Object();
-    static final Object[] EMPTY_ARGS = new Object[0];
-
-    private Class[/*number of args*/][/*arg index*/] marshalTypes;
-    // TODO: make it not concurrent
-    private final Map selectorCache = new HashMap();
-    private final List/*<Constructor|Method>*/ members = new LinkedList();
-    private final Map/*<Constructor|Method, Class[]>*/ signatures = new HashMap();
+class OverloadedFixArgMethods extends OverloadedMethodsSubset
+{
+    void onAddSignature(Member member, Class[] argTypes) {
+    };
     
-    void addMember(Member member) {
-        members.add(member);
+    void updateSignature(int l) {
+    };
+    
+    void afterSignatureAdded(int l) {
+    };
 
-        Class[] argTypes = MethodUtilities.getParameterTypes(member);
-        final int argCount = argTypes.length;
-        signatures.put(member, argTypes.clone());
+    Object getMemberAndArguments(List arguments, BeansWrapper w) 
+    throws TemplateModelException {
+        if(arguments == null) {
+            // null is treated as empty args
+            arguments = Collections.EMPTY_LIST;
+        }
+        final int argCount = arguments.size();
+        final Class[][] unwrappingTargetTypes = getUnwrappingTargetTypes();
+        if(unwrappingTargetTypes.length <= argCount) {
+            return NO_SUCH_METHOD;
+        }
+        Class[] types = unwrappingTargetTypes[argCount];
+        if(types == null) {
+            return NO_SUCH_METHOD;
+        }
+        //assert types.length == l;
+        // Marshal the arguments
+        Object[] args = new Object[argCount];
+        Iterator it = arguments.iterator();
+        for(int i = 0; i < argCount; ++i) {
+            Object obj = w.unwrapInternal((TemplateModel)it.next(), types[i]);
+            if(obj == BeansWrapper.CAN_NOT_UNWRAP) {
+                return NO_SUCH_METHOD;
+            }
+            args[i] = obj;
+        }
         
-        onAddSignature(member, argTypes);
-        
-        if (marshalTypes == null) {
-            marshalTypes = new Class[argCount + 1][];
-            marshalTypes[argCount] = argTypes;
-        } else if (marshalTypes.length <= argCount) {
-            Class[][] newMarshalTypes = new Class[argCount + 1][];
-            System.arraycopy(marshalTypes, 0, newMarshalTypes, 0, marshalTypes.length);
-            marshalTypes = newMarshalTypes;
-            marshalTypes[argCount] = argTypes;
+        Object objMember = getMemberForArgs(args, false);
+        if(objMember instanceof Member) {
+            Member member = (Member) objMember;
+            BeansWrapper.coerceBigDecimals(getSignature(member), args);
+            return new MemberAndArguments(member, args);
         } else {
-            Class[] oldArgTypes = marshalTypes[argCount]; 
-            if (oldArgTypes == null) {
-                marshalTypes[argCount] = argTypes;
-            } else {
-                for(int i = 0; i < oldArgTypes.length; ++i) {
-                    oldArgTypes[i] = MethodUtilities.getMostSpecificCommonType(oldArgTypes[i], argTypes[i]);
-                }
-            }
+            return objMember; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
         }
-        updateSignature(argCount);
-
-        afterSignatureAdded(argCount);
     }
-    
-    Class[] getSignature(Member member) {
-        return (Class[]) signatures.get(member);
-    }
-    
-    Class[][] getMarshalTypes() {
-        return marshalTypes;
-    }
-    
-    Object getMemberForArgs(Object[] args, boolean varArg) {
-        ClassString argTypes = new ClassString(args);
-        Object objMember;
-        synchronized(selectorCache) {
-            objMember = selectorCache.get(argTypes);
-            if(objMember == null) {
-                objMember = argTypes.getMostSpecific(members, varArg);
-                selectorCache.put(argTypes, objMember);
-            }
-        }
-        return objMember;
-    }
-    
-    Iterator/*<Constructor|Method>*/ getMembers() {
-        return members.iterator();
-    }
-    
-    abstract void onAddSignature(Member member, Class[] argTypes);
-    abstract void updateSignature(int l);
-    abstract void afterSignatureAdded(int l);
-    
-    abstract Object getMemberAndArguments(List arguments, 
-            BeansWrapper w) throws TemplateModelException;
 }

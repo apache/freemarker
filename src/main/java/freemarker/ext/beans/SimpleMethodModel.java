@@ -62,6 +62,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility.StringUtil;
 
@@ -146,7 +147,8 @@ public final class SimpleMethodModel extends SimpleMemberModel
 
     public int size() throws TemplateModelException {
         throw new TemplateModelException(
-                "Getting the number of items or enumerating the items is not supported on this method+sequence value.\n"
+                "Getting the number of items or enumerating the items is not supported on this "
+                + ClassUtil.getFTLTypeDescription(this) + " value.\n"
                 + "("
                 + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
                 + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."

@@ -66,25 +66,23 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
 
 /**
- * A class that will wrap a reflected method call into a
- * {@link freemarker.template.TemplateMethodModel} interface. 
- * It is used by {@link BeanModel} to wrap reflected method calls
- * for overloaded methods.
+ * Wraps a set of same-name overloaded methods behind {@link freemarker.template.TemplateMethodModel} interface,
+ * like if it was a single method, chooses among them behind the scenes on call-time based on the argument values.
+ *  
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
- * @version $Id: OverloadedMethodModel.java,v 1.25 2005/06/11 12:12:04 szegedia Exp $
  */
-class OverloadedMethodModel
+public class OverloadedMethodsModel
 implements
 	TemplateMethodModelEx,
 	TemplateSequenceModel
 {
     private final Object object;
-    private final MethodMap methodMap;
+    private final OverloadedMethods overloadedMethods;
     
-    public OverloadedMethodModel(Object object, MethodMap methodMap)
+    OverloadedMethodsModel(Object object, OverloadedMethods overloadedMethods)
     {
         this.object = object;
-        this.methodMap = methodMap;
+        this.overloadedMethods = overloadedMethods;
     }
 
     /**
@@ -98,10 +96,10 @@ implements
     throws
         TemplateModelException
     {
-        MemberAndArguments maa = methodMap.getMemberAndArguments(arguments);
+        MemberAndArguments maa = overloadedMethods.getMemberAndArguments(arguments);
         Method method = (Method)maa.getMember();
         try {
-            return methodMap.getWrapper().invokeMethod(object, method, maa.getArgs());
+            return overloadedMethods.getWrapper().invokeMethod(object, method, maa.getArgs());
         }
         catch(Exception e)
         {
@@ -146,7 +144,6 @@ implements
 
     public int size() throws TemplateModelException
     {
-        throw new TemplateModelException("?size is unsupported for: " + 
-                getClass().getName());
+        throw new TemplateModelException("?size is unsupported for " + getClass().getName());
     }
 }
