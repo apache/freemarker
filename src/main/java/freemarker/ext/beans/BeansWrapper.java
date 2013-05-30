@@ -242,7 +242,9 @@ public class BeansWrapper implements ObjectWrapper
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper;
     private boolean strict = false;
-    private Version overloadedMethodSelection;
+    
+    // I have commented this out, as it won't be in 2.3.20 yet.
+    //private Version overloadedMethodSelection;
     
     /**
      * Creates a new instance of BeansWrapper. The newly created instance
@@ -337,10 +339,12 @@ public class BeansWrapper implements ObjectWrapper
         return simpleMapWrapper;
     }
 
+    // I have commented this out, as it won't be in 2.3.20 yet.
+    /*
     /**
      * Tells which non-backward-compatible overloaded method selection fixes to apply;
      * see {@link #setOverloadedMethodSelection(Version)}.
-     */
+     * /
     public Version getOverloadedMethodSelection() {
         return overloadedMethodSelection;
     }
@@ -352,14 +356,13 @@ public class BeansWrapper implements ObjectWrapper
      * 
      * Currently significant values:
      * <ul>
-     *   <li>2.3.20: Fixes problem where a null actual parameter value was treated as if its class was {@link Object},
-     *       and hence only matched methods where the formal type was {@link Object} too. The correct behavior is
-     *       the opposite: the class of null (which doesn't actually exist in Java) is the subclass of all classes.</li>
+     *   <li>2.3.21: Completetlly rewritten overloaded method selection, fixes several issues with the old one.</li>
      * </ul>
-     */
+     * /
     public void setOverloadedMethodSelection(Version version) {
         overloadedMethodSelection = version;
     }
+    */
     
     /**
      * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
