@@ -158,12 +158,12 @@ final class Include extends TemplateElement {
         }
         catch (ParseException pe) {
             String msg = "Error parsing included template "
-                        + templateNameString  + "\n" + pe.getMessage();
+                        + StringUtil.jQuote(templateNameString)  + ":\n" + pe.getMessage();
             throw new TemplateException(msg, pe, env);
         }
         catch (IOException ioe) {
             String msg = "Error reading included file "
-                        + templateNameString;
+                        + StringUtil.jQuote(templateNameString) + ":\n" + ioe;
             throw new TemplateException(msg, ioe, env);
         }
         env.include(includedTemplate);
