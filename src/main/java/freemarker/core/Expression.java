@@ -116,7 +116,7 @@ abstract public class Expression extends TemplateObject {
                 return "";
             }
         }
-        assertNonNull(referentModel, exp, env);
+        exp.assertNonNull(referentModel, env);
         
         String msg = "Error " + exp.getStartLocation()
                      +"\nExpected a string (or a value of type implicitly convertible to string: " 
@@ -143,7 +143,7 @@ abstract public class Expression extends TemplateObject {
         if (env.isClassicCompatible()) {
             return referent != null && !isEmpty(referent);
         }
-        assertNonNull(referent, this, env);
+        assertNonNull(referent, env);
         String msg = "Error " + getStartLocation()
                      + "\nExpecting a boolean (true/false) expression here"
                      + "\nExpression " + this + " does not evaluate to true/false "

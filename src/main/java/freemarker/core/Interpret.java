@@ -106,7 +106,7 @@ class Interpret extends BuiltIn
         }
         else
         {
-            throw invalidTypeException(model, target, env, "sequence or string");
+            throw target.invalidTypeException(model, env, "sequence or string");
         }
         String templateSource = sourceExpr.getStringValue(env);
         Template parentTemplate = env.getTemplate();

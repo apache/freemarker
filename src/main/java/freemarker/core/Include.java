@@ -140,7 +140,7 @@ final class Include extends TemplateElement {
                     parse = false;
                 }
                 else {
-                    assertNonNull(tm, parseExp, env);
+                    parseExp.assertNonNull(tm, env);
                 }
             }
             if (tm instanceof TemplateScalarModel) {

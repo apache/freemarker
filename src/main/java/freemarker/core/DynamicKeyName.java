@@ -72,7 +72,7 @@ final class DynamicKeyName extends Expression {
     TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
     {
         TemplateModel targetModel = target.getAsTemplateModel(env);
-        assertNonNull(targetModel, target, env);
+        target.assertNonNull(targetModel, env);
         if (nameExpression instanceof Range) {
             return dealWithRangeKey(targetModel, (Range) nameExpression, env);
         }
@@ -82,7 +82,7 @@ final class DynamicKeyName extends Expression {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                assertNonNull(keyModel, nameExpression, env);
+                nameExpression.assertNonNull(keyModel, env);
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
@@ -93,7 +93,7 @@ final class DynamicKeyName extends Expression {
             String key = EvaluationUtil.getString((TemplateScalarModel)keyModel, nameExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
-        throw invalidTypeException(keyModel, nameExpression, env, "number, range, or string");
+        throw nameExpression.invalidTypeException(keyModel, env, "number, range, or string");
     }
 
 
@@ -124,7 +124,7 @@ final class DynamicKeyName extends Expression {
         }
         catch(NonStringException e)
         {
-            throw invalidTypeException(targetModel, target, env,
+            throw target.invalidTypeException(targetModel, env,
                     "sequence or string (or something that's implicitly convertible to string)");
         }
     }
@@ -138,7 +138,7 @@ final class DynamicKeyName extends Expression {
         if(targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
-        throw invalidTypeException(targetModel, target, env, "hash");
+        throw target.invalidTypeException(targetModel, env, "hash");
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
@@ -224,7 +224,8 @@ final class DynamicKeyName extends Expression {
         }
         catch(NonStringException e)
         {
-            throw invalidTypeException(target.getAsTemplateModel(env), target, env, "number, scalar, or sequence");
+            throw target.invalidTypeException(target.getAsTemplateModel(env), env,
+                    "string or sequence (or something implicilty convertible to string)");
         }
     }
 

@@ -52,10 +52,19 @@
 
 package freemarker.core;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import freemarker.template.*;
+import freemarker.template.EmptyMap;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateTransformModel;
 
 /**
  * An element for the unified macro/transform syntax. 
@@ -91,7 +100,6 @@ final class UnifiedCall extends TemplateElement {
         this.nestedBlock = nestedBlock;
         this.bodyParameterNames = bodyParameterNames;
     }
-
 
     void accept(Environment env) throws TemplateException, IOException {
         TemplateModel tm = nameExp.getAsTemplateModel(env);
@@ -131,12 +139,9 @@ final class UnifiedCall extends TemplateElement {
                 }
             }
             else if (tm == null) {
-                throw new InvalidReferenceException(this.getStartLocation() + " " +
-                        nameExp + " not found.", env);
+                throw nameExp.invalidReferenceException(env);
             } else {
-                throw new TemplateException(getStartLocation() + ": " + nameExp + 
-                        " is not a user-defined directive. It is a " + 
-                        tm.getClass().getName(), env);
+                throw nameExp.invalidTypeException(tm, env, "user-defined directive (macro, etc.)");
             }
         }
     }

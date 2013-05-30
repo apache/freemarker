@@ -14447,8 +14447,8 @@ May 16, 2011
           </indexterm>
 
           <para>This built-in returns the namespace (i.e. the ``gate'' hash to
-          the namespace) associated with a macro variable. You can use it with
-          macros only.</para>
+          the namespace) associated with a macro or function variable. You can
+          use it with macros and functions only.</para>
         </section>
 
         <section xml:id="ref_builtin_new">

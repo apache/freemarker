@@ -89,7 +89,7 @@ abstract class SequenceBuiltins {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             if (!(model instanceof TemplateSequenceModel)) {
-                throw invalidTypeException(model, target, env, "sequence");
+                throw target.invalidTypeException(model, env, "sequence");
             }
             return calculateResult((TemplateSequenceModel) model);
         }
@@ -489,7 +489,7 @@ abstract class SequenceBuiltins {
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
-                throw invalidTypeException(model, target, env, "sequence or collection");
+                throw target.invalidTypeException(model, env, "sequence or collection");
             }
         }
 
@@ -582,8 +582,7 @@ abstract class SequenceBuiltins {
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
-                    throw invalidTypeException(
-                            model, target, env, "sequence or collection");
+                    throw target.invalidTypeException(model, env, "sequence or collection");
                 }
                 
                 m_env = env;

@@ -70,7 +70,7 @@ final class VisitNode extends TemplateElement {
 
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.getAsTemplateModel(env);
-        assertNonNull(node, targetNode, env);
+        targetNode.assertNonNull(node, env);
         if (!(node instanceof TemplateNodeModel)) {
             throw new TemplateException("Expecting an XML node here", env);
         }

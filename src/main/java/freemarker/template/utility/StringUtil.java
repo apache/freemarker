@@ -1462,7 +1462,7 @@ public class StringUtil {
      * @since 2.4
      */
     public static String encloseAsTag(Template t, String tagContent) {
-        return t.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX
+        return t != null && t.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX
                 ? "[" + tagContent + "]"
                 : "<" + tagContent + ">";
                 

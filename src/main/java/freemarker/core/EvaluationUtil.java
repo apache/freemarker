@@ -265,7 +265,7 @@ class EvaluationUtil
                     return false;
                 } else {
                     if (leftExp != null) {
-                        TemplateObject.assertNonNull(leftValue, leftExp, env);
+                        leftExp.assertNonNull(leftValue, env);
                     } else {
                         throw new TemplateException("The left operand of the comparison was undefined or null.", env);
                     }
@@ -281,7 +281,7 @@ class EvaluationUtil
                     return false;
                 } else {
                     if (rightExp != null) {
-                        TemplateObject.assertNonNull(rightValue, rightExp, env);
+                        throw rightExp.invalidReferenceException(env);
                     } else {
                         throw new TemplateException("The right operand of the comparison was undefined or null.", env);
                     }

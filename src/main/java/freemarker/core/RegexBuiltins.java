@@ -218,9 +218,9 @@ abstract class RegexBuiltins {
     static class matchesBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
             TemplateModel targetModel = target.getAsTemplateModel(env);
-            assertNonNull(targetModel, this, env);
+            assertNonNull(targetModel, env);
             if (!(targetModel instanceof TemplateScalarModel)) {
-                throw invalidTypeException(targetModel, target, env, "string");
+                throw target.invalidTypeException(targetModel, env, "string");
             }
             return new MatcherBuilder((TemplateScalarModel) targetModel);
         }
@@ -229,14 +229,14 @@ abstract class RegexBuiltins {
     static class groupsBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
             TemplateModel targetModel = target.getAsTemplateModel(env);
-            assertNonNull(targetModel, this, env);
+            assertNonNull(targetModel, env);
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
             }
             if (targetModel instanceof RegexMatchModel.Match) {
                 return ((RegexMatchModel.Match) targetModel).subs;
             }
-            throw invalidTypeException(targetModel, target, env, "a regular expression matcher");
+            throw target.invalidTypeException(targetModel, env, "a regular expression matcher");
         }
     }
     
@@ -248,7 +248,7 @@ abstract class RegexBuiltins {
             if (model instanceof TemplateScalarModel) {
                 return new ReplaceMethod(((TemplateScalarModel) model).getAsString());
             }
-            throw invalidTypeException(model, target, env, "string");
+            throw target.invalidTypeException(model, env, "string");
         }
     }
     
@@ -259,7 +259,7 @@ abstract class RegexBuiltins {
             if (model instanceof TemplateScalarModel) {
                 return new SplitMethod(((TemplateScalarModel) model).getAsString());
             }
-            throw invalidTypeException(model, target, env, "string");
+            throw target.invalidTypeException(model, env, "string");
         }
     }
     

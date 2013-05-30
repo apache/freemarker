@@ -111,7 +111,7 @@ final class MethodCall extends Expression {
             return env.getLastReturnValue();
         }
         else {
-            throw invalidTypeException(targetModel, target, env, "method");
+            throw target.invalidTypeException(targetModel, env, "method");
         }
     }
 

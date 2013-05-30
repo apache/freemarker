@@ -68,7 +68,7 @@ abstract class NodeBuiltins {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             if (!(model instanceof TemplateNodeModel)) {
-                throw invalidTypeException(model, target, env, "node");
+                throw target.invalidTypeException(model, env, "node");
             }
             return calculateResult((TemplateNodeModel) model, env);
         }

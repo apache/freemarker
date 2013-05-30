@@ -75,7 +75,7 @@ final class Dot extends Expression {
         if(leftModel instanceof TemplateHashModel) {
             return ((TemplateHashModel) leftModel).get(key);
         }
-        throw invalidTypeException(leftModel, target, env, "hash");
+        throw target.invalidTypeException(leftModel, env, "hash");
     }
 
     public String getCanonicalForm() {

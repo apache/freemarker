@@ -219,7 +219,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                     throw firstReferenceException;
                 }
                 else {
-                    assertNonNull(null, firstUnresolvedExpression, env);
+                    firstUnresolvedExpression.invalidReferenceException(env);
                 }
             }
         }

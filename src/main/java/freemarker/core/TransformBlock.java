@@ -99,7 +99,7 @@ final class TransformBlock extends TemplateElement {
         }
         else {
             TemplateModel tm = transformExpression.getAsTemplateModel(env);
-            throw invalidTypeException(tm, transformExpression, env, "transform");
+            throw transformExpression.invalidTypeException(tm, env, "transform");
         }
     }
 

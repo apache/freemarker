@@ -97,7 +97,7 @@ final class IteratorBlock extends TemplateElement {
                 // Classic behavior of simply ignoring null references.
                 return;
             }
-            assertNonNull(baseModel, listExpression, env);
+            listExpression.assertNonNull(baseModel, env);
         }
         env.visit(new Context(baseModel));
     }
@@ -187,7 +187,7 @@ final class IteratorBlock extends TemplateElement {
                 }
             }
             else {
-                throw invalidTypeException(list, listExpression, env, "collection or sequence");
+                throw listExpression.invalidTypeException(list, env, "collection or sequence");
             }
         }
 

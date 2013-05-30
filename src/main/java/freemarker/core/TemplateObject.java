@@ -121,37 +121,41 @@ public abstract class TemplateObject {
         this.endLine = endLine;
     }
     
-    static void assertNonNull(TemplateModel model, Expression exp, Environment env) throws InvalidReferenceException {
+    void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
         if (model == null) {
-            throw new InvalidReferenceException(
-                "Error " + exp.getStartLocation() + ":\n"
-                + "The following has evaluated to null or missing:\n" + exp
-                + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
-                + " with myOptionalVar!myDefault, or use "
-                + StringUtil.encloseAsTag(exp.getTemplate(), "#if myOptionalVar??") + "when-present"
-                + StringUtil.encloseAsTag(exp.getTemplate(), "#else") + "when-missing"
-                + StringUtil.encloseAsTag(exp.getTemplate(), "/#if") + ".)",
-                env);
+            throw invalidReferenceException(env);
         }
     }
 
-    static TemplateException invalidTypeException(TemplateModel model, Expression exp, Environment env, String expected)
-    throws TemplateException {
-        return invalidTypeException(model, exp, env, expected, null);
+    InvalidReferenceException invalidReferenceException(Environment env) {
+        return new InvalidReferenceException(
+                "Error " + this.getStartLocation() + ":\n"
+                + "The following has evaluated to null or missing:\n" + this
+                + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
+                + " with myOptionalVar!myDefault, or use "
+                + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
+                + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
+                + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + ".)",
+                env);
     }
     
-    static TemplateException invalidTypeException(
-            TemplateModel model, Expression exp, Environment env, String expected,
+    TemplateException invalidTypeException(TemplateModel model, Environment env, String expected)
+    throws TemplateException {
+        return invalidTypeException(model, env, expected, null);
+    }
+    
+    TemplateException invalidTypeException(
+            TemplateModel model, Environment env, String expected,
             String hint)
     throws
         TemplateException
     {
-        assertNonNull(model, exp, env);
+        assertNonNull(model, env);
         return new TemplateException(
-            "Error " + exp.getStartLocation() + ":\n"
+            "Error " + this.getStartLocation() + ":\n"
             + "Expected a value of type " + expected + ", but this evaluated to a value of type " 
             + ClassUtil.getFTLTypeDescription(model) + ":\n"
-            + exp
+            + this
             + (hint == null ? "" : "\n(Hint: " + hint + ")"),
             env);
     }
@@ -238,4 +242,5 @@ public abstract class TemplateObject {
     }    
 
     abstract public String getCanonicalForm();
+    
 }
