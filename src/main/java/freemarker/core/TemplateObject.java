@@ -131,7 +131,7 @@ public abstract class TemplateObject {
         return new InvalidReferenceException(
                 "Error " + this.getStartLocation() + ":\n"
                 + "The following has evaluated to null or missing:\n" + this
-                + "\n(Hint: If the failing variable is known to be legally null/missing, either specify a default value"
+                + "\n(Tip: If the failing variable is known to be legally null/missing, either specify a default value"
                 + " with myOptionalVar!myDefault, or use "
                 + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
                 + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
@@ -146,7 +146,7 @@ public abstract class TemplateObject {
     
     TemplateException invalidTypeException(
             TemplateModel model, Environment env, String expected,
-            String hint)
+            String tip)
     throws
         TemplateException
     {
@@ -156,7 +156,7 @@ public abstract class TemplateObject {
             + "Expected a value of type " + expected + ", but this evaluated to a value of type " 
             + ClassUtil.getFTLTypeDescription(model) + ":\n"
             + this
-            + (hint == null ? "" : "\n(Hint: " + hint + ")"),
+            + (tip == null ? "" : "\n(Tip: " + tip + ")"),
             env);
     }
     

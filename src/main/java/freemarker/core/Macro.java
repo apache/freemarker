@@ -215,11 +215,11 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                     + " (parameter #" + (i + 1) + ") was "
                                     + (localVars.containsKey(argName)
                                             ? "specified, but had null/missing value.\n"
-                                              + "(Hint: If the parameter value expression is known to be legally "
+                                              + "(Tip: If the parameter value expression is known to be legally "
                                               + "null/missing, you may want to specify a default value with the \"!\" "
                                               + "operator, like paramValueExpression!defaultValueExpression.)"
                                             : "not specified.\n"
-                                    		  + "(Hint: If the omission was deliberate, you may consider making "
+                                    		  + "(Tip: If the omission was deliberate, you may consider making "
                                               + "the parameter optional in the macro by specifying a default value for "
                                               + "it, like "
                                               + StringUtil.encloseAsTag(
