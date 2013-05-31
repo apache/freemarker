@@ -208,7 +208,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                 }
                             }
                         }
-                        else {
+                        else if (!env.isClassicCompatible()) {
                             throw new TemplateException(
                                     "When calling macro " + StringUtil.jQuote(name) 
                                     + ", required parameter " + StringUtil.jQuote(argName)
@@ -235,8 +235,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             if(hasUnresolvedArg) {
                 if(firstReferenceException != null) {
                     throw firstReferenceException;
-                }
-                else {
+                } else if (!env.isClassicCompatible()) {
                     firstUnresolvedExpression.invalidReferenceException(env);
                 }
             }

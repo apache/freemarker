@@ -159,4 +159,7 @@
    <testcase name="number-to-date" />
    <testcase name="varargs" />
    <testcase name="overloaded-methods-23bc" nooutput="true" />
+   <testcase name="classic-compatible">
+      <config classic_compatible="true"/>
+   </testcase>   
 </testcases>

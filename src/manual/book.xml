@@ -20146,10 +20146,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Fixed bug where <literal>ParseException</literal> has
               contained 0 as line and column number for lexical errors. This
-              was a problem for IDE-s which had to extract the location from
-              the error message when this problem has occurred. Note that
-              parsing error message format was slightly changed (and made
-              consistent among parsing errors).</para>
+              was possibly a problem for IDE plugins and similar tools as they
+              were forced to extract the location from the error message text
+              because of this. Note that parsing error message format was
+              changed (and made consistent among parsing errors), but if
+              extracting from the error message text only happened when the
+              returned position was 0, it should not cause any
+              problems.</para>
             </listitem>
 
             <listitem>
@@ -20159,6 +20162,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               Depending on user feedback, the bundle description can change in
               the future. So please give feedback, especially if you are an
               OSGi expert.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixes in <literal>classic_compatible</literal> mode
+              (this mode is to help switching from FreeMarker 1):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>When a macro was called with an
+                  <literal>null</literal>/missing parameter value, it has
+                  caused error like in FreeMarker 2.3</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a hash literal contained reference to a
+                  <literal>null</literal>/missing variable, like in <literal>{
+                  'a': missingVar }</literal>, it has caused an error like in
+                  2.3</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a sequence literal contained reference to a
+                  <literal>null</literal>/missing variable, like in
+                  <literal>[1, missingVar</literal>], it has caused an error
+                  like in 2.3</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>

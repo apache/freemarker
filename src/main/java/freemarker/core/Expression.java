@@ -108,15 +108,17 @@ abstract public class Expression extends TemplateObject {
         if (referentModel instanceof TemplateScalarModel) {
             return EvaluationUtil.getString((TemplateScalarModel) referentModel, exp, env);
         }
+        
         if(env.isClassicCompatible()) {
-            if (referentModel instanceof TemplateBooleanModel) {
-                return ((TemplateBooleanModel)referentModel).getAsBoolean() ? "true" : "";
-            }
             if (referentModel == null) {
                 return "";
             }
+            if (referentModel instanceof TemplateBooleanModel) {
+                return ((TemplateBooleanModel)referentModel).getAsBoolean() ? "true" : "";
+            }
+        } else {
+            exp.assertNonNull(referentModel, env);
         }
-        exp.assertNonNull(referentModel, env);
         
         String msg = "Error " + exp.getStartLocation()
                      +"\nExpected a string (or a value of type implicitly convertible to string: " 
