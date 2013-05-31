@@ -20188,6 +20188,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>[1, missingVar</literal>], it has caused an error
                   like in 2.3</para>
                 </listitem>
+
+                <listitem>
+                  <para>When a the left-side of the dot operator was
+                  <literal>null</literal> or missing variable, like in
+                  <literal>missingVar.subVar</literal>, it has caused an error
+                  like in 2.3</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 

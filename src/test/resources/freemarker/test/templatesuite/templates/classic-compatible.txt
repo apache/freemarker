@@ -1,3 +1,5 @@
+[${noSuchVar}] [${noSuchVar!'null'}]
+[${noSuchVar.foo.bar}] [${noSuchVar.foo.bar!'null'}]
 <#assign b = 22>
 <#macro foo a b c>
   ${a?default("A")} ${b?default("B")} ${c?default("C")}

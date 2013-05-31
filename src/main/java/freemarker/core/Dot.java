@@ -75,6 +75,9 @@ final class Dot extends Expression {
         if(leftModel instanceof TemplateHashModel) {
             return ((TemplateHashModel) leftModel).get(key);
         }
+        if (leftModel == null && env.isClassicCompatible()) {
+            return null; // ${noSuchVar.foo} has just printed nothing in FM 1.
+        }
         throw target.invalidTypeException(leftModel, env, "hash");
     }
 
