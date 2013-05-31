@@ -72,7 +72,13 @@ final class DynamicKeyName extends Expression {
     TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
     {
         TemplateModel targetModel = target.getAsTemplateModel(env);
-        target.assertNonNull(targetModel, env);
+        if (targetModel == null) {
+            if (env.isClassicCompatible()) {
+                return null;
+            } else {
+                throw target.invalidReferenceException(env);
+            }
+        }
         if (nameExpression instanceof Range) {
             return dealWithRangeKey(targetModel, (Range) nameExpression, env);
         }
