@@ -55,6 +55,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.util.*;
 import freemarker.template.*;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An element representing a macro declaration.
@@ -208,7 +209,23 @@ public final class Macro extends TemplateElement implements TemplateModel {
                             }
                         }
                         else {
-                            throw new TemplateException("Error executing macro: " + name + "\nrequired parameter: " + argName + " is not specified.", env);
+                            throw new TemplateException(
+                                    "When calling macro " + StringUtil.jQuote(name) 
+                                    + ", required parameter " + StringUtil.jQuote(argName)
+                                    + " (parameter #" + (i + 1) + ") was "
+                                    + (localVars.containsKey(argName)
+                                            ? "specified, but had null/missing value.\n"
+                                              + "(Hint: If the parameter value expression is known to be legally "
+                                              + "null/missing, you may want to specify a default value with the \"!\" "
+                                              + "operator, like paramValueExpression!defaultValueExpression.)"
+                                            : "not specified.\n"
+                                    		  + "(Hint: If the omission was deliberate, you may consider making "
+                                              + "the parameter optional in the macro by specifying a default value for "
+                                              + "it, like "
+                                              + StringUtil.encloseAsTag(
+                                                      getTemplate(), "#macro myMacro paramName=defaultExpr")
+                                              + ".)"),
+                                    env);
                         }
                     }
                 }

@@ -233,6 +233,13 @@ implements TemplateHashModelEx, Serializable {
         return tm;
     }
 
+    /**
+     * Tells if the map contains a key or not, regardless if the associated value is {@code null} or not.
+     * @since 2.3.20
+     */
+    public boolean containsKey(String key) {
+        return map.containsKey(key);
+    }
 
     /**
      * Removes the given key from the underlying map.
