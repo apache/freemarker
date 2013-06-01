@@ -14,9 +14,13 @@ import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
 
 public class AssertFailsDirective implements TemplateDirectiveModel {
+    
+    public static AssertFailsDirective INSTANCE = new AssertFailsDirective();
 
     private static final String MESSAGE_PARAM = "message";
     private static final String EXCEPTION_PARAM = "exception";
+    
+    private AssertFailsDirective() { }
 
     public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
             throws TemplateException, IOException {

@@ -112,6 +112,7 @@ import freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.VarArgTestModel;
+import freemarker.test.utility.AssertDirective;
 import freemarker.test.utility.AssertEqualsDirective;
 import freemarker.test.utility.AssertFailsDirective;
 
@@ -194,8 +195,9 @@ public class TemplateTestCase extends TestCase {
      */
     
     public void setUp() throws Exception {
-        dataModel.put("assertEquals", new AssertEqualsDirective());
-        dataModel.put("assertFails", new AssertFailsDirective());
+        dataModel.put("assert", AssertDirective.INSTANCE);
+        dataModel.put("assertEquals", AssertEqualsDirective.INSTANCE);
+        dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
         
         dataModel.put("message", "Hello, world!");
         

@@ -3,9 +3,7 @@ package freemarker.test.utility;
 import java.io.IOException;
 import java.util.Map;
 
-import junit.framework.AssertionFailedError;
 import freemarker.core.Environment;
-import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateDirectiveBody;
@@ -18,10 +16,14 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 
 public class AssertEqualsDirective implements TemplateDirectiveModel {
+    
+    public static AssertEqualsDirective INSTANCE = new AssertEqualsDirective();
 
     private static final String ACTUAL_PARAM = "actual";
     private static final String EXPECTED_PARAM = "expected";
 
+    private AssertEqualsDirective() { }
+    
     public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
             throws TemplateException, IOException {
         TemplateModel actual = null;
@@ -47,8 +49,8 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
         
         if (!env.applyEqualsOperatorLenient(actual, expected)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "Expected: " + tryUnwrapp(actual) + "\n"
-                    + "Actual: " + tryUnwrapp(expected),
+                    + "Expected: " + tryUnwrapp(expected) + "\n"
+                    + "Actual: " + tryUnwrapp(actual),
                     env);
         }
         
