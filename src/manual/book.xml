@@ -11030,6 +11030,10 @@ End book</programlisting>
 
         <itemizedlist spacing="compact">
           <listitem>
+            <para><link linkend="ref_builtin_abs">abs</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_ancestors">ancestors</link></para>
           </listitem>
@@ -11137,7 +11141,17 @@ End book</programlisting>
           </listitem>
 
           <listitem>
-            <para><link linkend="ref_builtin_isType">is_...</link></para>
+            <para><link
+            linkend="ref_builtin_is_infinite">is_infinite</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_is_nan">is_nan</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_isType">is_<replaceable>type</replaceable></link></para>
           </listitem>
 
           <listitem>
@@ -11344,6 +11358,9 @@ End book</programlisting>
             <para><link linkend="ref_builtin_xml">xml</link></para>
           </listitem>
         </itemizedlist>
+
+        <para>See the built-ins filtered by left-hand-value type <link
+        linkend="ref_builtins">here</link>.</para>
 
         <para>If you don't find a built-in here that you have seen in a
         working template, probably you will find it here: <xref
@@ -12700,8 +12717,32 @@ rif: foo XYr baar</programlisting>
         linkend="faq_number_decimal_point">this</link> FAQ entry, also note
         the <literal>c</literal> built-in above.</para>
 
+        <section xml:id="ref_builtin_abs">
+          <title>abs</title>
+
+          <indexterm>
+            <primary>abs built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>absolute value</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.20.</para>
+          </note>
+
+          <para>Gives the absolute value of a number. For example
+          <literal>x?abs</literal> , if <literal>x</literal> is -5, will
+          evaluate to 5.</para>
+        </section>
+
         <section xml:id="ref_builtin_c">
           <title>c</title>
+
+          <indexterm>
+            <primary>c built-in</primary>
+          </indexterm>
 
           <indexterm>
             <primary>type-casting</primary>
@@ -12898,6 +12939,53 @@ Hungarian people write: ${12345678?string(",##0.00")}</programlisting>
 
           <programlisting role="output">US people write:        12,345,678.00
 Hungarian people write: 12 345 678,00</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_is_infinite">
+          <title>is_infinite</title>
+
+          <indexterm>
+            <primary>is_infinte built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>infinite</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.20.</para>
+          </note>
+
+          <para>Tells if a number is floating point infinite (according to
+          IEEE 754). For example, <literal>someNumber?is_infinite</literal>
+          evaluates to <literal>true</literal> or <literal>false</literal>
+          depending on if the value of <literal>someNumber</literal> is
+          infinite or not. Of course, if the underlying number is not of
+          floating point type, this will always return
+          <literal>false</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_is_nan">
+          <title>is_nan</title>
+
+          <indexterm>
+            <primary>is_nan built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>NaN</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.20.</para>
+          </note>
+
+          <para>Tells if a number is floating point NaN (according to IEEE
+          754). For example, <literal>someNumber?is_nan</literal> evaluates to
+          <literal>true</literal> or <literal>false</literal> depending on if
+          the value of <literal>someNumber</literal> is NaN or not. Of course,
+          if the underlying number is not of floating point type, this will
+          always return <literal>false</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_rounding">
@@ -20113,6 +20201,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Error messages become more helpful in several cases,
               especially for user who are not very experienced with
               FreeMarker.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-ins for numbers: <link
+              linkend="ref_builtin_abs"><literal>abs</literal></link>, <link
+              linkend="ref_builtin_is_nan"><literal>is_nan</literal></link>,
+              <link
+              linkend="ref_builtin_is_infinite"><literal>is_infinite</literal></link></para>
             </listitem>
 
             <listitem>

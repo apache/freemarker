@@ -164,4 +164,5 @@
       <config classic_compatible="Y"/>
    </testcase>   
    <testcase name="boolean-formatting"  />
+   <testcase name="number-math-builtins" nooutput="true" />
 </testcases>

@@ -59,11 +59,13 @@ import java.util.Date;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
 
 /**
  * A holder for builtins that operate exclusively on TemplateSequenceModels.
@@ -169,7 +171,82 @@ abstract class NumericalBuiltins {
         }
     }
 
- 
+    static class absBI extends NumberBuiltIn {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            if (num instanceof Integer) {
+                int n = ((Integer) num).intValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof BigDecimal) {
+                BigDecimal n = (BigDecimal) num;
+                if (n.signum() < 0) {
+                    return new SimpleNumber(n.negate());
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Double) {
+                double n = ((Double) num).doubleValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Float) {
+                float n = ((Float) num).floatValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Long) {
+                long n = ((Long) num).longValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Short) {
+                short n = ((Short) num).shortValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Byte) {
+                byte n = ((Byte) num).byteValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof BigInteger) {
+                BigInteger n = (BigInteger) num;
+                if (n.signum() < 0) {
+                    return new SimpleNumber(n.negate());
+                } else {
+                    return model;
+                }
+            } else {
+                throw new TemplateModelException("Unsupported number class: " + num.getClass());
+            }            
+        }
+    }
+    
+    static class is_nanBI extends NumberBuiltIn {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            return NumberUtil.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
+    static class is_infiniteBI extends NumberBuiltIn {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            return NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+    
     // Doesn't extend NumberBuiltIn because "calculateResult" would need the Environment.
     static class cBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env)
@@ -177,8 +254,8 @@ abstract class NumericalBuiltins {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             Number num = EvaluationUtil.getNumber(model, target, env);
-            if (num instanceof Integer) {
-                // We accelerate this fairly common case
+            if (num instanceof Integer || num instanceof Long) {
+                // Accelerate these fairly common cases
                 return new SimpleScalar(num.toString());
             } else {
                 return new SimpleScalar(env.getCNumberFormat().format(num));

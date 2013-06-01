@@ -72,6 +72,7 @@ import freemarker.core.NodeBuiltins.node_namespaceBI;
 import freemarker.core.NodeBuiltins.node_typeBI;
 import freemarker.core.NodeBuiltins.parentBI;
 import freemarker.core.NodeBuiltins.rootBI;
+import freemarker.core.NumericalBuiltins.absBI;
 import freemarker.core.NumericalBuiltins.byteBI;
 import freemarker.core.NumericalBuiltins.cBI;
 import freemarker.core.NumericalBuiltins.ceilingBI;
@@ -79,6 +80,8 @@ import freemarker.core.NumericalBuiltins.doubleBI;
 import freemarker.core.NumericalBuiltins.floatBI;
 import freemarker.core.NumericalBuiltins.floorBI;
 import freemarker.core.NumericalBuiltins.intBI;
+import freemarker.core.NumericalBuiltins.is_infiniteBI;
+import freemarker.core.NumericalBuiltins.is_nanBI;
 import freemarker.core.NumericalBuiltins.longBI;
 import freemarker.core.NumericalBuiltins.number_to_dateBI;
 import freemarker.core.NumericalBuiltins.roundBI;
@@ -143,6 +146,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static {
         // These are the only ones we have now.
         // We throw a parse exception if it's not one of these.
+        builtins.put("abs", new absBI());
         builtins.put("ancestors", new ancestorsBI());
         builtins.put("byte", new byteBI());
         builtins.put("c", new cBI());
@@ -176,9 +180,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_enumerable", new is_enumerableBI());
         builtins.put("is_hash_ex", new is_hash_exBI());
         builtins.put("is_hash", new is_hashBI());
+        builtins.put("is_infinite", new is_infiniteBI());
         builtins.put("is_indexable", new is_indexableBI());
         builtins.put("is_macro", new is_macroBI());
         builtins.put("is_method", new is_methodBI());
+        builtins.put("is_nan", new is_nanBI());
         builtins.put("is_node", new is_nodeBI());
         builtins.put("is_number", new is_numberBI());
         builtins.put("is_sequence", new is_sequenceBI());

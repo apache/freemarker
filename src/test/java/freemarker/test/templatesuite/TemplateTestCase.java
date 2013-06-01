@@ -392,6 +392,31 @@ public class TemplateTestCase extends TestCase {
           dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
         }
         
+        else if (testName.startsWith("number-math-builtins")) {
+            dataModel.put("fNan", Float.valueOf(Float.NaN));
+            dataModel.put("dNan", Double.valueOf(Double.NaN));
+            dataModel.put("fNinf", Float.valueOf(Float.NEGATIVE_INFINITY));
+            dataModel.put("dPinf", Double.valueOf(Double.POSITIVE_INFINITY));
+            
+            dataModel.put("fn", Float.valueOf(-0.05f));
+            dataModel.put("dn", Double.valueOf(-0.05));
+            dataModel.put("ineg", Integer.valueOf(-5));
+            dataModel.put("ln", Long.valueOf(-5));
+            dataModel.put("sn", Short.valueOf((short) -5));
+            dataModel.put("bn", Byte.valueOf((byte) -5));
+            dataModel.put("bin", BigInteger.valueOf(5));
+            dataModel.put("bdn", BigDecimal.valueOf(-0.05));
+            
+            dataModel.put("fp", Float.valueOf(0.05f));
+            dataModel.put("dp", Double.valueOf(0.05));
+            dataModel.put("ip", Integer.valueOf(5));
+            dataModel.put("lp", Long.valueOf(5));
+            dataModel.put("sp", Short.valueOf((short) 5));
+            dataModel.put("bp", Byte.valueOf((byte) 5));
+            dataModel.put("bip", BigInteger.valueOf(5));
+            dataModel.put("bdp", BigDecimal.valueOf(0.05));
+          }
+          
     }
     
     public void runTest() {
