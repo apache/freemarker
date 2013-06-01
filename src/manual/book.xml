@@ -20108,6 +20108,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para>Error messages become more helpful in several cases,
+              especially for user who are not very experienced with
+              FreeMarker.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -20184,12 +20190,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>applyLessThanOrEqualsOperator</literal>,
               <literal>applyGreaterThanOperator</literal>,
               <literal>applyWithGreaterThanOrEqualsOperator</literal></para>
-            </listitem>
-
-            <listitem>
-              <para>Error messages become more helpful in several cases,
-              especially for user who are not very experienced with
-              FreeMarker.</para>
             </listitem>
 
             <listitem>
