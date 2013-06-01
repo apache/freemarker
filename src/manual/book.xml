@@ -3703,9 +3703,9 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         <simplesect xml:id="dgui_template_valueinserion_universal_date">
           <title>Guide for inserting date/time values</title>
 
-          <para>If the expression evaluates to a date then the numerical value
-          will be transformed to a text according to a default format. Usually
-          the programmer should set the default format; you don't have to deal
+          <para>If the expression evaluates to a date then the date value will
+          be transformed to a text according to a default format. Usually the
+          programmer should set the default format; you don't have to deal
           with it (but if you care, see the <literal>date_format</literal>,
           <literal>time_format</literal> and
           <literal>datetime_format</literal> settings in the <link
@@ -3957,8 +3957,8 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           that you use the value of variable <literal>Fred</literal> for the
           <literal>person</literal> parameter, rather than the string
           <literal>"Fred"</literal>. Of course parameter value need not be a
-          string, it can be number, boolean, hash, sequence, ...etc., also you
-          can use complex expression on the left side of <literal>=</literal>
+          string, it can be number, boolean, hash, sequence, etc., also you
+          can use complex expression on the right side of <literal>=</literal>
           (e.g. <literal>someParam=(price + 50)*1.25</literal>).</para>
 
           <para>User-defined directives can have multiple parameters. For
@@ -20101,8 +20101,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Bugfix [<link
-                  xlink:href="http://sourceforge.net/tracker/?func=detail&amp;atid=100794&amp;aid=3519805&amp;group_id=794">3519805</link>]:
+                  <para>Bug fix [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/361/">361</link>]:
                   There was a small chance of deadlock when class-reloading
                   was detected. The locking logic was refactored to prevent
                   such oversights in the future.</para>
@@ -20161,7 +20161,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>freemarker.jar/META-INF/MANIFEST.MF</literal>).
               Depending on user feedback, the bundle description can change in
               the future. So please give feedback, especially if you are an
-              OSGi expert.</para>
+              OSGi expert!</para>
             </listitem>
 
             <listitem>
@@ -20190,10 +20190,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>When a the left-side of the dot operator was
-                  <literal>null</literal> or missing variable, like in
-                  <literal>missingVar.subVar</literal>, it has caused an error
-                  like in 2.3</para>
+                  <para>When a the left-side of the <literal>.</literal> (dot)
+                  or <literal>[<replaceable>key</replaceable>]</literal>
+                  operator was <literal>null</literal> or missing variable,
+                  like in <literal>missingVar.subVar</literal>, it has caused
+                  an error like in 2.3</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20212,6 +20213,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>getShortClassName</literal>,
               <literal>getShortClassNameOfObject</literal>,
               <literal>StringUtil.encloseAsTag</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fix [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/361/">364</link>]:
+              <literal>freemarker.template.EmptyMap</literal> (which is passed
+              to <literal>TemplateDirectiveModel</literal>-s if there are no
+              parameters) now allows <literal>remove(key)</literal>,
+              <literal>clear()</literal> and
+              <literal>putAll(anyEmptyMap)</literal>, as these are
+              non-destructive operations.</para>
             </listitem>
 
             <listitem>
