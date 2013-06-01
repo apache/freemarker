@@ -257,7 +257,8 @@ public class FMParser {
          throw new ParseException(e.getMessage() 
                                   + "\nCould not evaluate expression: "
                                   + exp.getCanonicalForm(),
-                                  exp);
+                                  exp,
+                                  e);
       }
       if (tm instanceof TemplateBooleanModel) {
           try {
@@ -2942,7 +2943,8 @@ void HeaderElement() :
                                          + exp.getCanonicalForm() + " " 
                                          + "\nUnderlying cause: " + 
                                          e.getMessage(),
-                                         exp);
+                                         exp,
+                                         e);
              }
 	     String vs = null;
              if (value instanceof TemplateScalarModel) {
