@@ -9,6 +9,9 @@ import freemarker.template.utility.StringUtil;
  */
 public class MessageUtil {
 
+    static final String TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING
+            = "string or something automatically convertible to string (number, date or boolean)";
+
     private MessageUtil() { }
     
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {

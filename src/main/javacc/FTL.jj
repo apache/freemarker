@@ -1664,9 +1664,8 @@ DollarVariable StringOutput() :
    begin=<OUTPUT_ESCAPE>
    exp=Expression()
    {
-      notHashLiteral(exp, "scalar");
-      notListLiteral(exp, "scalar");
-      notBooleanLiteral(exp, "scalar");
+      notHashLiteral(exp, MessageUtil.TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING);
+      notListLiteral(exp, MessageUtil.TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING);
    }
    end=<CLOSE_BRACE>
    {

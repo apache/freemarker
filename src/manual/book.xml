@@ -20063,6 +20063,55 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Date of release: [FIXME]</para>
 
         <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Boolean values will be automatically converted to string
+              where a string value is expected by the template language,
+              instead of giving an error. Thus, you don't have to use
+              <literal>?string</literal> anymore after booleans on those
+              places. This is exactly the same logic as with numbers, which
+              were automatically converted to string earlier too. The most
+              important consequence of this is that instead of
+              <literal>${someBoolean?string}</literal> now you can just write
+              <literal>${someBoolean}</literal>, and it will format the
+              boolean according the current <literal>boolean_format</literal>
+              setting (by default "true" and "false"), just like
+              <literal>?string</literal> did. Note that just like with
+              numbers, automatic conversion doesn't happen in these
+              cases:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Comparisons, i.e., <literal>someBoolean ==
+                  'true'</literal> is still an error</para>
+                </listitem>
+
+                <listitem>
+                  <para>Method calls where the declared type of the parameter
+                  is <literal>String</literal> but the actual value is a
+                  boolean; still an error</para>
+                </listitem>
+
+                <listitem>
+                  <para>When the boolean value is used as key in
+                  <literal><replaceable>expr</replaceable>[<replaceable>key</replaceable>]</literal>,
+                  it's still an error (there was no automatic conversion there
+                  for other types either, as numerical and string keys have
+                  different meaning)</para>
+                </listitem>
+
+                <listitem>
+                  <para>The opposite direction, i.e., string to boolean
+                  conversion; still won't happen</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
@@ -20204,6 +20253,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>getActualTagSyntax()</literal>: Tells if the template
               is using traditional or square-bracket syntax (this can be the
               result of auto-detection).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new convenience methods to
+              <literal>Configurable</literal> classes to set boolean format
+              true and false values independently:
+              <literal>set</literal>/<literal>getTrueStringValue</literal>,
+              <literal>set</literal>/<literal>getFalseStringValue</literal>.</para>
             </listitem>
 
             <listitem>

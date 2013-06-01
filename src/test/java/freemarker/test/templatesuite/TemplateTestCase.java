@@ -86,6 +86,7 @@ import junit.framework.TestCase;
 import org.xml.sax.InputSource;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
@@ -102,10 +103,12 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
+import freemarker.test.templatesuite.models.BooleanAndStringTemplateModel;
 import freemarker.test.templatesuite.models.BooleanHash1;
 import freemarker.test.templatesuite.models.BooleanHash2;
 import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
+import freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.VarArgTestModel;
@@ -380,6 +383,13 @@ public class TemplateTestCase extends TestCase {
         else if (testName.startsWith("overloaded-methods-")) {
           dataModel.put("obj", new OverloadedMethods());
         }
+        
+        else if (testName.startsWith("boolean-formatting")) {
+          dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (BeansWrapper) conf.getObjectWrapper()));
+          dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
+          dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
+        }
+        
     }
     
     public void runTest() {

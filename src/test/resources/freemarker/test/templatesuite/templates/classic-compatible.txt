@@ -9,3 +9,4 @@
 <@foo 1 wrong wrong />
 <#assign m = {"a": wrong, "b": wrong?default("null2")}>${m.a?default("null1")} ${m.b}
 <#assign xs = [1, wrong, 2]><#list xs as x>${x?default("null")} </#list>
+[${true}] [${false}]

@@ -358,7 +358,8 @@ class EvaluationUtil
                 // Falls through
             }
             throw new TemplateException(
-                    "The only legal comparisons are between two numbers, two strings, or two dates/times.\n"
+                    "Can't compare values of these types. "
+                    + "Allowed comparisons are between two numbers, two strings, or two dates.\n"
                     + "Left hand operand is a(n) " + ClassUtil.getFTLTypeDescription(leftValue) + ".\n"
                     + "Right hand operand is a(n) " + ClassUtil.getFTLTypeDescription(rightValue) + ".\n",
                     env);

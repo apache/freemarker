@@ -12,6 +12,7 @@
   <!ELEMENT config EMPTY>
      <!ATTLIST config 
             auto_import CDATA #IMPLIED
+            classic_compatible (Y|N) #IMPLIED
             clear_encoding_map (Y|N) #IMPLIED
             input_encoding CDATA #IMPLIED
             locale CDATA #IMPLIED
@@ -160,6 +161,7 @@
    <testcase name="varargs" />
    <testcase name="overloaded-methods-23bc" nooutput="true" />
    <testcase name="classic-compatible">
-      <config classic_compatible="true"/>
+      <config classic_compatible="Y"/>
    </testcase>   
+   <testcase name="boolean-formatting"  />
 </testcases>

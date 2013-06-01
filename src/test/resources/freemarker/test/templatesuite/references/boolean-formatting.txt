@@ -1,0 +1,14 @@
+TRUE TRUE TRUE
+FALSE FALSE FALSE
+true true true
+false false false
+y y y
+n n n
+str:n str:n
+nein ja
+y y
+theStringValue theStringValue
+
+
+
+

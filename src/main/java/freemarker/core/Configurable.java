@@ -59,6 +59,7 @@ import java.util.*;
 
 import freemarker.template.*;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 import freemarker.ext.beans.BeansWrapper;
 
@@ -110,8 +111,8 @@ public class Configurable
     private String dateFormat;
     private String dateTimeFormat;
     private TimeZone timeZone;
-    private String trueFormat;
-    private String falseFormat;
+    private String trueStringValue;
+    private String falseStringValue;
     private Boolean classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
@@ -131,8 +132,8 @@ public class Configurable
         timeFormat = "";
         dateFormat = "";
         dateTimeFormat = "";
-        trueFormat = "true";
-        falseFormat = "false";
+        trueStringValue = "true";
+        falseStringValue = "false";
         classicCompatible = Boolean.FALSE;
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
@@ -169,8 +170,8 @@ public class Configurable
         this.parent = parent;
         locale = null;
         numberFormat = null;
-        trueFormat = null;
-        falseFormat = null;
+        trueStringValue = null;
+        falseStringValue = null;
         classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
@@ -315,6 +316,11 @@ public class Configurable
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
     }
 
+    /**
+     * Corresponds to the {@code "boolean_format"} setting in {@link #setSettings(Properties)}.
+     * @see #setTrueStringValue(String)
+     * @see #setFalseStringValue(String)
+     */
     public void setBooleanFormat(String booleanFormat) {
         if (booleanFormat == null) {
             throw new IllegalArgumentException("Setting \"boolean_format\" can't be null");
@@ -323,28 +329,59 @@ public class Configurable
         if(comma == -1) {
             throw new IllegalArgumentException("Setting \"boolean_format\" must consist of two comma-separated values for true and false respectively");
         }
-        trueFormat = booleanFormat.substring(0, comma);
-        falseFormat = booleanFormat.substring(comma + 1);
+        trueStringValue = booleanFormat.substring(0, comma);
+        falseStringValue = booleanFormat.substring(comma + 1);
         properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
     }
     
     public String getBooleanFormat() {
-        if(trueFormat == null) {
+        if(trueStringValue == null) {
             return parent.getBooleanFormat(); 
         }
-        return trueFormat + COMMA + falseFormat;
+        return trueStringValue + COMMA + falseStringValue;
     }
     
-    String getBooleanFormat(boolean value) {
-        return value ? getTrueFormat() : getFalseFormat(); 
+    String formatBoolean(boolean value) {
+        return value ? getTrueStringValue() : getFalseStringValue(); 
+    }
+
+    /**
+     * @since 2.3.20
+     */
+    public String getTrueStringValue() {
+        return trueStringValue != null ? trueStringValue : parent.getTrueStringValue(); 
+    }
+
+    /**
+     * Corresponds to the boolean true half of the {@code "boolean_format"} setting in {@link #setSettings(Properties)}.
+     * @since 2.3.20
+     */
+    public void setTrueStringValue(String trueStringValue) {
+        NullArgumentException.check("trueStringValue", trueStringValue);
+        if (trueStringValue.indexOf(',') != -1) {
+            throw new IllegalArgumentException("Boolean string values can't contain comma.");
+        }
+        this.trueStringValue = trueStringValue; 
     }
     
-    private String getTrueFormat() {
-        return trueFormat != null ? trueFormat : parent.getTrueFormat(); 
+    /**
+     * @since 2.3.20
+     */
+    public String getFalseStringValue() {
+        return falseStringValue != null ? falseStringValue : parent.getFalseStringValue(); 
     }
-    
-    private String getFalseFormat() {
-        return falseFormat != null ? falseFormat : parent.getFalseFormat(); 
+
+    /**
+     * Corresponds to the boolean false half of the {@code "boolean_format"} setting in
+     * {@link #setSettings(Properties)}.
+     * @since 2.3.20
+     */
+    public void setFalseStringValue(String falseStringValue) {
+        NullArgumentException.check("falseStringValue", falseStringValue);
+        if (falseStringValue.indexOf(',') != -1) {
+            throw new IllegalArgumentException("Boolean string values can't contain comma.");
+        }
+        this.falseStringValue = falseStringValue; 
     }
 
     /**

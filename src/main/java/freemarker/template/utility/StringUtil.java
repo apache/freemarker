@@ -693,6 +693,14 @@ public class StringUtil {
     }
 
     /**
+     * Same as {@link #replace(String, String, String, boolean, boolean)} with two {@code false} parameters. 
+     * @since 2.3.20
+     */
+    public static String replace(String text, String oldSub, String newSub) {
+        return replace(text, oldSub, newSub, false, false);
+    }
+    
+    /**
      * Replaces all occurrences of a sub-string in a string.
      * @param text The string where it will replace <code>oldsub</code> with
      *     <code>newsub</code>.

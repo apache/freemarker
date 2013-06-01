@@ -100,33 +100,36 @@ abstract public class Expression extends TemplateObject {
     {
         if (referentModel instanceof TemplateNumberModel) {
             return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) referentModel, exp, env));
-        }
-        if (referentModel instanceof TemplateDateModel) {
+        } else if (referentModel instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) referentModel;
             return env.formatDate(EvaluationUtil.getDate(dm, exp, env), dm.getDateType());
-        }
-        if (referentModel instanceof TemplateScalarModel) {
+        } else if (referentModel instanceof TemplateScalarModel) {
             return EvaluationUtil.getString((TemplateScalarModel) referentModel, exp, env);
-        }
-        
-        if(env.isClassicCompatible()) {
-            if (referentModel == null) {
+        } else if(referentModel == null) {
+            if (env.isClassicCompatible()) {
                 return "";
+            } else {
+                throw exp.invalidReferenceException(env);
             }
-            if (referentModel instanceof TemplateBooleanModel) {
-                return ((TemplateBooleanModel)referentModel).getAsBoolean() ? "true" : "";
+        } else if (referentModel instanceof TemplateBooleanModel) {
+            // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
+            // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
+            // this before TemplateScalarModel.
+            boolean booleanValue = ((TemplateBooleanModel) referentModel).getAsBoolean(); 
+            if (env.isClassicCompatible()) {
+                return booleanValue ? "true" : "";
+            } else {
+                return env.formatBoolean(booleanValue);
             }
         } else {
-            exp.assertNonNull(referentModel, env);
+            throw new NonStringException(
+                    "Error " + exp.getStartLocation()
+                    +"\nExpected a " + MessageUtil.TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING
+                    + ", but this evaluated to a value of type "
+                    + ClassUtil.getFTLTypeDescription(referentModel) + ":\n"
+                    + exp,
+                    env);
         }
-        
-        String msg = "Error " + exp.getStartLocation()
-                     +"\nExpected a string (or a value of type implicitly convertible to string: " 
-                     + (env.isClassicCompatible() ? "boolean, " : "" )
-                     + "date or number), but this evaluated to a value of type "
-                     + ClassUtil.getFTLTypeDescription(referentModel) + ":\n"
-                     + exp;
-        throw new NonStringException(msg, env);
     }
 
     Expression deepClone(String name, Expression subst) {

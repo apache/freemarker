@@ -608,10 +608,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
 
             public String getAsString() throws TemplateModelException {
+                // Boolean should have come first... but that change would be non-BC. 
                 if (bool instanceof TemplateScalarModel) {
                     return ((TemplateScalarModel) bool).getAsString();
                 } else {
-                    return env.getBooleanFormat(bool.getAsBoolean());
+                    return env.formatBoolean(bool.getAsBoolean());
                 }
             }
 
