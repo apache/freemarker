@@ -129,7 +129,7 @@ final class HashLiteral extends Expression {
                 Expression valExp = (Expression) values.get(i);
                 String key = keyExp.getStringValue(env);
                 TemplateModel value = valExp.getAsTemplateModel(env);
-                if (!env.isClassicCompatible()) {
+                if (env == null || !env.isClassicCompatible()) {
                     valExp.assertNonNull(value, env);
                 }
                 keyMap.put(key, value);
