@@ -41,7 +41,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                 blockFailed = false;
             } catch (Throwable e) {
                 blockFailed = true;
-                if (message != null && e.getMessage().indexOf(message) == -1) {
+                if (message != null && e.getMessage().toLowerCase().indexOf(message.toLowerCase()) == -1) {
                     throw new AssertationFailedInTemplateException(
                             "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(e.getMessage())
                             + "\ndoesn't contain:\n" + StringUtil.jQuote(message) + ".",
