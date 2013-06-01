@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import freemarker.template.*;
+import freemarker.template.utility.NumberUtil;
 import freemarker.template.utility.OptimizerUtil;
 import freemarker.template.utility.StringUtil;
 
@@ -140,9 +141,20 @@ public abstract class ArithmeticEngine {
         ArithmeticEngine    
     {
         public int compareNumbers(Number first, Number second) {
-            BigDecimal left = toBigDecimal(first);
-            BigDecimal right = toBigDecimal(second);
-            return left.compareTo(right);
+            // We try to find the result based on the sign (+/-/0) first, because:
+            // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
+            // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
+            int firstSignum = NumberUtil.getSignum(first); 
+            int secondSignum = NumberUtil.getSignum(second);
+            if (firstSignum != secondSignum) {
+                return firstSignum < secondSignum ? -1 : (firstSignum > secondSignum ? 1 : 0); 
+            } else if (firstSignum == 0 && secondSignum == 0) {
+                return 0;
+            } else {
+                BigDecimal left = toBigDecimal(first);
+                BigDecimal right = toBigDecimal(second);
+                return left.compareTo(right);
+            }
         }
     
         public Number add(Number first, Number second) {

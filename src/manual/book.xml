@@ -20114,6 +20114,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               especially for user who are not very experienced with
               FreeMarker.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed: With the default arithmetic engine, it's now
+              supported to compare infinite (positive or negative) with 0, do
+              decide its sign.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -20288,6 +20294,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>clear()</literal> and
               <literal>putAll(anyEmptyMap)</literal>, as these are
               non-destructive operations.</para>
+            </listitem>
+
+            <listitem>
+              <para>With default arithmetic engine, performance optimizations
+              of comparison operations when some of the numbers is 0, and when
+              the sign of the numbers differ.</para>
             </listitem>
 
             <listitem>
