@@ -20176,6 +20176,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Unnamed templates couldn't include or import other
+              templates, and thrown a <literal>NullPointerException</literal>
+              when they tried to. Now they resolve relative paths as if they
+              where in the template root directory. </para>
+            </listitem>
+
+            <listitem>
               <para>Added new method to <literal>Configuration</literal>:
               <literal>CacheStorage getCacheStorage()</literal></para>
             </listitem>

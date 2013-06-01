@@ -83,6 +83,10 @@ final class Include extends TemplateElement {
             Expression parseExp) throws ParseException
     {
         String templatePath1 = template.getName();
+        if (templatePath1 == null) {
+            // This can be the case if the template wasn't created throuh a TemplateLoader. 
+            templatePath1 = "";
+        }
         int lastSlash = templatePath1.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath1.substring(0, lastSlash + 1);
         this.includedTemplateName = includedTemplateName;
