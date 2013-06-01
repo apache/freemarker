@@ -299,7 +299,11 @@ class EvaluationUtil
                         : (leftExp != null
                             ? leftExp.getTemplate().getArithmeticEngine()
                             : ArithmeticEngine.BIGDECIMAL_ENGINE);
-            cmpResult = ae.compareNumbers(leftNum, rightNum);
+            try {
+                cmpResult = ae.compareNumbers(leftNum, rightNum);
+            } catch (RuntimeException e) {
+                throw new TemplateModelException("Unexpected error while comparing two numbers: " + e, e);
+            }
         } else if (leftValue instanceof TemplateDateModel && rightValue instanceof TemplateDateModel) {
             TemplateDateModel leftDateModel = (TemplateDateModel) leftValue;
             TemplateDateModel rightDateModel = (TemplateDateModel) rightValue;

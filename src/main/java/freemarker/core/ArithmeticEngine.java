@@ -58,6 +58,7 @@ import java.util.Map;
 
 import freemarker.template.*;
 import freemarker.template.utility.OptimizerUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Class to perform arithmetic operations.
@@ -526,6 +527,11 @@ public abstract class ArithmeticEngine {
     }
 
     private static BigDecimal toBigDecimal(Number num) {
-        return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+        try {
+            return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+        } catch (NumberFormatException e) {
+            // The exception message is useless, so we add a new one:
+            throw new NumberFormatException("Can't parse this as BigDecimal number: " + StringUtil.jQuote(num));
+        }
     }
 }
