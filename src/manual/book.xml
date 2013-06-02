@@ -20399,7 +20399,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fix [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/361/">364</link>]:
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/364/">364</link>]:
               <literal>freemarker.template.EmptyMap</literal> (which is passed
               to <literal>TemplateDirectiveModel</literal>-s if there are no
               parameters) now allows <literal>remove(key)</literal>,
@@ -20410,12 +20410,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fix [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/361/">375</link>]:
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/375/">375</link>]:
               <literal>NullPointerException</literal> in
               <literal>BeansWrapper</literal> when the Java implementation
               legally returns <literal>null</literal> for some
               <literal>BeanInfo</literal> getters (actually happens on IBM J9
               VM).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fix [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/377/">377</link>]:
+              After a failed method call the exception handler could fail in
+              the rare occasion when
+              <literal>targetObject.toString()</literal> fails, raising a
+              runtime exception that not even the <literal>attempt</literal>
+              directive will catch.</para>
             </listitem>
 
             <listitem>

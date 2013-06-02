@@ -64,6 +64,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Wraps a set of same-name overloaded methods behind {@link freemarker.template.TemplateMethodModel} interface,
@@ -118,7 +119,7 @@ implements
             if((method.getModifiers() & Modifier.STATIC) != 0)
             {
                 throw new TemplateModelException("Method " + method + 
-                        " threw an exception", e);
+                        " threw an exception. See cause exception.", e);
             }
             else
             {
@@ -130,8 +131,10 @@ implements
                     buf.append(arg == null ? "null" : arg.getClass().getName()).append(',');
                 }
                 throw new TemplateModelException("Method " + method + 
-                        " threw an exception when invoked on " + object + 
-                        " with arguments of types [" + buf + "]", e);
+                        " threw an exception when invoked on "
+                        + object.getClass().getName() + " object "
+                        + StringUtil.jQuote(StringUtil.tryToString(object))
+                        + " with arguments of types [" + buf + "]. See cause exception.", e);
             }
         }
     }

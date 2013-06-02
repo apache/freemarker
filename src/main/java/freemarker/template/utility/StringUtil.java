@@ -1473,5 +1473,23 @@ public class StringUtil {
                 : "<" + tagContent + ">";
                 
     }
+
+    /**
+     * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
+     * Also, it return {@code null} for {@code null} parameter.  
+     */
+    public static String tryToString(Object object) {
+        if (object == null) return null;
+        
+        try {
+            return object.toString();
+        } catch (Throwable e) {
+            try {
+                return "[toString() failed: " + e + "]";
+            } catch (Throwable e2) {
+                return "[toString() failed: " + e.getClass().getName() + "]";
+            }
+        }
+    }
     
 }

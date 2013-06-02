@@ -220,7 +220,7 @@ implements
         catch(Exception e)
         {
             throw new TemplateModelException("get(" + key + ") failed on " +
-                "instance of " + object.getClass().getName(), e);
+                "instance of " + object.getClass().getName() + ". See cause exception.", e);
         }
     }
 
