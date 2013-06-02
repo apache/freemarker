@@ -1217,18 +1217,21 @@ public class BeansWrapper implements ObjectWrapper
     private void addBeanInfoToClassInrospectionData(Map introspData, Class clazz,
             Map accessibleMethods) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+        
         PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
-        MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
-
-        for(int i = pda.length - 1; i >= 0; --i) {
+        int pdaLength = pda != null ? pda.length : 0;
+        for(int i = pdaLength - 1; i >= 0; --i) {
             addPropertyDescriptorToClassIntrospectionData(
                     pda[i], clazz, accessibleMethods,
                     introspData);
         }
+        
         if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
         {
             MethodAppearanceDecision decision = new MethodAppearanceDecision();  
-            for(int i = mda.length - 1; i >= 0; --i)
+            MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
+            int mdaLength = mda != null ? mda.length : 0;  
+            for(int i = mdaLength - 1; i >= 0; --i)
             {
                 MethodDescriptor md = mda[i];
                 Method publicMethod = getAccessibleMethod(
@@ -1278,7 +1281,7 @@ public class BeansWrapper implements ObjectWrapper
                     }
                 }
             }
-        }
+        } // end if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(PropertyDescriptor pd,
