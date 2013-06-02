@@ -169,7 +169,6 @@ import java.util.Locale;
  * </ul>
  * 
  * @author Attila Szegedi
- * @version $Id: FreemarkerServlet.java,v 1.82.2.5 2006/06/21 13:02:01 ddekany Exp $
  */
 
 public class FreemarkerServlet extends HttpServlet

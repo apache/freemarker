@@ -63,7 +63,6 @@ package freemarker.template;
  * @see SimpleCollection
  *
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
- * @version $Id: TemplateCollectionModel.java,v 1.10 2003/01/12 23:40:21 revusky Exp $
  */
 public interface TemplateCollectionModel extends TemplateModel {
 

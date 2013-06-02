@@ -62,9 +62,6 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateTransformModel;
 
-/**
- * @version $Id: BlockAssignment.java,v 1.4 2004/07/07 21:11:12 szegedia Exp $
- */
 final class BlockAssignment extends TemplateElement {
 
     private final String varName;

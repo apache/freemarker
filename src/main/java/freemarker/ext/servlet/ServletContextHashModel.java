@@ -63,7 +63,6 @@ import freemarker.template.TemplateModelException;
 /**
  * TemplateHashModel wrapper for a ServletContext attributes.
  * @author Attila Szegedi
- * @version $Id: ServletContextHashModel.java,v 1.12 2003/01/12 23:40:14 revusky Exp $
  */
 public final class ServletContextHashModel implements TemplateHashModel
 {

@@ -76,7 +76,6 @@ import freemarker.template.TemplateModelException;
  * <tt>preTemplateProcess</tt>) are discovered as "page" variables by the FM
  * JSP PageContext implementation.
  * @author Attila Szegedi
- * @version $Id: AllHttpScopesHashModel.java,v 1.5.4.1 2006/04/26 12:22:07 szegedia Exp $
  */
 public class AllHttpScopesHashModel extends SimpleHash
 {

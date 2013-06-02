@@ -66,10 +66,10 @@ package freemarker.template;
  * @see TemplateCollectionModel
  * @see TemplateDirectiveModel
  * @see TemplateMethodModelEx
- *
- * @version $Id: TemplateModel.java,v 1.19 2003/01/12 23:40:21 revusky Exp $
  */
-public interface TemplateModel {    /**
+public interface TemplateModel {
+    
+    /**
      * A general-purpose object to represent nothing. It acts as
      * an empty string, false, empty sequence, empty hash, and
      * null-returning method model.

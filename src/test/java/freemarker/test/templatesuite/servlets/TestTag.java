@@ -61,7 +61,6 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
 /**
- * @version $Id: TestTag.java,v 1.6 2003/01/12 23:40:26 revusky Exp $
  * @author Attila Szegedi
  */
 public class TestTag extends BodyTagSupport implements TryCatchFinally

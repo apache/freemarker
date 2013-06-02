@@ -55,7 +55,6 @@ package freemarker.core;
 /**
  * An instruction that indicates that that opening
  * and trailing whitespace on this line should be trimmed.
- * @version $Id: TrimInstruction.java,v 1.2 2003/08/29 09:42:38 revusky Exp $
  */
 final class TrimInstruction extends TemplateElement {
 

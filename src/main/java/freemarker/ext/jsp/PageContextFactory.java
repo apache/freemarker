@@ -9,7 +9,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: PageContextFactory.java,v 1.2 2005/06/11 21:21:09 szegedia Exp $
  */
 class PageContextFactory {
     private static final Class pageContextImpl = getPageContextImpl();

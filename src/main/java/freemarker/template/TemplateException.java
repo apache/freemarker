@@ -62,8 +62,6 @@ import freemarker.core.Environment;
 /**
  * The FreeMarker classes usually use this exception and its descendants to
  * signal FreeMarker specific exceptions.
- *
- * @version $Id: TemplateException.java,v 1.26.2.1 2006/02/12 20:02:15 revusky Exp $
  */
 public class TemplateException extends Exception {
 

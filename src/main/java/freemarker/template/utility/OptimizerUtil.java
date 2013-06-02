@@ -59,7 +59,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @version $Id: OptimizerUtil.java,v 1.9 2003/02/25 11:52:58 szegedia Exp $
  * @author Attila Szegedi
  */
 public class OptimizerUtil

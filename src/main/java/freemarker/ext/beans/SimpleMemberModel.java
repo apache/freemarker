@@ -65,7 +65,6 @@ import freemarker.template.utility.StringUtil;
 /**
  * This class is used for constructors and as a base for non-overloaded methods
  * @author Attila Szegedi
- * @version $Id: $
  */
 class SimpleMemberModel
 {

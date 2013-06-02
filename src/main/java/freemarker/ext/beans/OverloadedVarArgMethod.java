@@ -64,7 +64,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 class OverloadedVarargMethods extends OverloadedMethodsSubset
 {

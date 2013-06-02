@@ -62,8 +62,6 @@ import freemarker.ext.dom.NodeModel;
 /**
  * <p>The default implementation of the ObjectWrapper
  * interface.
- *
- * @version $Id: DefaultObjectWrapper.java,v 1.23 2005/06/08 00:06:19 revusky Exp $
  */
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     

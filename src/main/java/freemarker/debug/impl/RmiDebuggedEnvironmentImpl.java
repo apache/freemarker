@@ -27,7 +27,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: RmiDebuggedEnvironmentImpl.java,v 1.3.2.2 2006/11/27 07:55:17 szegedia Exp $
  */
 class RmiDebuggedEnvironmentImpl
 extends

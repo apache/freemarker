@@ -4,7 +4,6 @@ import java.lang.reflect.Member;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 class MemberAndArguments {
     private final Member member;

@@ -112,7 +112,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * Utility class that provides generic services to reflection classes.
  * It handles all polymorphism issues in the {@link #wrap(Object)} and {@link #unwrap(TemplateModel)} methods.
  * @author Attila Szegedi
- * @version $Id: BeansWrapper.java,v 1.91.2.13 2007/04/02 13:08:59 szegedia Exp $
  */
 public class BeansWrapper implements ObjectWrapper
 {

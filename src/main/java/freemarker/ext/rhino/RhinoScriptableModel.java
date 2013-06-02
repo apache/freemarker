@@ -22,7 +22,6 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * @author Attila Szegedi
- * @version $Id: RhinoScriptableModel.java,v 1.4 2005/06/22 10:52:52 ddekany Exp $
  */
 public class RhinoScriptableModel implements TemplateHashModelEx, 
 TemplateSequenceModel, AdapterTemplateModel, TemplateScalarModel, 

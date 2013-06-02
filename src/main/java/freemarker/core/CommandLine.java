@@ -59,8 +59,6 @@ import freemarker.template.utility.DateUtil;
 /**
  * FreeMarker command-line utility, the Main-Class of <tt>freemarker.jar</tt>.
  * Currently it just prints the version number.
- *
- * @version $Id: CommandLine.java,v 1.2 2003/09/24 12:15:08 ddekany Exp $
  */
 public class CommandLine {
     

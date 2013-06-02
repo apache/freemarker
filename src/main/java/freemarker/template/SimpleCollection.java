@@ -69,8 +69,6 @@ import java.util.*;
  *
  * <p>This class is thread-safe. The returned <tt>TemplateModelIterator</tt>-s
  * are <em>not</em> thread-safe.
- *
- * @version $Id: SimpleCollection.java,v 1.13 2004/11/27 14:49:57 ddekany Exp $
  */
 public class SimpleCollection extends WrappingTemplateModel
 implements TemplateCollectionModel, Serializable {

@@ -75,7 +75,6 @@ import freemarker.ext.beans.BeansWrapper;
  * parent of a <code>Template</code> object is a <code>Configuration</code>
  * object.
  *
- * @version $Id: Configurable.java,v 1.23.2.2 2007/04/02 13:46:43 szegedia Exp $
  * @author Attila Szegedi
  */
 public class Configurable

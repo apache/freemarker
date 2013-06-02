@@ -90,7 +90,6 @@ import freemarker.template.TemplateException;
 import freemarker.test.templatesuite.TemplateTestCase;
 
 /**
- * @version $Id: TestJspTaglibs.java,v 1.13 2005/06/12 00:44:39 revusky Exp $
  * @author Attila Szegedi
  */
 public class TestJspTaglibs extends TestCase {

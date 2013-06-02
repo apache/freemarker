@@ -73,7 +73,6 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * Utility methods for unwrapping {@link TemplateModel}-s.
  * @author Attila Szegedi
- * @version $Id: DeepUnwrap.java,v 1.6 2005/06/16 18:13:58 ddekany Exp $
  */
 public class DeepUnwrap
 {

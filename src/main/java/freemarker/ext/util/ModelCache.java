@@ -62,7 +62,6 @@ import freemarker.template.TemplateModelAdapter;
 /**
  * Internally used by various wrapper implementations to implement model
  * caching.
- * @version $Id: ModelCache.java,v 1.9 2003/01/12 23:40:15 revusky Exp $
  * @author Attila Szegedi
  */
 public abstract class ModelCache

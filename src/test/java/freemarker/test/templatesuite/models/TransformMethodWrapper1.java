@@ -58,8 +58,6 @@ import freemarker.template.utility.*;
 
 /**
  * Simple test of the interaction between MethodModels and TransformModels.
- *
- * @version $Id: TransformMethodWrapper1.java,v 1.12 2004/01/06 17:06:44 szegedia Exp $
  */
 public class TransformMethodWrapper1 extends Object implements TemplateMethodModel {
 

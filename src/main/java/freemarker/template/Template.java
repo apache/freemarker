@@ -106,10 +106,7 @@ import freemarker.debug.impl.DebuggerService;
  * <p>It's not legal to modify the values of FreeMarker settings: a) while the
  * template is executing; b) if the template object is already accessible from
  * multiple threads.
- * 
- * @version $Id: Template.java,v 1.216.2.3 2006/03/10 17:49:02 revusky Exp $
  */
-
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";

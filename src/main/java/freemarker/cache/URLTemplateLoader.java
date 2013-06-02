@@ -63,7 +63,6 @@ import java.net.URL;
  * location can be described by an URL. Subclasses only need to override
  * the {@link #getURL(String)} method. Both {@link ClassTemplateLoader} and
  * {@link WebappTemplateLoader} are (quite trivial) subclasses of this class.
- * @version $Id: URLTemplateLoader.java,v 1.14 2003/01/29 08:01:17 szegedia Exp $
  * @author Attila Szegedi
  */
 public abstract class URLTemplateLoader implements TemplateLoader

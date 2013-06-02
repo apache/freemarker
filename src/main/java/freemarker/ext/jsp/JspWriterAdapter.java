@@ -1,6 +1,3 @@
-/**
- * 
- */
 package freemarker.ext.jsp;
 
 import java.io.IOException;

@@ -6,7 +6,6 @@ import java.util.EventObject;
  * Event describing a suspension of an environment (ie because it hit a
  * breakpoint).
  * @author Attila Szegedi
- * @version $Id: EnvironmentSuspendedEvent.java,v 1.1.2.1 2006/11/27 07:54:19 szegedia Exp $
  */
 public class EnvironmentSuspendedEvent extends EventObject
 {

@@ -55,7 +55,6 @@ package freemarker.log;
 import org.apache.log.Hierarchy;
 
 /**
- * @version $Id: AvalonLoggerFactory.java,v 1.7 2003/01/27 20:36:43 szegedia Exp $
  * @author Attila Szegedi
  */
 class AvalonLoggerFactory implements LoggerFactory

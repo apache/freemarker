@@ -75,7 +75,6 @@ import freemarker.template.TemplateModelException;
  * <tt>map.values()</tt> to obtain {@link freemarker.template.TemplateCollectionModel} instances for 
  * various aspects of the map.</p>
  * @author Attila Szegedi
- * @version $Id: MapModel.java,v 1.26.2.3 2006/02/26 18:26:37 revusky Exp $
  */
 public class MapModel
 extends

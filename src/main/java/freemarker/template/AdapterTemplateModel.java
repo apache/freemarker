@@ -9,7 +9,6 @@ package freemarker.template;
  * implemented by applications. It is tipically implemented by adapter classes
  * used for wrapping in various object wrapper implementation.  
  * @author Attila Szegedi
- * @version $Id: AdapterTemplateModel.java,v 1.1 2005/06/12 19:03:07 szegedia Exp $
  */
 public interface AdapterTemplateModel extends TemplateModel {
     /**

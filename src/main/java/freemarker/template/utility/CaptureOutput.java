@@ -84,8 +84,6 @@ import java.util.Map;
  * common usage pattern.</p>
  *
  * @deprecated Use block-assignments instead, as <code>&lt;assign x>...&lt;/assign></code>.
- *
- * @version $Id: CaptureOutput.java,v 1.31 2004/01/06 17:06:43 szegedia Exp $
  */
 public class CaptureOutput implements TemplateTransformModel {
 

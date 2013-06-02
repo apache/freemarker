@@ -53,7 +53,6 @@
 package freemarker.log;
 
 /**
- * @version $Id: NullLoggerFactory.java,v 1.9 2003/01/27 20:36:45 szegedia Exp $
  * @author Attila Szegedi
  */
 class NullLoggerFactory implements LoggerFactory

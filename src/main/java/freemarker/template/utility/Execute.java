@@ -86,8 +86,6 @@ import java.util.*;
  *
  * ...
  * </pre>
- *
- * @version $Id: Execute.java,v 1.14 2003/10/13 11:57:18 szegedia Exp $
  */
 public class Execute implements freemarker.template.TemplateMethodModel {
 

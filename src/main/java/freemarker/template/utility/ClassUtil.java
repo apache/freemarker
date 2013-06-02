@@ -86,7 +86,6 @@ import freemarker.template.TemplateTransformModel;
 
 /**
  * @author Attila Szegedi
- * @version $Id: ClassUtil.java,v 1.1 2003/03/06 13:16:31 szegedia Exp $
  */
 public class ClassUtil
 {

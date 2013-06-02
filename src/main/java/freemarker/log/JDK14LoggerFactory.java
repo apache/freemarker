@@ -55,7 +55,6 @@ package freemarker.log;
 import java.util.logging.Level;
 
 /**
- * @version $Id: JDK14LoggerFactory.java,v 1.8 2003/01/27 20:36:44 szegedia Exp $
  * @author Attila Szegedi
  */
 class JDK14LoggerFactory implements LoggerFactory

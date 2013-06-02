@@ -55,8 +55,6 @@ package freemarker.template;
 /**
  * Objects that will be interpreted as true/false in the appropriate
  * context must implement this interface.
- *
- * @version $Id: TemplateBooleanModel.java,v 1.8 2003/01/12 23:40:21 revusky Exp $
  */
 public interface TemplateBooleanModel extends TemplateModel {
 

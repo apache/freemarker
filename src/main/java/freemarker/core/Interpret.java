@@ -66,7 +66,6 @@ import freemarker.template.*;
  * <tt>executingTemplate.getName() + "$anonymous_interpreted"</tt>. You can
  * specify another parameter to the method call in which case the
  * template name suffix is the specified id instead of "anonymous_interpreted".
- * @version $Id: Interpret.java,v 1.2 2005/06/16 18:13:56 ddekany Exp $
  * @author Attila Szegedi
  */
 class Interpret extends BuiltIn

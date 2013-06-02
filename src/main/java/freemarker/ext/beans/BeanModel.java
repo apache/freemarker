@@ -89,7 +89,6 @@ import freemarker.template.utility.StringUtil;
  * access indexed properties. It uses Beans {@link java.beans.Introspector}
  * to dynamically discover the properties and methods. 
  * @author Attila Szegedi
- * @version $Id: BeanModel.java,v 1.49.2.4 2006/11/12 10:20:37 szegedia Exp $
  */
 
 public class BeanModel

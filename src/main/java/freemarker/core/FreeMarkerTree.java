@@ -64,7 +64,6 @@ import javax.swing.tree.TreeNode;
 /**
  * Allows exposure of a FreeMarker template's AST as a Swing tree.
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class FreeMarkerTree extends JTree {
     private static final long serialVersionUID = 1L;

@@ -7,7 +7,6 @@ import freemarker.template.Configuration;
  * sort of internal state (i.e. caches of earlier lookups for performance 
  * optimization purposes etc.) and support resetting of their state. 
  * @author Attila Szegedi
- * @version $Id: StatefulTemplateLoader.java,v 1.1.2.1 2007/04/03 18:06:07 szegedia Exp $
  */
 public interface StatefulTemplateLoader extends TemplateLoader
 {

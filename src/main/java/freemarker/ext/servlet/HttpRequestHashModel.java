@@ -60,7 +60,6 @@ import freemarker.template.*;
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.
  * @author Attila Szegedi
- * @version $Id: HttpRequestHashModel.java,v 1.16 2005/05/05 07:49:58 vsajip Exp $
  */
 public final class HttpRequestHashModel implements TemplateHashModelEx
 {

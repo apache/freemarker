@@ -65,7 +65,6 @@ import freemarker.template.utility.SecurityUtilities;
  * not usable for anyone outside the FreeMarker core classes. It is public only
  * as an implementation detail.
  * @author Attila Szegedi
- * @version $Id: DebuggerService.java,v 1.2 2003/05/30 16:51:53 szegedia Exp $
  */
 public abstract class DebuggerService
 {

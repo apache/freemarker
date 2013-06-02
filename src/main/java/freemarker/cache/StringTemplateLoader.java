@@ -90,10 +90,8 @@ import java.util.Map;
  * want to combine a <tt>StringTemplateLoader</tt> with another loader. You can
  * do so using a {@link freemarker.cache.MultiTemplateLoader}.
  *
- * @version $Id: v 1.0 2005/04/01
  * @author Meikel Bisping
  * @author Attila Szegedi
- * @version $Id: StringTemplateLoader.java,v 1.1 2005/04/08 11:47:53 szegedia Exp $
  */
 public class StringTemplateLoader implements TemplateLoader {
     private final Map templates = new HashMap();

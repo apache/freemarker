@@ -57,8 +57,6 @@ import freemarker.template.*;
 
 /**
  * A simple method model used as a test bed.
- *
- * @version $Id: SimpleTestMethod.java,v 1.12 2004/01/06 17:06:44 szegedia Exp $
  */
 public class SimpleTestMethod implements TemplateMethodModel {
 

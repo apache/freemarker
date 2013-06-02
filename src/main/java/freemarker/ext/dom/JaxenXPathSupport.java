@@ -76,7 +76,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * @author Jonathan Revusky
- * @version $Id: JaxenXPathSupport.java,v 1.30 2003/12/20 01:17:30 ddekany Exp $
  */
 class JaxenXPathSupport implements XPathSupport {
     

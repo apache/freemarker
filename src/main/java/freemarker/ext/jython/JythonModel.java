@@ -72,7 +72,6 @@ import freemarker.template.TemplateScalarModel;
 
 /**
  * Generic model for arbitrary Jython objects.
- * @version $Id: JythonModel.java,v 1.14 2005/06/12 19:03:06 szegedia Exp $
  * @author Attila Szegedi
  */
 public class JythonModel

@@ -73,7 +73,6 @@ import freemarker.template.TemplateModelException;
  * Unfortunately, there is currently no support for bean property-style
  * calls of static methods, similar to that in {@link BeanModel}.
  * @author Attila Szegedi
- * @version $Id: StaticModel.java,v 1.24.2.1 2006/11/12 10:23:02 szegedia Exp $
  */
 final class StaticModel implements TemplateHashModelEx
 {

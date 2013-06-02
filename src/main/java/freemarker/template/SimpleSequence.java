@@ -77,7 +77,6 @@ import freemarker.ext.beans.BeansWrapper;
  * As of 2.0, this class is unsynchronized by default.
  * To obtain a synchronized wrapper, call the {@link #synchronizedWrapper} method.</p>
  *
- * @version $Id: SimpleSequence.java,v 1.53 2005/06/21 18:17:54 ddekany Exp $
  * @see SimpleHash
  * @see SimpleScalar
  */

@@ -68,7 +68,6 @@ import freemarker.template.utility.StringUtil;
 /**
  * A {@link TemplateLoader} that uses streams reachable through 
  * {@link ServletContext#getResource(String)} as its source of templates.
- * @version $Id: WebappTemplateLoader.java,v 1.10 2003/01/29 08:01:18 szegedia Exp $
  * @author Attila Szegedi
  */
 public class WebappTemplateLoader implements TemplateLoader

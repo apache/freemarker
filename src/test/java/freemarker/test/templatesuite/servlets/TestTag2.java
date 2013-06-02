@@ -58,7 +58,6 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
 /**
- * @version $Id: TestTag2.java,v 1.4 2003/01/12 23:40:26 revusky Exp $
  * @author Attila Szegedi
  */
 public class TestTag2 extends TagSupport

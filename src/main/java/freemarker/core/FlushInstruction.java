@@ -56,7 +56,6 @@ import java.io.IOException;
 
 /**
  * An instruction that flushes the output stream.
- * @version $Id: FlushInstruction.java,v 1.2 2004/01/06 17:06:42 szegedia Exp $
  */
 final class FlushInstruction extends TemplateElement {
 

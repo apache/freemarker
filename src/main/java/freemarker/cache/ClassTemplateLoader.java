@@ -58,7 +58,6 @@ import java.net.URL;
  * A {@link TemplateLoader} that uses streams reachable through 
  * {@link Class#getResourceAsStream(String)} as its source of templates.
  * @author Attila Szegedi, szegedia at freemail dot hu
- * @version $Id: ClassTemplateLoader.java,v 1.9.2.3 2005/10/10 21:28:46 ddekany Exp $
  */
 public class ClassTemplateLoader extends URLTemplateLoader
 {

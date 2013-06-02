@@ -68,7 +68,6 @@ import freemarker.template.utility.DeepUnwrap;
  * operate on POJOs that might be underlying the models, it can use the static 
  * utility methods in the {@link DeepUnwrap} class to easily obtain them.
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
- * @version $Id: TemplateMethodModelEx.java,v 1.8 2003/01/12 23:40:21 revusky Exp $
  */
 public interface TemplateMethodModelEx extends TemplateMethodModel {
 

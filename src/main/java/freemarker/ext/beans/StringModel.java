@@ -62,7 +62,6 @@ import freemarker.template.TemplateScalarModel;
  * java.lang.Object#toString()} method through the {@link TemplateScalarModel}
  * interface.
  * @author Attila Szegedi
- * @version $Id: StringModel.java,v 1.9 2003/06/03 13:21:33 szegedia Exp $
  */
 public class StringModel extends BeanModel
 implements TemplateScalarModel

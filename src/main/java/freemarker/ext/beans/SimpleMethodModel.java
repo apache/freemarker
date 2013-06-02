@@ -73,7 +73,6 @@ import freemarker.template.utility.StringUtil;
  * It is used by {@link BeanModel} to wrap reflected method calls
  * for non-overloaded methods.
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
- * @version $Id: SimpleMethodModel.java,v 1.27 2005/06/11 12:12:04 szegedia Exp $
  */
 public final class SimpleMethodModel extends SimpleMemberModel
     implements

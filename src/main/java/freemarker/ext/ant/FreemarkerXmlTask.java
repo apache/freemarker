@@ -248,7 +248,6 @@ import freemarker.template.*;
  * @author Attila Szegedi
  * @author Jonathan Revusky, jon@revusky.com
  * @deprecated <a href="http://fmpp.sourceforge.net">FMPP</a> is a more complete solution.
- * @version $Id: FreemarkerXmlTask.java,v 1.58.2.1 2006/04/26 11:07:58 revusky Exp $
  */
 public class FreemarkerXmlTask
 extends

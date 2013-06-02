@@ -101,8 +101,6 @@ import freemarker.template.TemplateTransformModel;
  * extraneous
  * whitespace removed.&lt;/p&gt;
  * </pre>
- * 
- * @version $Id: StandardCompress.java,v 1.14 2004/01/06 17:06:43 szegedia Exp $
  */
 public class StandardCompress implements TemplateTransformModel {
     private static final String BUFFER_SIZE_KEY = "buffer_size";

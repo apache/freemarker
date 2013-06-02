@@ -39,7 +39,6 @@ import freemarker.template.utility.DeepUnwrap;
  * request. In this case values in 'params' will get prepended to the existing
  * values of parameters.
  * @author Attila Szegedi
- * @version $Id: $
  */
 public class IncludePage implements TemplateDirectiveModel
 {

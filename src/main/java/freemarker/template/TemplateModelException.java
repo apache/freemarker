@@ -57,8 +57,6 @@ import freemarker.core.Environment;
 /**
  * Template model implementation classes should throw this exception if
  * requested data cannot be retrieved.  
- *
- * @version $Id: TemplateModelException.java,v 1.14 2003/04/22 21:03:22 revusky Exp $
  */
 public class TemplateModelException extends TemplateException {
 

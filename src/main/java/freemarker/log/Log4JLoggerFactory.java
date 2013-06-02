@@ -55,7 +55,6 @@ package freemarker.log;
 import org.apache.log4j.Level;
 
 /**
- * @version $Id: Log4JLoggerFactory.java,v 1.8 2005/05/04 12:02:43 ddekany Exp $
  * @author Attila Szegedi
  */
 class Log4JLoggerFactory implements LoggerFactory

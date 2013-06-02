@@ -63,7 +63,6 @@ import freemarker.template.TemplateSequenceModel;
  * list.
  *
  * @author Daniel Dekany
- * @version $Id: TemplateModelListSequence.java,v 1.2 2004/01/06 17:06:43 szegedia Exp $
  */
 public class TemplateModelListSequence implements TemplateSequenceModel {
     private List list;

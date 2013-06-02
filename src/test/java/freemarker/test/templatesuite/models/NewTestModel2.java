@@ -56,8 +56,6 @@ import freemarker.template.*;
 
 /**
  * Testcase to see how FreeMarker's ?new built-in deals with constructors.
- *
- * @version $Id: NewTestModel.java,v 1.4 2003/01/12 23:40:25 revusky Exp $
  */
 public class NewTestModel2
 implements

@@ -14,7 +14,6 @@ import freemarker.template.utility.DeepUnwrap;
  *
  * @since 2.3.11
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface TemplateDirectiveModel extends TemplateModel
 {

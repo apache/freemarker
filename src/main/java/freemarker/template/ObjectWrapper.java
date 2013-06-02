@@ -56,10 +56,7 @@ import freemarker.ext.beans.BeansWrapper;
 
 /**
  * <p>An object that knows how to "wrap" a java object
- * as a TemplateModel instance.
- *
- * @version $Id: ObjectWrapper.java,v 1.15 2003/06/22 17:50:28 ddekany Exp $
- */
+ * as a TemplateModel instance. */
 public interface ObjectWrapper {
     /**
      * An ObjectWrapper that works similarly to {@link #SIMPLE_WRAPPER}, but

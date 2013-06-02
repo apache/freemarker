@@ -66,8 +66,6 @@ import freemarker.template.Version;
 
 /**
  *  Some text related utilities.
- *
- *  @version $Id: StringUtil.java,v 1.48 2005/06/01 22:39:08 ddekany Exp $
  */
 public class StringUtil {
     private static final char[] ESCAPES = createEscapes();

@@ -63,7 +63,6 @@ import org.jaxen.NamespaceContext;
 import freemarker.template.TemplateModelException;
 
 /**
- * @version $Id: Navigator.java,v 1.4 2003/01/31 11:39:17 szegedia Exp $
  * @author Attila Szegedi
  */
 abstract class Navigator {

@@ -56,8 +56,6 @@ import freemarker.template.*;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
- *
- * @version $Id: MultiModel5.java,v 1.12 2004/01/06 17:06:44 szegedia Exp $
  */
 public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
 

@@ -13,7 +13,6 @@ import freemarker.log.Logger;
 /**
  * Used by the {@link DebuggerClient} to create local 
  * @author Attila Szegedi
- * @version $Id: RmiDebuggerListenerImpl.java,v 1.1.2.1 2006/11/27 07:54:49 szegedia Exp $
  */
 public class RmiDebuggerListenerImpl
 extends

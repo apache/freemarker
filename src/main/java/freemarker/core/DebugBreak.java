@@ -59,7 +59,6 @@ import freemarker.template.TemplateException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: DebugBreak.java,v 1.2 2004/09/11 13:11:14 stephanmueller Exp $
  */
 public class DebugBreak extends TemplateElement
 {

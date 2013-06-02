@@ -71,7 +71,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: DebuggerServer.java,v 1.3 2004/09/09 15:34:38 szegedia Exp $
  */
 class DebuggerServer
 {

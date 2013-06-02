@@ -86,9 +86,6 @@ import java.util.Map;
  *   &lt;/html&gt;
  * &lt;/transform&gt;
  * </pre>
- *
- *
- * @version $Id: NormalizeNewlines.java,v 1.29 2003/04/11 20:57:32 revusky Exp $
  */
 public class NormalizeNewlines implements TemplateTransformModel {
 

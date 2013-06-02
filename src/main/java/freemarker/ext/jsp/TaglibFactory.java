@@ -95,7 +95,6 @@ import freemarker.template.utility.StringUtil;
  * {@link freemarker.ext.servlet.FreemarkerServlet} under key
  * <tt>JspTaglibs</tt>. It can be added to custom servlets as well to enable JSP
  * taglib integration in them as well.
- * @version $Id: TaglibFactory.java,v 1.26.2.1 2007/05/16 12:13:04 szegedia Exp $
  * @author Attila Szegedi
  */
 public class TaglibFactory implements TemplateHashModel {

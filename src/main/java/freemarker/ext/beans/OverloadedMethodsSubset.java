@@ -62,7 +62,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 abstract class OverloadedMethodsSubset {
     static final Object NO_SUCH_METHOD = new Object();

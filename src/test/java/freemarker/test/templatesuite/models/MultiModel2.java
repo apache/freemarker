@@ -57,8 +57,6 @@ import java.util.*;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
- *
- * @version $Id: MultiModel2.java,v 1.15 2004/01/06 17:06:44 szegedia Exp $
  */
 public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
 

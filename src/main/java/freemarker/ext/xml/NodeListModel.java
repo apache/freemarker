@@ -95,7 +95,6 @@ import freemarker.template.utility.Collections12;
  * this model.</p>
  *
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
- * @version $Id: NodeListModel.java,v 1.15 2004/01/06 17:06:43 szegedia Exp $
  * @author Attila Szegedi
  */
 public class NodeListModel

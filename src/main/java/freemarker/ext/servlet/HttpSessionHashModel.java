@@ -66,7 +66,6 @@ import freemarker.template.TemplateModelException;
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.
  * @author Attila Szegedi
- * @version $Id: HttpSessionHashModel.java,v 1.14.4.1 2006/04/19 16:16:43 szegedia Exp $
  */
 
 public final class HttpSessionHashModel implements TemplateHashModel, Serializable

@@ -60,7 +60,6 @@ import java.util.List;
 /**
  * 
  * @author Attila Szegedi
- * @version $Id: $
  */
 final class ClassString
 {
@@ -203,7 +202,6 @@ final class ClassString
     /**
      * Returns true if the supplied method is applicable to actual
      * parameter classes represented by this ClassString object.
-     * 
      */
     private boolean isApplicable(Member member, boolean varArg) {
         final Class[] formalTypes = MethodUtilities.getParameterTypes(member);

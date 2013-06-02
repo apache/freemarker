@@ -110,7 +110,6 @@ import freemarker.template.utility.XmlEscape;
  *
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @author Attila Szegedi
- * @version $Id: Configuration.java,v 1.122.2.5 2006/04/26 21:25:19 ddekany Exp $
  */
 
 public class Configuration extends Configurable implements Cloneable {

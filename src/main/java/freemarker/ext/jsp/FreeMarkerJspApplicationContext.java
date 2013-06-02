@@ -26,7 +26,6 @@ import freemarker.template.utility.ClassUtil;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 class FreeMarkerJspApplicationContext implements JspApplicationContext
 {

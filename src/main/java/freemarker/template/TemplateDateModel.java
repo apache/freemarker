@@ -64,8 +64,6 @@ import java.util.List;
  * represented using this single interface, however there's a method that
  *
  * @author Attila Szegedi
- *
- * @version $Id: TemplateDateModel.java,v 1.10 2004/03/13 13:05:09 ddekany Exp $
  */
 public interface TemplateDateModel extends TemplateModel
 {

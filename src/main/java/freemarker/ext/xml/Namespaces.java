@@ -60,7 +60,6 @@ import java.util.HashMap;
 
 /**
  * @author Attila Szegedi
- * @version $Id: Namespaces.java,v 1.4 2003/10/13 11:57:50 szegedia Exp $
  */
 class Namespaces
 implements

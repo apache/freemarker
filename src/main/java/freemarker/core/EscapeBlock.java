@@ -57,7 +57,6 @@ import freemarker.template.*;
 
 /**
  * Representation of the compile-time Escape directive.
- * @version $Id: EscapeBlock.java,v 1.1 2003/04/22 21:05:01 revusky Exp $
  * @author Attila Szegedi
  */
 class EscapeBlock extends TemplateElement {

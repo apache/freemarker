@@ -66,7 +66,6 @@ import javax.xml.transform.TransformerException;
  * Some glue code that bridges the Xalan XPath stuff (that is built into the JDK 1.4.x)
  * with FreeMarker TemplateModel semantics
  * @author Jonathan Revusky
- * @version $Id: XalanXPathSupport.java,v 1.20 2004/01/02 20:20:23 ddekany Exp $
  */
 
 class XalanXPathSupport implements XPathSupport {
