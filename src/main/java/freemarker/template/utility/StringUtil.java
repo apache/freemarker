@@ -60,9 +60,9 @@ import java.util.StringTokenizer;
 
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.core.Version;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.Version;
 
 /**
  *  Some text related utilities.

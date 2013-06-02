@@ -85,6 +85,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import freemarker.core.Internal_ConcurrentMapFactory;
+import freemarker.core.Version;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -102,7 +103,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility.SecurityUtilities;

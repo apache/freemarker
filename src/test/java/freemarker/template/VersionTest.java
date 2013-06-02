@@ -2,6 +2,8 @@ package freemarker.template;
 
 import java.sql.Date;
 
+import freemarker.core.Version;
+
 import junit.framework.TestCase;
 
 public class VersionTest extends TestCase {

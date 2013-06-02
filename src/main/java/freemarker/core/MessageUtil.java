@@ -13,7 +13,7 @@ class MessageUtil {
             = "string or something automatically convertible to string (number, date or boolean)";
 
     private MessageUtil() { }
-    
+        
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {
         return formatLocation("in", template, line, column);
     }

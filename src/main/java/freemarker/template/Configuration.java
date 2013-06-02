@@ -84,6 +84,7 @@ import freemarker.core.Internal_ConcurrentMapFactory;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.core.Version;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
