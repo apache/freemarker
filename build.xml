@@ -502,6 +502,22 @@
       <fileset dir="src/main/java">
         <exclude name="**/Internal_*.java" />
         <exclude name="**/SunInternalXalanXPathSupport.java" />
+        <!-- Remove classes that are, I suppose, only accidentally public: -->
+        <exclude name="**/core/LocalContext.java" />
+        <exclude name="**/core/CollectionAndSequence.java" />
+        <exclude name="**/core/Comment.java" />
+        <exclude name="**/core/DebugBreak.java" />
+        <exclude name="**/core/Expression.java" />
+        <exclude name="**/core/LibraryLoad.java" />
+        <exclude name="**/core/Macro.java" />
+        <exclude name="**/core/ReturnInstruction.java" />
+        <exclude name="**/core/StringArraySequence.java" />
+        <exclude name="**/core/TemplateElement.java" />
+        <exclude name="**/core/TemplateObject.java" />
+        <exclude name="**/core/TextBlock.java" />
+        <exclude name="**/core/ReturnInstruction.java" />
+        <exclude name="**/core/TokenMgrError.java" />
+        <exclude name="**/template/EmptyMap.java" />
       </fileset>
     </copy>
     <!-- conf="IDE": as that has to contain all depedencies -->
