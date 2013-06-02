@@ -87,8 +87,8 @@ public class TemplateException extends Exception {
     private final transient Environment env;
     private final String ftlInstructionStack;
     
-    private final Object lock = new Object();
-    private ThreadLocal messageWasAlreadyPrintedForThisTrace;
+    private transient final Object lock = new Object();
+    private transient ThreadLocal messageWasAlreadyPrintedForThisTrace;
 
 
     /**
