@@ -83,6 +83,7 @@ import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Internal_ConcurrentMapFactory;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.core.Internal_CoreAPI;
 import freemarker.core.ParseException;
 import freemarker.core.Version;
 import freemarker.template.utility.CaptureOutput;
@@ -1183,6 +1184,17 @@ public class Configuration extends Configurable implements Cloneable {
         } catch (IOException e) {
             throw new RuntimeException("Failed to load version file: " + e);
         }
+	}
+	
+    /**
+     * Returns the names of the supported "built-ins" ({@code expr?builtin_name}-like things). As of this
+     * writing, this information doesn't depend on the configuration options, so it could be a static method, but
+     * to be future-proof, it's an instance method. 
+     * 
+     * @return {@link Set} of {@link String}-s. 
+     */
+	public Set getSupportedBuiltInNames() {
+	    return Internal_CoreAPI.getSupportedBuiltInNames();
 	}
 
 	private static String getRequiredVersionProperty(Properties vp, String properyName) {
