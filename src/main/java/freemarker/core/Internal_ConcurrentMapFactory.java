@@ -13,11 +13,11 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * plain maps otherwise. This is used for avoiding linking-time J2SE 5
  * dependency.
  * 
- * @deprecated This class will be removed when J2SE 5 becomes the required
- *    minimum for FreeMarker, so don't use it unless you are developing
- *    FreeMarker itself.
+ * This class will be removed when J2SE 5 becomes the required
+ * minimum for FreeMarker, so don't use it unless you are developing
+ * FreeMarker itself.
  */
-public class ConcurrentMapFactory {
+public class Internal_ConcurrentMapFactory {
     private static final Class concurrentMapClass = getConcurrentMapClass(); 
     private static final Class bestHashMapClass = getBestHashMapClass();
     

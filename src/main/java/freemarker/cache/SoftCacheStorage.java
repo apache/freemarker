@@ -59,7 +59,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core.Internal_ConcurrentMapFactory;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -84,7 +84,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage
     private final boolean concurrent;
     
     public SoftCacheStorage() {
-        this(ConcurrentMapFactory.newMaybeConcurrentHashMap());
+        this(Internal_ConcurrentMapFactory.newMaybeConcurrentHashMap());
     }
     
     public boolean isConcurrent() {
@@ -93,7 +93,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage
     
     public SoftCacheStorage(Map backingMap) {
         map = backingMap;
-        this.concurrent = ConcurrentMapFactory.isConcurrent(map);
+        this.concurrent = Internal_ConcurrentMapFactory.isConcurrent(map);
     }
     
     public Object get(Object key) {

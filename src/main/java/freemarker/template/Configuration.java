@@ -80,7 +80,7 @@ import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core.Internal_ConcurrentMapFactory;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
@@ -149,7 +149,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     private TemplateCache cache;
     private HashMap variables = new HashMap();
-    private Map encodingMap = ConcurrentMapFactory.newThreadSafeMap();
+    private Map encodingMap = Internal_ConcurrentMapFactory.newThreadSafeMap();
     private Map autoImportMap = new HashMap();
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList();
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
