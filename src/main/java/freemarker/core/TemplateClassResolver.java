@@ -90,7 +90,7 @@ public interface TemplateClassResolver {
     
     /**
      * Same as {@link #UNRESTRICTED_RESOLVER}, except that it doesn't allow
-     * resolving {@link ObjectConstructor}.
+     * resolving {@link ObjectConstructor} and {@link Execute} and {@code freemarker.template.utility.JythonRuntime}.
      */
     TemplateClassResolver SAFER_RESOLVER =  new TemplateClassResolver() {
 

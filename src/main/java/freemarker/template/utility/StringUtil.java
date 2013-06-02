@@ -1476,7 +1476,9 @@ public class StringUtil {
 
     /**
      * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
-     * Also, it return {@code null} for {@code null} parameter.  
+     * Also, it return {@code null} for {@code null} parameter.
+     * 
+     * @since 2.3.20
      */
     public static String tryToString(Object object) {
         if (object == null) return null;
