@@ -7,7 +7,7 @@ import freemarker.template.utility.StringUtil;
 /**
  * Utilities for creating error messages (and other messages).
  */
-public class MessageUtil {
+class MessageUtil {
 
     static final String TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING
             = "string or something automatically convertible to string (number, date or boolean)";
