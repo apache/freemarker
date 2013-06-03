@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.19</subtitle>
+  <subtitle>For FreeMarker 2.3.20</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -20281,7 +20281,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Nameless templates couldn't include or import other
               templates, and thrown a <literal>NullPointerException</literal>
               when they tried to. Now they resolve relative paths as if they
-              where in the template root directory. </para>
+              where in the template root directory.</para>
             </listitem>
 
             <listitem>
@@ -20302,7 +20302,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Concerning tool (like IDE plugin) authors:</para>
+              <para>Mostly concerning tool (like IDE plugin) authors:</para>
 
               <itemizedlist>
                 <listitem>
