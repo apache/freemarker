@@ -55,6 +55,7 @@ package freemarker.template.utility;
 import java.util.HashSet;
 import java.util.Set;
 
+import freemarker.core.Environment;
 import freemarker.core.Macro;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
@@ -73,6 +74,7 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
@@ -240,7 +242,12 @@ public class ClassUtil
             appendTypeName(sb, typeNamesAppended, "method");
         }
         
-        if (TemplateHashModelEx.class.isAssignableFrom(cl)) {
+        
+        if (Environment.Namespace.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "namespace");
+        } else if (TemplateHashModelEx.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "extendedHash");
+        } else if (TemplateHashModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "hash");
         }
         
