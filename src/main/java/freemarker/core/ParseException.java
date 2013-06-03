@@ -275,6 +275,12 @@ public class ParseException extends java.io.IOException implements FMParserConst
     return cachedUnexpectedTokenMessage;
   }
   
+  /**
+   * Returns the name (template-root relative path) of the template whose parsing was failed.
+   * Maybe {@code null} if this is a non-stored template. 
+   * 
+   * @since 2.3.20
+   */
   public String getTemplateName() {
       return templateName;
   }

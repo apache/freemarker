@@ -20319,6 +20319,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>Added
+                  <literal>ParseException.getTemplateName()</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para>Added
                   <literal>Configuration.getSupportedBuiltInNames()</literal>.
                   As new built-ins
                   (<literal><replaceable>expr</replaceable>?<replaceable>builtin_name</replaceable></literal>)
