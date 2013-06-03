@@ -180,7 +180,8 @@ final class BuiltinVariable extends Expression {
         return false;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return this;
     }
 

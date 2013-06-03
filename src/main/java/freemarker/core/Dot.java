@@ -89,8 +89,11 @@ final class Dot extends Expression {
         return target.isLiteral();
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new Dot(target.deepClone(name, subst), key);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new Dot(
+    	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        key);
     }
 
     boolean onlyHasIdentifiers() {

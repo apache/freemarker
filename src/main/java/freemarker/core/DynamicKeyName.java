@@ -246,7 +246,10 @@ final class DynamicKeyName extends Expression {
         return constantValue != null || (target.isLiteral() && nameExpression.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new DynamicKeyName(target.deepClone(name, subst), nameExpression.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new DynamicKeyName(
+    	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        nameExpression.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

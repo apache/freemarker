@@ -103,14 +103,17 @@ final class HashLiteral extends Expression {
     }
 
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
 		ArrayList clonedKeys = (ArrayList)keys.clone();
 		for (ListIterator iter = clonedKeys.listIterator(); iter.hasNext();) {
-            iter.set(((Expression)iter.next()).deepClone(name, subst));
+            iter.set(((Expression)iter.next()).deepCloneWithIdentifierReplaced(
+                    replacedIdentifier, replacement, replacementState));
         }
 		ArrayList clonedValues = (ArrayList)values.clone();
 		for (ListIterator iter = clonedValues.listIterator(); iter.hasNext();) {
-            iter.set(((Expression)iter.next()).deepClone(name, subst));
+            iter.set(((Expression)iter.next()).deepCloneWithIdentifierReplaced(
+                    replacedIdentifier, replacement, replacementState));
         }
     	return new HashLiteral(clonedKeys, clonedValues);
     }

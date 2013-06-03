@@ -91,7 +91,8 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         return true;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new NumberLiteral(value);
     }
 

@@ -133,8 +133,11 @@ final class MethodCall extends Expression {
         return false;
     }
 
-    Expression _deepClone(String name, Expression subst) {
-        return new MethodCall(target.deepClone(name, subst), (ListLiteral)arguments.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new MethodCall(
+                target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                (ListLiteral)arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
 }

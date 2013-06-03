@@ -91,11 +91,20 @@ final class Identifier extends Expression {
         return false;
     }
 
-    Expression _deepClone(String name, Expression subst) {
-        if(this.name.equals(name)) {
-        	return subst.deepClone(null, null);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        if(this.name.equals(replacedIdentifier)) {
+            if (replacementState.replacementAlreadyInUse) {
+                Expression clone = replacement.deepCloneWithIdentifierReplaced(null, null, replacementState);
+                clone.copyLocationFrom(replacement);
+                return clone;
+            } else {
+                replacementState.replacementAlreadyInUse = true;
+                return replacement;
+            }
+        } else {
+            return new Identifier(this.name);
         }
-        return new Identifier(this.name);
     }
 
 }

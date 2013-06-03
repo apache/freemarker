@@ -100,7 +100,10 @@ final class Range extends Expression {
         return constantValue != null || (left.isLiteral() && rightIsLiteral);
     }
     
-    Expression _deepClone(String name, Expression subst) {
-        return new Range(left.deepClone(name, subst), right.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new Range(
+                left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

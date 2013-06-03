@@ -125,8 +125,11 @@ final class AddConcatExpression extends Expression {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new AddConcatExpression(left.deepClone(name, subst), right.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new AddConcatExpression(
+    	left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
     public String getCanonicalForm() {

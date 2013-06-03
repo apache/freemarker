@@ -344,10 +344,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
         return false; // be on the safe side.
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	try {
 	    	BuiltIn clone = (BuiltIn)clone();
-	    	clone.target = target.deepClone(name, subst);
+	    	clone.target = target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState);
 	    	return clone;
         }
         catch (CloneNotSupportedException e) {

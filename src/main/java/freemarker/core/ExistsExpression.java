@@ -81,8 +81,9 @@ class ExistsExpression extends Expression {
 		return false;
 	}
 
-	Expression _deepClone(String name, Expression subst) {
-		return new ExistsExpression(exp.deepClone(name, subst));
+	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+		return new ExistsExpression(
+		        exp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
 	}
 
 	public String getCanonicalForm() {

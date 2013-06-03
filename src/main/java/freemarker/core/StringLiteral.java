@@ -118,8 +118,10 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         return interpolatedOutput == null;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         StringLiteral cloned = new StringLiteral(value);
+        // FIXME: replacedIdentifier should be searched inside interpolatedOutput too:
         cloned.interpolatedOutput = this.interpolatedOutput;
         return cloned;
     }

@@ -111,7 +111,11 @@ final class ComparisonExpression extends BooleanExpression {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new ComparisonExpression(left.deepClone(name, subst), right.deepClone(name, subst), opString);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new ComparisonExpression(
+    	        left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        opString);
     }
 }

@@ -52,3 +52,10 @@ ${x} = <Mooo>
   ${1} ${2} ${3}
 </#escape>
 ---
+<#assign s = 'A&B'>
+<#escape x as '<' + x?html + '>[' + x?lower_case + '](' + x + ')'>
+  ${s} ${s + 2}
+  <#escape x as '{' + x?lower_case + '}' + x>
+    ${s} ${s + 2}
+  </#escape>
+</#escape>

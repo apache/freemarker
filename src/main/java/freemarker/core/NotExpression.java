@@ -74,7 +74,9 @@ final class NotExpression extends BooleanExpression {
         return target.isLiteral();
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new NotExpression(target.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new NotExpression(
+    	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

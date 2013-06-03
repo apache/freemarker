@@ -96,7 +96,10 @@ final class UnaryPlusMinusExpression extends Expression {
         return target.isLiteral();
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new UnaryPlusMinusExpression(target.deepClone(name, subst), isMinus);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new UnaryPlusMinusExpression(
+    	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        isMinus);
     }
 }

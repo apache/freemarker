@@ -245,8 +245,8 @@ public class FMParser {
   private Expression escapedExpression(Expression exp) {
       if(!escapes.isEmpty()) {
           return ((EscapeBlock)escapes.getFirst()).doEscape(exp);
+      } else {          return exp;
       }
-      return exp;
   }
   
   private boolean getBoolean(Expression exp) throws ParseException {

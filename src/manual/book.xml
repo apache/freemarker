@@ -20474,6 +20474,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="???">https://github.com/freemarker/freemarker</link>),
               and switched to an Ivy-based build.</para>
             </listitem>
+
+            <listitem>
+              <para>Various smaller internal code cleanups.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

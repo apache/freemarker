@@ -53,6 +53,8 @@
 package freemarker.core;
 
 import java.io.IOException;
+
+import freemarker.core.Expression.ReplacemenetState;
 import freemarker.template.*;
 
 /**
@@ -84,8 +86,8 @@ class EscapeBlock extends TemplateElement {
         }
     }
 
-    Expression doEscape(Expression subst) {
-        return escapedExpr.deepClone(variable, subst);
+    Expression doEscape(Expression expression) {
+        return escapedExpr.deepCloneWithIdentifierReplaced(variable, expression, new ReplacemenetState());
     }
 
     public String getDescription() {

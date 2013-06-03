@@ -112,11 +112,12 @@ class DefaultToExpression extends Expression {
 		return false;
 	}
 
-	Expression _deepClone(String name, Expression subst) {
-		if (rhs == null) {
-			return new DefaultToExpression(lhs.deepClone(name, subst), null);
-		}
-		return new DefaultToExpression(lhs.deepClone(name, subst), rhs.deepClone(name, subst));
+	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new DefaultToExpression(
+                lhs.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                rhs != null
+                        ? rhs.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState)
+                        : null);
 	}
 
 	public String getCanonicalForm() {

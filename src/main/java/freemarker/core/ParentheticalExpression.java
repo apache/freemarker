@@ -79,7 +79,9 @@ final class ParentheticalExpression extends Expression {
         return nested.isLiteral();
     }
 
-    Expression _deepClone(String name, Expression subst) {
-        return new ParentheticalExpression(nested.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new ParentheticalExpression(
+                nested.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

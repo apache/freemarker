@@ -86,7 +86,8 @@ final class BooleanLiteral extends Expression {
         return true;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new BooleanLiteral(val);
     }
 }

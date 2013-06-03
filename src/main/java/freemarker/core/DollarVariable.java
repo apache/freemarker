@@ -84,7 +84,7 @@ final class DollarVariable extends TemplateElement {
         return this.getSource()  +
         (expression == escapedExpression 
             ? "" 
-            : " escaped ${" + escapedExpression.getCanonicalForm() + "}");
+            : " escaped as ${" + escapedExpression.getCanonicalForm() + "}");
     }
 
     boolean heedsOpeningWhitespace() {
@@ -94,4 +94,5 @@ final class DollarVariable extends TemplateElement {
     boolean heedsTrailingWhitespace() {
         return true;
     }
+    
 }

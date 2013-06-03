@@ -76,7 +76,10 @@ final class AndExpression extends BooleanExpression {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new AndExpression(left.deepClone(name, subst), right.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new AndExpression(
+    	        left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

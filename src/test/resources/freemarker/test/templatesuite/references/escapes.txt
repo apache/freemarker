@@ -27,3 +27,5 @@ c
   <MOOO> = <MOOO>
   red green blue
 ---
+  <A&amp;B>[a&b](A&B) <A&amp;B2>[a&b2](A&B2)
+    <{a&amp;b}A&amp;B>[{a&b}a&b]({a&b}A&B) <{a&amp;b2}A&amp;B2>[{a&b2}a&b2]({a&b2}A&B2)

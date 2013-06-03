@@ -132,13 +132,28 @@ abstract public class Expression extends TemplateObject {
         }
     }
 
-    Expression deepClone(String name, Expression subst) {
-        Expression clone = _deepClone(name, subst);
-        clone.copyLocationFrom(this);
+    final Expression deepCloneWithIdentifierReplaced(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        Expression clone = deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);
+        if (clone.beginLine == 0) {
+            clone.copyLocationFrom(this);
+        }
         return clone;
     }
+    
+    static class ReplacemenetState {
+        /**
+         * If the replacement expression is not in use yet, we don't have to clone it.
+         */
+        boolean replacementAlreadyInUse; 
+    }
 
-    abstract Expression _deepClone(String name, Expression subst);
+    /**
+     * This should return an equivalent new expression object (or an identifier replacement expression).
+     * The position need not be filled, unless it will be different from the position of what were cloning. 
+     */
+    protected abstract Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState);
 
     boolean isTrue(Environment env) throws TemplateException {
         TemplateModel referent = getAsTemplateModel(env);
@@ -155,7 +170,6 @@ abstract public class Expression extends TemplateObject {
                      + "\nit is an instance of " + referent.getClass().getName();
         throw new NonBooleanException(msg, env);
     }
-
 
     static boolean isEmpty(TemplateModel model) throws TemplateModelException
     {
