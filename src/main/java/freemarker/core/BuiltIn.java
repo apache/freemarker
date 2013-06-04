@@ -966,7 +966,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
             TemplateModel tm = target.getAsTemplateModel(env);
             if (!(tm instanceof Macro)) {
-                target.newUnexpectedTypeException(tm, "macro or function");
+                throw target.newUnexpectedTypeException(tm, "macro or function");
             }
             return env.getMacroNamespace((Macro) tm);
         }

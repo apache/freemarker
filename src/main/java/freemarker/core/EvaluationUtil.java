@@ -304,7 +304,7 @@ class EvaluationUtil
             }
             if (leftDateType == TemplateDateModel.UNKNOWN) {
                 if (leftExp != null) {
-                    leftExp.newTemplateException(
+                    throw leftExp.newTemplateException(
                             "The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN + " " + USE_DATE_TIME_TYPE_BUILTINS);                    
                 } else {
                     throw new TemplateException("The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN,
@@ -313,7 +313,7 @@ class EvaluationUtil
             }
             if (rightDateType == TemplateDateModel.UNKNOWN) {
                 if (rightExp != null) {
-                    rightExp.newTemplateException(
+                    throw rightExp.newTemplateException(
                             "The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN + " " + USE_DATE_TIME_TYPE_BUILTINS);                    
                 } else {
                     throw new TemplateException("The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN,
