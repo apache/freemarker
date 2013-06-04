@@ -52,7 +52,10 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * A class that represents a Range between two integers.

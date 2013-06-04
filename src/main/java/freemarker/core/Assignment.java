@@ -52,7 +52,9 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * An instruction that assigns a literal or reference, to a single-identifier
@@ -87,28 +89,26 @@ final class Assignment extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException {
-        TemplateModel tm = value.getAsTemplateModel(env);
         Environment.Namespace namespace = null;
         if (namespaceExp != null) {
-            boolean oops = false;
+            TemplateModel namespaceTM = namespaceExp.getAsTemplateModel(env);
             try {
-                namespace = (Environment.Namespace) namespaceExp.getAsTemplateModel(env);
-            } catch (ClassCastException cce) {
-                oops = true;
+                namespace = (Environment.Namespace) namespaceTM;
+            } catch (ClassCastException e) {
+                throw namespaceExp.newUnexpectedTypeException(namespaceTM, "namespace");
             }
-            if (oops || namespace==null) {
-                throw new InvalidReferenceException(getStartLocation() + "\nInvalid reference to namespace: " + namespaceExp, env);
+            if (namespace == null) {
+                throw namespaceExp.newInvalidReferenceException();
             }
         }
+        
+        TemplateModel tm = value.getAsTemplateModel(env);
         if (tm == null) {
             if (env.isClassicCompatible()) {
                 tm = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                String msg = "Error " + getStartLocation()
-                            +"\n" + value + " is undefined."
-                            +"\nIt cannot be assigned to " + variableName;
-                throw new InvalidReferenceException(msg, env);
+                throw value.newInvalidReferenceException();
             }
         }
         if (scope == LOCAL) {
@@ -121,6 +121,9 @@ final class Assignment extends TemplateElement {
                 }
                 else if (scope == NAMESPACE) {
                     namespace = env.getCurrentNamespace();
+                }
+                else {
+                    throw new RuntimeException("Unexpected scope type: " + scope);
                 }
             }
             namespace.put(variableName, tm);

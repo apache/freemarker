@@ -52,26 +52,47 @@
  
 package freemarker.ext.dom;
 
-import freemarker.template.*;
-import freemarker.template.utility.Collections12;
-import freemarker.template.utility.UndeclaredThrowableException;
-import freemarker.cache.TemplateCache;
-import freemarker.core.CustomAttribute;
-import freemarker.core.Environment;
-import org.jaxen.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.jaxen.BaseXPath;
+import org.jaxen.Function;
+import org.jaxen.FunctionCallException;
+import org.jaxen.FunctionContext;
+import org.jaxen.JaxenException;
+import org.jaxen.NamespaceContext;
+import org.jaxen.Navigator;
+import org.jaxen.UnresolvableException;
+import org.jaxen.VariableContext;
+import org.jaxen.XPathFunctionContext;
 import org.jaxen.dom.DocumentNavigator;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.*;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import freemarker.cache.TemplateCache;
+import freemarker.core.CustomAttribute;
+import freemarker.core.Environment;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.Collections12;
+import freemarker.template.utility.UndeclaredThrowableException;
 
 
 /**

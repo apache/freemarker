@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * A reference to a top-level variable
@@ -70,9 +71,9 @@ final class Identifier extends Expression {
             return env.getVariable(name);
         } catch (NullPointerException e) {
             if (env == null) {
-                throw new TemplateException("Variables are not available "
+                throw newTemplateException("Variables are not available "
                 + "(certainly you are in a parse-time executed directive). The name of the variable "
-                + "you tried to read: " + name, null);
+                + "you tried to read: " + name);
             } else {
                 throw e;
             }

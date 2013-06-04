@@ -52,8 +52,14 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 
 final class StringLiteral extends Expression implements TemplateScalarModel {
     

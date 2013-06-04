@@ -52,9 +52,20 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.ClassUtil;
 import freemarker.ext.beans.BeanModel;
+import freemarker.template.Template;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An abstract class for nodes in the parse tree 
@@ -109,7 +120,7 @@ abstract public class Expression extends TemplateObject {
             if (env.isClassicCompatible()) {
                 return "";
             } else {
-                throw exp.invalidReferenceException(env);
+                throw exp.newInvalidReferenceException();
             }
         } else if (referentModel instanceof TemplateBooleanModel) {
             // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
@@ -122,13 +133,7 @@ abstract public class Expression extends TemplateObject {
                 return env.formatBoolean(booleanValue);
             }
         } else {
-            throw new NonStringException(
-                    "Error " + exp.getStartLocation()
-                    +"\nExpected a " + MessageUtil.TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING
-                    + ", but this evaluated to a value of type "
-                    + ClassUtil.getFTLTypeDescription(referentModel) + ":\n"
-                    + exp,
-                    env);
+            throw exp.newNonStringException(referentModel);
         }
     }
 
@@ -163,12 +168,8 @@ abstract public class Expression extends TemplateObject {
         if (env.isClassicCompatible()) {
             return referent != null && !isEmpty(referent);
         }
-        assertNonNull(referent, env);
-        String msg = "Error " + getStartLocation()
-                     + "\nExpecting a boolean (true/false) expression here"
-                     + "\nExpression " + this + " does not evaluate to true/false "
-                     + "\nit is an instance of " + referent.getClass().getName();
-        throw new NonBooleanException(msg, env);
+        assertNonNull(referent);
+        throw newNonBooleanException(referent);
     }
 
     static boolean isEmpty(TemplateModel model) throws TemplateModelException
@@ -192,4 +193,166 @@ abstract public class Expression extends TemplateObject {
             return true;
         }
     }
+    
+    void assertNonNull(TemplateModel model) throws InvalidReferenceException {
+        if (model == null) {
+            throw newInvalidReferenceException();
+        }
+    }
+
+    TemplateException newTemplateException(Exception cause) {
+        return newTemplateException("Unexpected error: " + cause, (String) null, cause);
+    }
+    
+    TemplateException newTemplateException(String description) {
+        return newTemplateException(description, (String) null, null);
+    }
+
+    TemplateException newTemplateException(String description, String[] tips) {
+        return newTemplateException(description, tips, (Exception) null);
+    }
+    
+    TemplateException newTemplateException(String description, Exception cause) {
+        return newTemplateException(description, (String) null, cause);
+    }
+    
+    TemplateException newTemplateException(String description, String tip, Exception cause) {
+        return new TemplateException(
+                MessageUtil.decorateErrorDescription(description, this, tip),
+                cause,
+                Environment.getCurrentEnvironment());
+    }
+
+    TemplateException newTemplateException(String description, String[] tips, Exception cause) {
+        return new TemplateException(
+                MessageUtil.decorateErrorDescription(description, this, tips),
+                cause,
+                Environment.getCurrentEnvironment());
+    }
+    
+    TemplateModelException newTemplateModelException(String description) {
+        return newTemplateModelException(description, null, null);
+    }
+    
+    TemplateModelException newTemplateModelException(String description, Exception cause) {
+        return newTemplateModelException(description, null, cause);
+    }
+    
+    // TODO: The newTemplateModelException-s shouldn't exist at all. TemplateModelException-s should be blamed on
+    // the expression who has called the failing TM method. Wherever we use these, we blame the wrong expression.
+    TemplateModelException newTemplateModelException(String description, String tip, Exception cause) {
+        return new TemplateModelException(
+                MessageUtil.decorateErrorDescription(description, this, tip),
+                cause);
+    }
+
+    InvalidReferenceException newInvalidReferenceException() {
+        return new InvalidReferenceException(
+                MessageUtil.decorateErrorDescription(
+                        "The following has evaluated to null or missing:",
+                        this,
+                        "If the failing expression is known to be legally null/missing, either specify a default value"
+                        + " with myOptionalVar!myDefault, or use "
+                        + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
+                        + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
+                        + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + "."),
+                    Environment.getCurrentEnvironment());
+    }
+    
+    UnexpectedTypeException newUnexpectedTypeException(TemplateModel model, String expected)
+    throws TemplateException {
+        return newUnexpectedTypeException(model, expected, null);
+    }
+    
+    UnexpectedTypeException newUnexpectedTypeException(
+            TemplateModel model, String expected, String tip)
+    throws InvalidReferenceException
+    {
+        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model);
+        return new UnexpectedTypeException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription(expected, model),
+                        this,
+                        tip),
+                env);
+    }
+    
+    NonNumericalException newNonNumericalException(TemplateModel model)
+    throws InvalidReferenceException {
+        return newNonNumericalException(model, null);
+    }
+    
+    NonNumericalException newNonNumericalException(TemplateModel model, String tip)
+    throws InvalidReferenceException
+    {
+        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model);
+        return new NonNumericalException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription("number", model),
+                        this,
+                        tip),
+                env);
+    }
+
+    NonNumericalException newMalformedNumberException(String text) {
+        return new NonNumericalException(
+                MessageUtil.decorateErrorDescription(
+                        "Can't convert this string to number: " + StringUtil.jQuote(text),
+                        this),
+                Environment.getCurrentEnvironment());
+    }
+    
+    NonStringException newNonStringException(TemplateModel model)
+    throws InvalidReferenceException {
+        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model);
+        return new NonStringException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
+                        this),
+                env);
+    }
+    
+    NonDateException newNonDateException(TemplateModel model)
+    throws InvalidReferenceException {
+        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model);
+        return new NonDateException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription("date", model),
+                        this),
+                env);
+    }
+
+    NonBooleanException newNonBooleanException(TemplateModel model)
+    throws InvalidReferenceException {
+        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model);
+        return new NonBooleanException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription("boolean", model),
+                        this),
+                env);
+    }
+
+    NonBooleanException newNonBooleanException(String actualType)
+    throws InvalidReferenceException {
+        return new NonBooleanException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription("boolean", actualType),
+                        this),
+                Environment.getCurrentEnvironment());
+    }
+    
+    private static String unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
+        return unexpectedTypeErrorDescription(expectedType, ClassUtil.getFTLTypeDescription(model));
+    }
+
+    private static String unexpectedTypeErrorDescription(String expectedType, String actualType) {
+        return "Expected a(n) " + expectedType + ", but this evaluated to a value of type " 
+                + actualType + ":";
+    }
+    
 }

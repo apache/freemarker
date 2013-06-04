@@ -53,7 +53,13 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 
 /**
@@ -70,10 +76,10 @@ final class VisitNode extends TemplateElement {
 
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.getAsTemplateModel(env);
-        targetNode.assertNonNull(node, env);
         if (!(node instanceof TemplateNodeModel)) {
-            throw new TemplateException("Expecting an XML node here", env);
+            throw targetNode.newUnexpectedTypeException(node, "node");
         }
+        
         TemplateModel nss = namespaces == null ? null : namespaces.getAsTemplateModel(env);
         if (namespaces instanceof StringLiteral) {
             nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
@@ -88,7 +94,12 @@ final class VisitNode extends TemplateElement {
                 nss = ss;
             }
             else if (!(nss instanceof TemplateSequenceModel)) {
-                throw new TemplateException("Expecting a sequence of namespaces after 'using'", env);
+                if (namespaces != null) {
+                    throw namespaces.newUnexpectedTypeException(nss, "sequence");
+                } else {
+                    // Should not occur
+                    throw new TemplateException("Expecting a sequence of namespaces after \"using\"", env);
+                }
             }
         }
         env.visit((TemplateNodeModel) node, (TemplateSequenceModel) nss);
@@ -102,6 +113,7 @@ final class VisitNode extends TemplateElement {
     }
 
     public String getDescription() {
-        return "visit instruction";
+        return "visit";
     }
+    
 }

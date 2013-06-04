@@ -52,9 +52,15 @@
 
 package freemarker.core;
 
-import java.io.*;
-import java.util.*;
-import freemarker.template.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import freemarker.template.EmptyMap;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateTransformModel;
 
 /**
  * A template element that contains a nested block
@@ -99,7 +105,7 @@ final class TransformBlock extends TemplateElement {
         }
         else {
             TemplateModel tm = transformExpression.getAsTemplateModel(env);
-            throw transformExpression.invalidTypeException(tm, env, "transform");
+            throw transformExpression.newUnexpectedTypeException(tm, "transform");
         }
     }
 

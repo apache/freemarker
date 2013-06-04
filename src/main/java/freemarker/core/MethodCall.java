@@ -56,11 +56,15 @@
 
 package freemarker.core;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Writer;
-import freemarker.template.*;
-import java.io.IOException;
+
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
 
 
 /**
@@ -97,7 +101,7 @@ final class MethodCall extends Expression {
             Macro func = (Macro) targetModel;
             env.setLastReturnValue(null);
             if (!func.isFunction) {
-                throw new TemplateException("A macro cannot be called in an expression.", env);
+                throw newTemplateException("A macro cannot be called in an expression.");
             }
             Writer prevOut = env.getOut();
             try {
@@ -111,7 +115,7 @@ final class MethodCall extends Expression {
             return env.getLastReturnValue();
         }
         else {
-            throw target.invalidTypeException(targetModel, env, "method");
+            throw target.newUnexpectedTypeException(targetModel, "method");
         }
     }
 

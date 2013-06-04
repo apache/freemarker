@@ -81,7 +81,7 @@ public class TemplateException extends Exception {
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
     
     /** The underlying cause of this exception, if any */
-    private final Exception causeException;
+    private final Throwable causeException;
     private final transient Environment env;
     private final String ftlInstructionStack;
     
@@ -128,7 +128,7 @@ public class TemplateException extends Exception {
      * exception to be raised
      */
     public TemplateException(String description, Exception cause, Environment env) {
-        super(getDescription(description, cause));
+        super(ensureNonEmptyDescription(description, cause));
         causeException = cause;
         this.env = env;
         if(env != null)
@@ -145,7 +145,7 @@ public class TemplateException extends Exception {
         }
     }
 
-    private static String getDescription(String description, Exception cause)  {
+    private static String ensureNonEmptyDescription(String description, Throwable cause)  {
         if(description != null && description.length() != 0) {
             return description;
         }
@@ -166,14 +166,17 @@ public class TemplateException extends Exception {
      *
      * @return the underlying <code>Exception</code>, if any, that caused this
      * exception to be raised
+     * 
+     * @deprecated Use {@link #getCause()} instead, as this can't return runtime exceptions and errors as is.
      */
     public Exception getCauseException() {
-        return causeException;
+        return causeException instanceof Exception
+                ? (Exception) causeException
+                : new Exception("Wrapped to exception: " + causeException);
     }
 
     /**
-     * Returns the same exception as <code>getCauseException</code>. Provided
-     * to enable full JDK-generated stack traces when running under JDK 1.4.
+     * Returns the cause exception.
      *
      * @see Throwable#getCause()
      * @return the underlying <code>Exception</code>, if any, that caused this
@@ -208,13 +211,14 @@ public class TemplateException extends Exception {
 
     public void printStackTrace(PrintWriter pw) {
         synchronized (pw) {
+            pw.println("FreeMarker template error:");
             pw.println(getMessage());
             if (ftlInstructionStack != null && ftlInstructionStack.length() != 0) {
                 pw.println();
-                pw.println("The problematic instruction:");
+                pw.println("The problematic instruction (FTL stack trace):");
                 pw.println(ftlInstructionStack);
             }
-            pw.println("Java backtrace for programmers:");
+            pw.println("Java stack trace (for programmers):");
             pw.println("----------");
             synchronized (lock) {
                 if (messageWasAlreadyPrintedForThisTrace == null) {

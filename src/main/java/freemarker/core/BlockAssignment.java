@@ -103,10 +103,7 @@ final class BlockAssignment extends TemplateElement {
             if(namespaceExp != null) {
                 nsModel = namespaceExp.getAsTemplateModel(env);
                 if (!(nsModel instanceof Environment.Namespace)) {
-                    throw new TemplateException(
-                        "namespace parameter does not specify "
-                        + "a namespace. It is a " 
-                        + nsModel.getClass().getName(), env);
+                    throw namespaceExp.newUnexpectedTypeException(nsModel, "namespace");
                 }
             }
             fnsModel = (Environment.Namespace )nsModel; 

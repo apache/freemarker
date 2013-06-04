@@ -67,7 +67,7 @@ final class BreakInstruction extends TemplateElement {
     }
 
     public String getDescription() {
-        return "break" + " [" + getStartLocation() + "]";
+        return "break";
     }
 
     static class Break extends RuntimeException {

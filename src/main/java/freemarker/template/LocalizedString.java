@@ -1,7 +1,8 @@
 package freemarker.template;
 
-import freemarker.core.Environment;
 import java.util.Locale;
+
+import freemarker.core.Environment;
 
 /**
  * An abstract base class for scalars that vary by locale.

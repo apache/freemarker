@@ -53,7 +53,8 @@
 package freemarker.template;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * A simple implementation of {@link TemplateCollectionModel}.

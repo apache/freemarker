@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import java.io.IOException;
+
 import freemarker.template.TemplateException;
 
 /**

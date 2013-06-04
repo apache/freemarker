@@ -51,12 +51,12 @@
  */
 
 package freemarker.ext.xml;
-import freemarker.template.TemplateMethodModel;
-import java.lang.String;
-import java.util.List;
-import freemarker.template.TemplateScalarModel;
-import freemarker.template.TemplateModelException;
 import java.util.HashMap;
+import java.util.List;
+
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * @author Attila Szegedi

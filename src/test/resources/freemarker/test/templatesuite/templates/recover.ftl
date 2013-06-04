@@ -5,17 +5,17 @@
   We should never get here.
 </#recover>
 <#attempt>
- Let's try to output an undefined variable: ${undefined}
+ Let's try to output an undefined variable: ${undefinedVariable}
 <#recover>
- Well, that did not work. Here is the error: ${truncate(.error)}
+ Well, that did not work.<@assert test=.error?contains('undefinedVariable') />
  Now we nest another attempt/recover here:
  <#attempt>
    ${sequence[1]}
  <#recover>
-   Oops: ${.error[0..20]}[...]
+   Oops...<@assert test=.error?contains('sequence[1]') />
    Remember, freeMarker sequences are zero-based! ${sequence[0]}
  </#recover>
- Now we output the current error message: ${truncate(.error)}
+ Now we check the current error message.<@assert test=.error?contains('undefinedVariable') />
 </#recover>
 <#attempt>
   <#include "nonexistent_template">
@@ -25,12 +25,5 @@
 <#attempt>
   <#include "undefined.ftl">
 <#recover>
-  The included template has a problem: ${truncate(.error)}
+  The included template had a problem.<@assert test=.error?contains('undefined_variable') />
 </#attempt>
-<#function truncate str>
-  <#if str?length gt 110>
-    <#return str[0..110]?j_string + '[...]'>
-  <#else>
-    <#return str>
-  </#if>
-</#function>

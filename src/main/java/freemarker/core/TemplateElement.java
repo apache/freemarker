@@ -52,10 +52,17 @@
 
 package freemarker.core;
 
-import java.util.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 
-import freemarker.template.*;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
 
 /**

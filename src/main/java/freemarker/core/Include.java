@@ -55,7 +55,10 @@ package freemarker.core;
 import java.io.IOException;
 
 import freemarker.cache.TemplateCache;
-import freemarker.template.*;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -126,11 +129,6 @@ final class Include extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         String templateNameString = includedTemplateName.getStringValue(env);
-        if( templateNameString == null ) {
-            String msg = "Error " + getStartLocation()
-                        + "The expression " + includedTemplateName + " is undefined.";
-            throw new InvalidReferenceException(msg, env);
-        }
         String enc = encoding;
         if (encoding == null && encodingExp != null) {
             enc = encodingExp.getStringValue(env);
@@ -144,7 +142,7 @@ final class Include extends TemplateElement {
                     parse = false;
                 }
                 else {
-                    parseExp.assertNonNull(tm, env);
+                    parseExp.assertNonNull(tm);
                 }
             }
             if (tm instanceof TemplateScalarModel) {
@@ -195,16 +193,15 @@ final class Include extends TemplateElement {
         return "include " + includedTemplateName;
     }
 
-    private boolean getYesNo(String s) throws ParseException {
+    private boolean getYesNo(String s) throws TemplateException {
         try {
            return StringUtil.getYesNo(s);
         }
         catch (IllegalArgumentException iae) {
-            throw new ParseException("Error " + getStartLocation()
-                 + "\nValue of include parse parameter "
+            throw parseExp.newTemplateException(
+                 "Value of include parse parameter "
                  + "must be boolean or one of these strings: "
-                 + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\""
-                 + "\nFound: " + parseExp, parseExp);
+                 + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"");
         }
     }
 

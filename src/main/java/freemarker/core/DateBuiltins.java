@@ -64,7 +64,6 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UnrecognizedTimeZoneException;
@@ -83,14 +82,10 @@ abstract class DateBuiltins {
                 return calculateResult(EvaluationUtil.getDate(tdm, target, env), tdm.getDateType(), env);
             } else {
                 if(model == null) {
-                    throw new InvalidReferenceException(target + " is undefined.", env);
+                    throw target.newInvalidReferenceException();
+                } else {
+                    throw target.newUnexpectedTypeException(model, "date");
                 }
-                throw new NonDateException(
-                        "Error " + target.getStartLocation() + ":\n"
-                        + "Expected a date (date or time or date-time), but this evaluted to a value of type "
-                        + ClassUtil.getFTLTypeDescription(model) + ":\n"
-                        + target,
-                        env);                
             }
         }
 
@@ -113,15 +108,18 @@ abstract class DateBuiltins {
             this.accuracy = accuracy;
         }
         
-        protected void checkDateTypeNotUnknown(int dateType, Environment env)
+        protected void checkDateTypeNotUnknown(int dateType)
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
-                throw new TemplateException(
-                        "Unknown date type: ?" + biName + " needs a date value "
+                throw target.newTemplateException(
+                        "The value of the following has unknown date type, but ?" + biName + " needs a date value "
                         + "where it's known if it's a date-only, time-only, or "
-                        + "date+time value. Use ?time, ?date or ?datetime "
-                        + "before ? " + biName + " to estabilish that.",
-                        env);
+                        + "date+time value:",
+                        new String[] {
+                            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used.",
+                            "For programmers: Use java.sql.Date/Time/Timestamp instead of java.util.Date in the "
+                            + "data-model to avoid this ambiguity."
+                        });
             }
         }
     }
@@ -143,7 +141,7 @@ abstract class DateBuiltins {
         protected TemplateModel calculateResult(
                 Date date, int dateType, Environment env)
         throws TemplateException {
-            checkDateTypeNotUnknown(dateType, env);
+            checkDateTypeNotUnknown(dateType);
             return new SimpleScalar(DateUtil.dateToISO8601String(
                     date,
                     dateType != TemplateDateModel.TIME,
@@ -169,7 +167,7 @@ abstract class DateBuiltins {
         protected TemplateModel calculateResult(
                 Date date, int dateType, Environment env)
         throws TemplateException {
-            checkDateTypeNotUnknown(dateType, env);
+            checkDateTypeNotUnknown(dateType);
             return new Result(date, dateType, env);
         }
         

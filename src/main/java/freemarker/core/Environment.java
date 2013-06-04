@@ -52,13 +52,52 @@
 
 package freemarker.core;
 
-import java.io.*;
-import java.text.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.text.Collator;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleSequence;
+import freemarker.template.Template;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTransformModel;
+import freemarker.template.TransformControl;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.StringUtil;
@@ -383,7 +422,7 @@ public final class Environment extends Configurable {
      String getCurrentRecoveredErrorMesssage() throws TemplateException {
          if(recoveredErrorStack.isEmpty()) {
              throw new TemplateException(
-                 ".error is not available outside of a <#recover> block", this);
+                 ".error is not available outside of a #recover block", this);
          }
          return (String) recoveredErrorStack.get(recoveredErrorStack.size() -1);
      }
@@ -483,35 +522,15 @@ public final class Environment extends Configurable {
                          && !nodeType.equals("comment") 
                          && !nodeType.equals("document_type")) 
                     {
-                        String nsBit = "";
-                        String ns = node.getNodeNamespace();
-                        if (ns != null) {
-                            if (ns.length() >0) {
-                                nsBit = " and namespace " + ns;
-                            } else {
-                                nsBit = " and no namespace";
-                            }
-                        }
-                        throw new TemplateException("No macro or transform defined for node named "  
-                                    + node.getNodeName() + nsBit
-                                    + ", and there is no fallback handler called @" + nodeType + " either.",
-                                    this);
+                        throw new TemplateException(
+                                noNodeHandlerDefinedMessage(node, node.getNodeNamespace(), nodeType),
+                                this);
                     }
                 }
                 else {
-                    String nsBit = "";
-                    String ns = node.getNodeNamespace();
-                    if (ns != null) {
-                        if (ns.length() >0) {
-                            nsBit = " and namespace " + ns;
-                        } else {
-                            nsBit = " and no namespace";
-                        }
-                    }
-                    throw new TemplateException("No macro or transform defined for node with name " 
-                                + node.getNodeName() + nsBit 
-                                + ", and there is no macro or transform called @default either.",
-                                this);
+                    throw new TemplateException(
+                            noNodeHandlerDefinedMessage(node, node.getNodeNamespace(), "default"),
+                            this);
                 }
             }
         } 
@@ -522,6 +541,23 @@ public final class Environment extends Configurable {
             this.currentNodeNS = prevNodeNS;
             this.nodeNamespaces = prevNodeNamespaces;
         }
+    }
+
+    private String noNodeHandlerDefinedMessage(TemplateNodeModel node, String ns, String nodeType)
+            throws TemplateModelException {
+        String nsBit;
+        if (ns != null) {
+            if (ns.length() > 0) {
+                nsBit = " and namespace " + ns;
+            } else {
+                nsBit = " and no namespace";
+            }
+        } else {
+            nsBit = "";
+        }
+        return "No macro or directive is defined for node named "  
+                + StringUtil.jQuote(node.getNodeName()) + nsBit
+                + ", and there is no fallback handler called @" + nodeType + " either.";
     }
     
     void fallback() throws TemplateException, IOException {
@@ -572,8 +608,9 @@ public final class Environment extends Configurable {
                             ((SimpleHash)unknownVars).put(varName, value);
                         }
                     } else {
-                        String msg = "Macro " + macro.getName() + " has no such argument: " + varName;
-                        throw new TemplateException(msg, this);
+                        throw new TemplateException(
+                                "Macro " + StringUtil.jQuote(macro.getName()) + " has no such argument: " + varName,
+                                this);
                     }
                 }
             }
@@ -583,8 +620,10 @@ public final class Environment extends Configurable {
                 String[] argumentNames = macro.getArgumentNamesInternal();
                 int size = positionalArgs.size();
                 if (argumentNames.length < size && catchAll == null) {
-                    throw new TemplateException("Macro " + macro.getName() 
-                      + " only accepts " + argumentNames.length + " parameters.", this);
+                    throw new TemplateException(
+                      "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
+                      + argumentNames.length + " parameters.",
+                      this);
                 }
                 for (int i = 0; i < size; i++) {
                     Expression argExp = (Expression) positionalArgs.get(i);
@@ -1438,7 +1477,10 @@ public final class Environment extends Configurable {
             try {                                   
                 ns = (Namespace) nodeNamespaces.get(i);
             } catch (ClassCastException cce) {
-                throw new InvalidReferenceException("A using clause should contain a sequence of namespaces or strings that indicate the location of importable macro libraries.", this);
+                throw new TemplateException(
+                        "A \"using\" clause should contain a sequence of namespaces or strings that indicate the "
+                        + "location of importable macro libraries.",
+                        this);
             }
             result = getNodeProcessor(ns, nodeName, nsURI);
             if (result != null) 

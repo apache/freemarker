@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * A class that represents a Range between two integers.
@@ -83,11 +84,9 @@ final class Range extends Expression {
         return new NumericalRange(min);
     }
     
+    // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean isTrue(Environment env) throws TemplateException {
-        String msg = "Error " + getStartLocation() + ". " 
-                    + "\nExpecting a boolean here."
-                    + " Expression " + this + " is a range.";
-        throw new NonBooleanException(msg, env);
+        throw newNonBooleanException("sequence (numerical range)");
     }
 
     public String getCanonicalForm() {

@@ -55,7 +55,8 @@ package freemarker.core;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 /**
  * An instruction that outputs the value of a numerical expression.

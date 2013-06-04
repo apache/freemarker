@@ -165,7 +165,7 @@ final class BuiltinVariable extends Expression {
         if (name == NOW) {
             return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
         }
-        throw new TemplateException("Invalid built-in variable: " + this, env);
+        throw newTemplateException("Invalid built-in variable: " + this);
     }
 
     public String toString() {

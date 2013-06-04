@@ -52,12 +52,11 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateException;
 
 /**
  * Indicates that a date, time or date+time was expected.
  */
-public class NonDateException extends TemplateException {
+public class NonDateException extends UnexpectedTypeException {
 
     public NonDateException(Environment env) {
         super("expecting date/time value here", env);
@@ -66,4 +65,5 @@ public class NonDateException extends TemplateException {
     public NonDateException(String description, Environment env) {
         super(description, env);
     }
+    
 }

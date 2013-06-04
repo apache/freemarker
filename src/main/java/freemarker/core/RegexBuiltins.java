@@ -218,9 +218,9 @@ abstract class RegexBuiltins {
     static class matchesBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
             TemplateModel targetModel = target.getAsTemplateModel(env);
-            assertNonNull(targetModel, env);
+            assertNonNull(targetModel);
             if (!(targetModel instanceof TemplateScalarModel)) {
-                throw target.invalidTypeException(targetModel, env, "string");
+                throw target.newUnexpectedTypeException(targetModel, "string");
             }
             return new MatcherBuilder((TemplateScalarModel) targetModel);
         }
@@ -229,14 +229,14 @@ abstract class RegexBuiltins {
     static class groupsBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
             TemplateModel targetModel = target.getAsTemplateModel(env);
-            assertNonNull(targetModel, env);
+            assertNonNull(targetModel);
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
             }
             if (targetModel instanceof RegexMatchModel.Match) {
                 return ((RegexMatchModel.Match) targetModel).subs;
             }
-            throw target.invalidTypeException(targetModel, env, "a regular expression matcher");
+            throw target.newUnexpectedTypeException(targetModel, "a regular expression matcher");
         }
     }
     
@@ -248,7 +248,7 @@ abstract class RegexBuiltins {
             if (model instanceof TemplateScalarModel) {
                 return new ReplaceMethod(((TemplateScalarModel) model).getAsString());
             }
-            throw target.invalidTypeException(model, env, "string");
+            throw target.newUnexpectedTypeException(model, "string");
         }
     }
     
@@ -259,7 +259,7 @@ abstract class RegexBuiltins {
             if (model instanceof TemplateScalarModel) {
                 return new SplitMethod(((TemplateScalarModel) model).getAsString());
             }
-            throw target.invalidTypeException(model, env, "string");
+            throw target.newUnexpectedTypeException(model, "string");
         }
     }
     

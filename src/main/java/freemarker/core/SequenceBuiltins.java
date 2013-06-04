@@ -63,18 +63,18 @@ import java.util.List;
 import freemarker.ext.beans.CollectionModel;
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateModelListSequence;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.TemplateCollectionModel;
-import freemarker.template.TemplateModelIterator;
 import freemarker.template.utility.Constants;
 import freemarker.template.utility.StringUtil;
 
@@ -89,7 +89,7 @@ abstract class SequenceBuiltins {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             if (!(model instanceof TemplateSequenceModel)) {
-                throw target.invalidTypeException(model, env, "sequence");
+                throw target.newUnexpectedTypeException(model, "sequence");
             }
             return calculateResult((TemplateSequenceModel) model);
         }
@@ -489,7 +489,7 @@ abstract class SequenceBuiltins {
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
-                throw target.invalidTypeException(model, env, "sequence or collection");
+                throw target.newUnexpectedTypeException(model, "sequence or collection");
             }
         }
 
@@ -582,7 +582,7 @@ abstract class SequenceBuiltins {
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
-                    throw target.invalidTypeException(model, env, "sequence or collection");
+                    throw target.newUnexpectedTypeException(model, "sequence or collection");
                 }
                 
                 m_env = env;

@@ -57,22 +57,22 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
-import freemarker.template.TemplateModelException;
-
 import org.jaxen.Context;
 import org.jaxen.NamespaceContext;
 import org.jaxen.jdom.JDOMXPath;
-import org.jdom.Element;
 import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
+import org.jdom.Element;
 import org.jdom.EntityRef;
 import org.jdom.Namespace;
 import org.jdom.ProcessingInstruction;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
+
+import freemarker.template.TemplateModelException;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java

@@ -54,7 +54,8 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 final class AttemptBlock extends TemplateElement {
     

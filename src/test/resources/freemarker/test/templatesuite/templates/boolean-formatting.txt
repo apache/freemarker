@@ -12,7 +12,7 @@ ${x?string('ja', 'nein')} ${true?string('ja', 'nein')}
 ${beansBoolean} ${beansBoolean?string}
 ${booleanAndString} ${booleanAndString?string}
 <#assign n = 123><#assign m = { x: 'foo', n: 'bar' }><@assertEquals actual=m['n'] + m['123'] expected='foobar' />
-<@assertFails message="Expected a value of type">${m[false]}</@>
+<@assertFails exception="UnexpectedTypeException">${m[false]}</@>
 <@assertFails message="can't compare">${x == 'false'}</@>
 <@assertFails message="can't compare">${x != 'false'}</@>
 <@assertFails message="can't convert">${booleanVsStringMethods.expectsString(x)}</@>

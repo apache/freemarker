@@ -79,7 +79,7 @@ final class StopInstruction extends TemplateElement {
     }
 
     public String getDescription() {
-        return "stop" + " [" + getStartLocation() + "]";
+        return "stop";
     }
 }
 

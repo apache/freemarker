@@ -629,26 +629,26 @@ TOKEN:
 			    int index = s.indexOf('#');
 			    s = s.substring(index);
 			    
-			    String hint = null;
+			    String tip = null;
 			    if (!s.toLowerCase().equals(s))			    {
-			        hint = "Directive names are all-lower-case.";			    }
-			    else if (s.equals("#set"))			    {			        hint = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
+			        tip = "Directive names are all-lower-case.";			    }
+			    else if (s.equals("#set"))			    {			        tip = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
 			    }
-			    else if (s.equals("#else_if")) hint = "Use #elseif.";
-			    else if (s.equals("#no_escape")) hint = "Use #noescape instead.";
-			    else if (s.equals("#method")) hint = "Use #function instead.";
-			    else if (s.equals("#head") || s.equals("#template") || s.equals("#fm")) hint = "You may meant #ftl.";
-			    else if (s.equals("#try") || s.equals("#atempt")) hint = "You may meant #attempt.";
-			    else if (s.equals("#for") || s.equals("#each") || s.equals("#iterate") || s.equals("#iterator"))			    {			        hint = "You may meant #list "
+			    else if (s.equals("#else_if")) tip = "Use #elseif.";
+			    else if (s.equals("#no_escape")) tip = "Use #noescape instead.";
+			    else if (s.equals("#method")) tip = "Use #function instead.";
+			    else if (s.equals("#head") || s.equals("#template") || s.equals("#fm")) tip = "You may meant #ftl.";
+			    else if (s.equals("#try") || s.equals("#atempt")) tip = "You may meant #attempt.";
+			    else if (s.equals("#for") || s.equals("#each") || s.equals("#iterate") || s.equals("#iterator"))			    {			        tip = "You may meant #list "
 			               + "(http://freemarker.org/docs/ref_directive_list.html).";
 			    }
 			    else
-			    {			        hint = "Check the Directive Reference in the manual: "
+			    {			        tip = "Check the Directive Reference in the manual: "
 			      		   + "http://freemarker.org/docs/ref_directive_alphaidx.html. If the name is there, "
 			      		   + "check the version; you are using FreeMarker " + Configuration.getVersion() +")";
 			    }
 			    throw new TokenMgrError(
-			      		"Unknown directive: " + s + (hint != null ? "\n(Hint: " + hint + ")" : ""),
+			      		"Unknown directive: " + s + (tip != null ? "\nTip: " + tip : ""),
 			      		TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
 			}
         }
@@ -1664,8 +1664,8 @@ DollarVariable StringOutput() :
    begin=<OUTPUT_ESCAPE>
    exp=Expression()
    {
-      notHashLiteral(exp, MessageUtil.TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING);
-      notListLiteral(exp, MessageUtil.TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING);
+      notHashLiteral(exp, MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED);
+      notListLiteral(exp, MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED);
    }
    end=<CLOSE_BRACE>
    {

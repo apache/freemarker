@@ -52,8 +52,15 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.ListIterator;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
 
 final class HashLiteral extends Expression {
 
@@ -133,7 +140,7 @@ final class HashLiteral extends Expression {
                 String key = keyExp.getStringValue(env);
                 TemplateModel value = valExp.getAsTemplateModel(env);
                 if (env == null || !env.isClassicCompatible()) {
-                    valExp.assertNonNull(value, env);
+                    valExp.assertNonNull(value);
                 }
                 keyMap.put(key, value);
                 keyList.add(key);

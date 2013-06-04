@@ -52,8 +52,8 @@
 
 package freemarker.core;
 
-import java.io.PrintWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import freemarker.template.TemplateException;
 

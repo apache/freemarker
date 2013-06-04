@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModel;
 
 final class BooleanLiteral extends Expression {
 

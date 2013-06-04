@@ -52,9 +52,7 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.StringUtil;
+import freemarker.template.Template;
 
 /**
  * Objects that represent instructions or expressions
@@ -94,6 +92,17 @@ public abstract class TemplateObject {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
+    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
+    throws
+        ParseException
+    {
+        this.template = template;
+        this.beginColumn = beginColumn;
+        this.beginLine = beginLine;
+        this.endColumn = endColumn;
+        this.endLine = endLine;
+    }
+    
     public final int getBeginColumn() {
         return beginColumn;
     }
@@ -110,56 +119,6 @@ public abstract class TemplateObject {
         return endLine;
     }
 
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws
-        ParseException
-    {
-        this.template = template;
-        this.beginColumn = beginColumn;
-        this.beginLine = beginLine;
-        this.endColumn = endColumn;
-        this.endLine = endLine;
-    }
-    
-    void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
-        if (model == null) {
-            throw invalidReferenceException(env);
-        }
-    }
-
-    InvalidReferenceException invalidReferenceException(Environment env) {
-        return new InvalidReferenceException(
-                "Error " + this.getStartLocation() + ":\n"
-                + "The following has evaluated to null or missing:\n" + this
-                + "\n(Tip: If the failing variable is known to be legally null/missing, either specify a default value"
-                + " with myOptionalVar!myDefault, or use "
-                + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
-                + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
-                + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + ".)",
-                env);
-    }
-    
-    TemplateException invalidTypeException(TemplateModel model, Environment env, String expected)
-    throws TemplateException {
-        return invalidTypeException(model, env, expected, null);
-    }
-    
-    TemplateException invalidTypeException(
-            TemplateModel model, Environment env, String expected,
-            String tip)
-    throws
-        TemplateException
-    {
-        assertNonNull(model, env);
-        return new TemplateException(
-            "Error " + this.getStartLocation() + ":\n"
-            + "Expected a value of type " + expected + ", but this evaluated to a value of type " 
-            + ClassUtil.getFTLTypeDescription(model) + ":\n"
-            + this
-            + (tip == null ? "" : "\n(Tip: " + tip + ")"),
-            env);
-    }
-    
     /**
      * Returns a string that indicates
      * where in the template source, this object is.
@@ -203,7 +162,6 @@ public abstract class TemplateObject {
     		return getCanonicalForm();
     	}
     }
-
 
     /**
      * @return whether the point in the template file specified by the 

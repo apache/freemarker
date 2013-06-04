@@ -202,7 +202,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
   }
   
   private static String formatMessage(String details, String templateName, int lineNumber, int columnNumber) {
-      return "Error "
+      return "Parsing error "
               + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
               + ":\n" + details;      
   }
@@ -236,19 +236,20 @@ public class ParseException extends java.io.IOException implements FMParserConst
         String details = getCustomUnexpectedTokenDetails();
         if (details == null) {
             // The default JavaCC message generation stuff follows.
-            String expected = "";
+            StringBuffer expected = new StringBuffer();
             int maxSize = 0;
             for (int i = 0; i < expectedTokenSequences.length; i++) {
+              if (i != 0) {
+                  expected.append(eol);
+              }
+              expected.append("    ");
               if (maxSize < expectedTokenSequences[i].length) {
                 maxSize = expectedTokenSequences[i].length;
               }
               for (int j = 0; j < expectedTokenSequences[i].length; j++) {
-                expected += tokenImage[expectedTokenSequences[i][j]] + " ";
+                if (j != 0) expected.append(' ');
+                expected.append(tokenImage[expectedTokenSequences[i][j]]);
               }
-              if (expectedTokenSequences[i][expectedTokenSequences[i].length - 1] != 0) {
-                expected += "...";
-              }
-              expected += eol + "    ";
             }
             details = "Encountered \"";
             Token tok = currentToken.next;
@@ -264,9 +265,9 @@ public class ParseException extends java.io.IOException implements FMParserConst
             details += "\"" + eol;
             
             if (expectedTokenSequences.length == 1) {
-              details += "Was expecting:" + eol + "    ";
+              details += "Was expecting:" + eol;
             } else {
-              details += "Was expecting one of:" + eol + "    ";
+              details += "Was expecting one of:" + eol;
             }
             details += expected;
         }
@@ -310,34 +311,34 @@ public class ParseException extends java.io.IOException implements FMParserConst
               int[] sequence = expectedTokenSequences[i];
               switch (sequence[0]) {
                   case END_FOREACH :
-                      buf.append("Unclosed \"foreach\" directive.\n");
+                      buf.append("Unclosed \"foreach\" directive.");
                       break;
                   case END_LIST :
-                      buf.append("Unclosed \"list\" directive.\n");
+                      buf.append("Unclosed \"list\" directive.");
                       break;
                   case END_SWITCH :
-                      buf.append("Unclosed \"switch\" directive.\n");
+                      buf.append("Unclosed \"switch\" directive.");
                       break;
                   case END_IF :
-                      buf.append("Unclosed \"if\" directive.\n");
+                      buf.append("Unclosed \"if\" directive.");
                       break;
                   case END_COMPRESS :
-                      buf.append("Unclosed \"compress\" directive.\n");
+                      buf.append("Unclosed \"compress\" directive.");
                       break;
                   case END_MACRO :
-                      buf.append("Unclosed \"macro\" directive.\n");
+                      buf.append("Unclosed \"macro\" directive.");
                       break;
                   case END_FUNCTION :
-                      buf.append("Unclosed \"function\" directive.\n");
+                      buf.append("Unclosed \"function\" directive.");
                       break;
                   case END_TRANSFORM :
-                      buf.append("Unclosed \"transform\" directive.\n");
+                      buf.append("Unclosed \"transform\" directive.");
                       break;
                   case END_ESCAPE :
-                      buf.append("Unclosed \"escape\" directive.\n");
+                      buf.append("Unclosed \"escape\" directive.");
                       break;
                   case END_NOESCAPE :
-                      buf.append("Unclosed \"noescape\" directive.\n");
+                      buf.append("Unclosed \"noescape\" directive.");
                       break;
               }
           }

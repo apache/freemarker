@@ -53,7 +53,8 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+
 import freemarker.template.TemplateException;
 
 /**

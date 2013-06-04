@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 final class ParentheticalExpression extends Expression {
 

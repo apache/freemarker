@@ -54,9 +54,6 @@ package freemarker.template;
 
 import java.util.List;
 
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateSequenceModel;
-
 /**
  * Sequence that wraps a <code>java.util.List</code> of already wrapped objects
  * directly, with minimal resource usage. Warning! It does not copy the original

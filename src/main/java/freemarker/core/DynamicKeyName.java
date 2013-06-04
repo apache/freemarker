@@ -53,7 +53,15 @@
 package freemarker.core;
 
 import java.util.ArrayList;
-import freemarker.template.*;
+
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * A unary operator that uses the string value of an expression as a hash key.
@@ -76,7 +84,7 @@ final class DynamicKeyName extends Expression {
             if (env.isClassicCompatible()) {
                 return null;
             } else {
-                throw target.invalidReferenceException(env);
+                throw target.newInvalidReferenceException();
             }
         }
         if (nameExpression instanceof Range) {
@@ -88,7 +96,7 @@ final class DynamicKeyName extends Expression {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                nameExpression.assertNonNull(keyModel, env);
+                nameExpression.assertNonNull(keyModel);
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
@@ -97,9 +105,9 @@ final class DynamicKeyName extends Expression {
         }
         if (keyModel instanceof TemplateScalarModel) {
             String key = EvaluationUtil.getString((TemplateScalarModel)keyModel, nameExpression, env);
-            return dealWithStringKey(targetModel, key, env);
+            return dealWithStringKey(targetModel, key);
         }
-        throw nameExpression.invalidTypeException(keyModel, env, "number, range, or string");
+        throw nameExpression.newUnexpectedTypeException(keyModel, "number, range, or string");
     }
 
 
@@ -130,21 +138,17 @@ final class DynamicKeyName extends Expression {
         }
         catch(NonStringException e)
         {
-            throw target.invalidTypeException(targetModel, env,
-                    "sequence or string (or something that's implicitly convertible to string)");
+            throw target.newUnexpectedTypeException(targetModel, "sequence or string (or something that's implicitly convertible to string)");
         }
     }
 
-
-    private TemplateModel dealWithStringKey(TemplateModel targetModel, 
-                                            String key,
-                                            Environment env)
+    private TemplateModel dealWithStringKey(TemplateModel targetModel, String key)
         throws TemplateException
     {
         if(targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
-        throw target.invalidTypeException(targetModel, env, "hash");
+        throw target.newUnexpectedTypeException(targetModel, "hash");
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
@@ -162,26 +166,22 @@ final class DynamicKeyName extends Expression {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
             if (!hasRhs) end = sequence.size() -1;
             if (start < 0) {
-                String msg = range.left.getStartLocation() + "\nNegative starting index for range, is " + range;
-                throw new TemplateException(msg, env);
+                throw range.left.newTemplateException("Negative starting index " + start + " for slicing range.");
             }
             if (end < 0) {
-                String msg = range.left.getStartLocation() + "\nNegative ending index for range, is " + range;
-                throw new TemplateException(msg, env);
+                throw range.right.newTemplateException("Negative ending index " + end + " for slicing range.");
             }
             if (start >= sequence.size()) {
-                String msg = range.left.getStartLocation() 
-                            + "\nLeft side index of range out of bounds, is " + start
-                            + ", but the sequence has only " + sequence.size() + " element(s) "
-                            + "(note that indices are 0 based, and ranges are inclusive).";
-                throw new TemplateException(msg, env);
+                throw range.left.newTemplateException(
+                        "Left side index of range out of bounds, is " + start
+                        + ", but the sequence has only " + sequence.size() + " element(s) "
+                        + "(note that indices are 0 based, and ranges are inclusive).");
             }
             if (end >= sequence.size()) {
-                String msg = range.right.getStartLocation() 
-                             + "\nRight side index of range out of bounds, is " + end
-                             + ", but the sequence has only " + sequence.size() + " element(s)."
-                             + "(note that indices are 0 based, and ranges are inclusive).";
-                throw new TemplateException(msg, env);
+                throw range.right.newTemplateException(
+                        "Right side index of range out of bounds, is " + end
+                        + ", but the sequence has only " + sequence.size() + " element(s)."
+                        + "(note that indices are 0 based, and ranges are inclusive).");
             }
             ArrayList list = new ArrayList(1+Math.abs(start-end));
             if (start>end) {
@@ -202,36 +202,31 @@ final class DynamicKeyName extends Expression {
             String s = target.getStringValue(env);
             if (!hasRhs) end = s.length() -1;
             if (start < 0) {
-                String msg = range.left.getStartLocation() + "\nNegative starting index for range " + range + " : " + start;
-                throw new TemplateException(msg, env);
+                throw range.left.newTemplateException("Negative starting index " + start + " for slicing range.");
             }
             if (end < 0) {
-                String msg = range.left.getStartLocation() + "\nNegative ending index for range " + range + " : " + end;
-                throw new TemplateException(msg, env);
+                throw range.right.newTemplateException("Negative ending index " + end + " for slicing range.");
             }
             if (start > s.length()) {
-                String msg = range.left.getStartLocation() 
-                            + "\nLeft side of range out of bounds, is: " + start
+                String msg = "Left side of range out of bounds, is: " + start
                             + "\nbut string " + targetModel + " has " + s.length() + " elements.";
-                throw new TemplateException(msg, env);
+                throw range.left.newTemplateException(msg);
             }
             if (end > s.length()) {
-                String msg = range.right.getStartLocation() 
-                             + "\nRight side of range out of bounds, is: " + end
+                String msg = "Right side of range out of bounds, is: " + end
                              + "\nbut string " + targetModel + " is only " + s.length() + " characters.";
-                throw new TemplateException(msg, env);
+                throw range.right.newTemplateException(msg);
             }
             try {
                 return new SimpleScalar(s.substring(start, end+1));
             } catch (RuntimeException re) {
-                String msg = "Error " + getStartLocation();
-                throw new TemplateException(msg, re, env);
+                throw this.newTemplateException(re);
             }
         }
         catch(NonStringException e)
         {
-            throw target.invalidTypeException(target.getAsTemplateModel(env), env,
-                    "string or sequence (or something implicilty convertible to string)");
+            throw target.newUnexpectedTypeException(
+                    target.getAsTemplateModel(env), MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence");
         }
     }
 

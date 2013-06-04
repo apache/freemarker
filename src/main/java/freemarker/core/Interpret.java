@@ -52,9 +52,18 @@
 
 package freemarker.core;
 
-import java.io.*;
-import java.util.*;
-import freemarker.template.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
+import java.util.Map;
+
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTransformModel;
 
 
 /**
@@ -105,7 +114,7 @@ class Interpret extends BuiltIn
         }
         else
         {
-            throw target.invalidTypeException(model, env, "sequence or string");
+            throw target.newUnexpectedTypeException(model, "sequence or string");
         }
         String templateSource = sourceExpr.getStringValue(env);
         Template parentTemplate = env.getTemplate();
@@ -120,10 +129,10 @@ class Interpret extends BuiltIn
         }
         catch(IOException e)
         {
-            throw new TemplateException(
-                    "Error " + getStartLocation() + ":\n"
-                    + "\"?interpret\" has failed with this parsing error:\n" + e.getMessage(),
-                    e, env);
+            throw newTemplateException(
+                    "\"?interpret\" has failed with this parsing error:\n" + e.getMessage()
+                    + "\nThe failed expression:",
+                    e);
         }
         
         interpretedTemplate.setLocale(env.getLocale());
@@ -150,10 +159,9 @@ class Interpret extends BuiltIn
             }
             catch(Exception e)
             {
-                throw new TemplateModelException(
-                        "Error " + getStartLocation() + ":\n"
-                        + "Interpreted template has stopped with error:\n"
-                        + e.getMessage(),
+                throw newTemplateModelException(
+                        "Template created with \"?interpret\" has stopped with error:\n" + e.getMessage()
+                        + "\n\nThe interpreted template was created here:",
                         e);
             }
     

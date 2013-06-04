@@ -52,9 +52,10 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import java.io.IOException;
+
+import freemarker.template.TemplateException;
 import freemarker.template.utility.StandardCompress;
-import java.io.*;
 
 /**
  * An instruction that reduces all sequences of whitespace to a single

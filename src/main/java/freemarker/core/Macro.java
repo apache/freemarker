@@ -53,8 +53,17 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.*;
-import freemarker.template.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -209,23 +218,27 @@ public final class Macro extends TemplateElement implements TemplateModel {
                             }
                         }
                         else if (!env.isClassicCompatible()) {
-                            throw new TemplateException(
-                                    "When calling macro " + StringUtil.jQuote(name) 
+                            String desc = "When calling macro " + StringUtil.jQuote(name) 
                                     + ", required parameter " + StringUtil.jQuote(argName)
-                                    + " (parameter #" + (i + 1) + ") was "
-                                    + (localVars.containsKey(argName)
-                                            ? "specified, but had null/missing value.\n"
-                                              + "(Tip: If the parameter value expression on the caller side is known "
-                                              + "to be legally null/missing, you may want to specify a default value "
-                                              + "for it with the \"!\" operator, like "
-                                              + "paramValueExpression!defaultValueExpression.)"
-                                            : "not specified.\n"
-                                    		  + "(Tip: If the omission was deliberate, you may consider making "
-                                              + "the parameter optional in the macro by specifying a default value for "
-                                              + "it, like "
-                                              + StringUtil.encloseAsTag(
-                                                      getTemplate(), "#macro myMacro paramName=defaultExpr")
-                                              + ".)"),
+                                    + " (parameter #" + (i + 1) + ") was ";
+                            String hint;
+                            if (localVars.containsKey(argName)) {
+                                desc += "specified, but had null/missing value.";
+                                hint = "If the parameter value expression on the caller side is known "
+                                        + "to be legally null/missing, you may want to specify a default value "
+                                        + "for it with the \"!\" operator, like "
+                                        + "paramValueExpression!defaultValueExpression.";
+                            } else {
+                                desc += "not specified.";
+                                hint = "If the omission was deliberate, you may consider making "
+                                        + "the parameter optional in the macro by specifying a default value for "
+                                        + "it, like "
+                                        + StringUtil.encloseAsTag(
+                                                getTemplate(), "#macro myMacro paramName=defaultExpr")
+                                        + ")";
+                            }
+                            throw new TemplateException(
+                                    MessageUtil.decorateErrorDescription(desc, null, hint),
                                     env);
                         }
                     }
@@ -236,7 +249,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 if(firstReferenceException != null) {
                     throw firstReferenceException;
                 } else if (!env.isClassicCompatible()) {
-                    firstUnresolvedExpression.invalidReferenceException(env);
+                    firstUnresolvedExpression.newInvalidReferenceException();
                 }
             }
         }

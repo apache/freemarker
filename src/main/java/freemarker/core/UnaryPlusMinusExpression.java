@@ -52,8 +52,10 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.ClassUtil;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 
 final class UnaryPlusMinusExpression extends Expression {
 
@@ -72,16 +74,12 @@ final class UnaryPlusMinusExpression extends Expression {
         try {
             targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {
-            throw new NonNumericalException(
-                    "Error " + getStartLocation() + ":\n"
-                    + "Expected a number, but this evaluated to a value of type "
-                    + ClassUtil.getFTLTypeDescription(tm) + ":\n"
-                    + target,
-                    env);
+            throw newNonNumericalException(tm);
         }
         if (!isMinus) {
             return targetModel;
         }
+        target.assertNonNull(targetModel);
         Number n = targetModel.getAsNumber();
         n = ArithmeticEngine.CONSERVATIVE_ENGINE.multiply(MINUS_ONE, n);
         return new SimpleNumber(n);

@@ -109,7 +109,8 @@ final class UnifiedCall extends TemplateElement {
             if (macro.isFunction && !legacySyntax) {
                 throw new TemplateException("Routine " + macro.getName() + 
                         " is a function. A function can only be called " +
-                        "within the evaluation of an expression.", env);
+                        "within the evaluation of an expression, like from inside ${...}.",
+                        env);
             }    
             env.visit(macro, namedArgs, positionalArgs, bodyParameterNames,
                     nestedBlock);
@@ -139,9 +140,9 @@ final class UnifiedCall extends TemplateElement {
                 }
             }
             else if (tm == null) {
-                throw nameExp.invalidReferenceException(env);
+                throw nameExp.newInvalidReferenceException();
             } else {
-                throw nameExp.invalidTypeException(tm, env, "user-defined directive (macro, etc.)");
+                throw nameExp.newUnexpectedTypeException(tm, "user-defined directive (macro, etc.)");
             }
         }
     }

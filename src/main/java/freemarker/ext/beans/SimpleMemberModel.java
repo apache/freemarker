@@ -60,7 +60,6 @@ import java.util.List;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.StringUtil;
 
 /**
  * This class is used for constructors and as a base for non-overloaded methods

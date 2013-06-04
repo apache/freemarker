@@ -86,7 +86,7 @@ public final class ReturnInstruction extends TemplateElement {
     }
 
     public String getDescription() {
-        return "return" + " [" + getStartLocation() + "]";
+        return "return";
     }
 
     public static class Return extends RuntimeException {

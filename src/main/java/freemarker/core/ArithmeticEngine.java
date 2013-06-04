@@ -52,11 +52,12 @@
 
 package freemarker.core;
 
-import java.math.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
 import freemarker.template.utility.NumberUtil;
 import freemarker.template.utility.OptimizerUtil;
 import freemarker.template.utility.StringUtil;

@@ -9,7 +9,7 @@ import freemarker.template.utility.StringUtil;
  */
 class MessageUtil {
 
-    static final String TYPES_AUTOMATICALLY_CONVERTIBLE_TO_STRING
+    static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
             = "string or something automatically convertible to string (number, date or boolean)";
 
     private MessageUtil() { }
@@ -48,6 +48,65 @@ class MessageUtil {
                 : "nameless template";
         return "in " + templateDesc + " "
               + preposition + " line " + line + ", column " + column;
+    }
+
+    static String decorateErrorDescription(String description, String tip) {
+        return decorateErrorDescription(description, null, tip);
+    }
+
+    static String decorateErrorDescription(String description, String[] tip) {
+        return decorateErrorDescription(description, null, tip);
+    }
+
+    static String decorateErrorDescription(String description, Expression blamedExpr) {
+        return decorateErrorDescription(description, blamedExpr, (String[]) null);
+    }
+
+    static String decorateErrorDescription(String description, Expression blamedExpr, String tip) {
+        return decorateErrorDescription(description, blamedExpr, tip != null ? new String[] { tip } : null);
+    }
+    
+    static String decorateErrorDescription(String description, Expression blamedExpr, String[] tips) {
+        if (blamedExpr != null || tips != null) {
+            StringBuffer sb = new StringBuffer();
+            sb.append(description);
+            if (blamedExpr != null) {
+                // Right-trim:
+                for (int idx = sb.length() - 1; idx >= 0 && Character.isWhitespace(sb.charAt(idx)); idx --) {
+                    sb.deleteCharAt(idx);
+                }
+                
+                char lastChar = sb.length() > 0 ? (sb.charAt(sb.length() - 1)) : 0;
+                if (lastChar == ':') {
+                    sb.append('\n');
+                } else {
+                    if (lastChar == '.' || lastChar == '?' || lastChar == '!') {
+                        sb.append(' ');
+                    } else if (lastChar != 0) {
+                        sb.append('\n');
+                    }
+                    sb.append("The blamed expression:\n");
+                }
+                sb.append("==> ");
+                sb.append(blamedExpr);
+                sb.append("  [");
+                sb.append(blamedExpr.getStartLocation());
+                sb.append(']');
+            }
+            if (tips != null && tips.length > 0) {
+                sb.append("\n");
+                sb.append("\n");
+                for (int i = 0; i < tips.length; i++) {
+                    if (i != 0) sb.append('\n');
+                    sb.append("Tip: ");
+                    sb.append(tips[i]);
+                }
+                sb.append("");
+            }
+            return sb.toString();
+        } else {
+            return  description;
+        }
     }
     
 }

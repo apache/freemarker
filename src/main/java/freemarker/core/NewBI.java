@@ -92,13 +92,12 @@ class NewBI extends BuiltIn
             classname = ((TemplateScalarModel) tm).getAsString();
         } 
         catch (ClassCastException cce) {
-            target.invalidTypeException(tm, env, "string");
+            target.newUnexpectedTypeException(tm, "string");
         } 
         catch (NullPointerException npe) {
-            throw new InvalidReferenceException(getStartLocation() 
-                + "\nCould not resolve expression: " + target, env);
+            throw target.newInvalidReferenceException();
         }
-        return new ConstructorFunction(classname, env, target.getTemplate());
+        return new ConstructorFunction(classname, env, this, target.getTemplate());
     }
 
     static class ConstructorFunction implements TemplateMethodModelEx {
@@ -106,17 +105,17 @@ class NewBI extends BuiltIn
         private final Class cl;
         private final Environment env;
         
-        public ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
+        public ConstructorFunction(String classname, Environment env, Expression bi, Template template) throws TemplateException {
             this.env = env;
             cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
             if (!TM_CLASS.isAssignableFrom(cl)) {
-                throw new TemplateException("Class " + cl.getName() + " does not implement freemarker.template.TemplateModel", env);
+                throw bi.newTemplateException("Class " + cl.getName() + " does not implement freemarker.template.TemplateModel");
             }
             if (BEAN_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw new TemplateException("Bean Models cannot be instantiated using the ?new built-in", env);
+                throw bi.newTemplateException("Bean Models cannot be instantiated using the ?new built-in");
             }
             if (JYTHON_MODEL_CLASS != null && JYTHON_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw new TemplateException("Jython Models cannot be instantiated using the ?new built-in", env);
+                throw bi.newTemplateException("Jython Models cannot be instantiated using the ?new built-in");
             }
         }
 

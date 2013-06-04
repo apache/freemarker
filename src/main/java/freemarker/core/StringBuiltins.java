@@ -52,11 +52,18 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
-
 import java.io.StringReader;
 import java.util.StringTokenizer;
+
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.StringUtil;
 
 
 /**
@@ -180,7 +187,8 @@ abstract class StringBuiltins {
                 }
             } catch (ParseException pe) {
                 pe.setTemplateName(getTemplate().getName());
-                throw new TemplateException(pe, env);
+                throw newTemplateException("Failed to \"?eval\" string value:\n"
+                        + pe.getMessage() + "\nThe failing expression:");
             }
             return exp.getAsTemplateModel(env);
         }
@@ -193,10 +201,7 @@ abstract class StringBuiltins {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));
             }
             catch(NumberFormatException nfe) {
-                throw new NonNumericalException(
-                        "Error " + getStartLocation() + ":\n"
-                        + "Can't convert this string to number: " + StringUtil.jQuote(s),
-                        env);
+                throw newMalformedNumberException(s);
             }
         }
     }
@@ -206,7 +211,8 @@ abstract class StringBuiltins {
     			public Object exec(java.util.List args) throws TemplateModelException {
     				int argCount = args.size(), left=0, right=0;
     				if (argCount != 1 && argCount != 2) {
-    					throw new TemplateModelException("Error: " + getStartLocation() + "\nExpecting 1 or 2 numerical arguments here");
+    					throw newTemplateModelException(
+    					        "Expecting 1 or 2 numerical arguments passed to the method coming from:");
     				}
    					try {
    						TemplateNumberModel tnm = (TemplateNumberModel) args.get(0);
@@ -216,8 +222,7 @@ abstract class StringBuiltins {
    							right = tnm.getAsNumber().intValue();
    						}
    					} catch (ClassCastException cce) {
-   						String mess = "Error: " + getStartLocation() + "\nExpecting numerical argument here";
-   						throw new TemplateModelException(mess);
+   						throw newTemplateModelException("Expecting numerical argument passed to the method coming from:");
    					}
     				if (argCount == 1) {
     					return new SimpleScalar(s.substring(left));

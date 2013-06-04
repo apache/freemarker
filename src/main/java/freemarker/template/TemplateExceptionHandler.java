@@ -52,8 +52,9 @@
 
 package freemarker.template;
 
-import java.io.Writer;
 import java.io.PrintWriter;
+import java.io.Writer;
+
 import freemarker.core.Environment;
 
 /**

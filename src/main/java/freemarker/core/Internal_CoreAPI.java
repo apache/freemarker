@@ -19,6 +19,6 @@ public class Internal_CoreAPI {
      */
     public static Set/*<String>*/ getSupportedBuiltInNames() {
         return Collections.unmodifiableSet(BuiltIn.builtins.keySet());
-    }    
+    }
     
 }

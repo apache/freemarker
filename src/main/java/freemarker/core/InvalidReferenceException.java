@@ -62,10 +62,11 @@ import freemarker.template.TemplateException;
 public class InvalidReferenceException extends TemplateException {
 
     public InvalidReferenceException(Environment env) {
-        super("invalid reference", env);
+        super("Invalid reference", env);
     }
 
     public InvalidReferenceException(String description, Environment env) {
         super(description, env);
     }
+    
 }

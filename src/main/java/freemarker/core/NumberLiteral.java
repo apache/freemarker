@@ -52,7 +52,9 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 
 /**
  * A simple implementation of the <tt>TemplateNumberModel</tt>

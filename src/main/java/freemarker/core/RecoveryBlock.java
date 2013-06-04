@@ -53,7 +53,8 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 final class RecoveryBlock extends TemplateElement {
     

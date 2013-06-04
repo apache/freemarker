@@ -52,8 +52,9 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.ClassUtil;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * An operator for arithmetic operations. Note that the + operator
@@ -81,42 +82,24 @@ final class ArithmeticExpression extends Expression {
 
     TemplateModel _getAsTemplateModel(Environment env) throws TemplateException 
     {
-        TemplateModel leftModel = left.getAsTemplateModel(env);
-        TemplateModel rightModel = right.getAsTemplateModel(env);
-        boolean leftIsNumber = (leftModel instanceof TemplateNumberModel);
-        boolean rightIsNumber = (rightModel instanceof TemplateNumberModel);
-        boolean bothNumbers = leftIsNumber && rightIsNumber;
-        if (!bothNumbers) {
-            String msg = "Error " + getStartLocation();
-            if (!leftIsNumber) {
-                msg += ":\nExpected a number, but this evaluated to value s of type "
-                        + ClassUtil.getFTLTypeDescription(leftModel) + ":\n"
-                        + left;
-            }
-            if (!rightIsNumber) {
-                msg += ":\nExpected a number, but this evaluated to value of type "
-                       + ClassUtil.getFTLTypeDescription(rightModel) + ":\n"
-                       + right;
-            }
-            throw new NonNumericalException(msg, env);
-        }
-        Number first = EvaluationUtil.getNumber(leftModel, left, env);
-        Number second = EvaluationUtil.getNumber(rightModel, right, env);
+        Number leftNumber = EvaluationUtil.getNumber(left.getAsTemplateModel(env), left, env);
+        Number rightNumber = EvaluationUtil.getNumber(right.getAsTemplateModel(env), right, env);
+        
         ArithmeticEngine ae = 
             env != null 
                 ? env.getArithmeticEngine()
                 : getTemplate().getArithmeticEngine();
         switch (operation) {
             case SUBSTRACTION : 
-                return new SimpleNumber(ae.subtract(first, second));
+                return new SimpleNumber(ae.subtract(leftNumber, rightNumber));
             case MULTIPLICATION :
-                return new SimpleNumber(ae.multiply(first, second));
+                return new SimpleNumber(ae.multiply(leftNumber, rightNumber));
             case DIVISION :
-                return new SimpleNumber(ae.divide(first, second));
+                return new SimpleNumber(ae.divide(leftNumber, rightNumber));
             case MODULUS :
-                return new SimpleNumber(ae.modulus(first, second));
+                return new SimpleNumber(ae.modulus(leftNumber, rightNumber));
             default:
-                throw new TemplateException("unknown operation : " + operation, env);
+                throw this.newTemplateException("Unknown operation : " + operation);
         }
     }
 

@@ -52,9 +52,13 @@
 
 package freemarker.template.utility;
 
-import freemarker.template.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.List;
+
+import freemarker.template.TemplateModelException;
 
 /**
  * <p>Gives FreeMarker the the ability to execute external commands. Will fork

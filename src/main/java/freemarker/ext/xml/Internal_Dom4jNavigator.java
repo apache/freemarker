@@ -56,8 +56,6 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
-import freemarker.template.TemplateModelException;
-
 import org.dom4j.Attribute;
 import org.dom4j.Branch;
 import org.dom4j.Document;
@@ -69,6 +67,8 @@ import org.dom4j.tree.DefaultAttribute;
 import org.jaxen.Context;
 import org.jaxen.NamespaceContext;
 import org.jaxen.dom4j.Dom4jXPath;
+
+import freemarker.template.TemplateModelException;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java

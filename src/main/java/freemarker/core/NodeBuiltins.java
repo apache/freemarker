@@ -52,9 +52,16 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
 import java.util.List;
+
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A holder for builtins that operate on TemplateNodeModels.
@@ -68,7 +75,7 @@ abstract class NodeBuiltins {
         {
             TemplateModel model = target.getAsTemplateModel(env);
             if (!(model instanceof TemplateNodeModel)) {
-                throw target.invalidTypeException(model, env, "node");
+                throw target.newUnexpectedTypeException(model, "node");
             }
             return calculateResult((TemplateNodeModel) model, env);
         }

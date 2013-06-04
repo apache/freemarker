@@ -52,9 +52,11 @@
 
 package freemarker.core;
 
-import java.util.*;
 import java.io.IOException;
-import freemarker.template.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import freemarker.template.TemplateException;
 
 /**
  * An instruction representing a switch-case structure.

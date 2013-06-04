@@ -55,18 +55,19 @@ package freemarker.core;
 import freemarker.template.TemplateException;
 
 /**
- * A subclass of TemplateException that 
+ * A {@link TemplateException} that 
  * indicates that the internals expected an expression
  * to evaluate to a string or numeric value and it didn't.
  * @author Attila Szegedi
  */
-public class NonStringException extends TemplateException {
+public class NonStringException extends UnexpectedTypeException {
 
     public NonStringException(Environment env) {
-        super("expecting string or numerical value here", env);
+        super("Expecting " + MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " value here", env);
     }
 
     public NonStringException(String description, Environment env) {
         super(description, env);
     }
+    
 }

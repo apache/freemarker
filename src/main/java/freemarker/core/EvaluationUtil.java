@@ -93,12 +93,7 @@ class EvaluationUtil
             }
             else
             {
-                throw new TemplateException(
-                        (expr != null
-                            ? expr.toString()
-                            : "The " + model.getClass().getName() + "object ")
-                        + " has returned null instead of a String.",
-                        env);
+                throw newModelHasStoredNullException(String.class, model, expr, env);
             }
         }
         return value;
@@ -121,16 +116,11 @@ class EvaluationUtil
             return getNumber((TemplateNumberModel)model, expr, env);
         }
         else if(model == null) {
-            throw new InvalidReferenceException(expr + " is undefined or null.", env);
+            throw expr.newInvalidReferenceException();
         }
         else
         {
-            throw new NonNumericalException(
-                    "Error " + expr.getStartLocation() + ":\n"
-                    + "Expected a number, but this evaluated to a value of type "
-                    + ClassUtil.getFTLTypeDescription(model) + ":\n"
-                    + expr,
-                    env);
+            throw expr.newNonNumericalException(model);
         }
     }
 
@@ -141,14 +131,7 @@ class EvaluationUtil
         throws TemplateModelException, TemplateException
     {
         Number value = model.getAsNumber();
-        if(value == null) {
-            throw new TemplateException(
-                    (expr != null
-                        ? expr.toString()
-                        : "The " + model.getClass().getName() + "object ")
-                    + " has returned null instead of a number.",
-                    env);
-        }
+        if(value == null) throw newModelHasStoredNullException(Number.class, model, expr, env);
         return value;
     }
 
@@ -159,15 +142,17 @@ class EvaluationUtil
         throws TemplateModelException, TemplateException
     {
         Date value = model.getAsDate();
-        if(value == null) {
-            throw new TemplateException(
-                    (expr != null
-                        ? expr.toString()
-                        : "The " + model.getClass().getName() + "object ")
-                    + " has returned null instead of a date/time value.",
-                    env);
-        }
+        if(value == null) throw newModelHasStoredNullException(Date.class, model, expr, env);
         return value;
+    }
+    
+    /** Handles the buggy case where we have a non-null model, but its wraps a null. */
+    private static TemplateException newModelHasStoredNullException(
+            Class expected, TemplateModel tm, Expression expr, Environment env) {
+        String msg = "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: "
+                +  tm.getClass().getName() + ") has returned a null instead of a " + expected.getName() + ". "
+                + "This is probably a bug in the non-FreeMarker code that builds the data-model.";
+        return expr != null ? expr.newTemplateException(msg) : new TemplateException(msg, env);
     }
     
     /**
@@ -238,6 +223,7 @@ class EvaluationUtil
             = "You may use the expression?date, expression?time or expression?date_time to specify the missing "
               + "informaton.";
     
+    // TODO: A lot of errors aren't bound to the left or right expression, so the exceptions will be unbound. Not good.
     /**
      * @param leftExp {@code null} is allowed, but may results in less helpful error messages
      * @param operator one of the {@code COMP_OP_...} constants, like {@link #CMP_OP_EQUALS}.
@@ -265,7 +251,7 @@ class EvaluationUtil
                     return false;
                 } else {
                     if (leftExp != null) {
-                        leftExp.assertNonNull(leftValue, env);
+                        leftExp.assertNonNull(leftValue);
                     } else {
                         throw new TemplateException("The left operand of the comparison was undefined or null.", env);
                     }
@@ -281,7 +267,7 @@ class EvaluationUtil
                     return false;
                 } else {
                     if (rightExp != null) {
-                        throw rightExp.invalidReferenceException(env);
+                        throw rightExp.newInvalidReferenceException();
                     } else {
                         throw new TemplateException("The right operand of the comparison was undefined or null.", env);
                     }
@@ -317,14 +303,22 @@ class EvaluationUtil
                         env);
             }
             if (leftDateType == TemplateDateModel.UNKNOWN) {
-                throw new TemplateException("The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN
-                        + (leftExp != null ? " " + USE_DATE_TIME_TYPE_BUILTINS : ""),
-                        env);
+                if (leftExp != null) {
+                    leftExp.newTemplateException(
+                            "The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN + " " + USE_DATE_TIME_TYPE_BUILTINS);                    
+                } else {
+                    throw new TemplateException("The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN,
+                            env);
+                }
             }
             if (rightDateType == TemplateDateModel.UNKNOWN) {
-                throw new TemplateException("The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN
-                        + (rightExp != null ? " " + USE_DATE_TIME_TYPE_BUILTINS : ""),
-                        env);
+                if (rightExp != null) {
+                    rightExp.newTemplateException(
+                            "The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN + " " + USE_DATE_TIME_TYPE_BUILTINS);                    
+                } else {
+                    throw new TemplateException("The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN,
+                            env);
+                }
             }
 
             Date leftDate = EvaluationUtil.getDate(leftDateModel, leftExp, env);

@@ -78,6 +78,7 @@ final class PropertySetting extends TemplateElement {
         ParseException
     {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
+        
         if (!key.equals(Configurable.LOCALE_KEY) &&
             !key.equals(Configurable.NUMBER_FORMAT_KEY) &&
             !key.equals(Configurable.TIME_FORMAT_KEY) &&
@@ -89,11 +90,10 @@ final class PropertySetting extends TemplateElement {
             !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY)) 
         {
             throw new ParseException(
-                    "Error " + getStartLocation()
-                    + "\nInvalid setting name, or it is not allowed to change "
+                    "Invalid setting name, or it is not allowed to change "
                     + "the value of the setting with FTL: "
                     + key,
-                    beginLine, beginColumn);
+                    template, beginLine, beginColumn);
         }
     }
 
@@ -117,7 +117,6 @@ final class PropertySetting extends TemplateElement {
     }
 
     public String getDescription() {
-        return "setting " + key + " set to " + "\"" + value + "\" "
-	    + "[" + getStartLocation() + "]";
+        return "setting " + key + "=" + value;
     }
 }

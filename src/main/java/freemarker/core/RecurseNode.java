@@ -53,7 +53,14 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 
 /**
@@ -70,15 +77,16 @@ final class RecurseNode extends TemplateElement {
 
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.getAsTemplateModel(env);
+        if (node != null && !(node instanceof TemplateNodeModel)) {
+            throw targetNode.newUnexpectedTypeException(node, "node");
+        }
+        
         TemplateModel nss = namespaces == null ? null : namespaces.getAsTemplateModel(env);
         if (namespaces instanceof StringLiteral) {
             nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
         }
         else if (namespaces instanceof ListLiteral) {
             nss = ((ListLiteral) namespaces).evaluateStringsToNamespaces(env);
-        }
-        if (node != null && !(node instanceof TemplateNodeModel)) {
-            throw new TemplateException("Expecting an XML node here, for expression: " + targetNode + ", found a: " + node.getClass().getName(), env);
         }
         if (nss != null) {
             if (nss instanceof TemplateHashModel) {
@@ -87,7 +95,12 @@ final class RecurseNode extends TemplateElement {
                 nss = ss;
             }
             else if (!(nss instanceof TemplateSequenceModel)) {
-                throw new TemplateException("Expecting a sequence of namespaces after 'using'", env);
+                if (namespaces != null) {
+                    throw namespaces.newUnexpectedTypeException(nss, "sequence");
+                } else {
+                    // Should not occur
+                    throw new TemplateException("Expecting a sequence of namespaces after \"using\"", env);
+                }
             }
         }
         

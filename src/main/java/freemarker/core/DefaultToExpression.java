@@ -53,7 +53,13 @@
 package freemarker.core;
 
 
-import freemarker.template.*;
+import freemarker.template.SimpleCollection;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 class DefaultToExpression extends Expression {
 	

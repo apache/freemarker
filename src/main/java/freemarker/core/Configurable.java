@@ -55,13 +55,28 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TimeZone;
 
-import freemarker.template.*;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
-import freemarker.ext.beans.BeansWrapper;
 
 /**
  * This is a common superclass of {@link freemarker.template.Configuration},

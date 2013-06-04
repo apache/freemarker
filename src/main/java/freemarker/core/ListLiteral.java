@@ -52,14 +52,18 @@
 
 package freemarker.core;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import freemarker.template.*;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
-import java.io.IOException;
 
 final class ListLiteral extends Expression {
 
@@ -76,7 +80,7 @@ final class ListLiteral extends Expression {
             Expression exp = (Expression) it.next();
             TemplateModel tm = exp.getAsTemplateModel(env);
             if (env == null || !env.isClassicCompatible()) {            
-                exp.assertNonNull(tm, env);
+                exp.assertNonNull(tm);
             }
             list.add(tm);
         }
@@ -171,7 +175,8 @@ final class ListLiteral extends Expression {
                     result.add(ns);
                 } 
                 catch (IOException ioe) {
-                    throw new TemplateException("Could not import library '" + s + "', " + ioe.getMessage(), env); 
+                    throw ((Expression) values.get(i)).newTemplateException(
+                            "Could not import library '" + s + "', " + ioe.getMessage()); 
                 }
             }
             else {

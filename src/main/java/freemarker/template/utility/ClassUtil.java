@@ -246,7 +246,7 @@ public class ClassUtil
         if (Environment.Namespace.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "namespace");
         } else if (TemplateHashModelEx.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "extendedHash");
+            appendTypeName(sb, typeNamesAppended, "extended_hash");
         } else if (TemplateHashModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "hash");
         }
