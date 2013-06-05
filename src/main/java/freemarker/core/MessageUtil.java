@@ -11,6 +11,12 @@ class MessageUtil {
 
     static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
             = "string or something automatically convertible to string (number, date or boolean)";
+    
+    public static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
+            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used.",
+            "For programmers: Use java.sql.Date/Time/Timestamp instead of java.util.Date in the "
+            + "data-model to avoid this ambiguity."
+    };
 
     private MessageUtil() { }
         
@@ -77,14 +83,10 @@ class MessageUtil {
                 }
                 
                 char lastChar = sb.length() > 0 ? (sb.charAt(sb.length() - 1)) : 0;
-                if (lastChar == ':') {
+                if (lastChar != 0) {
                     sb.append('\n');
-                } else {
-                    if (lastChar == '.' || lastChar == '?' || lastChar == '!') {
-                        sb.append(' ');
-                    } else if (lastChar != 0) {
-                        sb.append('\n');
-                    }
+                }
+                if (lastChar != ':') {
                     sb.append("The blamed expression:\n");
                 }
                 sb.append("==> ");

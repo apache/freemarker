@@ -99,8 +99,9 @@ final class SwitchBlock extends TemplateElement {
                     processCase = true;
                 } else if (!cas.isDefault) {
                     // Otherwise, if this case isn't the default, test it.
-                    ComparisonExpression equalsOp = new ComparisonExpression(testExpression, cas.expression, "==");
-                    processCase = equalsOp.isTrue(env);
+                    processCase = EvaluationUtil.compare(
+                            testExpression,
+                            EvaluationUtil.CMP_OP_EQUALS, "case==", cas.expression, cas.expression, env);
                 }
                 if (processCase) {
                     env.visit(cas);

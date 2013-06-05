@@ -815,10 +815,6 @@ abstract class SequenceBuiltins {
         
     }
     
-    /*
-     * WARNING! This algorithm is duplication of ComparisonExpression.isTrue(...).
-     * Thus, if you update this method, then you have to update that too!
-     */
     public static boolean modelsEqual(
             int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
             Environment env)
@@ -828,6 +824,7 @@ abstract class SequenceBuiltins {
                     seqItem, null,
                     EvaluationUtil.CMP_OP_EQUALS, null,
                     searchedItem, null,
+                    null,
                     true, true, true, // The last one is true to emulate an old bug for BC 
                     env);
         } catch (TemplateException ex) {

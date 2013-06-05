@@ -115,11 +115,7 @@ abstract class DateBuiltins {
                         "The value of the following has unknown date type, but ?" + biName + " needs a date value "
                         + "where it's known if it's a date-only, time-only, or "
                         + "date+time value:",
-                        new String[] {
-                            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used.",
-                            "For programmers: Use java.sql.Date/Time/Timestamp instead of java.util.Date in the "
-                            + "data-model to avoid this ambiguity."
-                        });
+                        MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);
             }
         }
     }

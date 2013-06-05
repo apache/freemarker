@@ -100,7 +100,7 @@ final class ComparisonExpression extends BooleanExpression {
      * Thus, if you update this method, then you have to update that too!
      */
     boolean isTrue(Environment env) throws TemplateException {
-        return EvaluationUtil.compare(left, operation, opString, right, env);
+        return EvaluationUtil.compare(left, operation, opString, right, this, env);
     }
 
     public String getCanonicalForm() {

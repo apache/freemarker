@@ -168,6 +168,7 @@ class EvaluationUtil
             Expression leftExp,
             int operator, String  operatorString,
             Expression rightExp,
+            Expression defaultBlamed,
             Environment env) throws TemplateException {
         TemplateModel ltm = leftExp.getAsTemplateModel(env);
         TemplateModel rtm = rightExp.getAsTemplateModel(env);
@@ -175,14 +176,15 @@ class EvaluationUtil
                 ltm, leftExp,
                 operator, operatorString,
                 rtm, rightExp,
+                defaultBlamed,
                 false, false, false,
                 env);
     }
     
     /**
      * Compares values according the rules of the FTL comparator operators; if the {@link Expression}-s are
-     * accessible, use {@link #compare(Expression, int, String, Expression, Environment)} instead, as that gives better
-     * error messages.
+     * accessible, use {@link #compare(Expression, int, String, Expression, Expression, Environment)} instead, as
+     * that gives better error messages.
      * 
      * @param leftValue maybe {@code null}, which will usually cause the appropriate {@link TemplateException}. 
      * @param operator one of the {@code COMP_OP_...} constants, like {@link #CMP_OP_EQUALS}.
@@ -196,6 +198,7 @@ class EvaluationUtil
                 leftValue, null,
                 operator, null,
                 rightValue, null,
+                null,
                 false, false, false,
                 env);
     }
@@ -212,6 +215,7 @@ class EvaluationUtil
                 leftValue, null,
                 operator, null,
                 rightValue, null,
+                null,
                 true, false, false,
                 env);
     }
@@ -219,16 +223,14 @@ class EvaluationUtil
     private static final String DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN
             = "date of the comparison is of UNKNOWN type (it's not known if it's date-only, time-only, or date-time), "
               + "and thus can't be used in a comparison.";
-    private static final String USE_DATE_TIME_TYPE_BUILTINS
-            = "You may use the expression?date, expression?time or expression?date_time to specify the missing "
-              + "informaton.";
     
-    // TODO: A lot of errors aren't bound to the left or right expression, so the exceptions will be unbound. Not good.
     /**
      * @param leftExp {@code null} is allowed, but may results in less helpful error messages
      * @param operator one of the {@code COMP_OP_...} constants, like {@link #CMP_OP_EQUALS}.
      * @param operatorString can be null {@code null}; the actual operator used, used for more accurate error message.
      * @param rightExp {@code null} is allowed, but may results in less helpful error messages
+     * @param defaultBlamed {@code null} allowed; the expression who to which error will point to if something goes
+     *        wrong that is not specific to the left or right side expression, or if that expression is {@code null}.
      * @param typeMismatchMeansNotEqual If the two types are incompatible, they are treated as non-equal instead
      *     of throwing an exception. Comparing dates of different types will still throw an exception, however. 
      * @param leftNullReturnsFalse if {@code true}, a {@code null} left value will not cause exception, but make the
@@ -240,6 +242,7 @@ class EvaluationUtil
             TemplateModel leftValue, Expression leftExp,
             int operator, String operatorString,
             TemplateModel rightValue, Expression rightExp,
+            Expression defaultBlamed,
             boolean typeMismatchMeansNotEqual,
             boolean leftNullReturnsFalse, boolean rightNullReturnsFalse,
             Environment env) throws TemplateException {
@@ -253,7 +256,12 @@ class EvaluationUtil
                     if (leftExp != null) {
                         leftExp.assertNonNull(leftValue);
                     } else {
-                        throw new TemplateException("The left operand of the comparison was undefined or null.", env);
+                        String desc = "The left operand of the comparison was undefined or null.";
+                        if (defaultBlamed != null) {
+                            throw defaultBlamed.newTemplateException(desc);
+                        } else {
+                            throw new TemplateException(desc, env);
+                        }
                     }
                 }
             }
@@ -269,7 +277,12 @@ class EvaluationUtil
                     if (rightExp != null) {
                         throw rightExp.newInvalidReferenceException();
                     } else {
-                        throw new TemplateException("The right operand of the comparison was undefined or null.", env);
+                        String msg = "The right operand of the comparison was undefined or null.";
+                        if (defaultBlamed != null) {
+                            throw defaultBlamed.newTemplateException(msg);
+                        } else {
+                            throw new TemplateException(msg, env);
+                        }
                     }
                 }
             }
@@ -288,7 +301,12 @@ class EvaluationUtil
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);
             } catch (RuntimeException e) {
-                throw new TemplateModelException("Unexpected error while comparing two numbers: " + e, e);
+                String desc = "Unexpected error while comparing two numbers: " + e;
+                if (defaultBlamed != null) {
+                    throw defaultBlamed.newTemplateModelException(desc, e);
+                } else {
+                    throw new TemplateModelException(desc, e);
+                }
             }
         } else if (leftValue instanceof TemplateDateModel && rightValue instanceof TemplateDateModel) {
             TemplateDateModel leftDateModel = (TemplateDateModel) leftValue;
@@ -296,28 +314,36 @@ class EvaluationUtil
             
             int leftDateType = leftDateModel.getDateType();
             int rightDateType = rightDateModel.getDateType();
-            if (leftDateType != rightDateType) {
-                throw new TemplateException("Can not compare dates of different types. Left date is of "
-                        + TemplateDateModel.TYPE_NAMES.get(leftDateType) + " type, right date is of "
-                        + TemplateDateModel.TYPE_NAMES.get(rightDateType) + " type.",
-                        env);
-            }
-            if (leftDateType == TemplateDateModel.UNKNOWN) {
-                if (leftExp != null) {
-                    throw leftExp.newTemplateException(
-                            "The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN + " " + USE_DATE_TIME_TYPE_BUILTINS);                    
+            
+            if (leftDateType == TemplateDateModel.UNKNOWN || rightDateType == TemplateDateModel.UNKNOWN) {
+                String sideName;
+                Expression sideExp;
+                if (leftDateType == TemplateDateModel.UNKNOWN) {
+                    sideName = "left";
+                    sideExp = leftExp;
                 } else {
-                    throw new TemplateException("The left " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN,
-                            env);
+                    sideName = "right";
+                    sideExp = rightExp;
+                }
+                
+                String desc = "The " + sideName + " " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN; 
+                if (sideExp != null) {
+                    throw sideExp.newTemplateException(desc, MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);                    
+                } else if (defaultBlamed != null) {
+                    throw defaultBlamed.newTemplateModelException(desc, MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);
+                } else {
+                    throw new TemplateException(desc, env);
                 }
             }
-            if (rightDateType == TemplateDateModel.UNKNOWN) {
-                if (rightExp != null) {
-                    throw rightExp.newTemplateException(
-                            "The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN + " " + USE_DATE_TIME_TYPE_BUILTINS);                    
+            
+            if (leftDateType != rightDateType) {
+                String desc = "Can not compare dates of different types. Left date is of "
+                        + TemplateDateModel.TYPE_NAMES.get(leftDateType) + " type, right date is of "
+                        + TemplateDateModel.TYPE_NAMES.get(rightDateType) + " type.";
+                if (defaultBlamed != null) {
+                    throw defaultBlamed.newTemplateModelException(desc);
                 } else {
-                    throw new TemplateException("The right " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN,
-                            env);
+                    throw new TemplateException(desc, env);
                 }
             }
 
@@ -326,9 +352,13 @@ class EvaluationUtil
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new TemplateException("Can not use operator \"" + cmpOpToString(operator, operatorString)
-                        + "\" on string values.",
-                        env);
+                String desc = "Can not use operator \"" + cmpOpToString(operator, operatorString)
+                        + "\" on string values.";
+                if (defaultBlamed != null) {
+                    throw defaultBlamed.newTemplateModelException(desc);
+                } else {
+                    throw new TemplateException(desc, env);
+                }
             }
             String leftString = EvaluationUtil.getString((TemplateScalarModel) leftValue, leftExp, env);
             String rightString = EvaluationUtil.getString((TemplateScalarModel) rightValue, rightExp, env);
@@ -336,8 +366,13 @@ class EvaluationUtil
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new TemplateException("Can not use operator \"" + cmpOpToString(operator, operatorString)
-                        + "\" on boolean values.", env);
+                String desc = "Can not use operator \"" + cmpOpToString(operator, operatorString)
+                        + "\" on boolean values.";
+                if (defaultBlamed != null) {
+                    throw defaultBlamed.newTemplateModelException(desc);
+                } else {
+                    throw new TemplateException(desc, env);
+                }
             }
             boolean leftBool = ((TemplateBooleanModel) leftValue).getAsBoolean();
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
@@ -355,12 +390,15 @@ class EvaluationUtil
                 }
                 // Falls through
             }
-            throw new TemplateException(
-                    "Can't compare values of these types. "
+            String desc = "Can't compare values of these types. "
                     + "Allowed comparisons are between two numbers, two strings, or two dates.\n"
                     + "Left hand operand is a(n) " + ClassUtil.getFTLTypeDescription(leftValue) + ".\n"
-                    + "Right hand operand is a(n) " + ClassUtil.getFTLTypeDescription(rightValue) + ".\n",
-                    env);
+                    + "Right hand operand is a(n) " + ClassUtil.getFTLTypeDescription(rightValue) + ".";
+            if (defaultBlamed != null) {
+                throw defaultBlamed.newTemplateModelException(desc);
+            } else {
+                throw new TemplateException(desc, env);
+            }
         }
 
         switch (operator) {
@@ -370,7 +408,7 @@ class EvaluationUtil
             case CMP_OP_GREATER_THAN: return cmpResult > 0;
             case CMP_OP_LESS_THAN_EQUALS: return cmpResult <= 0;
             case CMP_OP_GREATER_THAN_EQUALS: return cmpResult >= 0;
-            default: throw new TemplateException("Unsupported comparator operator code: " + operator, env);
+            default: throw new RuntimeException("Unsupported comparator operator code: " + operator);
         }
     }
 

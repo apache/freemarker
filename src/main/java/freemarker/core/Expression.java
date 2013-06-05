@@ -231,11 +231,15 @@ abstract public class Expression extends TemplateObject {
     }
     
     TemplateModelException newTemplateModelException(String description) {
-        return newTemplateModelException(description, null, null);
+        return newTemplateModelException(description, (String) null, null);
+    }
+    
+    TemplateModelException newTemplateModelException(String description, String[] tips) {
+        return newTemplateModelException(description, tips, null);
     }
     
     TemplateModelException newTemplateModelException(String description, Exception cause) {
-        return newTemplateModelException(description, null, cause);
+        return newTemplateModelException(description, (String) null, cause);
     }
     
     // TODO: The newTemplateModelException-s shouldn't exist at all. TemplateModelException-s should be blamed on
@@ -246,6 +250,12 @@ abstract public class Expression extends TemplateObject {
                 cause);
     }
 
+    TemplateModelException newTemplateModelException(String description, String[] tips, Exception cause) {
+        return new TemplateModelException(
+                MessageUtil.decorateErrorDescription(description, this, tips),
+                cause);
+    }
+    
     InvalidReferenceException newInvalidReferenceException() {
         return new InvalidReferenceException(
                 MessageUtil.decorateErrorDescription(
