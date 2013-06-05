@@ -20345,7 +20345,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fixes in <literal>classic_compatible</literal> mode
-              (this mode is to help switching from FreeMarker 1):</para>
+              (this mode is to help switching from FreeMarker 1), thanks to
+              Information Mosaic:</para>
 
               <itemizedlist>
                 <listitem>
