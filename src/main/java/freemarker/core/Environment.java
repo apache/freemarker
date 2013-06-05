@@ -1272,27 +1272,41 @@ public final class Environment extends Configurable {
      */
     public void outputInstructionStack(PrintWriter pw) {
         pw.println("----------");
-        ListIterator iter = elementStack.listIterator(elementStack.size());
-        if(iter.hasPrevious()) {
-            pw.print("==> ");
-            TemplateElement prev = (TemplateElement) iter.previous();
-            pw.print(prev.getDescription());
-            pw.print("  [");
-            pw.print(prev.getStartLocation());
-            pw.println("]");
-        }
-        while(iter.hasPrevious()) {
-            TemplateElement prev = (TemplateElement) iter.previous();
-            if (prev instanceof UnifiedCall || prev instanceof Include) {
-                String location = prev.getDescription() + " [" + prev.getStartLocation() + "]";
-                if(location != null && location.length() > 0) {
-                    pw.print(" in ");
-                    pw.println(location);
+        ListIterator stackIter = elementStack.listIterator(elementStack.size());
+        boolean topElement = true;
+        while(stackIter.hasPrevious()) {
+            TemplateElement stackEl = (TemplateElement) stackIter.previous();
+
+            if (!(stackEl instanceof MixedContent || stackEl instanceof Macro) || !stackIter.hasNext()) {
+                if (topElement) {
+                    pw.print("==> ");
+                    topElement = false;
                 }
+                
+                pw.print(stackEl.getDescription());
+                
+                pw.print("  [");
+                Macro enclosingMacro = getEnclosingMacro(stackEl);
+                if (enclosingMacro != null) {
+                    pw.print(MessageUtil.formatLocationForEvaluationError(
+                            enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
+                } else {
+                    pw.print(MessageUtil.formatLocationForEvaluationError(
+                            stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
+                }
+                pw.println("]");
             }
         }
         pw.println("----------");
         pw.flush();
+    }
+
+    private Macro getEnclosingMacro(TemplateElement stackEl) {
+        while (stackEl != null) {
+            if (stackEl instanceof Macro) return (Macro) stackEl;
+            stackEl = stackEl.getParent();
+        }
+        return null;
     }
 
     private void pushLocalContext(LocalContext localContext) {

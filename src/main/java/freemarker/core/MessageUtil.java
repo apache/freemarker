@@ -39,6 +39,11 @@ class MessageUtil {
     static String formatLocationForEvaluationError(Template template, int line, int column) {
         return formatLocation("at", template, line, column);
     }
+
+    static String formatLocationForEvaluationError(Macro macro, int line, int column) {
+        Template t = macro.getTemplate();
+        return formatLocation("at", t != null ? t.getName() : null, macro.getName(), macro.isFunction(), line, column);
+    }
     
     static String formatLocationForEvaluationError(String templateName, int line, int column) {
         return formatLocation("at", templateName, line, column);
@@ -49,13 +54,27 @@ class MessageUtil {
     }
     
     private static String formatLocation(String preposition, String templateName, int line, int column) {
+        return formatLocation(
+                preposition, templateName,
+                null, false,
+                line, column);
+    }
+
+    private static String formatLocation(
+            String preposition, String templateName,
+            String macroOrFuncName, boolean isFunction,
+            int line, int column) {
         String templateDesc = templateName != null
                 ? "template " + StringUtil.jQuoteNoXSS(templateName)
                 : "nameless template";
-        return "in " + templateDesc + " "
+        return "in " + templateDesc
+              + (macroOrFuncName != null
+                      ? " in " + (isFunction ? "function " : "macro ") + StringUtil.jQuote(macroOrFuncName)
+                      : "")
+              + " "
               + preposition + " line " + line + ", column " + column;
     }
-
+    
     static String decorateErrorDescription(String description, String tip) {
         return decorateErrorDescription(description, null, tip);
     }

@@ -83,8 +83,7 @@ public class TemplateException extends Exception {
     /** The underlying cause of this exception, if any */
     private final Throwable causeException;
     private final transient Environment env;
-    private final String ftlInstructionStack;
-    
+    private final String ftlInstructionStack; 
     private transient final Object lock = new Object();
     private transient ThreadLocal messageWasAlreadyPrintedForThisTrace;
 
