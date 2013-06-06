@@ -20202,13 +20202,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>Many messages become more helpful, especially for user
-                  who are not very experienced with FreeMarker.</para>
+                  <para>Many messages become more helpful, especially for
+                  users who are not very experienced with FreeMarker.</para>
+                </listitem>
+
+                <listitem>
+                  <para>It's now ensured that the error location is included
+                  in the message returned by
+                  <literal>TemplateException.getMessage()</literal>. The stack
+                  trace always showed this information anyway, but some users
+                  only see the <quote>message</quote>, not the stack trace,
+                  and that often didn't contained the location.</para>
                 </listitem>
 
                 <listitem>
                   <para>The template language part of the stack trace is now
-                  more detailed, and easier to understand</para>
+                  more detailed, and easier to understand.</para>
                 </listitem>
 
                 <listitem>

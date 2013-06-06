@@ -112,7 +112,7 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally
     }
     
     public void doCatch(Throwable t) throws Throwable {
-        pageContext.getOut().println("doCatch() called here with " + t.getClass() + ": " + t.getMessage());
+        pageContext.getOut().println("doCatch() called here with " + t.getClass() + ": " + getFirstLine(t.getMessage()));
     }
 
     public void doFinally() {
@@ -123,4 +123,11 @@ public class TestTag extends BodyTagSupport implements TryCatchFinally
             throw new Error(); // Shouldn't happen
         }
     }
+    
+    private static final String getFirstLine(String s) {
+        int brIdx = s.indexOf('\n');
+        if (brIdx == -1) brIdx = s.indexOf('\r');
+        return brIdx == -1 ? s : s.substring(0, brIdx);
+    }
+    
 }

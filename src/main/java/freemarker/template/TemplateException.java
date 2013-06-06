@@ -58,12 +58,15 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 
 import freemarker.core.Environment;
+import freemarker.core.Internal_CoreAPI;
 
 /**
  * The FreeMarker classes usually use this exception and its descendants to
  * signal FreeMarker specific exceptions.
  */
 public class TemplateException extends Exception {
+
+    private static final String THE_FAILING_INSTRUCTION = "The failing instruction";
 
     private static final boolean BEFORE_1_4 = before14();
     private static boolean before14() {
@@ -84,16 +87,16 @@ public class TemplateException extends Exception {
     private final Throwable causeException;
     private final transient Environment env;
     private final String ftlInstructionStack; 
+    private final String description; 
     private transient final Object lock = new Object();
     private transient ThreadLocal messageWasAlreadyPrintedForThisTrace;
-
 
     /**
      * Constructs a TemplateException with no specified detail message
      * or underlying cause.
      */
     public TemplateException(Environment env) {
-        this(null, null, env);
+        this((String) null, null, env);
     }
 
     /**
@@ -114,7 +117,7 @@ public class TemplateException extends Exception {
      * exception to be raised
      */
     public TemplateException(Exception cause, Environment env) {
-        this(null, cause, env);
+        this((String) null, cause, env);
     }
 
     /**
@@ -127,7 +130,16 @@ public class TemplateException extends Exception {
      * exception to be raised
      */
     public TemplateException(String description, Exception cause, Environment env) {
-        super(ensureNonEmptyDescription(description, cause));
+        this(rawDescToMessageAndDesc(description, cause, env), cause, env);
+    }
+
+    /**
+     * Just an awkward hack because of the restrictions of super().  
+     */
+    private TemplateException(String[] msgs, Exception cause, Environment env) {
+        super(msgs[0]); 
+        description = msgs[1];
+        
         causeException = cause;
         this.env = env;
         if(env != null)
@@ -143,16 +155,33 @@ public class TemplateException extends Exception {
             ftlInstructionStack = "";
         }
     }
-
-    private static String ensureNonEmptyDescription(String description, Throwable cause)  {
-        if(description != null && description.length() != 0) {
-            return description;
-        }
-        if(cause != null) {
-            return "No error description was specified for this error; low-level message: "
+    
+    private static String[] rawDescToMessageAndDesc(String rawDesc, Throwable cause, Environment env)  {
+        String desc;
+        if(rawDesc != null && rawDesc.length() != 0) {
+            desc = rawDesc;
+        } else if (cause != null) {
+            desc = "No error description was specified for this error; low-level message: "
                     + cause.getClass().getName() + ": " + cause.getMessage();
+        } else {
+            desc = "No error message.";
         }
-        return "No error message";
+        
+        String message;
+        if (env != null) {
+            String stackTop = Internal_CoreAPI.getInstructionStackTop(env);
+            if (stackTop != null) {
+                message = desc + "\n\n" + THE_FAILING_INSTRUCTION + " (print stack trace for more):\n==> "
+                        + Internal_CoreAPI.getInstructionStackTop(env);
+                desc = message.substring(0, desc.length());  // to reuse the backing char[] of `message`
+            } else {
+                message = desc;
+            }
+        } else {
+            message = desc;
+        }
+        
+        return new String[] { message, desc };
     }
     
     /**
@@ -211,10 +240,11 @@ public class TemplateException extends Exception {
     public void printStackTrace(PrintWriter pw) {
         synchronized (pw) {
             pw.println("FreeMarker template error:");
-            pw.println(getMessage());
+            pw.println(getDescription());  // Not getMessage()!
             if (ftlInstructionStack != null && ftlInstructionStack.length() != 0) {
                 pw.println();
-                pw.println("The problematic instruction (FTL stack trace):");
+                pw.print(THE_FAILING_INSTRUCTION);
+                pw.println(" (FTL stack trace):");
                 pw.println(ftlInstructionStack);
             }
             pw.println("Java stack trace (for programmers):");
@@ -257,6 +287,15 @@ public class TemplateException extends Exception {
                 ; // ignore
             }
         }
+    }
+
+    /**
+     * Similar to {@link #getMessage()}, but it doesn't contain the position of the failing instruction at then end
+     * of the text. It might contains the position of the failing <em>expression</em> though as part of the expression
+     * quotation, as that's the part of the description. 
+     */
+    public String getDescription() {
+        return description;
     }
     
     public String getMessage() {

@@ -1303,24 +1303,41 @@ public final class Environment extends Configurable {
                 if (topElement) {
                     pw.print("==> ");
                     topElement = false;
-                }
-                
-                pw.print(MessageUtil.shorten(stackEl.getDescription(), 30));
-                
-                pw.print("  [");
-                Macro enclosingMacro = getEnclosingMacro(stackEl);
-                if (enclosingMacro != null) {
-                    pw.print(MessageUtil.formatLocationForEvaluationError(
-                            enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
                 } else {
-                    pw.print(MessageUtil.formatLocationForEvaluationError(
-                            stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
+                    pw.print("    ");
                 }
-                pw.println("]");
+                pw.println(getStackTraceElementLine(stackEl));
             }
         }
         pw.println("----------");
         pw.flush();
+    }
+    
+    private String getStackTraceElementLine(TemplateElement stackEl) {
+        StringBuffer sb = new StringBuffer(); 
+        sb.append(MessageUtil.shorten(stackEl.getDescription(), 30));
+        
+        sb.append("  [");
+        Macro enclosingMacro = getEnclosingMacro(stackEl);
+        if (enclosingMacro != null) {
+            sb.append(MessageUtil.formatLocationForEvaluationError(
+                    enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
+        } else {
+            sb.append(MessageUtil.formatLocationForEvaluationError(
+                    stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
+        }
+        sb.append("]");
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Returns the description of the top element in the stack, or {@code null} if the stack is empty.
+     * This is used internally for error message creation.
+     */
+    String getInstructionStackTop() {
+        if (elementStack.size() == 0) return null;
+        return getStackTraceElementLine((TemplateElement) elementStack.get(elementStack.size() - 1));
     }
 
     private Macro getEnclosingMacro(TemplateElement stackEl) {

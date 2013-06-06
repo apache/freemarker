@@ -21,4 +21,8 @@ public class Internal_CoreAPI {
         return Collections.unmodifiableSet(BuiltIn.builtins.keySet());
     }
     
+    public static String getInstructionStackTop(Environment env) {
+        return env.getInstructionStackTop();
+    }
+    
 }
