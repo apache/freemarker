@@ -131,7 +131,7 @@ class Interpret extends BuiltIn
         {
             throw newTemplateException(
                     "\"?interpret\" has failed with this parsing error:\n" + e.getMessage()
-                    + "\nThe failed expression:",
+                    + "\n\nThe failed expression:",
                     e);
         }
         
@@ -160,8 +160,8 @@ class Interpret extends BuiltIn
             catch(Exception e)
             {
                 throw newTemplateModelException(
-                        "Template created with \"?interpret\" has stopped with error:\n" + e.getMessage()
-                        + "\n\nThe interpreted template was created here:",
+                        "Template created with \"?interpret\" has stopped with error:\n--begin-message--\n" + e.getMessage()
+                        + "\n--end-message--\n\nThe interpreted template was created here:",
                         e);
             }
     

@@ -188,7 +188,7 @@ abstract class StringBuiltins {
             } catch (ParseException pe) {
                 pe.setTemplateName(getTemplate().getName());
                 throw newTemplateException("Failed to \"?eval\" string value:\n"
-                        + pe.getMessage() + "\nThe failing expression:");
+                        + pe.getMessage() + "\n\nThe failing expression:");
             }
             return exp.getAsTemplateModel(env);
         }
