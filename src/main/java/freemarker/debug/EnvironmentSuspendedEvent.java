@@ -12,14 +12,26 @@ public class EnvironmentSuspendedEvent extends EventObject
 {
     private static final long serialVersionUID = 1L;
 
+    private final String name;
     private final int line;
     private final DebuggedEnvironment env;
 
-    public EnvironmentSuspendedEvent(Object source, int line, DebuggedEnvironment env)
+    public EnvironmentSuspendedEvent(Object source, String templateName, int line, DebuggedEnvironment env)
     {
         super(source);
+        this.name = templateName;
         this.line = line;
         this.env = env;
+    }
+
+    /**
+     * The name of the template where the execution of the environment
+     * was suspended
+     * @return String the template name
+     */
+    public String getName()
+    {
+        return this.name;
     }
 
     /**

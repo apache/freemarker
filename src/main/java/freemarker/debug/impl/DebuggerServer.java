@@ -82,6 +82,8 @@ class DebuggerServer
     private final byte[] password;
     private final int port;
     private final Serializable debuggerStub;
+    private boolean stop = false;
+    private ServerSocket serverSocket;
     
     public DebuggerServer(Serializable debuggerStub)
     {
@@ -112,10 +114,10 @@ class DebuggerServer
     {
         try
         {
-            ServerSocket ss = new ServerSocket(port);
-            for(;;)
+            serverSocket = new ServerSocket(port);
+            while(!stop)
             {
-                Socket s = ss.accept();
+                Socket s = serverSocket.accept();
                 new Thread(new DebuggerAuthProtocol(s)).start();
             }
         }
@@ -163,5 +165,21 @@ class DebuggerServer
             }
         }
 
+    }
+
+    public void stop()
+    {
+        this.stop = true;
+        if(serverSocket != null)
+        {
+            try
+            {
+                serverSocket.close();
+            }
+            catch(IOException e)
+            {
+                logger.error("Unable to close server socket.", e);
+            }
+        }
     }
 }
