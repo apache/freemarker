@@ -266,6 +266,29 @@ public final class Environment extends Configurable {
             popElement();
         }
     }
+    
+    /**
+     * Instead of pushing into the element stack, we replace the top element for the time the parameter element is
+     * visited, and then we restore the top element. The main purpose of this is to get rid of elements in the error
+     * stack trace that from user perspective shouldn't have a stack frame. These typical example is
+     * {@code [#if foo]...[@failsHere/]...[/#if]}, where the #if call shouldn't be in the stack trace. (Simply marking
+     * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)    
+     */
+    void visitByHiddingParent(TemplateElement element)
+    throws TemplateException, IOException {
+        TemplateElement parent = replaceTopElement(element);
+        try {
+            element.accept(this);
+        } catch (TemplateException te) {
+            handleTemplateException(te);
+        } finally {
+            replaceTopElement(parent);
+        }
+    }
+
+    private TemplateElement replaceTopElement(TemplateElement element) {
+        return (TemplateElement) elementStack.set(elementStack.size() - 1, element);
+    }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
     
@@ -327,7 +350,7 @@ public final class Environment extends Configurable {
      * through
      * @param args optional arguments fed to the transform
      */
-    void visit(TemplateElement element,
+    void visitAndTransform(TemplateElement element,
                TemplateTransformModel transform,
                Map args)
     throws TemplateException, IOException
@@ -346,7 +369,7 @@ public final class Environment extends Configurable {
                 if(tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
                     do {
                         if(element != null) {
-                            visit(element);
+                            visitByHiddingParent(element);
                         }
                     } while(tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
                 }
@@ -389,15 +412,14 @@ public final class Environment extends Configurable {
     /**
      * Visit a block using buffering/recovery
      */
-    
-     void visit(TemplateElement attemptBlock, TemplateElement recoveryBlock) 
+     void visitAttemptRecover(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) 
      throws TemplateException, IOException {
          Writer prevOut = this.out;
          StringWriter sw = new StringWriter();
          this.out = sw;
          TemplateException thrownException = null;
          try {
-             visit(attemptBlock);
+             visitByHiddingParent(attemptBlock);
          } catch (TemplateException te) {
              thrownException = te;
          } finally {
@@ -459,7 +481,7 @@ public final class Environment extends Configurable {
     /**
      * "visit" an IteratorBlock
      */
-    void visit(IteratorBlock.Context ictxt)
+    void visitIteratorBlock(IteratorBlock.Context ictxt)
     throws TemplateException, IOException
     {
         pushLocalContext(ictxt);
@@ -503,7 +525,7 @@ public final class Environment extends Configurable {
                 visit((Macro) macroOrTransform, null, null, null, null);
             }
             else if (macroOrTransform instanceof TemplateTransformModel) {
-                visit(null, (TemplateTransformModel) macroOrTransform, null); 
+                visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
             }
             else {
                 String nodeType = node.getNodeType();
@@ -566,7 +588,7 @@ public final class Environment extends Configurable {
             visit((Macro) macroOrTransform, null, null, null, null);
         }
         else if (macroOrTransform instanceof TemplateTransformModel) {
-            visit(null, (TemplateTransformModel) macroOrTransform, null); 
+            visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
         }
     }
     
@@ -1277,7 +1299,7 @@ public final class Environment extends Configurable {
         while(stackIter.hasPrevious()) {
             TemplateElement stackEl = (TemplateElement) stackIter.previous();
 
-            if (!(stackEl instanceof MixedContent || stackEl instanceof Macro) || !stackIter.hasNext()) {
+            if (stackEl.isShownInStackTrace() || !stackIter.hasNext()) {
                 if (topElement) {
                     pw.print("==> ");
                     topElement = false;
@@ -1441,7 +1463,7 @@ public final class Environment extends Configurable {
     private void popElement() {
         elementStack.remove(elementStack.size() - 1);
     }
-    
+
     public TemplateNodeModel getCurrentVisitorNode() {
         return currentVisitorNode;
     }

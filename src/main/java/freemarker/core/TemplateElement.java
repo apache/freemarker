@@ -74,10 +74,8 @@ abstract public class TemplateElement extends TemplateObject {
 
     TemplateElement parent;
 
-// Only one of nestedBlock and nestedElements can be non-null.
-
+    // Only one of nestedBlock and nestedElements can be non-null.
     TemplateElement nestedBlock;
-
     List nestedElements; 
 
     /**
@@ -100,6 +98,16 @@ abstract public class TemplateElement extends TemplateObject {
     
     public final String getCanonicalForm() {
         return dump(true);
+    }
+    
+    /**
+     * Tells if the element should show up in error stack traces. If you think you need to set this to {@code false} for
+     * an element, always consider if you should use {@link Environment#visitByHiddingParent(TemplateElement)} instead.
+     * 
+     * Note that this will be ignored for the top (current) element of a stack trace, as that's always shown.
+     */
+    boolean isShownInStackTrace() {
+        return true;
     }
 
     /**

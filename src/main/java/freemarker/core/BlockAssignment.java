@@ -80,7 +80,7 @@ final class BlockAssignment extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         if (nestedBlock != null) {
-            env.visit(nestedBlock, new CaptureOutput(env), null);
+            env.visitAndTransform(nestedBlock, new CaptureOutput(env), null);
         } else {
 			TemplateModel value = new SimpleScalar("");
 			if (namespaceExp != null) {

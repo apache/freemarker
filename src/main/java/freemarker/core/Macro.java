@@ -166,6 +166,10 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return sb.toString();
     }
 
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
     public boolean isFunction() {
         return isFunction;
     }

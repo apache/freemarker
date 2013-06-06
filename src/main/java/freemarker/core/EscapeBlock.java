@@ -100,4 +100,8 @@ class EscapeBlock extends TemplateElement {
         return sb.toString();
     }
     
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
 }

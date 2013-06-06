@@ -1800,7 +1800,8 @@ TemplateElement If() :
 AttemptBlock Attempt() :
 {
    Token start, end;
-   TemplateElement block, recoveryBlock;
+   TemplateElement block;
+   RecoveryBlock recoveryBlock;
 }
 {
    start=<ATTEMPT>

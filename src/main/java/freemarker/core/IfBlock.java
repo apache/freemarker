@@ -58,10 +58,10 @@ import java.util.ArrayList;
 import freemarker.template.TemplateException;
 
 /**
- * A instruction that handles if-elseif-else blocks.
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
+ * Container for a group of related #if, #elseif and #else elements.
+ * Each such block is a nested {@link ConditionalBlock}. Note that if an #if has no #else of #elseif,
+ * {@link ConditionalBlock} doesn't need this parent element. 
  */
-
 final class IfBlock extends TemplateElement {
 
     IfBlock(ConditionalBlock block)
@@ -113,6 +113,10 @@ final class IfBlock extends TemplateElement {
         } else {
             return "#if-#elseif-#else-container";
         }
+    }
+    
+    boolean isShownInStackTrace() {
+        return false;
     }
     
 }

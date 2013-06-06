@@ -78,7 +78,7 @@ final class Case extends TemplateElement {
         throws TemplateException, IOException 
     {
         if (nestedBlock != null) {
-            env.visit(nestedBlock);
+            env.visitByHiddingParent(nestedBlock);
         }
     }
 

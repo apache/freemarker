@@ -104,7 +104,7 @@ final class SwitchBlock extends TemplateElement {
                             EvaluationUtil.CMP_OP_EQUALS, "case==", cas.expression, cas.expression, env);
                 }
                 if (processCase) {
-                    env.visit(cas);
+                    env.visitByHiddingParent(cas);
                     processedCase = true;
                 }
             }
@@ -112,7 +112,7 @@ final class SwitchBlock extends TemplateElement {
             // If we didn't process any nestedElements, and we have a default,
             // process it.
             if (!processedCase && defaultCase != null) {
-                env.visit(defaultCase);
+                env.visitByHiddingParent(defaultCase);
             }
         }
         catch (BreakInstruction.Break br) {}

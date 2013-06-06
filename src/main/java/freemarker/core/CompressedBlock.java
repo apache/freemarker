@@ -70,7 +70,7 @@ final class CompressedBlock extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         if (nestedBlock != null) {
-            env.visit(nestedBlock, StandardCompress.INSTANCE, null);
+            env.visitAndTransform(nestedBlock, StandardCompress.INSTANCE, null);
         }
     }
 

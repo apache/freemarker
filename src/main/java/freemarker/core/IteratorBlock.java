@@ -65,7 +65,7 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * An instruction that processes a list or foreach block
+ * A #list or #foreach element.
  */
 final class IteratorBlock extends TemplateElement {
 
@@ -99,7 +99,8 @@ final class IteratorBlock extends TemplateElement {
             }
             listExpression.assertNonNull(baseModel);
         }
-        env.visit(new Context(baseModel));
+
+        env.visitIteratorBlock(new Context(baseModel));
     }
 
     protected String dump(boolean canonical) {
@@ -173,14 +174,14 @@ final class IteratorBlock extends TemplateElement {
                     loopVar = tsm.get(index);
                     hasNext = (size > index +1);
                     if (nestedBlock != null) {
-                        env.visit(nestedBlock);
+                        env.visitByHiddingParent(nestedBlock);
                     }
                 }
             }
             else if (env.isClassicCompatible()) {
                 loopVar = list;
                 if (nestedBlock != null) {
-                    env.visit(nestedBlock);
+                    env.visitByHiddingParent(nestedBlock);
                 }
             }
             else {

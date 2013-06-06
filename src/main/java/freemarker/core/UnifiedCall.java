@@ -137,7 +137,7 @@ final class UnifiedCall extends TemplateElement {
                             bodyParameterNames);
                 }
                 else { 
-                    env.visit(nestedBlock, (TemplateTransformModel) tm, args);
+                    env.visitAndTransform(nestedBlock, (TemplateTransformModel) tm, args);
                 }
             }
             else if (tm == null) {

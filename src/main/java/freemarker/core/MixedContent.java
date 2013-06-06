@@ -110,6 +110,10 @@ final class MixedContent extends TemplateElement {
         }
     }
 
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
     boolean isIgnorable() {
         return nestedElements == null || nestedElements.size() == 0;
     }

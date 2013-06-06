@@ -57,11 +57,15 @@ import java.util.ArrayList;
 
 import freemarker.template.TemplateException;
 
+/**
+ * #attempt element; might has a nested {@link RecoveryBlock}.
+ */
 final class AttemptBlock extends TemplateElement {
     
-    private TemplateElement attemptBlock, recoveryBlock;
+    private TemplateElement attemptBlock;
+    private RecoveryBlock recoveryBlock;
     
-    AttemptBlock(TemplateElement attemptBlock, TemplateElement recoveryBlock) {
+    AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
         this.attemptBlock = attemptBlock;
         this.recoveryBlock = recoveryBlock;
         nestedElements = new ArrayList();
@@ -71,7 +75,7 @@ final class AttemptBlock extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        env.visit(attemptBlock, recoveryBlock);
+        env.visitAttemptRecover(attemptBlock, recoveryBlock);
     }
 
     protected String dump(boolean canonical) {
@@ -87,6 +91,10 @@ final class AttemptBlock extends TemplateElement {
             }
             return buf.toString();
         }
+    }
+    
+    boolean isShownInStackTrace() {
+        return false;
     }
     
 }

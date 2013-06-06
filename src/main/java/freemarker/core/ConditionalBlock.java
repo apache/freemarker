@@ -57,7 +57,9 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * An element that represents a conditionally executed block.
+ * An element that represents a conditionally executed block: #if, #elseif or #elseif. Note that when an #if has
+ * related #elseif-s or #else, an {@link IfBlock} parent must be used. For a lonely #if, no such parent is needed. 
+ * 
  * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 
@@ -77,7 +79,7 @@ final class ConditionalBlock extends TemplateElement {
     void accept(Environment env) throws TemplateException, IOException {
         if (condition == null || condition.isTrue(env)) {
             if (nestedBlock != null) {
-                env.visit(nestedBlock);
+                env.visitByHiddingParent(nestedBlock);
             }
         }
     }

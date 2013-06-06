@@ -101,7 +101,7 @@ final class TransformBlock extends TemplateElement {
             } else {
                 args = EmptyMap.instance;
             }
-            env.visit(nestedBlock, ttm, args);
+            env.visitAndTransform(nestedBlock, ttm, args);
         }
         else {
             TemplateModel tm = transformExpression.getAsTemplateModel(env);
