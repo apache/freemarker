@@ -107,14 +107,20 @@ final class RecurseNode extends TemplateElement {
         env.recurse((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
-    public String getCanonicalForm() {
-        String result = "<#recurse";
-        if (targetNode != null) result += (" " + targetNode.getCanonicalForm());
-        if (namespaces != null) result += (" using " + namespaces.getCanonicalForm());
-        return result + "/>";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#recurse");
+        if (targetNode != null) {
+            sb.append(' ');
+            sb.append(targetNode.getCanonicalForm());
+        }
+        if (namespaces != null) {
+            sb.append(" using ");
+            sb.append(namespaces.getCanonicalForm());
+        }
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
 
-    public String getDescription() {
-        return "recurse instruction";
-    }
 }

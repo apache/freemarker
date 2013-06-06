@@ -109,28 +109,28 @@ final class TransformBlock extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#transform ");
-        buf.append(transformExpression);
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#transform ");
+        sb.append(transformExpression);
         if (namedArgs != null) {
             for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
                 Map.Entry entry = (Map.Entry) it.next();
-                buf.append(' ');
-                buf.append(entry.getKey());
-                buf.append('=');
-                Expression val = (Expression) entry.getValue();
-                buf.append(val.getCanonicalForm());
+                sb.append(' ');
+                sb.append(entry.getKey());
+                sb.append('=');
+                MessageUtil.appendExpressionAsUntearable(sb, (Expression) entry.getValue());
             }
         }
-        buf.append(">");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
+        if (canonical) {
+            sb.append(">");
+            if (nestedBlock != null) {
+                sb.append(nestedBlock.getCanonicalForm());
+            }
+            sb.append("</#transform>");
         }
-        buf.append("</#transform>");
-        return buf.toString();
+        return sb.toString();
     }
-
-    public String getDescription() {
-        return "transform " + transformExpression;
-    }
+    
 }

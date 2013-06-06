@@ -88,7 +88,25 @@ abstract public class TemplateElement extends TemplateObject {
      */
     abstract void accept(Environment env) throws TemplateException, IOException;
 
-    abstract public String getDescription();
+    /**
+     * One-line description of the element, that contain all the information that is used in
+     * {@link #getCanonicalForm()}, except the nested content of the element. Meant to be used for stack traces and
+     * tree views. There are no backward-compatibility guarantees regarding the format used ATM, but it should be
+     * regular enough to be machine-parseable.
+     */
+    public final String getDescription() {
+        return dump(false);
+    }
+    
+    public final String getCanonicalForm() {
+        return dump(true);
+    }
+
+    /**
+     * @param canonical if {@code true}, it calculates the return value of {@link #getCanonicalForm()},
+     *        otherwise of {@link #getDescription()}.
+     */
+    abstract protected String dump(boolean canonical);
     
 // Methods to implement TemplateNodeModel 
 

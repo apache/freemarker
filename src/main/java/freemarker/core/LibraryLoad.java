@@ -123,17 +123,15 @@ public final class LibraryLoad extends TemplateElement {
         env.importLib(importedTemplate, namespace);
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#import ");
+    protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append("#import ");
         buf.append(templateName);
         buf.append(" as ");
         buf.append(namespace);
-        buf.append("/>");
+        if (canonical) buf.append("/>");
         return buf.toString();
-    }
-
-    public String getDescription() {
-        return "import " + templateName + " as " + namespace;
     }
 
     public String getTemplateName() {

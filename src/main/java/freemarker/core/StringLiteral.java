@@ -60,6 +60,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.StringUtil;
 
 final class StringLiteral extends Expression implements TemplateScalarModel {
     
@@ -116,8 +117,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
 
     public String getCanonicalForm() {
-//        return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
-        return "\"" + escapeString(value) + "\"";
+        return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
     }
     
     boolean isLiteral() {
@@ -131,20 +131,5 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         cloned.interpolatedOutput = this.interpolatedOutput;
         return cloned;
     }
-
-    static private String escapeString(String s) {
-        if (s.indexOf('"') == -1) {
-            return s;
-        }
-        java.util.StringTokenizer st = new java.util.StringTokenizer(s, "\"", true);
-        StringBuffer buf = new StringBuffer();
-        while (st.hasMoreTokens()) {
-            String tok = st.nextToken();
-            if (tok.equals("\"")) {
-                buf.append('\\');
-            }
-            buf.append(tok);
-        }
-        return buf.toString();
-    }
+    
 }

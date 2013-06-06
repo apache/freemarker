@@ -111,12 +111,16 @@ final class PropertySetting extends TemplateElement {
         }
         env.setSetting(key, strval);
     }
-
-    public String getCanonicalForm() {
-        return "<#setting " + key + "=" + value.getCanonicalForm() + "/>";
+    
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#setting ");
+        sb.append(key);
+        sb.append('=');
+        sb.append(value.getCanonicalForm());
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
-
-    public String getDescription() {
-        return "setting " + key + "=" + value;
-    }
+    
 }

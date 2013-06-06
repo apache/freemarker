@@ -69,27 +69,20 @@ final class TrimInstruction extends TemplateElement {
         // This instruction does nothing at render-time, only parse-time.
     }
 
-    public String getCanonicalForm() {
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
         if (left && right) {
-            return "<#t>";
+            sb.append("#t");
+        } else if (left) {
+            sb.append("#lt");
+        } else if (right) {
+            sb.append("#rt");
+        } else {
+            sb.append("#nt");
         }
-        else if (left) {
-            return "<#lt>";
-        }
-        else if (right) {
-            return "<#rt>";
-        }
-        else {
-            return "<#nt>";
-        }
-    }
-
-    public String getDescription() {
-        String type = "";
-        if (!right) type = "left ";
-        if (!left) type = "right ";
-        if (!left && !right) type = "no-";
-        return type + "trim instruction";
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
 
     boolean isIgnorable() {

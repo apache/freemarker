@@ -81,40 +81,33 @@ final class ConditionalBlock extends TemplateElement {
             }
         }
     }
-
-    public String getCanonicalForm() {
+    
+    protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
         if (condition == null) {
-            buf.append("<#else");
+            if (canonical) buf.append('<');
+            buf.append("#else");
         }
         else if (isFirst) {
-            buf.append("<#if ");
+            if (canonical) buf.append('<');
+            buf.append("#if ");
         }
         else {
-            buf.append("<#elseif ");
+            if (canonical) buf.append('<');
+            buf.append("#elseif ");
         }
         if (condition != null) {
             buf.append(condition.getCanonicalForm());
         }
-        buf.append(">");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
-        }
-        if (isSimple) {
-            buf.append("</#if>");
+        if (canonical) {
+            buf.append(">");
+            if (nestedBlock != null) {
+                buf.append(nestedBlock.getCanonicalForm());
+            }
+            if (isSimple) {
+                buf.append("</#if>");
+            }
         }
         return buf.toString();
-    }
-
-    public String getDescription() {
-        String s = "if ";
-        if (condition == null) {
-            s = "else ";
-        } 
-        else if (!isFirst) {
-            s = "elseif ";
-        }
-        String cond = condition != null ? condition.toString() : "";
-        return s + cond;
     }
 }

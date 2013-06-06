@@ -200,5 +200,5 @@ public abstract class TemplateObject {
     }    
 
     abstract public String getCanonicalForm();
-    
+
 }

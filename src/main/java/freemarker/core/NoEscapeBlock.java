@@ -71,11 +71,12 @@ class NoEscapeBlock extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        return "<#noescape>" + nestedBlock.getCanonicalForm() + "</#noescape>";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            return "<#noescape>" + nestedBlock.getCanonicalForm() + "</#noescape>";
+        } else {
+            return "#noescape";
+        }
     }
-
-    public String getDescription() {
-        return "noescape block";
-    }
+    
 }

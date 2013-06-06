@@ -58,7 +58,9 @@ import java.util.ArrayList;
 import freemarker.template.TemplateException;
 
 /**
- * An instruction that contains one or more assignments
+ * An instruction that multiple assignments, like [#local x=1 x=2].
+ * Each assignment is represented by a {@link Assignment} child element.
+ * If there's only one assignment, its usually just a {@link Assignment} without parent {@link AssignmentInstruction}.
  */
 final class AssignmentInstruction extends TemplateElement {
 
@@ -88,43 +90,28 @@ final class AssignmentInstruction extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        String tag = "<#local ";
-        if (scope == Assignment.GLOBAL) {
-            tag = "<#global ";
-        }
-        else if (scope == Assignment.NAMESPACE) {
-            tag = "<#assign ";
-        }
-        StringBuffer buf = new StringBuffer(tag);
-        for (int i = 0; i<nestedElements.size(); i++) {
-            Assignment ass = (Assignment) nestedElements.get(i);
-            buf.append(ass.getCanonicalForm());
-            if (i < nestedElements.size() -1) {
-                buf.append(" ");
+    protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append(Assignment.getDirectiveName(scope));
+        if (canonical) {
+            buf.append(' ');
+            for (int i = 0; i<nestedElements.size(); i++) {
+                Assignment ass = (Assignment) nestedElements.get(i);
+                buf.append(ass.getCanonicalForm());
+                if (i < nestedElements.size() -1) {
+                    buf.append(" ");
+                }
             }
+        } else {
+            buf.append("-container");
         }
         if (namespaceExp != null) {
             buf.append(" in ");
             buf.append(namespaceExp.getCanonicalForm());
         }
-        buf.append("/>");
+        if (canonical) buf.append("/>");
         return buf.toString();
-    }
-
-    public String getDescription() {
-        String tag = "local ";
-        if (scope == Assignment.GLOBAL) {
-            tag = "global ";
-        }
-        else if (scope == Assignment.NAMESPACE) {
-            tag = "assign ";
-        }
-        tag += "assignment";
-        if (nestedElements.size() > 1) {
-            tag += "s";
-        }
-        return tag;
     }
 
     public TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {

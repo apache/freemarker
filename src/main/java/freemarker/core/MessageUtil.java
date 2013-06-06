@@ -129,5 +129,68 @@ class MessageUtil {
             return  description;
         }
     }
+
+    /**
+     * Returns a single line string that is no longer than {@code maxLength}.
+     * If will truncate the string at line-breaks too.
+     * The truncation is always signaled with a a {@code "..."} at the end of the result string.  
+     */
+    static String shorten(String s, int maxLength) {
+        if (maxLength < 5) maxLength = 5;
+        
+        boolean isTruncated = false;
+        
+        int brIdx = s.indexOf('\n');
+        if (brIdx != -1) {
+            s = s.substring(0, brIdx);
+            isTruncated = true;
+        };
+        brIdx = s.indexOf('\r');
+        if (brIdx != -1) {
+            s = s.substring(0, brIdx);
+            isTruncated = true;
+        }
+        
+        if (s.length() > maxLength) {
+            s = s.substring(0, maxLength - 3);
+            isTruncated = true;
+        }
+        
+        if (!isTruncated) {
+            return s;
+        } else {
+            if (s.endsWith(".")) {
+                if (s.endsWith("..")) {
+                    if (s.endsWith("...")) {
+                        return s;
+                    } else {
+                        return s + ".";
+                    }
+                } else {
+                    return s + "..";
+                }
+            } else {
+                return s + "...";
+            }
+        }
+    }
+    
+    static StringBuffer appendExpressionAsUntearable(StringBuffer sb, Expression argExp) {
+        boolean needParen =
+                !(argExp instanceof NumberLiteral)
+                && !(argExp instanceof StringLiteral)
+                && !(argExp instanceof BooleanLiteral)
+                && !(argExp instanceof ListLiteral)
+                && !(argExp instanceof HashLiteral)
+                && !(argExp instanceof Identifier)
+                && !(argExp instanceof Dot)
+                && !(argExp instanceof DynamicKeyName)
+                && !(argExp instanceof MethodCall)
+                && !(argExp instanceof BuiltIn);
+        if (needParen) sb.append('(');
+        sb.append(argExp.getCanonicalForm());
+        if (needParen) sb.append(')');
+        return sb;
+    }
     
 }

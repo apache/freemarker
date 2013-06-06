@@ -82,26 +82,22 @@ final class Case extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
         if (isDefault) {
-            buf.append("<#default>");
+            if (canonical) sb.append('<');
+            sb.append("#default");
+            if (canonical) sb.append('>');
+        } else {
+            if (canonical) sb.append('<');
+            sb.append("#case ");
+            sb.append(expression.getCanonicalForm());
+            if (canonical) sb.append('>');
         }
-        else {
-            buf.append("<#case ");
-            buf.append(expression.getCanonicalForm());
-            buf.append(">");
+        if (nestedBlock != null && canonical) {
+            sb.append(nestedBlock.getCanonicalForm());
         }
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
-        }
-        return buf.toString();
+        return sb.toString();
     }
-
-    public String getDescription() {
-        if (isDefault) {
-            return "default case";
-        } 
-        return "case " + expression;
-    }
+    
 }

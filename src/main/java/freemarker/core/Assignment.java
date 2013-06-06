@@ -57,8 +57,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
 
 /**
- * An instruction that assigns a literal or reference, to a single-identifier
- * variable.
+ * An instruction that makes a single assignment, like [#local x=1].
+ * This is also used as the child of {@link AssignmentInstruction}, if there are multiple assignments in the same tag,
+ * like in [#local x=1 x=2].
  */
 final class Assignment extends TemplateElement {
 
@@ -130,45 +131,38 @@ final class Assignment extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
+    protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
-        if (!(parent instanceof AssignmentInstruction)) {
-            if (scope == LOCAL) {
-                buf.append("<#local ");
-            }
-            else if (scope ==GLOBAL) {
-                buf.append("<#global ");
-            }
-            else {
-                buf.append("<#assign ");
-            }
+        String dn = parent instanceof AssignmentInstruction ? null : getDirectiveName(scope);
+        if (dn != null) {
+            if (canonical) buf.append("<");
+            buf.append(dn);
+            buf.append(' ');
         }
         buf.append (variableName);
         buf.append('=');
         buf.append(value.getCanonicalForm());
-        if (!(parent instanceof AssignmentInstruction)) {
+        if (dn != null) {
             if (namespaceExp != null) {
                 buf.append(" in ");
                 buf.append(namespaceExp.getCanonicalForm());
             }
-            buf.append(">");
+            if (canonical) buf.append(">");
         }
-        return buf.toString();
+        String result = buf.toString();
+        return result;
     }
-
-    public String getDescription() {
-        String s ="";
-        if (!(parent instanceof AssignmentInstruction)) {
-            s = "assignment: ";
-            if (scope == LOCAL) {
-                s = "local " + s;
-            }
-            else if (scope == GLOBAL) {
-                s  = "global " + s;
-            }
+    
+    static String getDirectiveName(int scope) {
+        if (scope == Assignment.LOCAL) {
+            return "#local";
+        } else if (scope == Assignment.GLOBAL) {
+            return "#global";
+        } else if (scope == Assignment.NAMESPACE) {
+            return "#assign";
+        } else {
+            return "#{unknown_assignment_type}";
         }
-        return s + variableName 
-               + "=" 
-               + value; 
     }
+    
 }

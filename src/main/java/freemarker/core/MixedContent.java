@@ -94,20 +94,20 @@ final class MixedContent extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i<nestedElements.size(); i++) {
-            TemplateElement element = (TemplateElement) nestedElements.get(i);
-            buf.append(element.getCanonicalForm());
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            StringBuffer buf = new StringBuffer();
+            for (int i = 0; i<nestedElements.size(); i++) {
+                TemplateElement element = (TemplateElement) nestedElements.get(i);
+                buf.append(element.getCanonicalForm());
+            }
+            return buf.toString();
+        } else {
+            if (parent == null) {
+                return "root";
+            }
+            return "mixed_content"; // MixedContent is uninteresting in a stack trace.
         }
-        return buf.toString();
-    }
-
-    public String getDescription() {
-        if (parent == null) {
-            return "root element";
-        }
-        return "content"; // MixedContent is uninteresting in a stack trace.
     }
 
     boolean isIgnorable() {

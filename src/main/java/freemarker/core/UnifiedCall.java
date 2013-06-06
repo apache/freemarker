@@ -147,47 +147,49 @@ final class UnifiedCall extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<@");
-        buf.append(nameExp.getCanonicalForm());
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append('@');
+        MessageUtil.appendExpressionAsUntearable(sb, nameExp);
+        boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
-            for (int i=0; i<positionalArgs.size(); i++) {
-                Expression arg = (Expression) positionalArgs.get(i);
-                if (i!=0) {
-                    buf.append(',');
+            for (int i=0; i < positionalArgs.size(); i++) {
+                Expression argExp = (Expression) positionalArgs.get(i);
+                if (i != 0) {
+                    sb.append(',');
                 }
-                buf.append(' ');
-                buf.append(arg.getCanonicalForm());
+                sb.append(' ');
+                sb.append(argExp.getCanonicalForm());
             }
-        }
-        else {
+        } else {
             ArrayList keys = new ArrayList(namedArgs.keySet());
             Collections.sort(keys);
-            for (int i=0; i<keys.size();i++) {
-                Expression arg = (Expression) namedArgs.get(keys.get(i));
-                buf.append(' ');
-                buf.append(keys.get(i));
-                buf.append('=');
-                buf.append(arg.getCanonicalForm());
+            for (int i = 0; i < keys.size(); i++) {
+                Expression argExp = (Expression) namedArgs.get(keys.get(i));
+                sb.append(' ');
+                sb.append(keys.get(i));
+                sb.append('=');
+                MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
         }
-        if (nestedBlock == null) {
-            buf.append("/>");
-        } 
-        else {
-            buf.append('>');
-            buf.append(nestedBlock.getCanonicalForm());
-            buf.append("</@");
-            if (nameExp instanceof Identifier || (nameExp instanceof Dot && ((Dot) nameExp).onlyHasIdentifiers())) {
-                buf.append(nameExp);
+        if (canonical) {
+            if (nestedBlock == null) {
+                sb.append("/>");
+            } 
+            else {
+                sb.append('>');
+                sb.append(nestedBlock.getCanonicalForm());
+                sb.append("</@");
+                if (!nameIsInParen
+                        && (nameExp instanceof Identifier
+                            || (nameExp instanceof Dot && ((Dot) nameExp).onlyHasIdentifiers()))) {
+                    sb.append(nameExp.getCanonicalForm());
+                }
+                sb.append('>');
             }
-            buf.append('>');
         }
-        return buf.toString();
-    }
-
-    public String getDescription() {
-        return "user-directive-call " + nameExp;
+        return sb.toString();
     }
 /*
     //REVISIT

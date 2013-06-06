@@ -105,15 +105,17 @@ final class VisitNode extends TemplateElement {
         env.visit((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
-    public String getCanonicalForm() {
-        if (namespaces == null) {
-            return "<#visit " + targetNode.getCanonicalForm() + "/>";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#visit ");
+        sb.append(targetNode.getCanonicalForm());
+        if (namespaces != null) {
+            sb.append(" using ");
+            sb.append(namespaces.getCanonicalForm());
         }
-        return "<#visit " + targetNode.getCanonicalForm() + " using " + namespaces.getCanonicalForm() + "/>";
-    }
-
-    public String getDescription() {
-        return "visit";
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
     
 }

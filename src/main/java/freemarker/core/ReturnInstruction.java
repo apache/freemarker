@@ -80,13 +80,16 @@ public final class ReturnInstruction extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        String expString = exp == null ? "" : " " + exp.getCanonicalForm();
-        return "<#return" + expString + "/>";
-    }
-
-    public String getDescription() {
-        return "return";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#return");
+        if (exp != null) {
+            sb.append(' ');
+            sb.append(exp.getCanonicalForm());
+        }
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
 
     public static class Return extends RuntimeException {

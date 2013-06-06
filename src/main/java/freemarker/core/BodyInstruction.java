@@ -93,23 +93,21 @@ final class BodyInstruction extends TemplateElement {
         env.visit(bodyContext);
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#nested");
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#nested");
         if (bodyParameters != null) {
             for (int i = 0; i<bodyParameters.size(); i++) {
-                buf.append(' ');
-                buf.append(bodyParameters.get(i));
+                sb.append(' ');
+                sb.append(bodyParameters.get(i));
             }
         }
-        buf.append('>');
-        return buf.toString();
+        if (canonical) sb.append('>');
+        return sb.toString();
     }
-
-    public String getDescription() {
-        return "nested macro content";
-    }
-
-/*
+    
+    /*
     boolean heedsOpeningWhitespace() {
         return true;
     }
@@ -117,7 +115,8 @@ final class BodyInstruction extends TemplateElement {
     boolean heedsTrailingWhitespace() {
         return true;
     }
-*/
+    */
+    
     class Context implements LocalContext {
         Macro.Context invokingMacroContext;
         Environment.Namespace bodyVars;

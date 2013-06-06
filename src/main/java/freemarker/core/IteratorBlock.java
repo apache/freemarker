@@ -102,47 +102,44 @@ final class IteratorBlock extends TemplateElement {
         env.visit(new Context(baseModel));
     }
 
-    public String getCanonicalForm() {
+    protected String dump(boolean canonical) {
         if (isForEach) {
-            StringBuffer buf = new StringBuffer("<#foreach ");
+            StringBuffer buf = new StringBuffer();
+            if (canonical) buf.append('<');
+            buf.append("#foreach ");
             buf.append(indexName);
             buf.append(" in ");
             buf.append(listExpression.getCanonicalForm());
-            buf.append(">");
-            if (nestedBlock != null) {
-                buf.append(nestedBlock.getCanonicalForm());
+            if (canonical) {
+                buf.append(">");
+                if (nestedBlock != null) {
+                    buf.append(nestedBlock.getCanonicalForm());
+                }
+                buf.append("</#foreach>");
             }
-            buf.append("</#foreach>");
             return buf.toString();
         }
         else {
-            StringBuffer buf = new StringBuffer("<#list ");
+            StringBuffer buf = new StringBuffer();
+            if (canonical) buf.append('<');
+            buf.append("#list ");
             buf.append(listExpression.getCanonicalForm());
             buf.append(" as ");
             buf.append(indexName);
-            buf.append(">");
-            if (nestedBlock != null) {
-                buf.append(nestedBlock.getCanonicalForm());            
+            if (canonical) {
+                buf.append(">");
+                if (nestedBlock != null) {
+                    buf.append(nestedBlock.getCanonicalForm());            
+                }
+                buf.append("</#list>");
             }
-            buf.append("</#list>");
             return buf.toString();
-        }
-    }
-
-    public String getDescription() {
-        if (isForEach) {
-            return "foreach " + indexName + " in " + listExpression; 
-
-        }
-        else {
-            return "list " + listExpression + " as " + indexName;
         }
     }
 
     /**
      * A helper class that holds the context of the loop.
      */
-
     class Context implements LocalContext {
         private boolean hasNext;
         private TemplateModel loopVar;

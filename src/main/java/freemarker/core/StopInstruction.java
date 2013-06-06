@@ -73,14 +73,16 @@ final class StopInstruction extends TemplateElement {
         throw new StopException(env, exp.getStringValue(env));
     }
 
-    public String getCanonicalForm() {
-        String expString = exp == null ? "" : " " + exp.getCanonicalForm();
-        return "<#stop" + expString + "/>";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#stop");
+        if (exp != null) {
+            sb.append(' ');
+            sb.append(exp.getCanonicalForm());
+        }
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
-
-    public String getDescription() {
-        return "stop";
-    }
+    
 }
-
-

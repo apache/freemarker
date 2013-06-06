@@ -170,27 +170,24 @@ final class Include extends TemplateElement {
         }
         env.include(includedTemplate);
     }
-
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#include ");
-        buf.append(includedTemplateName);
+    
+    protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append("#include ");
+        buf.append(includedTemplateName.getCanonicalForm());
         if (encoding != null) {
             buf.append(" encoding=\"");
             buf.append(encodingExp.getCanonicalForm());
-            buf.append("\"");
+            buf.append('"');
         }
         if(parseExp != null) {
             buf.append(" parse=" + parseExp.getCanonicalForm());
-        }
-        else if (!parse) {
+        } else if (!parse) {
             buf.append(" parse=false");
         }
-        buf.append("/>");
+        if (canonical) buf.append("/>");
         return buf.toString();
-    }
-
-    public String getDescription() {
-        return "include " + includedTemplateName;
     }
 
     private boolean getYesNo(String s) throws TemplateException {

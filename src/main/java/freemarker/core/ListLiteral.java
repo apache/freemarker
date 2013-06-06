@@ -142,7 +142,7 @@ final class ListLiteral extends Expression {
             Expression value = (Expression) values.get(i);
             buf.append(value.getCanonicalForm());
             if (i != size-1) {
-                buf.append(",");
+                buf.append(", ");
             }
         }
         buf.append("]");

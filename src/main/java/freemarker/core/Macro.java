@@ -72,7 +72,7 @@ import freemarker.template.utility.StringUtil;
 public final class Macro extends TemplateElement implements TemplateModel {
     private final String name;
     private final String[] argumentNames;
-    private Map args;
+    private Map argumentDefaults;
     private String catchAll;
     boolean isFunction;
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
@@ -86,7 +86,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         this.name = name;
         this.argumentNames = (String[])argumentNames.toArray(
                 new String[argumentNames.size()]);
-        this.args = args;
+        this.argumentDefaults = args;
         this.nestedBlock = nestedBlock;
     }
 
@@ -107,7 +107,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
 
     boolean hasArgNamed(String name) {
-        return args.containsKey(name);
+        return argumentDefaults.containsKey(name);
     }
 
     public String getName() {
@@ -118,32 +118,52 @@ public final class Macro extends TemplateElement implements TemplateModel {
         env.visitMacroDef(this);
     }
 
-    public String getCanonicalForm() {
-        String directiveName = isFunction ? "function" : "macro";
-        StringBuffer buf = new StringBuffer("<#");
-        buf.append(directiveName);
-        buf.append(' ');
-        buf.append(name);
-        buf.append('(');
-        int size = argumentNames.length;
-        for (int i = 0; i<size; i++) {
-            buf.append(argumentNames[i]);
-            if (i != (size-1)) {
-                buf.append(",");
+    protected String dump(boolean canonical) {
+        String directiveName = isFunction ? "#function" : "#macro";
+        
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(directiveName);
+        sb.append(' ');
+        sb.append(name);
+        sb.append(isFunction ? '(' : ' ');
+        int argCnt = argumentNames.length;
+        for (int i = 0; i < argCnt; i++) {
+            if (i != 0) {
+                if (isFunction) {
+                    sb.append(", ");
+                } else {
+                    sb.append(' ');
+                }
+            }
+            String argName = argumentNames[i];
+            sb.append(argName);
+            if (argumentDefaults != null && argumentDefaults.get(argName) != null) {
+                sb.append('=');
+                Expression defaultExpr = (Expression) argumentDefaults.get(argName);
+                if (isFunction) {
+                    sb.append(defaultExpr.getCanonicalForm());
+                } else {
+                    MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
+                }
             }
         }
-        buf.append(")>");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
+        if (catchAll != null) {
+            if (argCnt != 0) sb.append(", ");
+            sb.append(catchAll);
+            sb.append("...");
         }
-        buf.append("</#");
-        buf.append(directiveName);
-        buf.append('>');
-        return buf.toString();
-    }
-
-    public String getDescription() {
-        return (isFunction() ? "function " : "macro ") + name;
+        if (isFunction) sb.append(')');
+        if (canonical) {
+            sb.append('>');
+            if (nestedBlock != null) {
+                sb.append(nestedBlock.getCanonicalForm());
+            }
+            sb.append("</");
+            sb.append(directiveName);
+            sb.append('>');
+        }
+        return sb.toString();
     }
 
     public boolean isFunction() {
@@ -195,7 +215,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 for(int i = 0; i < argumentNames.length; ++i) {
                     String argName = argumentNames[i];
                     if(localVars.get(argName) == null) {
-                        Expression valueExp = (Expression) args.get(argName);
+                        Expression valueExp = (Expression) argumentDefaults.get(argName);
                         if (valueExp != null) {
                             try {
                                 TemplateModel tm = valueExp.getAsTemplateModel(env);

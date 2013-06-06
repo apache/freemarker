@@ -74,17 +74,17 @@ final class CompressedBlock extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        String nested = nestedBlock != null ? nestedBlock.getCanonicalForm() : "";
-        return "<#compress>" + nested + "</#compress>";
-    }
-
-    public String getDescription() {
-        return "compressed block";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            String nested = nestedBlock != null ? nestedBlock.getCanonicalForm() : "";
+            return "<#compress>" + nested + "</#compress>";
+        } else {
+            return "#compress";
+        }
     }
 
     boolean isIgnorable() {
         return nestedBlock == null || nestedBlock.isIgnorable();
     }
+    
 }
-

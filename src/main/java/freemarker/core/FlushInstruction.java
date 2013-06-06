@@ -63,11 +63,8 @@ final class FlushInstruction extends TemplateElement {
         env.getOut().flush();
     }
 
-    public String getCanonicalForm() {
-        return "<#flush/>";
+    protected String dump(boolean canonical) {
+        return canonical ? "<#flush/>" : "#flush";
     }
-
-    public String getDescription() {
-        return "flush instruction";
-    }
+    
 }

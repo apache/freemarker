@@ -76,15 +76,15 @@ final class DollarVariable extends TemplateElement {
         env.getOut().write(escapedExpression.getStringValue(env));
     }
 
-    public String getCanonicalForm() {
-        return "${" + expression.getCanonicalForm() + "}";
-    }
-
-    public String getDescription() {
-        return this.getSource()  +
-        (expression == escapedExpression 
-            ? "" 
-            : " escaped as ${" + escapedExpression.getCanonicalForm() + "}");
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("${");
+        sb.append(expression.getCanonicalForm());
+        sb.append("}");
+        if (!canonical && expression != escapedExpression) {
+            sb.append(" auto-escaped");            
+        }
+        return sb.toString();
     }
 
     boolean heedsOpeningWhitespace() {

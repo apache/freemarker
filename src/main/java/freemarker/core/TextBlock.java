@@ -54,6 +54,8 @@ package freemarker.core;
 
 import java.io.IOException;
 
+import freemarker.template.utility.StringUtil;
+
 /**
  * A TemplateElement representing a block of plain text.
  */
@@ -90,27 +92,18 @@ public final class TextBlock extends TemplateElement {
         env.getOut().write(text);
     }
 
-    public String getCanonicalForm() {
-        String text = new String(this.text);
-        if (unparsed) {
-            return "<#noparse>" + text + "</#noparse>";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            String text = new String(this.text);
+            if (unparsed) {
+                return "<#noparse>" + text + "</#noparse>";
+            }
+            return text;
+        } else {
+            return "text " + StringUtil.jQuote(new String(text));
         }
-        return text;
     }
 
-    public String getDescription() {
-        String s = new String(text).trim();
-        if (s.length() == 0) {
-            return "whitespace";
-        }
-        if (s.length() > 20) {
-            s = s.substring(0,20) + "...";
-            s = s.replace('\n', ' ');
-            s = s.replace('\r', ' ');
-        }
-        return "text block (" + s + ")";
-    }
-    
     TemplateElement postParseCleanup(boolean stripWhitespace) {
         if (text.length == 0) return this;
         int openingCharsToStrip = 0, trailingCharsToStrip=0;

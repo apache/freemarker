@@ -74,18 +74,19 @@ final class AttemptBlock extends TemplateElement {
         env.visit(attemptBlock, recoveryBlock);
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#attempt>");
-        if (attemptBlock != null) {
-            buf.append(attemptBlock.getCanonicalForm());            
+    protected String dump(boolean canonical) {
+        if (!canonical) {
+            return "#attempt";
+        } else {
+            StringBuffer buf = new StringBuffer("<#attempt>");
+            if (attemptBlock != null) {
+                buf.append(attemptBlock.getCanonicalForm());            
+            }
+            if (recoveryBlock != null) {
+                buf.append(recoveryBlock.getCanonicalForm());
+            }
+            return buf.toString();
         }
-        if (recoveryBlock != null) {
-            buf.append(recoveryBlock.getCanonicalForm());
-        }
-        return buf.toString();
     }
-
-    public String getDescription() {
-        return "attempt block";
-    }
+    
 }

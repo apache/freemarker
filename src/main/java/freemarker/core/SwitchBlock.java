@@ -118,22 +118,20 @@ final class SwitchBlock extends TemplateElement {
         catch (BreakInstruction.Break br) {}
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#switch ");
+    protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append("#switch ");
         buf.append(testExpression.getCanonicalForm());
-        buf.append(">");
-        for (int i = 0; i<nestedElements.size(); i++) {
-            Case cas = (Case) nestedElements.get(i);
-            buf.append(cas.getCanonicalForm());
+        if (canonical) {
+            buf.append('>');
+            for (int i = 0; i<nestedElements.size(); i++) {
+                Case cas = (Case) nestedElements.get(i);
+                buf.append(cas.getCanonicalForm());
+            }
+            buf.append("</#switch>");
         }
-        if (defaultCase != null) {
-            buf.append(defaultCase.getCanonicalForm());
-        }
-        buf.append("</#switch>");
         return buf.toString();
     }
-
-    public String getDescription() {
-        return "switch " + testExpression;
-    }
+    
 }

@@ -116,7 +116,7 @@ final class NumericalOutput extends TemplateElement {
         env.getOut().write(fmth.format.format(num));
     }
 
-    public String getCanonicalForm() {
+    protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer("#{");
         buf.append(expression.getCanonicalForm());
         if (hasFormat) {
@@ -128,10 +128,6 @@ final class NumericalOutput extends TemplateElement {
         }
         buf.append("}");
         return buf.toString();
-    }
-
-    public String getDescription() {
-        return getSource();
     }
 
     boolean heedsOpeningWhitespace() {

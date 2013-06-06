@@ -20198,9 +20198,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Error messages become more helpful in several cases,
-              especially for user who are not very experienced with
-              FreeMarker.</para>
+              <para>Error message quality improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Many messages become more helpful, especially for user
+                  who are not very experienced with FreeMarker.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The template language part of the stack trace is now
+                  more detailed, and easier to understand</para>
+                </listitem>
+
+                <listitem>
+                  <para>Several smaller bugs were fixed that made the error
+                  information wrong or lacking.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The layout of the error messages is now more
+                  consistent, and generally easier to read.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -20306,15 +20326,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
+                  <para><emphasis>Attention!</emphasis> The error message
+                  formats (what <literal>Throwable.getMessage()</literal>
+                  returns) were heavily changed for
+                  <literal>TemplateException</literal>-s, and somewhat for
+                  <literal>ParseException</literal>-s. It's unlikely that
+                  anybody depends on these, but if you tried to parse these
+                  messages intended for humans, be aware of this.</para>
+                </listitem>
+
+                <listitem>
                   <para>Fixed bug where <literal>ParseException</literal> has
-                  contained 0 as line and column number for lexical errors.
-                  This was possibly a problem for IDE plugins and similar
-                  tools as they were forced to extract the location from the
-                  error message text because of this. Note that parsing error
-                  message format was changed (and made consistent among
-                  parsing errors), but if extracting from the error message
-                  text only happened when the returned position was 0, it
-                  should not cause any problems.</para>
+                  contained 0 as line and column number for lexical
+                  errors.</para>
                 </listitem>
 
                 <listitem>
@@ -20330,6 +20354,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   are very often added to new FreeMarker versions, syntax
                   highlighting should use this set instead of a set of names
                   entered into the tool source code.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The format returned by
+                  <literal>TemplateElement.getDescription()</literal> was
+                  heavily changed. It's what FTL stack traces and maybe some
+                  outline views (tree-views) show. It was always for human
+                  reading (and was too inconsistent for anything else), so
+                  it's unlikely that this breaks anything.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20441,6 +20474,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Some smaller fixes in
+              <literal>TemplateElement.getCanonicalForm()</literal>, also some
+              quality improvements there.</para>
+            </listitem>
+
+            <listitem>
               <para>Version and build information changes:</para>
 
               <itemizedlist>
@@ -20477,7 +20516,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Various smaller internal code cleanups.</para>
+              <para>Various internal code cleanups.</para>
             </listitem>
           </itemizedlist>
         </section>

@@ -62,11 +62,8 @@ final class FallbackInstruction extends TemplateElement {
         env.fallback();
     }
 
-    public String getCanonicalForm() {
-        return "<#fallback/>";
+    protected String dump(boolean canonical) {
+        return canonical ? "<#fallback/>" : "#fallback";
     }
-
-    public String getDescription() {
-        return "fallback instruction";
-    }
+    
 }

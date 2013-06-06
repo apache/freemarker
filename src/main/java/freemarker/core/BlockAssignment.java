@@ -62,6 +62,9 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateTransformModel;
 
+/**
+ * Like [#local x]...[/#local].
+ */
 final class BlockAssignment extends TemplateElement {
 
     private final String varName;
@@ -137,34 +140,29 @@ final class BlockAssignment extends TemplateElement {
         }
     }
     
-    public String getCanonicalForm() {
-        String key;
-        switch(scope) {
-            case Assignment.LOCAL: {
-                key = "local";
-                break;
-            }
-            case Assignment.GLOBAL: {
-                key = "global";
-                break;
-            }
-            default: {
-                key = "assign";
-                break;
-            }
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append("<");
+        sb.append(Assignment.getDirectiveName(scope));
+        sb.append(' ');
+        sb.append(varName);
+        if (namespaceExp != null) {
+            sb.append(" in ");
+            sb.append(namespaceExp.getCanonicalForm());
         }
-	String block = nestedBlock == null ? "" : nestedBlock.getCanonicalForm();
-        return "<#" + key + " " + varName + 
-            (namespaceExp != null ? " in " + namespaceExp.getCanonicalForm() : "") 
-            + ">" +block + "</#" + key + ">";
-    }
-
-    public String getDescription() {
-        return "block assignment to variable: " + varName;
+        if (canonical) {
+            sb.append('>');
+            sb.append(nestedBlock == null ? "" : nestedBlock.getCanonicalForm());
+            sb.append("</");
+            sb.append(Assignment.getDirectiveName(scope));
+            sb.append('>');
+        } else {
+            sb.append(" = .nested_output");
+        }
+        return sb.toString();
     }
 
     boolean isIgnorable() {
         return false;
     }
 }
-

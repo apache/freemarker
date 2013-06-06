@@ -81,13 +81,8 @@ public class DebugBreak extends TemplateElement
         }
     }
 
-    public String getDescription()
-    {
-        return nestedBlock.getDescription();
+    protected String dump(boolean canonical) {
+        return canonical ? nestedBlock.getCanonicalForm() : nestedBlock.getDescription();
     }
-
-    public String getCanonicalForm()
-    {
-        return nestedBlock.getCanonicalForm();
-    }
+    
 }

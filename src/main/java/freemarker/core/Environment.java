@@ -75,6 +75,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import sun.misc.MessageUtils;
+
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
@@ -1283,7 +1285,7 @@ public final class Environment extends Configurable {
                     topElement = false;
                 }
                 
-                pw.print(stackEl.getDescription());
+                pw.print(MessageUtil.shorten(stackEl.getDescription(), 30));
                 
                 pw.print("  [");
                 Macro enclosingMacro = getEnclosingMacro(stackEl);

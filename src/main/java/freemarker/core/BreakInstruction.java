@@ -62,12 +62,8 @@ final class BreakInstruction extends TemplateElement {
         throw Break.INSTANCE;
     }
 
-    public String getCanonicalForm() {
-        return "<#break/>";
-    }
-
-    public String getDescription() {
-        return "break";
+    protected String dump(boolean canonical) {
+        return canonical ? "<#break/>" : "#break";
     }
 
     static class Break extends RuntimeException {

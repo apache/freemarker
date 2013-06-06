@@ -90,17 +90,14 @@ class EscapeBlock extends TemplateElement {
         return escapedExpr.deepCloneWithIdentifierReplaced(variable, expression, new ReplacemenetState());
     }
 
-    public String getDescription() {
-        return "escape " + variable + " as " + expr.toString();
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append("#escape ").append(variable).append(" as ").append(expr.getCanonicalForm());
+        if (canonical) {
+            sb.append('>').append(nestedBlock.getCanonicalForm()).append("</#escape>");
+        }
+        return sb.toString();
     }
-
-    public String getCanonicalForm() {
-        return "<#escape "
-            + variable
-            + " as "
-            + expr.getCanonicalForm()
-            + ">"
-            + nestedBlock.getCanonicalForm()
-            + "</#escape>";
-    }
+    
 }

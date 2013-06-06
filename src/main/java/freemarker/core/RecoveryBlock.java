@@ -69,16 +69,17 @@ final class RecoveryBlock extends TemplateElement {
 	}
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#recover>");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());            
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            StringBuffer buf = new StringBuffer("<#recover>");
+            if (nestedBlock != null) {
+                buf.append(nestedBlock.getCanonicalForm());            
+            }
+            buf.append("</#attempt>");
+            return buf.toString();
+        } else {
+            return "#recover";
         }
-        buf.append("/#recover");
-        return buf.toString();
     }
 
-    public String getDescription() {
-        return "recover block";
-    }
 }
