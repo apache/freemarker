@@ -102,13 +102,17 @@ final class IfBlock extends TemplateElement {
     }
     
     protected String dump(boolean canonical) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < nestedElements.size(); i++) {
-            ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
-            buf.append(cblock.dump(canonical));
+        if (canonical) {
+            StringBuffer buf = new StringBuffer();
+            for (int i = 0; i < nestedElements.size(); i++) {
+                ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
+                buf.append(cblock.dump(canonical));
+            }
+            buf.append("</#if>");
+            return buf.toString();
+        } else {
+            return "#if-#elseif-#else-container";
         }
-        if (canonical) buf.append("</#if>");
-        return buf.toString();
     }
     
 }
