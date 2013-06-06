@@ -55,6 +55,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -163,12 +164,33 @@ final class UnifiedCall extends TemplateElement {
                 sb.append(argExp.getCanonicalForm());
             }
         } else {
-            ArrayList keys = new ArrayList(namedArgs.keySet());
-            Collections.sort(keys);
-            for (int i = 0; i < keys.size(); i++) {
-                Expression argExp = (Expression) namedArgs.get(keys.get(i));
+            ArrayList entries = new ArrayList(namedArgs.entrySet());
+            Collections.sort(entries, 
+                    new Comparator() {  // for sorting to source code order
+                        public int compare(Object o1, Object o2) {
+                            Map.Entry ent1 = (Map.Entry) o1;
+                            Expression exp1 = (Expression) ent1.getValue();
+                            
+                            Map.Entry ent2 = (Map.Entry) o2;
+                            Expression exp2 = (Expression) ent2.getValue();
+                            
+                            int res = exp1.beginLine - exp2.beginLine;
+                            if (res != 0) return res;
+                            res = exp1.beginColumn - exp2.beginColumn;
+                            if (res != 0) return res;
+                            
+                            if (ent1 == ent2) return 0;
+                            
+                            // Should never reach this
+                            return ((String) ent1.getKey()).compareTo((String) ent1.getKey()); 
+                        }
+                
+            });
+            for (int i = 0; i < entries.size(); i++) {
+                Map.Entry entry = (Map.Entry) entries.get(i);
+                Expression argExp = (Expression) entry.getValue();
                 sb.append(' ');
-                sb.append(keys.get(i));
+                sb.append(entry.getKey());
                 sb.append('=');
                 MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
