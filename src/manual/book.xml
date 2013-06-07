@@ -20414,42 +20414,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixes in <literal>classic_compatible</literal> mode
-              (this mode is to help switching from FreeMarker 1), thanks to
-              Information Mosaic:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>When a macro was called with an
-                  <literal>null</literal>/missing parameter value, it has
-                  caused error like in FreeMarker 2.3</para>
-                </listitem>
-
-                <listitem>
-                  <para>When a hash literal contained reference to a
-                  <literal>null</literal>/missing variable, like in <literal>{
-                  'a': missingVar }</literal>, it has caused an error like in
-                  2.3</para>
-                </listitem>
-
-                <listitem>
-                  <para>When a sequence literal contained reference to a
-                  <literal>null</literal>/missing variable, like in
-                  <literal>[1, missingVar</literal>], it has caused an error
-                  like in 2.3</para>
-                </listitem>
-
-                <listitem>
-                  <para>When a the left-side of the <literal>.</literal> (dot)
-                  or <literal>[<replaceable>key</replaceable>]</literal>
-                  operator was <literal>null</literal> or missing variable,
-                  like in <literal>missingVar.subVar</literal>, it has caused
-                  an error like in 2.3</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
               <para>New <literal>Template</literal> method,
               <literal>getActualTagSyntax()</literal>: Tells if the template
               is using traditional or square-bracket syntax (this can be the
@@ -20514,6 +20478,56 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Some smaller fixes in
               <literal>TemplateElement.getCanonicalForm()</literal>, also some
               quality improvements there.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixes in <literal>classic_compatible</literal> mode
+              (this mode is to help migrating from FreeMarker 1), thanks to
+              Information Mosaic:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>When a macro was called with an
+                  <literal>null</literal>/missing parameter value, it has
+                  caused error like in FreeMarker 2.3</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a hash literal contained reference to a
+                  <literal>null</literal>/missing variable, like in <literal>{
+                  'a': missingVar }</literal>, it has caused an error like in
+                  2.3</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a sequence literal contained reference to a
+                  <literal>null</literal>/missing variable, like in
+                  <literal>[1, missingVar</literal>], it has caused an error
+                  like in 2.3</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a the left-side of the <literal>.</literal> (dot)
+                  or <literal>[<replaceable>key</replaceable>]</literal>
+                  operator was <literal>null</literal> or missing variable,
+                  like in <literal>missingVar.subVar</literal>, it has caused
+                  an error like in 2.3</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <literal>BeanModel</literal>-s are tried to be
+                  treated as strings, for most subclasses it has failed with
+                  type error, like in 2.3. In FreeMarker 1 all
+                  <literal>BeanModel</literal>-s were
+                  <literal>TemplateScalarModel</literal>-s, so it should
+                  succeed. The fix for this only works where FreeMarker
+                  <emphasis>coerces</emphasis> to string (string built-ins on
+                  the left-side and concatenation (<literal>+</literal>) and
+                  interpolation
+                  (<literal>${<replaceable>...</replaceable>}</literal>) do
+                  that), otherwise unfortunately it will still fail.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
