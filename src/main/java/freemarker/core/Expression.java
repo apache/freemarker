@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.Internal_BeansAPI;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -141,7 +142,9 @@ abstract public class Expression extends TemplateObject {
                 return env.formatBoolean(booleanValue);
             }
         } else {
-            if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
+            if (env.isClassicCompatible() && tm instanceof BeanModel) {
+                return Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
+            } if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
                 throw exp.newNonStringException(tm, seqHint);
             } else {
                 throw exp.newNonStringException(tm);

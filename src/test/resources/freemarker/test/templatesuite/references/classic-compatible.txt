@@ -6,3 +6,7 @@
 null1 null2
 1 null 2 
 [true] []
+[Ljava.lang.String  <- All BeanModel-s were strings; not anymore
+[Ljava.lang.String
+[Lcofe.lang.String
+1

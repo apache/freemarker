@@ -108,6 +108,8 @@ import freemarker.core.StringBuiltins.substringBI;
 import freemarker.core.StringBuiltins.uncap_firstBI;
 import freemarker.core.StringBuiltins.upper_caseBI;
 import freemarker.core.StringBuiltins.word_listBI;
+import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.Internal_BeansAPI;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
@@ -495,6 +497,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
             if (model instanceof TemplateScalarModel) {
                 return new SimpleScalar(((TemplateScalarModel) model).getAsString());
             }
+            if (env.isClassicCompatible() && model instanceof BeanModel) {
+                return new SimpleScalar(Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) model));
+            }            
             throw target.newUnexpectedTypeException(model, "number, date, or string");
         }
 

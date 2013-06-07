@@ -377,6 +377,16 @@ implements
         return new CollectionAndSequence(new SimpleSequence(values, wrapper));
     }
     
+    /**
+     * Used for {@code classic_compatbile} mode; don't use it for anything else.
+     * In FreeMarker 1.7 (and also at least in 2.1) {@link BeanModel} was a {@link TemplateScalarModel}. Some internal
+     * FreeMarker code tries to emulate FreeMarker classic by calling this method when a {@link TemplateScalarModel} is
+     * expected.
+     */
+    String getAsClassicCompatibleString() {
+        return object == null ? "null" : object.toString();        
+    }
+    
     public String toString() {
         return object.toString();
     }

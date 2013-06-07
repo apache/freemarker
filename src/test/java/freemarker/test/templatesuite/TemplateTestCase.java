@@ -417,6 +417,10 @@ public class TemplateTestCase extends TestCase {
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
           }
           
+        else if (testName.equals("classic-compatible")) {
+            dataModel.put("array", new String[] { "a", "b", "c" });
+            dataModel.put("beansArray", new BeansWrapper().wrap(new String[] { "a", "b", "c" }));
+        }
     }
     
     public void runTest() {
