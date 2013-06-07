@@ -73,7 +73,7 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         return new SimpleNumber(value);
     }
 
-    public String getStringValue(Environment env) {
+    public String getCoercedStringValue(Environment env) {
         return env.formatNumber(value);
     }
 

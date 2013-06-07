@@ -23,6 +23,8 @@ ${"test\nFoo"?matches('.*\n^foo', 'im')?string} == true
 ${"test\nFoo"?matches('.*\n^foo', 'mi')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'ism')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'smi')?string} == true
+<@assert test=false?matches('[eslaf]+') />
+<@assert test='false'?matches('[eslaf]+') />
 
 <#assign s = "Code without test coverage\nis considered to be BROKEN">
 
@@ -94,6 +96,8 @@ ${"foobar"?replace("fo+", "FOO", "")} == foobar
 ${"foobar"?replace("fo+", "FOO", "r")} == FOObar
 ${"foobarfOo"?replace("fo+", "FOO", "ri")} == FOObarFOO
 ${"foobarfOo"?replace("fo+", "FOO", "rif")} == FOObarfOo
+${false?replace('a', 'A')} == fAlse
+${false?replace('[abc]', 'A', 'r')} == fAlse
 
 <#attempt>
   Ignored but logged in 2.3: ${"foobar"?replace("foo", "FOO", "c")}
@@ -109,3 +113,5 @@ ${"foobarfOo"?replace("fo+", "FOO", "rif")} == FOObarfOo
 <@dumpList "fooXbarxbaaz"?split("X", "ri") /> == [foo, bar, baaz]
 <@dumpList "fooXXbarxxbaaz"?split("X+", "i") /> == [fooXXbarxxbaaz]
 <@dumpList "fooXXbarxxbaaz"?split("X+", "ri") /> == [foo, bar, baaz]
+<@dumpList false?split("[ae]", "r") /> == [f, ls]
+<@dumpList false?split("e") /> == [fals, ]

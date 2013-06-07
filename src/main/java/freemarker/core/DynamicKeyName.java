@@ -129,7 +129,7 @@ final class DynamicKeyName extends Expression {
         
         try
         {
-            String s = target.getStringValue(env);
+            String s = target.getCoercedStringValue(env);
             try {
                return new SimpleScalar(s.substring(index, index+1));
             } catch (RuntimeException re) {
@@ -199,7 +199,7 @@ final class DynamicKeyName extends Expression {
         
         try
         {
-            String s = target.getStringValue(env);
+            String s = target.getCoercedStringValue(env);
             if (!hasRhs) end = s.length() -1;
             if (start < 0) {
                 throw range.left.newTemplateException("Negative starting index " + start + " for slicing range.");

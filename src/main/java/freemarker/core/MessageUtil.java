@@ -12,10 +12,16 @@ class MessageUtil {
     static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
             = "string or something automatically convertible to string (number, date or boolean)";
     
-    public static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
+    static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
             "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used.",
             "For programmers: Use java.sql.Date/Time/Timestamp instead of java.util.Date in the "
             + "data-model to avoid this ambiguity."
+    };
+    
+    static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
+        "Use ?string(format) to specify which parts to display.",
+        UNKNOWN_DATE_TYPE_ERROR_TIPS[0],
+        UNKNOWN_DATE_TYPE_ERROR_TIPS[1]
     };
 
     private MessageUtil() { }

@@ -137,7 +137,7 @@ final class HashLiteral extends Expression {
             for (int i = 0; i< size; i++) {
                 Expression keyExp = (Expression) keys.get(i);
                 Expression valExp = (Expression) values.get(i);
-                String key = keyExp.getStringValue(env);
+                String key = keyExp.getCoercedStringValue(env);
                 TemplateModel value = valExp.getAsTemplateModel(env);
                 if (env == null || !env.isClassicCompatible()) {
                     valExp.assertNonNull(value);

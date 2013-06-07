@@ -352,7 +352,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 	    	return clone;
         }
         catch (CloneNotSupportedException e) {
-            throw new InternalError();
+            throw new RuntimeException("Internal error: " + e);
         }
     }
 
@@ -361,7 +361,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         TemplateModel _getAsTemplateModel(Environment env)
         throws TemplateException
         {
-            return new SimpleNumber(target.getStringValue(env).length());
+            return new SimpleNumber(target.getCoercedStringValue(env).length());
         }
     }
 
@@ -393,7 +393,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
-            String s = target.getStringValue(env);
+            String s = target.getCoercedStringValue(env);
             return new DateParser(s, env);
         }
         
@@ -571,7 +571,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
                 TemplateModelException
             {
                 if(dateType == TemplateDateModel.UNKNOWN) {
-                    throw new TemplateModelException("Can't convert the date to string, because it is not known which parts of the date variable are in use. Use ?date, ?time or ?datetime built-in, or ?string.<format> or ?string(format) built-in with this date.");
+                    throw new TemplateModelException(
+                            MessageUtil.decorateErrorDescription(
+                                    "Can't convert the date to string, because it isn't known if it's a "
+                                    + "date-only, time-only, or date-time value.",
+                                    MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                 }
                 if(cachedValue == null) {
                     cachedValue = defaultFormat.format(date);
@@ -626,9 +630,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             public Object exec(List arguments)
                     throws TemplateModelException {
                 if (arguments.size() != 2) {
-                    throw new TemplateModelException(
-                            "boolean?string(...) requires exactly "
-                            + "2 arguments.");
+                    throw new TemplateModelException("boolean?string(...) requires exactly 2 arguments.");
                 }
                 return new SimpleScalar(
                     (String) arguments.get(bool.getAsBoolean() ? 0 : 1));
@@ -1029,17 +1031,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static class containsBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env)
                 throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            } else {
-                throw target.newUnexpectedTypeException(
-                        model, "string", model instanceof TemplateSequenceModel || model instanceof TemplateCollectionModel
-                                ? "To find items in sequences/collections (lists and such) you need to use "
-                                + "\"?seq_contains\" instead."
-                                : null
-                );
-            }
+            return new BIMethod(target.getCoercedStringValue(
+                    env,
+                    "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
         }
 
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1078,17 +1072,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static class index_ofBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env)
                 throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            } else {
-                throw target.newUnexpectedTypeException(
-                        model, "string", model instanceof TemplateSequenceModel || model instanceof TemplateCollectionModel
-                            ? "To find items in sequences/collections (lists and such) you need to use "
-                              + "\"?seq_index_of\" instead."
-                            : null
-                );
-            }
+            return new BIMethod(target.getCoercedStringValue(
+                    env,
+                    "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
         }
         
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1141,11 +1127,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static class last_index_ofBI extends BuiltIn {
         TemplateModel _getAsTemplateModel(Environment env)
                 throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+            return new BIMethod(target.getCoercedStringValue(
+                    env,
+                    "For sequences/collections (lists and such) use \"?seq_last_index_of\" instead."));
         }
 
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1193,14 +1177,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
     
-    static class starts_withBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    static class starts_withBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
         }
 
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1231,14 +1211,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
-    static class ends_withBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    static class ends_withBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
         }
 
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1269,14 +1245,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
     
-    static class replaceBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    /** This isn't used on J2SE 1.4 and later. */
+    static class replaceBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
         }
 
         private static class BIMethod implements TemplateMethodModel {
@@ -1306,14 +1279,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
-    static class splitBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    /** This isn't used on J2SE 1.4 and later. */
+    static class splitBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
         }
 
         private static class BIMethod implements TemplateMethodModel {
@@ -1341,14 +1311,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
-    static class left_padBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    static class left_padBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
         }
 
         private static class BIMethod implements TemplateMethodModelEx {
@@ -1407,14 +1373,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
-    static class right_padBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new BIMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    static class right_padBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
         }
 
         private static class BIMethod implements TemplateMethodModelEx {

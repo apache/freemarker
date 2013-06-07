@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import freemarker.cache.MruCacheStorage;
+import freemarker.core.StringBuiltins.StringBuiltIn;
 import freemarker.log.Logger;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
@@ -215,14 +216,9 @@ abstract class RegexBuiltins {
         logger.warn(message);
     }
     
-    static class matchesBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel targetModel = target.getAsTemplateModel(env);
-            assertNonNull(targetModel);
-            if (!(targetModel instanceof TemplateScalarModel)) {
-                throw target.newUnexpectedTypeException(targetModel, "string");
-            }
-            return new MatcherBuilder((TemplateScalarModel) targetModel);
+    static class matchesBI extends StringBuiltIn {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new MatcherBuilder(s);
         }
     }
     
@@ -236,30 +232,19 @@ abstract class RegexBuiltins {
             if (targetModel instanceof RegexMatchModel.Match) {
                 return ((RegexMatchModel.Match) targetModel).subs;
             }
-            throw target.newUnexpectedTypeException(targetModel, "a regular expression matcher");
+            throw target.newUnexpectedTypeException(targetModel, "regular_expression_matcher");
         }
     }
     
-    
-    static class replace_reBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new ReplaceMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    static class replace_reBI extends StringBuiltIn {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new ReplaceMethod(s);
         }
     }
     
-    static class split_reBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
-            if (model instanceof TemplateScalarModel) {
-                return new SplitMethod(((TemplateScalarModel) model).getAsString());
-            }
-            throw target.newUnexpectedTypeException(model, "string");
+    static class split_reBI extends StringBuiltIn {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new SplitMethod(s);
         }
     }
     
@@ -362,8 +347,8 @@ abstract class RegexBuiltins {
         
         String matchString;
         
-        MatcherBuilder(TemplateScalarModel match) throws TemplateModelException {
-            this.matchString = match.getAsString();
+        MatcherBuilder(String matchString) throws TemplateModelException {
+            this.matchString = matchString;
         }
         
         public Object exec(List args) throws TemplateModelException {

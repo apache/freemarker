@@ -378,8 +378,8 @@ class EvaluationUtil
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
             cmpResult = (leftBool ? 1 : 0) - (rightBool ? 1 : 0);
         } else if (env.isClassicCompatible()) {
-            String leftSting = leftExp.getStringValue(env);
-            String rightString = rightExp.getStringValue(env);
+            String leftSting = leftExp.getCoercedStringValue(env);
+            String rightString = rightExp.getCoercedStringValue(env);
             cmpResult = env.getCollator().compare(leftSting, rightString);
         } else {
             if (typeMismatchMeansNotEqual) {

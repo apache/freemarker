@@ -106,7 +106,7 @@ final class Include extends TemplateElement {
         else if(parseExp.isLiteral()) {
             try {
                 if (parseExp instanceof StringLiteral) {
-                    parse = StringUtil.getYesNo(parseExp.getStringValue(null));
+                    parse = StringUtil.getYesNo(parseExp.getCoercedStringValue(null));
                 }
                 else {
                     try {
@@ -128,10 +128,10 @@ final class Include extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = includedTemplateName.getStringValue(env);
+        String templateNameString = includedTemplateName.getCoercedStringValue(env);
         String enc = encoding;
         if (encoding == null && encodingExp != null) {
-            enc = encodingExp.getStringValue(env);
+            enc = encodingExp.getCoercedStringValue(env);
         }
         
         boolean parse = this.parse;

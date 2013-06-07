@@ -105,7 +105,7 @@ class Interpret extends BuiltIn
             sourceExpr = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(0))).copyLocationFrom(target));
             if(((TemplateSequenceModel)model).size() > 1)
             {
-                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).getStringValue(env);
+                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).getCoercedStringValue(env);
             }
         }
         else if (model instanceof TemplateScalarModel)
@@ -116,7 +116,7 @@ class Interpret extends BuiltIn
         {
             throw target.newUnexpectedTypeException(model, "sequence or string");
         }
-        String templateSource = sourceExpr.getStringValue(env);
+        String templateSource = sourceExpr.getCoercedStringValue(env);
         Template parentTemplate = env.getTemplate();
         
         final Template interpretedTemplate;

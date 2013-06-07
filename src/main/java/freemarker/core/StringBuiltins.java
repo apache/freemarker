@@ -75,7 +75,7 @@ abstract class StringBuiltins {
         TemplateModel _getAsTemplateModel(Environment env)
         throws TemplateException
         {
-            return calculateResult(target.getStringValue(env), env);
+            return calculateResult(target.getCoercedStringValue(env), env);
         }
         abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
     }

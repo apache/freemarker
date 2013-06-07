@@ -165,4 +165,5 @@
    </testcase>   
    <testcase name="boolean-formatting"  />
    <testcase name="number-math-builtins" nooutput="true" />
+   <testcase name="string-builtin-coercion" nooutput="true" />
 </testcases>

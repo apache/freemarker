@@ -107,9 +107,9 @@ final class AddConcatExpression extends Expression {
         else
         {
             try {
-                String s1 = getStringValue(leftModel, left, env);
+                String s1 = Expression.getCoercedStringValue(leftModel, left, env);
                 if(s1 == null) s1 = "null";
-                String s2 = getStringValue(rightModel, right, env);
+                String s2 = Expression.getCoercedStringValue(rightModel, right, env);
                 if(s2 == null) s2 = "null";
                 return new SimpleScalar(s1.concat(s2));
             } catch (NonStringException e) {

@@ -11376,6 +11376,13 @@ End book</programlisting>
           <secondary>built-ins</secondary>
         </indexterm>
 
+        <para>These built-ins act on a string left-value. However, if the
+        left-value is number or date or, since 2.3.20, boolean, it will
+        automatically converted to string according the current number-, date-
+        and boolean-format settings (which are the same formatters that are
+        applied when inserting such values with
+        <literal>${<replaceable>...</replaceable>}</literal>).</para>
+
         <section xml:id="ref_builtin_substring">
           <title>substring</title>
 
@@ -20248,6 +20255,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               linkend="ref_builtin_is_nan"><literal>is_nan</literal></link>,
               <link
               linkend="ref_builtin_is_infinite"><literal>is_infinite</literal></link></para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: The following string built-ins didn't coerce
+              the numerical, date (and now the boolean) left-values to string,
+              instead they threw a type error: contains,
+              <literal>index_of</literal>, <literal>last_index_of</literal>,
+              <literal>left_pad</literal>, <literal>right_pad</literal>,
+              <literal>matches</literal>, <literal>replace</literal>,
+              <literal>split</literal>. (The other string built-ins already
+              did this conversion for a long time.)</para>
             </listitem>
 
             <listitem>

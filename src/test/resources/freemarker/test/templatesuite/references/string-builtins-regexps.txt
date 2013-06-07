@@ -78,6 +78,8 @@ foobar == foobar
 FOObar == FOObar
 FOObarFOO == FOObarFOO
 FOObarfOo == FOObarfOo
+fAlse == fAlse
+fAlse == fAlse
 
   Ignored but logged in 2.3: FOObar
 
@@ -88,3 +90,5 @@ FOObarfOo == FOObarfOo
 [foo, bar, baaz] == [foo, bar, baaz]
 [fooXXbarxxbaaz] == [fooXXbarxxbaaz]
 [foo, bar, baaz] == [foo, bar, baaz]
+[f, ls] == [f, ls]
+[fals, ] == [fals, ]

@@ -101,39 +101,51 @@ abstract public class Expression extends TemplateObject {
         return constantValue != null ? constantValue : _getAsTemplateModel(env);
     }
     
-    String getStringValue(Environment env) throws TemplateException {
-        return getStringValue(getAsTemplateModel(env), this, env);
+    String getCoercedStringValue(Environment env) throws TemplateException {
+        return getCoercedStringValue(getAsTemplateModel(env), this, null, env);
+    }
+
+    /**
+     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     */
+    String getCoercedStringValue(Environment env, String seqTip) throws TemplateException {
+        return getCoercedStringValue(getAsTemplateModel(env), this, seqTip, env);
     }
     
-    static String getStringValue(TemplateModel referentModel, Expression exp, Environment env)
-    throws
-        TemplateException
-    {
-        if (referentModel instanceof TemplateNumberModel) {
-            return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) referentModel, exp, env));
-        } else if (referentModel instanceof TemplateDateModel) {
-            TemplateDateModel dm = (TemplateDateModel) referentModel;
+    static String getCoercedStringValue(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
+        return getCoercedStringValue(tm, exp, null, env);
+    }
+    
+    static String getCoercedStringValue(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
+        if (tm instanceof TemplateNumberModel) {
+            return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) tm, exp, env));
+        } else if (tm instanceof TemplateDateModel) {
+            TemplateDateModel dm = (TemplateDateModel) tm;
             return env.formatDate(EvaluationUtil.getDate(dm, exp, env), dm.getDateType());
-        } else if (referentModel instanceof TemplateScalarModel) {
-            return EvaluationUtil.getString((TemplateScalarModel) referentModel, exp, env);
-        } else if(referentModel == null) {
+        } else if (tm instanceof TemplateScalarModel) {
+            return EvaluationUtil.getString((TemplateScalarModel) tm, exp, env);
+        } else if(tm == null) {
             if (env.isClassicCompatible()) {
                 return "";
             } else {
                 throw exp.newInvalidReferenceException();
             }
-        } else if (referentModel instanceof TemplateBooleanModel) {
+        } else if (tm instanceof TemplateBooleanModel) {
             // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
             // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
             // this before TemplateScalarModel.
-            boolean booleanValue = ((TemplateBooleanModel) referentModel).getAsBoolean(); 
+            boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean(); 
             if (env.isClassicCompatible()) {
                 return booleanValue ? "true" : "";
             } else {
                 return env.formatBoolean(booleanValue);
             }
         } else {
-            throw exp.newNonStringException(referentModel);
+            if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
+                throw exp.newNonStringException(tm, seqHint);
+            } else {
+                throw exp.newNonStringException(tm);
+            }
         }
     }
 
@@ -322,6 +334,18 @@ abstract public class Expression extends TemplateObject {
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
                         this),
+                env);
+    }
+
+    NonStringException newNonStringException(TemplateModel model, String tip)
+    throws InvalidReferenceException {
+        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model);
+        return new NonStringException(
+                MessageUtil.decorateErrorDescription(
+                        unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
+                        this,
+                        tip),
                 env);
     }
     

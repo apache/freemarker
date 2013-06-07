@@ -73,7 +73,7 @@ final class DollarVariable extends TemplateElement {
      * Outputs the string value of the enclosed expression.
      */
     void accept(Environment env) throws TemplateException, IOException {
-        env.getOut().write(escapedExpression.getStringValue(env));
+        env.getOut().write(escapedExpression.getCoercedStringValue(env));
     }
 
     protected String dump(boolean canonical) {
