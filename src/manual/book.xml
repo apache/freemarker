@@ -12358,7 +12358,8 @@ ${x?url}</programlisting>
 - text</programlisting>
 
           <para>Note that it is assumed that all occurrences of the separator
-          is before a new item, thus:</para>
+          is before a new item (except with <literal>"r"</literal> flag - see
+          later), thus:</para>
 
           <programlisting role="template">&lt;#list "some,,test,text,"?split(",") as x&gt;
 - "${x}"
@@ -12374,7 +12375,11 @@ ${x?url}</programlisting>
 
           <para><literal>split</literal> accepts an optional <link
           linkend="ref_builtin_string_flags">flags parameter</link>, as its
-          2nd parameter.</para>
+          2nd parameter. There's a historical glitch with the
+          <literal>r</literal> (regular expression) flag; it removes the empty
+          elements from the end of the resulting list, so with
+          <literal>?split(",", "r")</literal> in the last example the last
+          <literal>""</literal> would be missing from the output.</para>
         </section>
 
         <section xml:id="ref_builtin_starts_with">
@@ -12683,7 +12688,7 @@ rif: foo XYr baar</programlisting>
               </tr>
 
               <tr>
-                <td><literal>match</literal></td>
+                <td><literal>matches</literal></td>
 
                 <td>Yes</td>
 
