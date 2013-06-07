@@ -20150,6 +20150,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: [FIXME]</para>
 
+        <para>If you are IDE/tools author, <link
+        linkend="version_2_3_20_ide">note these changes</link>.</para>
+
         <section>
           <title>Changes on the FTL side</title>
 
@@ -20242,7 +20245,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fixed: With the default arithmetic engine, it's now
-              supported to compare infinite (positive or negative) with 0, do
+              supported to compare infinite (positive or negative) with 0, to
               decide its sign.</para>
             </listitem>
           </itemizedlist>
@@ -20330,7 +20333,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>applyWithGreaterThanOrEqualsOperator</literal></para>
             </listitem>
 
-            <listitem>
+            <listitem xml:id="version_2_3_20_ide">
               <para>Mostly concerning tool (like IDE plugin) authors:</para>
 
               <itemizedlist>
