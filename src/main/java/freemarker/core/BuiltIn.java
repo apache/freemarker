@@ -363,7 +363,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         TemplateModel _eval(Environment env)
         throws TemplateException
         {
-            return new SimpleNumber(target.evalToCoercedString(env).length());
+            return new SimpleNumber(target.evalAndCoerceToString(env).length());
         }
     }
 
@@ -395,7 +395,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
-            String s = target.evalToCoercedString(env);
+            String s = target.evalAndCoerceToString(env);
             return new DateParser(s, env);
         }
         
@@ -481,12 +481,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
         {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvaluationUtil.getNumber((TemplateNumberModel)model, target, env), env);
+                return new NumberFormatter(EvaluationUtil.modelToNumber((TemplateNumberModel)model, target, env), env);
             }
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
                 int dateType = dm.getDateType();
-                return new DateFormatter(EvaluationUtil.getDate(dm, target, env), dateType, env);
+                return new DateFormatter(EvaluationUtil.modelToDate(dm, target, env), dateType, env);
             }
             if (model instanceof SimpleScalar) {
                 return model;
@@ -1036,7 +1036,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static class containsBI extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException {
-            return new BIMethod(target.evalToCoercedString(
+            return new BIMethod(target.evalAndCoerceToString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
         }
@@ -1077,7 +1077,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static class index_ofBI extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException {
-            return new BIMethod(target.evalToCoercedString(
+            return new BIMethod(target.evalAndCoerceToString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
         }
@@ -1132,7 +1132,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static class last_index_ofBI extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException {
-            return new BIMethod(target.evalToCoercedString(
+            return new BIMethod(target.evalAndCoerceToString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_last_index_of\" instead."));
         }

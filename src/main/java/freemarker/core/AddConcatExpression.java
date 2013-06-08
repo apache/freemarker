@@ -92,8 +92,8 @@ final class AddConcatExpression extends Expression {
         TemplateModel rightModel = right.eval(env);
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel)
         {
-            Number first = EvaluationUtil.getNumber((TemplateNumberModel) leftModel, left, env);
-            Number second = EvaluationUtil.getNumber((TemplateNumberModel) rightModel, right, env);
+            Number first = EvaluationUtil.modelToNumber((TemplateNumberModel) leftModel, left, env);
+            Number second = EvaluationUtil.modelToNumber((TemplateNumberModel) rightModel, right, env);
             ArithmeticEngine ae =
                 env != null
                     ? env.getArithmeticEngine()
@@ -107,9 +107,9 @@ final class AddConcatExpression extends Expression {
         else
         {
             try {
-                String s1 = Expression.getCoercedString(leftModel, left, env);
+                String s1 = Expression.coerceModelToString(leftModel, left, env);
                 if(s1 == null) s1 = "null";
-                String s2 = Expression.getCoercedString(rightModel, right, env);
+                String s2 = Expression.coerceModelToString(rightModel, right, env);
                 if(s2 == null) s2 = "null";
                 return new SimpleScalar(s1.concat(s2));
             } catch (NonStringException e) {

@@ -77,7 +77,7 @@ abstract class NumericalBuiltins {
                 throws TemplateException
         {
             TemplateModel model = target.eval(env);
-            return calculateResult(EvaluationUtil.getNumber(model, target, env), model);
+            return calculateResult(target.modelToNumber(model, env), model);
         }
         
         abstract TemplateModel calculateResult(Number num, TemplateModel model)
@@ -119,10 +119,10 @@ abstract class NumericalBuiltins {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = EvaluationUtil.getDate((TemplateDateModel) model, target, env);
+                Date date = EvaluationUtil.modelToDate((TemplateDateModel) model, target, env);
                 return new SimpleNumber(date.getTime());
             } else {
-                Number num = EvaluationUtil.getNumber(model, target, env);
+                Number num = target.modelToNumber(model, env);
                 if (num instanceof Long) {
                     return model;
                 }
@@ -253,7 +253,7 @@ abstract class NumericalBuiltins {
                 throws TemplateException
         {
             TemplateModel model = target.eval(env);
-            Number num = EvaluationUtil.getNumber(model, target, env);
+            Number num = target.modelToNumber(model, env);
             if (num instanceof Integer || num instanceof Long) {
                 // Accelerate these fairly common cases
                 return new SimpleScalar(num.toString());

@@ -80,7 +80,11 @@ class EvaluationUtil
     {
     }
     
-    static String getString(TemplateScalarModel model, Expression expr, Environment env)
+    /**
+     * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in less helpful error messages
+     */
+    static String modelToString(TemplateScalarModel model, Expression expr, Environment env)
     throws
         TemplateException
     {
@@ -101,8 +105,9 @@ class EvaluationUtil
 
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in less helpful error messages
      */
-    static Number getNumber(TemplateNumberModel model, Expression expr, Environment env)
+    static Number modelToNumber(TemplateNumberModel model, Expression expr, Environment env)
         throws TemplateModelException, TemplateException
     {
         Number value = model.getAsNumber();
@@ -112,8 +117,9 @@ class EvaluationUtil
 
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in less helpful error messages
      */
-    static Date getDate(TemplateDateModel model, Expression expr, Environment env)
+    static Date modelToDate(TemplateDateModel model, Expression expr, Environment env)
         throws TemplateModelException, TemplateException
     {
         Date value = model.getAsDate();
@@ -265,8 +271,8 @@ class EvaluationUtil
 
         final int cmpResult;
         if (leftValue instanceof TemplateNumberModel && rightValue instanceof TemplateNumberModel) {
-            Number leftNum = EvaluationUtil.getNumber((TemplateNumberModel) leftValue, leftExp, env);
-            Number rightNum = EvaluationUtil.getNumber((TemplateNumberModel) rightValue, rightExp, env);
+            Number leftNum = EvaluationUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp, env);
+            Number rightNum = EvaluationUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp, env);
             ArithmeticEngine ae =
                     env != null
                         ? env.getArithmeticEngine()
@@ -322,8 +328,8 @@ class EvaluationUtil
                 }
             }
 
-            Date leftDate = EvaluationUtil.getDate(leftDateModel, leftExp, env);
-            Date rightDate = EvaluationUtil.getDate(rightDateModel, rightExp, env);
+            Date leftDate = EvaluationUtil.modelToDate(leftDateModel, leftExp, env);
+            Date rightDate = EvaluationUtil.modelToDate(rightDateModel, rightExp, env);
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
@@ -335,8 +341,8 @@ class EvaluationUtil
                     throw new TemplateException(desc, env);
                 }
             }
-            String leftString = EvaluationUtil.getString((TemplateScalarModel) leftValue, leftExp, env);
-            String rightString = EvaluationUtil.getString((TemplateScalarModel) rightValue, rightExp, env);
+            String leftString = EvaluationUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
+            String rightString = EvaluationUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
             // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
@@ -353,8 +359,8 @@ class EvaluationUtil
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
             cmpResult = (leftBool ? 1 : 0) - (rightBool ? 1 : 0);
         } else if (env.isClassicCompatible()) {
-            String leftSting = leftExp.evalToCoercedString(env);
-            String rightString = rightExp.evalToCoercedString(env);
+            String leftSting = leftExp.evalAndCoerceToString(env);
+            String rightString = rightExp.evalAndCoerceToString(env);
             cmpResult = env.getCollator().compare(leftSting, rightString);
         } else {
             if (typeMismatchMeansNotEqual) {

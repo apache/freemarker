@@ -102,29 +102,29 @@ abstract public class Expression extends TemplateObject {
         return constantValue != null ? constantValue : _eval(env);
     }
     
-    String evalToCoercedString(Environment env) throws TemplateException {
-        return getCoercedString(eval(env), this, null, env);
+    String evalAndCoerceToString(Environment env) throws TemplateException {
+        return coerceModelToString(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
-    String evalToCoercedString(Environment env, String seqTip) throws TemplateException {
-        return getCoercedString(eval(env), this, seqTip, env);
+    String evalAndCoerceToString(Environment env, String seqTip) throws TemplateException {
+        return coerceModelToString(eval(env), this, seqTip, env);
     }
     
-    static String getCoercedString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
-        return getCoercedString(tm, exp, null, env);
+    static String coerceModelToString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
+        return coerceModelToString(tm, exp, null, env);
     }
     
-    static String getCoercedString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
+    static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) tm, exp, env));
+            return env.formatNumber(EvaluationUtil.modelToNumber((TemplateNumberModel) tm, exp, env));
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(EvaluationUtil.getDate(dm, exp, env), dm.getDateType());
+            return env.formatDate(EvaluationUtil.modelToDate(dm, exp, env), dm.getDateType());
         } else if (tm instanceof TemplateScalarModel) {
-            return EvaluationUtil.getString((TemplateScalarModel) tm, exp, env);
+            return EvaluationUtil.modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {
             if (env.isClassicCompatible()) {
                 return "";
@@ -154,12 +154,12 @@ abstract public class Expression extends TemplateObject {
     
     Number evalToNumber(Environment env) throws TemplateException {
         TemplateModel model = eval(env);
-        return getNumber(model, env);
+        return modelToNumber(model, env);
     }
 
-    Number getNumber(TemplateModel model, Environment env) throws TemplateException {
+    Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
         if(model instanceof TemplateNumberModel) {
-            return EvaluationUtil.getNumber((TemplateNumberModel) model, this, env);
+            return EvaluationUtil.modelToNumber((TemplateNumberModel) model, this, env);
         } else {
             throw newNonNumericalException(model);
         }
@@ -167,6 +167,10 @@ abstract public class Expression extends TemplateObject {
     
     boolean evalToBoolean(Environment env) throws TemplateException {
         TemplateModel model = eval(env);
+        return modelToBoolean(model, env);
+    }
+
+    boolean modelToBoolean(TemplateModel model, Environment env) throws TemplateException {
         if (model instanceof TemplateBooleanModel) {
             return ((TemplateBooleanModel) model).getAsBoolean();
         } else if (env.isClassicCompatible()) {
@@ -175,7 +179,7 @@ abstract public class Expression extends TemplateObject {
             throw newNonBooleanException(model);
         }
     }
-
+    
     final Expression deepCloneWithIdentifierReplaced(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         Expression clone = deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);

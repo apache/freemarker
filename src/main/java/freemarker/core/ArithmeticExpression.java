@@ -82,8 +82,8 @@ final class ArithmeticExpression extends Expression {
 
     TemplateModel _eval(Environment env) throws TemplateException 
     {
-        Number leftNumber = EvaluationUtil.getNumber(left.eval(env), left, env);
-        Number rightNumber = EvaluationUtil.getNumber(right.eval(env), right, env);
+        Number leftNumber = left.evalToNumber(env);
+        Number rightNumber = right.evalToNumber(env);
         
         ArithmeticEngine ae = 
             env != null 

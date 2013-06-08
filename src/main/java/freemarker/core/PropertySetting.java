@@ -107,7 +107,7 @@ final class PropertySetting extends TemplateElement {
         } else if (mval instanceof TemplateNumberModel) {
             strval = ((TemplateNumberModel) mval).getAsNumber().toString();
         } else {
-            strval = value.evalToCoercedString(env);
+            strval = value.evalAndCoerceToString(env);
         }
         env.setSetting(key, strval);
     }

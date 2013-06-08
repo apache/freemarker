@@ -75,10 +75,10 @@ final class Range extends Expression {
     TemplateModel _eval(Environment env) 
         throws TemplateException
     {
-        int min = EvaluationUtil.evalToNumber(left, env).intValue();
+        int min = left.evalToNumber(env).intValue();
         int max = 0;
         if (right != null) {
-            max = EvaluationUtil.evalToNumber(right, env).intValue();
+            max = right.evalToNumber(env).intValue();
             return new NumericalRange(min, max);
         }
         return new NumericalRange(min);
