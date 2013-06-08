@@ -119,12 +119,12 @@ abstract public class Expression extends TemplateObject {
     
     static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber(EvaluationUtil.modelToNumber((TemplateNumberModel) tm, exp, env));
+            return env.formatNumber(EvalUtil.modelToNumber((TemplateNumberModel) tm, exp, env));
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(EvaluationUtil.modelToDate(dm, exp, env), dm.getDateType());
+            return env.formatDate(EvalUtil.modelToDate(dm, exp, env), dm.getDateType());
         } else if (tm instanceof TemplateScalarModel) {
-            return EvaluationUtil.modelToString((TemplateScalarModel) tm, exp, env);
+            return EvalUtil.modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {
             if (env.isClassicCompatible()) {
                 return "";
@@ -159,7 +159,7 @@ abstract public class Expression extends TemplateObject {
 
     Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
         if(model instanceof TemplateNumberModel) {
-            return EvaluationUtil.modelToNumber((TemplateNumberModel) model, this, env);
+            return EvalUtil.modelToNumber((TemplateNumberModel) model, this, env);
         } else {
             throw newNonNumericalException(model);
         }
@@ -309,8 +309,8 @@ abstract public class Expression extends TemplateObject {
             TemplateModel model, String expected, String tip)
     throws InvalidReferenceException
     {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new UnexpectedTypeException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(expected, model),
@@ -327,8 +327,8 @@ abstract public class Expression extends TemplateObject {
     NonNumericalException newNonNumericalException(TemplateModel model, String tip)
     throws InvalidReferenceException
     {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonNumericalException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("number", model),
@@ -347,8 +347,8 @@ abstract public class Expression extends TemplateObject {
     
     NonStringException newNonStringException(TemplateModel model)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
@@ -358,8 +358,8 @@ abstract public class Expression extends TemplateObject {
 
     NonStringException newNonStringException(TemplateModel model, String tip)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
@@ -370,8 +370,8 @@ abstract public class Expression extends TemplateObject {
     
     NonDateException newNonDateException(TemplateModel model)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonDateException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("date", model),
@@ -381,8 +381,8 @@ abstract public class Expression extends TemplateObject {
 
     NonBooleanException newNonBooleanException(TemplateModel model)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonBooleanException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("boolean", model),

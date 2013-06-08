@@ -119,7 +119,7 @@ abstract class NumericalBuiltins {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = EvaluationUtil.modelToDate((TemplateDateModel) model, target, env);
+                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target, env);
                 return new SimpleNumber(date.getTime());
             } else {
                 Number num = target.modelToNumber(model, env);

@@ -816,7 +816,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_EQUALS, rightValue, this);
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
     }
 
     /**
@@ -826,7 +826,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvaluationUtil.compareLenient(leftValue, EvaluationUtil.CMP_OP_EQUALS, rightValue, this);
+        return EvalUtil.compareLenient(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
     }
     
     /**
@@ -834,7 +834,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_LESS_THAN, rightValue, this);
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN, rightValue, this);
     }
 
     /**
@@ -842,7 +842,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
     }
     
     /**
@@ -850,7 +850,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_GREATER_THAN, rightValue, this);
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_GREATER_THAN, rightValue, this);
     }
 
     /**
@@ -858,7 +858,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvaluationUtil.compare(leftValue, EvaluationUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
     }
 
     public void setOut(Writer out) {

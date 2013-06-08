@@ -820,9 +820,9 @@ abstract class SequenceBuiltins {
             Environment env)
             throws TemplateModelException {
         try {
-            return EvaluationUtil.compare(
+            return EvalUtil.compare(
                     seqItem, null,
-                    EvaluationUtil.CMP_OP_EQUALS, null,
+                    EvalUtil.CMP_OP_EQUALS, null,
                     searchedItem, null,
                     null,
                     true, true, true, // The last one is true to emulate an old bug for BC 

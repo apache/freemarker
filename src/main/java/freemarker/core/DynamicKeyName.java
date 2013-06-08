@@ -104,7 +104,7 @@ final class DynamicKeyName extends Expression {
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvaluationUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
+            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
             return dealWithStringKey(targetModel, key);
         }
         throw nameExpression.newUnexpectedTypeException(keyModel, "number, range, or string");

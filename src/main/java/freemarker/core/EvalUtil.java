@@ -66,7 +66,7 @@ import freemarker.template.utility.ClassUtil;
 /**
  * Internally used static utilities for evaluation expressions.
  */
-class EvaluationUtil
+class EvalUtil
 {
     static final int CMP_OP_EQUALS = 1;
     static final int CMP_OP_NOT_EQUALS = 2;
@@ -76,9 +76,8 @@ class EvaluationUtil
     static final int CMP_OP_GREATER_THAN_EQUALS = 6;
     // If you add a new operator here, update the "compare" and "cmpOpToString" methods!
 
-    private EvaluationUtil()
-    {
-    }
+    // Prevents instantination.
+    private EvalUtil() { }
     
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
@@ -271,8 +270,8 @@ class EvaluationUtil
 
         final int cmpResult;
         if (leftValue instanceof TemplateNumberModel && rightValue instanceof TemplateNumberModel) {
-            Number leftNum = EvaluationUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp, env);
-            Number rightNum = EvaluationUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp, env);
+            Number leftNum = EvalUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp, env);
+            Number rightNum = EvalUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp, env);
             ArithmeticEngine ae =
                     env != null
                         ? env.getArithmeticEngine()
@@ -328,8 +327,8 @@ class EvaluationUtil
                 }
             }
 
-            Date leftDate = EvaluationUtil.modelToDate(leftDateModel, leftExp, env);
-            Date rightDate = EvaluationUtil.modelToDate(rightDateModel, rightExp, env);
+            Date leftDate = EvalUtil.modelToDate(leftDateModel, leftExp, env);
+            Date rightDate = EvalUtil.modelToDate(rightDateModel, rightExp, env);
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
@@ -341,8 +340,8 @@ class EvaluationUtil
                     throw new TemplateException(desc, env);
                 }
             }
-            String leftString = EvaluationUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
-            String rightString = EvaluationUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
+            String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
+            String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
             // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
