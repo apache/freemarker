@@ -1,0 +1,4 @@
+<@assertEquals expected="false" actual=""+false />
+<@assertEquals expected="true" actual=""+true />
+<@assertEquals expected="false" actual=false?string />
+<@assertEquals expected="n" actual=false?string('y', 'n') />
