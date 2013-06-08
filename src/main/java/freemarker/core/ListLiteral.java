@@ -74,11 +74,11 @@ final class ListLiteral extends Expression {
         values.trimToSize();
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         SimpleSequence list = new SimpleSequence(values.size());
         for (Iterator it = values.iterator(); it.hasNext();) {
             Expression exp = (Expression) it.next();
-            TemplateModel tm = exp.getAsTemplateModel(env);
+            TemplateModel tm = exp.eval(env);
             if (env == null || !env.isClassicCompatible()) {            
                 exp.assertNonNull(tm);
             }
@@ -98,13 +98,13 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections12.singletonList(((Expression)values.get(0)).getCoercedStringValue(env));
+                return Collections12.singletonList(((Expression)values.get(0)).evalToCoercedString(env));
             }
             default: {
                 List result = new ArrayList(values.size());
                 for (ListIterator iterator = values.listIterator(); iterator.hasNext();) {
                     Expression exp = (Expression)iterator.next();
-                    result.add(exp.getCoercedStringValue(env));
+                    result.add(exp.evalToCoercedString(env));
                 }
                 return result;
             }
@@ -122,13 +122,13 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections12.singletonList(((Expression)values.get(0)).getAsTemplateModel(env));
+                return Collections12.singletonList(((Expression)values.get(0)).eval(env));
             }
             default: {
                 List result = new ArrayList(values.size());
                 for (ListIterator iterator = values.listIterator(); iterator.hasNext();) {
                     Expression exp = (Expression)iterator.next();
-                    result.add(exp.getAsTemplateModel(env));
+                    result.add(exp.eval(env));
                 }
                 return result;
             }
@@ -165,7 +165,7 @@ final class ListLiteral extends Expression {
     // A hacky routine used by VisitNode and RecurseNode
     
     TemplateSequenceModel evaluateStringsToNamespaces(Environment env) throws TemplateException {
-        TemplateSequenceModel val = (TemplateSequenceModel) getAsTemplateModel(env);
+        TemplateSequenceModel val = (TemplateSequenceModel) eval(env);
         SimpleSequence result = new SimpleSequence(val.size());
         for (int i=0; i<values.size(); i++) {
             if (values.get(i) instanceof StringLiteral) {

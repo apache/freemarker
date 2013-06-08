@@ -92,7 +92,7 @@ final class Assignment extends TemplateElement {
     void accept(Environment env) throws TemplateException {
         Environment.Namespace namespace = null;
         if (namespaceExp != null) {
-            TemplateModel namespaceTM = namespaceExp.getAsTemplateModel(env);
+            TemplateModel namespaceTM = namespaceExp.eval(env);
             try {
                 namespace = (Environment.Namespace) namespaceTM;
             } catch (ClassCastException e) {
@@ -103,7 +103,7 @@ final class Assignment extends TemplateElement {
             }
         }
         
-        TemplateModel tm = value.getAsTemplateModel(env);
+        TemplateModel tm = value.eval(env);
         if (tm == null) {
             if (env.isClassicCompatible()) {
                 tm = TemplateScalarModel.EMPTY_STRING;

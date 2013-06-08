@@ -106,11 +106,11 @@ final class Include extends TemplateElement {
         else if(parseExp.isLiteral()) {
             try {
                 if (parseExp instanceof StringLiteral) {
-                    parse = StringUtil.getYesNo(parseExp.getCoercedStringValue(null));
+                    parse = StringUtil.getYesNo(parseExp.evalToCoercedString(null));
                 }
                 else {
                     try {
-                        parse = parseExp.isTrue(null);
+                        parse = parseExp.evalToBoolean(null);
                     }
                     catch(NonBooleanException e) {
                         throw new ParseException("Expected a boolean or string as the value of the parse attribute", parseExp);
@@ -128,15 +128,15 @@ final class Include extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = includedTemplateName.getCoercedStringValue(env);
+        String templateNameString = includedTemplateName.evalToCoercedString(env);
         String enc = encoding;
         if (encoding == null && encodingExp != null) {
-            enc = encodingExp.getCoercedStringValue(env);
+            enc = encodingExp.evalToCoercedString(env);
         }
         
         boolean parse = this.parse;
         if (parseExp != null) {
-            TemplateModel tm = parseExp.getAsTemplateModel(env);
+            TemplateModel tm = parseExp.eval(env);
             if(tm == null) {
                 if(env.isClassicCompatible()) {
                     parse = false;
@@ -149,7 +149,7 @@ final class Include extends TemplateElement {
                 parse = getYesNo(EvaluationUtil.getString((TemplateScalarModel)tm, parseExp, env));
             }
             else {
-                parse = parseExp.isTrue(env);
+                parse = parseExp.evalToBoolean(env);
             }
         }
         

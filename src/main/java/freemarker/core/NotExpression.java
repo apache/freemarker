@@ -62,8 +62,8 @@ final class NotExpression extends BooleanExpression {
         this.target = target;
     }
 
-    boolean isTrue(Environment env) throws TemplateException {
-        return (!target.isTrue(env));
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        return (!target.evalToBoolean(env));
     }
 
     public String getCanonicalForm() {

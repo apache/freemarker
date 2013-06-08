@@ -63,17 +63,17 @@ final class ParentheticalExpression extends Expression {
         this.nested = nested;
     }
 
-    boolean isTrue(Environment env) throws TemplateException {
-        return nested.isTrue(env);
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        return nested.evalToBoolean(env);
     }
 
     public String getCanonicalForm() {
         return "(" + nested.getCanonicalForm() + ")";
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException 
+    TemplateModel _eval(Environment env) throws TemplateException 
     {
-        return nested.getAsTemplateModel(env);
+        return nested.eval(env);
     }
     
     public boolean isLiteral() {

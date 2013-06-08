@@ -75,12 +75,12 @@ final class VisitNode extends TemplateElement {
     }
 
     void accept(Environment env) throws IOException, TemplateException {
-        TemplateModel node = targetNode.getAsTemplateModel(env);
+        TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
             throw targetNode.newUnexpectedTypeException(node, "node");
         }
         
-        TemplateModel nss = namespaces == null ? null : namespaces.getAsTemplateModel(env);
+        TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
         if (namespaces instanceof StringLiteral) {
             nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
         }

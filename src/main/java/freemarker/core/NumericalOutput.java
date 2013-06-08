@@ -89,7 +89,7 @@ final class NumericalOutput extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        Number num = EvaluationUtil.getNumber(expression, env);
+        Number num = EvaluationUtil.evalToNumber(expression, env);
         
         FormatHolder fmth = formatCache;  // atomic sampling
         if (fmth == null || !fmth.locale.equals(env.getLocale())) {

@@ -70,7 +70,7 @@ final class StopInstruction extends TemplateElement {
         if (exp == null) {
             throw new StopException(env);
         }
-        throw new StopException(env, exp.getCoercedStringValue(env));
+        throw new StopException(env, exp.evalToCoercedString(env));
     }
 
     protected String dump(boolean canonical) {

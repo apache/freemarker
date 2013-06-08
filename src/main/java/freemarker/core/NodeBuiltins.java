@@ -70,10 +70,10 @@ import freemarker.template.utility.StringUtil;
 abstract class NodeBuiltins {
     
     abstract static class NodeBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNodeModel)) {
                 throw target.newUnexpectedTypeException(model, "node");
             }

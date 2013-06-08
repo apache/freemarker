@@ -89,7 +89,7 @@ public final class LibraryLoad extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = templateName.getCoercedStringValue(env);
+        String templateNameString = templateName.evalToCoercedString(env);
         Template importedTemplate;
         try {
             if(!env.isClassicCompatible()) {

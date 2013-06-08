@@ -64,8 +64,8 @@ final class OrExpression extends BooleanExpression {
         this.right = right;
     }
 
-    boolean isTrue(Environment env) throws TemplateException {
-        return left.isTrue(env) || right.isTrue(env);
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        return left.evalToBoolean(env) || right.evalToBoolean(env);
     }
 
     public String getCanonicalForm() {

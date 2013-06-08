@@ -95,7 +95,7 @@ final class TransformBlock extends TemplateElement {
                     Map.Entry entry = (Map.Entry) it.next();
                     String key = (String) entry.getKey();
                     Expression valueExp = (Expression) entry.getValue();
-                    TemplateModel value = valueExp.getAsTemplateModel(env);
+                    TemplateModel value = valueExp.eval(env);
                     args.put(key, value);
                 }
             } else {
@@ -104,7 +104,7 @@ final class TransformBlock extends TemplateElement {
             env.visitAndTransform(nestedBlock, ttm, args);
         }
         else {
-            TemplateModel tm = transformExpression.getAsTemplateModel(env);
+            TemplateModel tm = transformExpression.eval(env);
             throw transformExpression.newUnexpectedTypeException(tm, "transform");
         }
     }

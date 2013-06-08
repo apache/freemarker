@@ -74,7 +74,7 @@ import freemarker.template.utility.StringUtil;
  */
 abstract public class Expression extends TemplateObject {
 
-    abstract TemplateModel _getAsTemplateModel(Environment env) throws TemplateException;
+    abstract TemplateModel _eval(Environment env) throws TemplateException;
     abstract boolean isLiteral();
 
     // Used to store a constant return value for this expression. Only if it
@@ -91,33 +91,33 @@ abstract public class Expression extends TemplateObject {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {
-                constantValue = _getAsTemplateModel(null);
+                constantValue = _eval(null);
             } catch (Exception e) {
             // deliberately ignore.
             }
         }
     }
     
-    public final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
-        return constantValue != null ? constantValue : _getAsTemplateModel(env);
+    public final TemplateModel eval(Environment env) throws TemplateException {
+        return constantValue != null ? constantValue : _eval(env);
     }
     
-    String getCoercedStringValue(Environment env) throws TemplateException {
-        return getCoercedStringValue(getAsTemplateModel(env), this, null, env);
+    String evalToCoercedString(Environment env) throws TemplateException {
+        return getCoercedString(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
-    String getCoercedStringValue(Environment env, String seqTip) throws TemplateException {
-        return getCoercedStringValue(getAsTemplateModel(env), this, seqTip, env);
+    String evalToCoercedString(Environment env, String seqTip) throws TemplateException {
+        return getCoercedString(eval(env), this, seqTip, env);
     }
     
-    static String getCoercedStringValue(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
-        return getCoercedStringValue(tm, exp, null, env);
+    static String getCoercedString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
+        return getCoercedString(tm, exp, null, env);
     }
     
-    static String getCoercedStringValue(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
+    static String getCoercedString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) tm, exp, env));
         } else if (tm instanceof TemplateDateModel) {
@@ -151,6 +151,30 @@ abstract public class Expression extends TemplateObject {
             }
         }
     }
+    
+    Number evalToNumber(Environment env) throws TemplateException {
+        TemplateModel model = eval(env);
+        return getNumber(model, env);
+    }
+
+    Number getNumber(TemplateModel model, Environment env) throws TemplateException {
+        if(model instanceof TemplateNumberModel) {
+            return EvaluationUtil.getNumber((TemplateNumberModel) model, this, env);
+        } else {
+            throw newNonNumericalException(model);
+        }
+    }
+    
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        TemplateModel model = eval(env);
+        if (model instanceof TemplateBooleanModel) {
+            return ((TemplateBooleanModel) model).getAsBoolean();
+        } else if (env.isClassicCompatible()) {
+            return model != null && !isEmpty(model);
+        } else {
+            throw newNonBooleanException(model);
+        }
+    }
 
     final Expression deepCloneWithIdentifierReplaced(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
@@ -174,18 +198,6 @@ abstract public class Expression extends TemplateObject {
      */
     protected abstract Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState);
-
-    boolean isTrue(Environment env) throws TemplateException {
-        TemplateModel referent = getAsTemplateModel(env);
-        if (referent instanceof TemplateBooleanModel) {
-            return ((TemplateBooleanModel) referent).getAsBoolean();
-        }
-        if (env.isClassicCompatible()) {
-            return referent != null && !isEmpty(referent);
-        }
-        assertNonNull(referent);
-        throw newNonBooleanException(referent);
-    }
 
     static boolean isEmpty(TemplateModel model) throws TemplateModelException
     {

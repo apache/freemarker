@@ -75,7 +75,7 @@ final class HashLiteral extends Expression {
         values.trimToSize();
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         return new SequenceHash(env);
     }
 
@@ -137,8 +137,8 @@ final class HashLiteral extends Expression {
             for (int i = 0; i< size; i++) {
                 Expression keyExp = (Expression) keys.get(i);
                 Expression valExp = (Expression) values.get(i);
-                String key = keyExp.getCoercedStringValue(env);
-                TemplateModel value = valExp.getAsTemplateModel(env);
+                String key = keyExp.evalToCoercedString(env);
+                TemplateModel value = valExp.eval(env);
                 if (env == null || !env.isClassicCompatible()) {
                     valExp.assertNonNull(value);
                 }

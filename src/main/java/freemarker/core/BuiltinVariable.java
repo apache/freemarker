@@ -113,7 +113,7 @@ final class BuiltinVariable extends Expression {
         }
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         if (name == NAMESPACE) {
             return env.getCurrentNamespace();
         }

@@ -72,10 +72,10 @@ import freemarker.template.utility.StringUtil;
 
 abstract class StringBuiltins {
     abstract static class StringBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
         throws TemplateException
         {
-            return calculateResult(target.getCoercedStringValue(env), env);
+            return calculateResult(target.evalToCoercedString(env), env);
         }
         abstract TemplateModel calculateResult(String s, Environment env) throws TemplateException;
     }
@@ -190,7 +190,7 @@ abstract class StringBuiltins {
                 throw newTemplateException("Failed to \"?eval\" string value:\n"
                         + pe.getMessage() + "\n\nThe failing expression:");
             }
-            return exp.getAsTemplateModel(env);
+            return exp.eval(env);
         }
     }
 

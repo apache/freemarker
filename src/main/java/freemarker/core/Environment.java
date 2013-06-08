@@ -623,7 +623,7 @@ public final class Environment extends Configurable {
                     boolean hasVar = macro.hasArgNamed(varName);
                     if (hasVar || catchAll != null) {
                         Expression arg = (Expression) entry.getValue();
-                        TemplateModel value = arg.getAsTemplateModel(this);
+                        TemplateModel value = arg.eval(this);
                         if (hasVar) {
                             mc.setLocalVar(varName, value);
                         } else {
@@ -649,7 +649,7 @@ public final class Environment extends Configurable {
                 }
                 for (int i = 0; i < size; i++) {
                     Expression argExp = (Expression) positionalArgs.get(i);
-                    TemplateModel argModel = argExp.getAsTemplateModel(this);
+                    TemplateModel argModel = argExp.eval(this);
                     try {
                         if (i < argumentNames.length) {
                             String argName = argumentNames[i];
@@ -1126,7 +1126,7 @@ public final class Environment extends Configurable {
 
     TemplateTransformModel getTransform(Expression exp) throws TemplateException {
         TemplateTransformModel ttm = null;
-        TemplateModel tm = exp.getAsTemplateModel(this);
+        TemplateModel tm = exp.eval(this);
         if (tm instanceof TemplateTransformModel) {
             ttm = (TemplateTransformModel) tm;
         }

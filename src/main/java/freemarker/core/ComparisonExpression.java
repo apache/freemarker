@@ -99,7 +99,7 @@ final class ComparisonExpression extends BooleanExpression {
      * WARNING! This algorithm is duplicated in SequenceBuiltins.modelsEqual.
      * Thus, if you update this method, then you have to update that too!
      */
-    boolean isTrue(Environment env) throws TemplateException {
+    boolean evalToBoolean(Environment env) throws TemplateException {
         return EvaluationUtil.compare(left, operation, opString, right, this, env);
     }
 

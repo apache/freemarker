@@ -99,31 +99,6 @@ class EvaluationUtil
         return value;
     }
 
-    static Number getNumber(Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        TemplateModel model = expr.getAsTemplateModel(env);
-        return getNumber(model, expr, env);
-    }
-
-    static Number getNumber(TemplateModel model, Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        if(model instanceof TemplateNumberModel)
-        {
-            return getNumber((TemplateNumberModel)model, expr, env);
-        }
-        else if(model == null) {
-            throw expr.newInvalidReferenceException();
-        }
-        else
-        {
-            throw expr.newNonNumericalException(model);
-        }
-    }
-
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
@@ -170,8 +145,8 @@ class EvaluationUtil
             Expression rightExp,
             Expression defaultBlamed,
             Environment env) throws TemplateException {
-        TemplateModel ltm = leftExp.getAsTemplateModel(env);
-        TemplateModel rtm = rightExp.getAsTemplateModel(env);
+        TemplateModel ltm = leftExp.eval(env);
+        TemplateModel rtm = rightExp.eval(env);
         return compare(
                 ltm, leftExp,
                 operator, operatorString,
@@ -378,8 +353,8 @@ class EvaluationUtil
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
             cmpResult = (leftBool ? 1 : 0) - (rightBool ? 1 : 0);
         } else if (env.isClassicCompatible()) {
-            String leftSting = leftExp.getCoercedStringValue(env);
-            String rightString = rightExp.getCoercedStringValue(env);
+            String leftSting = leftExp.evalToCoercedString(env);
+            String rightString = rightExp.evalToCoercedString(env);
             cmpResult = env.getCollator().compare(leftSting, rightString);
         } else {
             if (typeMismatchMeansNotEqual) {

@@ -222,7 +222,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                         Expression valueExp = (Expression) argumentDefaults.get(argName);
                         if (valueExp != null) {
                             try {
-                                TemplateModel tm = valueExp.getAsTemplateModel(env);
+                                TemplateModel tm = valueExp.eval(env);
                                 if(tm == null) {
                                     if(!hasUnresolvedArg) {
                                         firstUnresolvedExpression = valueExp;

@@ -360,10 +360,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
 
     static class lengthBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
         throws TemplateException
         {
-            return new SimpleNumber(target.getCoercedStringValue(env).length());
+            return new SimpleNumber(target.evalToCoercedString(env).length());
         }
     }
 
@@ -374,10 +374,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
             this.dateType = dateType;
         }
         
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel dmodel = (TemplateDateModel)model;
                 int dtype = dmodel.getDateType();
@@ -395,7 +395,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
-            String s = target.getCoercedStringValue(env);
+            String s = target.evalToCoercedString(env);
             return new DateParser(s, env);
         }
         
@@ -476,10 +476,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class stringBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
                 return new NumberFormatter(EvaluationUtil.getNumber((TemplateNumberModel)model, target, env), env);
             }
@@ -734,10 +734,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
     
     static class keysBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateHashModelEx) {
                 TemplateCollectionModel keys = ((TemplateHashModelEx) model).keys();
                 assertNonNull(keys);
@@ -750,10 +750,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class valuesBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateHashModelEx) {
                 TemplateCollectionModel values = ((TemplateHashModelEx) model).values();
                 assertNonNull(values);
@@ -766,10 +766,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class sizeBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateSequenceModel) {
                 int size = ((TemplateSequenceModel) model).size();
                 return new SimpleNumber(size);
@@ -783,11 +783,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class existsBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
             try {
-                TemplateModel model = target.getAsTemplateModel(env);
+                TemplateModel model = target.eval(env);
                 return model==null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
             } catch (InvalidReferenceException ire) {
                 if (target instanceof ParentheticalExpression) {
@@ -797,17 +797,17 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
         }
 
-        boolean isTrue(Environment env) throws TemplateException {
-            return _getAsTemplateModel(env) == TemplateBooleanModel.TRUE;
+        boolean evalToBoolean(Environment env) throws TemplateException {
+            return _eval(env) == TemplateBooleanModel.TRUE;
         }
     }
 
     static class has_contentBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
             try {
-                TemplateModel model = target.getAsTemplateModel(env);
+                TemplateModel model = target.eval(env);
                 return Expression.isEmpty(model) ?
                     TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
             } catch (InvalidReferenceException ire) {
@@ -818,17 +818,17 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
         }
 
-        boolean isTrue(Environment env) throws TemplateException {
-            return _getAsTemplateModel(env) == TemplateBooleanModel.TRUE;
+        boolean evalToBoolean(Environment env) throws TemplateException {
+            return _eval(env) == TemplateBooleanModel.TRUE;
         }
     }
 
     static class if_existsBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
             try {
-                TemplateModel model = target.getAsTemplateModel(env);
+                TemplateModel model = target.eval(env);
                 return model == null ? TemplateModel.NOTHING : model;
             } catch (InvalidReferenceException ire) {
                 if (target instanceof ParentheticalExpression) {
@@ -840,8 +840,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_stringBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateScalarModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -849,8 +849,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_numberBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateNumberModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -858,8 +858,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_nodeBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateNodeModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -867,8 +867,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_booleanBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateBooleanModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -876,8 +876,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_dateBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateDateModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -885,8 +885,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_methodBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateMethodModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -894,8 +894,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_macroBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof Macro)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -903,8 +903,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_transformBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateTransformModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -912,48 +912,48 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_hashBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateHashModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
     static class is_hash_exBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateHashModelEx) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
     static class is_sequenceBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateSequenceModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
     static class is_collectionBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateCollectionModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
     static class is_indexableBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateSequenceModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
     static class is_enumerableBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -961,8 +961,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class is_directiveBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             target.assertNonNull(tm);
             return (tm instanceof TemplateTransformModel || tm instanceof Macro || tm instanceof TemplateDirectiveModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -970,8 +970,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class namespaceBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
             if (!(tm instanceof Macro)) {
                 throw target.newUnexpectedTypeException(tm, "macro or function");
             }
@@ -980,11 +980,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class defaultBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(final Environment env)
+        TemplateModel _eval(final Environment env)
                 throws TemplateException
         {
             try {
-                TemplateModel model = target.getAsTemplateModel(env);
+                TemplateModel model = target.eval(env);
                 return
                     model == null
                     ? FIRST_NON_NULL_METHOD
@@ -1034,9 +1034,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class containsBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
-            return new BIMethod(target.getCoercedStringValue(
+            return new BIMethod(target.evalToCoercedString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
         }
@@ -1075,9 +1075,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
     
     static class index_ofBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
-            return new BIMethod(target.getCoercedStringValue(
+            return new BIMethod(target.evalToCoercedString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
         }
@@ -1130,9 +1130,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     static class last_index_ofBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
-            return new BIMethod(target.getCoercedStringValue(
+            return new BIMethod(target.evalToCoercedString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_last_index_of\" instead."));
         }

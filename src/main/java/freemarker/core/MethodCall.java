@@ -85,9 +85,9 @@ final class MethodCall extends Expression {
         this.arguments = arguments;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
+    TemplateModel _eval(Environment env) throws TemplateException
     {
-        TemplateModel targetModel = target.getAsTemplateModel(env);
+        TemplateModel targetModel = target.eval(env);
         if (targetModel instanceof TemplateMethodModel) {
             TemplateMethodModel targetMethod = (TemplateMethodModel)targetModel;
             List argumentStrings = 

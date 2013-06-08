@@ -84,10 +84,10 @@ import freemarker.template.utility.StringUtil;
 
 abstract class SequenceBuiltins {
     abstract static class SequenceBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateSequenceModel)) {
                 throw target.newUnexpectedTypeException(model, "sequence");
             }
@@ -479,9 +479,9 @@ abstract class SequenceBuiltins {
     }
     
     static class seq_containsBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             // In 2.3.x only, we prefer TemplateSequenceModel for
             // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
             if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
@@ -553,7 +553,7 @@ abstract class SequenceBuiltins {
             m_dir = dir;
         }
 
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
             return new BIMethod(env);
         }
@@ -566,7 +566,7 @@ abstract class SequenceBuiltins {
 
             private BIMethod(Environment env)
                     throws TemplateException {
-                TemplateModel model = target.getAsTemplateModel(env);
+                TemplateModel model = target.eval(env);
                 m_seq = model instanceof TemplateSequenceModel
                             && !isBuggySeqButGoodCollection(model)
                         ? (TemplateSequenceModel) model

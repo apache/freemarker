@@ -72,20 +72,20 @@ final class Range extends Expression {
         return right != null;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) 
+    TemplateModel _eval(Environment env) 
         throws TemplateException
     {
-        int min = EvaluationUtil.getNumber(left, env).intValue();
+        int min = EvaluationUtil.evalToNumber(left, env).intValue();
         int max = 0;
         if (right != null) {
-            max = EvaluationUtil.getNumber(right, env).intValue();
+            max = EvaluationUtil.evalToNumber(right, env).intValue();
             return new NumericalRange(min, max);
         }
         return new NumericalRange(min);
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
-    boolean isTrue(Environment env) throws TemplateException {
+    boolean evalToBoolean(Environment env) throws TemplateException {
         throw newNonBooleanException("sequence (numerical range)");
     }
 

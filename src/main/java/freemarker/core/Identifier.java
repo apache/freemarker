@@ -66,7 +66,7 @@ final class Identifier extends Expression {
         this.name = name;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         try {
             return env.getVariable(name);
         } catch (NullPointerException e) {

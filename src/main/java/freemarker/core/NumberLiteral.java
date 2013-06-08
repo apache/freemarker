@@ -69,11 +69,11 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         this.value = value;
     }
     
-    TemplateModel _getAsTemplateModel(Environment env) {
+    TemplateModel _eval(Environment env) {
         return new SimpleNumber(value);
     }
 
-    public String getCoercedStringValue(Environment env) {
+    public String evalToCoercedString(Environment env) {
         return env.formatNumber(value);
     }
 

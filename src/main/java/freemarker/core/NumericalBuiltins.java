@@ -73,10 +73,10 @@ import freemarker.template.utility.NumberUtil;
 
 abstract class NumericalBuiltins {
     abstract static class NumberBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             return calculateResult(EvaluationUtil.getNumber(model, target, env), model);
         }
         
@@ -113,10 +113,10 @@ abstract class NumericalBuiltins {
 
     // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
     static class longBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
                 Date date = EvaluationUtil.getDate((TemplateDateModel) model, target, env);
@@ -249,10 +249,10 @@ abstract class NumericalBuiltins {
     
     // Doesn't extend NumberBuiltIn because "calculateResult" would need the Environment.
     static class cBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             Number num = EvaluationUtil.getNumber(model, target, env);
             if (num instanceof Integer || num instanceof Long) {
                 // Accelerate these fairly common cases

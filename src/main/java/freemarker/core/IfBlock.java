@@ -78,7 +78,7 @@ final class IfBlock extends TemplateElement {
         for (int i = 0; i<nestedElements.size(); i++) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
             Expression condition = cblock.condition;
-            if (condition == null || condition.isTrue(env)) {
+            if (condition == null || condition.evalToBoolean(env)) {
                 if (cblock.nestedBlock != null) {
                     env.visit(cblock.nestedBlock);
                 }
