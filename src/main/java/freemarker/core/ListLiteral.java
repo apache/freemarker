@@ -61,6 +61,8 @@ import java.util.ListIterator;
 
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
@@ -88,10 +90,10 @@ final class ListLiteral extends Expression {
     }
 
     /**
-     * For the benefit of method calls, return the list of arguments as a list
-     * of values.
+     * For {@link TemplateMethodModel} calls, but not for {@link TemplateMethodModelEx}-es, returns the list of
+     * arguments as {@link String}-s.
      */
-    List getValueList(Environment env) throws TemplateException {
+    List/*<String>*/ getValueList(Environment env) throws TemplateException {
         int size = values.size();
         switch(size) {
             case 0: {
@@ -112,10 +114,9 @@ final class ListLiteral extends Expression {
     }
 
     /**
-     * For the benefit of extended method calls, return the list of arguments as a
-     * list of template models.
+     * For {@link TemplateMethodModelEx} calls, returns the list of arguments as {@link TemplateModel}-s.
      */
-    List getModelList(Environment env) throws TemplateException {
+    List/*<TemplateModel>*/ getModelList(Environment env) throws TemplateException {
         int size = values.size();
         switch(size) {
             case 0: {
