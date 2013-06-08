@@ -67,7 +67,7 @@ final class BooleanLiteral extends Expression {
         return b? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }
 
-    boolean isTrue(Environment env) {
+    boolean evalToBoolean(Environment env) {
         return val;
     }
 
@@ -79,7 +79,7 @@ final class BooleanLiteral extends Expression {
         return val ? "true" : "false";
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) {
+    TemplateModel _eval(Environment env) {
         return val ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }
     

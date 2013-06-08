@@ -223,8 +223,8 @@ abstract class RegexBuiltins {
     }
     
     static class groupsBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-            TemplateModel targetModel = target.getAsTemplateModel(env);
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel targetModel = target.eval(env);
             assertNonNull(targetModel);
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();

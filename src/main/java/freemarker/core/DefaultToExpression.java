@@ -100,10 +100,10 @@ class DefaultToExpression extends Expression {
 		this.rhs = rhs;
 	}
 
-	TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+	TemplateModel _eval(Environment env) throws TemplateException {
 		TemplateModel left = null;		
 		try {
-			left = lhs.getAsTemplateModel(env);
+			left = lhs.eval(env);
 		} catch (InvalidReferenceException ire) {
 			if (!(lhs instanceof ParentheticalExpression)) {
 				throw ire;
@@ -111,7 +111,7 @@ class DefaultToExpression extends Expression {
 		}
 		if (left != null) return left;
 		if (rhs == null) return EMPTY_STRING_AND_SEQUENCE;
-		return rhs.getAsTemplateModel(env);
+		return rhs.eval(env);
 	}
 
 	boolean isLiteral() {

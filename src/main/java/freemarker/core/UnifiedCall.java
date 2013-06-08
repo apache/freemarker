@@ -103,7 +103,7 @@ final class UnifiedCall extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        TemplateModel tm = nameExp.getAsTemplateModel(env);
+        TemplateModel tm = nameExp.eval(env);
         if (tm == Macro.DO_NOTHING_MACRO) return; // shortcut here.
         if (tm instanceof Macro) {
             Macro macro = (Macro) tm;
@@ -126,7 +126,7 @@ final class UnifiedCall extends TemplateElement {
                         Map.Entry entry = (Map.Entry) it.next();
                         String key = (String) entry.getKey();
                         Expression valueExp = (Expression) entry.getValue();
-                        TemplateModel value = valueExp.getAsTemplateModel(env);
+                        TemplateModel value = valueExp.eval(env);
                         args.put(key, value);
                     }
                 } else {

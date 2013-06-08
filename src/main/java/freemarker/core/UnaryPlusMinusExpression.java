@@ -68,9 +68,9 @@ final class UnaryPlusMinusExpression extends Expression {
         this.isMinus = isMinus;
     }
     
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         TemplateNumberModel targetModel = null;
-        TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel tm = target.eval(env);
         try {
             targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {

@@ -84,7 +84,7 @@ final class BlockAssignment extends TemplateElement {
         } else {
 			TemplateModel value = new SimpleScalar("");
 			if (namespaceExp != null) {
-				Environment.Namespace ns = (Environment.Namespace) namespaceExp.getAsTemplateModel(env);
+				Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
 				ns.put(varName, value);
  			} else if (scope == Assignment.NAMESPACE) {
 				env.setVariable(varName, value);
@@ -104,7 +104,7 @@ final class BlockAssignment extends TemplateElement {
             this.env = env;
             TemplateModel nsModel = null;
             if(namespaceExp != null) {
-                nsModel = namespaceExp.getAsTemplateModel(env);
+                nsModel = namespaceExp.eval(env);
                 if (!(nsModel instanceof Environment.Namespace)) {
                     throw namespaceExp.newUnexpectedTypeException(nsModel, "namespace");
                 }

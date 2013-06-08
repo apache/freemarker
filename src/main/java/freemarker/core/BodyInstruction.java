@@ -127,7 +127,7 @@ final class BodyInstruction extends TemplateElement {
             if (bodyParameters != null) {
                 for (int i=0; i<bodyParameters.size(); i++) {
                     Expression exp = (Expression) bodyParameters.get(i);
-                    TemplateModel tm = exp.getAsTemplateModel(env);
+                    TemplateModel tm = exp.eval(env);
                     if (bodyParameterNames != null && i < bodyParameterNames.size()) {
                         String bodyParameterName = (String) bodyParameterNames.get(i);
                         if (bodyVars == null) {

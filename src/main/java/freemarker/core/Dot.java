@@ -69,9 +69,9 @@ final class Dot extends Expression {
         this.key = key;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
+    TemplateModel _eval(Environment env) throws TemplateException
     {
-        TemplateModel leftModel = target.getAsTemplateModel(env);
+        TemplateModel leftModel = target.eval(env);
         if(leftModel instanceof TemplateHashModel) {
             return ((TemplateHashModel) leftModel).get(key);
         }

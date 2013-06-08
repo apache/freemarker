@@ -91,7 +91,7 @@ final class IteratorBlock extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        TemplateModel baseModel = listExpression.getAsTemplateModel(env);
+        TemplateModel baseModel = listExpression.eval(env);
         if (baseModel == null) {
             if (env.isClassicCompatible()) {
                 // Classic behavior of simply ignoring null references.

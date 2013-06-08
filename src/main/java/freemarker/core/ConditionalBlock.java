@@ -77,7 +77,7 @@ final class ConditionalBlock extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        if (condition == null || condition.isTrue(env)) {
+        if (condition == null || condition.evalToBoolean(env)) {
             if (nestedBlock != null) {
                 env.visitByHiddingParent(nestedBlock);
             }

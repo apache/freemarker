@@ -74,7 +74,12 @@ import freemarker.template.utility.StringUtil;
  */
 abstract public class Expression extends TemplateObject {
 
-    abstract TemplateModel _getAsTemplateModel(Environment env) throws TemplateException;
+    /**
+     * @param env might be {@code null}, if this kind of expression can be evaluated during parsing (as opposed to
+     *     during template execution).
+     */
+    abstract TemplateModel _eval(Environment env) throws TemplateException;
+    
     abstract boolean isLiteral();
 
     // Used to store a constant return value for this expression. Only if it
@@ -91,40 +96,40 @@ abstract public class Expression extends TemplateObject {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {
-                constantValue = _getAsTemplateModel(null);
+                constantValue = _eval(null);
             } catch (Exception e) {
             // deliberately ignore.
             }
         }
     }
     
-    public final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
-        return constantValue != null ? constantValue : _getAsTemplateModel(env);
+    public final TemplateModel eval(Environment env) throws TemplateException {
+        return constantValue != null ? constantValue : _eval(env);
     }
     
-    String getCoercedStringValue(Environment env) throws TemplateException {
-        return getCoercedStringValue(getAsTemplateModel(env), this, null, env);
+    String evalAndCoerceToString(Environment env) throws TemplateException {
+        return coerceModelToString(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
-    String getCoercedStringValue(Environment env, String seqTip) throws TemplateException {
-        return getCoercedStringValue(getAsTemplateModel(env), this, seqTip, env);
+    String evalAndCoerceToString(Environment env, String seqTip) throws TemplateException {
+        return coerceModelToString(eval(env), this, seqTip, env);
     }
     
-    static String getCoercedStringValue(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
-        return getCoercedStringValue(tm, exp, null, env);
+    static String coerceModelToString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
+        return coerceModelToString(tm, exp, null, env);
     }
     
-    static String getCoercedStringValue(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
+    static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) tm, exp, env));
+            return env.formatNumber(EvalUtil.modelToNumber((TemplateNumberModel) tm, exp, env));
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(EvaluationUtil.getDate(dm, exp, env), dm.getDateType());
+            return env.formatDate(EvalUtil.modelToDate(dm, exp, env), dm.getDateType());
         } else if (tm instanceof TemplateScalarModel) {
-            return EvaluationUtil.getString((TemplateScalarModel) tm, exp, env);
+            return EvalUtil.modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {
             if (env.isClassicCompatible()) {
                 return "";
@@ -151,7 +156,35 @@ abstract public class Expression extends TemplateObject {
             }
         }
     }
+    
+    Number evalToNumber(Environment env) throws TemplateException {
+        TemplateModel model = eval(env);
+        return modelToNumber(model, env);
+    }
 
+    Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
+        if(model instanceof TemplateNumberModel) {
+            return EvalUtil.modelToNumber((TemplateNumberModel) model, this, env);
+        } else {
+            throw newNonNumericalException(model);
+        }
+    }
+    
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        TemplateModel model = eval(env);
+        return modelToBoolean(model, env);
+    }
+
+    boolean modelToBoolean(TemplateModel model, Environment env) throws TemplateException {
+        if (model instanceof TemplateBooleanModel) {
+            return ((TemplateBooleanModel) model).getAsBoolean();
+        } else if (env.isClassicCompatible()) {
+            return model != null && !isEmpty(model);
+        } else {
+            throw newNonBooleanException(model);
+        }
+    }
+    
     final Expression deepCloneWithIdentifierReplaced(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         Expression clone = deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);
@@ -174,18 +207,6 @@ abstract public class Expression extends TemplateObject {
      */
     protected abstract Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState);
-
-    boolean isTrue(Environment env) throws TemplateException {
-        TemplateModel referent = getAsTemplateModel(env);
-        if (referent instanceof TemplateBooleanModel) {
-            return ((TemplateBooleanModel) referent).getAsBoolean();
-        }
-        if (env.isClassicCompatible()) {
-            return referent != null && !isEmpty(referent);
-        }
-        assertNonNull(referent);
-        throw newNonBooleanException(referent);
-    }
 
     static boolean isEmpty(TemplateModel model) throws TemplateModelException
     {
@@ -293,8 +314,8 @@ abstract public class Expression extends TemplateObject {
             TemplateModel model, String expected, String tip)
     throws InvalidReferenceException
     {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new UnexpectedTypeException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(expected, model),
@@ -311,8 +332,8 @@ abstract public class Expression extends TemplateObject {
     NonNumericalException newNonNumericalException(TemplateModel model, String tip)
     throws InvalidReferenceException
     {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonNumericalException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("number", model),
@@ -331,8 +352,8 @@ abstract public class Expression extends TemplateObject {
     
     NonStringException newNonStringException(TemplateModel model)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
@@ -342,8 +363,8 @@ abstract public class Expression extends TemplateObject {
 
     NonStringException newNonStringException(TemplateModel model, String tip)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
@@ -354,8 +375,8 @@ abstract public class Expression extends TemplateObject {
     
     NonDateException newNonDateException(TemplateModel model)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonDateException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("date", model),
@@ -365,8 +386,8 @@ abstract public class Expression extends TemplateObject {
 
     NonBooleanException newNonBooleanException(TemplateModel model)
     throws InvalidReferenceException {
-        Environment env = Environment.getCurrentEnvironment();
         assertNonNull(model);
+        Environment env = Environment.getCurrentEnvironment();
         return new NonBooleanException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("boolean", model),

@@ -98,7 +98,7 @@ final class PropertySetting extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException {
-        TemplateModel mval = value.getAsTemplateModel(env);
+        TemplateModel mval = value.eval(env);
         String strval;
         if (mval instanceof TemplateScalarModel) {
             strval = ((TemplateScalarModel) mval).getAsString();
@@ -107,7 +107,7 @@ final class PropertySetting extends TemplateElement {
         } else if (mval instanceof TemplateNumberModel) {
             strval = ((TemplateNumberModel) mval).getAsNumber().toString();
         } else {
-            strval = value.getCoercedStringValue(env);
+            strval = value.evalAndCoerceToString(env);
         }
         env.setSetting(key, strval);
     }

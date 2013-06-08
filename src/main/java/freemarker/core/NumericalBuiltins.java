@@ -73,11 +73,11 @@ import freemarker.template.utility.NumberUtil;
 
 abstract class NumericalBuiltins {
     abstract static class NumberBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
-            return calculateResult(EvaluationUtil.getNumber(model, target, env), model);
+            TemplateModel model = target.eval(env);
+            return calculateResult(target.modelToNumber(model, env), model);
         }
         
         abstract TemplateModel calculateResult(Number num, TemplateModel model)
@@ -113,16 +113,16 @@ abstract class NumericalBuiltins {
 
     // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
     static class longBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = EvaluationUtil.getDate((TemplateDateModel) model, target, env);
+                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target, env);
                 return new SimpleNumber(date.getTime());
             } else {
-                Number num = EvaluationUtil.getNumber(model, target, env);
+                Number num = target.modelToNumber(model, env);
                 if (num instanceof Long) {
                     return model;
                 }
@@ -249,11 +249,11 @@ abstract class NumericalBuiltins {
     
     // Doesn't extend NumberBuiltIn because "calculateResult" would need the Environment.
     static class cBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
-            Number num = EvaluationUtil.getNumber(model, target, env);
+            TemplateModel model = target.eval(env);
+            Number num = target.modelToNumber(model, env);
             if (num instanceof Integer || num instanceof Long) {
                 // Accelerate these fairly common cases
                 return new SimpleScalar(num.toString());

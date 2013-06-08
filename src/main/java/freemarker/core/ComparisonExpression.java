@@ -73,22 +73,22 @@ final class ComparisonExpression extends BooleanExpression {
         opString = opString.intern();
         this.opString = opString;
         if (opString == "==" || opString == "=") {
-            operation = EvaluationUtil.CMP_OP_EQUALS;
+            operation = EvalUtil.CMP_OP_EQUALS;
         }
         else if (opString == "!=") {
-            operation = EvaluationUtil.CMP_OP_NOT_EQUALS;
+            operation = EvalUtil.CMP_OP_NOT_EQUALS;
         }
         else if (opString == "gt" || opString == "\\gt" || opString == ">" || opString == "&gt;") {
-            operation = EvaluationUtil.CMP_OP_GREATER_THAN;
+            operation = EvalUtil.CMP_OP_GREATER_THAN;
         }
         else if (opString == "gte" || opString == "\\gte" || opString == ">=" || opString == "&gt;=") {
-            operation = EvaluationUtil.CMP_OP_GREATER_THAN_EQUALS;
+            operation = EvalUtil.CMP_OP_GREATER_THAN_EQUALS;
         }
         else if (opString== "lt" || opString == "\\lt" || opString == "<" || opString == "&lt;") {
-            operation = EvaluationUtil.CMP_OP_LESS_THAN;
+            operation = EvalUtil.CMP_OP_LESS_THAN;
         }
         else if (opString == "lte" || opString == "\\lte" || opString == "<=" || opString == "&lt;=") {
-            operation = EvaluationUtil.CMP_OP_LESS_THAN_EQUALS;
+            operation = EvalUtil.CMP_OP_LESS_THAN_EQUALS;
         }
         else {
             throw new RuntimeException("Unknown comparison operator " + opString);
@@ -99,8 +99,8 @@ final class ComparisonExpression extends BooleanExpression {
      * WARNING! This algorithm is duplicated in SequenceBuiltins.modelsEqual.
      * Thus, if you update this method, then you have to update that too!
      */
-    boolean isTrue(Environment env) throws TemplateException {
-        return EvaluationUtil.compare(left, operation, opString, right, this, env);
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        return EvalUtil.compare(left, operation, opString, right, this, env);
     }
 
     public String getCanonicalForm() {

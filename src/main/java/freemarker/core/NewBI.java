@@ -83,10 +83,10 @@ class NewBI extends BuiltIn
         }
     }
     
-    TemplateModel _getAsTemplateModel(Environment env)
+    TemplateModel _eval(Environment env)
             throws TemplateException 
     {
-        TemplateModel tm = target.getAsTemplateModel(env);
+        TemplateModel tm = target.eval(env);
         String classname = null;
         try {
             classname = ((TemplateScalarModel) tm).getAsString();

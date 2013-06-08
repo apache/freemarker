@@ -67,10 +67,10 @@ class ExistsExpression extends Expression {
 		this.exp = exp;
 	}
 
-	TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+	TemplateModel _eval(Environment env) throws TemplateException {
 		TemplateModel tm = null;
 		try {
-			tm = exp.getAsTemplateModel(env);
+			tm = exp.eval(env);
 		} catch (InvalidReferenceException ire) {
 			if (!(exp instanceof ParentheticalExpression)) {
 				throw ire;

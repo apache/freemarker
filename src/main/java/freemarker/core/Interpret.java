@@ -94,10 +94,10 @@ class Interpret extends BuiltIn
      * a <tt>&lt;transform></tt> block will process the generated template
      * just as if it had been <tt>&lt;transform></tt>-ed at that point.
      */
-    TemplateModel _getAsTemplateModel(Environment env)
+    TemplateModel _eval(Environment env)
             throws TemplateException 
     {
-        TemplateModel model = target.getAsTemplateModel(env);
+        TemplateModel model = target.eval(env);
         Expression sourceExpr = null;
         String id = "anonymous_interpreted";
         if(model instanceof TemplateSequenceModel)
@@ -105,7 +105,7 @@ class Interpret extends BuiltIn
             sourceExpr = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(0))).copyLocationFrom(target));
             if(((TemplateSequenceModel)model).size() > 1)
             {
-                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).getCoercedStringValue(env);
+                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
             }
         }
         else if (model instanceof TemplateScalarModel)
@@ -116,7 +116,7 @@ class Interpret extends BuiltIn
         {
             throw target.newUnexpectedTypeException(model, "sequence or string");
         }
-        String templateSource = sourceExpr.getCoercedStringValue(env);
+        String templateSource = sourceExpr.evalAndCoerceToString(env);
         Template parentTemplate = env.getTemplate();
         
         final Template interpretedTemplate;

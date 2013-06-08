@@ -89,15 +89,15 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
     
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-        return new SimpleScalar(getCoercedStringValue(env));
+    TemplateModel _eval(Environment env) throws TemplateException {
+        return new SimpleScalar(evalAndCoerceToString(env));
     }
 
     public String getAsString() {
         return value;
     }
     
-    String getCoercedStringValue(Environment env) throws TemplateException {
+    String evalAndCoerceToString(Environment env) throws TemplateException {
         if (interpolatedOutput == null) {
             return value;
         } 

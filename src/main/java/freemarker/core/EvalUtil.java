@@ -66,7 +66,7 @@ import freemarker.template.utility.ClassUtil;
 /**
  * Internally used static utilities for evaluation expressions.
  */
-class EvaluationUtil
+class EvalUtil
 {
     static final int CMP_OP_EQUALS = 1;
     static final int CMP_OP_NOT_EQUALS = 2;
@@ -76,11 +76,14 @@ class EvaluationUtil
     static final int CMP_OP_GREATER_THAN_EQUALS = 6;
     // If you add a new operator here, update the "compare" and "cmpOpToString" methods!
 
-    private EvaluationUtil()
-    {
-    }
+    // Prevents instantination.
+    private EvalUtil() { }
     
-    static String getString(TemplateScalarModel model, Expression expr, Environment env)
+    /**
+     * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in less helpful error messages
+     */
+    static String modelToString(TemplateScalarModel model, Expression expr, Environment env)
     throws
         TemplateException
     {
@@ -99,35 +102,11 @@ class EvaluationUtil
         return value;
     }
 
-    static Number getNumber(Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        TemplateModel model = expr.getAsTemplateModel(env);
-        return getNumber(model, expr, env);
-    }
-
-    static Number getNumber(TemplateModel model, Expression expr, Environment env)
-    throws
-        TemplateException
-    {
-        if(model instanceof TemplateNumberModel)
-        {
-            return getNumber((TemplateNumberModel)model, expr, env);
-        }
-        else if(model == null) {
-            throw expr.newInvalidReferenceException();
-        }
-        else
-        {
-            throw expr.newNonNumericalException(model);
-        }
-    }
-
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in less helpful error messages
      */
-    static Number getNumber(TemplateNumberModel model, Expression expr, Environment env)
+    static Number modelToNumber(TemplateNumberModel model, Expression expr, Environment env)
         throws TemplateModelException, TemplateException
     {
         Number value = model.getAsNumber();
@@ -137,8 +116,9 @@ class EvaluationUtil
 
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in less helpful error messages
      */
-    static Date getDate(TemplateDateModel model, Expression expr, Environment env)
+    static Date modelToDate(TemplateDateModel model, Expression expr, Environment env)
         throws TemplateModelException, TemplateException
     {
         Date value = model.getAsDate();
@@ -170,8 +150,8 @@ class EvaluationUtil
             Expression rightExp,
             Expression defaultBlamed,
             Environment env) throws TemplateException {
-        TemplateModel ltm = leftExp.getAsTemplateModel(env);
-        TemplateModel rtm = rightExp.getAsTemplateModel(env);
+        TemplateModel ltm = leftExp.eval(env);
+        TemplateModel rtm = rightExp.eval(env);
         return compare(
                 ltm, leftExp,
                 operator, operatorString,
@@ -290,8 +270,8 @@ class EvaluationUtil
 
         final int cmpResult;
         if (leftValue instanceof TemplateNumberModel && rightValue instanceof TemplateNumberModel) {
-            Number leftNum = EvaluationUtil.getNumber((TemplateNumberModel) leftValue, leftExp, env);
-            Number rightNum = EvaluationUtil.getNumber((TemplateNumberModel) rightValue, rightExp, env);
+            Number leftNum = EvalUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp, env);
+            Number rightNum = EvalUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp, env);
             ArithmeticEngine ae =
                     env != null
                         ? env.getArithmeticEngine()
@@ -347,8 +327,8 @@ class EvaluationUtil
                 }
             }
 
-            Date leftDate = EvaluationUtil.getDate(leftDateModel, leftExp, env);
-            Date rightDate = EvaluationUtil.getDate(rightDateModel, rightExp, env);
+            Date leftDate = EvalUtil.modelToDate(leftDateModel, leftExp, env);
+            Date rightDate = EvalUtil.modelToDate(rightDateModel, rightExp, env);
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
@@ -360,8 +340,8 @@ class EvaluationUtil
                     throw new TemplateException(desc, env);
                 }
             }
-            String leftString = EvaluationUtil.getString((TemplateScalarModel) leftValue, leftExp, env);
-            String rightString = EvaluationUtil.getString((TemplateScalarModel) rightValue, rightExp, env);
+            String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
+            String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
             // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
@@ -378,8 +358,8 @@ class EvaluationUtil
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
             cmpResult = (leftBool ? 1 : 0) - (rightBool ? 1 : 0);
         } else if (env.isClassicCompatible()) {
-            String leftSting = leftExp.getCoercedStringValue(env);
-            String rightString = rightExp.getCoercedStringValue(env);
+            String leftSting = leftExp.evalAndCoerceToString(env);
+            String rightString = rightExp.evalAndCoerceToString(env);
             cmpResult = env.getCollator().compare(leftSting, rightString);
         } else {
             if (typeMismatchMeansNotEqual) {

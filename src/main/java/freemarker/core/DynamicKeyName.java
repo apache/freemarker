@@ -77,9 +77,9 @@ final class DynamicKeyName extends Expression {
         this.nameExpression = nameExpression;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
+    TemplateModel _eval(Environment env) throws TemplateException
     {
-        TemplateModel targetModel = target.getAsTemplateModel(env);
+        TemplateModel targetModel = target.eval(env);
         if (targetModel == null) {
             if (env.isClassicCompatible()) {
                 return null;
@@ -90,7 +90,7 @@ final class DynamicKeyName extends Expression {
         if (nameExpression instanceof Range) {
             return dealWithRangeKey(targetModel, (Range) nameExpression, env);
         }
-        TemplateModel keyModel = nameExpression.getAsTemplateModel(env);
+        TemplateModel keyModel = nameExpression.eval(env);
         if(keyModel == null) {
             if(env.isClassicCompatible()) {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
@@ -100,11 +100,11 @@ final class DynamicKeyName extends Expression {
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
-            int index = EvaluationUtil.getNumber(keyModel, nameExpression, env).intValue();
+            int index = nameExpression.modelToNumber(keyModel, env).intValue();
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvaluationUtil.getString((TemplateScalarModel)keyModel, nameExpression, env);
+            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
             return dealWithStringKey(targetModel, key);
         }
         throw nameExpression.newUnexpectedTypeException(keyModel, "number, range, or string");
@@ -129,7 +129,7 @@ final class DynamicKeyName extends Expression {
         
         try
         {
-            String s = target.getCoercedStringValue(env);
+            String s = target.evalAndCoerceToString(env);
             try {
                return new SimpleScalar(s.substring(index, index+1));
             } catch (RuntimeException re) {
@@ -156,11 +156,11 @@ final class DynamicKeyName extends Expression {
                                            Environment env)
         throws TemplateException
     {
-        int start = EvaluationUtil.getNumber(range.left, env).intValue();
+        int start = range.left.evalToNumber(env).intValue();
         int end = 0;
         boolean hasRhs = range.hasRhs();
         if (hasRhs) {
-            end = EvaluationUtil.getNumber(range.right, env).intValue();
+            end = range.right.evalToNumber(env).intValue();
         }
         if (targetModel instanceof TemplateSequenceModel) {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
@@ -199,7 +199,7 @@ final class DynamicKeyName extends Expression {
         
         try
         {
-            String s = target.getCoercedStringValue(env);
+            String s = target.evalAndCoerceToString(env);
             if (!hasRhs) end = s.length() -1;
             if (start < 0) {
                 throw range.left.newTemplateException("Negative starting index " + start + " for slicing range.");
@@ -226,7 +226,7 @@ final class DynamicKeyName extends Expression {
         catch(NonStringException e)
         {
             throw target.newUnexpectedTypeException(
-                    target.getAsTemplateModel(env), MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence");
+                    target.eval(env), MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence");
         }
     }
 

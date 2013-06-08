@@ -73,13 +73,13 @@ import freemarker.template.utility.UnrecognizedTimeZoneException;
  */
 abstract class DateBuiltins {
     abstract static class DateBuiltin extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel tdm = (TemplateDateModel) model;
-                return calculateResult(EvaluationUtil.getDate(tdm, target, env), tdm.getDateType(), env);
+                return calculateResult(EvalUtil.modelToDate(tdm, target, env), tdm.getDateType(), env);
             } else {
                 if(model == null) {
                     throw target.newInvalidReferenceException();
