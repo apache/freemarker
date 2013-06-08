@@ -74,7 +74,12 @@ import freemarker.template.utility.StringUtil;
  */
 abstract public class Expression extends TemplateObject {
 
+    /**
+     * @param env might be {@code null}, if this kind of expression can be evaluated during parsing (as opposed to
+     *     during template execution).
+     */
     abstract TemplateModel _eval(Environment env) throws TemplateException;
+    
     abstract boolean isLiteral();
 
     // Used to store a constant return value for this expression. Only if it

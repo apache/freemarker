@@ -252,7 +252,7 @@ public class FMParser {
   private boolean getBoolean(Expression exp) throws ParseException {
       TemplateModel tm = null;
       try {
-          tm = exp.getAsTemplateModel(null);
+          tm = exp.eval(null);
       } catch (Exception e) {
          throw new ParseException(e.getMessage() 
                                   + "\nCould not evaluate expression: "
@@ -2937,7 +2937,7 @@ void HeaderElement() :
              String ks = key.image;
              TemplateModel value = null;
              try {
-                value = exp.getAsTemplateModel(null);
+                value = exp.eval(null);
              } catch (Exception e) {
                 throw new ParseException("Could not evaluate expression: " 
                                          + exp.getCanonicalForm() + " " 
