@@ -128,7 +128,7 @@ public class Configurable
     private TimeZone timeZone;
     private String trueStringValue;
     private String falseStringValue;
-    private Boolean classicCompatible;
+    private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
@@ -153,7 +153,7 @@ public class Configurable
         dateTimeFormat = "";
         trueStringValue = "true";
         falseStringValue = "false";
-        classicCompatible = Boolean.FALSE;
+        classicCompatible = new Integer(0);
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
@@ -232,10 +232,31 @@ public class Configurable
      * of this mode, see {@link #isClassicCompatible()}.
      */
     public void setClassicCompatible(boolean classicCompatibility) {
-        this.classicCompatible = classicCompatibility ? Boolean.TRUE : Boolean.FALSE;
-        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
+        this.classicCompatible = new Integer(classicCompatibility ? 1 : 0);
+        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatibilityIntToString(classicCompatible));
     }
 
+    /**
+     * Same as {@link #setClassicCompatible(boolean)}, but allows some extra values. 
+     * 
+     * @param classicCompatibility {@code 0} means {@code false}, {@code 1} means {@code true},
+     *     {@code 2} means {@code true} but with 2.3 boolean formatter. (The last was originally a bug in the
+     *     compatibility mode of early FreeMarker 2.X-es, hence "2".)
+     */
+    public void setClassicCompatibleAsInt(int classicCompatibility) {
+        if (classicCompatibility < 0 || classicCompatibility > 2) {
+            throw new IllegalArgumentException("Unsupported \"classicCompatibility\": " + classicCompatibility);
+        }
+        this.classicCompatible = new Integer(classicCompatibility);
+    }
+    
+    private String classicCompatibilityIntToString(Integer i) {
+        if (i == null) return null;
+        else if (i.intValue() == 0) return "false";
+        else if (i.intValue() == 1) return "true";
+        else return i.toString();
+    }
+    
     /**
      * Returns whether the engine runs in the "Classic Compatibile" mode.
      * When this mode is active, the engine behavior is altered in following
@@ -271,7 +292,9 @@ public class Configurable
      * <li>When boolean value is treated as a string (i.e. output in 
      *   <tt>${...}</tt> directive, or concatenated with other string), true 
      * values are converted to string "true", false values are converted to 
-     * empty string.
+     * empty string. Except, if the value of the setting is <tt>2</tt>, it will be
+     * formatted according the <tt>boolean_format</tt> setting, just like in
+     * 2.3.20 and later.
      * </li>
      * <li>Scalar models supplied to <tt>&lt;list></tt> and 
      *   <tt>&lt;foreach></tt> are treated as a one-element list consisting
@@ -285,9 +308,13 @@ public class Configurable
      * mode - you don't lose any of the new functionality by enabling it.
      */
     public boolean isClassicCompatible() {
-        return classicCompatible != null ? classicCompatible.booleanValue() : parent.isClassicCompatible();
+        return classicCompatible != null ? classicCompatible.intValue() != 0 : parent.isClassicCompatible();
     }
 
+    public int getClassicCompatibleAsInt() {
+        return classicCompatible != null ? classicCompatible.intValue() : parent.getClassicCompatibleAsInt();
+    }
+    
     /**
      * Sets the locale to assume when searching for template files with no 
      * explicit requested locale.
@@ -756,7 +783,13 @@ public class Configurable
             } else if (TIME_ZONE_KEY.equals(key)) {
                 setTimeZone(TimeZone.getTimeZone(value));
             } else if (CLASSIC_COMPATIBLE_KEY.equals(key)) {
-                setClassicCompatible(StringUtil.getYesNo(value));
+                char firstChar;
+                if (value != null && value.length() > 0) firstChar =  value.charAt(0); else firstChar = 0;
+                if (Character.isDigit(firstChar) || firstChar == '+' || firstChar == '-') {
+                    setClassicCompatibleAsInt(Integer.parseInt(value));
+                } else {
+                    setClassicCompatible(StringUtil.getYesNo(value));
+                }
             } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(key)) {
                 if (value.indexOf('.') == -1) {
                     if ("debug".equalsIgnoreCase(value)) {

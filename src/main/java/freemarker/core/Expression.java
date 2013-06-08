@@ -136,7 +136,7 @@ abstract public class Expression extends TemplateObject {
             // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
             // this before TemplateScalarModel.
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean(); 
-            if (env.isClassicCompatible()) {
+            if (env.getClassicCompatibleAsInt() == 1) {
                 return booleanValue ? "true" : "";
             } else {
                 return env.formatBoolean(booleanValue);
