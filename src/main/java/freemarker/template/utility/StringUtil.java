@@ -578,8 +578,9 @@ public class StringUtil {
     }
 
     public static Locale deduceLocale(String input) {
+       if (input == null) return null;
        Locale locale = Locale.getDefault();
-       if (input.charAt(0) == '"') input = input.substring(1, input.length() -1);
+       if (input.length() > 0 && input.charAt(0) == '"') input = input.substring(1, input.length() -1);
        StringTokenizer st = new StringTokenizer(input, ",_ ");
        String lang = "", country = "";
        if (st.hasMoreTokens()) {
