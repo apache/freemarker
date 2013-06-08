@@ -20527,6 +20527,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (<literal>${<replaceable>...</replaceable>}</literal>) do
                   that), otherwise unfortunately it will still fail.</para>
                 </listitem>
+
+                <listitem>
+                  <para>The <literal>classic_compatible</literal> setting now
+                  accepts value <literal>2</literal> along
+                  <literal>true</literal> (alias <literal>1</literal>) and
+                  <literal>false</literal> (alias <literal>0</literal>). If
+                  it's 2, boolean values will be coerced to string like in
+                  2.3.20, and thus by default become to
+                  <literal>"true"</literal> or <literal>"false"</literal>,
+                  which in turn is like in early FreeMarker 2-s. (With normal
+                  classic-compatible mode they become to
+                  <literal>"true"</literal> and <literal>""</literal>, just
+                  like in FreeMarker 1.)</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
