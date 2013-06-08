@@ -70,6 +70,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -138,6 +139,10 @@ public class Configurable
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
     
+    /**
+     * Creates a top-level configurable, one that doesn't ingerit from a parent, and thus stores the default values.
+     * The only class that should use this is {@link Configuration}.
+     */
     public Configurable() {
         parent = null;
         locale = Locale.getDefault();
@@ -240,16 +245,21 @@ public class Configurable
      * <li>handle undefined expressions gracefully. Namely when an expression
      *   "expr" evaluates to null:
      *   <ul>
-     *     <li>as argument of the <tt>&lt;assign varname=expr></tt> directive, 
-     *       <tt>${expr}</tt> directive, <tt>otherexpr == expr</tt> or 
-     *       <tt>otherexpr != expr</tt> conditional expressions, or 
-     *       <tt>hash[expr]</tt> expression, then it is treated as empty string.
+     *     <li>
+     *       in <tt>&lt;assign varname=expr></tt> directive, 
+     *       or in <tt>${expr}</tt> directive,
+     *       or in <tt>otherexpr == expr</tt>,
+     *       or in <tt>otherexpr != expr</tt>, 
+     *       or in <tt>hash[expr]</tt>,
+     *       or in <tt>expr[keyOrIndex]</tt> (since 2.3.20),
+     *       or in <tt>expr.key</tt> (since 2.3.20),
+     *       then it's treated as empty string.
      *     </li>
      *     <li>as argument of <tt>&lt;list expr as item></tt> or 
      *       <tt>&lt;foreach item in expr></tt>, the loop body is not executed
      *       (as if it were a 0-length list)
      *     </li>
-     *     <li>as argument of <tt>&lt;if></tt> directive, or otherwise where a
+     *     <li>as argument of <tt>&lt;if></tt> directive, or on other places where a
      *       boolean expression is expected, it is treated as false
      *     </li>
      *   </ul>
@@ -283,7 +293,7 @@ public class Configurable
      * explicit requested locale.
      */
     public void setLocale(Locale locale) {
-        if (locale == null) throw new IllegalArgumentException("Setting \"locale\" can't be null");
+        NullArgumentException.check("locale", locale);
         this.locale = locale;
         properties.setProperty(LOCALE_KEY, locale.toString());
     }
@@ -300,7 +310,7 @@ public class Configurable
      * Sets the time zone to use when formatting time values. 
      */
     public void setTimeZone(TimeZone timeZone) {
-        if (timeZone == null) throw new IllegalArgumentException("Setting \"time_zone\" can't be null");
+        NullArgumentException.check("timeZone", timeZone);
         this.timeZone = timeZone;
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
     }
@@ -317,7 +327,7 @@ public class Configurable
      * Sets the number format used to convert numbers to strings.
      */
     public void setNumberFormat(String numberFormat) {
-        if (numberFormat == null) throw new IllegalArgumentException("Setting \"number_format\" can't be null");
+        NullArgumentException.check("numberFormat", numberFormat);
         this.numberFormat = numberFormat;
         properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
     }
@@ -336,12 +346,13 @@ public class Configurable
      * @see #setFalseStringValue(String)
      */
     public void setBooleanFormat(String booleanFormat) {
-        if (booleanFormat == null) {
-            throw new IllegalArgumentException("Setting \"boolean_format\" can't be null");
-        } 
+        NullArgumentException.check("booleanFormat", booleanFormat);
+        
         int comma = booleanFormat.indexOf(COMMA);
         if(comma == -1) {
-            throw new IllegalArgumentException("Setting \"boolean_format\" must consist of two comma-separated values for true and false respectively");
+            throw new IllegalArgumentException(
+                    "Setting \"boolean_format\" must consist of two comma-separated values for true and false," +
+                    "respectively.");
         }
         trueStringValue = booleanFormat.substring(0, comma);
         falseStringValue = booleanFormat.substring(comma + 1);
@@ -403,7 +414,7 @@ public class Configurable
      * values to strings.
      */
     public void setTimeFormat(String timeFormat) {
-        if (timeFormat == null) throw new IllegalArgumentException("Setting \"time_format\" can't be null");
+        NullArgumentException.check("timeFormat", timeFormat);
         this.timeFormat = timeFormat;
         properties.setProperty(TIME_FORMAT_KEY, timeFormat);
     }
@@ -422,7 +433,7 @@ public class Configurable
      * dates to strings.
      */
     public void setDateFormat(String dateFormat) {
-        if (dateFormat == null) throw new IllegalArgumentException("Setting \"date_format\" can't be null");
+        NullArgumentException.check("dateFormat", dateFormat);
         this.dateFormat = dateFormat;
         properties.setProperty(DATE_FORMAT_KEY, dateFormat);
     }
@@ -441,7 +452,7 @@ public class Configurable
      * dates to strings.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
-        if (dateTimeFormat == null) throw new IllegalArgumentException("Setting \"datetime_format\" can't be null");
+        NullArgumentException.check("dateTimeFormat", dateTimeFormat);
         this.dateTimeFormat = dateTimeFormat;
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
     }
@@ -463,7 +474,7 @@ public class Configurable
      * {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER} is used.
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
-        if (templateExceptionHandler == null) throw new IllegalArgumentException("Setting \"template_exception_handler\" can't be null");
+        NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
         this.templateExceptionHandler = templateExceptionHandler;
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
     }
@@ -484,7 +495,7 @@ public class Configurable
      * used.
      */
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
-        if (arithmeticEngine == null) throw new IllegalArgumentException("Setting \"arithmetic_engine\" can't be null");
+        NullArgumentException.check("arithmeticEngine", arithmeticEngine);
         this.arithmeticEngine = arithmeticEngine;
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
     }
@@ -504,7 +515,7 @@ public class Configurable
      * models.By default, {@link ObjectWrapper#DEFAULT_WRAPPER} is used.
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
-        if (objectWrapper == null) throw new IllegalArgumentException("Setting \"object_wrapper\" can't be null");
+        NullArgumentException.check("objectWrapper", objectWrapper);
         this.objectWrapper = objectWrapper;
         properties.setProperty(OBJECT_WRAPPER_KEY, objectWrapper.getClass().getName());
     }
@@ -573,8 +584,7 @@ public class Configurable
      * @since 2.3.17
      */
     public void setNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
-        if (newBuiltinClassResolver == null) throw new IllegalArgumentException(
-                "Setting \"" + NEW_BUILTIN_CLASS_RESOLVER_KEY + "\" can't be null.");
+        NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
         this.newBuiltinClassResolver = newBuiltinClassResolver;
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY,
                 newBuiltinClassResolver.getClass().getName());
