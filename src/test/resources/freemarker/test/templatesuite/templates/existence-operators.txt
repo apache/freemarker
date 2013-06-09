@@ -4,6 +4,8 @@
 
 <@assertEquals actual=v!'-' expected='-' />
 <@assertEquals actual=(v)!'-' expected='-' />
+<@assertEquals actual=(v!) expected='' />
+<@assertEquals actual=((v)!) expected='' />
 <@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?? expected=false />
 <@assertEquals actual=(v)?? expected=false />
@@ -100,6 +102,9 @@
 </#function>
 <@attemptTest />
 ${(attemptTestFunc())!}
+
+<@assertEquals actual='fails'?eval!'-' expected='-' />
+<@assertEquals actual=('fails')?eval!'-' expected='-' />
 
 <#macro isIRE><@assertFails exception="InvalidReferenceException"><#nested></@></#macro>
 <#macro isNonFastIRE><@assertFails message="Tip:"><#nested></@></#macro>
