@@ -1497,6 +1497,10 @@ public final class Environment extends Configurable {
     private void popElement() {
         instructionStack.remove(instructionStack.size() - 1);
     }
+    
+    void replaceElemetStackTop(TemplateElement instr) {
+        instructionStack.set(instructionStack.size() - 1, instr);
+    }
 
     public TemplateNodeModel getCurrentVisitorNode() {
         return currentVisitorNode;
