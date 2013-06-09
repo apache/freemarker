@@ -1,15 +1,15 @@
 <@isIRE>${v}</@>
 <@isIRE>${w}</@>
-<@assertFails message="Tip:">${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
+<@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 
 <@assertEquals actual=v!'-' expected='-' />
 <@assertEquals actual=(v)!'-' expected='-' />
-<@assertFails message="Tip:">${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
+<@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?? expected=false />
 <@assertEquals actual=(v)?? expected=false />
 <@assertEquals actual=v?default('-') expected='-' />
 <@assertEquals actual=(v)?default('-') expected='-' />
-<@assertFails message="Tip:">${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
+<@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?exists expected=false />
 <@assertEquals actual=(v)?exists expected=false />
 <@assertEquals actual=v?if_exists expected='' />
@@ -39,7 +39,7 @@
 </#list>
 <@assert test=!v?? />
 <@assert test=!v?exists />
-<@assertFails message="Tip:">${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
+<@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 
 <@isIRE>${u.v!'-'}</@>
 <@assertEquals actual=(u.v)!'-' expected='-' />
@@ -87,4 +87,19 @@
   <@assertEquals actual=((x!'-') == '-') expected=(i < 3) />
 </#list>
 
+<#macro attemptTest>
+  <#attempt>
+    ${fails}
+  <#recover>
+    <@assert test=.error?contains('Tip:') />
+  </#attempt>
+</#macro>
+<#function attemptTestFunc>
+  <#local captured><@attemptTest /></#local>
+  <#return captured>
+</#function>
+<@attemptTest />
+${(attemptTestFunc())!}
+
 <#macro isIRE><@assertFails exception="InvalidReferenceException"><#nested></@></#macro>
+<#macro isNonFastIRE><@assertFails message="Tip:"><#nested></@></#macro>

@@ -75,6 +75,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
+
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
@@ -420,11 +422,13 @@ public final class Environment extends Configurable {
          StringWriter sw = new StringWriter();
          this.out = sw;
          TemplateException thrownException = null;
+         boolean lastFIRE = setFastInvalidReferenceExceptions(false);
          try {
              visitByHiddingParent(attemptBlock);
          } catch (TemplateException te) {
              thrownException = te;
          } finally {
+             setFastInvalidReferenceExceptions(lastFIRE);
              this.out = prevOut;
          }
          if (thrownException != null) {
