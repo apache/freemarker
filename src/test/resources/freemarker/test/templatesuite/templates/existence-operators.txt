@@ -115,7 +115,7 @@ ${(callMacroFromExpression(attemptTest))!}
 <@assertEquals actual=('fails')?eval!'-' expected='-' />
 
 <#macro isIRE><@assertFails exception="InvalidReferenceException"><#nested></@></#macro>
-<#macro isNonFastIRE><@assertFails message="Tip:"><#nested></@></#macro>
+<#macro isNonFastIRE><@assertFails exception="InvalidReferenceException" message="Tip:"><#nested></@></#macro>
 <#function isNonFastIREMessage msg><#return msg?contains('Tip:') && msg?contains('null or missing')></#function>
 <#function callMacroFromExpression m>
   <#local captured><@m /></#local>
