@@ -234,7 +234,7 @@ class EvalUtil
                     return false;
                 } else {
                     if (leftExp != null) {
-                        leftExp.assertNonNull(leftValue);
+                        leftExp.assertNonNull(leftValue, env);
                     } else {
                         String desc = "The left operand of the comparison was undefined or null.";
                         if (defaultBlamed != null) {
@@ -255,7 +255,7 @@ class EvalUtil
                     return false;
                 } else {
                     if (rightExp != null) {
-                        throw rightExp.newInvalidReferenceException();
+                        throw rightExp.newInvalidReferenceException(env);
                     } else {
                         String msg = "The right operand of the comparison was undefined or null.";
                         if (defaultBlamed != null) {

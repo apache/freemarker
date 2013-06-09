@@ -107,6 +107,7 @@
    <testcase name="strictinheader" filename="strictinheader.html">
       <config strict_syntax="N"/>
    </testcase>
+   <testcase name="existence-operators" nooutput="true" />
    <testcase name="string-builtins1" filename="stringbuiltins.txt" />
    <testcase name="string-builtins2" filename="stringbuiltins2.txt" />
    <testcase name="string-builtins-regexps" />

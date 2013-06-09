@@ -20545,6 +20545,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Improved the performance of
+              <literal>(thisVarIsMissing.foo)!default</literal> and similar
+              <emphasis>parenthetical</emphasis> existence operators and
+              existence built-ins in the case when the
+              <literal>null</literal>/missing variable is not the last step
+              inside the parenthesis. In that case it's about 30 times faster
+              on Java 6 now. In other cases (when all variables exists, or the
+              the last step is missing) the performance is abut the same as
+              before.</para>
+            </listitem>
+
+            <listitem>
               <para>Version and build information changes:</para>
 
               <itemizedlist>

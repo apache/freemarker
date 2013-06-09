@@ -225,14 +225,14 @@ abstract class RegexBuiltins {
     static class groupsBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel targetModel = target.eval(env);
-            assertNonNull(targetModel);
+            assertNonNull(targetModel, env);
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
             }
             if (targetModel instanceof RegexMatchModel.Match) {
                 return ((RegexMatchModel.Match) targetModel).subs;
             }
-            throw target.newUnexpectedTypeException(targetModel, "regular_expression_matcher");
+            throw target.newUnexpectedTypeException(targetModel, "regular_expression_matcher", env);
         }
     }
     

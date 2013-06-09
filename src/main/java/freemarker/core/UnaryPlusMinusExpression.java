@@ -74,12 +74,12 @@ final class UnaryPlusMinusExpression extends Expression {
         try {
             targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {
-            throw newNonNumericalException(tm);
+            throw newNonNumericalException(tm, env);
         }
         if (!isMinus) {
             return targetModel;
         }
-        target.assertNonNull(targetModel);
+        target.assertNonNull(targetModel, env);
         Number n = targetModel.getAsNumber();
         n = ArithmeticEngine.CONSERVATIVE_ENGINE.multiply(MINUS_ONE, n);
         return new SimpleNumber(n);

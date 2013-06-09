@@ -75,7 +75,7 @@ abstract class NodeBuiltins {
         {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNodeModel)) {
-                throw target.newUnexpectedTypeException(model, "node");
+                throw target.newUnexpectedTypeException(model, "node", env);
             }
             return calculateResult((TemplateNodeModel) model, env);
         }

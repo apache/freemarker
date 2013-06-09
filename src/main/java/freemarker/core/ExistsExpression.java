@@ -57,25 +57,29 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
-
+/** {@code exp??} and {@code (exp)??} */
 class ExistsExpression extends Expression {
 	
-	private Expression exp;
-	
+	protected final Expression exp;
 	
 	ExistsExpression(Expression exp) {
 		this.exp = exp;
 	}
 
 	TemplateModel _eval(Environment env) throws TemplateException {
-		TemplateModel tm = null;
-		try {
-			tm = exp.eval(env);
-		} catch (InvalidReferenceException ire) {
-			if (!(exp instanceof ParentheticalExpression)) {
-				throw ire;
-			}
-		}
+        TemplateModel tm;
+	    if (exp instanceof ParentheticalExpression) {
+            boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
+            try {
+                tm = exp.eval(env);
+            } catch (InvalidReferenceException ire) {
+                tm = null;
+            } finally {
+                env.setFastInvalidReferenceExceptions(lastFIRE);
+            }
+	    } else {
+            tm = exp.eval(env);
+	    }
 		return tm == null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
 	}
 

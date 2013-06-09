@@ -89,7 +89,7 @@ abstract class SequenceBuiltins {
         {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateSequenceModel)) {
-                throw target.newUnexpectedTypeException(model, "sequence");
+                throw target.newUnexpectedTypeException(model, "sequence", env);
             }
             return calculateResult((TemplateSequenceModel) model);
         }
@@ -489,7 +489,7 @@ abstract class SequenceBuiltins {
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
-                throw target.newUnexpectedTypeException(model, "sequence or collection");
+                throw target.newUnexpectedTypeException(model, "sequence or collection", env);
             }
         }
 
@@ -582,7 +582,7 @@ abstract class SequenceBuiltins {
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
-                    throw target.newUnexpectedTypeException(model, "sequence or collection");
+                    throw target.newUnexpectedTypeException(model, "sequence or collection", env);
                 }
                 
                 m_env = env;

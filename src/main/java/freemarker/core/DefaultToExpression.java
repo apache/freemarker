@@ -61,6 +61,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 
+/** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class DefaultToExpression extends Expression {
 	
     private static final TemplateCollectionModel EMPTY_COLLECTION = new SimpleCollection(new java.util.ArrayList(0));
@@ -93,7 +94,7 @@ class DefaultToExpression extends Expression {
 	
 	static final TemplateModel EMPTY_STRING_AND_SEQUENCE = new EmptyStringAndSequence();
 	
-	private Expression lhs, rhs;
+	private final Expression lhs, rhs;
 	
 	DefaultToExpression(Expression lhs, Expression rhs) {
 		this.lhs = lhs;
@@ -101,17 +102,23 @@ class DefaultToExpression extends Expression {
 	}
 
 	TemplateModel _eval(Environment env) throws TemplateException {
-		TemplateModel left = null;		
-		try {
-			left = lhs.eval(env);
-		} catch (InvalidReferenceException ire) {
-			if (!(lhs instanceof ParentheticalExpression)) {
-				throw ire;
-			}
+		TemplateModel left;
+		if (lhs instanceof ParentheticalExpression) {
+            boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
+	        try {
+                left = lhs.eval(env);
+	        } catch (InvalidReferenceException ire) {
+	            left = null;
+            } finally {
+                env.setFastInvalidReferenceExceptions(lastFIRE);
+	        }
+		} else {
+            left = lhs.eval(env);
 		}
+		
 		if (left != null) return left;
-		if (rhs == null) return EMPTY_STRING_AND_SEQUENCE;
-		return rhs.eval(env);
+		else if (rhs == null) return EMPTY_STRING_AND_SEQUENCE;
+		else return rhs.eval(env);
 	}
 
 	boolean isLiteral() {

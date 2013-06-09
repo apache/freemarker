@@ -273,7 +273,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 if(firstReferenceException != null) {
                     throw firstReferenceException;
                 } else if (!env.isClassicCompatible()) {
-                    throw firstUnresolvedExpression.newInvalidReferenceException();
+                    throw firstUnresolvedExpression.newInvalidReferenceException(env);
                 }
             }
         }

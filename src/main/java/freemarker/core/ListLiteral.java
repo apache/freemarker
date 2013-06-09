@@ -82,7 +82,7 @@ final class ListLiteral extends Expression {
             Expression exp = (Expression) it.next();
             TemplateModel tm = exp.eval(env);
             if (env == null || !env.isClassicCompatible()) {            
-                exp.assertNonNull(tm);
+                exp.assertNonNull(tm, env);
             }
             list.add(tm);
         }

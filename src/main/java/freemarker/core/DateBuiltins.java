@@ -82,9 +82,9 @@ abstract class DateBuiltins {
                 return calculateResult(EvalUtil.modelToDate(tdm, target, env), tdm.getDateType(), env);
             } else {
                 if(model == null) {
-                    throw target.newInvalidReferenceException();
+                    throw target.newInvalidReferenceException(env);
                 } else {
-                    throw target.newUnexpectedTypeException(model, "date");
+                    throw target.newUnexpectedTypeException(model, "date", env);
                 }
             }
         }

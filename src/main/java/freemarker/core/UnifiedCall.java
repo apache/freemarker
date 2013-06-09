@@ -141,9 +141,9 @@ final class UnifiedCall extends TemplateElement {
                 }
             }
             else if (tm == null) {
-                throw nameExp.newInvalidReferenceException();
+                throw nameExp.newInvalidReferenceException(env);
             } else {
-                throw nameExp.newUnexpectedTypeException(tm, "user-defined directive (macro, etc.)");
+                throw nameExp.newUnexpectedTypeException(tm, "user-defined directive (macro, etc.)", env);
             }
         }
     }

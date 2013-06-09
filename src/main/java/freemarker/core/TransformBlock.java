@@ -105,7 +105,7 @@ final class TransformBlock extends TemplateElement {
         }
         else {
             TemplateModel tm = transformExpression.eval(env);
-            throw transformExpression.newUnexpectedTypeException(tm, "transform");
+            throw transformExpression.newUnexpectedTypeException(tm, "transform", env);
         }
     }
 

@@ -134,7 +134,7 @@ abstract public class Expression extends TemplateObject {
             if (env.isClassicCompatible()) {
                 return "";
             } else {
-                throw exp.newInvalidReferenceException();
+                throw exp.newInvalidReferenceException(env);
             }
         } else if (tm instanceof TemplateBooleanModel) {
             // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
@@ -150,9 +150,9 @@ abstract public class Expression extends TemplateObject {
             if (env.isClassicCompatible() && tm instanceof BeanModel) {
                 return Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
             } if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
-                throw exp.newNonStringException(tm, seqHint);
+                throw exp.newNonStringException(tm, seqHint, env);
             } else {
-                throw exp.newNonStringException(tm);
+                throw exp.newNonStringException(tm, env);
             }
         }
     }
@@ -166,7 +166,7 @@ abstract public class Expression extends TemplateObject {
         if(model instanceof TemplateNumberModel) {
             return EvalUtil.modelToNumber((TemplateNumberModel) model, this, env);
         } else {
-            throw newNonNumericalException(model);
+            throw newNonNumericalException(model, env);
         }
     }
     
@@ -181,7 +181,7 @@ abstract public class Expression extends TemplateObject {
         } else if (env.isClassicCompatible()) {
             return model != null && !isEmpty(model);
         } else {
-            throw newNonBooleanException(model);
+            throw newNonBooleanException(model, env);
         }
     }
     
@@ -217,6 +217,8 @@ abstract public class Expression extends TemplateObject {
         } else if (model instanceof TemplateScalarModel) {
             String s = ((TemplateScalarModel) model).getAsString();
             return (s == null || s.length() == 0);
+        } else if (model == null) {
+            return true;
         } else if (model instanceof TemplateCollectionModel) {
             return !((TemplateCollectionModel) model).iterator().hasNext();
         } else if (model instanceof TemplateHashModel) {
@@ -230,9 +232,9 @@ abstract public class Expression extends TemplateObject {
         }
     }
     
-    void assertNonNull(TemplateModel model) throws InvalidReferenceException {
+    void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
         if (model == null) {
-            throw newInvalidReferenceException();
+            throw newInvalidReferenceException(env);
         }
     }
 
@@ -292,30 +294,33 @@ abstract public class Expression extends TemplateObject {
                 cause);
     }
     
-    InvalidReferenceException newInvalidReferenceException() {
-        return new InvalidReferenceException(
-                MessageUtil.decorateErrorDescription(
-                        "The following has evaluated to null or missing:",
-                        this,
-                        "If the failing expression is known to be legally null/missing, either specify a default value"
-                        + " with myOptionalVar!myDefault, or use "
-                        + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
-                        + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
-                        + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + "."),
-                    Environment.getCurrentEnvironment());
+    InvalidReferenceException newInvalidReferenceException(Environment env) {
+        if (env != null && env.getFastInvalidReferenceExceptions()) {
+            return InvalidReferenceException.FAST_INSTANCE;
+        } else {
+            return new InvalidReferenceException(
+                    MessageUtil.decorateErrorDescription(
+                            "The following has evaluated to null or missing:",
+                            this,
+                            "If the failing expression is known to be legally null/missing, either specify a default value"
+                            + " with myOptionalVar!myDefault, or use "
+                            + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
+                            + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
+                            + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + "."),
+                        env);
+        }
     }
     
-    UnexpectedTypeException newUnexpectedTypeException(TemplateModel model, String expected)
+    UnexpectedTypeException newUnexpectedTypeException(TemplateModel model, String expected, Environment env)
     throws TemplateException {
-        return newUnexpectedTypeException(model, expected, null);
+        return newUnexpectedTypeException(model, expected, null, env);
     }
     
     UnexpectedTypeException newUnexpectedTypeException(
-            TemplateModel model, String expected, String tip)
+            TemplateModel model, String expected, String tip, Environment env)
     throws InvalidReferenceException
     {
-        assertNonNull(model);
-        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model, env);
         return new UnexpectedTypeException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(expected, model),
@@ -324,16 +329,15 @@ abstract public class Expression extends TemplateObject {
                 env);
     }
     
-    NonNumericalException newNonNumericalException(TemplateModel model)
+    NonNumericalException newNonNumericalException(TemplateModel model, Environment env)
     throws InvalidReferenceException {
-        return newNonNumericalException(model, null);
+        return newNonNumericalException(model, null, env);
     }
     
-    NonNumericalException newNonNumericalException(TemplateModel model, String tip)
+    NonNumericalException newNonNumericalException(TemplateModel model, String tip, Environment env)
     throws InvalidReferenceException
     {
-        assertNonNull(model);
-        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model, env);
         return new NonNumericalException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("number", model),
@@ -350,10 +354,9 @@ abstract public class Expression extends TemplateObject {
                 Environment.getCurrentEnvironment());
     }
     
-    NonStringException newNonStringException(TemplateModel model)
+    NonStringException newNonStringException(TemplateModel model, Environment env)
     throws InvalidReferenceException {
-        assertNonNull(model);
-        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model, env);
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
@@ -361,10 +364,9 @@ abstract public class Expression extends TemplateObject {
                 env);
     }
 
-    NonStringException newNonStringException(TemplateModel model, String tip)
+    NonStringException newNonStringException(TemplateModel model, String tip, Environment env)
     throws InvalidReferenceException {
-        assertNonNull(model);
-        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model, env);
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
@@ -373,10 +375,9 @@ abstract public class Expression extends TemplateObject {
                 env);
     }
     
-    NonDateException newNonDateException(TemplateModel model)
+    NonDateException newNonDateException(TemplateModel model, Environment env)
     throws InvalidReferenceException {
-        assertNonNull(model);
-        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model, env);
         return new NonDateException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("date", model),
@@ -384,10 +385,9 @@ abstract public class Expression extends TemplateObject {
                 env);
     }
 
-    NonBooleanException newNonBooleanException(TemplateModel model)
+    NonBooleanException newNonBooleanException(TemplateModel model, Environment env)
     throws InvalidReferenceException {
-        assertNonNull(model);
-        Environment env = Environment.getCurrentEnvironment();
+        assertNonNull(model, env);
         return new NonBooleanException(
                 MessageUtil.decorateErrorDescription(
                         unexpectedTypeErrorDescription("boolean", model),

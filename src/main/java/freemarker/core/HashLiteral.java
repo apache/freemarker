@@ -140,7 +140,7 @@ final class HashLiteral extends Expression {
                 String key = keyExp.evalAndCoerceToString(env);
                 TemplateModel value = valExp.eval(env);
                 if (env == null || !env.isClassicCompatible()) {
-                    valExp.assertNonNull(value);
+                    valExp.assertNonNull(value, env);
                 }
                 keyMap.put(key, value);
                 keyList.add(key);

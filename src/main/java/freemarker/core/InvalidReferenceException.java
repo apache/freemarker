@@ -61,6 +61,11 @@ import freemarker.template.TemplateException;
  */
 public class InvalidReferenceException extends TemplateException {
 
+    static final InvalidReferenceException FAST_INSTANCE = new InvalidReferenceException(
+            "Invalid reference. Details are unavilable, as this should have been handled by an FTL construct. "
+            + "If it wasn't, that's problably a bug in FreeMarker.",
+            null);
+    
     public InvalidReferenceException(Environment env) {
         super("Invalid reference", env);
     }

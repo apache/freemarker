@@ -84,7 +84,7 @@ final class DynamicKeyName extends Expression {
             if (env.isClassicCompatible()) {
                 return null;
             } else {
-                throw target.newInvalidReferenceException();
+                throw target.newInvalidReferenceException(env);
             }
         }
         if (nameExpression instanceof Range) {
@@ -96,7 +96,7 @@ final class DynamicKeyName extends Expression {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                nameExpression.assertNonNull(keyModel);
+                nameExpression.assertNonNull(keyModel, env);
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
@@ -105,9 +105,9 @@ final class DynamicKeyName extends Expression {
         }
         if (keyModel instanceof TemplateScalarModel) {
             String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
-            return dealWithStringKey(targetModel, key);
+            return dealWithStringKey(targetModel, key, env);
         }
-        throw nameExpression.newUnexpectedTypeException(keyModel, "number, range, or string");
+        throw nameExpression.newUnexpectedTypeException(keyModel, "number, range, or string", env);
     }
 
 
@@ -138,17 +138,20 @@ final class DynamicKeyName extends Expression {
         }
         catch(NonStringException e)
         {
-            throw target.newUnexpectedTypeException(targetModel, "sequence or string (or something that's implicitly convertible to string)");
+            throw target.newUnexpectedTypeException(
+                    targetModel,
+                    "sequence or string (or something that's implicitly convertible to string)",
+                    env);
         }
     }
 
-    private TemplateModel dealWithStringKey(TemplateModel targetModel, String key)
+    private TemplateModel dealWithStringKey(TemplateModel targetModel, String key, Environment env)
         throws TemplateException
     {
         if(targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
-        throw target.newUnexpectedTypeException(targetModel, "hash");
+        throw target.newUnexpectedTypeException(targetModel, "hash", env);
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
@@ -226,7 +229,7 @@ final class DynamicKeyName extends Expression {
         catch(NonStringException e)
         {
             throw target.newUnexpectedTypeException(
-                    target.eval(env), MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence");
+                    target.eval(env), MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence", env);
         }
     }
 

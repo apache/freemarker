@@ -181,6 +181,8 @@ public final class Environment extends Configurable {
     private String cachedURLEscapingCharset;
     private boolean urlEscapingCharsetCached;
 
+    private boolean fastInvalidReferenceExceptions;
+    
     /**
      * Retrieves the environment object associated with the current
      * thread. Data model implementations that need access to the
@@ -1882,5 +1884,23 @@ public final class Environment extends Configurable {
         public void close() {
         }
     };
+    
+    /**
+     * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
+     */
+    boolean getFastInvalidReferenceExceptions() {
+        return fastInvalidReferenceExceptions;
+    }
+    
+    /**
+     * Sets if for invalid references {@link InvalidReferenceException#FAST_INSTANCE} should be thrown, or a new
+     * {@link InvalidReferenceException}. The "fast" instance is used if we know that the error will be handled
+     * so that its message will not be logged or shown anywhere.
+     */
+    boolean setFastInvalidReferenceExceptions(boolean b) {
+        boolean res = fastInvalidReferenceExceptions;
+        fastInvalidReferenceExceptions = b;
+        return res;
+    }
     
 }

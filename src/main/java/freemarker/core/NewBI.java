@@ -92,10 +92,10 @@ class NewBI extends BuiltIn
             classname = ((TemplateScalarModel) tm).getAsString();
         } 
         catch (ClassCastException cce) {
-            throw target.newUnexpectedTypeException(tm, "string");
+            throw target.newUnexpectedTypeException(tm, "string", env);
         } 
         catch (NullPointerException npe) {
-            throw target.newInvalidReferenceException();
+            throw target.newInvalidReferenceException(env);
         }
         return new ConstructorFunction(classname, env, this, target.getTemplate());
     }
