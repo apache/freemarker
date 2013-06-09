@@ -78,6 +78,7 @@
     <conf name="example.webapp1" extends="example.servlet" />
     <conf name="example.webapp2" extends="example.servlet" />
     <conf name="example.struts-webapp" extends="example.servlet" />
+    <conf name="example.ant" />
   </configurations>
   <publications>
     <artifact name="freemarker" type="jar" conf="runtime" ext="jar" />

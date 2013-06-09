@@ -22,9 +22,10 @@ public class HelloServlet extends HttpServlet {
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");
-        // In a real-world application various other settings should be explicitly
-        // set here, but for the sake of brevity we leave it out now. See the
-        // "webapp2" example for them.
+        cfg.setTemplateExceptionHandler(
+				TemplateExceptionHandler.RETHROW_HANDLER);
+        // You *really* should set various other settings in a real app.
+		// See the "webapp2" example for them.
     }
     
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

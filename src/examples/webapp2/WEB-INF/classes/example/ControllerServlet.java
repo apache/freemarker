@@ -6,6 +6,8 @@ import java.lang.reflect.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import freemarker.template.*;
+import freemarker.ext.beans.BeansWrapper;
+
 
 /**
  * <p>This is very very primitive MVC Controller servlet base class, based
@@ -25,12 +27,17 @@ public class ControllerServlet extends HttpServlet {
         // - Set update dealy to 0 for now, to ease debugging and testing.
         //   Higher value should be used in production environment.
         cfg.setTemplateUpdateDelay(0);
-        // - Set an error handler that prints errors so they are readable with
-        //   a HTML browser.
+        // - When developing, set an error handler that prints errors so they are
+		//   readable with a HTML browser, otherwise we just let the HTTP 500
+		//   handler to deal with it.
         cfg.setTemplateExceptionHandler(
-                TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+				isInDevelopmentMode()
+						? TemplateExceptionHandler.HTML_DEBUG_HANDLER
+						: TemplateExceptionHandler.RETHROW_HANDLER);
         // - Use beans wrapper (recommmended for most applications)
-        cfg.setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
+		BeansWrapper bw = new BeansWrapper();
+		bw.setSimpleMapWrapper(true);
+        cfg.setObjectWrapper(bw);
         // - Set the default charset of the template files
         cfg.setDefaultEncoding("ISO-8859-1");
         // - Set the charset of the output. This is actually just a hint, that
@@ -40,7 +47,7 @@ public class ControllerServlet extends HttpServlet {
         // - Set the default locale
         cfg.setLocale(Locale.US);
     }
-    
+	
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         doGet(req, resp);
@@ -110,4 +117,10 @@ public class ControllerServlet extends HttpServlet {
             throw new ServletException("The action didn't specified a command.");
         }
     }
+	
+	private boolean isInDevelopmentMode() {
+		// This should detect this with a system property for example.
+		return true;
+	}
+	
 }
