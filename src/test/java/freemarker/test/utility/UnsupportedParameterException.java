@@ -24,7 +24,7 @@ class UnsupportedParameterException extends ParameterException {
     public UnsupportedParameterException(String parameterName, String description, Exception cause, Environment env) {
         super(parameterName,
                 "Unsuppored parameter: " + StringUtil.jQuote(parameterName)
-                + (description == null ? ". " + StringUtil.jQuote(description) : ""),
+                + (description == null ? "." : ". " + StringUtil.jQuote(description)),
                 cause, env);
     }
 
