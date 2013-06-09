@@ -86,18 +86,7 @@ class NewBI extends BuiltIn
     TemplateModel _eval(Environment env)
             throws TemplateException 
     {
-        TemplateModel tm = target.eval(env);
-        String classname = null;
-        try {
-            classname = ((TemplateScalarModel) tm).getAsString();
-        } 
-        catch (ClassCastException cce) {
-            throw target.newUnexpectedTypeException(tm, "string", env);
-        } 
-        catch (NullPointerException npe) {
-            throw target.newInvalidReferenceException(env);
-        }
-        return new ConstructorFunction(classname, env, this, target.getTemplate());
+        return new ConstructorFunction(target.evalAndCoerceToString(env), env, this, target.getTemplate());
     }
 
     static class ConstructorFunction implements TemplateMethodModelEx {

@@ -20264,8 +20264,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>index_of</literal>, <literal>last_index_of</literal>,
               <literal>left_pad</literal>, <literal>right_pad</literal>,
               <literal>matches</literal>, <literal>replace</literal>,
-              <literal>split</literal>. (The other string built-ins already
-              did this conversion for a long time.)</para>
+              <literal>split</literal>, <literal>new</literal>. (The other
+              string built-ins already did this conversion for a long
+              time.)</para>
             </listitem>
 
             <listitem>
