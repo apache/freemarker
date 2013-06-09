@@ -93,18 +93,31 @@
   <#attempt>
     ${fails}
   <#recover>
-    <@assert test=.error?contains('Tip:') />
+    <@assert test=isNonFastIREMessage(.error) />
   </#attempt>
 </#macro>
-<#function attemptTestFunc>
-  <#local captured><@attemptTest /></#local>
-  <#return captured>
-</#function>
 <@attemptTest />
-${(attemptTestFunc())!}
+${(callMacroFromExpression(attemptTest))!}
+
+<#macro interpretTest><@'$\{fails}'?interpret /></#macro>
+<#attempt>
+  <@interpretTest />
+<#recover>
+  <@assert test=isNonFastIREMessage(.error) />
+</#attempt>
+<#attempt>
+  ${(callMacroFromExpression(interpretTest))!}
+<#recover>
+  <@assert test=isNonFastIREMessage(.error) />
+</#attempt>
 
 <@assertEquals actual='fails'?eval!'-' expected='-' />
 <@assertEquals actual=('fails')?eval!'-' expected='-' />
 
 <#macro isIRE><@assertFails exception="InvalidReferenceException"><#nested></@></#macro>
 <#macro isNonFastIRE><@assertFails message="Tip:"><#nested></@></#macro>
+<#function isNonFastIREMessage msg><#return msg?contains('Tip:') && msg?contains('null or missing')></#function>
+<#function callMacroFromExpression m>
+  <#local captured><@m /></#local>
+  <#return captured>
+</#function>

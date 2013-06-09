@@ -155,7 +155,12 @@ class Interpret extends BuiltIn
             try
             {
                 Environment env = Environment.getCurrentEnvironment();
-                env.include(template);
+                boolean lastFIRE = env.setFastInvalidReferenceExceptions(false);
+                try {
+                    env.include(template);
+                } finally {
+                    env.setFastInvalidReferenceExceptions(lastFIRE);
+                }
             }
             catch(Exception e)
             {
