@@ -306,7 +306,9 @@ abstract public class Expression extends TemplateObject {
                             + " with myOptionalVar!myDefault, or use "
                             + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
                             + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
-                            + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + "."),
+                            + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + ". "
+                            + "(These only cover the last step of the expression; to cover the whole expression, "
+                            + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"),
                         env);
         }
     }

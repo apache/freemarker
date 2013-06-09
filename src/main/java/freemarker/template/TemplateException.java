@@ -171,8 +171,11 @@ public class TemplateException extends Exception {
         if (env != null) {
             String stackTop = Internal_CoreAPI.getInstructionStackTop(env);
             if (stackTop != null) {
-                message = desc + "\n\n" + THE_FAILING_INSTRUCTION + " (print stack trace for more):\n==> "
-                        + Internal_CoreAPI.getInstructionStackTop(env);
+                int stackSize = Internal_CoreAPI.getDisplayedInstructionStackSize(env);
+                message = desc + "\n\n" + THE_FAILING_INSTRUCTION
+                        + (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
+                        + ":\n==> "
+                        + stackTop;
                 desc = message.substring(0, desc.length());  // to reuse the backing char[] of `message`
             } else {
                 message = desc;

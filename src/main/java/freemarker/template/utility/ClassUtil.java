@@ -142,25 +142,29 @@ public class ClassUtil
      * @since 2.4
      */
     public static String getShortClassName(Class pClass, boolean shortenFreeMarkerClasses) {
-        if (pClass == null) return null;
-        
-        String cn = pClass.getName();
-        if (cn.startsWith("java.lang.") || cn.startsWith("java.util.")) {
-            return cn.substring(10);
+        if (pClass == null) {
+            return null;
+        } else if (pClass.isArray()) {
+            return getShortClassName(pClass.getComponentType()) + "[]";
         } else {
-            if (shortenFreeMarkerClasses) {
-                if (cn.startsWith("freemarker.template.")) {
-                    return "f.t" + cn.substring(19);
-                } else if (cn.startsWith("freemarker.ext.beans.")) {
-                    return "f.e.b" + cn.substring(20);
-                } else if (cn.startsWith("freemarker.ext.")) {
-                    return "f.e" + cn.substring(14);
-                } else if (cn.startsWith("freemarker.")) {
-                    return "f" + cn.substring(10);
+            String cn = pClass.getName();
+            if (cn.startsWith("java.lang.") || cn.startsWith("java.util.")) {
+                return cn.substring(10);
+            } else {
+                if (shortenFreeMarkerClasses) {
+                    if (cn.startsWith("freemarker.template.")) {
+                        return "f.t" + cn.substring(19);
+                    } else if (cn.startsWith("freemarker.ext.beans.")) {
+                        return "f.e.b" + cn.substring(20);
+                    } else if (cn.startsWith("freemarker.ext.")) {
+                        return "f.e" + cn.substring(14);
+                    } else if (cn.startsWith("freemarker.")) {
+                        return "f" + cn.substring(10);
+                    }
+                    // Falls through
                 }
-                // Falls through
+                return cn;
             }
-            return cn;
         }
     }
 

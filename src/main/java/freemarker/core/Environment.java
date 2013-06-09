@@ -75,8 +75,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
-
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
@@ -145,7 +143,7 @@ public final class Environment extends Configurable {
     }
 
     private final TemplateHashModel rootDataModel;
-    private final ArrayList elementStack = new ArrayList();
+    private final ArrayList/*<TemplateElement>*/ instructionStack = new ArrayList();
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private NumberFormat numberFormat;
@@ -291,7 +289,7 @@ public final class Environment extends Configurable {
     }
 
     private TemplateElement replaceTopElement(TemplateElement element) {
-        return (TemplateElement) elementStack.set(elementStack.size() - 1, element);
+        return (TemplateElement) instructionStack.set(instructionStack.size() - 1, element);
     }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
@@ -1300,7 +1298,7 @@ public final class Environment extends Configurable {
      */
     public void outputInstructionStack(PrintWriter pw) {
         pw.println("----------");
-        ListIterator stackIter = elementStack.listIterator(elementStack.size());
+        ListIterator stackIter = instructionStack.listIterator(instructionStack.size());
         boolean topElement = true;
         while(stackIter.hasPrevious()) {
             TemplateElement stackEl = (TemplateElement) stackIter.previous();
@@ -1312,16 +1310,16 @@ public final class Environment extends Configurable {
                 } else {
                     pw.print("    ");
                 }
-                pw.println(getStackTraceElementLine(stackEl));
+                pw.println(getStackTraceItemLine(stackEl));
             }
         }
         pw.println("----------");
         pw.flush();
     }
     
-    private String getStackTraceElementLine(TemplateElement stackEl) {
+    private String getStackTraceItemLine(TemplateElement stackEl) {
         StringBuffer sb = new StringBuffer(); 
-        sb.append(MessageUtil.shorten(stackEl.getDescription(), 30));
+        sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
         
         sb.append("  [");
         Macro enclosingMacro = getEnclosingMacro(stackEl);
@@ -1342,8 +1340,21 @@ public final class Environment extends Configurable {
      * This is used internally for error message creation.
      */
     String getInstructionStackTop() {
-        if (elementStack.size() == 0) return null;
-        return getStackTraceElementLine((TemplateElement) elementStack.get(elementStack.size() - 1));
+        if (instructionStack.size() == 0) return null;
+        return getStackTraceItemLine((TemplateElement) instructionStack.get(instructionStack.size() - 1));
+    }
+    
+    /**
+     * Returns the number of stack items that would be shown if we print the stack trace now.
+     */
+    int getDisplayedInstructionStackSize() {
+        int res = 0;
+        int ln = instructionStack.size();
+        for (int i = 0; i < ln; i++) {
+            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
+            if (i == ln || stackEl.isShownInStackTrace()) res++;
+        }
+        return res;
     }
 
     private Macro getEnclosingMacro(TemplateElement stackEl) {
@@ -1480,11 +1491,11 @@ public final class Environment extends Configurable {
     }
 
     private void pushElement(TemplateElement element) {
-        elementStack.add(element);
+        instructionStack.add(element);
     }
 
     private void popElement() {
-        elementStack.remove(elementStack.size() - 1);
+        instructionStack.remove(instructionStack.size() - 1);
     }
 
     public TemplateNodeModel getCurrentVisitorNode() {

@@ -24,5 +24,9 @@ public class Internal_CoreAPI {
     public static String getInstructionStackTop(Environment env) {
         return env.getInstructionStackTop();
     }
+
+    public static int getDisplayedInstructionStackSize(Environment env) {
+        return env.getDisplayedInstructionStackSize();
+    }
     
 }
