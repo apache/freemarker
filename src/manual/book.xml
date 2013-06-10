@@ -20370,7 +20370,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateException</literal>-s, and somewhat for
                   <literal>ParseException</literal>-s. It's unlikely that
                   anybody depends on these, but if you tried to parse these
-                  messages intended for humans, be aware of this.</para>
+                  messages, be aware of this.</para>
                 </listitem>
 
                 <listitem>
