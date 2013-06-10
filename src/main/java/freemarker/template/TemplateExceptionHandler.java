@@ -53,9 +53,11 @@
 package freemarker.template;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 
 import freemarker.core.Environment;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An API for objects that handle exceptions that are thrown during
@@ -114,39 +116,57 @@ public interface TemplateExceptionHandler {
 		}
 	}; 
 
+	
         /**
           * This is a TemplateExceptionHandler used when you develop HTML templates. This handler
           * outputs the stack trace information to the client and then rethrows the exception, and
           * surrounds it with tags to make the error message readable with the browser.
           */
-	TemplateExceptionHandler HTML_DEBUG_HANDLER =new TemplateExceptionHandler() {
+	TemplateExceptionHandler HTML_DEBUG_HANDLER = new TemplateExceptionHandler() {
 		public void handleTemplateException(TemplateException te, Environment env, Writer out) 
                     throws TemplateException  
                 {
                     PrintWriter pw = (out instanceof PrintWriter) 
                                  ? (PrintWriter) out 
                                  : new PrintWriter(out);
-                    pw.println("<!-- FREEMARKER ERROR MESSAGE STARTS HERE -->"
+                    pw.print("<!-- FREEMARKER ERROR MESSAGE STARTS HERE -->"
+                            + "<!-- ]]> -->"
                             + "<script language=javascript>//\"></script>"
-                            + "<script language=javascript>//\'></script>"
+                            + "<script language=javascript>//'></script>"
                             + "<script language=javascript>//\"></script>"
-                            + "<script language=javascript>//\'></script>"
+                            + "<script language=javascript>//'></script>"
                             + "</title></xmp></script></noscript></style></object>"
                             + "</head></pre></table>"
                             + "</form></table></table></table></a></u></i></b>"
-                            + "<div align=left "
-                            + "style='background-color:#FFFF00; color:#FF0000; "
-                            + "display:block; border-top:double; padding:2pt; "
-                            + "font-size:medium; font-family:Arial,sans-serif; "
-                            + "font-style: normal; font-variant: normal; "
-                            + "font-weight: normal; text-decoration: none; "
-                            + "text-transform: none'>"
-                            + "<b style='font-size:medium'>FreeMarker template error!</b>"
-                            + "<pre><xmp>");
-                    te.printStackTrace(pw);
-                    pw.println("</xmp></pre></div></html>");
+                            + "<div align='left' "
+                            + "style='background-color:#FFFF7C; "
+                            + "display:block; border-top:double; padding:4px; margin:0; "
+                            + "font-family:Arial,sans-serif; ");
+                    pw.print(FONT_RESET_CSS);
+                    pw.print("'>"
+                            + "<b style='font-size:12px; font-style:normal; font-weight:bold; "
+                            + "text-decoration:none; text-transform: none;'>FreeMarker template error</b>"
+                            + "<pre style='display:block; background: none; border: 0; margin:0; padding: 0;"
+                            + "font-family:monospace; ");
+                    pw.print(FONT_RESET_CSS);
+                    pw.println("; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; "
+                            + "white-space: -o-pre-wrap; word-wrap: break-word;'>");
+                    
+                    StringWriter stackTraceSW = new StringWriter();
+                    PrintWriter stackPW = new PrintWriter(stackTraceSW);
+                    te.printStackTrace(stackPW, false);
+                    stackPW.close();
+                    pw.println();
+                    pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));
+                    
+                    pw.println("</pre></div></html>");
                     pw.flush();
                     throw te;
 		}
-	}; 
+		
+	    private static final String FONT_RESET_CSS =
+	            "color:#A80000; font-size:12px; font-style:normal; font-variant:normal; "
+	            + "font-weight:normal; text-decoration:none; text-transform: none";
+		
+	};
 }

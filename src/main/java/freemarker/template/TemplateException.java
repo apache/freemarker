@@ -218,7 +218,7 @@ public class TemplateException extends Exception {
     }
     
     /**
-     * Returns the quote of the problematic FTL instruction and the FTL stack strace.
+     * Returns the snapshot of the FTL stack strace at the time this exception was created.
      */
     public String getFTLInstructionStack() {
         return ftlInstructionStack;
@@ -240,9 +240,18 @@ public class TemplateException extends Exception {
         }
     }
 
+    /**
+     * Overrides {@link Throwable#printStackTrace} so that it will include the FTL stack trace.
+     */
     public void printStackTrace(PrintWriter pw) {
+        printStackTrace(pw, true);
+    }
+    
+    public void printStackTrace(PrintWriter pw, boolean printHeading) {
         synchronized (pw) {
-            pw.println("FreeMarker template error:");
+            if (printHeading) { 
+                pw.println("FreeMarker template error:");
+            }
             pw.println(getDescription());  // Not getMessage()!
             if (ftlInstructionStack != null && ftlInstructionStack.length() != 0) {
                 pw.println();
