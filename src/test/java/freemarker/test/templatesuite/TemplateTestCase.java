@@ -463,7 +463,7 @@ public class TemplateTestCase extends TestCase {
                         encoding);
                 Reader output = new InputStreamReader(new FileInputStream(outFile), 
                         encoding);
-                System.out.println(outFile);
+                System.out.println("Comparing with output file: " + outFile);
                 compare(ref, output);
                 outFile.delete();
             } catch (IOException e) {
