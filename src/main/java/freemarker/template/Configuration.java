@@ -488,12 +488,11 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading freemkarer.jar under an existing
      * application. But if you develop a new application with, say, 2.3.25, it's probably a good idea to set this from
-     * 2.3.0 to 2.3.25. (Note that if you later update FreeMarker to a higher 2.3.x version, you will still only have
-     * the incompatible changes that you have tested your application with.) As far as the 1st and 2nd version number
-     * remains, these changes are usually not substantial anyway.
+     * 2.3.0 to 2.3.25. As far as the 1st and 2nd version number remains, these changes are always very low-risk
+     * changes, so usually they don't break anything in older applications either.
      * 
-     * <p>This setting may doesn't affect some important non-backward compatible security fixes; they are always
-     * enabled.
+     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
+     * enabled, regardless of what you set here.
      * 
      * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
      * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you

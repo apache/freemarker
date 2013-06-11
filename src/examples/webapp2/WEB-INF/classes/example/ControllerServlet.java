@@ -5,6 +5,7 @@ import java.util.*;
 import java.lang.reflect.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import freemarker.core.Version;
 import freemarker.template.*;
 import freemarker.ext.beans.BeansWrapper;
 
@@ -21,6 +22,9 @@ public class ControllerServlet extends HttpServlet {
         // Initialize the FreeMarker configuration;
         // - Create a configuration instance
         cfg = new Configuration();
+        // - At least in new projects, specify that you want the fixes that aren't
+        //   100% backward compatible too (these are always very low-risk changes):
+        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");

@@ -5132,6 +5132,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">Configuration cfg = new Configuration();
+// At least in new projects, specify that you want the fixes that aren't
+// 100% backward compatible too (these are very low-risk changes):
+cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20
 // Specify the data source where the template files come from.
 // Here I set a file directory for it:
 cfg.setDirectoryForTemplateLoading(
