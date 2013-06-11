@@ -76,7 +76,7 @@ public final class Version implements Serializable {
         major = parts[0];
         minor = parts[1];
         micro = parts[2];
-        calculateIntValue(major, minor, micro);
+        calculateIntValue();
         
         this.stringValue = stringValue;
         this.gaeCompliant = gaeCompliant;
@@ -95,12 +95,15 @@ public final class Version implements Serializable {
         this.extraInfo = extraInfo;
         this.gaeCompliant = gaeCompatible;
         this.buildDate = buildDate;
-        
-        calculateIntValue(major, minor, micro);
+        calculateIntValue();
     }
 
-    private void calculateIntValue(int major, int minor, int micro) {
-        intValue = major * 1000000 + minor * 1000 + micro;
+    private void calculateIntValue() {
+        intValue = intValueFor(major, minor, micro);
+    }
+    
+    static public int intValueFor(int major, int minor, int micro) {
+        return major * 1000000 + minor * 1000 + micro;
     }
     
     /**
@@ -179,9 +182,6 @@ public final class Version implements Serializable {
             result = prime * result + ((gaeCompliant == null) ? 0 : gaeCompliant.hashCode());
             result = prime * result + ((hashCode == null) ? 0 : hashCode.hashCode());
             result = prime * result + intValue;
-            result = prime * result + major;
-            result = prime * result + micro;
-            result = prime * result + minor;
             result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
             hashCode = new Integer(result);  // J2SE 1.2 had no Integer.valueOf(int)
         }
@@ -216,12 +216,6 @@ public final class Version implements Serializable {
         } else if (!gaeCompliant.equals(other.gaeCompliant)) {
             return false;
         }
-        
-        if (major != other.major) return false;
-        
-        if (micro != other.micro) return false;
-        
-        if (minor != other.minor) return false;
         
         if (stringValue == null) {
             if (other.stringValue != null) return false;
