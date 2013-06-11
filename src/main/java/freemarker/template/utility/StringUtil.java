@@ -1006,6 +1006,8 @@ public class StringUtil {
      *     u2029 (Paragraph separator - source code line-break in ECMAScript)<br>
      *   <td><tt>\<tt>u</tt><i>XXXX</i></tt>
      * </table>
+     * 
+     * @since 2.3.20
      */
     public static String jsStringEnc(String s, boolean json) {
         NullArgumentException.check("s", s);
