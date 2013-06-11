@@ -64,12 +64,14 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A holder for builtins that operate on TemplateNodeModels.
+ * A holder for builtins that operate exclusively on (XML-)node left-hand value.
  */
-
-abstract class NodeBuiltins {
+class NodeBuiltins {
     
-    abstract static class NodeBuiltIn extends BuiltIn {
+    // Can't be instantiated
+    private NodeBuiltins() { }
+    
+    private abstract static class NodeBuiltIn extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException
         {

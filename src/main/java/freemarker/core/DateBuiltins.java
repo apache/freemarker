@@ -69,10 +69,14 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UnrecognizedTimeZoneException;
 
 /**
- * A holder for built-ins that operate exclusively on {@link TemplateDateModel}-a.
+ * A holder for built-ins that operate exclusively on date left-hand values.
  */
-abstract class DateBuiltins {
-    abstract static class DateBuiltin extends BuiltIn {
+class DateBuiltins {
+    
+    // Can't be instantiated
+    private DateBuiltins() { }
+    
+    private abstract static class DateBuiltin extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException
         {

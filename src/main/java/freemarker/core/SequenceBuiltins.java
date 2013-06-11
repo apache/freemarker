@@ -79,11 +79,14 @@ import freemarker.template.utility.Constants;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A holder for builtins that operate exclusively on TemplateSequenceModels.
+ * A holder for builtins that operate exclusively on sequence or collection left-hand value.
  */
-
-abstract class SequenceBuiltins {
-    abstract static class SequenceBuiltIn extends BuiltIn {
+class SequenceBuiltins {
+    
+    // Can't be instantiated
+    private SequenceBuiltins() { }
+    
+    private abstract static class SequenceBuiltIn extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException
         {

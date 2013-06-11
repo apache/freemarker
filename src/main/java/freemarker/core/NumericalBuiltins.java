@@ -68,11 +68,14 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.NumberUtil;
 
 /**
- * A holder for builtins that operate exclusively on TemplateSequenceModels.
+ * A holder for builtins that operate exclusively on number left-hand value.
  */
-
-abstract class NumericalBuiltins {
-    abstract static class NumberBuiltIn extends BuiltIn {
+class NumericalBuiltins {
+    
+    // Can't be instantiated
+    private NumericalBuiltins() { }
+    
+    private abstract static class NumberBuiltIn extends BuiltIn {
         TemplateModel _eval(Environment env)
                 throws TemplateException
         {

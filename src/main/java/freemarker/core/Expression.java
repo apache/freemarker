@@ -300,10 +300,19 @@ abstract public class Expression extends TemplateObject {
                 MessageUtil.decorateErrorDescription(description, this, tips),
                 cause);
     }
-    
+
     InvalidReferenceException newInvalidReferenceException(Environment env) {
+        return newInvalidReferenceException(null, env);
+    }
+    
+    /**
+     * Use this only if you really need a non-standard error message for the case. 
+     */
+    InvalidReferenceException newInvalidReferenceException(String message, Environment env) {
         if (env != null && env.getFastInvalidReferenceExceptions()) {
             return InvalidReferenceException.FAST_INSTANCE;
+        } else if (message != null) {
+            return new InvalidReferenceException(MessageUtil.decorateErrorDescription(message, this), env);
         } else {
             return new InvalidReferenceException(
                     MessageUtil.decorateErrorDescription(

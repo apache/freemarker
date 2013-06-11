@@ -484,7 +484,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
      * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
-     * active be default, as that would break backward-compatibility).
+     * active by default, as that would break backward-compatibility).
      * 
      * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading freemkarer.jar under an existing
      * application. But if you develop a new application with, say, 2.3.25, it's probably a good idea to set this from
