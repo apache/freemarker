@@ -102,8 +102,15 @@ abstract public class Expression extends TemplateObject {
             }
         }
     }
+
+    /**
+     * @deprecated At the moment FreeMarker has no API for this with backward-compatibility promises.
+     */
+    public final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
+        return eval(env);
+    }
     
-    public final TemplateModel eval(Environment env) throws TemplateException {
+    final TemplateModel eval(Environment env) throws TemplateException {
         return constantValue != null ? constantValue : _eval(env);
     }
     
