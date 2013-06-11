@@ -24,6 +24,7 @@
             url_escaping_charset CDATA #IMPLIED
             templatedir CDATA #IMPLIED
             referencedir CDATA #IMPLIED
+            incompatible_improvements CDATA #IMPLIED
       >
 ]>
 
@@ -170,4 +171,10 @@
    <testcase name="boolean-formatting"  />
    <testcase name="number-math-builtins" nooutput="true" />
    <testcase name="string-builtin-coercion" nooutput="true" />
+   <testcase name="string-builtins-ice-2.3.20" nooutput="true">
+      <config incompatible_improvements="2.3.20"/>
+   </testcase>
+   <testcase name="string-builtins-ice-2.3.19" nooutput="true">
+      <config incompatible_improvements="2.3.19"/>
+   </testcase>
 </testcases>

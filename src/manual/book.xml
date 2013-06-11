@@ -11661,6 +11661,15 @@ ${test3}</programlisting>
               <para><literal>"</literal> replaced with
               <literal>&amp;quot;</literal></para>
             </listitem>
+
+            <listitem>
+              <para>if FreeMarker was configured by the programmers so (by
+              setting the <literal>incompatible_improvements</literal> setting
+              to <literal>2.3.20</literal> or higher; more <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>),
+              <literal>'</literal> is replaced with
+              <literal>&amp;#39;</literal></para>
+            </listitem>
           </itemizedlist>
 
           <para>Note that if you want to insert an attribute value securely,
@@ -20255,6 +20264,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               linkend="ref_builtin_is_nan"><literal>is_nan</literal></link>,
               <link
               linkend="ref_builtin_is_infinite"><literal>is_infinite</literal></link></para>
+            </listitem>
+
+            <listitem>
+              <para>If you set the
+              <literal>incompatible_improvements</literal> setting (see <link
+              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
+              to <literal>2.3.20</literal> or higher, <literal>?html</literal>
+              will escape apostrophe-quotes just like
+              <literal>?xhtml</literal> does. Utilizing this is highly
+              recommended, because otherwise if interpolations are used inside
+              attribute values that use apostrophe-quotation (<literal>&lt;foo
+              bar='${val}'&gt;</literal>) instead of plain quotation mark
+              (<literal>&lt;foo bar="${val}"&gt;</literal>), they might
+              produce HTML/XML that's not well-formed. Note that
+              <literal>?html</literal> didn't do this because long ago there
+              was no cross-browser way of doing this, but it's not a concern
+              anymore. Also note that this will be the default behavior
+              starting from 2.4.</para>
             </listitem>
 
             <listitem>

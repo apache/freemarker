@@ -81,6 +81,7 @@ public class FMParser {
   private boolean inMacro, inFunction, stripWhitespace, stripText;
   private LinkedList escapes = new LinkedList();
   private int contentNesting; // for stripText
+  private int incompatibleImprovements; 
   
   /**
    * Create an FM expression parser using a string.
@@ -126,7 +127,8 @@ public class FMParser {
 	     break;
 	  default : throw new IllegalArgumentException("Illegal argument for tagSyntax");
       }
-      token_source.incompatibleImprovements = incompatibleImprovements; 
+      token_source.incompatibleImprovements = incompatibleImprovements;
+      this.incompatibleImprovements = incompatibleImprovements; 
   }
   
   public FMParser(String template) {
@@ -1467,7 +1469,7 @@ Expression BuiltIn(Expression exp) :
    {
        BuiltIn result = null;
        try {
-           result = BuiltIn.newBuiltIn(exp, t.image);
+           result = BuiltIn.newBuiltIn(incompatibleImprovements, exp, t.image);
        } catch (ParseException pe) {
            pe.lineNumber = t.beginLine;
            pe.columnNumber = t.beginColumn;

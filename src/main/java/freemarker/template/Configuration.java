@@ -496,7 +496,8 @@ public class Configuration extends Configurable implements Cloneable {
      * enabled.
      * 
      * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
-     * increases. When that happens, it's possible that some old behavior become unsupported.
+     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
+     * set this setting to a low value, it might wont bring back the old behavior anymore.
      * 
      * <p>Currently affected fixes/enhancements:
      * <ul>
@@ -504,6 +505,14 @@ public class Configuration extends Configurable implements Cloneable {
      *     2.3.19: Bug fix: Wrong # tags were printed as static text instead of
      *     causing parsing error if there was no correct # tag earlier in the
      *     same template.
+     *   </li>
+     *   <li>
+     *     2.3.20: {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing this is highly
+     *     recommended, because otherwise if interpolations are used inside attribute values that use
+     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
+     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
+     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
+     *     concern anymore.
      *   </li>
      * </ul>
      *
@@ -513,6 +522,10 @@ public class Configuration extends Configurable implements Cloneable {
         incompatibleImprovements = version;
     }
 
+    /**
+     * @see #setIncompatibleImprovements(Version) 
+     * @since 2.3.20
+     */
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
     }

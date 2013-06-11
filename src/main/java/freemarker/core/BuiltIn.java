@@ -301,7 +301,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         return ClassUtil.forName(className).newInstance();
     }
     
-    static BuiltIn newBuiltIn(Expression target, String key) throws ParseException {
+    static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             StringBuffer buf = new StringBuffer(
@@ -327,6 +327,12 @@ abstract class BuiltIn extends Expression implements Cloneable {
             }
             throw new ParseException(buf.toString(), target);
         }
+        
+        while (bi instanceof ICIChainMember
+                && incompatibleImprovements < ((ICIChainMember) bi).getMinimumICIVersion()) {
+            bi = (BuiltIn) ((ICIChainMember) bi).getPreviousICIChainMember();
+        }
+        
         try {
             bi = (BuiltIn) bi.clone();
         }
@@ -649,12 +655,31 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
     }
 
-    static class htmlBI extends StringBuiltIn {
+
+    static class htmlBI extends StringBuiltIn implements ICIChainMember {
+        
+        private static final int MIN_ICE = Version.intValueFor(2, 3, 20); 
+        private final BIBeforeICE2d3d20 prevICEObj = new BIBeforeICE2d3d20();
+        
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(StringUtil.HTMLEnc(s));
+            return new SimpleScalar(StringUtil.XHTMLEnc(s));
+        }
+        
+        static class BIBeforeICE2d3d20 extends StringBuiltIn {
+            TemplateModel calculateResult(String s, Environment env) {
+                return new SimpleScalar(StringUtil.HTMLEnc(s));
+            }
+        }
+
+        public int getMinimumICIVersion() {
+            return MIN_ICE;
+        }
+
+        public Object getPreviousICIChainMember() {
+            return prevICEObj;
         }
     }
-
+    
     static class xmlBI extends StringBuiltIn {
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XMLEnc(s));

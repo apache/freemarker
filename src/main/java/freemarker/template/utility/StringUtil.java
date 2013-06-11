@@ -75,8 +75,12 @@ public class StringUtil {
      */
 
     /**
-     *  HTML encoding (does not convert line breaks).
-     *  Replaces all '&gt;' '&lt;' '&amp;' and '"' with entity reference
+     *  HTML encoding (does not convert line breaks and apostrophe-quote).
+     *  Replaces all '&gt;' '&lt;' '&amp;' and '"' with entity reference, but not "'" (apostrophe-quote).
+     *  The last is not escaped as back then when this was written some user agents didn't understood 
+     *  "&amp;apos;" nor "&amp;#39;".
+     *    
+     *  @deprecated Use {@link #XHTMLEnc(String)} instead, because it escapes apostrophe-quote too.
      */
     public static String HTMLEnc(String s) {
         return XMLEncNA(s);
@@ -94,7 +98,7 @@ public class StringUtil {
      *  XHTML Encoding.
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
      *  suitable for XHTML decoding in common user agents (including legacy
-     *  user agents, which do not decode "&apos;" to "'", so "&#39;" is used
+     *  user agents, which do not decode "&amp;apos;" to "'", so "&amp;#39;" is used
      *  instead [see http://www.w3.org/TR/xhtml1/#C_16])
      */
     public static String XHTMLEnc(String s) {
