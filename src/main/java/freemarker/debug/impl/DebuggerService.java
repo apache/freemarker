@@ -95,16 +95,23 @@ public abstract class DebuggerService
     
     abstract void registerTemplateSpi(Template template);
     
-    public static boolean suspendEnvironment(Environment env, int line)
+    public static boolean suspendEnvironment(Environment env, String templateName, int line)
     throws
         RemoteException
     {
-        return instance.suspendEnvironmentSpi(env, line);
+        return instance.suspendEnvironmentSpi(env, templateName, line);
     }
     
-    abstract boolean suspendEnvironmentSpi(Environment env, int line)
+    abstract boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
     throws
         RemoteException;
+
+    abstract void shutdownSpi();
+
+    public static void shutdown()
+    {
+        instance.shutdownSpi();
+    }
 
     private static class NoOpDebuggerService extends DebuggerService
     {
@@ -113,12 +120,16 @@ public abstract class DebuggerService
             return Collections.EMPTY_LIST;
         }
         
-        boolean suspendEnvironmentSpi(Environment env, int line)
+        boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
         {
             throw new UnsupportedOperationException();
         }
         
         void registerTemplateSpi(Template template)
+        {
+        }
+
+        void shutdownSpi()
         {
         }
     }
