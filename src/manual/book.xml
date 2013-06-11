@@ -20258,6 +20258,30 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fix [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/390/">390</link>]
+              (and other improvements): <literal>?js_string</literal> and
+              <literal>?json_string</literal> didn't escape the
+              <literal>u2028</literal>-<literal>u2029</literal> line
+              terminators (problem for JavaScript) and the
+              <literal>u007F</literal>-<literal>u009F</literal> control
+              characters (maybe a problem in JSON, depending on
+              implementation). Furthermore, the escaping of
+              <literal>\</literal>, <literal>&lt;</literal>, and
+              <literal>&gt;</literal> become safer in that now they are
+              escaped whenever it can't be guaranteed that they won't be part
+              of <literal>&lt;!</literal>, <literal>]]&gt;</literal> or
+              <literal>&lt;/</literal>. Earlier they were only escaped when it
+              was known that they are part of these patterns, thus it was
+              possible to assemble these patterns from two adjacent
+              interpolations. Additionally, from now on
+              <literal>&lt;?</literal> and <literal>--&gt;</literal> also
+              count as dangerous patterns, and will trigger
+              <literal>&lt;</literal> and <literal>&gt;</literal>
+              escaping.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: The following string built-ins didn't coerce
               the numerical, date (and now the boolean) left-values to string,
               instead they threw a type error: contains,
