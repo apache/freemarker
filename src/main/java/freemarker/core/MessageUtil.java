@@ -83,6 +83,10 @@ class MessageUtil {
               + " "
               + preposition + " line " + line + ", column " + column;
     }
+
+    static String decorateErrorDescription(String description) {
+        return decorateErrorDescription(description, null, (String[]) null);
+    }
     
     static String decorateErrorDescription(String description, String tip) {
         return decorateErrorDescription(description, null, tip);
@@ -288,6 +292,15 @@ class MessageUtil {
         return new TemplateModelException(
                 methodName + "(...) expects " + expectedType + " as argument #" + (argIdx + 1) + ", but received a(n) "
                 + ClassUtil.getFTLTypeDescription(arg) + ".");
+    }
+
+    static String unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
+        return MessageUtil.unexpectedTypeErrorDescription(expectedType, ClassUtil.getFTLTypeDescription(model));
+    }
+
+    static String unexpectedTypeErrorDescription(String expectedType, String actualType) {
+        return "Expected a(n) " + expectedType + ", but this evaluated to a value of type " 
+                + actualType + ":";
     }
     
 }

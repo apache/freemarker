@@ -54,14 +54,19 @@ package freemarker.core;
 
 import java.util.Date;
 
+import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.Internal_BeansAPI;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Internally used static utilities for evaluation expressions.
@@ -395,6 +400,64 @@ class EvalUtil
                 case CMP_OP_LESS_THAN_EQUALS: return "less-than-equals";
                 case CMP_OP_GREATER_THAN_EQUALS: return "greater-than-equals";
                 default: return "???";
+            }
+        }
+    }
+
+    static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
+        if (tm instanceof TemplateNumberModel) {
+            return env.formatNumber(modelToNumber((TemplateNumberModel) tm, exp));
+        } else if (tm instanceof TemplateDateModel) {
+            TemplateDateModel dm = (TemplateDateModel) tm;
+            return env.formatDate(modelToDate(dm, exp), dm.getDateType());
+        } else if (tm instanceof TemplateScalarModel) {
+            return modelToString((TemplateScalarModel) tm, exp, env);
+        } else if(tm == null) {
+            if (env.isClassicCompatible()) {
+                return "";
+            } else {
+                if (exp != null) {
+                    throw exp.newInvalidReferenceException(env);
+                } else {
+                    throw new InvalidReferenceException(
+                            MessageUtil.decorateErrorDescription("Null/missing value (no more informatoin avilable)"),
+                            env);
+                }
+            }
+        } else if (tm instanceof TemplateBooleanModel) {
+            // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
+            // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
+            // this before TemplateScalarModel.
+            boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean(); 
+            if (env.getClassicCompatibleAsInt() == 1) {
+                return booleanValue ? "true" : "";
+            } else {
+                return env.formatBoolean(booleanValue);
+            }
+        } else {
+            if (env.isClassicCompatible() && tm instanceof BeanModel) {
+                return Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
+            } if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
+                if (exp != null) {
+                    throw exp.newNonStringException(tm, seqHint, env);
+                } else {
+                    throw new NonStringException(
+                            MessageUtil.decorateErrorDescription(
+                                    MessageUtil.unexpectedTypeErrorDescription(
+                                            MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm),
+                                    seqHint),
+                            env);
+                }
+            } else {
+                if (exp != null) {
+                    throw exp.newNonStringException(tm, env);
+                } else {
+                    throw new NonStringException(
+                            MessageUtil.decorateErrorDescription(
+                                    MessageUtil.unexpectedTypeErrorDescription(
+                                            MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm)),
+                            env);
+                }
             }
         }
     }

@@ -53,7 +53,6 @@
 package freemarker.core;
 
 import freemarker.ext.beans.BeanModel;
-import freemarker.ext.beans.Internal_BeansAPI;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -65,7 +64,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -115,53 +113,18 @@ abstract public class Expression extends TemplateObject {
     }
     
     String evalAndCoerceToString(Environment env) throws TemplateException {
-        return coerceModelToString(eval(env), this, null, env);
+        return EvalUtil.coerceModelToString(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
     String evalAndCoerceToString(Environment env, String seqTip) throws TemplateException {
-        return coerceModelToString(eval(env), this, seqTip, env);
+        return EvalUtil.coerceModelToString(eval(env), this, seqTip, env);
     }
     
     static String coerceModelToString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
-        return coerceModelToString(tm, exp, null, env);
-    }
-    
-    static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
-        if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber(EvalUtil.modelToNumber((TemplateNumberModel) tm, exp));
-        } else if (tm instanceof TemplateDateModel) {
-            TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(EvalUtil.modelToDate(dm, exp), dm.getDateType());
-        } else if (tm instanceof TemplateScalarModel) {
-            return EvalUtil.modelToString((TemplateScalarModel) tm, exp, env);
-        } else if(tm == null) {
-            if (env.isClassicCompatible()) {
-                return "";
-            } else {
-                throw exp.newInvalidReferenceException(env);
-            }
-        } else if (tm instanceof TemplateBooleanModel) {
-            // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
-            // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
-            // this before TemplateScalarModel.
-            boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean(); 
-            if (env.getClassicCompatibleAsInt() == 1) {
-                return booleanValue ? "true" : "";
-            } else {
-                return env.formatBoolean(booleanValue);
-            }
-        } else {
-            if (env.isClassicCompatible() && tm instanceof BeanModel) {
-                return Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
-            } if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
-                throw exp.newNonStringException(tm, seqHint, env);
-            } else {
-                throw exp.newNonStringException(tm, env);
-            }
-        }
+        return EvalUtil.coerceModelToString(tm, exp, null, env);
     }
     
     Number evalToNumber(Environment env) throws TemplateException {
@@ -341,7 +304,7 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(model, env);
         return new UnexpectedTypeException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription(expected, model),
+                        MessageUtil.unexpectedTypeErrorDescription(expected, model),
                         this,
                         tip),
                 env);
@@ -358,7 +321,7 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(model, env);
         return new NonNumericalException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription("number", model),
+                        MessageUtil.unexpectedTypeErrorDescription("number", model),
                         this,
                         tip),
                 env);
@@ -377,7 +340,7 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(model, env);
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
+                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
                         this),
                 env);
     }
@@ -387,7 +350,7 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(model, env);
         return new NonStringException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
+                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
                         this,
                         tip),
                 env);
@@ -398,7 +361,7 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(model, env);
         return new NonDateException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription("date", model),
+                        MessageUtil.unexpectedTypeErrorDescription("date", model),
                         this),
                 env);
     }
@@ -408,7 +371,7 @@ abstract public class Expression extends TemplateObject {
         assertNonNull(model, env);
         return new NonBooleanException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription("boolean", model),
+                        MessageUtil.unexpectedTypeErrorDescription("boolean", model),
                         this),
                 env);
     }
@@ -417,18 +380,9 @@ abstract public class Expression extends TemplateObject {
     throws InvalidReferenceException {
         return new NonBooleanException(
                 MessageUtil.decorateErrorDescription(
-                        unexpectedTypeErrorDescription("boolean", actualType),
+                        MessageUtil.unexpectedTypeErrorDescription("boolean", actualType),
                         this),
                 Environment.getCurrentEnvironment());
-    }
-    
-    private static String unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
-        return unexpectedTypeErrorDescription(expectedType, ClassUtil.getFTLTypeDescription(model));
-    }
-
-    private static String unexpectedTypeErrorDescription(String expectedType, String actualType) {
-        return "Expected a(n) " + expectedType + ", but this evaluated to a value of type " 
-                + actualType + ":";
     }
     
 }
