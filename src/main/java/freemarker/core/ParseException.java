@@ -307,39 +307,69 @@ public class ParseException extends java.io.IOException implements FMParserConst
       final int kind = nextToken.kind;
       if (kind == EOF) {
           StringBuffer buf = new StringBuffer("Unexpected end of file reached.\n");
-          for (int i = 0; i<expectedTokenSequences.length; i++) {
+          for (int i = 0; i < expectedTokenSequences.length; i++) {
               int[] sequence = expectedTokenSequences[i];
+              String name;
               switch (sequence[0]) {
                   case END_FOREACH :
+                      name = "#foreach";
                       buf.append("Unclosed \"foreach\" directive.");
                       break;
                   case END_LIST :
-                      buf.append("Unclosed \"list\" directive.");
+                      name = "#list";
                       break;
                   case END_SWITCH :
-                      buf.append("Unclosed \"switch\" directive.");
+                      name = "#switch";
                       break;
                   case END_IF :
-                      buf.append("Unclosed \"if\" directive.");
+                      name = "#if";
                       break;
                   case END_COMPRESS :
-                      buf.append("Unclosed \"compress\" directive.");
+                      name = "#compress";
                       break;
                   case END_MACRO :
-                      buf.append("Unclosed \"macro\" directive.");
+                      name = "#macro";
                       break;
                   case END_FUNCTION :
-                      buf.append("Unclosed \"function\" directive.");
+                      name = "#function";
                       break;
                   case END_TRANSFORM :
-                      buf.append("Unclosed \"transform\" directive.");
+                      name = "#transform";
                       break;
                   case END_ESCAPE :
-                      buf.append("Unclosed \"escape\" directive.");
+                      name = "#escape";
                       break;
                   case END_NOESCAPE :
-                      buf.append("Unclosed \"noescape\" directive.");
+                      name = "#noescape";
                       break;
+                  case END_ASSIGN:
+                      name = "#assign";
+                      break;
+                  case END_LOCAL:
+                      name = "#local";
+                      break;
+                  case END_GLOBAL:
+                      name = "#global";
+                      break;
+                  case END_ATTEMPT:
+                      name = "#attempt";
+                      break;
+                  case CLOSE_BRACE:
+                      name = "{";
+                      break;
+                  case CLOSE_BRACKET:
+                      name = "[";
+                      break;
+                  case CLOSE_PAREN:
+                      name = "(";
+                      break;
+                  default:
+                      name = null;
+              }
+              if (name != null) {
+                  buf.append("Had an unclosed \"");
+                  buf.append(name);
+                  buf.append("\".");
               }
           }
           return buf.toString();
