@@ -220,6 +220,30 @@ abstract class RegexBuiltins {
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new MatcherBuilder(s);
         }
+        
+        class MatcherBuilder implements TemplateMethodModel {
+            
+            String matchString;
+            
+            MatcherBuilder(String matchString) throws TemplateModelException {
+                this.matchString = matchString;
+            }
+            
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                
+                String patternString = (String) args.get(0);
+                long flags = argCnt > 1 ? parseFlagString((String) args.get(1)) : 0;
+                if ((flags & RE_FLAG_FIRST_ONLY) != 0) {
+                    logFlagWarning("?" + key + " doesn't support the \"f\" flag.");
+                }
+                Pattern pattern = getPattern(patternString, (int) flags);
+                Matcher matcher = pattern.matcher(matchString);
+                return new RegexMatchModel(matcher, matchString);
+            }
+        }
+        
     }
     
     static class groupsBI extends BuiltIn {
@@ -237,9 +261,42 @@ abstract class RegexBuiltins {
     }
     
     static class replace_reBI extends StringBuiltIn {
+        
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new ReplaceMethod(s);
         }
+        
+        class ReplaceMethod implements TemplateMethodModel {
+            private String s;
+
+            ReplaceMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 2, 3);
+                String arg1 = (String) args.get(0);
+                String arg2 = (String) args.get(1);
+                long flags = argCnt > 2 ? parseFlagString((String) args.get(2)) : 0;
+                String result;
+                if ((flags & RE_FLAG_REGEXP) == 0) {
+                    checkNonRegexpFlags("replace", flags);
+                    result = StringUtil.replace(s, arg1, arg2,
+                            (flags & RE_FLAG_CASE_INSENSITIVE) != 0,
+                            (flags & RE_FLAG_FIRST_ONLY) != 0);
+                } else {
+                    Pattern pattern = getPattern(arg1, (int) flags);
+                    Matcher matcher = pattern.matcher(s);
+                    result = (flags & RE_FLAG_FIRST_ONLY) != 0
+                            ? matcher.replaceFirst(arg2)
+                            : matcher.replaceAll(arg2);
+                } 
+                return new SimpleScalar(result);
+            }
+
+        }
+        
     }
     
     static class split_reBI extends StringBuiltIn {
@@ -343,33 +400,6 @@ abstract class RegexBuiltins {
         }
     }
     
-    static class MatcherBuilder implements TemplateMethodModel {
-        
-        String matchString;
-        
-        MatcherBuilder(String matchString) throws TemplateModelException {
-            this.matchString = matchString;
-        }
-        
-        public Object exec(List args) throws TemplateModelException {
-            int numArgs = args.size();
-            if (numArgs == 0) {
-                throw new TemplateModelException("Expecting at least one argument");
-            }
-            if (numArgs > 2) {
-                throw new TemplateModelException("Expecting at most two argumnets");
-            }
-            String patternString = (String) args.get(0);
-            long flags = numArgs > 1 ? parseFlagString((String) args.get(1)) : 0;
-            if ((flags & RE_FLAG_FIRST_ONLY) != 0) {
-                logFlagWarning("?match doesn't support the \"f\" flag.");
-            }
-            Pattern pattern = getPattern(patternString, (int) flags);
-            Matcher matcher = pattern.matcher(matchString);
-            return new RegexMatchModel(matcher, matchString);
-        }
-    }
-
     private static void checkNonRegexpFlags(String biName, long flags) {
         if (!flagWarningsEnabled) return;
         
@@ -385,40 +415,6 @@ abstract class RegexBuiltins {
             logFlagWarning("?" + biName + " doesn't support the \"c\" flag "
                     + "without the \"r\" flag.");
         }
-    }
-    
-    static class ReplaceMethod implements TemplateMethodModel {
-        private String s;
-
-        ReplaceMethod(String s) {
-            this.s = s;
-        }
-
-        public Object exec(List args) throws TemplateModelException {
-            int numArgs = args.size();
-            if (numArgs < 2 || numArgs > 3) {
-                throw new TemplateModelException(
-                        "?replace(...) needs 2 or 3 arguments.");
-            }
-            String arg1 = (String) args.get(0);
-            String arg2 = (String) args.get(1);
-            long flags = numArgs > 2 ? parseFlagString((String) args.get(2)) : 0;
-            String result;
-            if ((flags & RE_FLAG_REGEXP) == 0) {
-                checkNonRegexpFlags("replace", flags);
-                result = StringUtil.replace(s, arg1, arg2,
-                        (flags & RE_FLAG_CASE_INSENSITIVE) != 0,
-                        (flags & RE_FLAG_FIRST_ONLY) != 0);
-            } else {
-                Pattern pattern = getPattern(arg1, (int) flags);
-                Matcher matcher = pattern.matcher(s);
-                result = (flags & RE_FLAG_FIRST_ONLY) != 0
-                        ? matcher.replaceFirst(arg2)
-                        : matcher.replaceAll(arg2);
-            } 
-            return new SimpleScalar(result);
-        }
-
     }
     
     static class SplitMethod implements TemplateMethodModel {

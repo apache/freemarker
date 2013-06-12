@@ -131,10 +131,10 @@ abstract public class Expression extends TemplateObject {
     
     static String coerceModelToString(TemplateModel tm, Expression exp, String seqHint, Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return env.formatNumber(EvalUtil.modelToNumber((TemplateNumberModel) tm, exp, env));
+            return env.formatNumber(EvalUtil.modelToNumber((TemplateNumberModel) tm, exp));
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(EvalUtil.modelToDate(dm, exp, env), dm.getDateType());
+            return env.formatDate(EvalUtil.modelToDate(dm, exp), dm.getDateType());
         } else if (tm instanceof TemplateScalarModel) {
             return EvalUtil.modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {
@@ -171,7 +171,7 @@ abstract public class Expression extends TemplateObject {
 
     Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
         if(model instanceof TemplateNumberModel) {
-            return EvalUtil.modelToNumber((TemplateNumberModel) model, this, env);
+            return EvalUtil.modelToNumber((TemplateNumberModel) model, this);
         } else {
             throw newNonNumericalException(model, env);
         }

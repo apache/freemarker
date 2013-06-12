@@ -66,7 +66,6 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 
@@ -214,29 +213,19 @@ class StringBuiltins {
             }
         }
     }
+    
     static class substringBI extends StringBuiltIn {
     	TemplateModel calculateResult(final String s, final Environment env) throws TemplateException {
     		return new TemplateMethodModelEx() {
     			public Object exec(java.util.List args) throws TemplateModelException {
-    				int argCount = args.size(), left=0, right=0;
-    				if (argCount != 1 && argCount != 2) {
-    					throw newTemplateModelException(
-    					        "Expecting 1 or 2 numerical arguments passed to the method coming from:");
-    				}
-   					try {
-   						TemplateNumberModel tnm = (TemplateNumberModel) args.get(0);
-   						left = tnm.getAsNumber().intValue();
-   						if (argCount == 2) {
-   							tnm = (TemplateNumberModel) args.get(1);
-   							right = tnm.getAsNumber().intValue();
-   						}
-   					} catch (ClassCastException cce) {
-   						throw newTemplateModelException("Expecting numerical argument passed to the method coming from:");
-   					}
-    				if (argCount == 1) {
-    					return new SimpleScalar(s.substring(left));
-    				} 
-    				return new SimpleScalar(s.substring(left, right));
+    				int argCount = args.size();
+    				checkMethodArgCount(argCount, 1, 2);
+    				int left = getNumberMethodArg(args, 0).intValue();
+                    if (argCount > 1) {
+                        return new SimpleScalar(s.substring(left, getNumberMethodArg(args, 1).intValue()));  
+                    } else {
+                        return new SimpleScalar(s.substring(left));  
+                    }
     			}
     		};
     	}
@@ -364,7 +353,7 @@ class StringBuiltins {
             return new BIMethod(s);
         }
     
-        private static class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateMethodModelEx {
             private String s;
     
             private BIMethod(String s) {
@@ -372,21 +361,8 @@ class StringBuiltins {
             }
     
             public Object exec(List args) throws TemplateModelException {
-                String sub;
-    
-                if (args.size() != 1) {
-                    throw new TemplateModelException(
-                            "?starts_with(...) expects exactly 1 argument.");
-                }
-    
-                Object obj = args.get(0);
-                if (!(obj instanceof TemplateScalarModel)) {
-                    throw new TemplateModelException(
-                            "?starts_with(...) expects a string argument");
-                }
-                sub = ((TemplateScalarModel) obj).getAsString();
-    
-                return s.startsWith(sub) ?
+                checkMethodArgCount(args, 1);
+                return s.startsWith(getStringMethodArg(args, 0)) ?
                         TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
         }
@@ -398,7 +374,7 @@ class StringBuiltins {
             return new BIMethod(s);
         }
     
-        private static class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateMethodModelEx {
             private String s;
     
             private BIMethod(String s) {
@@ -406,34 +382,21 @@ class StringBuiltins {
             }
     
             public Object exec(List args) throws TemplateModelException {
-                String sub;
-    
-                if (args.size() != 1) {
-                    throw new TemplateModelException(
-                            "?ends_with(...) expects exactly 1 argument.");
-                }
-    
-                Object obj = args.get(0);
-                if (!(obj instanceof TemplateScalarModel)) {
-                    throw new TemplateModelException(
-                            "?ends_with(...) expects a string argument");
-                }
-                sub = ((TemplateScalarModel) obj).getAsString();
-    
-                return s.endsWith(sub) ?
+                checkMethodArgCount(args, 1);
+                return s.endsWith(getStringMethodArg(args, 0)) ?
                         TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
         }
     }
 
-    /** This isn't used on J2SE 1.4 and later. */
+    /** This isn't used on J2SE 1.4 and later. Remove it in 2.4. */
     static class replaceBI extends StringBuiltIn {
     
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
     
-        private static class BIMethod implements TemplateMethodModel {
+        private class BIMethod implements TemplateMethodModel {
             private String s;
     
             private BIMethod(String s) {
@@ -441,18 +404,22 @@ class StringBuiltins {
             }
     
             public Object exec(List args) throws TemplateModelException {
-                int numArgs = args.size();
-                if (numArgs < 2 || numArgs > 3) {
-                    throw new TemplateModelException(
-                            "?replace(...) needs 2 or 3 arguments.");
-                }
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 2, 3);
                 String first = (String) args.get(0);
                 String second = (String) args.get(1);
-                String flags = numArgs >2 ? (String) args.get(2) : "";
-                boolean caseInsensitive = flags.indexOf('i') >=0;
-                boolean firstOnly = flags.indexOf('f') >=0;
-                if (flags.indexOf('r') >=0) {
-                    throw new TemplateModelException("The regular expression classes are not available.");
+                boolean caseInsensitive;
+                boolean firstOnly;
+                if (argCnt > 2) {
+                    String flags = (String) args.get(2);
+                    caseInsensitive = flags.indexOf('i') >= 0;
+                    firstOnly = flags.indexOf('f') >= 0;
+                    if (flags.indexOf('r') >=0) {
+                        throw new TemplateModelException("The regular expression classes are not available.");
+                    }
+                } else {
+                    caseInsensitive = false;
+                    firstOnly = false;
                 }
                 return new SimpleScalar(StringUtil.replace(
                         s, first, second, caseInsensitive, firstOnly));
@@ -460,14 +427,14 @@ class StringBuiltins {
         }
     }
 
-    /** This isn't used on J2SE 1.4 and later. */
+    /** This isn't used on J2SE 1.4 and later. Remove it in 2.4. */
     static class splitBI extends StringBuiltIn {
     
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
     
-        private static class BIMethod implements TemplateMethodModel {
+        private class BIMethod implements TemplateMethodModel {
             private String s;
     
             private BIMethod(String s) {
@@ -475,13 +442,10 @@ class StringBuiltins {
             }
     
             public Object exec(List args) throws TemplateModelException {
-                int numArgs = args.size();
-                if (numArgs != 1 && numArgs !=2) {
-                    throw new TemplateModelException(
-                            "?split(...) expects 1 or 2 arguments.");
-                }
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
                 String splitString = (String) args.get(0);
-                String flags = numArgs ==2 ? (String) args.get(1) : "";
+                String flags = argCnt == 2 ? (String) args.get(1) : "";
                 boolean caseInsensitive = flags.indexOf('i') >=0;
                 if (flags.indexOf('r') >=0) {
                     throw new TemplateModelException("regular expression classes not available");
@@ -492,276 +456,116 @@ class StringBuiltins {
         }
     }
 
-    static class left_padBI extends StringBuiltIn {
+    static class padBI extends StringBuiltIn {
+        
+        private final boolean leftPadder;
     
-        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
-            return new BIMethod(s);
+        public padBI(boolean leftPadder) {
+            this.leftPadder = leftPadder;
         }
-    
-        private static class BIMethod implements TemplateMethodModelEx {
-            private String s;
-    
-            private BIMethod(String s) {
-                this.s = s;
-            }
-    
-            public Object exec(List args) throws TemplateModelException {
-                Object obj;
-    
-                int ln  = args.size();
-                if (ln == 0) {
-                    throw new TemplateModelException(
-                            "?left_pad(...) expects at least 1 argument.");
-                }
-                if (ln > 2) {
-                    throw new TemplateModelException(
-                            "?left_pad(...) expects at most 2 arguments.");
-                }
-    
-                obj = args.get(0);
-                if (!(obj instanceof TemplateNumberModel)) {
-                    throw new TemplateModelException(
-                            "?left_pad(...) expects a number as "
-                            + "its 1st argument.");
-                }
-                int width = ((TemplateNumberModel) obj).getAsNumber().intValue();
-    
-                if (ln > 1) {
-                    obj = args.get(1);
-                    if (!(obj instanceof TemplateScalarModel)) {
-                        throw new TemplateModelException(
-                                "?left_pad(...) expects a string as "
-                                + "its 2nd argument.");
-                    }
-                    String filling = ((TemplateScalarModel) obj).getAsString();
-                    try {
-                        return new SimpleScalar(StringUtil.leftPad(s, width, filling));
-                    } catch (IllegalArgumentException e) {
-                        if (filling.length() == 0) {
-                            throw new TemplateModelException(
-                                    "The 2nd argument of ?left_pad(...) "
-                                    + "can't be a 0 length string.");
-                        } else {
-                            throw new TemplateModelException(
-                                    "Error while executing the ?left_pad(...) "
-                                    + "built-in.", e);
-                        }
-                    }
-                } else {
-                    return new SimpleScalar(StringUtil.leftPad(s, width));
-                }
-            }
-        }
-    }
 
-    static class right_padBI extends StringBuiltIn {
-    
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new BIMethod(s);
         }
     
-        private static class BIMethod implements TemplateMethodModelEx {
-            private String s;
+        private class BIMethod implements TemplateMethodModelEx {
+            
+            private final String s;
     
             private BIMethod(String s) {
                 this.s = s;
             }
     
             public Object exec(List args) throws TemplateModelException {
-                Object obj;
+                int argCnt  = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
     
-                int ln  = args.size();
-                if (ln == 0) {
-                    throw new TemplateModelException(
-                            "?right_pad(...) expects at least 1 argument.");
-                }
-                if (ln > 2) {
-                    throw new TemplateModelException(
-                            "?right_pad(...) expects at most 2 arguments.");
-                }
+                int width = getNumberMethodArg(args, 0).intValue();
     
-                obj = args.get(0);
-                if (!(obj instanceof TemplateNumberModel)) {
-                    throw new TemplateModelException(
-                            "?right_pad(...) expects a number as "
-                            + "its 1st argument.");
-                }
-                int width = ((TemplateNumberModel) obj).getAsNumber().intValue();
-    
-                if (ln > 1) {
-                    obj = args.get(1);
-                    if (!(obj instanceof TemplateScalarModel)) {
-                        throw new TemplateModelException(
-                                "?right_pad(...) expects a string as "
-                                + "its 2nd argument.");
-                    }
-                    String filling = ((TemplateScalarModel) obj).getAsString();
+                if (argCnt > 1) {
+                    String filling = getStringMethodArg(args, 1);
                     try {
-                        return new SimpleScalar(StringUtil.rightPad(s, width, filling));
+                        return new SimpleScalar(
+                                leftPadder
+                                        ? StringUtil.leftPad(s, width, filling)
+                                        : StringUtil.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
                             throw new TemplateModelException(
-                                    "The 2nd argument of ?right_pad(...) "
-                                    + "can't be a 0 length string.");
+                                    "?" + key + "(...) argument #2 can't be a 0-length string.");
                         } else {
                             throw new TemplateModelException(
-                                    "Error while executing the ?right_pad(...) "
-                                    + "built-in.", e);
+                                    "?" + key + "(...) failed: " + e, e);
                         }
                     }
                 } else {
-                    return new SimpleScalar(StringUtil.rightPad(s, width));
+                    return new SimpleScalar(
+                            leftPadder
+                                    ? StringUtil.leftPad(s, width)
+                                    : StringUtil.rightPad(s, width));
                 }
             }
         }
     }
 
     static class containsBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
+        
+        TemplateModel _eval(Environment env) throws TemplateException {
             return new BIMethod(target.evalAndCoerceToString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
         }
     
-        private static class BIMethod implements TemplateMethodModelEx {
-            private String s;
+        private class BIMethod implements TemplateMethodModelEx {
+            
+            private final String s;
     
             private BIMethod(String s) {
                 this.s = s;
             }
     
             public Object exec(List args) throws TemplateModelException {
-                Object obj;
-                String sub;
-    
-                int ln  = args.size();
-                if (ln != 1) {
-                    throw new TemplateModelException(
-                            "?contains(...) expects one argument.");
-                }
-    
-                obj = args.get(0);
-                if (!(obj instanceof TemplateScalarModel)) {
-                    throw new TemplateModelException(
-                            "?contains(...) expects a string as "
-                            + "its first argument.");
-                }
-                sub = ((TemplateScalarModel) obj).getAsString();
-    
-                return
-                    (s.indexOf(sub) != -1) ?
-                    TemplateBooleanModel.TRUE :
-                    TemplateBooleanModel.FALSE;
+                checkMethodArgCount(args, 1);
+                return s.indexOf(getStringMethodArg(args, 0)) != -1
+                        ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
         }
     }
 
     static class index_ofBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
+        
+        private final boolean findLast;
+        
+        public index_ofBI(boolean findLast) {
+            this.findLast = findLast;
+        }
+
+        TemplateModel _eval(Environment env) throws TemplateException {
             return new BIMethod(target.evalAndCoerceToString(
                     env,
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
         }
         
-        private static class BIMethod implements TemplateMethodModelEx {
-            private String s;
+        private class BIMethod implements TemplateMethodModelEx {
+            
+            private final String s;
             
             private BIMethod(String s) {
                 this.s = s;
             }
             
             public Object exec(List args) throws TemplateModelException {
-                Object obj;
-                String sub;
-                int fidx;
-    
-                int ln  = args.size();
-                if (ln == 0) {
-                    throw new TemplateModelException(
-                            "?index_of(...) expects at least one argument.");
-                }
-                if (ln > 2) {
-                    throw new TemplateModelException(
-                            "?index_of(...) expects at most two arguments.");
-                }
-    
-                obj = args.get(0);       
-                if (!(obj instanceof TemplateScalarModel)) {
-                    throw new TemplateModelException(
-                            "?index_of(...) expects a string as "
-                            + "its first argument.");
-                }
-                sub = ((TemplateScalarModel) obj).getAsString();
-                
-                if (ln > 1) {
-                    obj = args.get(1);
-                    if (!(obj instanceof TemplateNumberModel)) {
-                        throw new TemplateModelException(
-                                "?index_of(...) expects a number as "
-                                + "its second argument.");
-                    }
-                    fidx = ((TemplateNumberModel) obj).getAsNumber().intValue();
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String subStr = getStringMethodArg(args, 0);
+                if (argCnt > 1) {
+                    int startIdx = getNumberMethodArg(args, 1).intValue();
+                    return new SimpleNumber(findLast ? s.lastIndexOf(subStr, startIdx) : s.indexOf(subStr, startIdx));
                 } else {
-                    fidx = 0;
+                    return new SimpleNumber(findLast ? s.lastIndexOf(subStr) : s.indexOf(subStr));
                 }
-    
-                return new SimpleNumber(s.indexOf(sub, fidx));
             }
         } 
     }
 
-    static class last_index_ofBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
-            return new BIMethod(target.evalAndCoerceToString(
-                    env,
-                    "For sequences/collections (lists and such) use \"?seq_last_index_of\" instead."));
-        }
-    
-        private static class BIMethod implements TemplateMethodModelEx {
-            private String s;
-    
-            private BIMethod(String s) {
-                this.s = s;
-            }
-    
-            public Object exec(List args) throws TemplateModelException {
-                Object obj;
-                String sub;
-    
-                int ln  = args.size();
-                if (ln == 0) {
-                    throw new TemplateModelException(
-                            "?last_index_of(...) expects at least one argument.");
-                }
-                if (ln > 2) {
-                    throw new TemplateModelException(
-                            "?last_index_of(...) expects at most two arguments.");
-                }
-    
-                obj = args.get(0);
-                if (!(obj instanceof TemplateScalarModel)) {
-                    throw new TemplateModelException(
-                            "?last_index_of(...) expects a string as "
-                            + "its first argument.");
-                }
-                sub = ((TemplateScalarModel) obj).getAsString();
-    
-                if (ln > 1) {
-                    obj = args.get(1);
-                    if (!(obj instanceof TemplateNumberModel)) {
-                        throw new TemplateModelException(
-                                "?last_index_of(...) expects a number as "
-                                + "its second argument.");
-                    }
-                    int fidx = ((TemplateNumberModel) obj).getAsNumber().intValue();
-                    return new SimpleNumber(s.lastIndexOf(sub, fidx));
-                } else {
-                    return new SimpleNumber(s.lastIndexOf(sub));
-                }
-            }
-        }
-    }
 }

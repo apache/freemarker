@@ -427,21 +427,22 @@ class SequenceBuiltins {
             return new BIMethod(seq);
         }
         
-        static class BIMethod implements TemplateMethodModelEx {
+        class BIMethod implements TemplateMethodModelEx {
             TemplateSequenceModel seq;
             
             BIMethod(TemplateSequenceModel seq) {
                 this.seq = seq;
             }
             
-            public Object exec(List params)
+            public Object exec(List args)
                     throws TemplateModelException {
-                if (params.size() == 0) {
-                    throw new TemplateModelException(
-                            "?sort_by(key) needs exactly 1 argument.");
-                }
+                // Should be:
+                // checkMethodArgCount(args, 1);
+                // But for BC:
+                if (args.size() < 1) throw MessageUtil.newArgCntError("?" + key, args.size(), 1);
+                
                 String[] subvars;
-                Object obj = params.get(0);
+                Object obj = args.get(0);
                 if (obj instanceof TemplateScalarModel) {
                     subvars = new String[]{((TemplateScalarModel) obj).getAsString()};
                 } else if (obj instanceof TemplateSequenceModel) {
@@ -496,7 +497,7 @@ class SequenceBuiltins {
             }
         }
 
-        private static class BIMethodForSequence implements TemplateMethodModelEx {
+        private class BIMethodForSequence implements TemplateMethodModelEx {
             private TemplateSequenceModel m_seq;
             private Environment m_env;
 
@@ -507,8 +508,7 @@ class SequenceBuiltins {
 
             public Object exec(List args)
                     throws TemplateModelException {
-                if (args.size() != 1)
-                    throw new TemplateModelException("?seq_contains(...) expects one argument.");
+                checkMethodArgCount(args, 1);
                 TemplateModel arg = (TemplateModel) args.get(0);
                 int size = m_seq.size();
                 for (int i = 0; i < size; i++) {
@@ -520,7 +520,7 @@ class SequenceBuiltins {
 
         }
     
-        private static class BIMethodForCollection implements TemplateMethodModelEx {
+        private class BIMethodForCollection implements TemplateMethodModelEx {
             private TemplateCollectionModel m_coll;
             private Environment m_env;
 
@@ -531,8 +531,7 @@ class SequenceBuiltins {
 
             public Object exec(List args)
                     throws TemplateModelException {
-                if (args.size() != 1)
-                    throw new TemplateModelException("?seq_contains(...) expects one argument.");
+                checkMethodArgCount(args, 1);
                 TemplateModel arg = (TemplateModel) args.get(0);
                 TemplateModelIterator it = m_coll.iterator();
                 int idx = 0;
@@ -593,22 +592,13 @@ class SequenceBuiltins {
 
             public final Object exec(List args)
                     throws TemplateModelException {
-                int argcnt = args.size();
-                if (argcnt != 1 && argcnt != 2) {
-                    throw new TemplateModelException(
-                            getBuiltinTemplate() + " expects 1 or 2 arguments.");
-                }
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
                 
                 TemplateModel target = (TemplateModel) args.get(0);
                 int foundAtIdx;
-                if (argcnt > 1) {
-                    Object obj = args.get(1);
-                    if (!(obj instanceof TemplateNumberModel)) {
-                        throw new TemplateModelException(
-                                getBuiltinTemplate()
-                                + "expects a number as its second argument.");
-                    }
-                    int startIndex = ((TemplateNumberModel) obj).getAsNumber().intValue();
+                if (argCnt > 1) {
+                    int startIndex = getNumberMethodArg(args, 1).intValue();
                     // In 2.3.x only, we prefer TemplateSequenceModel for
                     // backward compatibility:
                     foundAtIdx = m_seq != null
@@ -622,10 +612,6 @@ class SequenceBuiltins {
                             : findInCol(target);
                 }
                 return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
-            }
-
-            private final String getBuiltinTemplate() {
-                return m_dir == 1 ? "?seq_index_of(...)" : "?seq_last_index_of(...)";
             }
             
             public int findInSeq(TemplateModel target)
@@ -727,7 +713,7 @@ class SequenceBuiltins {
             return new BIMethod(tsm);
         }
 
-        private static class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateMethodModelEx {
             
             private final TemplateSequenceModel tsm;
 
@@ -736,11 +722,7 @@ class SequenceBuiltins {
             }
 
             public Object exec(List args) throws TemplateModelException {
-                int numArgs = args.size();
-                if (numArgs != 1 && numArgs !=2) {
-                    throw new TemplateModelException(
-                            "?chunk(...) expects 1 or 2 arguments.");
-                }
+                checkMethodArgCount(args, 1, 2);
                 
                 Object chunkSize = args.get(0);
                 if (!(chunkSize instanceof TemplateNumberModel)) {
@@ -752,7 +734,7 @@ class SequenceBuiltins {
                 return new ChunkedSequence(
                         tsm,
                         ((TemplateNumberModel) chunkSize).getAsNumber().intValue(),
-                        numArgs > 1 ? (TemplateModel) args.get(1) : null);
+                        args.size() > 1 ? (TemplateModel) args.get(1) : null);
             }
         }
         

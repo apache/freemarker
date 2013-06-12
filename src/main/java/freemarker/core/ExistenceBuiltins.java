@@ -9,7 +9,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * A holder for builtins that operate exclusively on hash left-hand value.
+ * A holder for builtins that deal with null left-hand values.
  */
 public class ExistenceBuiltins {
 
@@ -38,6 +38,7 @@ public class ExistenceBuiltins {
     }
     
     static class defaultBI extends ExistenceBuiltins.ExistenceBuiltIn {
+        
         TemplateModel _eval(final Environment env) throws TemplateException {
             TemplateModel model = evalMaybeNonexistentTarget(env);
             return model == null ? FIRST_NON_NULL_METHOD : new ConstantMethod(model);
@@ -63,18 +64,13 @@ public class ExistenceBuiltins {
         private static final TemplateMethodModelEx FIRST_NON_NULL_METHOD =
             new TemplateMethodModelEx() {
                 public Object exec(List args) throws TemplateModelException {
-                    if(args.isEmpty()) {
-                        throw new TemplateModelException(
-                            "?default(arg) expects at least one argument.");
+                    int argCnt = args.size();
+                    if(argCnt == 0) throw MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
+                    for (int i = 0; i < argCnt; i++ ) {
+                        TemplateModel result = (TemplateModel) args.get(i);
+                        if (result != null) return result;
                     }
-                    TemplateModel result = null;
-                    for (int i = 0; i< args.size(); i++ ) {
-                        result = (TemplateModel) args.get(i);
-                        if (result != null) {
-                            break;
-                        }
-                    }
-                    return result;
+                    return null;
                 }
             };
     }

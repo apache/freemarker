@@ -2,6 +2,9 @@ package freemarker.core;
 
 
 import freemarker.template.Template;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -197,6 +200,94 @@ class MessageUtil {
         sb.append(argExp.getCanonicalForm());
         if (needParen) sb.append(')');
         return sb;
+    }
+
+    static String buildModelHasStoredNullMessage(Class expected, TemplateModel model) {
+        String msg = "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: "
+                +  model.getClass().getName() + ") has returned a null instead of a "
+                + ClassUtil.getShortClassName(expected) + ". "
+                + "This is probably a bug in the non-FreeMarker code that builds the data-model.";
+        return msg;
+    }
+
+    static TemplateModelException newArgCntError(String methodName, int argCnt, int expectedCnt) {
+        return newArgCntError(methodName, argCnt, expectedCnt, expectedCnt);
+    }
+    
+    static TemplateModelException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
+        StringBuffer sb = new StringBuffer();
+        
+        sb.append(methodName);
+        
+        sb.append('(');
+        if (maxCnt != 0) sb.append("...");
+        sb.append(") expects ");
+        
+        if (minCnt == maxCnt) {
+            if (maxCnt == 0) {
+                sb.append("no");
+            } else {
+                sb.append(maxCnt);
+            }
+        } else if (maxCnt - minCnt == 1) {
+            sb.append(minCnt);
+            sb.append(" or ");
+            sb.append(maxCnt);
+        } else {
+            sb.append(minCnt);
+            if (maxCnt != Integer.MAX_VALUE) {
+                sb.append(" to ");
+                sb.append(maxCnt);
+            } else {
+                sb.append(" or more (unlimited)");
+            }
+        }
+        sb.append(" argument");
+        if (maxCnt > 1) sb.append('s');
+        
+        sb.append(" but has received ");
+        if (argCnt == 0) {
+            sb.append("none");
+        } else {
+            sb.append(argCnt);
+        }
+        sb.append(".");
+        
+        return new TemplateModelException(sb.toString());
+    }
+
+    static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "string", arg);
+    }
+
+    static TemplateModelException newMethodArgMustBeNumberException(String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "number", arg);
+    }
+    
+    static TemplateModelException newMethodArgMustBeBooleanException(String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "boolean", arg);
+    }
+    
+    static TemplateModelException newMethodArgMustBeExtendedHashException(
+            String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "extended hash", arg);
+    }
+    
+    static TemplateModelException newMethodArgMustBeSequenceException(
+            String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence", arg);
+    }
+    
+    static TemplateModelException newMethodArgMustBeSequenceOrCollectionException(
+            String methodName, int argIdx, TemplateModel arg) {
+        return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence or collection", arg);
+    }
+    
+    static TemplateModelException newMethodArgUnexpectedTypeException(
+            String methodName, int argIdx, String expectedType, TemplateModel arg) {
+        return new TemplateModelException(
+                methodName + "(...) expects " + expectedType + " as argument #" + (argIdx + 1) + ", but received a(n) "
+                + ClassUtil.getFTLTypeDescription(arg) + ".");
     }
     
 }

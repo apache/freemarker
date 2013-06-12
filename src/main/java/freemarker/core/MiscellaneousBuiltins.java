@@ -167,12 +167,12 @@ class MiscellaneousBuiltins {
         {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel)model, target, env), env);
+                return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel)model, target), env);
             }
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
                 int dateType = dm.getDateType();
-                return new DateFormatter(EvalUtil.modelToDate(dm, target, env), dateType, env);
+                return new DateFormatter(EvalUtil.modelToDate(dm, target), dateType, env);
             }
             if (model instanceof SimpleScalar) {
                 return model;

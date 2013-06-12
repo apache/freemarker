@@ -122,7 +122,7 @@ class NumericalBuiltins {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target, env);
+                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target);
                 return new SimpleNumber(date.getTime());
             } else {
                 Number num = target.modelToNumber(model, env);
@@ -310,9 +310,9 @@ class NumericalBuiltins {
             }
         } else if (num instanceof Long || num instanceof Integer
                 || num instanceof Byte || num instanceof Short) {
-            // Should add Atomic* types in 2.4...
             return num.longValue();
         } else {
+            // Should add Atomic* types in 2.4...
             throw new TemplateModelException(
                     "Unsupported number type: " + num.getClass());
         }

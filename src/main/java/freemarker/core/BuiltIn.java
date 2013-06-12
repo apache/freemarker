@@ -104,6 +104,10 @@ import freemarker.core.StringBuiltins.upper_caseBI;
 import freemarker.core.StringBuiltins.word_listBI;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
@@ -146,7 +150,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("has_content", new ExistenceBuiltins.has_contentBI());
         builtins.put("html", new StringBuiltins.htmlBI());
         builtins.put("if_exists", new ExistenceBuiltins.if_existsBI());
-        builtins.put("index_of", new StringBuiltins.index_ofBI());
+        builtins.put("index_of", new StringBuiltins.index_ofBI(false));
         builtins.put("int", new intBI());
         builtins.put("interpret", new Interpret());
         builtins.put("is_boolean", new MiscellaneousBuiltins.is_booleanBI());
@@ -166,61 +170,61 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_sequence", new MiscellaneousBuiltins.is_sequenceBI());
         builtins.put("is_string", new MiscellaneousBuiltins.is_stringBI());
         builtins.put("is_transform", new MiscellaneousBuiltins.is_transformBI());
-        builtins.put("iso_utc", new iso_tz_BI("iso_utc",
+        builtins.put("iso_utc", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_nz", new iso_tz_BI("iso_utc_nz",
+        builtins.put("iso_utc_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_ms", new iso_tz_BI("iso_utc_ms",
+        builtins.put("iso_utc_ms", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_ms_nz", new iso_tz_BI("iso_utc_ms_nz",
+        builtins.put("iso_utc_ms_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
-        builtins.put("iso_utc_m", new iso_tz_BI("iso_utc_m",
+        builtins.put("iso_utc_m", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
-        builtins.put("iso_utc_m_nz", new iso_tz_BI("iso_utc_m_nz",
+        builtins.put("iso_utc_m_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
-        builtins.put("iso_utc_h", new iso_tz_BI("iso_utc_h",
+        builtins.put("iso_utc_h", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
-        builtins.put("iso_utc_h_nz", new iso_tz_BI("iso_utc_h_nz",
+        builtins.put("iso_utc_h_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
-        builtins.put("iso_local", new iso_tz_BI("iso_local",
+        builtins.put("iso_local", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
-        builtins.put("iso_local_nz", new iso_tz_BI("iso_local_nz",
+        builtins.put("iso_local_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
-        builtins.put("iso_local_ms", new iso_tz_BI("iso_local_ms",
+        builtins.put("iso_local_ms", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
-        builtins.put("iso_local_ms_nz", new iso_tz_BI("iso_local_ms_nz",
+        builtins.put("iso_local_ms_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
-        builtins.put("iso_local_m", new iso_tz_BI("iso_local_m",
+        builtins.put("iso_local_m", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
-        builtins.put("iso_local_m_nz", new iso_tz_BI("iso_local_m_nz",
+        builtins.put("iso_local_m_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
-        builtins.put("iso_local_h", new iso_tz_BI("iso_local_h",
+        builtins.put("iso_local_h", new iso_tz_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
-        builtins.put("iso_local_h_nz", new iso_tz_BI("iso_local_h_nz",
+        builtins.put("iso_local_h_nz", new iso_tz_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
-        builtins.put("iso", new iso_BI("iso",
+        builtins.put("iso", new iso_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_SECONDS));
-        builtins.put("iso_nz", new iso_BI("iso_nz",
+        builtins.put("iso_nz", new iso_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_SECONDS));
-        builtins.put("iso_ms", new iso_BI("iso_ms",
+        builtins.put("iso_ms", new iso_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS));
-        builtins.put("iso_ms_nz", new iso_BI("iso_ms_nz",
+        builtins.put("iso_ms_nz", new iso_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS));
-        builtins.put("iso_m", new iso_BI("iso_m",
+        builtins.put("iso_m", new iso_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_MINUTES));
-        builtins.put("iso_m_nz", new iso_BI("iso_m_nz",
+        builtins.put("iso_m_nz", new iso_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_MINUTES));
-        builtins.put("iso_h", new iso_BI("iso_h",
+        builtins.put("iso_h", new iso_BI(
                 /* showOffset = */ true, DateUtil.ACCURACY_HOURS));
-        builtins.put("iso_h_nz", new iso_BI("iso_h_nz",
+        builtins.put("iso_h_nz", new iso_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_HOURS));
         builtins.put("j_string", new j_stringBI());
         builtins.put("js_string", new js_stringBI());
         builtins.put("json_string", new json_stringBI());
         builtins.put("keys", new HashBuiltins.keysBI());
-        builtins.put("last_index_of", new StringBuiltins.last_index_ofBI());
+        builtins.put("last_index_of", new StringBuiltins.index_ofBI(true));
         builtins.put("last", new lastBI());
-        builtins.put("left_pad", new StringBuiltins.left_padBI());
+        builtins.put("left_pad", new StringBuiltins.padBI(true));
         builtins.put("length", new StringBuiltins.lengthBI());
         builtins.put("long", new longBI());
         builtins.put("lower_case", new lower_caseBI());
@@ -236,7 +240,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("parent", new parentBI());
         builtins.put("replace", new StringBuiltins.replaceBI());
         builtins.put("reverse", new reverseBI());
-        builtins.put("right_pad", new StringBuiltins.right_padBI());
+        builtins.put("right_pad", new StringBuiltins.padBI(false));
         builtins.put("root", new rootBI());
         builtins.put("round", new roundBI());
         builtins.put("rtf", new StringBuiltins.rtfBI());
@@ -325,8 +329,63 @@ abstract class BuiltIn extends Expression implements Cloneable {
     boolean isLiteral() {
         return false; // be on the safe side.
     }
+    
+    protected final void checkMethodArgCount(List args, int expectedCnt) throws TemplateModelException {
+        checkMethodArgCount(args.size(), expectedCnt);
+    }
+    
+    protected final void checkMethodArgCount(int argCnt, int expectedCnt) throws TemplateModelException {
+        if (argCnt != expectedCnt) {
+            throw MessageUtil.newArgCntError("?" + key, argCnt, expectedCnt);
+        }
+    }
 
-    protected Expression deepCloneWithIdentifierReplaced_inner(
+    protected final void checkMethodArgCount(List args, int minCnt, int maxCnt) throws TemplateModelException {
+        checkMethodArgCount(args.size(), minCnt, maxCnt);
+    }
+    
+    protected final void checkMethodArgCount(int argCnt, int minCnt, int maxCnt) throws TemplateModelException {
+        if (argCnt < minCnt || argCnt > maxCnt) {
+            throw MessageUtil.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
+        }
+    }
+
+    /**
+     * Same as {@link #getStringMethodArg}, but checks if {@code args} is big enough, and returns {@code null} if it
+     * isn't.
+     */
+    protected final String getOptStringMethodArg(List args, int argIdx)
+            throws TemplateModelException {
+        return args.size() > argIdx ? getStringMethodArg(args, argIdx) : null;
+    }
+    
+    /**
+     * Gets a method argument and checks if it's a string; it does NOT check if {@code args} is big enough.
+     */
+    protected final String getStringMethodArg(List args, int argIdx)
+            throws TemplateModelException {
+        TemplateModel arg = (TemplateModel) args.get(argIdx);
+        if (!(arg instanceof TemplateScalarModel)) {
+            throw MessageUtil.newMethodArgMustBeStringException("?" + key, argIdx, arg);
+        } else {
+            return EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
+        }
+    }
+
+    /**
+     * Gets a method argument and checks if it's a number; it does NOT check if {@code args} is big enough.
+     */
+    protected final Number getNumberMethodArg(List args, int argIdx)
+            throws TemplateModelException {
+        TemplateModel arg = (TemplateModel) args.get(argIdx);
+        if (!(arg instanceof TemplateNumberModel)) {
+            throw MessageUtil.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
+        } else {
+            return EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
+        }
+    }
+    
+    protected final Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	try {
 	    	BuiltIn clone = (BuiltIn)clone();

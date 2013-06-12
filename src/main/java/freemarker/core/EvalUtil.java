@@ -81,60 +81,51 @@ class EvalUtil
     
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
-     * @param env {@code null} is allowed, but may results in less helpful error messages
+     * @param env {@code null} is allowed, but may results in lower performance in classic-compatible mode
      */
     static String modelToString(TemplateScalarModel model, Expression expr, Environment env)
-    throws
-        TemplateException
-    {
+    throws TemplateModelException {
         String value = model.getAsString();
-        if(value == null)
-        {
-            if(env.isClassicCompatible())
-            {
+        if(value == null) {
+            if (env == null) env = Environment.getCurrentEnvironment();
+            if (env != null && env.isClassicCompatible()) {
                 return "";
-            }
-            else
-            {
-                throw newModelHasStoredNullException(String.class, model, expr, env);
+            } else {
+                throw newModelHasStoredNullException(String.class, model, expr);
             }
         }
         return value;
     }
-
+    
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
-     * @param env {@code null} is allowed, but may results in less helpful error messages
      */
-    static Number modelToNumber(TemplateNumberModel model, Expression expr, Environment env)
-        throws TemplateModelException, TemplateException
+    static Number modelToNumber(TemplateNumberModel model, Expression expr)
+        throws TemplateModelException
     {
         Number value = model.getAsNumber();
-        if(value == null) throw newModelHasStoredNullException(Number.class, model, expr, env);
+        if(value == null) throw newModelHasStoredNullException(Number.class, model, expr);
         return value;
     }
 
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
-     * @param env {@code null} is allowed, but may results in less helpful error messages
      */
-    static Date modelToDate(TemplateDateModel model, Expression expr, Environment env)
+    static Date modelToDate(TemplateDateModel model, Expression expr)
         throws TemplateModelException, TemplateException
     {
         Date value = model.getAsDate();
-        if(value == null) throw newModelHasStoredNullException(Date.class, model, expr, env);
+        if(value == null) throw newModelHasStoredNullException(Date.class, model, expr);
         return value;
     }
     
-    /** Handles the buggy case where we have a non-null model, but its wraps a null. */
-    private static TemplateException newModelHasStoredNullException(
-            Class expected, TemplateModel tm, Expression expr, Environment env) {
-        String msg = "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: "
-                +  tm.getClass().getName() + ") has returned a null instead of a " + expected.getName() + ". "
-                + "This is probably a bug in the non-FreeMarker code that builds the data-model.";
-        return expr != null ? expr.newTemplateException(msg) : new TemplateException(msg, env);
+    /** Signals the buggy case where we have a non-null model, but its wraps a null. */
+    private static TemplateModelException newModelHasStoredNullException(
+            Class expected, TemplateModel model, Expression expr) {
+        String msg = MessageUtil.buildModelHasStoredNullMessage(expected, model);
+        return expr != null ? expr.newTemplateModelException(msg) : new TemplateModelException(msg);
     }
-    
+
     /**
      * Compares two expressions according the rules of the FTL comparator operators.
      * 
@@ -270,8 +261,8 @@ class EvalUtil
 
         final int cmpResult;
         if (leftValue instanceof TemplateNumberModel && rightValue instanceof TemplateNumberModel) {
-            Number leftNum = EvalUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp, env);
-            Number rightNum = EvalUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp, env);
+            Number leftNum = EvalUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp);
+            Number rightNum = EvalUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp);
             ArithmeticEngine ae =
                     env != null
                         ? env.getArithmeticEngine()
@@ -327,8 +318,8 @@ class EvalUtil
                 }
             }
 
-            Date leftDate = EvalUtil.modelToDate(leftDateModel, leftExp, env);
-            Date rightDate = EvalUtil.modelToDate(rightDateModel, rightExp, env);
+            Date leftDate = EvalUtil.modelToDate(leftDateModel, leftExp);
+            Date rightDate = EvalUtil.modelToDate(rightDateModel, rightExp);
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {

@@ -83,7 +83,7 @@ class DateBuiltins {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel tdm = (TemplateDateModel) model;
-                return calculateResult(EvalUtil.modelToDate(tdm, target, env), tdm.getDateType(), env);
+                return calculateResult(EvalUtil.modelToDate(tdm, target), tdm.getDateType(), env);
             } else {
                 if(model == null) {
                     throw target.newInvalidReferenceException(env);
@@ -101,13 +101,10 @@ class DateBuiltins {
     }
 
     static abstract class AbstractISOBI extends DateBuiltin {
-        protected final String biName;
         protected final boolean showOffset;
         protected final int accuracy;
 
-        protected AbstractISOBI(String biName,
-                boolean showOffset, int accuracy) {
-            this.biName = biName;
+        protected AbstractISOBI(boolean showOffset, int accuracy) {
             this.showOffset = showOffset;
             this.accuracy = accuracy;
         }
@@ -116,7 +113,7 @@ class DateBuiltins {
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
                 throw target.newTemplateException(
-                        "The value of the following has unknown date type, but ?" + biName + " needs a date value "
+                        "The value of the following has unknown date type, but ?" + key + " needs a date value "
                         + "where it's known if it's a date-only, time-only, or "
                         + "date+time value:",
                         MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);
@@ -132,9 +129,8 @@ class DateBuiltins {
         
         private final boolean useUTC;
         
-        iso_tz_BI(String biName,
-                boolean showOffset, int accuracy, boolean useUTC) {
-            super(biName, showOffset, accuracy);
+        iso_tz_BI(boolean showOffset, int accuracy, boolean useUTC) {
+            super(showOffset, accuracy);
             this.useUTC = useUTC;
         }
 
@@ -159,9 +155,8 @@ class DateBuiltins {
      */
     static class iso_BI extends AbstractISOBI {
         
-        iso_BI(String biName,
-                boolean showOffset, int accuracy) {
-            super(biName, showOffset, accuracy);
+        iso_BI(boolean showOffset, int accuracy) {
+            super(showOffset, accuracy);
         }
 
         protected TemplateModel calculateResult(
@@ -185,7 +180,7 @@ class DateBuiltins {
             public Object exec(List args) throws TemplateModelException {
                 if (args.size() != 1) {
                     throw new TemplateModelException(
-                        "?" + biName + "(...) expects exactly 1 argument, but had "
+                        "?" + key + "(...) expects exactly 1 argument, but had "
                         + args.size() + ".");
                 }
                 
@@ -199,23 +194,19 @@ class DateBuiltins {
                             instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;                    
                 } else if (tzArgTM instanceof TemplateScalarModel) {
-                    String tzName = ((TemplateScalarModel) tzArgTM).getAsString();
+                    String tzName = EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
                     try {
                         tzArg = DateUtil.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
                         throw new TemplateModelException(
-                                "The time zone string specified for ?" + biName +
+                                "The time zone string specified for ?" + key +
                                 "(...) is not recognized as a valid time zone name: " +
                                 StringUtil.jQuote(tzName));
                     }
  
                 } else {
-                    throw new TemplateModelException(
-                            "The argument to ?" + biName +
-                            "(...) must be a String or a " +
-                            "java.util.TimeZone but it was a " +
-                            (tzArgTM != null ? tzArgTM.getClass().getName() : "null") +
-                            ".");
+                    throw MessageUtil.newMethodArgUnexpectedTypeException(
+                            "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
                 }
                 
                 return new SimpleScalar(DateUtil.dateToISO8601String(
