@@ -68,7 +68,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -1292,32 +1291,64 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Outputs the instruction stack. Useful for debugging.
-     * {@link TemplateException}s incorporate this information in their stack
-     * traces.
+     * Prints the current FTL stack trace. Useful for debugging.
+     * {@link TemplateException}s incorporate this information in their stack traces.
      */
     public void outputInstructionStack(PrintWriter pw) {
-        pw.println("----------");
-        ListIterator stackIter = instructionStack.listIterator(instructionStack.size());
-        boolean topElement = true;
-        while(stackIter.hasPrevious()) {
-            TemplateElement stackEl = (TemplateElement) stackIter.previous();
-
-            if (stackEl.isShownInStackTrace() || !stackIter.hasNext()) {
-                if (topElement) {
-                    pw.print("==> ");
-                    topElement = false;
-                } else {
-                    pw.print("    ");
-                }
-                pw.println(getStackTraceItemLine(stackEl));
-            }
-        }
-        pw.println("----------");
+        outputInstructionStack(getInstructionStackSnapshot(), true, pw);
         pw.flush();
     }
+
+    /**
+     * Prints an FTL stack trace based on a stack trace snapshot.
+     * @see #getInstructionStackSnapshot()
+     * @since 2.3.20
+     */
+    public static void outputInstructionStack(
+            TemplateElement[] instructionStackSnapshot, boolean printBorders, PrintWriter pw) {
+        if (printBorders) pw.println("----------");
+        if (instructionStackSnapshot != null) {
+            for (int i = 0; i < instructionStackSnapshot.length; i++) {
+                TemplateElement stackEl = instructionStackSnapshot[i];
+                pw.print(i == 0 ? "==> " : "    ");
+                pw.println(instructionStackItemToString(stackEl));
+            }
+        } else {
+            pw.println("[the stack was empty]");
+        }
+        if (printBorders) pw.println("----------");
+    }
     
-    private String getStackTraceItemLine(TemplateElement stackEl) {
+    /**
+     * Returns the snapshot of what would be printed as FTL stack trace.
+     * @since 2.3.20
+     */
+    public TemplateElement[] getInstructionStackSnapshot() {
+        int requiredLength = 0;
+        int ln = instructionStack.size();
+        
+        for (int i = 0; i < ln; i++) {
+            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
+            if (i == ln || stackEl.isShownInStackTrace()) {
+                requiredLength++;
+            }
+        }
+        
+        if (requiredLength == 0) return null;
+        
+        TemplateElement[] result = new TemplateElement[requiredLength];
+        int dstIdx = requiredLength - 1;
+        for (int i = 0; i < ln; i++) {
+            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
+            if (i == ln || stackEl.isShownInStackTrace()) {
+                result[dstIdx--] = stackEl;
+            }
+        }
+        
+        return result;
+    }
+    
+    static String instructionStackItemToString(TemplateElement stackEl) {
         StringBuffer sb = new StringBuffer(); 
         sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
         
@@ -1334,30 +1365,8 @@ public final class Environment extends Configurable {
         
         return sb.toString();
     }
-    
-    /**
-     * Returns the description of the top element in the stack, or {@code null} if the stack is empty.
-     * This is used internally for error message creation.
-     */
-    String getInstructionStackTop() {
-        if (instructionStack.size() == 0) return null;
-        return getStackTraceItemLine((TemplateElement) instructionStack.get(instructionStack.size() - 1));
-    }
-    
-    /**
-     * Returns the number of stack items that would be shown if we print the stack trace now.
-     */
-    int getDisplayedInstructionStackSize() {
-        int res = 0;
-        int ln = instructionStack.size();
-        for (int i = 0; i < ln; i++) {
-            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
-            if (i == ln || stackEl.isShownInStackTrace()) res++;
-        }
-        return res;
-    }
 
-    private Macro getEnclosingMacro(TemplateElement stackEl) {
+    static private Macro getEnclosingMacro(TemplateElement stackEl) {
         while (stackEl != null) {
             if (stackEl instanceof Macro) return (Macro) stackEl;
             stackEl = stackEl.getParent();

@@ -52,6 +52,9 @@
 
 package freemarker.template;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -59,6 +62,7 @@ import java.lang.reflect.Method;
 
 import freemarker.core.Environment;
 import freemarker.core.Internal_CoreAPI;
+import freemarker.core.TemplateElement;
 
 /**
  * The FreeMarker classes usually use this exception and its descendants to
@@ -82,15 +86,23 @@ public class TemplateException extends Exception {
     private static final Class[] EMPTY_CLASS_ARRAY = new Class[]{};
 
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
-    
-    /** The underlying cause of this exception, if any */
+
+    // Set in constructor:
+    private final String rawDescription;
     private final Throwable causeException;
     private final transient Environment env;
-    private final String ftlInstructionStack; 
-    private final String description; 
-    private transient final Object lock = new Object();
-    private transient ThreadLocal messageWasAlreadyPrintedForThisTrace;
+    private transient TemplateElement[] ftlInstructionStackSnapshot;
+    
+    // Calculated on demand:
+    private String renderedFtlInstructionStackSnapshot;
+    private String renderedFtlInstructionStackSnapshotTop;
+    private transient String description; 
+    private transient String message; 
 
+    // Concurrency:
+    private transient Object lock = new Object();
+    private transient ThreadLocal messageWasAlreadyPrintedForThisTrace;
+    
     /**
      * Constructs a TemplateException with no specified detail message
      * or underlying cause.
@@ -117,7 +129,7 @@ public class TemplateException extends Exception {
      * exception to be raised
      */
     public TemplateException(Exception cause, Environment env) {
-        this((String) null, cause, env);
+        this(null, cause, env);
     }
 
     /**
@@ -126,65 +138,34 @@ public class TemplateException extends Exception {
      * to be raised.
      *
      * @param description the description of the error that occurred
-     * @param cause the underlying <code>Exception</code> that caused this
-     * exception to be raised
+     * @param cause the underlying {@link Exception} that caused this exception to be raised
      */
     public TemplateException(String description, Exception cause, Environment env) {
-        this(rawDescToMessageAndDesc(description, cause, env), cause, env);
+        super(null, cause);
+        
+        rawDescription = description;
+        causeException = cause;  // for Java 1.2(?) compatibility
+        this.env = env;
+        if(env != null) ftlInstructionStackSnapshot = env.getInstructionStackSnapshot();
     }
 
-    /**
-     * Just an awkward hack because of the restrictions of super().  
-     */
-    private TemplateException(String[] msgs, Exception cause, Environment env) {
-        super(msgs[0]); 
-        description = msgs[1];
-        
-        causeException = cause;
-        this.env = env;
-        if(env != null)
-        {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            env.outputInstructionStack(pw);
-            pw.flush();
-            ftlInstructionStack = sw.toString();
-        }
-        else
-        {
-            ftlInstructionStack = "";
-        }
-    }
-    
-    private static String[] rawDescToMessageAndDesc(String rawDesc, Throwable cause, Environment env)  {
-        String desc;
-        if(rawDesc != null && rawDesc.length() != 0) {
-            desc = rawDesc;
-        } else if (cause != null) {
-            desc = "No error description was specified for this error; low-level message: "
-                    + cause.getClass().getName() + ": " + cause.getMessage();
+    private void renderMessageAndDescription()  {
+        if(rawDescription != null && rawDescription.length() != 0) {
+            description = rawDescription;
+        } else if (getCause() != null) {
+            description = "No error description was specified for this error; low-level message: "
+                    + getCause().getClass().getName() + ": " + getCause().getMessage();
         } else {
-            desc = "No error message.";
+            description = "[No error description was available.]";
         }
         
-        String message;
-        if (env != null) {
-            String stackTop = Internal_CoreAPI.getInstructionStackTop(env);
-            if (stackTop != null) {
-                int stackSize = Internal_CoreAPI.getDisplayedInstructionStackSize(env);
-                message = desc + "\n\n" + THE_FAILING_INSTRUCTION
-                        + (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
-                        + ":\n==> "
-                        + stackTop;
-                desc = message.substring(0, desc.length());  // to reuse the backing char[] of `message`
-            } else {
-                message = desc;
-            }
+        String stackTop = getFTLInstructionStackTop();
+        if (stackTop != null) {
+            message = description + "\n\n" + THE_FAILING_INSTRUCTION + stackTop;
+            description = message.substring(0, description.length());  // to reuse the backing char[] of `message`
         } else {
-            message = desc;
+            message = description;
         }
-        
-        return new String[] { message, desc };
     }
     
     /**
@@ -203,7 +184,7 @@ public class TemplateException extends Exception {
     public Exception getCauseException() {
         return causeException instanceof Exception
                 ? (Exception) causeException
-                : new Exception("Wrapped to exception: " + causeException);
+                : new Exception("Wrapped to Exception: " + causeException);
     }
 
     /**
@@ -221,17 +202,63 @@ public class TemplateException extends Exception {
      * Returns the snapshot of the FTL stack strace at the time this exception was created.
      */
     public String getFTLInstructionStack() {
-        return ftlInstructionStack;
+        if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshot != null) {
+            if (renderedFtlInstructionStackSnapshot == null) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                Environment.outputInstructionStack(ftlInstructionStackSnapshot, true, pw);
+                pw.close();
+                synchronized (lock) {
+                    if (renderedFtlInstructionStackSnapshot == null) {
+                        renderedFtlInstructionStackSnapshot = sw.toString();
+                        deleteFTLInstructionStackSnapshotIfNotNeeded();
+                    }
+                }
+            }
+            return renderedFtlInstructionStackSnapshot;
+        } else {
+            return null;
+        }
+    }
+    
+    private String getFTLInstructionStackTop() {
+        if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshotTop != null) {
+            if (renderedFtlInstructionStackSnapshotTop == null) {
+                int stackSize = ftlInstructionStackSnapshot.length;
+                String s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
+                        + ":\n==> "
+                        + Internal_CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
+                synchronized (lock) {
+                    if (renderedFtlInstructionStackSnapshotTop == null) {
+                        renderedFtlInstructionStackSnapshotTop = s;
+                        deleteFTLInstructionStackSnapshotIfNotNeeded();
+                    }
+                }
+            }
+            return renderedFtlInstructionStackSnapshotTop;
+        } else {
+            return null;
+        }
+    }
+    
+    private void deleteFTLInstructionStackSnapshotIfNotNeeded() {
+        if (renderedFtlInstructionStackSnapshot != null && renderedFtlInstructionStackSnapshotTop != null) {
+            ftlInstructionStackSnapshot = null;
+        }
+        
     }
 
     /**
      * @return the execution environment in which the exception occurred.
-     *    <tt>null</tt> if the exception was deserialized. 
+     *    {@code null} if the exception was deserialized. 
      */
     public Environment getEnvironment() {
         return env;
     }
 
+    /**
+     * Overrides {@link Throwable#printStackTrace(java.io.PrintStream)} so that it will include the FTL stack trace.
+     */
     public void printStackTrace(java.io.PrintStream ps) {
         synchronized (ps) {
             PrintWriter pw = new PrintWriter(new OutputStreamWriter(ps), true);
@@ -241,7 +268,7 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Overrides {@link Throwable#printStackTrace} so that it will include the FTL stack trace.
+     * Overrides {@link Throwable#printStackTrace(PrintWriter)} so that it will include the FTL stack trace.
      */
     public void printStackTrace(PrintWriter pw) {
         printStackTrace(pw, true);
@@ -253,11 +280,14 @@ public class TemplateException extends Exception {
                 pw.println("FreeMarker template error:");
             }
             pw.println(getDescription());  // Not getMessage()!
-            if (ftlInstructionStack != null && ftlInstructionStack.length() != 0) {
+            String stackTrace = getFTLInstructionStack();
+            if (stackTrace != null) {
                 pw.println();
                 pw.print(THE_FAILING_INSTRUCTION);
                 pw.println(" (FTL stack trace):");
-                pw.println(ftlInstructionStack);
+                pw.println(stackTrace);
+            } else {
+                pw.println();
             }
             pw.println("Java stack trace (for programmers):");
             pw.println("----------");
@@ -307,6 +337,13 @@ public class TemplateException extends Exception {
      * quotation, as that's the part of the description. 
      */
     public String getDescription() {
+        if (description == null) {
+            synchronized (lock) {
+                if (description == null) {
+                    renderMessageAndDescription();
+                }
+            }
+        }
         return description;
     }
     
@@ -314,8 +351,28 @@ public class TemplateException extends Exception {
         if (messageWasAlreadyPrintedForThisTrace != null && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
             return "[... Exception message was already printed; see it above ...]";
         } else {
-            return super.getMessage();
+            if (message == null) {
+                synchronized (lock) {
+                    if (message == null) {
+                        renderMessageAndDescription();
+                    }
+                }
+            }
+            return message;
         }
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
+        // Since the FTL stack trace is transient, this is the last chance to calculate these: 
+        getFTLInstructionStack();
+        getFTLInstructionStackTop();
+        
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        lock = new Object();
+        in.defaultReadObject();
     }
     
 }
