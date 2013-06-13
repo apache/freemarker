@@ -122,6 +122,8 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 public final class Environment extends Configurable {
 
+    static final String STACK_SECTION_SEPARATOR = "----------";
+
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
     private static final Logger logger = Logger.getLogger("freemarker.runtime");
@@ -1295,7 +1297,7 @@ public final class Environment extends Configurable {
      * {@link TemplateException}s incorporate this information in their stack traces.
      */
     public void outputInstructionStack(PrintWriter pw) {
-        outputInstructionStack(getInstructionStackSnapshot(), true, pw);
+        outputInstructionStack(getInstructionStackSnapshot(), pw);
         pw.flush();
     }
 
@@ -1304,9 +1306,9 @@ public final class Environment extends Configurable {
      * @see #getInstructionStackSnapshot()
      * @since 2.3.20
      */
-    public static void outputInstructionStack(
-            TemplateElement[] instructionStackSnapshot, boolean printBorders, PrintWriter pw) {
-        if (printBorders) pw.println("----------");
+    static void outputInstructionStack(
+            TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
+        pw.println(STACK_SECTION_SEPARATOR);
         if (instructionStackSnapshot != null) {
             for (int i = 0; i < instructionStackSnapshot.length; i++) {
                 TemplateElement stackEl = instructionStackSnapshot[i];
@@ -1316,14 +1318,14 @@ public final class Environment extends Configurable {
         } else {
             pw.println("[the stack was empty]");
         }
-        if (printBorders) pw.println("----------");
+        pw.println(STACK_SECTION_SEPARATOR);
     }
     
     /**
      * Returns the snapshot of what would be printed as FTL stack trace.
      * @since 2.3.20
      */
-    public TemplateElement[] getInstructionStackSnapshot() {
+    TemplateElement[] getInstructionStackSnapshot() {
         int requiredLength = 0;
         int ln = instructionStack.size();
         

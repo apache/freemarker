@@ -62,6 +62,7 @@ import java.util.List;
 
 import freemarker.ext.beans.CollectionModel;
 import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
@@ -818,6 +819,90 @@ class SequenceBuiltins {
                     + ex.getMessage(),
                     ex);
         }
+    }
+ 
+    static class joinBI extends BuiltIn {
+        
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateCollectionModel) {
+                return new BIMethodForCollection((TemplateCollectionModel) model);
+            } else if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
+                return new BIMethodForSequence((TemplateSequenceModel) model);
+            } else {
+                throw target.newUnexpectedTypeException(model, "sequence or collection", env);
+            }
+        }
+
+        private abstract class BIMethod implements TemplateMethodModelEx {
+
+            public Object exec(List args)
+                    throws TemplateModelException {
+                checkMethodArgCount(args, 1, 3);
+                return execJoin(
+                        getStringMethodArg(args, 0),
+                        getOptStringMethodArg(args, 1),
+                        getOptStringMethodArg(args, 2));
+            }
+
+            protected abstract Object execJoin(String separator, String whenEmpty, String afterLast) throws TemplateModelException;
+
+        }
+        
+        private class BIMethodForSequence extends BIMethod {
+            
+            private final TemplateSequenceModel m_seq;
+
+            private BIMethodForSequence(TemplateSequenceModel seq) {
+                m_seq = seq;
+            }
+
+            protected Object execJoin(String separator, String whenEmpty, String afterLast) throws TemplateModelException {
+                StringBuffer sb = new StringBuffer();
+                int size = m_seq.size();
+                boolean hadItem = false;
+                for (int i = 0; i < size; i++) {
+                    TemplateModel item = m_seq.get(i);
+                    if (item != null) {
+                        if (hadItem) {
+                            sb.append(separator);
+                        } else {
+                            hadItem = true;
+                        }
+                        try {
+                            sb.append(EvalUtil.coerceModelToString(item, null, null, null));
+                        } catch (TemplateModelException e) {
+                            throw e;
+                        } catch (TemplateException e) {
+                            throw new TemplateModelException("?" + key + " failed at index " + i + ":", e);
+                        }
+                    }
+                }
+                if (hadItem) {
+                    if (afterLast != null) sb.append(afterLast);
+                } else {
+                    if (whenEmpty != null) sb.append(whenEmpty);
+                }
+                return new SimpleScalar(sb.toString());
+           }
+
+        }
+    
+        private class BIMethodForCollection extends BIMethod {
+            
+            private TemplateCollectionModel m_coll;
+
+            private BIMethodForCollection(TemplateCollectionModel coll) {
+                m_coll = coll;
+            }
+
+            protected Object execJoin(String separator, String whenEmpty, String afterLast) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+        }
+    
     }
     
 }

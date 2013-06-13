@@ -147,7 +147,7 @@ public class TemplateException extends Exception {
         rawDescription = description;
         causeException = cause;  // for Java 1.2(?) compatibility
         this.env = env;
-        if(env != null) ftlInstructionStackSnapshot = env.getInstructionStackSnapshot();
+        if(env != null) ftlInstructionStackSnapshot = Internal_CoreAPI.getInstructionStackSnapshot(env);
     }
 
     private void renderMessageAndDescription()  {
@@ -207,7 +207,7 @@ public class TemplateException extends Exception {
             if (renderedFtlInstructionStackSnapshot == null) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
-                Environment.outputInstructionStack(ftlInstructionStackSnapshot, true, pw);
+                Internal_CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, pw);
                 pw.close();
                 synchronized (lock) {
                     if (renderedFtlInstructionStackSnapshot == null) {
@@ -291,7 +291,7 @@ public class TemplateException extends Exception {
                 pw.println();
             }
             pw.println("Java stack trace (for programmers):");
-            pw.println("----------");
+            pw.println(Internal_CoreAPI.STACK_SECTION_SEPARATOR);
             synchronized (lock) {
                 if (messageWasAlreadyPrintedForThisTrace == null) {
                     messageWasAlreadyPrintedForThisTrace = new ThreadLocal();
