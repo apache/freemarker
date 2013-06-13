@@ -62,11 +62,12 @@ import java.lang.reflect.Method;
 
 import freemarker.core.Environment;
 import freemarker.core.Internal_CoreAPI;
+import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 
 /**
- * The FreeMarker classes usually use this exception and its descendants to
- * signal FreeMarker specific exceptions.
+ * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
+ * It prints a special stack trace that contains the template-language stack trace along the usual Java stack trace.
  */
 public class TemplateException extends Exception {
 
