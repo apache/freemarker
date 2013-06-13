@@ -66,4 +66,8 @@ public class NonDateException extends UnexpectedTypeException {
         super(description, env);
     }
     
+    NonDateException(Internal_ErrorDescriptionBuilder description, Environment env) {
+        super(description, env);
+    }
+        
 }

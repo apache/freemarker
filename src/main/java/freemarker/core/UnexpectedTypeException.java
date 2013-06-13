@@ -12,5 +12,9 @@ public class UnexpectedTypeException extends TemplateException {
     public UnexpectedTypeException(String description, Environment env) {
         super(description, env);
     }
+
+    UnexpectedTypeException(Internal_ErrorDescriptionBuilder description, Environment env) {
+        super(description, env, true);
+    }
     
 }

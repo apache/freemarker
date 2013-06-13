@@ -73,5 +73,9 @@ public class InvalidReferenceException extends TemplateException {
     public InvalidReferenceException(String description, Environment env) {
         super(description, env);
     }
+
+    InvalidReferenceException(Internal_ErrorDescriptionBuilder description, Environment env) {
+        super(description, env, true);
+    }
     
 }

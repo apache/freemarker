@@ -27,6 +27,14 @@ class MessageUtil {
         UNKNOWN_DATE_TYPE_ERROR_TIPS[1]
     };
 
+    static final String[] INVALID_REFERENCE_EXCEPTION_TIP = new String[] {
+        "If the failing expression is known to be legally null/missing, either specify a "
+        + "default value with myOptionalVar!myDefault, or use ",
+        "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
+        ". (These only cover the last step of the expression; to cover the whole expression, "
+        + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"
+    };
+
     private MessageUtil() { }
         
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {
@@ -82,65 +90,6 @@ class MessageUtil {
                       : "")
               + " "
               + preposition + " line " + line + ", column " + column;
-    }
-
-    static String decorateErrorDescription(String description) {
-        return decorateErrorDescription(description, null, (String[]) null);
-    }
-    
-    static String decorateErrorDescription(String description, String tip) {
-        return decorateErrorDescription(description, null, tip);
-    }
-
-    static String decorateErrorDescription(String description, String[] tip) {
-        return decorateErrorDescription(description, null, tip);
-    }
-
-    static String decorateErrorDescription(String description, Expression blamedExpr) {
-        return decorateErrorDescription(description, blamedExpr, (String[]) null);
-    }
-
-    static String decorateErrorDescription(String description, Expression blamedExpr, String tip) {
-        return decorateErrorDescription(description, blamedExpr, tip != null ? new String[] { tip } : null);
-    }
-    
-    static String decorateErrorDescription(String description, Expression blamedExpr, String[] tips) {
-        if (blamedExpr != null || tips != null) {
-            StringBuffer sb = new StringBuffer();
-            sb.append(description);
-            if (blamedExpr != null) {
-                // Right-trim:
-                for (int idx = sb.length() - 1; idx >= 0 && Character.isWhitespace(sb.charAt(idx)); idx --) {
-                    sb.deleteCharAt(idx);
-                }
-                
-                char lastChar = sb.length() > 0 ? (sb.charAt(sb.length() - 1)) : 0;
-                if (lastChar != 0) {
-                    sb.append('\n');
-                }
-                if (lastChar != ':') {
-                    sb.append("The blamed expression:\n");
-                }
-                sb.append("==> ");
-                sb.append(blamedExpr);
-                sb.append("  [");
-                sb.append(blamedExpr.getStartLocation());
-                sb.append(']');
-            }
-            if (tips != null && tips.length > 0) {
-                sb.append("\n");
-                sb.append("\n");
-                for (int i = 0; i < tips.length; i++) {
-                    if (i != 0) sb.append('\n');
-                    sb.append("Tip: ");
-                    sb.append(tips[i]);
-                }
-                sb.append("");
-            }
-            return sb.toString();
-        } else {
-            return  description;
-        }
     }
 
     /**
@@ -290,17 +239,21 @@ class MessageUtil {
     static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
         return new TemplateModelException(
-                methodName + "(...) expects " + expectedType + " as argument #" + (argIdx + 1) + ", but received a(n) "
-                + ClassUtil.getFTLTypeDescription(arg) + ".");
+                new Internal_ErrorDescriptionBuilder(
+                        new Object[] {
+                            methodName, "(...) expects ", expectedType, " as argument #", new Integer(argIdx + 1),
+                            ", but received a(n) ", new Internal_DelayedFTLTypeDescription(arg), "."
+                        }),
+                        true);
     }
 
-    static String unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
-        return MessageUtil.unexpectedTypeErrorDescription(expectedType, ClassUtil.getFTLTypeDescription(model));
+    static Object[] unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
+        return MessageUtil.unexpectedTypeErrorDescription(expectedType, new Internal_DelayedFTLTypeDescription(model));
     }
 
-    static String unexpectedTypeErrorDescription(String expectedType, String actualType) {
-        return "Expected a(n) " + expectedType + ", but this evaluated to a value of type " 
-                + actualType + ":";
+    static Object[] unexpectedTypeErrorDescription(String expectedType, Internal_DelayedFTLTypeDescription actualType) {
+        return new Object[] {
+                "Expected a(n) ", expectedType, ", but this evaluated to a value of type ", actualType, ":"};
     }
     
 }

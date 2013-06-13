@@ -226,16 +226,18 @@ abstract public class Expression extends TemplateObject {
     
     TemplateException newTemplateException(String description, String tip, Exception cause) {
         return new TemplateException(
-                MessageUtil.decorateErrorDescription(description, this, tip),
+                new Internal_ErrorDescriptionBuilder(description).blame(this).tip(tip),
                 cause,
-                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment(),
+                true);
     }
 
     TemplateException newTemplateException(String description, String[] tips, Exception cause) {
         return new TemplateException(
-                MessageUtil.decorateErrorDescription(description, this, tips),
+                new Internal_ErrorDescriptionBuilder(description).blame(this).tips(tips),
                 cause,
-                Environment.getCurrentEnvironment());
+                Environment.getCurrentEnvironment(),
+                true);
     }
     
     TemplateModelException newTemplateModelException(String description) {
@@ -254,14 +256,14 @@ abstract public class Expression extends TemplateObject {
     // the expression who has called the failing TM method. Wherever we use these, we blame the wrong expression.
     TemplateModelException newTemplateModelException(String description, String tip, Exception cause) {
         return new TemplateModelException(
-                MessageUtil.decorateErrorDescription(description, this, tip),
-                cause);
+                new Internal_ErrorDescriptionBuilder(description).blame(this).tip(tip),
+                cause, true);
     }
 
     TemplateModelException newTemplateModelException(String description, String[] tips, Exception cause) {
         return new TemplateModelException(
-                MessageUtil.decorateErrorDescription(description, this, tips),
-                cause);
+                new Internal_ErrorDescriptionBuilder(description).blame(this).tips(tips),
+                cause, true);
     }
 
     InvalidReferenceException newInvalidReferenceException(Environment env) {
@@ -275,19 +277,11 @@ abstract public class Expression extends TemplateObject {
         if (env != null && env.getFastInvalidReferenceExceptions()) {
             return InvalidReferenceException.FAST_INSTANCE;
         } else if (message != null) {
-            return new InvalidReferenceException(MessageUtil.decorateErrorDescription(message, this), env);
+            return new InvalidReferenceException(new Internal_ErrorDescriptionBuilder(message).blame(this), env);
         } else {
             return new InvalidReferenceException(
-                    MessageUtil.decorateErrorDescription(
-                            "The following has evaluated to null or missing:",
-                            this,
-                            "If the failing expression is known to be legally null/missing, either specify a default value"
-                            + " with myOptionalVar!myDefault, or use "
-                            + StringUtil.encloseAsTag(this.getTemplate(), "#if myOptionalVar??") + "when-present"
-                            + StringUtil.encloseAsTag(this.getTemplate(), "#else") + "when-missing"
-                            + StringUtil.encloseAsTag(this.getTemplate(), "/#if") + ". "
-                            + "(These only cover the last step of the expression; to cover the whole expression, "
-                            + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"),
+                    new Internal_ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(this)
+                            .tip(MessageUtil.INVALID_REFERENCE_EXCEPTION_TIP),
                         env);
         }
     }
@@ -303,10 +297,8 @@ abstract public class Expression extends TemplateObject {
     {
         assertNonNull(model, env);
         return new UnexpectedTypeException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription(expected, model),
-                        this,
-                        tip),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription(expected, model)).blame(this).tip(tip),
                 env);
     }
     
@@ -320,18 +312,15 @@ abstract public class Expression extends TemplateObject {
     {
         assertNonNull(model, env);
         return new NonNumericalException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription("number", model),
-                        this,
-                        tip),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription("number", model)).blame(this).tip(tip),
                 env);
     }
 
     NonNumericalException newMalformedNumberException(String text) {
         return new NonNumericalException(
-                MessageUtil.decorateErrorDescription(
-                        "Can't convert this string to number: " + StringUtil.jQuote(text),
-                        this),
+                new Internal_ErrorDescriptionBuilder(
+                        "Can't convert this string to number: " + StringUtil.jQuote(text)).blame(this),
                 Environment.getCurrentEnvironment());
     }
     
@@ -339,9 +328,9 @@ abstract public class Expression extends TemplateObject {
     throws InvalidReferenceException {
         assertNonNull(model, env);
         return new NonStringException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
-                        this),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model)
+                        ).blame(this),
                 env);
     }
 
@@ -349,10 +338,9 @@ abstract public class Expression extends TemplateObject {
     throws InvalidReferenceException {
         assertNonNull(model, env);
         return new NonStringException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model),
-                        this,
-                        tip),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model)
+                        ).blame(this).tip(tip),
                 env);
     }
     
@@ -360,9 +348,8 @@ abstract public class Expression extends TemplateObject {
     throws InvalidReferenceException {
         assertNonNull(model, env);
         return new NonDateException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription("date", model),
-                        this),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription("date", model)).blame(this),
                 env);
     }
 
@@ -370,18 +357,16 @@ abstract public class Expression extends TemplateObject {
     throws InvalidReferenceException {
         assertNonNull(model, env);
         return new NonBooleanException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription("boolean", model),
-                        this),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription("boolean", model)).blame(this),
                 env);
     }
 
-    NonBooleanException newNonBooleanException(String actualType)
+    NonBooleanException newNonBooleanException(Internal_DelayedFTLTypeDescription actualType)
     throws InvalidReferenceException {
         return new NonBooleanException(
-                MessageUtil.decorateErrorDescription(
-                        MessageUtil.unexpectedTypeErrorDescription("boolean", actualType),
-                        this),
+                new Internal_ErrorDescriptionBuilder(
+                        MessageUtil.unexpectedTypeErrorDescription("boolean", actualType)).blame(this),
                 Environment.getCurrentEnvironment());
     }
     

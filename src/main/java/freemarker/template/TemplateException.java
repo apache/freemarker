@@ -56,12 +56,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 
+import org.python.modules.synchronize;
+
 import freemarker.core.Environment;
 import freemarker.core.Internal_CoreAPI;
+import freemarker.core.Internal_ErrorDescriptionBuilder;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 
@@ -89,15 +93,16 @@ public class TemplateException extends Exception {
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
 
     // Set in constructor:
-    private final String rawDescription;
+    private transient Internal_ErrorDescriptionBuilder descriptionBuilder;
     private final Throwable causeException;
     private final transient Environment env;
     private transient TemplateElement[] ftlInstructionStackSnapshot;
     
     // Calculated on demand:
-    private String renderedFtlInstructionStackSnapshot;
-    private String renderedFtlInstructionStackSnapshotTop;
-    private transient String description; 
+    private String renderedFtlInstructionStackSnapshot;  // clalc. from ftlInstructionStackSnapshot 
+    private String renderedFtlInstructionStackSnapshotTop; // clalc. from ftlInstructionStackSnapshot
+    private String description;  // calc. from descriptionBuilder, or set by the construcor
+    private transient String stackTraceMessage;
     private transient String message; 
 
     // Concurrency:
@@ -130,9 +135,17 @@ public class TemplateException extends Exception {
      * exception to be raised
      */
     public TemplateException(Exception cause, Environment env) {
-        this(null, cause, env);
+        this((String) null, cause, env);
     }
 
+    /**
+     * Don't use this; this is to be used internal by FreeMarker.
+     */
+    public TemplateException(Internal_ErrorDescriptionBuilder description, Environment env,
+            boolean preventAmbiguity) {
+        this(description, null, env, true);
+    }
+    
     /**
      * Constructs a TemplateException with both a description of the error
      * that occurred and the underlying Exception that caused this exception
@@ -142,30 +155,52 @@ public class TemplateException extends Exception {
      * @param cause the underlying {@link Exception} that caused this exception to be raised
      */
     public TemplateException(String description, Exception cause, Environment env) {
+        this(null, description, cause, env);
+    }
+
+    /**
+     * Don't use this; this is to be used internal by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's to prevent constructor selection ambiguities for
+     *     backward-compatibility
+     */
+    public TemplateException(Internal_ErrorDescriptionBuilder descriptionBuilder, Exception cause, Environment env,
+            boolean preventAmbiguity) {
+        this(descriptionBuilder, null, cause, env);
+    }
+    
+    private TemplateException(
+            Internal_ErrorDescriptionBuilder descriptionBuilder,
+            String renderedDescription,
+            Exception cause, Environment env) {
+        // Note: Keep this constructor lightweight.
+        
         super(null, cause);
         
-        rawDescription = description;
+        this.descriptionBuilder = descriptionBuilder;
+        description = renderedDescription;
         causeException = cause;  // for Java 1.2(?) compatibility
         this.env = env;
         if(env != null) ftlInstructionStackSnapshot = Internal_CoreAPI.getInstructionStackSnapshot(env);
     }
-
-    private void renderMessageAndDescription()  {
-        if(rawDescription != null && rawDescription.length() != 0) {
-            description = rawDescription;
+    
+    private void renderMessages()  {
+        String description = getDescription();
+        
+        if(description != null && description.length() != 0) {
+            stackTraceMessage = description;
         } else if (getCause() != null) {
-            description = "No error description was specified for this error; low-level message: "
+            stackTraceMessage = "No error description was specified for this error; low-level message: "
                     + getCause().getClass().getName() + ": " + getCause().getMessage();
         } else {
-            description = "[No error description was available.]";
+            stackTraceMessage = "[No error description was available.]";
         }
         
         String stackTop = getFTLInstructionStackTop();
         if (stackTop != null) {
-            message = description + "\n\n" + THE_FAILING_INSTRUCTION + stackTop;
-            description = message.substring(0, description.length());  // to reuse the backing char[] of `message`
+            message = stackTraceMessage + "\n\n" + THE_FAILING_INSTRUCTION + stackTop;
+            stackTraceMessage = message.substring(0, stackTraceMessage.length());  // to reuse the backing char[]
         } else {
-            message = description;
+            message = stackTraceMessage;
         }
     }
     
@@ -248,6 +283,18 @@ public class TemplateException extends Exception {
         }
         
     }
+    
+    private String getDescription() {
+        if (description == null) {
+            synchronized (lock) {
+                if (description == null && descriptionBuilder != null) {
+                    description = descriptionBuilder.toString();
+                    descriptionBuilder = null;
+                }
+            }
+        }
+        return description;
+    }
 
     /**
      * @return the execution environment in which the exception occurred.
@@ -258,78 +305,127 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Overrides {@link Throwable#printStackTrace(java.io.PrintStream)} so that it will include the FTL stack trace.
+     * Overrides {@link Throwable#printStackTrace(PrintStream)} so that it will include the FTL stack trace.
      */
-    public void printStackTrace(java.io.PrintStream ps) {
-        synchronized (ps) {
-            PrintWriter pw = new PrintWriter(new OutputStreamWriter(ps), true);
-            printStackTrace(pw);
-            pw.flush();
-        }
+    public void printStackTrace(PrintStream out) {
+        printStackTrace(out, true, true, true);
     }
 
     /**
      * Overrides {@link Throwable#printStackTrace(PrintWriter)} so that it will include the FTL stack trace.
      */
-    public void printStackTrace(PrintWriter pw) {
-        printStackTrace(pw, true);
+    public void printStackTrace(PrintWriter out) {
+        printStackTrace(out, true, true, true);
     }
     
-    public void printStackTrace(PrintWriter pw, boolean printHeading) {
-        synchronized (pw) {
-            if (printHeading) { 
-                pw.println("FreeMarker template error:");
-            }
-            pw.println(getDescription());  // Not getMessage()!
-            String stackTrace = getFTLInstructionStack();
-            if (stackTrace != null) {
-                pw.println();
-                pw.print(THE_FAILING_INSTRUCTION);
-                pw.println(" (FTL stack trace):");
-                pw.println(stackTrace);
-            } else {
-                pw.println();
-            }
-            pw.println("Java stack trace (for programmers):");
-            pw.println(Internal_CoreAPI.STACK_SECTION_SEPARATOR);
-            synchronized (lock) {
-                if (messageWasAlreadyPrintedForThisTrace == null) {
-                    messageWasAlreadyPrintedForThisTrace = new ThreadLocal();
-                }
-                messageWasAlreadyPrintedForThisTrace.set(Boolean.TRUE);
-            }
-            try {
-                super.printStackTrace(pw);
-            } finally {
-                messageWasAlreadyPrintedForThisTrace.set(Boolean.FALSE);
-            }
-            if (BEFORE_1_4 && causeException != null) {
-                pw.println("Underlying cause: ");
-                causeException.printStackTrace(pw);
+    /**
+     * @param heading should the heading at the top be printed 
+     * @param ftlStackTrace should the FTL stack trace be printed 
+     * @param javaStackTrace should the Java stack trace be printed
+     *  
+     * @since 2.3.20
+     */
+    public void printStackTrace(PrintWriter out, boolean heading, boolean ftlStackTrace, boolean javaStackTrace) {
+        synchronized (out) {
+            printStackTrace(new PrintWriterStackTraceWriter(out), heading, ftlStackTrace, javaStackTrace);
+        }
+    }
+
+    /**
+     * @param heading should the heading at the top be printed 
+     * @param ftlStackTrace should the FTL stack trace be printed 
+     * @param javaStackTrace should the Java stack trace be printed
+     *  
+     * @since 2.3.20
+     */
+    public void printStackTrace(PrintStream out, boolean heading, boolean ftlStackTrace, boolean javaStackTrace) {
+        synchronized (out) {
+            printStackTrace(new PrintStreamStackTraceWriter(out), heading, ftlStackTrace, javaStackTrace);
+        }
+    }
+    
+    private void printStackTrace(StackTraceWriter out, boolean heading, boolean ftlStackTrace, boolean javaStackTrace) {
+        synchronized (out) {
+            if (heading) { 
+                out.println("FreeMarker template error:");
             }
             
-            // Dirty hack to fight with stupid ServletException class whose
-            // getCause() method doesn't work properly. Also an aid for pre-J2xE 1.4
-            // users.
-            try {
-                // Reflection is used to prevent dependency on Servlet classes.
-                Method m = causeException.getClass().getMethod("getRootCause", EMPTY_CLASS_ARRAY);
-                Throwable rootCause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
-                if (rootCause != null) {
-                    Throwable j14Cause = null;
-                    if (!BEFORE_1_4) {
-                        m = causeException.getClass().getMethod("getCause", EMPTY_CLASS_ARRAY);
-                        j14Cause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
-                    }
-                    if (j14Cause == null) {
-                        pw.println("ServletException root cause: ");
-                        rootCause.printStackTrace(pw);
-                    }
+            if (ftlStackTrace) {
+                out.println(getStackTraceMessage());  // Not getMessage()!
+                String stackTrace = getFTLInstructionStack();
+                if (stackTrace != null) {
+                    out.println();
+                    out.print(THE_FAILING_INSTRUCTION);
+                    out.println(" (FTL stack trace):");
+                    out.print(stackTrace);
                 }
-            } catch (Throwable exc) {
-                ; // ignore
             }
+            
+            if (javaStackTrace) {
+                if (ftlStackTrace) {  // We are after an FTL stack trace
+                    out.println();
+                    out.println("Java stack trace (for programmers):");
+                    out.println(Internal_CoreAPI.STACK_SECTION_SEPARATOR);
+                    synchronized (lock) {
+                        if (messageWasAlreadyPrintedForThisTrace == null) {
+                            messageWasAlreadyPrintedForThisTrace = new ThreadLocal();
+                        }
+                        messageWasAlreadyPrintedForThisTrace.set(Boolean.TRUE);
+                    }
+                    
+                    try {
+                        out.printStandardStackTrace(this);
+                    } finally {
+                        messageWasAlreadyPrintedForThisTrace.set(Boolean.FALSE);
+                    }
+                } else {  // javaStackTrace only
+                    out.printStandardStackTrace(this);
+                }
+                
+                if (BEFORE_1_4 && causeException != null) {
+                    out.println("Underlying cause: ");
+                    out.printStandardStackTrace(causeException);
+                }
+                
+                // Dirty hack to fight with stupid ServletException class whose
+                // getCause() method doesn't work properly. Also an aid for pre-J2xE 1.4
+                // users.
+                try {
+                    // Reflection is used to prevent dependency on Servlet classes.
+                    Method m = causeException.getClass().getMethod("getRootCause", EMPTY_CLASS_ARRAY);
+                    Throwable rootCause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
+                    if (rootCause != null) {
+                        Throwable j14Cause = null;
+                        if (!BEFORE_1_4) {
+                            m = causeException.getClass().getMethod("getCause", EMPTY_CLASS_ARRAY);
+                            j14Cause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
+                        }
+                        if (j14Cause == null) {
+                            out.println("ServletException root cause: ");
+                            out.printStandardStackTrace(rootCause);
+                        }
+                    }
+                } catch (Throwable exc) {
+                    ; // ignore
+                }
+            }  // if (javaStackTrace)
         }
+    }
+    
+    /**
+     * Prints the stack trace as if wasn't overridden by {@link TemplateException}. 
+     * @since 2.3.20
+     */
+    public void printStandardStackTrace(PrintStream ps) {
+        super.printStackTrace(ps);
+    }
+
+    /**
+     * Prints the stack trace as if wasn't overridden by {@link TemplateException}. 
+     * @since 2.3.20
+     */
+    public void printStandardStackTrace(PrintWriter pw) {
+        super.printStackTrace(pw);
     }
 
     /**
@@ -337,15 +433,13 @@ public class TemplateException extends Exception {
      * of the text. It might contains the position of the failing <em>expression</em> though as part of the expression
      * quotation, as that's the part of the description. 
      */
-    public String getDescription() {
-        if (description == null) {
+    private String getStackTraceMessage() {
+        if (stackTraceMessage == null) {
             synchronized (lock) {
-                if (description == null) {
-                    renderMessageAndDescription();
-                }
+                if (stackTraceMessage == null) renderMessages();
             }
         }
-        return description;
+        return stackTraceMessage;
     }
     
     public String getMessage() {
@@ -354,9 +448,7 @@ public class TemplateException extends Exception {
         } else {
             if (message == null) {
                 synchronized (lock) {
-                    if (message == null) {
-                        renderMessageAndDescription();
-                    }
+                    if (message == null) renderMessages();
                 }
             }
             return message;
@@ -364,9 +456,10 @@ public class TemplateException extends Exception {
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
-        // Since the FTL stack trace is transient, this is the last chance to calculate these: 
+        // These are calculated from transient fields, so this is the last chance to calculate them: 
         getFTLInstructionStack();
         getFTLInstructionStackTop();
+        getDescription();
         
         out.defaultWriteObject();
     }
@@ -374,6 +467,74 @@ public class TemplateException extends Exception {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         lock = new Object();
         in.defaultReadObject();
+    }
+    
+    /** Delegate to a {@link PrintWriter} or to a {@link PrintStream}. */
+    private interface StackTraceWriter {
+        void print(Object obj);
+        void println(Object obj);
+        void println();
+        void printStandardStackTrace(Throwable exception);
+    }
+    
+    private static class PrintStreamStackTraceWriter implements StackTraceWriter {
+        
+        private final PrintStream out;
+
+        PrintStreamStackTraceWriter(PrintStream out) {
+            this.out = out;
+        }
+
+        public void print(Object obj) {
+            out.print(obj);
+        }
+
+        public void println(Object obj) {
+            out.println(obj);
+        }
+
+        public void println() {
+            out.println();
+        }
+
+        public void printStandardStackTrace(Throwable exception) {
+            if (exception instanceof TemplateException) {
+                ((TemplateException) exception).printStandardStackTrace(out);
+            } else {
+                exception.printStackTrace(out);
+            }
+        }
+        
+    }
+
+    private static class PrintWriterStackTraceWriter implements StackTraceWriter {
+        
+        private final PrintWriter out;
+
+        PrintWriterStackTraceWriter(PrintWriter out) {
+            this.out = out;
+        }
+
+        public void print(Object obj) {
+            out.print(obj);
+        }
+
+        public void println(Object obj) {
+            out.println(obj);
+        }
+
+        public void println() {
+            out.println();
+        }
+
+        public void printStandardStackTrace(Throwable exception) {
+            if (exception instanceof TemplateException) {
+                ((TemplateException) exception).printStandardStackTrace(out);
+            } else {
+                exception.printStackTrace(out);
+            }
+        }
+        
     }
     
 }

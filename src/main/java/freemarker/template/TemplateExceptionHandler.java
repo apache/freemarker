@@ -154,7 +154,7 @@ public interface TemplateExceptionHandler {
                     
                     StringWriter stackTraceSW = new StringWriter();
                     PrintWriter stackPW = new PrintWriter(stackTraceSW);
-                    te.printStackTrace(stackPW, false);
+                    te.printStackTrace(stackPW, false, true, true);
                     stackPW.close();
                     pw.println();
                     pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));

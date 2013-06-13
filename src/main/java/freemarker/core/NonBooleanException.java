@@ -69,5 +69,9 @@ public class NonBooleanException extends UnexpectedTypeException {
     public NonBooleanException(String description, Environment env) {
         super(description, env);
     }
+
+    NonBooleanException(Internal_ErrorDescriptionBuilder description, Environment env) {
+        super(description, env);
+    }
     
 }

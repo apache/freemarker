@@ -263,10 +263,10 @@ class MiscellaneousBuiltins {
             {
                 if(dateType == TemplateDateModel.UNKNOWN) {
                     throw new TemplateModelException(
-                            MessageUtil.decorateErrorDescription(
+                            new Internal_ErrorDescriptionBuilder(
                                     "Can't convert the date to string, because it isn't known if it's a "
-                                    + "date-only, time-only, or date-time value.",
-                                    MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
+                                    + "date-only, time-only, or date-time value.")
+                                    .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS), true);
                 }
                 if(cachedValue == null) {
                     cachedValue = defaultFormat.format(date);

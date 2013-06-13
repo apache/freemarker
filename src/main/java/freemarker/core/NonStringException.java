@@ -69,5 +69,9 @@ public class NonStringException extends UnexpectedTypeException {
     public NonStringException(String description, Environment env) {
         super(description, env);
     }
-    
+ 
+    NonStringException(Internal_ErrorDescriptionBuilder description, Environment env) {
+        super(description, env);
+    }
+        
 }

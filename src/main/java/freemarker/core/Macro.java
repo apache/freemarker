@@ -262,8 +262,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                         + ")";
                             }
                             throw new TemplateException(
-                                    MessageUtil.decorateErrorDescription(desc, null, hint),
-                                    env);
+                                    new Internal_ErrorDescriptionBuilder(desc).tip(hint),
+                                    env, true);
                         }
                     }
                 }

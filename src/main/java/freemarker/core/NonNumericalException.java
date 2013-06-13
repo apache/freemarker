@@ -70,4 +70,8 @@ public class NonNumericalException extends UnexpectedTypeException {
         super(description, env);
     }
     
+    NonNumericalException(Internal_ErrorDescriptionBuilder description, Environment env) {
+        super(description, env);
+    }
+    
 }

@@ -366,15 +366,15 @@ class EvalUtil
                 }
                 // Falls through
             }
-            String desc = "Can't compare values of these types. "
-                    + "Allowed comparisons are between two numbers, two strings, or two dates.\n"
-                    + "Left hand operand is a(n) " + ClassUtil.getFTLTypeDescription(leftValue) + ".\n"
-                    + "Right hand operand is a(n) " + ClassUtil.getFTLTypeDescription(rightValue) + ".";
-            if (defaultBlamed != null) {
-                throw defaultBlamed.newTemplateModelException(desc);
-            } else {
-                throw new TemplateException(desc, env);
-            }
+            throw new TemplateException(
+                    new Internal_ErrorDescriptionBuilder(new Object[] {
+                            "Can't compare values of these types. ",
+                            "Allowed comparisons are between two numbers, two strings, or two dates.\n",
+                            "Left hand operand is a(n) ", new Internal_DelayedFTLTypeDescription(leftValue), ".\n",
+                            "Right hand operand is a(n) ", new Internal_DelayedFTLTypeDescription(rightValue), "."
+                    }).blame(defaultBlamed),
+                    env,
+                    true);
         }
 
         switch (operator) {
@@ -420,7 +420,7 @@ class EvalUtil
                     throw exp.newInvalidReferenceException(env);
                 } else {
                     throw new InvalidReferenceException(
-                            MessageUtil.decorateErrorDescription("Null/missing value (no more informatoin avilable)"),
+                            "Null/missing value (no more informatoin avilable)",
                             env);
                 }
             }
@@ -442,10 +442,9 @@ class EvalUtil
                     throw exp.newNonStringException(tm, seqHint, env);
                 } else {
                     throw new NonStringException(
-                            MessageUtil.decorateErrorDescription(
+                            new Internal_ErrorDescriptionBuilder(
                                     MessageUtil.unexpectedTypeErrorDescription(
-                                            MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm),
-                                    seqHint),
+                                            MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm)).tip(seqHint),
                             env);
                 }
             } else {
@@ -453,7 +452,7 @@ class EvalUtil
                     throw exp.newNonStringException(tm, env);
                 } else {
                     throw new NonStringException(
-                            MessageUtil.decorateErrorDescription(
+                            new Internal_ErrorDescriptionBuilder(
                                     MessageUtil.unexpectedTypeErrorDescription(
                                             MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm)),
                             env);
