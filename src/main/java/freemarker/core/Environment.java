@@ -452,8 +452,7 @@ public final class Environment extends Configurable {
      
      String getCurrentRecoveredErrorMessage() throws TemplateException {
          if(recoveredErrorStack.isEmpty()) {
-             throw new TemplateException(
-                 ".error is not available outside of a #recover block", this);
+             throw new Internal_MiscTemplateException(this, ".error is not available outside of a #recover block");
          }
          return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() -1)).getMessage();
      }
@@ -463,7 +462,7 @@ public final class Environment extends Configurable {
       * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
       * <tt>#attempt</tt> will roll it back anyway. 
       * 
-      * @sine 2.3.20
+      * @since 2.3.20
       */
      public boolean isInAttemptBlock() {
          return inAttemptBlock;
@@ -564,15 +563,13 @@ public final class Environment extends Configurable {
                          && !nodeType.equals("comment") 
                          && !nodeType.equals("document_type")) 
                     {
-                        throw new TemplateException(
-                                noNodeHandlerDefinedMessage(node, node.getNodeNamespace(), nodeType),
-                                this);
+                        throw new Internal_MiscTemplateException(
+                                this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), nodeType));
                     }
                 }
                 else {
-                    throw new TemplateException(
-                            noNodeHandlerDefinedMessage(node, node.getNodeNamespace(), "default"),
-                            this);
+                    throw new Internal_MiscTemplateException(
+                            this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), "default"));
                 }
             }
         } 
@@ -585,21 +582,23 @@ public final class Environment extends Configurable {
         }
     }
 
-    private String noNodeHandlerDefinedMessage(TemplateNodeModel node, String ns, String nodeType)
-            throws TemplateModelException {
-        String nsBit;
+    private Object[] noNodeHandlerDefinedDescription(
+            TemplateNodeModel node, String ns, String nodeType)
+    throws TemplateModelException {
+        String nsPrefix;
         if (ns != null) {
             if (ns.length() > 0) {
-                nsBit = " and namespace " + ns;
+                nsPrefix = " and namespace ";
             } else {
-                nsBit = " and no namespace";
+                nsPrefix = " and no namespace";
             }
         } else {
-            nsBit = "";
+            nsPrefix = "";
+            ns = "";
         }
-        return "No macro or directive is defined for node named "  
-                + StringUtil.jQuote(node.getNodeName()) + nsBit
-                + ", and there is no fallback handler called @" + nodeType + " either.";
+        return new Object[] { "No macro or directive is defined for node named ",  
+                new Internal_DelayedJQuote(node.getNodeName()), nsPrefix, ns,
+                ", and there is no fallback handler called @", nodeType, " either." };
     }
     
     void fallback() throws TemplateException, IOException {
@@ -650,9 +649,9 @@ public final class Environment extends Configurable {
                             ((SimpleHash)unknownVars).put(varName, value);
                         }
                     } else {
-                        throw new TemplateException(
-                                "Macro " + StringUtil.jQuote(macro.getName()) + " has no such argument: " + varName,
-                                this);
+                        throw new Internal_MiscTemplateException(this, new Object[] {
+                                "Macro ", new Internal_DelayedJQuote(macro.getName()), " has no such argument: ",
+                                varName });
                     }
                 }
             }
@@ -662,10 +661,9 @@ public final class Environment extends Configurable {
                 String[] argumentNames = macro.getArgumentNamesInternal();
                 int size = positionalArgs.size();
                 if (argumentNames.length < size && catchAll == null) {
-                    throw new TemplateException(
-                      "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
-                      + argumentNames.length + " parameters.",
-                      this);
+                    throw new Internal_MiscTemplateException(this, new Object[] { 
+                            "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
+                            + argumentNames.length + " parameters." });
                 }
                 for (int i = 0; i < size; i++) {
                     Expression argExp = (Expression) positionalArgs.get(i);
@@ -678,7 +676,7 @@ public final class Environment extends Configurable {
                             ((SimpleSequence)unknownVars).add(argModel);
                         }
                     } catch (RuntimeException re) {
-                        throw new TemplateException(re, this);
+                        throw new Internal_MiscTemplateException(re, this);
                     }
                 }
             }
@@ -724,7 +722,7 @@ public final class Environment extends Configurable {
         if (node == null) {
             node = this.getCurrentVisitorNode();
             if (node == null) {
-                throw new TemplateModelException(
+                throw new Internal_TemplateModelException(
                         "The target node of recursion is missing or null.");
             }
         }
@@ -833,6 +831,8 @@ public final class Environment extends Configurable {
     
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator.
+     * 
+     * @since 2.3.20
      */
     public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -843,6 +843,8 @@ public final class Environment extends Configurable {
      * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator, except that if the two types
      *     are incompatible, they are treated as non-equal instead of throwing an exception. Comparing dates of
      *     different types (date-only VS time-only VS date-time) will still throw an exception, however.
+     * 
+     * @since 2.3.20
      */
     public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -851,6 +853,8 @@ public final class Environment extends Configurable {
     
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     * 
+     * @since 2.3.20
      */
     public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -859,6 +863,8 @@ public final class Environment extends Configurable {
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     * 
+     * @since 2.3.20
      */
     public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -867,6 +873,8 @@ public final class Environment extends Configurable {
     
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL ">" operator.
+     * 
+     * @since 2.3.20
      */
     public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -875,6 +883,8 @@ public final class Environment extends Configurable {
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL ">=" operator.
+     * 
+     * @since 2.3.20
      */
     public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -904,7 +914,10 @@ public final class Environment extends Configurable {
     String formatDate(Date date, int type) throws TemplateModelException {
         DateFormat df = getDateFormatObject(type);
         if(df == null) {
-            throw new TemplateModelException("Can't convert the date to string, because it is not known which parts of the date variable are in use. Use ?date, ?time or ?datetime built-in, or ?string.<format> or ?string(format) built-in with this date.");
+            throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
+                    "Can't convert the date to string, because it is not known which parts of the date variable are "
+                    + "in use.")
+                    .tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
         }
         return df.format(date);
     }
@@ -1019,7 +1032,8 @@ public final class Environment extends Configurable {
                 return dateTimeFormat;
             }
             default: {
-                throw new TemplateModelException("Unrecognized date type " + dateType);
+                throw new Internal_TemplateModelException(new Object[] {
+                        "Unrecognized date type: ", new Integer(dateType) });
             }
         }
     }
@@ -1056,13 +1070,10 @@ public final class Environment extends Configurable {
                 if(style != -1) {
                     switch(dateType) {
                         case TemplateDateModel.UNKNOWN: {
-                            throw new TemplateModelException(
-                                "Can't convert the date to string using a " +
-                                "built-in format, because it is not known which " +
-                                "parts of the date variable are in use. Use " +
-                                "?date, ?time or ?datetime built-in, or " +
-                                "?string.<format> or ?string(<format>) built-in "+
-                                "with explicit formatting pattern with this date.");
+                            throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
+                                    "Can't convert the date to string using a built-in format because it is not known "
+                                    + "which parts of the date are in use.")
+                                    .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                         }
                         case TemplateDateModel.TIME: {
                             format = DateFormat.getTimeInstance(style, locale);
@@ -1086,7 +1097,8 @@ public final class Environment extends Configurable {
                         format = new SimpleDateFormat(pattern, locale);
                     }
                     catch(IllegalArgumentException e) {
-                        throw new TemplateModelException("Can't parse " + pattern + " to a date format.", e);
+                        throw new Internal_TemplateModelException(e, new Object[] {
+                                "Can't parse ", new Internal_DelayedJQuote(pattern), " to a date format, because:\n", e });
                     }
                 }
                 format.setTimeZone(timeZone);
@@ -1542,7 +1554,7 @@ public final class Environment extends Configurable {
     TemplateModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
         String nodeName = node.getNodeName();
         if (nodeName == null) {
-            throw new TemplateException("Node name is null.", this);
+            throw new Internal_MiscTemplateException(this, "Node name is null.");
         }
         TemplateModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
     
@@ -1577,10 +1589,9 @@ public final class Environment extends Configurable {
             try {                                   
                 ns = (Namespace) nodeNamespaces.get(i);
             } catch (ClassCastException cce) {
-                throw new TemplateException(
+                throw new Internal_MiscTemplateException(this,
                         "A \"using\" clause should contain a sequence of namespaces or strings that indicate the "
-                        + "location of importable macro libraries.",
-                        this);
+                        + "location of importable macro libraries.");
             }
             result = getNodeProcessor(ns, nodeName, nsURI);
             if (result != null) 

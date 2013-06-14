@@ -114,7 +114,7 @@ class Interpret extends BuiltIn
         }
         else
         {
-            throw target.newUnexpectedTypeException(model, "sequence or string", env);
+            throw new UnexpectedTypeException(target, model, "sequence or string", env);
         }
         String templateSource = sourceExpr.evalAndCoerceToString(env);
         Template parentTemplate = env.getTemplate();
@@ -129,10 +129,9 @@ class Interpret extends BuiltIn
         }
         catch(IOException e)
         {
-            throw newTemplateException(
-                    "\"?interpret\" has failed with this parsing error:\n" + e.getMessage()
-                    + "\n\nThe failed expression:",
-                    e);
+            throw new Internal_MiscTemplateException(this, e, env, new Object[] {
+                        "\"?", key, "\" has failed with this parsing error:\n", new Internal_DelayedGetMessage(e),
+                        "\n\nThe failed expression:" });
         }
         
         interpretedTemplate.setLocale(env.getLocale());
@@ -164,10 +163,10 @@ class Interpret extends BuiltIn
             }
             catch(Exception e)
             {
-                throw newTemplateModelException(
-                        "Template created with \"?interpret\" has stopped with error:\n--begin-message--\n" + e.getMessage()
-                        + "\n--end-message--\n\nThe interpreted template was created here:",
-                        e);
+                throw new Internal_TemplateModelException(e, new Object[] {
+                        "Template created with \"?", key, "\" has stopped with error:\n--begin-message--\n",
+                        new Internal_DelayedGetMessage(e),
+                        "\n--end-message--\n\nThe interpreted template was created here:" });
             }
     
             return new Writer(out)

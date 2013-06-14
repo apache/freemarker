@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * A {@link TemplateException} that 
@@ -63,15 +64,42 @@ import freemarker.template.TemplateException;
 public class NonNumericalException extends UnexpectedTypeException {
 
     public NonNumericalException(Environment env) {
-        super("Expecting numerical value here", env);
+        super(env, "Expecting numerical value here");
     }
 
     public NonNumericalException(String description, Environment env) {
-        super(description, env);
+        super(env, description);
     }
-    
+ 
     NonNumericalException(Internal_ErrorDescriptionBuilder description, Environment env) {
-        super(description, env);
+        super(env, description);
+    }
+
+    NonNumericalException(
+            Expression blamed, TemplateModel model, Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, "number", env);
+    }
+
+    NonNumericalException(
+            Expression blamed, TemplateModel model, String tip,
+            Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, "number", tip, env);
+    }
+
+    NonNumericalException(
+            Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
+        super(blamed, model, "number", tips, env);
+    }
+
+    
+    static NonNumericalException newMalformedNumberException(Expression blamed, String text, Environment env) {
+        return new NonNumericalException(
+                new Internal_ErrorDescriptionBuilder(new Object[] {
+                        "Can't convert this string to number: ", new Internal_DelayedJQuote(text) })
+                .blame(blamed),
+                env);
     }
     
 }

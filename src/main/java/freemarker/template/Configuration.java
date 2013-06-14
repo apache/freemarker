@@ -84,6 +84,8 @@ import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.Internal_ConcurrentMapFactory;
 import freemarker.core.Internal_CoreAPI;
+import freemarker.core.Internal_DelayedJQuote;
+import freemarker.core.Internal_MiscTemplateException;
 import freemarker.core.ParseException;
 import freemarker.core.Version;
 import freemarker.template.utility.CaptureOutput;
@@ -877,75 +879,14 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setLocalizedLookup(localizedLookup);
     }
     
-    /**
-     * Sets a setting by name and string value.
-     *
-     * In additional to the settings understood by
-     * {@link Configurable#setSetting the super method}, it understands these:
-     * <ul>
-     *   <li><code>"auto_import"</code>: Sets the list of auto-imports. Example of valid value:
-     *       <br><code>/lib/form.ftl as f, /lib/widget as w, "/lib/evil name.ftl" as odd</code>
-     *       See: {@link #setAutoImports}
-     *   <li><code>"auto_include"</code>: Sets the list of auto-includes. Example of valid value:
-     *       <br><code>/include/common.ftl, "/include/evil name.ftl"</code>
-     *       See: {@link #setAutoIncludes}
-     *   <li><code>"default_encoding"</code>: The name of the charset, such as <code>"UTF-8"</code>.
-     *       See: {@link #setDefaultEncoding}
-     *   <li><code>"localized_lookup"</code>:
-     *       <code>"true"</code>, <code>"false"</code>, <code>"yes"</code>, <code>"no"</code>,
-     *       <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>.
-     *       Case insensitive.
-     *      See: {@link #setLocalizedLookup}
-     *   <li><code>"strict_syntax"</code>: <code>"true"</code>, <code>"false"</code>, etc.
-     *       See: {@link #setStrictSyntaxMode}
-     *   <li><code>"whitespace_stripping"</code>: <code>"true"</code>, <code>"false"</code>, etc.
-     *       See: {@link #setWhitespaceStripping}
-     *   <li><code>"cache_storage"</code>: If the value contains dot, then it is
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then a {@link freemarker.cache.MruCacheStorage} will be used with the
-     *       maximum strong and soft sizes specified with the setting value. Examples
-     *       of valid setting values:
-     *       <table border=1 cellpadding=4>
-     *         <tr><th>Setting value<th>max. strong size<th>max. soft size
-     *         <tr><td><code>"strong:50, soft:500"</code><td>50<td>500
-     *         <tr><td><code>"strong:100, soft"</code><td>100<td><code>Integer.MAX_VALUE</code>
-     *         <tr><td><code>"strong:100"</code><td>100<td>0
-     *         <tr><td><code>"soft:100"</code><td>0<td>100
-     *         <tr><td><code>"strong"</code><td><code>Integer.MAX_VALUE</code><td>0
-     *         <tr><td><code>"soft"</code><td>0<td><code>Integer.MAX_VALUE</code>
-     *       </table>
-     *       The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
-     *       entries is not significant.
-     *       For more details see: {@link #setCacheStorage}
-     *   <li><code>"template_update_delay"</code>: Valid positive integer, the
-     *       update delay measured in seconds.
-     *       See: {@link #setTemplateUpdateDelay}
-     *   <li><code>"tag_syntax"</code>: Must be one of:
-     *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
-     *       <code>"square_bracket"</code>.
-     *   <li><code>"incompatible_improvements"</code>: The FreeMarker version
-     *       where the desired non-backward-compatible improvements were already available.
-     *       See: {@link #setIncompatibleImprovements(Version)}.
-     *   <li><code>"incompatible_enhancements"</code>: Deprecated, use <code>"incompatible_improvements"</code>
-     *       instead. See: {@link #setIncompatibleEnhancements(String)}.
-     * </ul>
-     *
-     * @param key the name of the setting.
-     * @param value the string that describes the new value of the setting.
-     *
-     * @throws UnknownSettingException if the key is wrong.
-     * @throws TemplateException if the new value of the setting can't be set
-     *     for any other reasons.
-     */
     public void setSetting(String key, String value) throws TemplateException {
-        if ("TemplateUpdateInterval".equalsIgnoreCase(key)) {
-            key = TEMPLATE_UPDATE_DELAY_KEY;
-        } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
-            key = DEFAULT_ENCODING_KEY;
-        }
-        boolean callSuper = false;
         try {
+            if ("TemplateUpdateInterval".equalsIgnoreCase(key)) {
+                key = TEMPLATE_UPDATE_DELAY_KEY;
+            } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
+                key = DEFAULT_ENCODING_KEY;
+            }
+            
             if (DEFAULT_ENCODING_KEY.equals(key)) {
                 setDefaultEncoding(value);
             } else if (LOCALIZED_LOOKUP_KEY.equals(key)) {
@@ -1007,17 +948,12 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(key)) {
                 setIncompatibleEnhancements(value);
             } else {
-                callSuper = true;
+                super.setSetting(key, value);
             }
         } catch(Exception e) {
-            throw new TemplateException(
-                    "Failed to set setting " + 
-                    StringUtil.jQuote(key) + " to value " + StringUtil.jQuote(value) +
-                    "; see cause exception.",
-                    e, getEnvironment());
-        }
-        if (callSuper) {
-            super.setSetting(key, value);
+            throw new Internal_MiscTemplateException(e, getEnvironment(), new Object[] {
+                    "Failed to set setting ", new Internal_DelayedJQuote(key),
+                    " to value ", new Internal_DelayedJQuote(value), "; see cause exception." });
         }
     }
     

@@ -101,7 +101,7 @@ final class MethodCall extends Expression {
             Macro func = (Macro) targetModel;
             env.setLastReturnValue(null);
             if (!func.isFunction) {
-                throw newTemplateException("A macro cannot be called in an expression.");
+                throw new Internal_MiscTemplateException(env, "A macro cannot be called in an expression.");
             }
             Writer prevOut = env.getOut();
             try {
@@ -115,7 +115,7 @@ final class MethodCall extends Expression {
             return env.getLastReturnValue();
         }
         else {
-            throw target.newUnexpectedTypeException(targetModel, "method", env);
+            throw new UnexpectedTypeException(target, targetModel, "method", env);
         }
     }
 

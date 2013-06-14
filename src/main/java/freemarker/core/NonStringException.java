@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * A {@link TemplateException} that 
@@ -62,16 +63,40 @@ import freemarker.template.TemplateException;
  */
 public class NonStringException extends UnexpectedTypeException {
 
+    private static final String DEFAULT_DESCRIPTION
+            = "Expecting " + NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " value here";
+    
+    static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
+            = "string or something automatically convertible to string (number, date or boolean)";
+
     public NonStringException(Environment env) {
-        super("Expecting " + MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " value here", env);
+        super(env, DEFAULT_DESCRIPTION);
     }
 
     public NonStringException(String description, Environment env) {
-        super(description, env);
+        super(env, description);
     }
  
-    NonStringException(Internal_ErrorDescriptionBuilder description, Environment env) {
-        super(description, env);
+    NonStringException(Environment env, Internal_ErrorDescriptionBuilder description) {
+        super(env, description);
+    }
+
+    NonStringException(
+            Expression blamed, TemplateModel model, Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, env);
+    }
+
+    NonStringException(
+            Expression blamed, TemplateModel model, String tip,
+            Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tip, env);
+    }
+
+    NonStringException(
+            Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
+        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tips, env);
     }
         
 }

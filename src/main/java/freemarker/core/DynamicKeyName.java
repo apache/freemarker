@@ -84,7 +84,7 @@ final class DynamicKeyName extends Expression {
             if (env.isClassicCompatible()) {
                 return null;
             } else {
-                throw target.newInvalidReferenceException(env);
+                throw InvalidReferenceException.getInstance(target, env);
             }
         }
         if (nameExpression instanceof Range) {
@@ -107,7 +107,7 @@ final class DynamicKeyName extends Expression {
             String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
-        throw nameExpression.newUnexpectedTypeException(keyModel, "number, range, or string", env);
+        throw new UnexpectedTypeException(nameExpression, keyModel, "number, range, or string", env);
     }
 
 
@@ -131,16 +131,15 @@ final class DynamicKeyName extends Expression {
         {
             String s = target.evalAndCoerceToString(env);
             try {
-               return new SimpleScalar(s.substring(index, index+1));
+               return new SimpleScalar(s.substring(index, index + 1));
             } catch (RuntimeException re) {
-                throw new TemplateException("", re, env);
+                throw new Internal_MiscTemplateException(re, env);
             }
         }
         catch(NonStringException e)
         {
-            throw target.newUnexpectedTypeException(
-                    targetModel,
-                    "sequence or string (or something that's implicitly convertible to string)",
+            throw new UnexpectedTypeException(
+                    target, targetModel, "sequence or string (or something that's implicitly convertible to string)",
                     env);
         }
     }
@@ -151,7 +150,7 @@ final class DynamicKeyName extends Expression {
         if(targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
-        throw target.newUnexpectedTypeException(targetModel, "hash", env);
+        throw new UnexpectedTypeException(target, targetModel, "hash", env);
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
@@ -169,22 +168,24 @@ final class DynamicKeyName extends Expression {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
             if (!hasRhs) end = sequence.size() -1;
             if (start < 0) {
-                throw range.left.newTemplateException("Negative starting index " + start + " for slicing range.");
+                throw new Internal_MiscTemplateException(range.left, new Object[] {
+                        "Negative starting index ", new Integer(start), " for slicing range." });
             }
             if (end < 0) {
-                throw range.right.newTemplateException("Negative ending index " + end + " for slicing range.");
+                throw new Internal_MiscTemplateException(range.right, new Object[] {
+                        "Negative ending index ", new Integer(end), " for slicing range." });
             }
             if (start >= sequence.size()) {
-                throw range.left.newTemplateException(
-                        "Left side index of range out of bounds, is " + start
-                        + ", but the sequence has only " + sequence.size() + " element(s) "
-                        + "(note that indices are 0 based, and ranges are inclusive).");
+                throw new Internal_MiscTemplateException(range.left, new Object[] {
+                        "Left side index of range out of bounds, is ", new Integer(start),
+                        ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
+                        "(Note that indices are 0 based, and ranges are inclusive)." });
             }
             if (end >= sequence.size()) {
-                throw range.right.newTemplateException(
-                        "Right side index of range out of bounds, is " + end
-                        + ", but the sequence has only " + sequence.size() + " element(s)."
-                        + "(note that indices are 0 based, and ranges are inclusive).");
+                throw new Internal_MiscTemplateException(range.right, new Object[] {
+                        "Right side index of range out of bounds, is ", new Integer(end),
+                        ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
+                        "(Note that indices are 0 based, and ranges are inclusive)." });
             }
             ArrayList list = new ArrayList(1+Math.abs(start-end));
             if (start>end) {
@@ -200,36 +201,37 @@ final class DynamicKeyName extends Expression {
             return new SimpleSequence(list);
         }
         
-        try
-        {
-            String s = target.evalAndCoerceToString(env);
-            if (!hasRhs) end = s.length() -1;
-            if (start < 0) {
-                throw range.left.newTemplateException("Negative starting index " + start + " for slicing range.");
-            }
-            if (end < 0) {
-                throw range.right.newTemplateException("Negative ending index " + end + " for slicing range.");
-            }
-            if (start > s.length()) {
-                String msg = "Left side of range out of bounds, is: " + start
-                            + "\nbut string " + targetModel + " has " + s.length() + " elements.";
-                throw range.left.newTemplateException(msg);
-            }
-            if (end > s.length()) {
-                String msg = "Right side of range out of bounds, is: " + end
-                             + "\nbut string " + targetModel + " is only " + s.length() + " characters.";
-                throw range.right.newTemplateException(msg);
-            }
-            try {
-                return new SimpleScalar(s.substring(start, end+1));
-            } catch (RuntimeException re) {
-                throw this.newTemplateException(re);
-            }
+        final String targetStr;
+        try {
+            targetStr = target.evalAndCoerceToString(env);
+        } catch(NonStringException e) {
+            throw new UnexpectedTypeException(target, target.eval(env),
+                    NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence", env);
         }
-        catch(NonStringException e)
-        {
-            throw target.newUnexpectedTypeException(
-                    target.eval(env), MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence", env);
+        
+        if (!hasRhs) end = targetStr.length() -1;
+        if (start < 0) {
+            throw new Internal_MiscTemplateException(range.left, new Object[] {
+                    "Negative starting index ", new Integer(start), " for slicing range." });
+        }
+        if (end < 0) {
+            throw new Internal_MiscTemplateException(range.right, new Object[] {
+                    "Negative ending index ", new Integer(end), " for slicing range." });
+        }
+        if (start > targetStr.length()) {
+            throw new Internal_MiscTemplateException(range.left, new Object[] {
+                    "Left side of range out of bounds, is: ", new Integer(start),
+                    "\nbut the string has ", new Integer(targetStr.length()), " elements." });
+        }
+        if (end > targetStr.length()) {
+            throw new Internal_MiscTemplateException(range.right, new Object[] {
+                    "Right side of range out of bounds, is: ", new Integer(end),
+                    "\nbut the string is only ", new Integer(targetStr.length()), " characters." });
+        }
+        try {
+            return new SimpleScalar(targetStr.substring(start, end+1));
+        } catch (RuntimeException re) {
+            throw new Internal_MiscTemplateException(re, new Object[] { "Unexpected exception: ", re });
         }
     }
 

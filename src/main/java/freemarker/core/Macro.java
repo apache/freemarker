@@ -242,28 +242,26 @@ public final class Macro extends TemplateElement implements TemplateModel {
                             }
                         }
                         else if (!env.isClassicCompatible()) {
-                            String desc = "When calling macro " + StringUtil.jQuote(name) 
-                                    + ", required parameter " + StringUtil.jQuote(argName)
-                                    + " (parameter #" + (i + 1) + ") was ";
-                            String hint;
-                            if (localVars.containsKey(argName)) {
-                                desc += "specified, but had null/missing value.";
-                                hint = "If the parameter value expression on the caller side is known "
-                                        + "to be legally null/missing, you may want to specify a default value "
-                                        + "for it with the \"!\" operator, like "
-                                        + "paramValueExpression!defaultValueExpression.";
-                            } else {
-                                desc += "not specified.";
-                                hint = "If the omission was deliberate, you may consider making "
-                                        + "the parameter optional in the macro by specifying a default value for "
-                                        + "it, like "
-                                        + StringUtil.encloseAsTag(
-                                                getTemplate(), "#macro myMacro paramName=defaultExpr")
-                                        + ")";
-                            }
-                            throw new TemplateException(
-                                    new Internal_ErrorDescriptionBuilder(desc).tip(hint),
-                                    env, true);
+                            boolean argWasSpecified = localVars.containsKey(argName);
+                            throw new Internal_MiscTemplateException(env,
+                                    new Internal_ErrorDescriptionBuilder(new Object[] {
+                                            "When calling macro ", new Internal_DelayedJQuote(name), 
+                                            ", required parameter ", new Internal_DelayedJQuote(argName),
+                                            " (parameter #", new Integer(i + 1), ") was ", 
+                                            (argWasSpecified
+                                                    ? "specified, but had null/missing value."
+                                                    : "not specified.") 
+                                    }).tip(argWasSpecified
+                                            ? new Object[] {
+                                                    "If the parameter value expression on the caller side is known to "
+                                                    + "be legally null/missing, you may want to specify a default "
+                                                    + "value for it with the \"!\" operator, like "
+                                                    + "paramValue!defaultValue." }
+                                            : new Object[] { 
+                                                    "If the omission was deliberate, you may consider making the "
+                                                    + "parameter optional in the macro by specifying a default value "
+                                                    + "for it, like ", "<#macro macroName paramName=defaultExpr>", ")" }
+                                            ));
                         }
                     }
                 }
@@ -273,7 +271,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 if(firstReferenceException != null) {
                     throw firstReferenceException;
                 } else if (!env.isClassicCompatible()) {
-                    throw firstUnresolvedExpression.newInvalidReferenceException(env);
+                    throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
                 }
             }
         }

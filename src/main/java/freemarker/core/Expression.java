@@ -64,7 +64,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.StringUtil;
 
 /**
  * An abstract class for nodes in the parse tree 
@@ -136,7 +135,7 @@ abstract public class Expression extends TemplateObject {
         if(model instanceof TemplateNumberModel) {
             return EvalUtil.modelToNumber((TemplateNumberModel) model, this);
         } else {
-            throw newNonNumericalException(model, env);
+            throw new NonNumericalException(this, model, env);
         }
     }
     
@@ -151,7 +150,7 @@ abstract public class Expression extends TemplateObject {
         } else if (env.isClassicCompatible()) {
             return model != null && !isEmpty(model);
         } else {
-            throw newNonBooleanException(model, env);
+            throw new NonBooleanException(this, model, env);
         }
     }
     
@@ -203,171 +202,7 @@ abstract public class Expression extends TemplateObject {
     }
     
     void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
-        if (model == null) {
-            throw newInvalidReferenceException(env);
-        }
-    }
-
-    TemplateException newTemplateException(Exception cause) {
-        return newTemplateException("Unexpected error: " + cause, (String) null, cause);
-    }
-    
-    TemplateException newTemplateException(String description) {
-        return newTemplateException(description, (String) null, null);
-    }
-
-    TemplateException newTemplateException(String description, String[] tips) {
-        return newTemplateException(description, tips, (Exception) null);
-    }
-    
-    TemplateException newTemplateException(String description, Exception cause) {
-        return newTemplateException(description, (String) null, cause);
-    }
-    
-    TemplateException newTemplateException(String description, String tip, Exception cause) {
-        return new TemplateException(
-                new Internal_ErrorDescriptionBuilder(description).blame(this).tip(tip),
-                cause,
-                Environment.getCurrentEnvironment(),
-                true);
-    }
-
-    TemplateException newTemplateException(String description, String[] tips, Exception cause) {
-        return new TemplateException(
-                new Internal_ErrorDescriptionBuilder(description).blame(this).tips(tips),
-                cause,
-                Environment.getCurrentEnvironment(),
-                true);
-    }
-    
-    TemplateModelException newTemplateModelException(String description) {
-        return newTemplateModelException(description, (String) null, null);
-    }
-    
-    TemplateModelException newTemplateModelException(String description, String[] tips) {
-        return newTemplateModelException(description, tips, null);
-    }
-    
-    TemplateModelException newTemplateModelException(String description, Exception cause) {
-        return newTemplateModelException(description, (String) null, cause);
-    }
-    
-    // TODO: The newTemplateModelException-s shouldn't exist at all. TemplateModelException-s should be blamed on
-    // the expression who has called the failing TM method. Wherever we use these, we blame the wrong expression.
-    TemplateModelException newTemplateModelException(String description, String tip, Exception cause) {
-        return new TemplateModelException(
-                new Internal_ErrorDescriptionBuilder(description).blame(this).tip(tip),
-                cause, true);
-    }
-
-    TemplateModelException newTemplateModelException(String description, String[] tips, Exception cause) {
-        return new TemplateModelException(
-                new Internal_ErrorDescriptionBuilder(description).blame(this).tips(tips),
-                cause, true);
-    }
-
-    InvalidReferenceException newInvalidReferenceException(Environment env) {
-        return newInvalidReferenceException(null, env);
-    }
-    
-    /**
-     * Use this only if you really need a non-standard error message for the case. 
-     */
-    InvalidReferenceException newInvalidReferenceException(String message, Environment env) {
-        if (env != null && env.getFastInvalidReferenceExceptions()) {
-            return InvalidReferenceException.FAST_INSTANCE;
-        } else if (message != null) {
-            return new InvalidReferenceException(new Internal_ErrorDescriptionBuilder(message).blame(this), env);
-        } else {
-            return new InvalidReferenceException(
-                    new Internal_ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(this)
-                            .tip(MessageUtil.INVALID_REFERENCE_EXCEPTION_TIP),
-                        env);
-        }
-    }
-    
-    UnexpectedTypeException newUnexpectedTypeException(TemplateModel model, String expected, Environment env)
-    throws TemplateException {
-        return newUnexpectedTypeException(model, expected, null, env);
-    }
-    
-    UnexpectedTypeException newUnexpectedTypeException(
-            TemplateModel model, String expected, String tip, Environment env)
-    throws InvalidReferenceException
-    {
-        assertNonNull(model, env);
-        return new UnexpectedTypeException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription(expected, model)).blame(this).tip(tip),
-                env);
-    }
-    
-    NonNumericalException newNonNumericalException(TemplateModel model, Environment env)
-    throws InvalidReferenceException {
-        return newNonNumericalException(model, null, env);
-    }
-    
-    NonNumericalException newNonNumericalException(TemplateModel model, String tip, Environment env)
-    throws InvalidReferenceException
-    {
-        assertNonNull(model, env);
-        return new NonNumericalException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription("number", model)).blame(this).tip(tip),
-                env);
-    }
-
-    NonNumericalException newMalformedNumberException(String text) {
-        return new NonNumericalException(
-                new Internal_ErrorDescriptionBuilder(
-                        "Can't convert this string to number: " + StringUtil.jQuote(text)).blame(this),
-                Environment.getCurrentEnvironment());
-    }
-    
-    NonStringException newNonStringException(TemplateModel model, Environment env)
-    throws InvalidReferenceException {
-        assertNonNull(model, env);
-        return new NonStringException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model)
-                        ).blame(this),
-                env);
-    }
-
-    NonStringException newNonStringException(TemplateModel model, String tip, Environment env)
-    throws InvalidReferenceException {
-        assertNonNull(model, env);
-        return new NonStringException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription(MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, model)
-                        ).blame(this).tip(tip),
-                env);
-    }
-    
-    NonDateException newNonDateException(TemplateModel model, Environment env)
-    throws InvalidReferenceException {
-        assertNonNull(model, env);
-        return new NonDateException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription("date", model)).blame(this),
-                env);
-    }
-
-    NonBooleanException newNonBooleanException(TemplateModel model, Environment env)
-    throws InvalidReferenceException {
-        assertNonNull(model, env);
-        return new NonBooleanException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription("boolean", model)).blame(this),
-                env);
-    }
-
-    NonBooleanException newNonBooleanException(Internal_DelayedFTLTypeDescription actualType)
-    throws InvalidReferenceException {
-        return new NonBooleanException(
-                new Internal_ErrorDescriptionBuilder(
-                        MessageUtil.unexpectedTypeErrorDescription("boolean", actualType)).blame(this),
-                Environment.getCurrentEnvironment());
+        if (model == null) throw InvalidReferenceException.getInstance(this, env);
     }
     
 }

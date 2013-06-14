@@ -99,7 +99,8 @@ final class ArithmeticExpression extends Expression {
             case MODULUS :
                 return new SimpleNumber(ae.modulus(leftNumber, rightNumber));
             default:
-                throw this.newTemplateException("Unknown operation : " + operation);
+                throw new Internal_MiscTemplateException(this, new Object[] {
+                        "Unknown operation: ", new Integer(operation) });
         }
     }
 

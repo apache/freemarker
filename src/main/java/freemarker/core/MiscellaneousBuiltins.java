@@ -26,7 +26,6 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
-import freemarker.template.utility.StringUtil;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -49,7 +48,7 @@ class MiscellaneousBuiltins {
                 int size = ((TemplateHashModelEx) model).size();
                 return new SimpleNumber(size);
             }
-            throw target.newUnexpectedTypeException(model, "extended-hash or sequence", env);
+            throw new UnexpectedTypeException(target, model, "extended-hash or sequence", env);
         }
     }
 
@@ -75,9 +74,9 @@ class MiscellaneousBuiltins {
                 if(dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATETIME) {
                     return new SimpleDate(dmodel.getAsDate(), dateType);
                 }
-                throw newTemplateException(
-                    "Cannot convert " + TemplateDateModel.TYPE_NAMES.get(dtype)
-                    + " into " + TemplateDateModel.TYPE_NAMES.get(dateType));
+                throw new Internal_MiscTemplateException(this, new Object[] {
+                            "Cannot convert ", TemplateDateModel.TYPE_NAMES.get(dtype),
+                            " into ", TemplateDateModel.TYPE_NAMES.get(dateType) });
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
@@ -122,13 +121,9 @@ class MiscellaneousBuiltins {
                     dateType);
             }
     
-            public Object exec(List arguments)
-                throws TemplateModelException {
-                if (arguments.size() != 1) {
-                    throw new TemplateModelException(
-                            "string?" + key + "(...) requires exactly 1 argument.");
-                }
-                return get((String) arguments.get(0));
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                return get((String) args.get(0));
             }
     
             public boolean isEmpty()
@@ -148,48 +143,41 @@ class MiscellaneousBuiltins {
                     if (df instanceof SimpleDateFormat) {
                         pattern = ((SimpleDateFormat) df).toPattern();
                     }
-                    throw newTemplateModelException(
-                            "The string doesn't match the expected date/time format. "
-                            + "The string to parse was: " + StringUtil.jQuote(text)
-                            + (pattern != null
-                                    ? ". The expected format was: "
-                                      + StringUtil.jQuote(pattern) + "."
-                                    : "")
-                            + " The string-to-date converter was created here:", e);
+                    throw new Internal_TemplateModelException(new Object[] {
+                            "The string doesn't match the expected date/time format. The string to parse was: ",
+                            new Internal_DelayedJQuote(text), ". ",
+                            (pattern != null ? "The expected format was: " : ""),
+                            (pattern != null ? (Object) new Internal_DelayedJQuote(pattern) : (Object) ""),
+                            (pattern != null ? ". " : "") });
                 }
             }
         }
     }
 
     static class stringBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+        
+        TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
                 return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel)model, target), env);
-            }
-            if (model instanceof TemplateDateModel) {
+            } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
                 int dateType = dm.getDateType();
                 return new DateFormatter(EvalUtil.modelToDate(dm, target), dateType, env);
-            }
-            if (model instanceof SimpleScalar) {
+            } else if (model instanceof SimpleScalar) {
                 return model;
-            }
-            if (model instanceof TemplateBooleanModel) {
+            } else if (model instanceof TemplateBooleanModel) {
                 return new BooleanFormatter((TemplateBooleanModel) model, env);
-            }
-            if (model instanceof TemplateScalarModel) {
+            } else if (model instanceof TemplateScalarModel) {
                 return new SimpleScalar(((TemplateScalarModel) model).getAsString());
-            }
-            if (env.isClassicCompatible() && model instanceof BeanModel) {
+            } else if (env.isClassicCompatible() && model instanceof BeanModel) {
                 return new SimpleScalar(Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) model));
-            }            
-            throw target.newUnexpectedTypeException(model, "number, date, or string", env);
+            } else {            
+                throw new UnexpectedTypeException(target, model, "number, date, or string", env);
+            }
         }
     
-        private static class NumberFormatter
+        private class NumberFormatter
         implements
             TemplateScalarModel,
             TemplateHashModel,
@@ -220,13 +208,9 @@ class MiscellaneousBuiltins {
                 return new SimpleScalar(env.getNumberFormatObject(key).format(number));
             }
             
-            public Object exec(List arguments)
-                throws TemplateModelException {
-                if (arguments.size() != 1) {
-                    throw new TemplateModelException(
-                            "number?string(...) requires exactly 1 argument.");
-                }
-                return get((String) arguments.get(0));
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                return get((String) args.get(0));
             }
     
             public boolean isEmpty()
@@ -235,7 +219,7 @@ class MiscellaneousBuiltins {
             }
         }
         
-        private static class DateFormatter
+        private class DateFormatter
         implements
             TemplateScalarModel,
             TemplateHashModel,
@@ -262,11 +246,10 @@ class MiscellaneousBuiltins {
                 TemplateModelException
             {
                 if(dateType == TemplateDateModel.UNKNOWN) {
-                    throw new TemplateModelException(
-                            new Internal_ErrorDescriptionBuilder(
-                                    "Can't convert the date to string, because it isn't known if it's a "
-                                    + "date-only, time-only, or date-time value.")
-                                    .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS), true);
+                    throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
+                            "Can't convert the date to string, because it isn't known if it's a "
+                            + "date-only, time-only, or date-time value.")
+                            .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                 }
                 if(cachedValue == null) {
                     cachedValue = defaultFormat.format(date);
@@ -281,13 +264,9 @@ class MiscellaneousBuiltins {
                 return new SimpleScalar(env.getDateFormatObject(dateType, key).format(date));
             }
             
-            public Object exec(List arguments)
-                throws TemplateModelException {
-                if (arguments.size() != 1) {
-                    throw new TemplateModelException(
-                            "date?string(...) requires exactly 1 argument.");
-                }
-                return get((String) arguments.get(0));
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                return get((String) args.get(0));
             }
     
             public boolean isEmpty()
@@ -296,7 +275,7 @@ class MiscellaneousBuiltins {
             }
         }
     
-        private static class BooleanFormatter
+        private class BooleanFormatter
         implements 
             TemplateScalarModel, 
             TemplateMethodModel 
@@ -318,13 +297,9 @@ class MiscellaneousBuiltins {
                 }
             }
     
-            public Object exec(List arguments)
-                    throws TemplateModelException {
-                if (arguments.size() != 2) {
-                    throw new TemplateModelException("boolean?string(...) requires exactly 2 arguments.");
-                }
-                return new SimpleScalar(
-                    (String) arguments.get(bool.getAsBoolean() ? 0 : 1));
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 2);
+                return new SimpleScalar((String) args.get(bool.getAsBoolean() ? 0 : 1));
             }
         }
     }
@@ -465,9 +440,10 @@ class MiscellaneousBuiltins {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             if (!(tm instanceof Macro)) {
-                throw target.newUnexpectedTypeException(tm, "macro or function", env);
+                throw new UnexpectedTypeException(target, tm, "macro or function", env);
+            } else {
+                return env.getMacroNamespace((Macro) tm);
             }
-            return env.getMacroNamespace((Macro) tm);
         }
     }
 

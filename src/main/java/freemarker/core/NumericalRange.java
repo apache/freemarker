@@ -86,7 +86,8 @@ class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
     public TemplateModel get(int i) throws TemplateModelException {
         int index = descending ? (upper -i) : (lower + i);
         if ((norhs && index > upper) || index <lower) {
-            throw new TemplateModelException("out of bounds of range");
+            throw new Internal_TemplateModelException(new Object[] {
+                    "Range item index ", new Integer(i), " is out of bounds." });
         }
         return new SimpleNumber(index);
     }

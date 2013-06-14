@@ -123,7 +123,8 @@ abstract class RegexBuiltins {
         try {
             result = Pattern.compile(patternString, flags);
         } catch (PatternSyntaxException e) {
-            throw new TemplateModelException(e);
+            throw new Internal_TemplateModelException(e, new Object[] {
+                    "Malformed regular expression: ", new Internal_DelayedGetMessage(e) });
         }
         synchronized (patternCache) {
             patternCache.put(patternKey, result);
@@ -252,11 +253,11 @@ abstract class RegexBuiltins {
             assertNonNull(targetModel, env);
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
-            }
-            if (targetModel instanceof RegexMatchModel.Match) {
+            } else if (targetModel instanceof RegexMatchModel.Match) {
                 return ((RegexMatchModel.Match) targetModel).subs;
+            } else {
+                throw new UnexpectedTypeException(target, targetModel, "regular expression matcher", env);
             }
-            throw target.newUnexpectedTypeException(targetModel, "regular_expression_matcher", env);
         }
     }
     
@@ -303,6 +304,32 @@ abstract class RegexBuiltins {
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new SplitMethod(s);
         }
+        
+        class SplitMethod implements TemplateMethodModel {
+            private String s;
+
+            SplitMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String splitString = (String) args.get(0);
+                long flags = argCnt > 1 ? parseFlagString((String) args.get(1)) : 0;
+                String[] result = null;
+                if ((flags & RE_FLAG_REGEXP) == 0) {
+                    checkNonRegexpFlags("split", flags);
+                    result = StringUtil.split(s, splitString,
+                            (flags & RE_FLAG_CASE_INSENSITIVE) != 0);
+                } else {
+                    Pattern pattern = getPattern(splitString, (int) flags);
+                    result = pattern.split(s);
+                } 
+                return ObjectWrapper.DEFAULT_WRAPPER.wrap(result);
+            }
+        }
+        
     }
     
     // Represents the match
@@ -351,7 +378,7 @@ abstract class RegexBuiltins {
                             return matcher.groupCount() + 1;
                         }
                         catch (Exception e) {
-                            throw new TemplateModelException(e);
+                            throw new Internal_TemplateModelException(e);
                         }
                     }
                     public TemplateModel get(int i) throws TemplateModelException {
@@ -359,7 +386,7 @@ abstract class RegexBuiltins {
                             return new SimpleScalar(matcher.group(i));
                         }
                         catch (Exception e) {
-                            throw new TemplateModelException(e);
+                            throw new Internal_TemplateModelException(e);
                         }
                     }
                 };
@@ -377,7 +404,7 @@ abstract class RegexBuiltins {
                 }
                 
                 public TemplateModel next() throws TemplateModelException {
-                    if (!hasNext()) throw new TemplateModelException("No more matches");
+                    if (!hasNext()) throw new Internal_TemplateModelException("No more matches");
                     Match result = new Match();
                     hasFindInfo = matcher.find();
                     return result;
@@ -417,31 +444,4 @@ abstract class RegexBuiltins {
         }
     }
     
-    static class SplitMethod implements TemplateMethodModel {
-        private String s;
-
-        SplitMethod(String s) {
-            this.s = s;
-        }
-
-        public Object exec(List args) throws TemplateModelException {
-            int numArgs = args.size();
-            if (numArgs < 1 || numArgs >2 ) {
-                throw new TemplateModelException(
-                        "?replace(...) needs 1 or 2 arguments.");
-            }
-            String splitString = (String) args.get(0);
-            long flags = numArgs > 1 ? parseFlagString((String) args.get(1)) : 0;
-            String[] result = null;
-            if ((flags & RE_FLAG_REGEXP) == 0) {
-                checkNonRegexpFlags("split", flags);
-                result = StringUtil.split(s, splitString,
-                        (flags & RE_FLAG_CASE_INSENSITIVE) != 0);
-            } else {
-                Pattern pattern = getPattern(splitString, (int) flags);
-                result = pattern.split(s);
-            } 
-            return ObjectWrapper.DEFAULT_WRAPPER.wrap(result);
-        }
-    }
 }

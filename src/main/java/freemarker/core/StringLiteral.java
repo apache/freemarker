@@ -108,7 +108,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                return env.renderElementToString(interpolatedOutput);
             }
             catch (IOException ioe) {
-                throw new TemplateException(ioe, env);
+                throw new Internal_MiscTemplateException(ioe, env);
             }
             finally {
                 env.setTemplateExceptionHandler(teh);

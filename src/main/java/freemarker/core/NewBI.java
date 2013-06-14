@@ -65,14 +65,11 @@ import freemarker.template.TemplateScalarModel;
 
 /**
  * A built-in that allows us to instantiate an instance of a java class.
- * Usage is something like:
- * &lt;#assign foobar = "foo.bar.MyClass"?new() /&gt;
+ * Usage is something like: <tt>&lt;#assign foobar = "foo.bar.MyClass"?new()></tt>;
  */
-
 class NewBI extends BuiltIn
 {
     
-    static final Class TM_CLASS = TemplateModel.class;
     static final Class BEAN_MODEL_CLASS = freemarker.ext.beans.BeanModel.class;
     static Class JYTHON_MODEL_CLASS;
     static {
@@ -86,25 +83,28 @@ class NewBI extends BuiltIn
     TemplateModel _eval(Environment env)
             throws TemplateException 
     {
-        return new ConstructorFunction(target.evalAndCoerceToString(env), env, this, target.getTemplate());
+        return new ConstructorFunction(target.evalAndCoerceToString(env), env, target.getTemplate());
     }
 
-    static class ConstructorFunction implements TemplateMethodModelEx {
+    class ConstructorFunction implements TemplateMethodModelEx {
 
         private final Class cl;
         private final Environment env;
         
-        public ConstructorFunction(String classname, Environment env, Expression bi, Template template) throws TemplateException {
+        public ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
             this.env = env;
             cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
-            if (!TM_CLASS.isAssignableFrom(cl)) {
-                throw bi.newTemplateException("Class " + cl.getName() + " does not implement freemarker.template.TemplateModel");
+            if (!TemplateModel.class.isAssignableFrom(cl)) {
+                throw new Internal_MiscTemplateException(NewBI.this, env, new Object[] {
+                        "Class ", cl.getName(), " does not implement freemarker.template.TemplateModel" });
             }
             if (BEAN_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw bi.newTemplateException("Bean Models cannot be instantiated using the ?new built-in");
+                throw new Internal_MiscTemplateException(NewBI.this, env, new Object[] {
+                        "Bean Models cannot be instantiated using the ?", key, " built-in" });
             }
             if (JYTHON_MODEL_CLASS != null && JYTHON_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw bi.newTemplateException("Jython Models cannot be instantiated using the ?new built-in");
+                throw new Internal_MiscTemplateException(NewBI.this, env, new Object[] {
+                        "Jython Models cannot be instantiated using the ?", key, " built-in" });
             }
         }
 

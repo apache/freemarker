@@ -3,25 +3,15 @@ package freemarker.core;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.ClassUtil;
 
-public class Internal_DelayedFTLTypeDescription {
-
-    private final TemplateModel tm;
-    private String description;
-
-    public Internal_DelayedFTLTypeDescription(TemplateModel tm) {
-        this.tm = tm;
-    }
-
-    public String toString() {
-        TemplateModel tm = this.tm;
-        if (tm != null) {
-            String s = ClassUtil.getFTLTypeDescription(tm);
-            synchronized (this) {
-                description = s;
-                tm = null;
-            }
-        }
-        return description;
-    }
+/** Don't use this; used internally by FreeMarker, might changes without notice. */
+public class Internal_DelayedFTLTypeDescription extends Internal_DelayedConversionToString {
     
+    public Internal_DelayedFTLTypeDescription(TemplateModel tm) {
+        super(tm);
+    }
+
+    protected String doConversion(Object obj) {
+        return ClassUtil.getFTLTypeDescription((TemplateModel) obj);
+    }
+
 }

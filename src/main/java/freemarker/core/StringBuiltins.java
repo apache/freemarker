@@ -195,8 +195,10 @@ class StringBuiltins {
                 }
             } catch (ParseException pe) {
                 pe.setTemplateName(getTemplate().getName());
-                throw newTemplateException("Failed to \"?eval\" string value:\n"
-                        + pe.getMessage() + "\n\nThe failing expression:");
+                throw new Internal_MiscTemplateException(this, new Object[] {
+                        "Failed to parse string value:\n",
+                        new Internal_DelayedGetMessage(pe),
+                        "\n\nThe failing expression:" });
             }
             return exp.eval(env);
         }
@@ -207,9 +209,8 @@ class StringBuiltins {
         {
             try {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));
-            }
-            catch(NumberFormatException nfe) {
-                throw newMalformedNumberException(s);
+            } catch(NumberFormatException nfe) {
+                throw NonNumericalException.newMalformedNumberException(this, s, env);
             }
         }
     }
@@ -309,7 +310,7 @@ class StringBuiltins {
                 if (cachedResult == null) {
                     String cs = env.getEffectiveURLEscapingCharset();
                     if (cs == null) {
-                        throw new TemplateModelException(
+                        throw new Internal_TemplateModelException(
                                 "To do URL encoding, the framework that encloses "
                                 + "FreeMarker must specify the output encoding "
                                 + "or the URL encoding charset, so ask the "
@@ -323,8 +324,7 @@ class StringBuiltins {
                     try {
                         cachedResult = StringUtil.URLEnc(target, cs);
                     } catch (UnsupportedEncodingException e) {
-                        throw new TemplateModelException(
-                                "Failed to execute URL encoding.", e);
+                        throw new Internal_TemplateModelException(e, "Failed to execute URL encoding.");
                     }
                 }
                 return cachedResult;
@@ -332,15 +332,14 @@ class StringBuiltins {
     
             public Object exec(List args) throws TemplateModelException {
                 if (args.size() != 1) {
-                    throw new TemplateModelException("The \"url\" built-in "
-                            + "needs exactly 1 parameter, the charset.");
+                    throw new Internal_TemplateModelException(
+                            "The \"url\" built-in needs exactly 1 parameter, the charset.");
                 }
                 try {
                     return new SimpleScalar(
                             StringUtil.URLEnc(target, (String) args.get(0)));
                 } catch (UnsupportedEncodingException e) {
-                    throw new TemplateModelException(
-                            "Failed to execute URL encoding.", e);
+                    throw new Internal_TemplateModelException(e, "Failed to execute URL encoding.");
                 }
             }
             
@@ -415,7 +414,8 @@ class StringBuiltins {
                     caseInsensitive = flags.indexOf('i') >= 0;
                     firstOnly = flags.indexOf('f') >= 0;
                     if (flags.indexOf('r') >=0) {
-                        throw new TemplateModelException("The regular expression classes are not available.");
+                        throw new Internal_TemplateModelException(
+                                "The regular expression classes are not available.");
                     }
                 } else {
                     caseInsensitive = false;
@@ -448,7 +448,7 @@ class StringBuiltins {
                 String flags = argCnt == 2 ? (String) args.get(1) : "";
                 boolean caseInsensitive = flags.indexOf('i') >=0;
                 if (flags.indexOf('r') >=0) {
-                    throw new TemplateModelException("regular expression classes not available");
+                    throw new Internal_TemplateModelException("Regular expression classes not available");
                 }
                 return new StringArraySequence(StringUtil.split(
                         s, splitString, caseInsensitive));
@@ -491,18 +491,15 @@ class StringBuiltins {
                                         : StringUtil.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
-                            throw new TemplateModelException(
-                                    "?" + key + "(...) argument #2 can't be a 0-length string.");
+                            throw new Internal_TemplateModelException(new Object[] {
+                                    "?", key, "(...) argument #2 can't be a 0-length string." });
                         } else {
-                            throw new TemplateModelException(
-                                    "?" + key + "(...) failed: " + e, e);
+                            throw new Internal_TemplateModelException(e, new Object[] {
+                                    "?", key, "(...) failed: ", e });
                         }
                     }
                 } else {
-                    return new SimpleScalar(
-                            leftPadder
-                                    ? StringUtil.leftPad(s, width)
-                                    : StringUtil.rightPad(s, width));
+                    return new SimpleScalar(leftPadder ? StringUtil.leftPad(s, width) : StringUtil.rightPad(s, width));
                 }
             }
         }
@@ -511,8 +508,7 @@ class StringBuiltins {
     static class containsBI extends BuiltIn {
         
         TemplateModel _eval(Environment env) throws TemplateException {
-            return new BIMethod(target.evalAndCoerceToString(
-                    env,
+            return new BIMethod(target.evalAndCoerceToString(env,
                     "For sequences/collections (lists and such) use \"?seq_contains\" instead."));
         }
     
@@ -541,8 +537,7 @@ class StringBuiltins {
         }
 
         TemplateModel _eval(Environment env) throws TemplateException {
-            return new BIMethod(target.evalAndCoerceToString(
-                    env,
+            return new BIMethod(target.evalAndCoerceToString(env,
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
         }
         

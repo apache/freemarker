@@ -69,10 +69,10 @@ public class Internal_ErrorDescriptionBuilder {
                 if (i != 0) sb.append('\n');
                 sb.append("Tip: ");
                 Object tip = tips[i];
-                if (tip instanceof String) {
+                if (!(tip instanceof Object[])) {
                     sb.append(tips[i]);
                 } else {
-                    appendParts(sb, (String[]) tip);
+                    appendParts(sb, (Object[]) tip);
                 }
             }
         }
@@ -81,30 +81,34 @@ public class Internal_ErrorDescriptionBuilder {
     }
 
     private void appendParts(StringBuffer sb, Object[] parts) {
-        Template template =
-                this.template != null ? this.template : (blame != null ? blame.getTemplate() : null); 
+        Template template = this.template != null ? this.template : (blame != null ? blame.getTemplate() : null); 
         for (int i = 0; i < parts.length; i++) {
-            String part = parts[i].toString();
-            if (template != null) {
-                if (part.length() > 4
-                        && part.charAt(0) == '<'
-                        && (
-                                (part.charAt(1) == '#' || part.charAt(1) == '@')
-                                || (part.charAt(1) == '/') && (part.charAt(2) == '#' || part.charAt(2) == '@')
-                           )
-                        && part.charAt(part.length() - 1) == '>') {
-                    if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
-                        sb.append('[');
-                        sb.append(part.substring(1, part.length() - 1));
-                        sb.append(']');
+            Object partObj = parts[i];
+            if (partObj instanceof Object[]) {
+                appendParts(sb, (Object[]) partObj);
+            } else {
+                String part = parts[i].toString();
+                if (template != null) {
+                    if (part.length() > 4
+                            && part.charAt(0) == '<'
+                            && (
+                                    (part.charAt(1) == '#' || part.charAt(1) == '@')
+                                    || (part.charAt(1) == '/') && (part.charAt(2) == '#' || part.charAt(2) == '@')
+                               )
+                            && part.charAt(part.length() - 1) == '>') {
+                        if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
+                            sb.append('[');
+                            sb.append(part.substring(1, part.length() - 1));
+                            sb.append(']');
+                        } else {
+                            sb.append(part);
+                        }
                     } else {
                         sb.append(part);
                     }
                 } else {
                     sb.append(part);
                 }
-            } else {
-                sb.append(part);
             }
         }
     }
@@ -121,18 +125,18 @@ public class Internal_ErrorDescriptionBuilder {
         this.blame = blamedExpr;
         return this;
     }
-
+    
     public Internal_ErrorDescriptionBuilder tip(String tip) {
         this.tip = tip;
         return this;
     }
     
-    public Internal_ErrorDescriptionBuilder tip(String tip[]) {
+    public Internal_ErrorDescriptionBuilder tip(Object tip[]) {
         this.tip = tip;
         return this;
     }
     
-    public Internal_ErrorDescriptionBuilder tips(String[] tips) {
+    public Internal_ErrorDescriptionBuilder tips(Object[] tips) {
         this.tips = tips;
         return this;
     }

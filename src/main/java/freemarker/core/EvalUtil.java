@@ -65,8 +65,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Internally used static utilities for evaluation expressions.
@@ -127,8 +125,7 @@ class EvalUtil
     /** Signals the buggy case where we have a non-null model, but its wraps a null. */
     private static TemplateModelException newModelHasStoredNullException(
             Class expected, TemplateModel model, Expression expr) {
-        String msg = MessageUtil.buildModelHasStoredNullMessage(expected, model);
-        return expr != null ? expr.newTemplateModelException(msg) : new TemplateModelException(msg);
+        return new Internal_TemplateModelException(expr, Internal_TemplateModelException.modelHasStoredNullDescription(expected, model));
     }
 
     /**
@@ -230,14 +227,10 @@ class EvalUtil
                     return false;
                 } else {
                     if (leftExp != null) {
-                        leftExp.assertNonNull(leftValue, env);
+                        throw InvalidReferenceException.getInstance(leftExp, env);
                     } else {
-                        String desc = "The left operand of the comparison was undefined or null.";
-                        if (defaultBlamed != null) {
-                            throw defaultBlamed.newTemplateException(desc);
-                        } else {
-                            throw new TemplateException(desc, env);
-                        }
+                        throw new Internal_MiscTemplateException(defaultBlamed, env, 
+                                    "The left operand of the comparison was undefined or null.");
                     }
                 }
             }
@@ -251,14 +244,10 @@ class EvalUtil
                     return false;
                 } else {
                     if (rightExp != null) {
-                        throw rightExp.newInvalidReferenceException(env);
+                        throw InvalidReferenceException.getInstance(rightExp, env);
                     } else {
-                        String msg = "The right operand of the comparison was undefined or null.";
-                        if (defaultBlamed != null) {
-                            throw defaultBlamed.newTemplateException(msg);
-                        } else {
-                            throw new TemplateException(msg, env);
-                        }
+                        throw new Internal_MiscTemplateException(defaultBlamed, env,
+                                    "The right operand of the comparison was undefined or null.");
                     }
                 }
             }
@@ -277,12 +266,8 @@ class EvalUtil
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);
             } catch (RuntimeException e) {
-                String desc = "Unexpected error while comparing two numbers: " + e;
-                if (defaultBlamed != null) {
-                    throw defaultBlamed.newTemplateModelException(desc, e);
-                } else {
-                    throw new TemplateModelException(desc, e);
-                }
+                throw new Internal_MiscTemplateException(defaultBlamed, e, env, new Object[]
+                        { "Unexpected error while comparing two numbers: ", e });
             }
         } else if (leftValue instanceof TemplateDateModel && rightValue instanceof TemplateDateModel) {
             TemplateDateModel leftDateModel = (TemplateDateModel) leftValue;
@@ -302,25 +287,16 @@ class EvalUtil
                     sideExp = rightExp;
                 }
                 
-                String desc = "The " + sideName + " " + DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN; 
-                if (sideExp != null) {
-                    throw sideExp.newTemplateException(desc, MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);                    
-                } else if (defaultBlamed != null) {
-                    throw defaultBlamed.newTemplateModelException(desc, MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);
-                } else {
-                    throw new TemplateException(desc, env);
-                }
+                throw new Internal_MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env, new Object[] {
+                        "The ", sideName, " ", DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN });
             }
             
             if (leftDateType != rightDateType) {
-                String desc = "Can not compare dates of different types. Left date is of "
-                        + TemplateDateModel.TYPE_NAMES.get(leftDateType) + " type, right date is of "
-                        + TemplateDateModel.TYPE_NAMES.get(rightDateType) + " type.";
-                if (defaultBlamed != null) {
-                    throw defaultBlamed.newTemplateModelException(desc);
-                } else {
-                    throw new TemplateException(desc, env);
-                }
+                ;
+                throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+                        "Can't compare dates of different types. Left date tpye is ",
+                        TemplateDateModel.TYPE_NAMES.get(leftDateType), ", right date type is ",
+                        TemplateDateModel.TYPE_NAMES.get(rightDateType), "." });
             }
 
             Date leftDate = EvalUtil.modelToDate(leftDateModel, leftExp);
@@ -328,13 +304,8 @@ class EvalUtil
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                String desc = "Can not use operator \"" + cmpOpToString(operator, operatorString)
-                        + "\" on string values.";
-                if (defaultBlamed != null) {
-                    throw defaultBlamed.newTemplateModelException(desc);
-                } else {
-                    throw new TemplateException(desc, env);
-                }
+                throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+                        "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values." });
             }
             String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
             String rightString = EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
@@ -342,13 +313,8 @@ class EvalUtil
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                String desc = "Can not use operator \"" + cmpOpToString(operator, operatorString)
-                        + "\" on boolean values.";
-                if (defaultBlamed != null) {
-                    throw defaultBlamed.newTemplateModelException(desc);
-                } else {
-                    throw new TemplateException(desc, env);
-                }
+                throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+                        "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on boolean values." });
             }
             boolean leftBool = ((TemplateBooleanModel) leftValue).getAsBoolean();
             boolean rightBool = ((TemplateBooleanModel) rightValue).getAsBoolean();
@@ -366,15 +332,11 @@ class EvalUtil
                 }
                 // Falls through
             }
-            throw new TemplateException(
-                    new Internal_ErrorDescriptionBuilder(new Object[] {
+            throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
                             "Can't compare values of these types. ",
                             "Allowed comparisons are between two numbers, two strings, or two dates.\n",
-                            "Left hand operand is a(n) ", new Internal_DelayedFTLTypeDescription(leftValue), ".\n",
-                            "Right hand operand is a(n) ", new Internal_DelayedFTLTypeDescription(rightValue), "."
-                    }).blame(defaultBlamed),
-                    env,
-                    true);
+                            "Left hand operand is ", new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(leftValue)), ".\n",
+                            "Right hand operand is ", new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(rightValue)), "." });
         }
 
         switch (operator) {
@@ -417,7 +379,7 @@ class EvalUtil
                 return "";
             } else {
                 if (exp != null) {
-                    throw exp.newInvalidReferenceException(env);
+                    throw InvalidReferenceException.getInstance(exp, env);
                 } else {
                     throw new InvalidReferenceException(
                             "Null/missing value (no more informatoin avilable)",
@@ -438,25 +400,9 @@ class EvalUtil
             if (env.isClassicCompatible() && tm instanceof BeanModel) {
                 return Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
             } if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
-                if (exp != null) {
-                    throw exp.newNonStringException(tm, seqHint, env);
-                } else {
-                    throw new NonStringException(
-                            new Internal_ErrorDescriptionBuilder(
-                                    MessageUtil.unexpectedTypeErrorDescription(
-                                            MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm)).tip(seqHint),
-                            env);
-                }
+                throw new NonStringException(exp, tm, seqHint, env);
             } else {
-                if (exp != null) {
-                    throw exp.newNonStringException(tm, env);
-                } else {
-                    throw new NonStringException(
-                            new Internal_ErrorDescriptionBuilder(
-                                    MessageUtil.unexpectedTypeErrorDescription(
-                                            MessageUtil.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tm)),
-                            env);
-                }
+                throw new NonStringException(exp, tm, env);
             }
         }
     }

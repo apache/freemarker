@@ -109,23 +109,17 @@ public class TestJspTaglibs extends TestCase {
         refFile = new File(thisDir, "reference/test-jsptaglibs.txt");
     }
 
-    public void runTest() throws TemplateException {
-        try {
-            ServletConfig cfg = new MockServletConfig();
-            FreemarkerServlet servlet = new FreemarkerServlet();
-            servlet.init(cfg);
-            MockRequest req = new MockRequest("test-jsptaglibs.txt");
-            MockResponse resp = new MockResponse();
-            servlet.doGet(req, resp);
-            StringReader output = new StringReader(resp.toString());
-            Reader reference = new FileReader(refFile);
-            System.out.println(resp.toString());
-            TemplateTestCase.compare(reference,output);
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-            throw new TemplateException(e, null);
-        }
+    public void runTest() throws Exception {
+        ServletConfig cfg = new MockServletConfig();
+        FreemarkerServlet servlet = new FreemarkerServlet();
+        servlet.init(cfg);
+        MockRequest req = new MockRequest("test-jsptaglibs.txt");
+        MockResponse resp = new MockResponse();
+        servlet.doGet(req, resp);
+        StringReader output = new StringReader(resp.toString());
+        Reader reference = new FileReader(refFile);
+        System.out.println(resp.toString());
+        TemplateTestCase.compare(reference,output);
     }
 
     private static class MockServletConfig

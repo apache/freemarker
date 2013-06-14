@@ -74,7 +74,7 @@ final class UnaryPlusMinusExpression extends Expression {
         try {
             targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {
-            throw newNonNumericalException(tm, env);
+            throw new NonNumericalException(target, tm, env);
         }
         if (!isMinus) {
             return targetModel;

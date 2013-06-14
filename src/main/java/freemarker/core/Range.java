@@ -86,7 +86,7 @@ final class Range extends Expression {
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean evalToBoolean(Environment env) throws TemplateException {
-        throw newNonBooleanException(new Internal_DelayedFTLTypeDescription(new NumericalRange(0, 0)));
+        throw new NonBooleanException(this, new NumericalRange(0, 0), env);
     }
 
     public String getCanonicalForm() {

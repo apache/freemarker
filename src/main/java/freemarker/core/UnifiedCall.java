@@ -108,10 +108,10 @@ final class UnifiedCall extends TemplateElement {
         if (tm instanceof Macro) {
             Macro macro = (Macro) tm;
             if (macro.isFunction && !legacySyntax) {
-                throw new TemplateException("Routine " + macro.getName() + 
-                        " is a function. A function can only be called " +
-                        "within the evaluation of an expression, like from inside ${...}.",
-                        env);
+                throw new Internal_MiscTemplateException(env, new Object[] {
+                        "Routine ", new Internal_DelayedJQuote(macro.getName()), " is a function, not a directive. "
+                        + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
+                        "<@someDirective someParam=f() />", "." });
             }    
             env.visit(macro, namedArgs, positionalArgs, bodyParameterNames,
                     nestedBlock);
@@ -141,9 +141,9 @@ final class UnifiedCall extends TemplateElement {
                 }
             }
             else if (tm == null) {
-                throw nameExp.newInvalidReferenceException(env);
+                throw InvalidReferenceException.getInstance(nameExp, env);
             } else {
-                throw nameExp.newUnexpectedTypeException(tm, "user-defined directive (macro, etc.)", env);
+                throw new UnexpectedTypeException(nameExp, tm, "user-defined directive (macro, etc.)", env);
             }
         }
     }

@@ -80,15 +80,6 @@ public class TemplateModelException extends TemplateException {
     }
 
     /**
-     * Don't use this; this is to be used internal by FreeMarker.
-     * @param preventAmbiguity its value is ignored; it's to prevent constructor selection ambiguities for
-     *     backward-compatibility
-     */
-    public TemplateModelException(Internal_ErrorDescriptionBuilder description, boolean preventAmbiguity) {
-        this(description, null, true);
-    }
-    
-    /**
      * Constructs a <tt>TemplateModelException</tt> with the given underlying
      * Exception, but no detail message.
      *
@@ -109,16 +100,28 @@ public class TemplateModelException extends TemplateException {
      * exception to be raised
      */
     public TemplateModelException(String description, Exception cause) {
-        super(description, cause, Environment.getCurrentEnvironment());
+        super(description, cause, null);
     }
 
     /**
-     * Don't use this; this is to be used internal by FreeMarker.
-     * @param preventAmbiguity its value is ignored; it's to prevent constructor selection ambiguities for
+     * Don't use this; this is to be used internally by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
      *     backward-compatibility
      */
-    public TemplateModelException(Internal_ErrorDescriptionBuilder description, Exception cause, boolean preventAmbiguity) {
-        super(description, cause, Environment.getCurrentEnvironment(), true);
+    protected TemplateModelException(Throwable cause, Environment env, String description,
+            boolean preventAmbiguity) {
+        super(cause, env, description, true);
+    }
+    
+    /**
+     * Don't use this; this is to be used internally by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
+     *     backward-compatibility
+     */
+    protected TemplateModelException(
+            Throwable cause, Environment env, Internal_ErrorDescriptionBuilder descriptionBuilder,
+            boolean preventAmbiguity) {
+        super(cause, env, descriptionBuilder, true);
     }
     
 }

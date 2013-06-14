@@ -65,7 +65,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UnrecognizedTimeZoneException;
 
 /**
@@ -86,9 +85,9 @@ class DateBuiltins {
                 return calculateResult(EvalUtil.modelToDate(tdm, target), tdm.getDateType(), env);
             } else {
                 if(model == null) {
-                    throw target.newInvalidReferenceException(env);
+                    throw InvalidReferenceException.getInstance(target, env);
                 } else {
-                    throw target.newUnexpectedTypeException(model, "date", env);
+                    throw new NonDateException(target, model, "date", env);
                 }
             }
         }
@@ -112,11 +111,10 @@ class DateBuiltins {
         protected void checkDateTypeNotUnknown(int dateType)
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
-                throw target.newTemplateException(
-                        "The value of the following has unknown date type, but ?" + key + " needs a date value "
-                        + "where it's known if it's a date-only, time-only, or "
-                        + "date+time value:",
-                        MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS);
+                throw new Internal_MiscTemplateException(new Internal_ErrorDescriptionBuilder(new Object[] {
+                            "The value of the following has unknown date type, but ?", key,
+                            " needs a date value where it's known if it's a date-only, time-only, or date+time value:"                        
+                        }).blame(target).tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
             }
         }
     }
@@ -178,11 +176,7 @@ class DateBuiltins {
             }
 
             public Object exec(List args) throws TemplateModelException {
-                if (args.size() != 1) {
-                    throw new TemplateModelException(
-                        "?" + key + "(...) expects exactly 1 argument, but had "
-                        + args.size() + ".");
-                }
+                checkMethodArgCount(args, 1);
                 
                 TemplateModel tzArgTM = (TemplateModel) args.get(0);
                 TimeZone tzArg; 
@@ -198,10 +192,10 @@ class DateBuiltins {
                     try {
                         tzArg = DateUtil.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
-                        throw new TemplateModelException(
-                                "The time zone string specified for ?" + key +
-                                "(...) is not recognized as a valid time zone name: " +
-                                StringUtil.jQuote(tzName));
+                        throw new Internal_TemplateModelException(new Object[] {
+                                "The time zone string specified for ?", key,
+                                "(...) is not recognized as a valid time zone name: ",
+                                new Internal_DelayedJQuote(tzName) });
                     }
  
                 } else {

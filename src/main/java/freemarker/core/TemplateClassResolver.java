@@ -82,7 +82,7 @@ public interface TemplateClassResolver {
             try {
                 return ClassUtil.forName(className);
             } catch (ClassNotFoundException e) {
-                throw new TemplateException(e, env);
+                throw new Internal_MiscTemplateException(e, env);
             }
         }
         
@@ -99,15 +99,12 @@ public interface TemplateClassResolver {
             if (className.equals(ObjectConstructor.class.getName())
                     || className.equals(Execute.class.getName())
                     || className.equals("freemarker.template.utility.JythonRuntime")) {
-                throw new TemplateException(
-                        "Instantiating " + className + " is not allowed in the " +
-                        "template for security reasons.",
-                        env);
+                throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
             }
             try {
                 return ClassUtil.forName(className);
             } catch (ClassNotFoundException e) {
-                throw new TemplateException(e, env);
+                throw new Internal_MiscTemplateException(e, env);
             }
         }
         
@@ -120,10 +117,7 @@ public interface TemplateClassResolver {
 
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
-            throw new TemplateException(
-                    "Instantiating " + className + " is not allowed in the " +
-                    "template for security reasons.",
-                    env);
+            throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
         }
         
     };

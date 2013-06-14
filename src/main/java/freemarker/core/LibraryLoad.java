@@ -111,14 +111,12 @@ public final class LibraryLoad extends TemplateElement {
             importedTemplate = env.getTemplateForImporting(templateNameString);
         }
         catch (ParseException pe) {
-            String msg = "Error parsing imported template "
-                        + templateNameString;
-            throw new TemplateException(msg, pe, env);
+            throw new Internal_MiscTemplateException(pe, env, new Object[] {
+                    "Error parsing imported template ", templateNameString });
         }
         catch (IOException ioe) {
-            String msg = "Error reading imported file "
-                        + templateNameString;
-            throw new TemplateException(msg, ioe, env);
+            throw new Internal_MiscTemplateException(ioe, env, new Object[] {
+                    "Error reading imported template ", templateNameString });
         }
         env.importLib(importedTemplate, namespace);
     }

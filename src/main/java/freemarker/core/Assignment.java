@@ -96,10 +96,10 @@ final class Assignment extends TemplateElement {
             try {
                 namespace = (Environment.Namespace) namespaceTM;
             } catch (ClassCastException e) {
-                throw namespaceExp.newUnexpectedTypeException(namespaceTM, "namespace", env);
+                throw new UnexpectedTypeException(namespaceExp, namespaceTM, "namespace", env);
             }
             if (namespace == null) {
-                throw namespaceExp.newInvalidReferenceException(env);
+                throw InvalidReferenceException.getInstance(namespaceExp, env);
             }
         }
         
@@ -109,7 +109,7 @@ final class Assignment extends TemplateElement {
                 tm = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                throw value.newInvalidReferenceException(env);
+                throw InvalidReferenceException.getInstance(value, env);
             }
         }
         if (scope == LOCAL) {

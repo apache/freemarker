@@ -281,7 +281,7 @@ public class Configurable
      *       (as if it were a 0-length list)
      *     </li>
      *     <li>as argument of <tt>&lt;if></tt> directive, or on other places where a
-     *       boolean expression is expected, it is treated as false
+     *       boolean expression is expected, it's treated as false
      *     </li>
      *   </ul>
      * </li>
@@ -664,27 +664,29 @@ public class Configurable
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
     /**
-     * Sets a setting by a name and string value.
+     * Sets a FreeMarker setting by a name and string value.
      * 
-     * <p>List of supported names and their valid values:
+     * <p>The list of settings commonly supported in all {@link Configurable} subclasses:
      * <ul>
      *   <li><code>"locale"</code>: local codes with the usual format, such as <code>"en_US"</code>.
      *   <li><code>"classic_compatible"</code>:
      *       <code>"true"</code>, <code>"false"</code>, <code>"yes"</code>, <code>"no"</code>,
      *       <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>.
      *       Case insensitive.
-     *   <li><code>"template_exception_handler"</code>:  If the value contains dot, then it is
+     *   <li><code>"template_exception_handler"</code>:  If the value contains dot, then it's
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these special values:
-     *       <code>"rethrow"</code>, <code>"debug"</code>,
-     *       <code>"html_debug"</code>, <code>"ignore"</code> (case insensitive).
-     *   <li><code>"arithmetic_engine"</code>: If the value contains dot, then it is
+     *       then it must be one of these special values (case insensitive):
+     *       <code>"rethrow"</code> (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
+     *       <code>"debug"</code> (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
+     *       <code>"html_debug"</code> (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
+     *       <code>"ignore"</code>  (means {@link TemplateExceptionHandler#IGNORE_HANDLER}).
+     *   <li><code>"arithmetic_engine"</code>: If the value contains dot, then it's
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
      *       then it must be one of these special values:
      *       <code>"bigdecimal"</code>, <code>"conservative"</code> (case insensitive).  
-     *   <li><code>"object_wrapper"</code>: If the value contains dot, then it is
+     *   <li><code>"object_wrapper"</code>: If the value contains dot, then it's
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
      *       then it must be one of these special values:
@@ -699,7 +701,7 @@ public class Configurable
      *       <code>"America/Los_Angeles"</code>
      *   <li><code>"output_encoding"</code>: Informs FreeMarker about the charset
      *       used for the output. As FreeMarker outputs character stream (not
-     *       byte stream), it is not aware of the output charset unless the
+     *       byte stream), it's not aware of the output charset unless the
      *       software that encloses it tells it explicitly with this setting.
      *       Some templates may use FreeMarker features that require this.</code>
      *   <li><code>"url_escaping_charset"</code>: If this setting is set, then it
@@ -759,6 +761,58 @@ public class Configurable
      *             a full-qualified class name, and the object will be created
      *             with its parameterless constructor.
      *       </ol>
+     * </ul>
+     * 
+     * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
+     * <ul>
+     *   <li><code>"auto_import"</code>: Sets the list of auto-imports. Example of valid value:
+     *       <br><code>/lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd</code>
+     *       See: {@link Configuration#setAutoImports}
+     *   <li><code>"auto_include"</code>: Sets the list of auto-includes. Example of valid value:
+     *       <br><code>/include/common.ftl, "/include/evil name.ftl"</code>
+     *       See: {@link Configuration#setAutoIncludes}
+     *   <li><code>"default_encoding"</code>: The name of the charset used to store templates, such as
+     *       <code>"UTF-8"</code> or <code>"ISO-8859-1"</code>. For historical reasons <b>the default value is quite
+     *       unpredictable, so you should always set this!</b>
+     *       See: {@link Configuration#setDefaultEncoding}
+     *   <li><code>"localized_lookup"</code>:
+     *       <code>"true"</code>, <code>"false"</code> (also the equivalents: <code>"yes"</code>, <code>"no"</code>,
+     *       <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>).
+     *       Case insensitive.
+     *      See: {@link Configuration#setLocalizedLookup}
+     *   <li><code>"strict_syntax"</code>: <code>"true"</code>, <code>"false"</code>, etc.
+     *       See: {@link Configuration#setStrictSyntaxMode}
+     *   <li><code>"whitespace_stripping"</code>: <code>"true"</code>, <code>"false"</code>, etc.
+     *       See: {@link Configuration#setWhitespaceStripping}
+     *   <li><code>"cache_storage"</code>: If the value contains dot, then it's
+     *       interpreted as class name, and the object will be created with
+     *       its parameterless constructor. If the value does not contain dot,
+     *       then a {@link freemarker.cache.MruCacheStorage} will be used with the
+     *       maximum strong and soft sizes specified with the setting value. Examples
+     *       of valid setting values:
+     *       <table border=1 cellpadding=4>
+     *         <tr><th>Setting value<th>max. strong size<th>max. soft size
+     *         <tr><td><code>"strong:50, soft:500"</code><td>50<td>500
+     *         <tr><td><code>"strong:100, soft"</code><td>100<td><code>Integer.MAX_VALUE</code>
+     *         <tr><td><code>"strong:100"</code><td>100<td>0
+     *         <tr><td><code>"soft:100"</code><td>0<td>100
+     *         <tr><td><code>"strong"</code><td><code>Integer.MAX_VALUE</code><td>0
+     *         <tr><td><code>"soft"</code><td>0<td><code>Integer.MAX_VALUE</code>
+     *       </table>
+     *       The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
+     *       entries is not significant.
+     *       For more details see: {@link Configuration#setCacheStorage}
+     *   <li><code>"template_update_delay"</code>: Valid positive integer, the
+     *       update delay measured in seconds.
+     *       See: {@link Configuration#setTemplateUpdateDelay}
+     *   <li><code>"tag_syntax"</code>: Must be one of:
+     *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
+     *       <code>"square_bracket"</code>.
+     *   <li><code>"incompatible_improvements"</code>: The FreeMarker version
+     *       where the desired non-backward-compatible improvements were already available.
+     *       See: {@link Configuration#setIncompatibleImprovements(Version)}.
+     *   <li><code>"incompatible_enhancements"</code>: Deprecated, use <code>"incompatible_improvements"</code>
+     *       instead. See: {@link Configuration#setIncompatibleEnhancements(String)}.
      * </ul>
      * 
      * @param key the name of the setting.
@@ -895,11 +949,9 @@ public class Configurable
                 throw unknownSettingException(key);
             }
         } catch(Exception e) {
-            throw new TemplateException(
-                    "Failed to set setting " + 
-                    StringUtil.jQuote(key) + " to value " + StringUtil.jQuote(value) +
-                    "; see cause exception.",
-                    e, getEnvironment());
+            throw new Internal_MiscTemplateException(e, getEnvironment(), new Object[] {
+                    "Failed to set setting ", new Internal_DelayedJQuote(key),
+                    " to value ", new Internal_DelayedJQuote(value), "; see cause exception." });
         }
     }
 
@@ -952,12 +1004,14 @@ public class Configurable
     }
 
     protected TemplateException invalidSettingValueException(String name, String value) {
-        return new TemplateException("Invalid value for setting " + name + ": " + value, getEnvironment());
+        return new Internal_MiscTemplateException(getEnvironment(), new Object[] {
+                "Invalid value for setting ", new Internal_DelayedJQuote(name), ": ",
+                new Internal_DelayedJQuote(value) });
     }
     
-    public static class UnknownSettingException extends TemplateException {
+    public static class UnknownSettingException extends Internal_MiscTemplateException {
         private UnknownSettingException(String name, Environment env) {
-            super("Unknown setting: " + name, env);
+            super(env, new Object[] { "Unknown setting: ", new Internal_DelayedJQuote(name) });
         }
     }
 

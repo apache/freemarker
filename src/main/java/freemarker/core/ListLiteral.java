@@ -169,15 +169,17 @@ final class ListLiteral extends Expression {
         TemplateSequenceModel val = (TemplateSequenceModel) eval(env);
         SimpleSequence result = new SimpleSequence(val.size());
         for (int i=0; i<values.size(); i++) {
-            if (values.get(i) instanceof StringLiteral) {
-                String s = ((StringLiteral) values.get(i)).getAsString();
+            Object itemExpr = values.get(i);
+            if (itemExpr instanceof StringLiteral) {
+                String s = ((StringLiteral) itemExpr).getAsString();
                 try {
                     Environment.Namespace ns = env.importLib(s, null);
                     result.add(ns);
                 } 
                 catch (IOException ioe) {
-                    throw ((Expression) values.get(i)).newTemplateException(
-                            "Could not import library '" + s + "', " + ioe.getMessage()); 
+                    throw new Internal_MiscTemplateException(((StringLiteral) itemExpr), new Object[] {
+                            "Couldn't import library ", new Internal_DelayedJQuote(s), ": ",
+                            new Internal_DelayedGetMessage(ioe) });
                 }
             }
             else {

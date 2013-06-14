@@ -1,10 +1,9 @@
 package freemarker.core;
 
-
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -12,9 +11,6 @@ import freemarker.template.utility.StringUtil;
  */
 class MessageUtil {
 
-    static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
-            = "string or something automatically convertible to string (number, date or boolean)";
-    
     static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
             "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used.",
             "For programmers: Use java.sql.Date/Time/Timestamp instead of java.util.Date in the "
@@ -22,19 +18,12 @@ class MessageUtil {
     };
     
     static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
-        "Use ?string(format) to specify which parts to display.",
-        UNKNOWN_DATE_TYPE_ERROR_TIPS[0],
-        UNKNOWN_DATE_TYPE_ERROR_TIPS[1]
+            "Use ?string(format) to specify which parts to display.",
+            UNKNOWN_DATE_TYPE_ERROR_TIPS[0],
+            UNKNOWN_DATE_TYPE_ERROR_TIPS[1]
     };
 
-    static final String[] INVALID_REFERENCE_EXCEPTION_TIP = new String[] {
-        "If the failing expression is known to be legally null/missing, either specify a "
-        + "default value with myOptionalVar!myDefault, or use ",
-        "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
-        ". (These only cover the last step of the expression; to cover the whole expression, "
-        + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"
-    };
-
+    // Can't be instantiated
     private MessageUtil() { }
         
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {
@@ -155,14 +144,6 @@ class MessageUtil {
         return sb;
     }
 
-    static String buildModelHasStoredNullMessage(Class expected, TemplateModel model) {
-        String msg = "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: "
-                +  model.getClass().getName() + ") has returned a null instead of a "
-                + ClassUtil.getShortClassName(expected) + ". "
-                + "This is probably a bug in the non-FreeMarker code that builds the data-model.";
-        return msg;
-    }
-
     static TemplateModelException newArgCntError(String methodName, int argCnt, int expectedCnt) {
         return newArgCntError(methodName, argCnt, expectedCnt, expectedCnt);
     }
@@ -206,7 +187,7 @@ class MessageUtil {
         }
         sb.append(".");
         
-        return new TemplateModelException(sb.toString());
+        return new Internal_TemplateModelException(sb.toString());
     }
 
     static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
@@ -238,22 +219,45 @@ class MessageUtil {
     
     static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
-        return new TemplateModelException(
-                new Internal_ErrorDescriptionBuilder(
-                        new Object[] {
-                            methodName, "(...) expects ", expectedType, " as argument #", new Integer(argIdx + 1),
-                            ", but received a(n) ", new Internal_DelayedFTLTypeDescription(arg), "."
-                        }),
-                        true);
+        return new Internal_TemplateModelException(new Object[] {
+                methodName, "(...) expects ", new Internal_DelayedAOrAn(expectedType), " as argument #", new Integer(argIdx + 1),
+                ", but received ", new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(arg)), "." });
     }
 
-    static Object[] unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
-        return MessageUtil.unexpectedTypeErrorDescription(expectedType, new Internal_DelayedFTLTypeDescription(model));
+    static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
+        return new Internal_MiscTemplateException(env, new Object[] {
+                "Instantiating ", className, " is not allowed in the template for security reasons." });
     }
 
-    static Object[] unexpectedTypeErrorDescription(String expectedType, Internal_DelayedFTLTypeDescription actualType) {
-        return new Object[] {
-                "Expected a(n) ", expectedType, ", but this evaluated to a value of type ", actualType, ":"};
+    /**
+     * @return "a" or "an" or "a(n)" (or "" for empty string) for an FTL type name
+     */
+    static String getAOrAn(String s) {
+        if (s == null) return null;
+        if (s.length() == 0) return "";
+        
+        char fc = Character.toLowerCase(s.charAt(0));
+        if (fc == 'a' || fc == 'e' || fc == 'i') {
+            return "an";
+        } else if (fc == 'h') { 
+            String ls = s.toLowerCase();
+            if (ls.startsWith("has") || ls.startsWith("hi")) { 
+                return "a";
+            } else if (ls.startsWith("ht")) { 
+                return "an";
+            } else {
+                return "a(n)";
+            }
+        } else if (fc == 'u' || fc == 'o') {
+            return "a(n)";
+        } else {
+            char sc = (s.length() > 1) ? s.charAt(1) : '\0'; 
+            if (fc == 'x' && !(sc == 'a' || sc == 'e' || sc == 'i' || sc == 'a' || sc == 'o' || sc == 'u')) {
+                return "an";
+            } else {
+                return "a";
+            }
+        }
     }
     
 }

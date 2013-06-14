@@ -28,7 +28,7 @@ public class BadParameterTypeException extends ParameterException {
             String parameterName, String expectedType, TemplateModel value, String description, Exception cause, Environment env) {
         super(parameterName,
                 "The type of the parameter " + StringUtil.jQuote(parameterName) + " should be " + expectedType
-                + ", but the actual value was a(n) " + getTypeDescription(value) + "."
+                + ", but the actual value was " + getTypeDescription(value) + "."
                 + (description != null ? " " + StringUtil.jQuote(description) : ""),
                 cause, env);
     }

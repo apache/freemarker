@@ -55,13 +55,10 @@ package freemarker.template;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-
-import org.python.modules.synchronize;
 
 import freemarker.core.Environment;
 import freemarker.core.Internal_CoreAPI;
@@ -139,14 +136,6 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Don't use this; this is to be used internal by FreeMarker.
-     */
-    public TemplateException(Internal_ErrorDescriptionBuilder description, Environment env,
-            boolean preventAmbiguity) {
-        this(description, null, env, true);
-    }
-    
-    /**
      * Constructs a TemplateException with both a description of the error
      * that occurred and the underlying Exception that caused this exception
      * to be raised.
@@ -155,31 +144,45 @@ public class TemplateException extends Exception {
      * @param cause the underlying {@link Exception} that caused this exception to be raised
      */
     public TemplateException(String description, Exception cause, Environment env) {
-        this(null, description, cause, env);
+        this(description, cause, env, null);
     }
 
     /**
-     * Don't use this; this is to be used internal by FreeMarker.
-     * @param preventAmbiguity its value is ignored; it's to prevent constructor selection ambiguities for
+     * Don't use this; this is to be used internally by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
      *     backward-compatibility
      */
-    public TemplateException(Internal_ErrorDescriptionBuilder descriptionBuilder, Exception cause, Environment env,
+    protected TemplateException(Throwable cause, Environment env, String description,
             boolean preventAmbiguity) {
-        this(descriptionBuilder, null, cause, env);
+        this(description, cause, env, null);
+    }
+    
+    /**
+     * Don't use this; this is to be used internally by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
+     *     backward-compatibility
+     */
+    protected TemplateException(Throwable cause, Environment env, Internal_ErrorDescriptionBuilder descriptionBuilder,
+            boolean preventAmbiguity) {
+        this(null, cause, env, descriptionBuilder);
     }
     
     private TemplateException(
-            Internal_ErrorDescriptionBuilder descriptionBuilder,
             String renderedDescription,
-            Exception cause, Environment env) {
+            Throwable cause,
+            Environment env, Internal_ErrorDescriptionBuilder descriptionBuilder) {
         // Note: Keep this constructor lightweight.
         
-        super(null, cause);
+        super();  // No args, because both the message and the cause exception is managed locally.
+        
+        if (env == null) env = Environment.getCurrentEnvironment();
+        this.env = env;
+
+        causeException = cause;  // for Java 1.2(?) compatibility
         
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;
-        causeException = cause;  // for Java 1.2(?) compatibility
-        this.env = env;
+        
         if(env != null) ftlInstructionStackSnapshot = Internal_CoreAPI.getInstructionStackSnapshot(env);
     }
     
@@ -351,13 +354,16 @@ public class TemplateException extends Exception {
             }
             
             if (ftlStackTrace) {
-                out.println(getStackTraceMessage());  // Not getMessage()!
                 String stackTrace = getFTLInstructionStack();
                 if (stackTrace != null) {
+                    out.println(getStackTraceMessage());  // Not getMessage()!
                     out.println();
                     out.print(THE_FAILING_INSTRUCTION);
                     out.println(" (FTL stack trace):");
                     out.print(stackTrace);
+                } else {
+                    ftlStackTrace = false;
+                    javaStackTrace = true;
                 }
             }
             

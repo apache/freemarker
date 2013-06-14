@@ -78,7 +78,7 @@ final class RecurseNode extends TemplateElement {
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
-            throw targetNode.newUnexpectedTypeException(node, "node", env);
+            throw new UnexpectedTypeException(targetNode, node, "node", env);
         }
         
         TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
@@ -96,10 +96,10 @@ final class RecurseNode extends TemplateElement {
             }
             else if (!(nss instanceof TemplateSequenceModel)) {
                 if (namespaces != null) {
-                    throw namespaces.newUnexpectedTypeException(nss, "sequence", env);
+                    throw new UnexpectedTypeException(namespaces, nss, "sequence", env);
                 } else {
                     // Should not occur
-                    throw new TemplateException("Expecting a sequence of namespaces after \"using\"", env);
+                    throw new Internal_MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");
                 }
             }
         }
