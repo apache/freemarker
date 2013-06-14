@@ -440,7 +440,7 @@ public final class Environment extends Configurable {
                          attemptBlock.getStartLocationQuoted(), thrownException);
              }
              try {
-                 recoveredErrorStack.add(thrownException.getMessage());
+                 recoveredErrorStack.add(thrownException);
                  visit(recoveryBlock);
              } finally {
                  recoveredErrorStack.remove(recoveredErrorStack.size() -1);
@@ -450,12 +450,12 @@ public final class Environment extends Configurable {
          }
      }
      
-     String getCurrentRecoveredErrorMesssage() throws TemplateException {
+     String getCurrentRecoveredErrorMessage() throws TemplateException {
          if(recoveredErrorStack.isEmpty()) {
              throw new TemplateException(
                  ".error is not available outside of a #recover block", this);
          }
-         return (String) recoveredErrorStack.get(recoveredErrorStack.size() -1);
+         return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() -1)).getMessage();
      }
      
      /**

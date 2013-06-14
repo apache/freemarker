@@ -160,7 +160,7 @@ final class BuiltinVariable extends Expression {
             return s != null ? new SimpleScalar(s) : null;
         }
         if (name == ERROR) {
-            return new SimpleScalar(env.getCurrentRecoveredErrorMesssage());
+            return new SimpleScalar(env.getCurrentRecoveredErrorMessage());
         }
         if (name == NOW) {
             return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
