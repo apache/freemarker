@@ -107,11 +107,13 @@ public interface TemplateExceptionHandler {
 		public void handleTemplateException(TemplateException te, Environment env, Writer out) 
                     throws TemplateException  
                 {
-                    PrintWriter pw = (out instanceof PrintWriter) 
-                                 ? (PrintWriter) out 
-                                 : new PrintWriter(out);
-                    te.printStackTrace(pw);
-                    pw.flush();
+                    if (!env.isInAttemptBlock()) {
+                        PrintWriter pw = (out instanceof PrintWriter) 
+                                     ? (PrintWriter) out 
+                                     : new PrintWriter(out);
+                        te.printStackTrace(pw);
+                        pw.flush();
+                    }
                     throw te;
 		}
 	}; 
@@ -126,41 +128,43 @@ public interface TemplateExceptionHandler {
 		public void handleTemplateException(TemplateException te, Environment env, Writer out) 
                     throws TemplateException  
                 {
-                    PrintWriter pw = (out instanceof PrintWriter) 
-                                 ? (PrintWriter) out 
-                                 : new PrintWriter(out);
-                    pw.print("<!-- FREEMARKER ERROR MESSAGE STARTS HERE -->"
-                            + "<!-- ]]> -->"
-                            + "<script language=javascript>//\"></script>"
-                            + "<script language=javascript>//'></script>"
-                            + "<script language=javascript>//\"></script>"
-                            + "<script language=javascript>//'></script>"
-                            + "</title></xmp></script></noscript></style></object>"
-                            + "</head></pre></table>"
-                            + "</form></table></table></table></a></u></i></b>"
-                            + "<div align='left' "
-                            + "style='background-color:#FFFF7C; "
-                            + "display:block; border-top:double; padding:4px; margin:0; "
-                            + "font-family:Arial,sans-serif; ");
-                    pw.print(FONT_RESET_CSS);
-                    pw.print("'>"
-                            + "<b style='font-size:12px; font-style:normal; font-weight:bold; "
-                            + "text-decoration:none; text-transform: none;'>FreeMarker template error</b>"
-                            + "<pre style='display:block; background: none; border: 0; margin:0; padding: 0;"
-                            + "font-family:monospace; ");
-                    pw.print(FONT_RESET_CSS);
-                    pw.println("; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; "
-                            + "white-space: -o-pre-wrap; word-wrap: break-word;'>");
-                    
-                    StringWriter stackTraceSW = new StringWriter();
-                    PrintWriter stackPW = new PrintWriter(stackTraceSW);
-                    te.printStackTrace(stackPW, false, true, true);
-                    stackPW.close();
-                    pw.println();
-                    pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));
-                    
-                    pw.println("</pre></div></html>");
-                    pw.flush();
+		            if (!env.isInAttemptBlock()) {
+                        PrintWriter pw = (out instanceof PrintWriter) 
+                                     ? (PrintWriter) out 
+                                     : new PrintWriter(out);
+                        pw.print("<!-- FREEMARKER ERROR MESSAGE STARTS HERE -->"
+                                + "<!-- ]]> -->"
+                                + "<script language=javascript>//\"></script>"
+                                + "<script language=javascript>//'></script>"
+                                + "<script language=javascript>//\"></script>"
+                                + "<script language=javascript>//'></script>"
+                                + "</title></xmp></script></noscript></style></object>"
+                                + "</head></pre></table>"
+                                + "</form></table></table></table></a></u></i></b>"
+                                + "<div align='left' "
+                                + "style='background-color:#FFFF7C; "
+                                + "display:block; border-top:double; padding:4px; margin:0; "
+                                + "font-family:Arial,sans-serif; ");
+                        pw.print(FONT_RESET_CSS);
+                        pw.print("'>"
+                                + "<b style='font-size:12px; font-style:normal; font-weight:bold; "
+                                + "text-decoration:none; text-transform: none;'>FreeMarker template error</b>"
+                                + "<pre style='display:block; background: none; border: 0; margin:0; padding: 0;"
+                                + "font-family:monospace; ");
+                        pw.print(FONT_RESET_CSS);
+                        pw.println("; white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; "
+                                + "white-space: -o-pre-wrap; word-wrap: break-word;'>");
+                        
+                        StringWriter stackTraceSW = new StringWriter();
+                        PrintWriter stackPW = new PrintWriter(stackTraceSW);
+                        te.printStackTrace(stackPW, false, true, true);
+                        stackPW.close();
+                        pw.println();
+                        pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));
+                        
+                        pw.println("</pre></div></html>");
+                        pw.flush();
+		            }
                     throw te;
 		}
 		

@@ -168,6 +168,7 @@ public final class Environment extends Configurable {
     private Namespace mainNamespace, currentNamespace, globalNamespace;
     private HashMap loadedLibs;
 
+    private boolean inAttemptBlock;
     private Throwable lastThrowable;
     
     private TemplateModel lastReturnValue;
@@ -422,11 +423,14 @@ public final class Environment extends Configurable {
          this.out = sw;
          TemplateException thrownException = null;
          boolean lastFIRE = setFastInvalidReferenceExceptions(false);
+         boolean lastInAttemptBlock = inAttemptBlock; 
          try {
+             inAttemptBlock = true;
              visitByHiddingParent(attemptBlock);
          } catch (TemplateException te) {
              thrownException = te;
          } finally {
+             inAttemptBlock = lastInAttemptBlock;
              setFastInvalidReferenceExceptions(lastFIRE);
              this.out = prevOut;
          }
@@ -452,6 +456,17 @@ public final class Environment extends Configurable {
                  ".error is not available outside of a #recover block", this);
          }
          return (String) recoveredErrorStack.get(recoveredErrorStack.size() -1);
+     }
+     
+     /**
+      * Tells if we are inside an <tt>#attempt</tt> block (but before <tt>#recover</tt>). This can be useful for
+      * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
+      * <tt>#attempt</tt> will roll it back anyway. 
+      * 
+      * @sine 2.3.20
+      */
+     public boolean isInAttemptBlock() {
+         return inAttemptBlock;
      }
 
 

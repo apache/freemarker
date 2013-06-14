@@ -20413,6 +20413,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>applyWithGreaterThanOrEqualsOperator</literal></para>
             </listitem>
 
+            <listitem>
+              <para>Added new method,
+              <literal>Environment.isInAttemptBlock()</literal>, to check if
+              we are within an <literal>#attempt</literal> block. This can be
+              useful for <literal>TemplateExceptionHandler</literal>-s, as
+              then they may don't want to print the error to the output, as
+              <literal>#attempt</literal> will roll it back anyway. This is
+              already utilized by the stock
+              <literal>TemplateExceptionHandler</literal>-s,
+              <literal>DEBUG_HANDLER</literal> and
+              <literal>HTML_DEBUG_HANDLER</literal>.</para>
+            </listitem>
+
             <listitem xml:id="version_2_3_20_ide">
               <para>Mostly concerning tool (like IDE plugin) authors:</para>
 
