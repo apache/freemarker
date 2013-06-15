@@ -101,7 +101,7 @@ implements
         super(array, wrapper);
         Class clazz = array.getClass();
         if(!clazz.isArray())
-            throw new IllegalArgumentException("Object is not an array, it is " + array.getClass().getName());
+            throw new IllegalArgumentException("Object is not an array, it's " + array.getClass().getName());
         length = Array.getLength(array);
     }
 

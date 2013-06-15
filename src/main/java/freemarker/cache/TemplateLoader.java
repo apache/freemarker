@@ -88,7 +88,7 @@ public interface TemplateLoader {
      * path components are separated by a slash (not backslash). Backslashes
      * (or any other OS specific separator character) are not considered as separators by
      * FreeMarker, and thus they will not be replaced with slash before passing to this method,
-     * so it is up to the template loader to handle them (say, be throwing and exception that
+     * so it's up to the template loader to handle them (say, be throwing and exception that
      * tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
      * typical mistake of Windows users).
      * The passed names are always considered relative to some loader-defined root
@@ -128,7 +128,7 @@ public interface TemplateLoader {
     /**
      * Returns the character stream of a template represented by the specified
      * template source. This method is called after <code>getLastModified()</code>
-     * if it is determined that a cached copy of the template is unavailable
+     * if it's determined that a cached copy of the template is unavailable
      * or stale.
      * @param templateSource an object representing a template source, obtained
      * through a prior call to {@link #findTemplateSource(String)}.

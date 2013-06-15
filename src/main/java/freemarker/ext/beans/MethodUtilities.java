@@ -119,7 +119,7 @@ outer:  for (Iterator it = a1.iterator(); it.hasNext();) {
                 }
             }
             // If we get here, no current maximal is more specific than the
-            // current class, so it is considered maximal as well
+            // current class, so it's considered maximal as well
             max.add(clazz);
         }
         if(max.size() > 1) {

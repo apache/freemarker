@@ -140,7 +140,7 @@ implements
 
     /**
      * Uses Beans introspection to locate a property or method with name
-     * matching the key name. If a method or property is found, it is wrapped
+     * matching the key name. If a method or property is found, it's wrapped
      * into {@link freemarker.template.TemplateMethodModelEx} (for a method or
      * indexed property), or evaluated on-the-fly and the return value wrapped
      * into appropriate model (for a simple property) Models for various
@@ -332,7 +332,7 @@ implements
 
     /**
      * Tells whether the model is empty. It is empty if either the wrapped 
-     * object is null, or it is a Boolean with false value.
+     * object is null, or it's a Boolean with false value.
      */
     public boolean isEmpty()
     {

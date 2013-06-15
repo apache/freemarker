@@ -363,7 +363,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                     // use it, and it seems most JSP compilers allow them to and
                     // treat it identically to SKIP_BODY, so we're going with 
                     // the flow and we allow it too, altough strictly speaking
-                    // it is in violation of the spec.
+                    // it's in violation of the spec.
                     case Tag.EVAL_PAGE: {
                         endEvaluation();
                         return TransformControl.SKIP_BODY;

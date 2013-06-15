@@ -148,7 +148,7 @@ public abstract class Logger
      * @param library one of <tt>LIBRARY_XXX</tt> constants. By default,
      * {@link #LIBRARY_AUTO} is used.
      * @throws ClassNotFoundException if an explicit logging library is asked for
-     * (that is, neither NONE, nor AUTO), and it is not found in the classpath.
+     * (that is, neither NONE, nor AUTO), and it's not found in the classpath.
      */
     public static void selectLoggerLibrary(int library)
     throws
@@ -254,7 +254,7 @@ public abstract class Logger
     /**
      * Returns a logger for the specified category.
      * @param category a dot separated hierarchical category name. If a category
-     * prefix is in effect, it is prepended to the category name.
+     * prefix is in effect, it's prepended to the category name.
      */
     public static Logger getLogger(String category)
     {

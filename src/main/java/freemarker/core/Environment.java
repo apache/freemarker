@@ -795,7 +795,7 @@ public final class Environment extends Configurable {
     }
     
     /*
-     * Note that altough it is not allowed to set this setting with the
+     * Note that altough it's not allowed to set this setting with the
      * <tt>setting</tt> directive, it still must be allowed to set it from Java
      * code while the template executes, since some frameworks allow templates
      * to actually change the output encoding on-the-fly.
@@ -808,7 +808,7 @@ public final class Environment extends Configurable {
     /**
      * Returns the name of the charset that should be used for URL encoding.
      * This will be <code>null</code> if the information is not available.
-     * The function caches the return value, so it is quick to call it
+     * The function caches the return value, so it's quick to call it
      * repeately. 
      */
     String getEffectiveURLEscapingCharset() {
@@ -915,7 +915,7 @@ public final class Environment extends Configurable {
         DateFormat df = getDateFormatObject(type);
         if(df == null) {
             throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
-                    "Can't convert the date to string, because it is not known which parts of the date variable are "
+                    "Can't convert the date to string, because it's not known which parts of the date variable are "
                     + "in use.")
                     .tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
         }
@@ -1071,7 +1071,7 @@ public final class Environment extends Configurable {
                     switch(dateType) {
                         case TemplateDateModel.UNKNOWN: {
                             throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
-                                    "Can't convert the date to string using a built-in format because it is not known "
+                                    "Can't convert the date to string using a built-in format because it's not known "
                                     + "which parts of the date are in use.")
                                     .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                         }

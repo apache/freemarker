@@ -42,7 +42,7 @@ public class TemplateCacheTest extends TestCase
             {
                 // Still 1 - returned cached exception
                 assertEquals("There was an error loading the template on an " +
-                        "earlier attempt; it is attached as a cause", e2.getMessage());
+                        "earlier attempt; it's attached as a cause", e2.getMessage());
                 assertSame(e, e2.getCause());
                 assertEquals(1, loader.getFindCount());
                 try

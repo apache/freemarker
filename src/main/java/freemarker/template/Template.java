@@ -147,7 +147,7 @@ public class Template extends Configurable {
      *        erroneous, unpredictable behaviour.
      *        (See more {@link Configuration#getDefaultConfiguration() here...})
      * @param encoding This is the encoding that we are supposed to be using. If this is
-     * non-null (It's not actually necessary because we are using a Reader) then it is
+     * non-null (It's not actually necessary because we are using a Reader) then it's
      * checked against the encoding specified in the FTL header -- assuming that is specified,
      * and if they don't match a WrongEncodingException is thrown.
      */
@@ -444,7 +444,7 @@ public class Template extends Configurable {
     /**
      * Sets the character encoding to use for
      * included files. Usually you don't set this value manually,
-     * instead it is assigned to the template upon loading.
+     * instead it's assigned to the template upon loading.
      */
 
     public void setEncoding(String encoding) {
@@ -619,7 +619,7 @@ public class Template extends Configurable {
             throw new IllegalArgumentException("Cannot map empty string prefix");
         }
         if (prefix.equals(NO_NS_PREFIX)) {
-            throw new IllegalArgumentException("The prefix: " + prefix + " cannot be registered, it is reserved for special internal use.");
+            throw new IllegalArgumentException("The prefix: " + prefix + " cannot be registered, it's reserved for special internal use.");
         }
         if (prefixToNamespaceURILookup.containsKey(prefix)) {
             throw new IllegalArgumentException("The prefix: '" + prefix + "' was repeated. This is illegal.");

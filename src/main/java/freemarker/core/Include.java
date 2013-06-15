@@ -77,7 +77,7 @@ final class Include extends TemplateElement {
     /**
      * @param template the template that this <tt>Include</tt> is a part of.
      * @param includedTemplateName the name of the template to be included.
-     * @param encodingExp the encoding to be used or null, if it is a default.
+     * @param encodingExp the encoding to be used or null, if it's a default.
      * @param parseExp whether the template should be parsed (or is raw text)
      */
     Include(Template template,

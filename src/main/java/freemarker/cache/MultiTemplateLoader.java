@@ -64,7 +64,7 @@ import java.util.Map;
  * array of loaders that this Loader owns. If a request for some template name 
  * was already satisfied in the past by one of the loaders, that Loader is queried 
  * first (a soft affinity).
- * This class is <em>NOT</em> thread-safe. If it is accessed from multiple
+ * This class is <em>NOT</em> thread-safe. If it's accessed from multiple
  * threads concurrently, proper synchronization must be provided by the callers.
  * Note that {@link TemplateCache}, the natural user of this class provides the
  * necessary synchronizations when it uses the class.

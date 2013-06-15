@@ -134,7 +134,7 @@ public class JythonWrapper implements ObjectWrapper
     
     /**
      * Wraps the passed Jython object into a FreeMarker template model. If
-     * the object is not a Jython object, it is first coerced into one using
+     * the object is not a Jython object, it's first coerced into one using
      * {@link Py#java2py(java.lang.Object)}. {@link PyDictionary} and {@link
      * PyStringMap} are wrapped into a hash model, {@link PySequence}
      * descendants are wrapped into a sequence model, {@link PyInteger}, {@link

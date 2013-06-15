@@ -74,7 +74,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * The actual loading is delegated to a {@link TemplateLoader}. Also,
  * various constructors provide you with convenient caches with predefined
  * behavior. Typically you don't use this class directly - in normal
- * circumstances it is hidden behind a {@link Configuration}. However,
+ * circumstances it's hidden behind a {@link Configuration}. However,
  * the {@link CacheStorage} it uses can be set with
  * {@link freemarker.template.Configuration#setCacheStorage(CacheStorage)}
  *
@@ -397,7 +397,7 @@ public class TemplateCache
         IOException ioe;
         if(INIT_CAUSE != null) {
             ioe = new IOException("There was an error loading the " +
-                "template on an earlier attempt; it is attached as a cause");
+                "template on an earlier attempt; it's attached as a cause");
             try {
                 INIT_CAUSE.invoke(ioe, new Object[] { e });
             } catch(RuntimeException ex) {

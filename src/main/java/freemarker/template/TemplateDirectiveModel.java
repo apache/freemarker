@@ -35,7 +35,7 @@ public interface TemplateDirectiveModel extends TemplateModel
      * number of loop-variables that the caller has specified.
      * Never <code>null</code>, but can be a zero-length array.
      * @param body an object that can be used to render the nested content (body) of
-     * the directive call. If the directive call has no nested content (i.e., it is like
+     * the directive call. If the directive call has no nested content (i.e., it's like
      * [@myDirective /] or [@myDirective][/@myDirective]), then this will be
      * <code>null</code>.
      *

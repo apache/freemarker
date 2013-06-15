@@ -81,7 +81,7 @@ final class BodyInstruction extends TemplateElement {
 
     /**
      * There is actually a subtle but essential point in the code below.
-     * A macro operates in the context in which it is defined. However, 
+     * A macro operates in the context in which it's defined. However, 
      * a nested block within a macro instruction is defined in the 
      * context in which the macro was invoked. So, we actually need to
      * temporarily switch the namespace and macro context back to

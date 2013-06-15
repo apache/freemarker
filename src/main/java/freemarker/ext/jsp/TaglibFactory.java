@@ -133,7 +133,7 @@ public class TaglibFactory implements TemplateHashModel {
      * @param uri the URI that describes the JSP taglib. It can be any of the
      * three forms allowed by the JSP specification: absolute URI, root relative
      * URI and non-root relative URI. Note that if a non-root relative URI is
-     * used it is resolved relative to the URL of the current request. In this
+     * used it's resolved relative to the URL of the current request. In this
      * case, the current request is obtained by looking up a
      * {@link HttpRequestHashModel} object named <tt>Request</tt> in the root
      * data model. FreemarkerServlet provides this object under the expected
@@ -184,7 +184,7 @@ public class TaglibFactory implements TemplateHashModel {
                         // Intentional fallthrough
                     }
                     case ROOT_REL_URI: {
-                        // If it is a .jar or .zip, add default TLD entry within it.
+                        // If it's a .jar or .zip, add default TLD entry within it.
                         if(uri.endsWith(".jar") || uri.endsWith(".zip")) {
                             return loadTaglib(new TldPath(uri, DEFAULT_JAR_TLD), uri);
                         }

@@ -189,7 +189,7 @@ implements TemplateHashModelEx, Serializable {
 
     public TemplateModel get(String key) throws TemplateModelException {
         Object result = map.get(key);
-        // The key to use for putting -- it is the key that already exists in
+        // The key to use for putting -- it's the key that already exists in
         // the map (either key or charKey below). This way, we'll never put a 
         // new key in the map, avoiding spurious ConcurrentModificationException
         // from another thread iterating over the map, see bug #1939742 in 

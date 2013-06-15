@@ -72,7 +72,7 @@ import java.util.Map;
  * {@link SoftCacheStorage} instead, as they can be used by 
  * {@link TemplateCache} concurrently without any synchronization on a 5.0 or 
  * later JRE. 
- * This class is <em>NOT</em> thread-safe. If it is accessed from multiple
+ * This class is <em>NOT</em> thread-safe. If it's accessed from multiple
  * threads concurrently, proper synchronization must be provided by the callers.
  * Note that {@link TemplateCache}, the natural user of this class provides the
  * necessary synchronizations when it uses the class.

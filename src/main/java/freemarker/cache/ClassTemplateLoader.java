@@ -96,7 +96,7 @@ public class ClassTemplateLoader extends URLTemplateLoader
      * @param loaderClass the class whose
      * {@link Class#getResource(String)} will be used to load the templates.
      *
-     * @deprecated it is confusing that the base path is <code>""</code>;
+     * @deprecated it's confusing that the base path is <code>""</code>;
      *     use {@link #ClassTemplateLoader(Class, String)} instead.
      */
     public ClassTemplateLoader(Class loaderClass)

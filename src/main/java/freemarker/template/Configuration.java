@@ -586,7 +586,7 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p>In FreeMarker 2.3.x {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX} is the
      * default for better backward compatibility. Starting from 2.4.x {@link
-     * Configuration#AUTO_DETECT_TAG_SYNTAX} is the default, so it is recommended to use
+     * Configuration#AUTO_DETECT_TAG_SYNTAX} is the default, so it's recommended to use
      * that even for 2.3.x.
      * 
      * <p>This setting is ignored for the templates that have <tt>ftl</tt> directive in

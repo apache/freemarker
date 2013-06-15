@@ -514,7 +514,7 @@ public class BeansWrapper implements ObjectWrapper
 
     /**
      * @deprecated override {@link #getModelFactory(Class)} instead. Using this
-     * method will now bypass wrapper caching (if it is enabled) and always 
+     * method will now bypass wrapper caching (if it's enabled) and always 
      * result in creation of a new wrapper. This method will be removed in 2.4
      * @param object
      * @param factory

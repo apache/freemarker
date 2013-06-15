@@ -886,7 +886,7 @@ public class StringUtil {
     
     /**
      * Escapes the <code>String</code> with the escaping rules of Java language
-     * string literals, so it is safe to insert the value into a string literal.
+     * string literals, so it's safe to insert the value into a string literal.
      * The resulting string will not be quoted.
      * 
      * <p>All characters under UCS code point 0x20 will be escaped.

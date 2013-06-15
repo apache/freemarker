@@ -57,7 +57,7 @@ package freemarker.template;
  * If you have a tree of objects, they can be recursively
  * <em>visited</em> using the &lt;#visit...&gt; and &lt;#recurse...&gt;
  * FTL directives. This API is largely based on the W3C Document Object Model
- * (DOM) API. However, it is meant to be generally useful for describing
+ * (DOM) API. However, it's meant to be generally useful for describing
  * any tree of objects that you wish to navigate using a recursive visitor
  * design pattern.
  * @since FreeMarker 2.3

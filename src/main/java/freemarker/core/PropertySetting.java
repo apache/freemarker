@@ -90,7 +90,7 @@ final class PropertySetting extends TemplateElement {
             !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY)) 
         {
             throw new ParseException(
-                    "Invalid setting name, or it is not allowed to change "
+                    "Invalid setting name, or it's not allowed to change "
                     + "the value of the setting with FTL: "
                     + key,
                     template, beginLine, beginColumn);

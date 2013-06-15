@@ -73,7 +73,7 @@ public abstract class DebuggerService
     private static DebuggerService createInstance()
     {
         // Creates the appropriate service class. If the debugging is turned
-        // off, this is a fast no-op service, otherwise it is the real-thing
+        // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
         return 
             SecurityUtilities.getSystemProperty("freemarker.debug.password") == null

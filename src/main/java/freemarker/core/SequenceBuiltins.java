@@ -456,7 +456,7 @@ class SequenceBuiltins {
                         } catch (ClassCastException e) {
                             if (!(item instanceof TemplateScalarModel)) {
                                 throw new Internal_TemplateModelException(new Object[] {
-                                        "The argument to ?", key, "(key), when it is a sequence, must be a "
+                                        "The argument to ?", key, "(key), when it's a sequence, must be a "
                                         + "sequence of strings, but the item at index ", new Integer(i),
                                         " is not a string."});
                             }

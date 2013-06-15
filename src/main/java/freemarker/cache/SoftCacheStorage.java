@@ -68,7 +68,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * collector to purge the cache when it determines that it wants to free up
  * memory.
  * This class is thread-safe to the extent that its underlying map is. The 
- * default implementation uses a concurrent map on Java 5 and above, so it is
+ * default implementation uses a concurrent map on Java 5 and above, so it's
  * thread-safe in that case.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)

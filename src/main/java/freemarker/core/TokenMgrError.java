@@ -149,7 +149,7 @@ public class TokenMgrError extends Error
    }
 
    /**
-    * Returns a detailed message for the Error when it is thrown by the
+    * Returns a detailed message for the Error when it's thrown by the
     * token manager to indicate a lexical error.
     * Parameters : 
     *    EOFSeen     : indicates if EOF caused the lexicl error

@@ -61,7 +61,7 @@ import freemarker.core.Internal_ConcurrentMapFactory;
  * It holds a strong reference to all objects it was passed, therefore prevents
  * the cache from being purged during garbage collection.
  * This class is thread-safe to the extent that its underlying map is. The 
- * default implementation uses a concurrent map on Java 5 and above, so it is
+ * default implementation uses a concurrent map on Java 5 and above, so it's
  * thread-safe in that case.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
