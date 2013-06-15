@@ -1,9 +1,9 @@
 package freemarker.core;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class Internal_DelayedGetMessage extends Internal_DelayedConversionToString  {
+public class _DelayedGetMessage extends _DelayedConversionToString  {
 
-    public Internal_DelayedGetMessage(Throwable exception) {
+    public _DelayedGetMessage(Throwable exception) {
         super(exception);
     }
 

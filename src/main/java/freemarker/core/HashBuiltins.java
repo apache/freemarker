@@ -34,7 +34,7 @@ class HashBuiltins {
                 return InvalidReferenceException.FAST_INSTANCE;
             } else {
                 return new InvalidReferenceException(
-                        new Internal_ErrorDescriptionBuilder(new Object[] {
+                        new _ErrorDescriptionBuilder(new Object[] {
                             "The exteneded hash (of class ", tm.getClass().getName(), ") has returned null for its \"",
                             propertyName,
                             "\" property. This is maybe a bug. The extended hash was returned by this expression:" })

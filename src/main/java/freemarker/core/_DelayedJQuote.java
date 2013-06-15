@@ -3,9 +3,9 @@ package freemarker.core;
 import freemarker.template.utility.StringUtil;
 
 /** Don't use; used internally by FreeMarker, might changes without notice. */
-public class Internal_DelayedJQuote extends Internal_DelayedConversionToString {
+public class _DelayedJQuote extends _DelayedConversionToString {
 
-    public Internal_DelayedJQuote(Object object) {
+    public _DelayedJQuote(Object object) {
         super(object);
     }
 

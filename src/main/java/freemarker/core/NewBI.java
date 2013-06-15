@@ -95,15 +95,15 @@ class NewBI extends BuiltIn
             this.env = env;
             cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
             if (!TemplateModel.class.isAssignableFrom(cl)) {
-                throw new Internal_MiscTemplateException(NewBI.this, env, new Object[] {
+                throw new _MiscTemplateException(NewBI.this, env, new Object[] {
                         "Class ", cl.getName(), " does not implement freemarker.template.TemplateModel" });
             }
             if (BEAN_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw new Internal_MiscTemplateException(NewBI.this, env, new Object[] {
+                throw new _MiscTemplateException(NewBI.this, env, new Object[] {
                         "Bean Models cannot be instantiated using the ?", key, " built-in" });
             }
             if (JYTHON_MODEL_CLASS != null && JYTHON_MODEL_CLASS.isAssignableFrom(cl)) {
-                throw new Internal_MiscTemplateException(NewBI.this, env, new Object[] {
+                throw new _MiscTemplateException(NewBI.this, env, new Object[] {
                         "Jython Models cannot be instantiated using the ?", key, " built-in" });
             }
         }

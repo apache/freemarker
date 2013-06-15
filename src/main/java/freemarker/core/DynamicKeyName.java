@@ -133,7 +133,7 @@ final class DynamicKeyName extends Expression {
             try {
                return new SimpleScalar(s.substring(index, index + 1));
             } catch (RuntimeException re) {
-                throw new Internal_MiscTemplateException(re, env);
+                throw new _MiscTemplateException(re, env);
             }
         }
         catch(NonStringException e)
@@ -168,21 +168,21 @@ final class DynamicKeyName extends Expression {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
             if (!hasRhs) end = sequence.size() -1;
             if (start < 0) {
-                throw new Internal_MiscTemplateException(range.left, new Object[] {
+                throw new _MiscTemplateException(range.left, new Object[] {
                         "Negative starting index ", new Integer(start), " for slicing range." });
             }
             if (end < 0) {
-                throw new Internal_MiscTemplateException(range.right, new Object[] {
+                throw new _MiscTemplateException(range.right, new Object[] {
                         "Negative ending index ", new Integer(end), " for slicing range." });
             }
             if (start >= sequence.size()) {
-                throw new Internal_MiscTemplateException(range.left, new Object[] {
+                throw new _MiscTemplateException(range.left, new Object[] {
                         "Left side index of range out of bounds, is ", new Integer(start),
                         ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
                         "(Note that indices are 0 based, and ranges are inclusive)." });
             }
             if (end >= sequence.size()) {
-                throw new Internal_MiscTemplateException(range.right, new Object[] {
+                throw new _MiscTemplateException(range.right, new Object[] {
                         "Right side index of range out of bounds, is ", new Integer(end),
                         ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
                         "(Note that indices are 0 based, and ranges are inclusive)." });
@@ -211,27 +211,27 @@ final class DynamicKeyName extends Expression {
         
         if (!hasRhs) end = targetStr.length() -1;
         if (start < 0) {
-            throw new Internal_MiscTemplateException(range.left, new Object[] {
+            throw new _MiscTemplateException(range.left, new Object[] {
                     "Negative starting index ", new Integer(start), " for slicing range." });
         }
         if (end < 0) {
-            throw new Internal_MiscTemplateException(range.right, new Object[] {
+            throw new _MiscTemplateException(range.right, new Object[] {
                     "Negative ending index ", new Integer(end), " for slicing range." });
         }
         if (start > targetStr.length()) {
-            throw new Internal_MiscTemplateException(range.left, new Object[] {
+            throw new _MiscTemplateException(range.left, new Object[] {
                     "Left side of range out of bounds, is: ", new Integer(start),
                     "\nbut the string has ", new Integer(targetStr.length()), " elements." });
         }
         if (end > targetStr.length()) {
-            throw new Internal_MiscTemplateException(range.right, new Object[] {
+            throw new _MiscTemplateException(range.right, new Object[] {
                     "Right side of range out of bounds, is: ", new Integer(end),
                     "\nbut the string is only ", new Integer(targetStr.length()), " characters." });
         }
         try {
             return new SimpleScalar(targetStr.substring(start, end+1));
         } catch (RuntimeException re) {
-            throw new Internal_MiscTemplateException(re, new Object[] { "Unexpected exception: ", re });
+            throw new _MiscTemplateException(re, new Object[] { "Unexpected exception: ", re });
         }
     }
 

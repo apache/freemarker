@@ -71,7 +71,7 @@ public class NonBooleanException extends UnexpectedTypeException {
         super(env, description);
     }
 
-    NonBooleanException(Environment env, Internal_ErrorDescriptionBuilder description) {
+    NonBooleanException(Environment env, _ErrorDescriptionBuilder description) {
         super(env, description);
     }
 

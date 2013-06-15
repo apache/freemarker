@@ -4,9 +4,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.utility.ClassUtil;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class Internal_DelayedFTLTypeDescription extends Internal_DelayedConversionToString {
+public class _DelayedFTLTypeDescription extends _DelayedConversionToString {
     
-    public Internal_DelayedFTLTypeDescription(TemplateModel tm) {
+    public _DelayedFTLTypeDescription(TemplateModel tm) {
         super(tm);
     }
 

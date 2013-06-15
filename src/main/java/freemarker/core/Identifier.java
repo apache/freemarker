@@ -71,7 +71,7 @@ final class Identifier extends Expression {
             return env.getVariable(name);
         } catch (NullPointerException e) {
             if (env == null) {
-                throw new Internal_MiscTemplateException(new Object[] {
+                throw new _MiscTemplateException(new Object[] {
                         "Variables are not available (certainly you are in a parse-time executed directive). "
                         + "The name of the variable you tried to read: ", name });
             } else {

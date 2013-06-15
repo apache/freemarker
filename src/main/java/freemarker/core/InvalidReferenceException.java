@@ -82,7 +82,7 @@ public class InvalidReferenceException extends TemplateException {
         super(description, env);
     }
 
-    InvalidReferenceException(Internal_ErrorDescriptionBuilder description, Environment env) {
+    InvalidReferenceException(_ErrorDescriptionBuilder description, Environment env) {
         super(null, env, description, true);
     }
 
@@ -96,7 +96,7 @@ public class InvalidReferenceException extends TemplateException {
         } else {
             if (blame != null) {
                 return new InvalidReferenceException(
-                        new Internal_ErrorDescriptionBuilder("The following has evaluated to null or missing:")
+                        new _ErrorDescriptionBuilder("The following has evaluated to null or missing:")
                                 .blame(blame)
                                 .tip(InvalidReferenceException.TIP),
                             env);

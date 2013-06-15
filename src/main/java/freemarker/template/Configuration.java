@@ -82,10 +82,10 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
-import freemarker.core.Internal_ConcurrentMapFactory;
-import freemarker.core.Internal_CoreAPI;
-import freemarker.core.Internal_DelayedJQuote;
-import freemarker.core.Internal_MiscTemplateException;
+import freemarker.core._ConcurrentMapFactory;
+import freemarker.core._CoreAPI;
+import freemarker.core._DelayedJQuote;
+import freemarker.core._MiscTemplateException;
 import freemarker.core.ParseException;
 import freemarker.core.Version;
 import freemarker.template.utility.CaptureOutput;
@@ -153,7 +153,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     private TemplateCache cache;
     private HashMap variables = new HashMap();
-    private Map encodingMap = Internal_ConcurrentMapFactory.newThreadSafeMap();
+    private Map encodingMap = _ConcurrentMapFactory.newThreadSafeMap();
     private Map autoImportMap = new HashMap();
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList();
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
@@ -951,9 +951,9 @@ public class Configuration extends Configurable implements Cloneable {
                 super.setSetting(key, value);
             }
         } catch(Exception e) {
-            throw new Internal_MiscTemplateException(e, getEnvironment(), new Object[] {
-                    "Failed to set setting ", new Internal_DelayedJQuote(key),
-                    " to value ", new Internal_DelayedJQuote(value), "; see cause exception." });
+            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
+                    "Failed to set setting ", new _DelayedJQuote(key),
+                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
     }
     
@@ -1142,7 +1142,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @return {@link Set} of {@link String}-s. 
      */
 	public Set getSupportedBuiltInNames() {
-	    return Internal_CoreAPI.getSupportedBuiltInNames();
+	    return _CoreAPI.getSupportedBuiltInNames();
 	}
 
 	private static String getRequiredVersionProperty(Properties vp, String properyName) {

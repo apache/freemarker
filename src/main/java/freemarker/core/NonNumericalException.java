@@ -71,7 +71,7 @@ public class NonNumericalException extends UnexpectedTypeException {
         super(env, description);
     }
  
-    NonNumericalException(Internal_ErrorDescriptionBuilder description, Environment env) {
+    NonNumericalException(_ErrorDescriptionBuilder description, Environment env) {
         super(env, description);
     }
 
@@ -96,8 +96,8 @@ public class NonNumericalException extends UnexpectedTypeException {
     
     static NonNumericalException newMalformedNumberException(Expression blamed, String text, Environment env) {
         return new NonNumericalException(
-                new Internal_ErrorDescriptionBuilder(new Object[] {
-                        "Can't convert this string to number: ", new Internal_DelayedJQuote(text) })
+                new _ErrorDescriptionBuilder(new Object[] {
+                        "Can't convert this string to number: ", new _DelayedJQuote(text) })
                 .blame(blamed),
                 env);
     }

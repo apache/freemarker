@@ -63,9 +63,9 @@ import freemarker.template.TemplateModel;
  *  
  * @author Attila Szegedi
  */
-public class Internal_EnumModels extends ClassBasedModelFactory {
+public class _EnumModels extends ClassBasedModelFactory {
 
-    public Internal_EnumModels(BeansWrapper wrapper) {
+    public _EnumModels(BeansWrapper wrapper) {
         super(wrapper);
     }
     

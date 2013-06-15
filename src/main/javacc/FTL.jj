@@ -144,7 +144,7 @@ public class FMParser {
  /**
   * Don't use it, unless you are developing FreeMarker itself.
   */
- public int internal_getLastTagSyntax()
+ public int _getLastTagSyntax()
  {
      return token_source.squBracTagSyntax
              ? Configuration.SQUARE_BRACKET_TAG_SYNTAX

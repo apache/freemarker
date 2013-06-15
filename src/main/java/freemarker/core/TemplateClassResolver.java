@@ -82,7 +82,7 @@ public interface TemplateClassResolver {
             try {
                 return ClassUtil.forName(className);
             } catch (ClassNotFoundException e) {
-                throw new Internal_MiscTemplateException(e, env);
+                throw new _MiscTemplateException(e, env);
             }
         }
         
@@ -104,7 +104,7 @@ public interface TemplateClassResolver {
             try {
                 return ClassUtil.forName(className);
             } catch (ClassNotFoundException e) {
-                throw new Internal_MiscTemplateException(e, env);
+                throw new _MiscTemplateException(e, env);
             }
         }
         

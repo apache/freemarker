@@ -60,5 +60,5 @@ import org.jaxen.NamespaceContext;
  * 
  * @author Attila Szegedi
  */
-public class Internal_JaxenNamespaces extends Namespaces implements NamespaceContext {
+public class _JaxenNamespaces extends Namespaces implements NamespaceContext {
 }

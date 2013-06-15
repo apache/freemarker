@@ -49,15 +49,15 @@ public abstract class JythonVersionAdapter {
                     try {
                         if (version >= 2005000) {
                             instance = (JythonVersionAdapter) cl.loadClass(
-                                    "freemarker.ext.jython.Internal_Jython25VersionAdapter")
+                                    "freemarker.ext.jython._Jython25VersionAdapter")
                                 .newInstance();
                         } else if (version >= 2002000) {
                             instance = (JythonVersionAdapter) cl.loadClass(
-                                    "freemarker.ext.jython.Internal_Jython22VersionAdapter")
+                                    "freemarker.ext.jython._Jython22VersionAdapter")
                                 .newInstance();
                         } else {
                             instance = (JythonVersionAdapter) cl.loadClass(
-                                    "freemarker.ext.jython.Internal_Jython20And21VersionAdapter")
+                                    "freemarker.ext.jython._Jython20And21VersionAdapter")
                                 .newInstance();
                         }
                     } catch (ClassNotFoundException e) {

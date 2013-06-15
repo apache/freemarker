@@ -452,7 +452,7 @@ public final class Environment extends Configurable {
      
      String getCurrentRecoveredErrorMessage() throws TemplateException {
          if(recoveredErrorStack.isEmpty()) {
-             throw new Internal_MiscTemplateException(this, ".error is not available outside of a #recover block");
+             throw new _MiscTemplateException(this, ".error is not available outside of a #recover block");
          }
          return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() -1)).getMessage();
      }
@@ -563,12 +563,12 @@ public final class Environment extends Configurable {
                          && !nodeType.equals("comment") 
                          && !nodeType.equals("document_type")) 
                     {
-                        throw new Internal_MiscTemplateException(
+                        throw new _MiscTemplateException(
                                 this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), nodeType));
                     }
                 }
                 else {
-                    throw new Internal_MiscTemplateException(
+                    throw new _MiscTemplateException(
                             this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), "default"));
                 }
             }
@@ -597,7 +597,7 @@ public final class Environment extends Configurable {
             ns = "";
         }
         return new Object[] { "No macro or directive is defined for node named ",  
-                new Internal_DelayedJQuote(node.getNodeName()), nsPrefix, ns,
+                new _DelayedJQuote(node.getNodeName()), nsPrefix, ns,
                 ", and there is no fallback handler called @", nodeType, " either." };
     }
     
@@ -649,8 +649,8 @@ public final class Environment extends Configurable {
                             ((SimpleHash)unknownVars).put(varName, value);
                         }
                     } else {
-                        throw new Internal_MiscTemplateException(this, new Object[] {
-                                "Macro ", new Internal_DelayedJQuote(macro.getName()), " has no such argument: ",
+                        throw new _MiscTemplateException(this, new Object[] {
+                                "Macro ", new _DelayedJQuote(macro.getName()), " has no such argument: ",
                                 varName });
                     }
                 }
@@ -661,7 +661,7 @@ public final class Environment extends Configurable {
                 String[] argumentNames = macro.getArgumentNamesInternal();
                 int size = positionalArgs.size();
                 if (argumentNames.length < size && catchAll == null) {
-                    throw new Internal_MiscTemplateException(this, new Object[] { 
+                    throw new _MiscTemplateException(this, new Object[] { 
                             "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
                             + argumentNames.length + " parameters." });
                 }
@@ -676,7 +676,7 @@ public final class Environment extends Configurable {
                             ((SimpleSequence)unknownVars).add(argModel);
                         }
                     } catch (RuntimeException re) {
-                        throw new Internal_MiscTemplateException(re, this);
+                        throw new _MiscTemplateException(re, this);
                     }
                 }
             }
@@ -722,7 +722,7 @@ public final class Environment extends Configurable {
         if (node == null) {
             node = this.getCurrentVisitorNode();
             if (node == null) {
-                throw new Internal_TemplateModelException(
+                throw new _TemplateModelException(
                         "The target node of recursion is missing or null.");
             }
         }
@@ -914,7 +914,7 @@ public final class Environment extends Configurable {
     String formatDate(Date date, int type) throws TemplateModelException {
         DateFormat df = getDateFormatObject(type);
         if(df == null) {
-            throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
+            throw new _TemplateModelException(new _ErrorDescriptionBuilder(
                     "Can't convert the date to string, because it's not known which parts of the date variable are "
                     + "in use.")
                     .tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
@@ -1032,7 +1032,7 @@ public final class Environment extends Configurable {
                 return dateTimeFormat;
             }
             default: {
-                throw new Internal_TemplateModelException(new Object[] {
+                throw new _TemplateModelException(new Object[] {
                         "Unrecognized date type: ", new Integer(dateType) });
             }
         }
@@ -1070,7 +1070,7 @@ public final class Environment extends Configurable {
                 if(style != -1) {
                     switch(dateType) {
                         case TemplateDateModel.UNKNOWN: {
-                            throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
+                            throw new _TemplateModelException(new _ErrorDescriptionBuilder(
                                     "Can't convert the date to string using a built-in format because it's not known "
                                     + "which parts of the date are in use.")
                                     .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
@@ -1097,8 +1097,8 @@ public final class Environment extends Configurable {
                         format = new SimpleDateFormat(pattern, locale);
                     }
                     catch(IllegalArgumentException e) {
-                        throw new Internal_TemplateModelException(e, new Object[] {
-                                "Can't parse ", new Internal_DelayedJQuote(pattern), " to a date format, because:\n", e });
+                        throw new _TemplateModelException(e, new Object[] {
+                                "Can't parse ", new _DelayedJQuote(pattern), " to a date format, because:\n", e });
                     }
                 }
                 format.setTimeZone(timeZone);
@@ -1554,7 +1554,7 @@ public final class Environment extends Configurable {
     TemplateModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
         String nodeName = node.getNodeName();
         if (nodeName == null) {
-            throw new Internal_MiscTemplateException(this, "Node name is null.");
+            throw new _MiscTemplateException(this, "Node name is null.");
         }
         TemplateModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
     
@@ -1589,7 +1589,7 @@ public final class Environment extends Configurable {
             try {                                   
                 ns = (Namespace) nodeNamespaces.get(i);
             } catch (ClassCastException cce) {
-                throw new Internal_MiscTemplateException(this,
+                throw new _MiscTemplateException(this,
                         "A \"using\" clause should contain a sequence of namespaces or strings that indicate the "
                         + "location of importable macro libraries.");
             }

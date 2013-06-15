@@ -7,7 +7,7 @@ import freemarker.template.Template;
  * Used internally only, might changes without notice!
  * Packs a structured from of the error description from which the error message can be rendered on-demand.
  */
-public class Internal_ErrorDescriptionBuilder {
+public class _ErrorDescriptionBuilder {
 
     private final String description;
     private final Object[] descriptionParts;
@@ -16,7 +16,7 @@ public class Internal_ErrorDescriptionBuilder {
     private Object[]/*String[]|Object[][]*/ tips;
     private Template template;
 
-    public Internal_ErrorDescriptionBuilder(String description) {
+    public _ErrorDescriptionBuilder(String description) {
         this.description = description;
         this.descriptionParts = null;
     }
@@ -26,7 +26,7 @@ public class Internal_ErrorDescriptionBuilder {
      *      {@link String} array items that look like FTL tag (must start with {@code "&lt;"} and end with {@code ">"})
      *      will be converted to the actual template syntax if {@link #blame} or {@link #template} was set.
      */
-    public Internal_ErrorDescriptionBuilder(Object[] descriptionParts) {
+    public _ErrorDescriptionBuilder(Object[] descriptionParts) {
         this.descriptionParts = descriptionParts;
         this.description = null;
     }
@@ -116,32 +116,32 @@ public class Internal_ErrorDescriptionBuilder {
     /**
      * Needed for description <em>parts</em> that look like an FTL tag to be converted, if there's no {@link #blame}.
      */
-    public Internal_ErrorDescriptionBuilder template(Template template) {
+    public _ErrorDescriptionBuilder template(Template template) {
         this.template = template;
         return this;
     }
 
-    public Internal_ErrorDescriptionBuilder blame(Expression blamedExpr) {
+    public _ErrorDescriptionBuilder blame(Expression blamedExpr) {
         this.blame = blamedExpr;
         return this;
     }
     
-    public Internal_ErrorDescriptionBuilder tip(String tip) {
+    public _ErrorDescriptionBuilder tip(String tip) {
         this.tip = tip;
         return this;
     }
     
-    public Internal_ErrorDescriptionBuilder tip(Object tip[]) {
+    public _ErrorDescriptionBuilder tip(Object tip[]) {
         this.tip = tip;
         return this;
     }
     
-    public Internal_ErrorDescriptionBuilder tips(Object[] tips) {
+    public _ErrorDescriptionBuilder tips(Object[] tips) {
         this.tips = tips;
         return this;
     }
 
-    public Internal_ErrorDescriptionBuilder tips(String[][] tips) {
+    public _ErrorDescriptionBuilder tips(String[][] tips) {
         this.tips = tips;
         return this;
     }

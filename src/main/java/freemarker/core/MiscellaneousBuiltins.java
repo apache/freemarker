@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import freemarker.ext.beans.BeanModel;
-import freemarker.ext.beans.Internal_BeansAPI;
+import freemarker.ext.beans._BeansAPI;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
@@ -74,7 +74,7 @@ class MiscellaneousBuiltins {
                 if(dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATETIME) {
                     return new SimpleDate(dmodel.getAsDate(), dateType);
                 }
-                throw new Internal_MiscTemplateException(this, new Object[] {
+                throw new _MiscTemplateException(this, new Object[] {
                             "Cannot convert ", TemplateDateModel.TYPE_NAMES.get(dtype),
                             " into ", TemplateDateModel.TYPE_NAMES.get(dateType) });
             }
@@ -143,11 +143,11 @@ class MiscellaneousBuiltins {
                     if (df instanceof SimpleDateFormat) {
                         pattern = ((SimpleDateFormat) df).toPattern();
                     }
-                    throw new Internal_TemplateModelException(new Object[] {
+                    throw new _TemplateModelException(new Object[] {
                             "The string doesn't match the expected date/time format. The string to parse was: ",
-                            new Internal_DelayedJQuote(text), ". ",
+                            new _DelayedJQuote(text), ". ",
                             (pattern != null ? "The expected format was: " : ""),
-                            (pattern != null ? (Object) new Internal_DelayedJQuote(pattern) : (Object) ""),
+                            (pattern != null ? (Object) new _DelayedJQuote(pattern) : (Object) ""),
                             (pattern != null ? ". " : "") });
                 }
             }
@@ -171,7 +171,7 @@ class MiscellaneousBuiltins {
             } else if (model instanceof TemplateScalarModel) {
                 return new SimpleScalar(((TemplateScalarModel) model).getAsString());
             } else if (env.isClassicCompatible() && model instanceof BeanModel) {
-                return new SimpleScalar(Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) model));
+                return new SimpleScalar(_BeansAPI.getAsClassicCompatibleString((BeanModel) model));
             } else {            
                 throw new UnexpectedTypeException(target, model, "number, date, or string", env);
             }
@@ -246,7 +246,7 @@ class MiscellaneousBuiltins {
                 TemplateModelException
             {
                 if(dateType == TemplateDateModel.UNKNOWN) {
-                    throw new Internal_TemplateModelException(new Internal_ErrorDescriptionBuilder(
+                    throw new _TemplateModelException(new _ErrorDescriptionBuilder(
                             "Can't convert the date to string, because it isn't known if it's a "
                             + "date-only, time-only, or date-time value.")
                             .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));

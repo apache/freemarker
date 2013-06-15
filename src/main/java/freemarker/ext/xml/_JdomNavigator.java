@@ -80,10 +80,10 @@ import freemarker.template.TemplateModelException;
  * 
  * @author Attila Szegedi
  */
-public class Internal_JdomNavigator extends Navigator {
+public class _JdomNavigator extends Navigator {
     private static final XMLOutputter OUTPUT = new XMLOutputter();
     
-    public Internal_JdomNavigator() {
+    public _JdomNavigator() {
     } 
 
     void getAsString(Object node, StringWriter sw)

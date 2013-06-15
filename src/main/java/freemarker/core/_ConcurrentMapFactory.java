@@ -17,7 +17,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * minimum for FreeMarker, so don't use it unless you are developing
  * FreeMarker itself.
  */
-public class Internal_ConcurrentMapFactory {
+public class _ConcurrentMapFactory {
     private static final Class concurrentMapClass = getConcurrentMapClass(); 
     private static final Class bestHashMapClass = getBestHashMapClass();
     

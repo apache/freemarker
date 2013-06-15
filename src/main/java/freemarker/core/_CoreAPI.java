@@ -10,10 +10,10 @@ import java.util.Set;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */ 
-public class Internal_CoreAPI {
+public class _CoreAPI {
     
     // Can't be instantiated
-    private Internal_CoreAPI() { }
+    private _CoreAPI() { }
 
     public static final String STACK_SECTION_SEPARATOR = Environment.STACK_SECTION_SEPARATOR;
     

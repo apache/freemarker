@@ -18,9 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import freemarker.core.Environment;
-import freemarker.core.Internal_DelayedFTLTypeDescription;
-import freemarker.core.Internal_ErrorDescriptionBuilder;
-import freemarker.core.Internal_MiscTemplateException;
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._ErrorDescriptionBuilder;
+import freemarker.core._MiscTemplateException;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
@@ -60,16 +60,16 @@ public class IncludePage implements TemplateDirectiveModel
         // Determine the path
         final TemplateModel path = (TemplateModel)params.get("path");
         if(path == null) {
-            throw new Internal_MiscTemplateException(env, "Missing required parameter \"path\"");
+            throw new _MiscTemplateException(env, "Missing required parameter \"path\"");
         }
         if(!(path instanceof TemplateScalarModel)) {
-            throw new Internal_MiscTemplateException(env, new Object[] {
+            throw new _MiscTemplateException(env, new Object[] {
                     "Expected a scalar model. \"path\" is instead ",
-                    new Internal_DelayedFTLTypeDescription(path) });
+                    new _DelayedFTLTypeDescription(path) });
         }
         final String strPath = ((TemplateScalarModel)path).getAsString();
         if(strPath == null) {
-            throw new Internal_MiscTemplateException(env, "String value of \"path\" parameter is null");
+            throw new _MiscTemplateException(env, "String value of \"path\" parameter is null");
         }
         
         // See whether we need to use a custom response (if we're inside a TTM
@@ -106,7 +106,7 @@ public class IncludePage implements TemplateDirectiveModel
         }
         else {
             if(!(inheritParamsModel instanceof TemplateBooleanModel)) {
-                throw new Internal_MiscTemplateException(env, new Object[] {
+                throw new _MiscTemplateException(env, new Object[] {
                         "\"inherit_params\" should be a boolean but it's a(n) ",
                         inheritParamsModel.getClass().getName(), " instead" });
             }
@@ -130,7 +130,7 @@ public class IncludePage implements TemplateDirectiveModel
                 // Convert params to a Map
                 final Object unwrapped = DeepUnwrap.unwrap(paramsModel);
                 if(!(unwrapped instanceof Map)) {
-                    throw new Internal_MiscTemplateException(env, new Object[] {
+                    throw new _MiscTemplateException(env, new Object[] {
                             "Expected \"params\" to unwrap into a java.util.Map. It unwrapped into ",
                             unwrapped.getClass().getName(), " instead." });
                 }
@@ -149,7 +149,7 @@ public class IncludePage implements TemplateDirectiveModel
                     wrappedResponse);
         }
         catch (ServletException e) {
-            throw new Internal_MiscTemplateException(e, env);
+            throw new _MiscTemplateException(e, env);
         }
     }
 

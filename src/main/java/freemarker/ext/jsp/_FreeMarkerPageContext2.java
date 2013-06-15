@@ -1,41 +1,36 @@
 package freemarker.ext.jsp;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
-import javax.el.ELContext;
-import javax.servlet.jsp.JspApplicationContext;
-import javax.servlet.jsp.JspContext;
-import javax.servlet.jsp.JspFactory;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ELException;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
-
 import freemarker.log.Logger;
 import freemarker.template.TemplateModelException;
+
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.el.VariableResolver;
+import javax.servlet.jsp.el.ELException;
+import javax.servlet.jsp.JspFactory;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  * 
- * Implementation of PageContext that contains JSP 2.0 and JSP 2.1 specific 
- * methods.
+ * Implementation of PageContext that contains JSP 2.0 specific methods.
  * 
  * @author Attila Szegedi
  */
-public class Internal_FreeMarkerPageContext21 extends FreeMarkerPageContext {
+public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
     private static final Logger logger = Logger.getLogger("freemarker.jsp");
 
     static {
         if(JspFactory.getDefaultFactory() == null) {
-            JspFactory.setDefaultFactory(new FreeMarkerJspFactory21());
+            JspFactory.setDefaultFactory(new FreeMarkerJspFactory2());
         }
         logger.debug("Using JspFactory implementation class " + 
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 
-    public Internal_FreeMarkerPageContext21() throws TemplateModelException {
+    public _FreeMarkerPageContext2() throws TemplateModelException {
         super();
     }
 
@@ -46,12 +41,7 @@ public class Internal_FreeMarkerPageContext21 extends FreeMarkerPageContext {
      */
     public ExpressionEvaluator getExpressionEvaluator() {
         try {
-            Class type = ((ClassLoader)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
-                            return Thread.currentThread().getContextClassLoader();
-                        }
-                    })).loadClass
+            Class type = Thread.currentThread().getContextClassLoader().loadClass
                     ("org.apache.commons.el.ExpressionEvaluatorImpl");
             return (ExpressionEvaluator) type.newInstance();
         }
@@ -77,22 +67,10 @@ public class Internal_FreeMarkerPageContext21 extends FreeMarkerPageContext {
         };
     }
 
-    private ELContext elContext;
-    
-    public ELContext getELContext() {
-        if(elContext == null) { 
-            JspApplicationContext jspctx = JspFactory.getDefaultFactory().getJspApplicationContext(getServletContext());
-            if(jspctx instanceof FreeMarkerJspApplicationContext) {
-                elContext = ((FreeMarkerJspApplicationContext)jspctx).createNewELContext(this);
-                elContext.putContext(JspContext.class, this);
-            }
-            else {
-                throw new UnsupportedOperationException(
-                        "Can not create an ELContext using a foreign JspApplicationContext\n" +
-                        "Consider dropping a private instance of JSP 2.1 API JAR file in\n" +
-                        "your WEB-INF/lib directory and then try again.");
-            }
-        }
-        return elContext;
+    /**
+     * Includes the specified path. The flush argument is ignored!
+     */
+    public void include(String path, boolean flush) throws IOException, ServletException {
+        super.include(path);
     }
 }

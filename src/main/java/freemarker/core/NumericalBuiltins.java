@@ -233,7 +233,7 @@ class NumericalBuiltins {
                     return model;
                 }
             } else {
-                throw new Internal_TemplateModelException(new Object[] {
+                throw new _TemplateModelException(new Object[] {
                         "Unsupported number class: ", num.getClass() });
             }            
         }
@@ -276,7 +276,7 @@ class NumericalBuiltins {
         if (num instanceof Double) {
             double d = Math.round(((Double) num).doubleValue());
             if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
-                throw new Internal_TemplateModelException(new Object[] {
+                throw new _TemplateModelException(new Object[] {
                         "Number doesn't fit into a 64 bit signed integer (long): ", new Double(d) });
             } else {
                 return (long) d;
@@ -284,7 +284,7 @@ class NumericalBuiltins {
         } else if (num instanceof Float) {
             float f = Math.round(((Float) num).floatValue());
             if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
-                throw new Internal_TemplateModelException(new Object[] {
+                throw new _TemplateModelException(new Object[] {
                         "Number doesn't fit into a 64 bit signed integer (long): ", new Float(f) });
             } else {
                 return (long) f;
@@ -292,7 +292,7 @@ class NumericalBuiltins {
         } else if (num instanceof BigDecimal) {
             BigDecimal bd = ((BigDecimal) num).setScale(0, BigDecimal.ROUND_HALF_UP);
             if (bd.compareTo(BIG_DECIMAL_LONG_MAX) > 0 || bd.compareTo(BIG_DECIMAL_LONG_MIN) < 0) {
-                throw new Internal_TemplateModelException(new Object[] {
+                throw new _TemplateModelException(new Object[] {
                         "Number doesn't fit into a 64 bit signed integer (long): ", bd });
             } else {
                 return bd.longValue();
@@ -300,7 +300,7 @@ class NumericalBuiltins {
         } else if (num instanceof BigInteger) {
             BigInteger bi = (BigInteger) num;
             if (bi.compareTo(BIG_INTEGER_LONG_MAX) > 0 || bi.compareTo(BIG_INTEGER_LONG_MIN) < 0) {
-                throw new Internal_TemplateModelException(new Object[] {
+                throw new _TemplateModelException(new Object[] {
                         "Number doesn't fit into a 64 bit signed integer (long): ", bi });
             } else {
                 return bi.longValue();
@@ -309,7 +309,7 @@ class NumericalBuiltins {
             return num.longValue();
         } else {
             // Should add Atomic* types in 2.4...
-            throw new Internal_TemplateModelException(new Object[] { "Unsupported number type: ", num.getClass() });
+            throw new _TemplateModelException(new Object[] { "Unsupported number type: ", num.getClass() });
         }
     }
     

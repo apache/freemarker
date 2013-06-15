@@ -949,9 +949,9 @@ public class Configurable
                 throw unknownSettingException(key);
             }
         } catch(Exception e) {
-            throw new Internal_MiscTemplateException(e, getEnvironment(), new Object[] {
-                    "Failed to set setting ", new Internal_DelayedJQuote(key),
-                    " to value ", new Internal_DelayedJQuote(value), "; see cause exception." });
+            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
+                    "Failed to set setting ", new _DelayedJQuote(key),
+                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
     }
 
@@ -1004,14 +1004,14 @@ public class Configurable
     }
 
     protected TemplateException invalidSettingValueException(String name, String value) {
-        return new Internal_MiscTemplateException(getEnvironment(), new Object[] {
-                "Invalid value for setting ", new Internal_DelayedJQuote(name), ": ",
-                new Internal_DelayedJQuote(value) });
+        return new _MiscTemplateException(getEnvironment(), new Object[] {
+                "Invalid value for setting ", new _DelayedJQuote(name), ": ",
+                new _DelayedJQuote(value) });
     }
     
-    public static class UnknownSettingException extends Internal_MiscTemplateException {
+    public static class UnknownSettingException extends _MiscTemplateException {
         private UnknownSettingException(String name, Environment env) {
-            super(env, new Object[] { "Unknown setting: ", new Internal_DelayedJQuote(name) });
+            super(env, new Object[] { "Unknown setting: ", new _DelayedJQuote(name) });
         }
     }
 

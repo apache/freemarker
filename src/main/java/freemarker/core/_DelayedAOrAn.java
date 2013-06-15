@@ -1,12 +1,11 @@
 package freemarker.core;
 
-public class Internal_DelayedAOrAn extends Internal_DelayedConversionToString {
+public class _DelayedAOrAn extends _DelayedConversionToString {
 
-    public Internal_DelayedAOrAn(Object object) {
+    public _DelayedAOrAn(Object object) {
         super(object);
     }
 
-    @Override
     protected String doConversion(Object obj) {
         String s = obj.toString();
         return MessageUtil.getAOrAn(s) + " " + s;

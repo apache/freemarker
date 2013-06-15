@@ -9,7 +9,7 @@ import org.python.core.PyObject;
  * 
  * {@link JythonVersionAdapter} for Jython 2.2.
  */
-public class Internal_Jython22VersionAdapter extends JythonVersionAdapter {
+public class _Jython22VersionAdapter extends JythonVersionAdapter {
 
     public boolean isPyInstance(Object obj) {
         return obj instanceof PyJavaInstance;

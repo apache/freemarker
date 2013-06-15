@@ -1,14 +1,14 @@
 package freemarker.core;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public abstract class Internal_DelayedConversionToString {
+public abstract class _DelayedConversionToString {
 
     private static final String NOT_SET = new String();
     
     private Object object;
     private String stringValue = NOT_SET;
 
-    public Internal_DelayedConversionToString(Object object) {
+    public _DelayedConversionToString(Object object) {
         this.object = object;
     }
 

@@ -84,7 +84,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import freemarker.core.Internal_ConcurrentMapFactory;
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -178,9 +178,9 @@ public class BeansWrapper implements ObjectWrapper
      * and {@link #enumModels}.
      */
     private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache
-            = Internal_ConcurrentMapFactory.newMaybeConcurrentHashMap();
+            = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
     private final boolean isGenericClassIntrospectionCacheConcurrentMap
-            = Internal_ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
+            = _ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
     private final Set/*<String>*/ genericClassIntrospectionCacheClassNames
             = new HashSet();
     private final Set/*<Class>*/ genericClassIntrospectionsInProgress
@@ -1769,7 +1769,7 @@ public class BeansWrapper implements ObjectWrapper
             Class.forName("java.lang.Enum");
             // If they are, return the appropriate constructor for enum models
             return Class.forName(
-                "freemarker.ext.beans.Internal_EnumModels").getDeclaredConstructor(
+                "freemarker.ext.beans._EnumModels").getDeclaredConstructor(
                         new Class[] { BeansWrapper.class });
         }
         catch(Exception e) {

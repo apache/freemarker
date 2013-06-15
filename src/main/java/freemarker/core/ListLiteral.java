@@ -177,9 +177,9 @@ final class ListLiteral extends Expression {
                     result.add(ns);
                 } 
                 catch (IOException ioe) {
-                    throw new Internal_MiscTemplateException(((StringLiteral) itemExpr), new Object[] {
-                            "Couldn't import library ", new Internal_DelayedJQuote(s), ": ",
-                            new Internal_DelayedGetMessage(ioe) });
+                    throw new _MiscTemplateException(((StringLiteral) itemExpr), new Object[] {
+                            "Couldn't import library ", new _DelayedJQuote(s), ": ",
+                            new _DelayedGetMessage(ioe) });
                 }
             }
             else {

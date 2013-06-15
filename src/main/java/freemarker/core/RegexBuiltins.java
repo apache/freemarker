@@ -123,8 +123,8 @@ abstract class RegexBuiltins {
         try {
             result = Pattern.compile(patternString, flags);
         } catch (PatternSyntaxException e) {
-            throw new Internal_TemplateModelException(e, new Object[] {
-                    "Malformed regular expression: ", new Internal_DelayedGetMessage(e) });
+            throw new _TemplateModelException(e, new Object[] {
+                    "Malformed regular expression: ", new _DelayedGetMessage(e) });
         }
         synchronized (patternCache) {
             patternCache.put(patternKey, result);
@@ -378,7 +378,7 @@ abstract class RegexBuiltins {
                             return matcher.groupCount() + 1;
                         }
                         catch (Exception e) {
-                            throw new Internal_TemplateModelException(e);
+                            throw new _TemplateModelException(e);
                         }
                     }
                     public TemplateModel get(int i) throws TemplateModelException {
@@ -386,7 +386,7 @@ abstract class RegexBuiltins {
                             return new SimpleScalar(matcher.group(i));
                         }
                         catch (Exception e) {
-                            throw new Internal_TemplateModelException(e);
+                            throw new _TemplateModelException(e);
                         }
                     }
                 };
@@ -404,7 +404,7 @@ abstract class RegexBuiltins {
                 }
                 
                 public TemplateModel next() throws TemplateModelException {
-                    if (!hasNext()) throw new Internal_TemplateModelException("No more matches");
+                    if (!hasNext()) throw new _TemplateModelException("No more matches");
                     Match result = new Match();
                     hasFindInfo = matcher.find();
                     return result;

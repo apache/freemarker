@@ -159,15 +159,15 @@ final class Include extends TemplateElement {
             includedTemplate = env.getTemplateForInclusion(templateNameString, enc, parse);
         }
         catch (ParseException pe) {
-            throw new Internal_MiscTemplateException(pe, env, new Object[] {
+            throw new _MiscTemplateException(pe, env, new Object[] {
                     "Error parsing included template ",
-                    new Internal_DelayedJQuote(templateNameString), ":\n",
-                    new Internal_DelayedGetMessage(pe) });
+                    new _DelayedJQuote(templateNameString), ":\n",
+                    new _DelayedGetMessage(pe) });
         }
         catch (IOException ioe) {
-            throw new Internal_MiscTemplateException(ioe, env, new Object[] {
-                    "Error reading included file ", new Internal_DelayedJQuote(templateNameString), ":\n",
-                    new Internal_DelayedGetMessage(ioe) });
+            throw new _MiscTemplateException(ioe, env, new Object[] {
+                    "Error reading included file ", new _DelayedJQuote(templateNameString), ":\n",
+                    new _DelayedGetMessage(ioe) });
         }
         env.include(includedTemplate);
     }
@@ -196,10 +196,10 @@ final class Include extends TemplateElement {
            return StringUtil.getYesNo(s);
         }
         catch (IllegalArgumentException iae) {
-            throw new Internal_MiscTemplateException(parseExp, new Object[] {
+            throw new _MiscTemplateException(parseExp, new Object[] {
                      "Value of include parse parameter must be boolean (or one of these strings: "
                      + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
-                     new Internal_DelayedJQuote(s), "." });
+                     new _DelayedJQuote(s), "." });
         }
     }
 

@@ -195,9 +195,9 @@ class StringBuiltins {
                 }
             } catch (ParseException pe) {
                 pe.setTemplateName(getTemplate().getName());
-                throw new Internal_MiscTemplateException(this, new Object[] {
+                throw new _MiscTemplateException(this, new Object[] {
                         "Failed to parse string value:\n",
-                        new Internal_DelayedGetMessage(pe),
+                        new _DelayedGetMessage(pe),
                         "\n\nThe failing expression:" });
             }
             return exp.eval(env);
@@ -310,7 +310,7 @@ class StringBuiltins {
                 if (cachedResult == null) {
                     String cs = env.getEffectiveURLEscapingCharset();
                     if (cs == null) {
-                        throw new Internal_TemplateModelException(
+                        throw new _TemplateModelException(
                                 "To do URL encoding, the framework that encloses "
                                 + "FreeMarker must specify the output encoding "
                                 + "or the URL encoding charset, so ask the "
@@ -324,7 +324,7 @@ class StringBuiltins {
                     try {
                         cachedResult = StringUtil.URLEnc(target, cs);
                     } catch (UnsupportedEncodingException e) {
-                        throw new Internal_TemplateModelException(e, "Failed to execute URL encoding.");
+                        throw new _TemplateModelException(e, "Failed to execute URL encoding.");
                     }
                 }
                 return cachedResult;
@@ -332,14 +332,14 @@ class StringBuiltins {
     
             public Object exec(List args) throws TemplateModelException {
                 if (args.size() != 1) {
-                    throw new Internal_TemplateModelException(
+                    throw new _TemplateModelException(
                             "The \"url\" built-in needs exactly 1 parameter, the charset.");
                 }
                 try {
                     return new SimpleScalar(
                             StringUtil.URLEnc(target, (String) args.get(0)));
                 } catch (UnsupportedEncodingException e) {
-                    throw new Internal_TemplateModelException(e, "Failed to execute URL encoding.");
+                    throw new _TemplateModelException(e, "Failed to execute URL encoding.");
                 }
             }
             
@@ -414,7 +414,7 @@ class StringBuiltins {
                     caseInsensitive = flags.indexOf('i') >= 0;
                     firstOnly = flags.indexOf('f') >= 0;
                     if (flags.indexOf('r') >=0) {
-                        throw new Internal_TemplateModelException(
+                        throw new _TemplateModelException(
                                 "The regular expression classes are not available.");
                     }
                 } else {
@@ -448,7 +448,7 @@ class StringBuiltins {
                 String flags = argCnt == 2 ? (String) args.get(1) : "";
                 boolean caseInsensitive = flags.indexOf('i') >=0;
                 if (flags.indexOf('r') >=0) {
-                    throw new Internal_TemplateModelException("Regular expression classes not available");
+                    throw new _TemplateModelException("Regular expression classes not available");
                 }
                 return new StringArraySequence(StringUtil.split(
                         s, splitString, caseInsensitive));
@@ -491,10 +491,10 @@ class StringBuiltins {
                                         : StringUtil.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
-                            throw new Internal_TemplateModelException(new Object[] {
+                            throw new _TemplateModelException(new Object[] {
                                     "?", key, "(...) argument #2 can't be a 0-length string." });
                         } else {
-                            throw new Internal_TemplateModelException(e, new Object[] {
+                            throw new _TemplateModelException(e, new Object[] {
                                     "?", key, "(...) failed: ", e });
                         }
                     }

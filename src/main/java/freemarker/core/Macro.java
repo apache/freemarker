@@ -243,10 +243,10 @@ public final class Macro extends TemplateElement implements TemplateModel {
                         }
                         else if (!env.isClassicCompatible()) {
                             boolean argWasSpecified = localVars.containsKey(argName);
-                            throw new Internal_MiscTemplateException(env,
-                                    new Internal_ErrorDescriptionBuilder(new Object[] {
-                                            "When calling macro ", new Internal_DelayedJQuote(name), 
-                                            ", required parameter ", new Internal_DelayedJQuote(argName),
+                            throw new _MiscTemplateException(env,
+                                    new _ErrorDescriptionBuilder(new Object[] {
+                                            "When calling macro ", new _DelayedJQuote(name), 
+                                            ", required parameter ", new _DelayedJQuote(argName),
                                             " (parameter #", new Integer(i + 1), ") was ", 
                                             (argWasSpecified
                                                     ? "specified, but had null/missing value."

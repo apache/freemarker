@@ -55,7 +55,7 @@ package freemarker.core;
 import java.util.Date;
 
 import freemarker.ext.beans.BeanModel;
-import freemarker.ext.beans.Internal_BeansAPI;
+import freemarker.ext.beans._BeansAPI;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
@@ -125,7 +125,7 @@ class EvalUtil
     /** Signals the buggy case where we have a non-null model, but its wraps a null. */
     private static TemplateModelException newModelHasStoredNullException(
             Class expected, TemplateModel model, Expression expr) {
-        return new Internal_TemplateModelException(expr, Internal_TemplateModelException.modelHasStoredNullDescription(expected, model));
+        return new _TemplateModelException(expr, _TemplateModelException.modelHasStoredNullDescription(expected, model));
     }
 
     /**
@@ -229,7 +229,7 @@ class EvalUtil
                     if (leftExp != null) {
                         throw InvalidReferenceException.getInstance(leftExp, env);
                     } else {
-                        throw new Internal_MiscTemplateException(defaultBlamed, env, 
+                        throw new _MiscTemplateException(defaultBlamed, env, 
                                     "The left operand of the comparison was undefined or null.");
                     }
                 }
@@ -246,7 +246,7 @@ class EvalUtil
                     if (rightExp != null) {
                         throw InvalidReferenceException.getInstance(rightExp, env);
                     } else {
-                        throw new Internal_MiscTemplateException(defaultBlamed, env,
+                        throw new _MiscTemplateException(defaultBlamed, env,
                                     "The right operand of the comparison was undefined or null.");
                     }
                 }
@@ -266,7 +266,7 @@ class EvalUtil
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);
             } catch (RuntimeException e) {
-                throw new Internal_MiscTemplateException(defaultBlamed, e, env, new Object[]
+                throw new _MiscTemplateException(defaultBlamed, e, env, new Object[]
                         { "Unexpected error while comparing two numbers: ", e });
             }
         } else if (leftValue instanceof TemplateDateModel && rightValue instanceof TemplateDateModel) {
@@ -287,13 +287,13 @@ class EvalUtil
                     sideExp = rightExp;
                 }
                 
-                throw new Internal_MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env, new Object[] {
+                throw new _MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env, new Object[] {
                         "The ", sideName, " ", DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN });
             }
             
             if (leftDateType != rightDateType) {
                 ;
-                throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+                throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
                         "Can't compare dates of different types. Left date tpye is ",
                         TemplateDateModel.TYPE_NAMES.get(leftDateType), ", right date type is ",
                         TemplateDateModel.TYPE_NAMES.get(rightDateType), "." });
@@ -304,7 +304,7 @@ class EvalUtil
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+                throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values." });
             }
             String leftString = EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
@@ -313,7 +313,7 @@ class EvalUtil
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+                throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on boolean values." });
             }
             boolean leftBool = ((TemplateBooleanModel) leftValue).getAsBoolean();
@@ -332,11 +332,11 @@ class EvalUtil
                 }
                 // Falls through
             }
-            throw new Internal_MiscTemplateException(defaultBlamed, env, new Object[] {
+            throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
                             "Can't compare values of these types. ",
                             "Allowed comparisons are between two numbers, two strings, or two dates.\n",
-                            "Left hand operand is ", new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(leftValue)), ".\n",
-                            "Right hand operand is ", new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(rightValue)), "." });
+                            "Left hand operand is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
+                            "Right hand operand is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)), "." });
         }
 
         switch (operator) {
@@ -398,7 +398,7 @@ class EvalUtil
             }
         } else {
             if (env.isClassicCompatible() && tm instanceof BeanModel) {
-                return Internal_BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
+                return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
             } if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
                 throw new NonStringException(exp, tm, seqHint, env);
             } else {

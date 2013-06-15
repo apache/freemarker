@@ -61,8 +61,8 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 
 import freemarker.core.Environment;
-import freemarker.core.Internal_CoreAPI;
-import freemarker.core.Internal_ErrorDescriptionBuilder;
+import freemarker.core._CoreAPI;
+import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 
@@ -90,7 +90,7 @@ public class TemplateException extends Exception {
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
 
     // Set in constructor:
-    private transient Internal_ErrorDescriptionBuilder descriptionBuilder;
+    private transient _ErrorDescriptionBuilder descriptionBuilder;
     private final Throwable causeException;
     private final transient Environment env;
     private transient TemplateElement[] ftlInstructionStackSnapshot;
@@ -162,7 +162,7 @@ public class TemplateException extends Exception {
      * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
      *     backward-compatibility
      */
-    protected TemplateException(Throwable cause, Environment env, Internal_ErrorDescriptionBuilder descriptionBuilder,
+    protected TemplateException(Throwable cause, Environment env, _ErrorDescriptionBuilder descriptionBuilder,
             boolean preventAmbiguity) {
         this(null, cause, env, descriptionBuilder);
     }
@@ -170,7 +170,7 @@ public class TemplateException extends Exception {
     private TemplateException(
             String renderedDescription,
             Throwable cause,
-            Environment env, Internal_ErrorDescriptionBuilder descriptionBuilder) {
+            Environment env, _ErrorDescriptionBuilder descriptionBuilder) {
         // Note: Keep this constructor lightweight.
         
         super();  // No args, because both the message and the cause exception is managed locally.
@@ -183,7 +183,7 @@ public class TemplateException extends Exception {
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;
         
-        if(env != null) ftlInstructionStackSnapshot = Internal_CoreAPI.getInstructionStackSnapshot(env);
+        if(env != null) ftlInstructionStackSnapshot = _CoreAPI.getInstructionStackSnapshot(env);
     }
     
     private void renderMessages()  {
@@ -245,7 +245,7 @@ public class TemplateException extends Exception {
             if (renderedFtlInstructionStackSnapshot == null) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
-                Internal_CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, pw);
+                _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, pw);
                 pw.close();
                 synchronized (lock) {
                     if (renderedFtlInstructionStackSnapshot == null) {
@@ -266,7 +266,7 @@ public class TemplateException extends Exception {
                 int stackSize = ftlInstructionStackSnapshot.length;
                 String s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
                         + ":\n==> "
-                        + Internal_CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
+                        + _CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
                 synchronized (lock) {
                     if (renderedFtlInstructionStackSnapshotTop == null) {
                         renderedFtlInstructionStackSnapshotTop = s;
@@ -371,7 +371,7 @@ public class TemplateException extends Exception {
                 if (ftlStackTrace) {  // We are after an FTL stack trace
                     out.println();
                     out.println("Java stack trace (for programmers):");
-                    out.println(Internal_CoreAPI.STACK_SECTION_SEPARATOR);
+                    out.println(_CoreAPI.STACK_SECTION_SEPARATOR);
                     synchronized (lock) {
                         if (messageWasAlreadyPrintedForThisTrace == null) {
                             messageWasAlreadyPrintedForThisTrace = new ThreadLocal();

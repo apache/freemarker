@@ -8,7 +8,7 @@ import freemarker.template.TemplateException;
  * because the API of {@link TemplateException} is too simple for the purposes of the core, but it can't be
  * extended without breaking backward compatibility and exposing internals.  
  */
-public class Internal_MiscTemplateException extends TemplateException {
+public class _MiscTemplateException extends TemplateException {
 
     // Note: On Java 5 we will use `String descPart1, Object... furtherDescParts` instead of `Object[] descriptionParts`
     //       and `String description`. That's why these are at the end of the parameter list.
@@ -16,95 +16,95 @@ public class Internal_MiscTemplateException extends TemplateException {
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_MiscTemplateException(String description) {
+    public _MiscTemplateException(String description) {
         super(description, null);
     }
 
-    public Internal_MiscTemplateException(Environment env, String description) {
+    public _MiscTemplateException(Environment env, String description) {
         super(description, env);
     }
     
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
 
-    public Internal_MiscTemplateException(Throwable cause, String description) {
+    public _MiscTemplateException(Throwable cause, String description) {
         this(cause, null, description);
     }
 
-    public Internal_MiscTemplateException(Throwable cause, Environment env) {
+    public _MiscTemplateException(Throwable cause, Environment env) {
         this(cause, env, (String) null);
     }
 
-    public Internal_MiscTemplateException(Throwable cause) {
+    public _MiscTemplateException(Throwable cause) {
         this(cause, null, (String) null);
     }
     
-    public Internal_MiscTemplateException(Throwable cause, Environment env, String description) {
+    public _MiscTemplateException(Throwable cause, Environment env, String description) {
         super(cause, env, description, true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_MiscTemplateException(Internal_ErrorDescriptionBuilder description) {
+    public _MiscTemplateException(_ErrorDescriptionBuilder description) {
         this(null, description);
     }
 
-    public Internal_MiscTemplateException(Environment env, Internal_ErrorDescriptionBuilder description) {
+    public _MiscTemplateException(Environment env, _ErrorDescriptionBuilder description) {
         this(null, env, description);
     }
 
-    public Internal_MiscTemplateException(Throwable cause, Environment env, Internal_ErrorDescriptionBuilder description) {
+    public _MiscTemplateException(Throwable cause, Environment env, _ErrorDescriptionBuilder description) {
         super(cause, env, description, true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_MiscTemplateException(Object[] descriptionParts) {
+    public _MiscTemplateException(Object[] descriptionParts) {
         this((Environment) null, descriptionParts);
     }
 
-    public Internal_MiscTemplateException(Environment env, Object[] descriptionParts) {
+    public _MiscTemplateException(Environment env, Object[] descriptionParts) {
         this((Throwable) null, env, descriptionParts);
     }
 
-    public Internal_MiscTemplateException(Throwable cause, Object[] descriptionParts) {
+    public _MiscTemplateException(Throwable cause, Object[] descriptionParts) {
         this(cause, null, descriptionParts);
     }
 
-    public Internal_MiscTemplateException(Throwable cause, Environment env, Object[] descriptionParts) {
-        super(cause, env, new Internal_ErrorDescriptionBuilder(descriptionParts), true);
+    public _MiscTemplateException(Throwable cause, Environment env, Object[] descriptionParts) {
+        super(cause, env, new _ErrorDescriptionBuilder(descriptionParts), true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_MiscTemplateException(Expression blamed, Object[] descriptionParts) {
+    public _MiscTemplateException(Expression blamed, Object[] descriptionParts) {
         this(blamed, null, descriptionParts);
     }
 
-    public Internal_MiscTemplateException(Expression blamed, Environment env, Object[] descriptionParts) {
+    public _MiscTemplateException(Expression blamed, Environment env, Object[] descriptionParts) {
         this(blamed, null, env, descriptionParts);
     }
 
-    public Internal_MiscTemplateException(Expression blamed, Throwable cause, Environment env, Object[] descriptionParts) {
-        super(cause, env, new Internal_ErrorDescriptionBuilder(descriptionParts).blame(blamed), true);
+    public _MiscTemplateException(Expression blamed, Throwable cause, Environment env, Object[] descriptionParts) {
+        super(cause, env, new _ErrorDescriptionBuilder(descriptionParts).blame(blamed), true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_MiscTemplateException(Expression blamed, String description) {
+    public _MiscTemplateException(Expression blamed, String description) {
         this(blamed, null, description);
     }
 
-    public Internal_MiscTemplateException(Expression blamed, Environment env, String description) {
+    public _MiscTemplateException(Expression blamed, Environment env, String description) {
         this(blamed, null, env, description);
     }
 
-    public Internal_MiscTemplateException(Expression blamed, Throwable cause, Environment env, String description) {
-        super(cause, env, new Internal_ErrorDescriptionBuilder(description).blame(blamed), true);
+    public _MiscTemplateException(Expression blamed, Throwable cause, Environment env, String description) {
+        super(cause, env, new _ErrorDescriptionBuilder(description).blame(blamed), true);
     }
     
 }

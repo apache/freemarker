@@ -99,7 +99,7 @@ final class RecurseNode extends TemplateElement {
                     throw new UnexpectedTypeException(namespaces, nss, "sequence", env);
                 } else {
                     // Should not occur
-                    throw new Internal_MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");
+                    throw new _MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");
                 }
             }
         }

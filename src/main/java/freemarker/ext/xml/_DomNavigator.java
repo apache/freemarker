@@ -77,8 +77,8 @@ import freemarker.template.utility.StringUtil;
  * 
  * @author Attila Szegedi
  */
-public class Internal_DomNavigator extends Navigator {
-    public Internal_DomNavigator() {
+public class _DomNavigator extends Navigator {
+    public _DomNavigator() {
     } 
 
     void getAsString(Object node, StringWriter sw) {

@@ -470,7 +470,7 @@ public abstract class ArithmeticEngine {
                     return n1.mod(n2);
                 }
                 case BIGDECIMAL: {
-                    throw new Internal_MiscTemplateException("Can't calculate remainder on BigDecimals");
+                    throw new _MiscTemplateException("Can't calculate remainder on BigDecimals");
                 }
             }
             // Make the compiler happy. getCommonClassCode() is guaranteed to 
@@ -502,9 +502,9 @@ public abstract class ArithmeticEngine {
             }
             catch(NullPointerException e) {
                 if(num == null) {
-                    throw new Internal_MiscTemplateException("The Number object was null.");
+                    throw new _MiscTemplateException("The Number object was null.");
                 } else {
-                    throw new Internal_MiscTemplateException(new Object[] {
+                    throw new _MiscTemplateException(new Object[] {
                             "Unknown number type ", num.getClass().getName() });
                 }
             }

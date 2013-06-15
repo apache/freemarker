@@ -187,7 +187,7 @@ class MessageUtil {
         }
         sb.append(".");
         
-        return new Internal_TemplateModelException(sb.toString());
+        return new _TemplateModelException(sb.toString());
     }
 
     static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
@@ -219,13 +219,13 @@ class MessageUtil {
     
     static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
-        return new Internal_TemplateModelException(new Object[] {
-                methodName, "(...) expects ", new Internal_DelayedAOrAn(expectedType), " as argument #", new Integer(argIdx + 1),
-                ", but received ", new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(arg)), "." });
+        return new _TemplateModelException(new Object[] {
+                methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", new Integer(argIdx + 1),
+                ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), "." });
     }
 
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
-        return new Internal_MiscTemplateException(env, new Object[] {
+        return new _MiscTemplateException(env, new Object[] {
                 "Instantiating ", className, " is not allowed in the template for security reasons." });
     }
 

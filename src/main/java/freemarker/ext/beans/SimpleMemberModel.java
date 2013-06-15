@@ -57,9 +57,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import freemarker.core.Internal_DelayedFTLTypeDescription;
-import freemarker.core.Internal_ErrorDescriptionBuilder;
-import freemarker.core.Internal_TemplateModelException;
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._ErrorDescriptionBuilder;
+import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
@@ -176,14 +176,14 @@ class SimpleMemberModel
 
     private static TemplateModelException createArgumentTypeMismarchException(
             int argIdx, TemplateModel argVal, Class targetType) {
-        return new Internal_TemplateModelException(new Object[] {
+        return new _TemplateModelException(new Object[] {
                 "Argument type mismatch; can't convert (unwrap) argument #", new Integer(argIdx + 1),
-                " value of type ", new Internal_DelayedFTLTypeDescription(argVal),
+                " value of type ", new _DelayedFTLTypeDescription(argVal),
                 " to ", ClassUtil.getShortClassName(targetType), "." });
     }
 
     private static TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
-        return new Internal_TemplateModelException(new Object[] {
+        return new _TemplateModelException(new Object[] {
                 "Argument type mismatch; argument #", new Integer(argIdx + 1),
                 " is null, which can't be converted to primitive type ", targetType.getName(), "." });
     }

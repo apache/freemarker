@@ -14,7 +14,7 @@ public class UnexpectedTypeException extends TemplateException {
         super(description, env);
     }
 
-    UnexpectedTypeException(Environment env, Internal_ErrorDescriptionBuilder description) {
+    UnexpectedTypeException(Environment env, _ErrorDescriptionBuilder description) {
         super(null, env, description, true);
     }
 
@@ -35,19 +35,19 @@ public class UnexpectedTypeException extends TemplateException {
         super(null, env, newDesciptionBuilder(blamed, model, expectedType, env).tips(tips), true);
     }
     
-    private static Internal_ErrorDescriptionBuilder newDesciptionBuilder(
+    private static _ErrorDescriptionBuilder newDesciptionBuilder(
             Expression blamed, TemplateModel model, String expectedType, Environment env)
             throws InvalidReferenceException {
         if (model == null) throw InvalidReferenceException.getInstance(blamed, env);
-        return new Internal_ErrorDescriptionBuilder(
+        return new _ErrorDescriptionBuilder(
                 unexpectedTypeErrorDescription(expectedType, model))
                 .blame(blamed);
     }
 
     private static Object[] unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
         return new Object[] {
-                "Expected ", new Internal_DelayedAOrAn(expectedType), ", but this evaluated to ",
-                new Internal_DelayedAOrAn(new Internal_DelayedFTLTypeDescription(model)), ":"};
+                "Expected ", new _DelayedAOrAn(expectedType), ", but this evaluated to ",
+                new _DelayedAOrAn(new _DelayedFTLTypeDescription(model)), ":"};
     }
     
 }

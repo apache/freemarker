@@ -169,7 +169,7 @@ public class Template extends Configurable {
                         getConfiguration().getTagSyntax(),
                         getConfiguration().getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
-                this.actualTagSyntax = parser.internal_getLastTagSyntax();
+                this.actualTagSyntax = parser._getLastTagSyntax();
             }
             catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it

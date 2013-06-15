@@ -53,7 +53,7 @@
 package freemarker.template;
 
 import freemarker.core.Environment;
-import freemarker.core.Internal_ErrorDescriptionBuilder;
+import freemarker.core._ErrorDescriptionBuilder;
 
 /**
  * Template model implementation classes should throw this exception if
@@ -119,7 +119,7 @@ public class TemplateModelException extends TemplateException {
      *     backward-compatibility
      */
     protected TemplateModelException(
-            Throwable cause, Environment env, Internal_ErrorDescriptionBuilder descriptionBuilder,
+            Throwable cause, Environment env, _ErrorDescriptionBuilder descriptionBuilder,
             boolean preventAmbiguity) {
         super(cause, env, descriptionBuilder, true);
     }

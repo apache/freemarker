@@ -10,9 +10,9 @@ import freemarker.template.TemplateModelException;
  * 
  * @author Attila Szegedi
  */
-public class Internal_FreeMarkerPageContext1 extends FreeMarkerPageContext {
+public class _FreeMarkerPageContext1 extends FreeMarkerPageContext {
 
-    public Internal_FreeMarkerPageContext1() throws TemplateModelException {
+    public _FreeMarkerPageContext1() throws TemplateModelException {
         super();
     }
 

@@ -4,7 +4,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 
-public class Internal_TemplateModelException extends TemplateModelException {
+public class _TemplateModelException extends TemplateModelException {
 
     // Note: On Java 5 we will use `String descPart1, Object... furtherDescParts` instead of `Object[] descriptionParts`
     //       and `String description`. That's why these are at the end of the parameter list.
@@ -12,95 +12,95 @@ public class Internal_TemplateModelException extends TemplateModelException {
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_TemplateModelException(String description) {
+    public _TemplateModelException(String description) {
         super(description);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
 
-    public Internal_TemplateModelException(Throwable cause, String description) {
+    public _TemplateModelException(Throwable cause, String description) {
         this(cause, null, description);
     }
 
-    public Internal_TemplateModelException(Environment env, String description) {
+    public _TemplateModelException(Environment env, String description) {
         this((Throwable) null, env, description);
     }
     
-    public Internal_TemplateModelException(Throwable cause, Environment env) {
+    public _TemplateModelException(Throwable cause, Environment env) {
         this(cause, env, (String) null);
     }
 
-    public Internal_TemplateModelException(Throwable cause) {
+    public _TemplateModelException(Throwable cause) {
         this(cause, null, (String) null);
     }
     
-    public Internal_TemplateModelException(Throwable cause, Environment env, String description) {
+    public _TemplateModelException(Throwable cause, Environment env, String description) {
         super(cause, env, description, true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_TemplateModelException(Internal_ErrorDescriptionBuilder description) {
+    public _TemplateModelException(_ErrorDescriptionBuilder description) {
         this(null, description);
     }
 
-    public Internal_TemplateModelException(Environment env, Internal_ErrorDescriptionBuilder description) {
+    public _TemplateModelException(Environment env, _ErrorDescriptionBuilder description) {
         this(null, env, description);
     }
 
-    public Internal_TemplateModelException(Throwable cause, Environment env, Internal_ErrorDescriptionBuilder description) {
+    public _TemplateModelException(Throwable cause, Environment env, _ErrorDescriptionBuilder description) {
         super(cause, env, description, true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_TemplateModelException(Object[] descriptionParts) {
+    public _TemplateModelException(Object[] descriptionParts) {
         this((Environment) null, descriptionParts);
     }
 
-    public Internal_TemplateModelException(Environment env, Object[] descriptionParts) {
+    public _TemplateModelException(Environment env, Object[] descriptionParts) {
         this((Throwable) null, env, descriptionParts);
     }
 
-    public Internal_TemplateModelException(Throwable cause, Object[] descriptionParts) {
+    public _TemplateModelException(Throwable cause, Object[] descriptionParts) {
         this(cause, null, descriptionParts);
     }
 
-    public Internal_TemplateModelException(Throwable cause, Environment env, Object[] descriptionParts) {
-        super(cause, env, new Internal_ErrorDescriptionBuilder(descriptionParts), true);
+    public _TemplateModelException(Throwable cause, Environment env, Object[] descriptionParts) {
+        super(cause, env, new _ErrorDescriptionBuilder(descriptionParts), true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_TemplateModelException(Expression blamed, Object[] descriptionParts) {
+    public _TemplateModelException(Expression blamed, Object[] descriptionParts) {
         this(blamed, null, descriptionParts);
     }
 
-    public Internal_TemplateModelException(Expression blamed, Environment env, Object[] descriptionParts) {
+    public _TemplateModelException(Expression blamed, Environment env, Object[] descriptionParts) {
         this(blamed, null, env, descriptionParts);
     }
 
-    public Internal_TemplateModelException(Expression blamed, Throwable cause, Environment env, Object[] descriptionParts) {
-        super(cause, env, new Internal_ErrorDescriptionBuilder(descriptionParts).blame(blamed), true);
+    public _TemplateModelException(Expression blamed, Throwable cause, Environment env, Object[] descriptionParts) {
+        super(cause, env, new _ErrorDescriptionBuilder(descriptionParts).blame(blamed), true);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
     // Permutation group:
     
-    public Internal_TemplateModelException(Expression blamed, String description) {
+    public _TemplateModelException(Expression blamed, String description) {
         this(blamed, null, description);
     }
 
-    public Internal_TemplateModelException(Expression blamed, Environment env, String description) {
+    public _TemplateModelException(Expression blamed, Environment env, String description) {
         this(blamed, null, env, description);
     }
 
-    public Internal_TemplateModelException(Expression blamed, Throwable cause, Environment env, String description) {
-        super(cause, env, new Internal_ErrorDescriptionBuilder(description).blame(blamed), true);
+    public _TemplateModelException(Expression blamed, Throwable cause, Environment env, String description) {
+        super(cause, env, new _ErrorDescriptionBuilder(description).blame(blamed), true);
     }
 
     static Object[] modelHasStoredNullDescription(Class expected, TemplateModel model) {

@@ -76,9 +76,9 @@ import freemarker.template.TemplateModelException;
  *  
  * @author Attila Szegedi
  */
-public class Internal_Dom4jNavigator extends Navigator {
+public class _Dom4jNavigator extends Navigator {
 
-    public Internal_Dom4jNavigator() {
+    public _Dom4jNavigator() {
     } 
 
     void getAsString(Object node, StringWriter sw) {

@@ -191,13 +191,13 @@ class SequenceBuiltins {
                 valueInMsg  = "key value";
                 valuesInMsg  = "key values";
             }
-            return new Internal_TemplateModelException(new Object[] {
+            return new _TemplateModelException(new Object[] {
                     startErrorMessage(keyNamesLn, index),
                     "All ", valuesInMsg, " in the sequence must be ",
                     firstTypePlural, ", because the first ", valueInMsg,
                     " was that. However, the ", valueInMsg,
                     " of the current item isn't a ", firstType, " but a ",
-                    new Internal_DelayedFTLTypeDescription(key), "."});
+                    new _DelayedFTLTypeDescription(key), "."});
         }
         
         /**
@@ -233,21 +233,21 @@ class SequenceBuiltins {
                         key = ((TemplateHashModel) key).get(keyNames[keyNameI]);
                     } catch (ClassCastException e) {
                         if (!(key instanceof TemplateHashModel)) {
-                            throw new Internal_TemplateModelException(new Object[] {
+                            throw new _TemplateModelException(new Object[] {
                                     startErrorMessage(keyNamesLn, i),
                                     (keyNameI == 0
                                             ? "Sequence items must be hashes when using ?sort_by. "
                                             : "The " + StringUtil.jQuote(keyNames[keyNameI - 1])),
                                     " subvariable is not a hash, so ?sort_by ",
                                     "can't proceed with getting the ",
-                                    new Internal_DelayedJQuote(keyNames[keyNameI]),
+                                    new _DelayedJQuote(keyNames[keyNameI]),
                                     " subvariable." });
                         } else {
                             throw e;
                         }
                     }
                     if (key == null) {
-                        throw new Internal_TemplateModelException(new Object[] {
+                        throw new _TemplateModelException(new Object[] {
                                 startErrorMessage(keyNamesLn, i),
                                 "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found." });
                     }
@@ -270,7 +270,7 @@ class SequenceBuiltins {
                         keyType = KEY_TYPE_BOOLEAN;
                         keyComparator = new BooleanKVPComparator();
                     } else {
-                        throw new Internal_TemplateModelException(new Object[] {
+                        throw new _TemplateModelException(new Object[] {
                                 startErrorMessage(keyNamesLn, i),
                                 "Values used for sorting must be numbers, strings, date/times or booleans." });
                     }
@@ -340,7 +340,7 @@ class SequenceBuiltins {
             try {
                 Collections.sort(res, keyComparator);
             } catch (Exception exc) {
-                throw new Internal_TemplateModelException(exc, new Object[] {
+                throw new _TemplateModelException(exc, new Object[] {
                         startErrorMessage(keyNamesLn), "Unexpected error while sorting:" + exc });
             }
 
@@ -455,7 +455,7 @@ class SequenceBuiltins {
                                     .getAsString();
                         } catch (ClassCastException e) {
                             if (!(item instanceof TemplateScalarModel)) {
-                                throw new Internal_TemplateModelException(new Object[] {
+                                throw new _TemplateModelException(new Object[] {
                                         "The argument to ?", key, "(key), when it's a sequence, must be a "
                                         + "sequence of strings, but the item at index ", new Integer(i),
                                         " is not a string."});
@@ -463,7 +463,7 @@ class SequenceBuiltins {
                         }
                     }
                 } else {
-                    throw new Internal_TemplateModelException(new Object[] {
+                    throw new _TemplateModelException(new Object[] {
                             "The argument to ?", key, "(key) must be a string (the name of the subvariable), or a "
                             + "sequence of strings (the \"path\" to the subvariable)." });
                 }
@@ -743,7 +743,7 @@ class SequenceBuiltins {
                     TemplateSequenceModel wrappedTsm, int chunkSize, TemplateModel fillerItem)
                     throws TemplateModelException {
                 if (chunkSize < 1) {
-                    throw new Internal_TemplateModelException(new Object[] {
+                    throw new _TemplateModelException(new Object[] {
                             "The 1st argument to ?', key, ' (...) must be at least 1." });
                 }
                 this.wrappedTsm = wrappedTsm;
@@ -804,9 +804,9 @@ class SequenceBuiltins {
                     true, true, true, // The last one is true to emulate an old bug for BC 
                     env);
         } catch (TemplateException ex) {
-            throw new Internal_TemplateModelException(ex, new Object[] {
+            throw new _TemplateModelException(ex, new Object[] {
                     "This error has occured when comparing sequence item at 0-based index ", new Integer(seqItemIndex),
-                    " to the searched item:\n", new Internal_DelayedGetMessage(ex) });
+                    " to the searched item:\n", new _DelayedGetMessage(ex) });
         }
     }
  
@@ -863,7 +863,7 @@ class SequenceBuiltins {
                         } catch (TemplateModelException e) {
                             throw e;
                         } catch (TemplateException e) {
-                            throw new Internal_TemplateModelException(e, new Object[] {
+                            throw new _TemplateModelException(e, new Object[] {
                                     "?", key, " failed at index ", new Integer(i), ":" });
                         }
                     }
