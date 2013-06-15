@@ -108,7 +108,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
 
@@ -267,16 +266,16 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("xml", new StringBuiltins.xmlBI());
         try {
             Class.forName("java.util.regex.Pattern");
-            builtins.put("matches", instantiate("freemarker.core.RegexBuiltins$matchesBI"));
-            builtins.put("groups", instantiate("freemarker.core.RegexBuiltins$groupsBI"));
-            builtins.put("replace", instantiate("freemarker.core.RegexBuiltins$replace_reBI"));
-            builtins.put("split", instantiate("freemarker.core.RegexBuiltins$split_reBI"));
+            builtins.put("matches", instantiateBI("freemarker.core._RegexBuiltins$matchesBI"));
+            builtins.put("groups", instantiateBI("freemarker.core._RegexBuiltins$groupsBI"));
+            builtins.put("replace", instantiateBI("freemarker.core._RegexBuiltins$replace_reBI"));
+            builtins.put("split", instantiateBI("freemarker.core._RegexBuiltins$split_reBI"));
         } catch (Exception e) {}
     }
 
-    private static Object instantiate(String className) throws Exception
+    private static Object instantiateBI(String className) throws Exception
     {
-        return ClassUtil.forName(className).newInstance();
+        return Class.forName(className).newInstance();
     }
     
     static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {

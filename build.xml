@@ -223,7 +223,7 @@
       bootclasspath="${boot.classpath.j2se1.2}"
       excludes="
         freemarker/log/JDK14LoggerFactory.java,
-        freemarker/core/RegexBuiltins.java,
+        freemarker/core/_RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java,
         
         freemarker/ext/beans/_EnumModels.java,
@@ -259,7 +259,7 @@
       bootclasspath="${boot.classpath.j2se1.4}"
       includes="
         freemarker/log/JDK14LoggerFactory.java,
-        freemarker/core/RegexBuiltins.java,
+        freemarker/core/_RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java"
     />
 

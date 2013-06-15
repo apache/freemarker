@@ -77,12 +77,18 @@ import freemarker.template.utility.StringUtil;
 
 
 /**
- * Implementation of built-ins that (might) use regular expressions.
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
+ * Contains the string built-ins that require J2SE 1.4 regular expression classes.
  */
 // TODO: I think that the implementator has neglected that Matcher-s are
 // stateful and hence the result of ?matches can produce glitches if it's
 // accessed while iterated through. (This is a single-thread issue.)
-abstract class RegexBuiltins {
+public class _RegexBuiltins {
+
+    // Can't be instantiated
+    private _RegexBuiltins() { }
     
     private static final Logger logger = Logger.getLogger("freemarker.runtime");
     
@@ -217,7 +223,7 @@ abstract class RegexBuiltins {
         logger.warn(message);
     }
     
-    static class matchesBI extends StringBuiltIn {
+    public static class matchesBI extends StringBuiltIn {
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new MatcherBuilder(s);
         }
@@ -247,7 +253,7 @@ abstract class RegexBuiltins {
         
     }
     
-    static class groupsBI extends BuiltIn {
+    public static class groupsBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel targetModel = target.eval(env);
             assertNonNull(targetModel, env);
@@ -261,7 +267,7 @@ abstract class RegexBuiltins {
         }
     }
     
-    static class replace_reBI extends StringBuiltIn {
+    public static class replace_reBI extends StringBuiltIn {
         
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new ReplaceMethod(s);
@@ -300,7 +306,7 @@ abstract class RegexBuiltins {
         
     }
     
-    static class split_reBI extends StringBuiltIn {
+    public static class split_reBI extends StringBuiltIn {
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new SplitMethod(s);
         }
