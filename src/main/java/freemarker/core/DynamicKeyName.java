@@ -223,10 +223,10 @@ final class DynamicKeyName extends Expression {
                     "Left side of range out of bounds, is: ", new Integer(start),
                     "\nbut the string has ", new Integer(targetStr.length()), " elements." });
         }
-        if (end > targetStr.length()) {
+        if (end >= targetStr.length()) {
             throw new _MiscTemplateException(range.right, new Object[] {
                     "Right side of range out of bounds, is: ", new Integer(end),
-                    "\nbut the string is only ", new Integer(targetStr.length()), " characters." });
+                    "\nbut the string is only ", new Integer(targetStr.length()), " characters long." });
         }
         try {
             return new SimpleScalar(targetStr.substring(start, end+1));
