@@ -390,11 +390,19 @@ class EvalUtil
             // This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since 2.3.20
             // (and before that when classic_compatible was true), so to keep backward compatibility we couldn't insert
             // this before TemplateScalarModel.
-            boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean(); 
-            if (env.getClassicCompatibleAsInt() == 1) {
+            boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
+            int compatMode = env.getClassicCompatibleAsInt();
+            if (compatMode == 1) {
                 return booleanValue ? "true" : "";
+            } else if (compatMode == 2) {
+                if (tm instanceof BeanModel) {
+                    // In 2.1, bean-wrapped booleans where strings, so that has overridden the boolean behavior: 
+                    return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
+                } else {
+                    return booleanValue ? "true" : "";
+                }
             } else {
-                return env.formatBoolean(booleanValue);
+                throw new RuntimeException("Unsupported classic_compatible variation: " + compatMode);
             }
         } else {
             if (env.isClassicCompatible() && tm instanceof BeanModel) {

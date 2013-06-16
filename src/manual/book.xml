@@ -20609,14 +20609,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>The <literal>classic_compatible</literal> setting now
                   accepts value <literal>2</literal> along
                   <literal>true</literal> (alias <literal>1</literal>) and
-                  <literal>false</literal> (alias <literal>0</literal>). If
-                  it's 2, boolean values will be coerced to string like in
-                  2.3.20, and thus by default become to
-                  <literal>"true"</literal> or <literal>"false"</literal>,
-                  which in turn is like in early FreeMarker 2-s. (With normal
-                  classic-compatible mode they become to
-                  <literal>"true"</literal> and <literal>""</literal>, just
-                  like in FreeMarker 1.)</para>
+                  <literal>false</literal> (alias <literal>0</literal>).
+                  <literal>2</literal> means <literal>true</literal> but with
+                  emulating bugs in early 2.x classic-compatibility mode.
+                  Currently this affects how booleans are converted to string;
+                  with <literal>1</literal> it's always
+                  <literal>"true"</literal>/<literal>""</literal>, but with
+                  <literal>2</literal> it's <literal>"true"/"false"</literal>
+                  for values wrapped by <literal>BeansWrapper</literal> as
+                  then <literal>Boolean.toString()</literal> prevails. Noe
+                  that
+                  <literal><replaceable>someBoolean</replaceable>?string</literal>
+                  will always consistently format the boolean according the
+                  <literal>boolean_format</literal> setting, just like in
+                  FreeMarker 2.3.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

@@ -240,8 +240,11 @@ public class Configurable
      * Same as {@link #setClassicCompatible(boolean)}, but allows some extra values. 
      * 
      * @param classicCompatibility {@code 0} means {@code false}, {@code 1} means {@code true},
-     *     {@code 2} means {@code true} but with 2.3 boolean formatter. (The last was originally a bug in the
-     *     compatibility mode of early FreeMarker 2.X-es, hence "2".)
+     *     {@code 2} means {@code true} but with emulating bugs in early 2.x classic-compatibility mode. Currently
+     *     {@code 2} affects how booleans are converted to string; with {@code 1} it's always {@code "true"}/{@code ""},
+     *     but with {@code 2} it's {@code "true"}/{@code "false"} for values wrapped by {@link BeansWrapper} as then
+     *     {@link Boolean#toString()} prevails. Note that {@code someBoolean?string} will always consistently format the
+     *     boolean according the {@code boolean_format} setting, just like in FreeMarker 2.3 and later.
      */
     public void setClassicCompatibleAsInt(int classicCompatibility) {
         if (classicCompatibility < 0 || classicCompatibility > 2) {
@@ -670,9 +673,10 @@ public class Configurable
      * <ul>
      *   <li><code>"locale"</code>: local codes with the usual format, such as <code>"en_US"</code>.
      *   <li><code>"classic_compatible"</code>:
-     *       <code>"true"</code>, <code>"false"</code>, <code>"yes"</code>, <code>"no"</code>,
-     *       <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>.
-     *       Case insensitive.
+     *       <code>"true"</code>, <code>"false"</code> or {@code 0} or {@code 1} or {@code 2}.
+     *       (Also accepts <code>"yes"</code>, <code>"no"</code>, <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>.)
+     *       Case insensitive. Help migration from FreeMarker Classic (1.x).
+     *       See {@link #setClassicCompatible(boolean)} and {@link Configurable#setClassicCompatibleAsInt(int)}.
      *   <li><code>"template_exception_handler"</code>:  If the value contains dot, then it's
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
@@ -809,8 +813,8 @@ public class Configurable
      *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
      *       <code>"square_bracket"</code>.
      *   <li><code>"incompatible_improvements"</code>: The FreeMarker version
-     *       where the desired non-backward-compatible improvements were already available.
-     *       See: {@link Configuration#setIncompatibleImprovements(Version)}.
+     *       where the desired non-backward-compatible improvements were already available (but maybe not active by
+     *       default). See: {@link Configuration#setIncompatibleImprovements(Version)}.
      *   <li><code>"incompatible_enhancements"</code>: Deprecated, use <code>"incompatible_improvements"</code>
      *       instead. See: {@link Configuration#setIncompatibleEnhancements(String)}.
      * </ul>
