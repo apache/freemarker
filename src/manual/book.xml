@@ -20617,7 +20617,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>"true"</literal>/<literal>""</literal>, but with
                   <literal>2</literal> it's <literal>"true"/"false"</literal>
                   for values wrapped by <literal>BeansWrapper</literal> as
-                  then <literal>Boolean.toString()</literal> prevails. Noe
+                  then <literal>Boolean.toString()</literal> prevails. Note
                   that
                   <literal><replaceable>someBoolean</replaceable>?string</literal>
                   will always consistently format the boolean according the
