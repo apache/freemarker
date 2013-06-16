@@ -65,7 +65,7 @@ import freemarker.template.utility.StringUtil;
 final class StringLiteral extends Expression implements TemplateScalarModel {
     
     private final String value;
-    private TemplateElement interpolatedOutput;
+    private TemplateElement dynamicValue;
     
     StringLiteral(String value) {
         this.value = value;
@@ -79,7 +79,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getTemplate());
             try {
-                interpolatedOutput = parser.FreeMarkerText();
+                dynamicValue = parser.FreeMarkerText();
             }
             catch(ParseException e) {
                 e.setTemplateName(getTemplate().getName());
@@ -98,14 +98,14 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
     
     String evalAndCoerceToString(Environment env) throws TemplateException {
-        if (interpolatedOutput == null) {
+        if (dynamicValue == null) {
             return value;
         } 
         else {
             TemplateExceptionHandler teh = env.getTemplateExceptionHandler();
             env.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             try {
-               return env.renderElementToString(interpolatedOutput);
+               return env.renderElementToString(dynamicValue);
             }
             catch (IOException ioe) {
                 throw new _MiscTemplateException(ioe, env);
@@ -120,16 +120,34 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
     }
     
+    String getNodeTypeSymbol() {
+        return dynamicValue == null ? getCanonicalForm() : "dynamic \"...\"";
+    }
+    
     boolean isLiteral() {
-        return interpolatedOutput == null;
+        return dynamicValue == null;
     }
 
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         StringLiteral cloned = new StringLiteral(value);
         // FIXME: replacedIdentifier should be searched inside interpolatedOutput too:
-        cloned.interpolatedOutput = this.interpolatedOutput;
+        cloned.dynamicValue = this.dynamicValue;
         return cloned;
+    }
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return dynamicValue;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.EMBEDDED_TEMPLATE;
     }
     
 }

@@ -65,6 +65,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
+import freemarker.template.utility.NullWriter;
 
 
 /**
@@ -105,8 +106,8 @@ final class MethodCall extends Expression {
             }
             Writer prevOut = env.getOut();
             try {
-                env.setOut(Environment.NULL_WRITER);
-                env.visit(func, null, arguments.values, null, null);
+                env.setOut(NullWriter.INSTANCE);
+                env.visit(func, null, arguments.items, null, null);
             } catch (IOException ioe) {
                 throw new InternalError("This should be impossible.");
             } finally {
@@ -129,6 +130,10 @@ final class MethodCall extends Expression {
         return buf.toString();
     }
 
+    String getNodeTypeSymbol() {
+        return "...(...)";
+    }
+    
     TemplateModel getConstantValue() {
         return null;
     }
@@ -142,6 +147,30 @@ final class MethodCall extends Expression {
         return new MethodCall(
                 target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
                 (ListLiteral)arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    }
+
+    int getParameterCount() {
+        return 1 + arguments.items.size();
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx == 0) {
+            return target;
+        } else if (idx < getParameterCount()) {
+            return arguments.items.get(idx - 1);
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx == 0) {
+            return ParameterRole.CALLEE;
+        } else if (idx < getParameterCount()) {
+            return ParameterRole.ARGUMENT_VALUE;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
 }

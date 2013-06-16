@@ -124,7 +124,8 @@ public final class LibraryLoad extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
         if (canonical) buf.append('<');
-        buf.append("#import ");
+        buf.append(getNodeTypeSymbol());
+        buf.append(' ');
         buf.append(templateName);
         buf.append(" as ");
         buf.append(namespace);
@@ -132,6 +133,30 @@ public final class LibraryLoad extends TemplateElement {
         return buf.toString();
     }
 
+    String getNodeTypeSymbol() {
+        return "#import";
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return templateName;
+        case 1: return namespace;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.TEMPLATE_NAME;
+        case 1: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }    
+    
     public String getTemplateName() {
         return templateName.toString();
     }

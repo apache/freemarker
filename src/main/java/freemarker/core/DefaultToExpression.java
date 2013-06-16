@@ -94,31 +94,31 @@ class DefaultToExpression extends Expression {
 	
 	static final TemplateModel EMPTY_STRING_AND_SEQUENCE = new EmptyStringAndSequence();
 	
-	private final Expression lhs, rhs;
+	private final Expression lho, rho;
 	
-	DefaultToExpression(Expression lhs, Expression rhs) {
-		this.lhs = lhs;
-		this.rhs = rhs;
+	DefaultToExpression(Expression lho, Expression rho) {
+		this.lho = lho;
+		this.rho = rho;
 	}
 
 	TemplateModel _eval(Environment env) throws TemplateException {
 		TemplateModel left;
-		if (lhs instanceof ParentheticalExpression) {
+		if (lho instanceof ParentheticalExpression) {
             boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
 	        try {
-                left = lhs.eval(env);
+                left = lho.eval(env);
 	        } catch (InvalidReferenceException ire) {
 	            left = null;
             } finally {
                 env.setFastInvalidReferenceExceptions(lastFIRE);
 	        }
 		} else {
-            left = lhs.eval(env);
+            left = lho.eval(env);
 		}
 		
 		if (left != null) return left;
-		else if (rhs == null) return EMPTY_STRING_AND_SEQUENCE;
-		else return rhs.eval(env);
+		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE;
+		else return rho.eval(env);
 	}
 
 	boolean isLiteral() {
@@ -127,16 +127,37 @@ class DefaultToExpression extends Expression {
 
 	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new DefaultToExpression(
-                lhs.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                rhs != null
-                        ? rhs.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState)
+                lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                rho != null
+                        ? rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState)
                         : null);
 	}
 
 	public String getCanonicalForm() {
-		if (rhs == null) {
-			return lhs.getCanonicalForm() + "!";
+		if (rho == null) {
+			return lho.getCanonicalForm() + '!';
 		}
-		return lhs.getCanonicalForm() + "!" + rhs.getCanonicalForm();
+		return lho.getCanonicalForm() + '!' + rho.getCanonicalForm();
 	}
+	
+	String getNodeTypeSymbol() {
+        return "...!...";
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return lho;
+        case 1: return rho;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
+        
 }

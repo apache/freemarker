@@ -1106,7 +1106,7 @@ Expression AdditiveExpression() :
              numberLiteralOnly(rhs);
              result = new ArithmeticExpression(lhs,
                                             rhs,
-                                            ArithmeticExpression.SUBSTRACTION);
+                                            ArithmeticExpression.TYPE_SUBSTRACTION);
          }
          result.setLocation(template, lhs, rhs);
          lhs = result;
@@ -1124,7 +1124,7 @@ Expression AdditiveExpression() :
 Expression MultiplicativeExpression() :
 {
    Expression lhs, rhs, result;
-   int operation = ArithmeticExpression.MULTIPLICATION;
+   int operation = ArithmeticExpression.TYPE_MULTIPLICATION;
 }
 {
    lhs=UnaryExpression() {result = lhs;}
@@ -1132,11 +1132,11 @@ Expression MultiplicativeExpression() :
       LOOKAHEAD(<TIMES>|<DIVIDE>|<PERCENT>)
       (
         (
-         <TIMES> {operation = ArithmeticExpression.MULTIPLICATION;}
+         <TIMES> {operation = ArithmeticExpression.TYPE_MULTIPLICATION;}
          |
-         <DIVIDE> {operation = ArithmeticExpression.DIVISION;}
+         <DIVIDE> {operation = ArithmeticExpression.TYPE_DIVISION;}
          |
-         <PERCENT>{operation = ArithmeticExpression.MODULUS;}
+         <PERCENT>{operation = ArithmeticExpression.TYPE_MODULO;}
         )
       )
       rhs=UnaryExpression()
@@ -1768,7 +1768,7 @@ TemplateElement If() :
    <DIRECTIVE_END>
    block=OptionalBlock()
    {
-      cblock = new ConditionalBlock(condition, block, true);
+      cblock = new ConditionalBlock(condition, block, ConditionalBlock.TYPE_IF);
       cblock.setLocation(template, start, block);
       ifBlock = new IfBlock(cblock);
    }
@@ -1778,7 +1778,7 @@ TemplateElement If() :
        LooseDirectiveEnd()
        block=OptionalBlock()
        {
-          cblock = new ConditionalBlock(condition, block, false);
+          cblock = new ConditionalBlock(condition, block, ConditionalBlock.TYPE_ELSE_IF);
           cblock.setLocation(template, t, block);
           ifBlock.addBlock(cblock);
        }
@@ -1787,7 +1787,7 @@ TemplateElement If() :
          t=<ELSE>
          block=OptionalBlock()
          {
-            cblock = new ConditionalBlock(null, block, false);
+            cblock = new ConditionalBlock(null, block, ConditionalBlock.TYPE_ELSE);
             cblock.setLocation(template, t, block);
             ifBlock.addBlock(cblock);
          }
@@ -2579,7 +2579,7 @@ SwitchBlock Switch() :
      LOOKAHEAD(2)
      caseIns=Case()
      {
-        if (caseIns.isDefault) {
+        if (caseIns.condition == null) {
 	   if (defaultFound) {
                 throw new ParseException("You can only have one default case in a switch statement", template, start);
 	   }
@@ -2599,21 +2599,20 @@ SwitchBlock Switch() :
 
 Case Case() :
 {
-    Expression exp = null;
+    Expression exp;
     TemplateElement block;
-    boolean isDefault = false;
     Token start;
 }
 {
    [<WHITESPACE>]
    (
-      start=<CASE>exp=Expression()<DIRECTIVE_END>
+      start=<CASE>exp = Expression()<DIRECTIVE_END>
       |
-      start=<DEFAUL>{isDefault = true;}
+      start=<DEFAUL>{exp = null;}
    )
    block=OptionalBlock()
    {
-       Case result = new Case(exp, block, isDefault);
+       Case result = new Case(exp, block);
        result.setLocation(template, start, block);
        return result;
    }

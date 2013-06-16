@@ -158,31 +158,31 @@ final class DynamicKeyName extends Expression {
                                            Environment env)
         throws TemplateException
     {
-        int start = range.left.evalToNumber(env).intValue();
+        int start = range.lho.evalToNumber(env).intValue();
         int end = 0;
-        boolean hasRhs = range.hasRhs();
+        boolean hasRhs = range.hasRho();
         if (hasRhs) {
-            end = range.right.evalToNumber(env).intValue();
+            end = range.rho.evalToNumber(env).intValue();
         }
         if (targetModel instanceof TemplateSequenceModel) {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
             if (!hasRhs) end = sequence.size() -1;
             if (start < 0) {
-                throw new _MiscTemplateException(range.left, new Object[] {
+                throw new _MiscTemplateException(range.lho, new Object[] {
                         "Negative starting index ", new Integer(start), " for slicing range." });
             }
             if (end < 0) {
-                throw new _MiscTemplateException(range.right, new Object[] {
+                throw new _MiscTemplateException(range.rho, new Object[] {
                         "Negative ending index ", new Integer(end), " for slicing range." });
             }
             if (start >= sequence.size()) {
-                throw new _MiscTemplateException(range.left, new Object[] {
+                throw new _MiscTemplateException(range.lho, new Object[] {
                         "Left side index of range out of bounds, is ", new Integer(start),
                         ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
                         "(Note that indices are 0 based, and ranges are inclusive)." });
             }
             if (end >= sequence.size()) {
-                throw new _MiscTemplateException(range.right, new Object[] {
+                throw new _MiscTemplateException(range.rho, new Object[] {
                         "Right side index of range out of bounds, is ", new Integer(end),
                         ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
                         "(Note that indices are 0 based, and ranges are inclusive)." });
@@ -211,20 +211,20 @@ final class DynamicKeyName extends Expression {
         
         if (!hasRhs) end = targetStr.length() -1;
         if (start < 0) {
-            throw new _MiscTemplateException(range.left, new Object[] {
+            throw new _MiscTemplateException(range.lho, new Object[] {
                     "Negative starting index ", new Integer(start), " for slicing range." });
         }
         if (end < 0) {
-            throw new _MiscTemplateException(range.right, new Object[] {
+            throw new _MiscTemplateException(range.rho, new Object[] {
                     "Negative ending index ", new Integer(end), " for slicing range." });
         }
         if (start > targetStr.length()) {
-            throw new _MiscTemplateException(range.left, new Object[] {
+            throw new _MiscTemplateException(range.lho, new Object[] {
                     "Left side of range out of bounds, is: ", new Integer(start),
                     "\nbut the string has ", new Integer(targetStr.length()), " elements." });
         }
         if (end >= targetStr.length()) {
-            throw new _MiscTemplateException(range.right, new Object[] {
+            throw new _MiscTemplateException(range.rho, new Object[] {
                     "Right side of range out of bounds, is: ", new Integer(end),
                     "\nbut the string is only ", new Integer(targetStr.length()), " characters long." });
         }
@@ -242,8 +242,24 @@ final class DynamicKeyName extends Expression {
                + "]";
     }
     
+    String getNodeTypeSymbol() {
+        return "...[...]";
+    }
+    
     boolean isLiteral() {
         return constantValue != null || (target.isLiteral() && nameExpression.isLiteral());
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        return idx == 0 ? target : nameExpression;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return idx == 0 ? ParameterRole.LEFT_HAND_OPERAND : ParameterRole.ENCLOSED_OPERAND;
     }
 
     protected Expression deepCloneWithIdentifierReplaced_inner(

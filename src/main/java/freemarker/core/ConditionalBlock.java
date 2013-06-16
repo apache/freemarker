@@ -65,15 +65,19 @@ import freemarker.template.TemplateException;
 
 final class ConditionalBlock extends TemplateElement {
 
+    static final int TYPE_IF = 0;
+    static final int TYPE_ELSE = 1;
+    static final int TYPE_ELSE_IF = 2;
+    
     final Expression condition;
-    private final boolean isFirst;
-    boolean isSimple;
+    private final int type;
+    boolean isLonelyIf;
 
-    ConditionalBlock(Expression condition, TemplateElement nestedBlock, boolean isFirst)
+    ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type)
     {
         this.condition = condition;
         this.nestedBlock = nestedBlock;
-        this.isFirst = isFirst;
+        this.type = type;
     }
 
     void accept(Environment env) throws TemplateException, IOException {
@@ -86,19 +90,10 @@ final class ConditionalBlock extends TemplateElement {
     
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
-        if (condition == null) {
-            if (canonical) buf.append('<');
-            buf.append("#else");
-        }
-        else if (isFirst) {
-            if (canonical) buf.append('<');
-            buf.append("#if ");
-        }
-        else {
-            if (canonical) buf.append('<');
-            buf.append("#elseif ");
-        }
+        if (canonical) buf.append('<');
+        buf.append(getNodeTypeSymbol());
         if (condition != null) {
+            buf.append(' ');
             buf.append(condition.getCanonicalForm());
         }
         if (canonical) {
@@ -106,10 +101,43 @@ final class ConditionalBlock extends TemplateElement {
             if (nestedBlock != null) {
                 buf.append(nestedBlock.getCanonicalForm());
             }
-            if (isSimple) {
+            if (isLonelyIf) {
                 buf.append("</#if>");
             }
         }
         return buf.toString();
     }
+    
+    String getNodeTypeSymbol() {
+        if (type == TYPE_ELSE) {
+            return "#else";
+        } else if (type == TYPE_IF) {
+            return "#if";
+        } else if (type == TYPE_ELSE_IF) {
+            return "#elseif";
+        } else {
+            throw new RuntimeException("Unknown type");
+        }
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return condition;
+        case 1: return new Integer(type);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.CONDITION;
+        case 1: return ParameterRole.AST_NODE_SUBTYPE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

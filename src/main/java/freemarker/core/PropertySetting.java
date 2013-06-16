@@ -115,12 +115,37 @@ final class PropertySetting extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        sb.append("#setting ");
+        sb.append(getNodeTypeSymbol());
+        sb.append(' ');
         sb.append(key);
         sb.append('=');
         sb.append(value.getCanonicalForm());
         if (canonical) sb.append("/>");
         return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#setting";
+    }
+
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return key;
+        case 1: return value;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.ITEM_KEY;
+        case 1: return ParameterRole.ITEM_VALUE;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
     
 }

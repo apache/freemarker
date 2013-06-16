@@ -76,13 +76,31 @@ final class StopInstruction extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        sb.append("#stop");
+        sb.append(getNodeTypeSymbol());
         if (exp != null) {
             sb.append(' ');
             sb.append(exp.getCanonicalForm());
         }
         if (canonical) sb.append("/>");
         return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#stop";
+    }
+    
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return exp;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.MESSAGE;
     }
     
 }

@@ -53,9 +53,8 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -76,6 +75,7 @@ final class UnifiedCall extends TemplateElement {
     private Map namedArgs;
     private List positionalArgs, bodyParameterNames;
     boolean legacySyntax;
+    private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
 
     UnifiedCall(Expression nameExp,
          Map namedArgs,
@@ -164,28 +164,7 @@ final class UnifiedCall extends TemplateElement {
                 sb.append(argExp.getCanonicalForm());
             }
         } else {
-            ArrayList entries = new ArrayList(namedArgs.entrySet());
-            Collections.sort(entries, 
-                    new Comparator() {  // for sorting to source code order
-                        public int compare(Object o1, Object o2) {
-                            Map.Entry ent1 = (Map.Entry) o1;
-                            Expression exp1 = (Expression) ent1.getValue();
-                            
-                            Map.Entry ent2 = (Map.Entry) o2;
-                            Expression exp2 = (Expression) ent2.getValue();
-                            
-                            int res = exp1.beginLine - exp2.beginLine;
-                            if (res != 0) return res;
-                            res = exp1.beginColumn - exp2.beginColumn;
-                            if (res != 0) return res;
-                            
-                            if (ent1 == ent2) return 0;
-                            
-                            // Should never reach this
-                            return ((String) ent1.getKey()).compareTo((String) ent1.getKey()); 
-                        }
-                
-            });
+            List entries = getSortedNamedArgs();
             for (int i = 0; i < entries.size(); i++) {
                 Map.Entry entry = (Map.Entry) entries.get(i);
                 Expression argExp = (Expression) entry.getValue();
@@ -213,6 +192,87 @@ final class UnifiedCall extends TemplateElement {
         }
         return sb.toString();
     }
+
+    String getNodeTypeSymbol() {
+        return "@";
+    }
+
+    int getParameterCount() {
+        return 1/*nameExp*/
+                + (positionalArgs != null ? positionalArgs.size() : 0)
+                + (namedArgs != null ? namedArgs.size() * 2 : 0)
+                + (bodyParameterNames != null ? bodyParameterNames.size() : 0);
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx == 0) {
+            return nameExp;
+        } else {
+            int base = 1;
+            final int positionalArgsSize = positionalArgs != null ? positionalArgs.size() : 0;  
+            if (idx - base < positionalArgsSize) {
+                return positionalArgs.get(idx - base);
+            } else {
+                base += positionalArgsSize;
+                final int namedArgsSize = namedArgs != null ? namedArgs.size() : 0;
+                if (idx - base < namedArgsSize * 2) {
+                    Map.Entry namedArg = (Map.Entry) getSortedNamedArgs().get((idx - base) / 2);
+                    return (idx - base) % 2 == 0 ? namedArg.getKey() : namedArg.getValue();
+                } else {
+                    base += namedArgsSize * 2;
+                    final int bodyParameterNamesSize = bodyParameterNames != null ? bodyParameterNames.size() : 0;
+                    if (idx - base < bodyParameterNamesSize) {
+                        return bodyParameterNames.get(idx - base);
+                    } else {
+                        throw new IndexOutOfBoundsException();
+                    }
+                }
+            }
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx == 0) {
+            return ParameterRole.CALLEE;
+        } else {
+            int base = 1;
+            final int positionalArgsSize = positionalArgs != null ? positionalArgs.size() : 0;  
+            if (idx - base < positionalArgsSize) {
+                return ParameterRole.ARGUMENT_VALUE;
+            } else {
+                base += positionalArgsSize;
+                final int namedArgsSize = namedArgs != null ? namedArgs.size() : 0;
+                if (idx - base < namedArgsSize * 2) {
+                    return (idx - base) % 2 == 0 ? ParameterRole.ARGUMENT_NAME : ParameterRole.ARGUMENT_VALUE;
+                } else {
+                    base += namedArgsSize * 2;
+                    final int bodyParameterNamesSize = bodyParameterNames != null ? bodyParameterNames.size() : 0;
+                    if (idx - base < bodyParameterNamesSize) {
+                        return ParameterRole.TARGET_LOOP_VARIABLE;
+                    } else {
+                        throw new IndexOutOfBoundsException();
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Returns the named args by source-code order; it's not meant to be used during template execution, too slow for
+     * that!
+     */
+    private List/*<Map.Entry<String, Expression>>*/ getSortedNamedArgs() {
+        Reference ref = sortedNamedArgsCache;
+        if (ref != null) {
+            List res = (List) ref.get();
+            if (res != null) return res;
+        }
+        
+        List res = MessageUtil.sortMapOfExpressions(namedArgs);
+        sortedNamedArgsCache = new SoftReference(res);
+        return res;
+    }
+    
 /*
     //REVISIT
     boolean heedsOpeningWhitespace() {

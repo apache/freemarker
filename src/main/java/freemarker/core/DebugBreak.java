@@ -99,4 +99,20 @@ public class DebugBreak extends TemplateElement
         }
     }
     
+    String getNodeTypeSymbol() {
+        return "#debug_break";
+    }
+
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+        
 }

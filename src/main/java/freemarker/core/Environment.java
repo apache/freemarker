@@ -99,6 +99,7 @@ import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
+import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -1778,7 +1779,7 @@ public final class Environment extends Configurable {
             this.currentNamespace = newNamespace;
             loadedLibs.put(templateName, currentNamespace);
             Writer prevOut = out;
-            this.out = NULL_WRITER;
+            this.out = NullWriter.INSTANCE;
             try {
                 include(loadedTemplate);
             } finally {
@@ -1919,12 +1920,6 @@ public final class Environment extends Configurable {
         }
     }
 
-    static final Writer NULL_WRITER = new Writer() {
-            public void write(char cbuf[], int off, int len) {}
-            public void flush() {}
-            public void close() {}
-     };
-     
      private static final Writer EMPTY_BODY_WRITER = new Writer() {
     
         public void write(char[] cbuf, int off, int len) throws IOException {

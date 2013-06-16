@@ -88,14 +88,24 @@ abstract public class TemplateElement extends TemplateObject {
 
     /**
      * One-line description of the element, that contain all the information that is used in
-     * {@link #getCanonicalForm()}, except the nested content of the element. Meant to be used for stack traces and
-     * tree views. There are no backward-compatibility guarantees regarding the format used ATM, but it should be
-     * regular enough to be machine-parseable.
+     * {@link #getCanonicalForm()}, except the nested content (elements) of the element. The expressions inside the 
+     * element (the parameters) has to be shown. Meant to be used for stack traces, also for tree views that don't go
+     * down to the expression-level. There are no backward-compatibility guarantees regarding the format used ATM, but
+     * it must be regular enough to be machine-parseable, and it must contain all information necessary for restoring an
+     * AST equivalent to the original.
+     * 
+     * This final implementation calls {@link #dump(boolean) dump(false)}.
+     * 
+     * @see #getCanonicalForm()
+     * @see #getNodeTypeSymbol()
      */
     public final String getDescription() {
         return dump(false);
     }
     
+    /**
+     * This final implementation calls {@link #dump(boolean) dump(false)}.
+     */
     public final String getCanonicalForm() {
         return dump(true);
     }
@@ -111,6 +121,9 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     /**
+     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place.
+     * Don't call those methods in method on {@code this}, because that will result in infinite recursion! 
+     * 
      * @param canonical if {@code true}, it calculates the return value of {@link #getCanonicalForm()},
      *        otherwise of {@link #getDescription()}.
      */

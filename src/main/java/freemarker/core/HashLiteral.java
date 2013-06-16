@@ -67,7 +67,7 @@ final class HashLiteral extends Expression {
     private final ArrayList keys, values;
     private final int size;
 
-    HashLiteral(ArrayList keys, ArrayList values) {
+    HashLiteral(ArrayList/*<Expression>*/ keys, ArrayList/*<Expression>*/ values) {
         this.keys = keys;
         this.values = values;
         this.size = keys.size();
@@ -93,6 +93,10 @@ final class HashLiteral extends Expression {
         }
         buf.append("}");
         return buf.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "{...}";
     }
 
     boolean isLiteral() {
@@ -170,4 +174,25 @@ final class HashLiteral extends Expression {
             return size == 0;
         }
     }
+
+    int getParameterCount() {
+        return size * 2;
+    }
+
+    Object getParameterValue(int idx) {
+        checkIndex(idx);
+        return idx % 2 == 0 ? keys.get(idx / 2) : values.get(idx / 2);
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        checkIndex(idx);
+        return idx % 2 == 0 ? ParameterRole.ITEM_KEY : ParameterRole.ITEM_VALUE;
+    }
+
+    private void checkIndex(int idx) {
+        if (idx >= size * 2) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

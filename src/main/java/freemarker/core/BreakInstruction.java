@@ -63,14 +63,31 @@ final class BreakInstruction extends TemplateElement {
     }
 
     protected String dump(boolean canonical) {
-        return canonical ? "<#break/>" : "#break";
+        return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#break";
     }
 
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
     static class Break extends RuntimeException {
         static final Break INSTANCE = new Break();
         private Break() {
         }
     }
+    
 }
 
 

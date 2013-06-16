@@ -106,10 +106,26 @@ final class MixedContent extends TemplateElement {
             if (parent == null) {
                 return "root";
             }
-            return "mixed_content"; // MixedContent is uninteresting in a stack trace.
+            return getNodeTypeSymbol(); // MixedContent is uninteresting in a stack trace.
         }
     }
 
+    String getNodeTypeSymbol() {
+        return "#mixed_content";
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
     boolean isShownInStackTrace() {
         return false;
     }

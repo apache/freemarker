@@ -58,7 +58,7 @@ import java.util.ArrayList;
 import freemarker.template.TemplateException;
 
 /**
- * An instruction that multiple assignments, like [#local x=1 x=2].
+ * An instruction that does multiple assignments, like [#local x=1 x=2].
  * Each assignment is represented by a {@link Assignment} child element.
  * If there's only one assignment, its usually just a {@link Assignment} without parent {@link AssignmentInstruction}.
  */
@@ -112,6 +112,30 @@ final class AssignmentInstruction extends TemplateElement {
         }
         if (canonical) buf.append("/>");
         return buf.toString();
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return new Integer(scope);
+        case 1: return namespaceExp;
+        default: return null;
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.VARIABLE_SCOPE;
+        case 1: return ParameterRole.NAMESPACE;
+        default: return null;
+        }
+    }
+    
+    String getNodeTypeSymbol() {
+        return Assignment.getDirectiveName(scope);
     }
 
     public TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {

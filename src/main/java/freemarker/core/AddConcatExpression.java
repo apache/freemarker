@@ -149,6 +149,22 @@ final class AddConcatExpression extends Expression {
     public String getCanonicalForm() {
         return left.getCanonicalForm() + " + " + right.getCanonicalForm();
     }
+    
+    String getNodeTypeSymbol() {
+        return "+";
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        return idx == 0 ? left : right;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
 
     private static final class ConcatenatedSequence
     implements

@@ -175,6 +175,10 @@ final class BuiltinVariable extends Expression {
     public String getCanonicalForm() {
         return "." + name;
     }
+    
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
 
     boolean isLiteral() {
         return false;
@@ -201,4 +205,17 @@ final class BuiltinVariable extends Expression {
             return false;
         }
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

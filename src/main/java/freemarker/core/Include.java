@@ -69,7 +69,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 final class Include extends TemplateElement {
 
-    private Expression includedTemplateName, encodingExp, parseExp;
+    private Expression templateName, encodingExp, parseExp;
     private String encoding;
     private boolean parse;
     private final String templatePath;
@@ -92,7 +92,7 @@ final class Include extends TemplateElement {
         }
         int lastSlash = templatePath1.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath1.substring(0, lastSlash + 1);
-        this.includedTemplateName = includedTemplateName;
+        this.templateName = includedTemplateName;
         if (encodingExp instanceof StringLiteral) {
             encoding = encodingExp.toString();
             encoding = encoding.substring(1, encoding.length() -1);
@@ -128,7 +128,7 @@ final class Include extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = includedTemplateName.evalAndCoerceToString(env);
+        String templateNameString = templateName.evalAndCoerceToString(env);
         String enc = encoding;
         if (encoding == null && encodingExp != null) {
             enc = encodingExp.evalAndCoerceToString(env);
@@ -175,8 +175,9 @@ final class Include extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
         if (canonical) buf.append('<');
-        buf.append("#include ");
-        buf.append(includedTemplateName.getCanonicalForm());
+        buf.append(getNodeTypeSymbol());
+        buf.append(' ');
+        buf.append(templateName.getCanonicalForm());
         if (encoding != null) {
             buf.append(" encoding=\"");
             buf.append(encodingExp.getCanonicalForm());
@@ -191,6 +192,10 @@ final class Include extends TemplateElement {
         return buf.toString();
     }
 
+    String getNodeTypeSymbol() {
+        return "#include";
+    }
+    
     private boolean getYesNo(String s) throws TemplateException {
         try {
            return StringUtil.getYesNo(s);
@@ -200,6 +205,28 @@ final class Include extends TemplateElement {
                      "Value of include parse parameter must be boolean (or one of these strings: "
                      + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
                      new _DelayedJQuote(s), "." });
+        }
+    }
+
+    int getParameterCount() {
+        return 3;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return templateName;
+        case 1: return new Boolean(parse);
+        case 2: return encoding;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.TEMPLATE_NAME;
+        case 1: return ParameterRole.PARSE_PARAMETER;
+        case 2: return ParameterRole.ENCODING_PARAMETER;
+        default: throw new IndexOutOfBoundsException();
         }
     }
 

@@ -93,7 +93,7 @@ final class IfBlock extends TemplateElement {
     {
         if (nestedElements.size() == 1) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(0);
-            cblock.isSimple = true;
+            cblock.isLonelyIf = true;
             cblock.setLocation(getTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
         }
@@ -112,8 +112,24 @@ final class IfBlock extends TemplateElement {
             buf.append("</#if>");
             return buf.toString();
         } else {
-            return "#if-#elseif-#else-container";
+            return getNodeTypeSymbol();
         }
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#if-#elseif-#else-container";
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
     }
     
     boolean isShownInStackTrace() {

@@ -93,7 +93,23 @@ class ExistsExpression extends Expression {
 	}
 
 	public String getCanonicalForm() {
-		return exp.getCanonicalForm() + "??";
+		return exp.getCanonicalForm() + getNodeTypeSymbol();
 	}
+	
+	String getNodeTypeSymbol() {
+        return "??";
+    }
 
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        return exp;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.LEFT_HAND_OPERAND;
+    }
+	
 }

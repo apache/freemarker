@@ -77,10 +77,26 @@ final class CompressedBlock extends TemplateElement {
     protected String dump(boolean canonical) {
         if (canonical) {
             String nested = nestedBlock != null ? nestedBlock.getCanonicalForm() : "";
-            return "<#compress>" + nested + "</#compress>";
+            return "<" + getNodeTypeSymbol() + ">" + nested + "</" + getNodeTypeSymbol() + ">";
         } else {
-            return "#compress";
+            return getNodeTypeSymbol();
         }
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#compress";
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
     }
 
     boolean isIgnorable() {

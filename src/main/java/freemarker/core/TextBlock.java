@@ -103,6 +103,24 @@ public final class TextBlock extends TemplateElement {
             return "text " + StringUtil.jQuote(new String(text));
         }
     }
+    
+    String getNodeTypeSymbol() {
+        return "#text";
+    }
+    
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return new String(text);
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.CONTENT;
+    }
 
     TemplateElement postParseCleanup(boolean stripWhitespace) {
         if (text.length == 0) return this;

@@ -70,7 +70,11 @@ final class ParentheticalExpression extends Expression {
     public String getCanonicalForm() {
         return "(" + nested.getCanonicalForm() + ")";
     }
-
+    
+    String getNodeTypeSymbol() {
+        return "(...)";
+    }
+    
     TemplateModel _eval(Environment env) throws TemplateException 
     {
         return nested.eval(env);
@@ -89,4 +93,19 @@ final class ParentheticalExpression extends Expression {
         return new ParentheticalExpression(
                 nested.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
+    
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return nested;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.ENCLOSED_OPERAND;
+    }
+    
 }

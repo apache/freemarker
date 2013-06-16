@@ -75,6 +75,10 @@ final class BooleanLiteral extends Expression {
         return val ? "true" : "false";
     }
 
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
+    
     public String toString() {
         return val ? "true" : "false";
     }
@@ -91,4 +95,17 @@ final class BooleanLiteral extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new BooleanLiteral(val);
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

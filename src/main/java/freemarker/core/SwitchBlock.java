@@ -64,13 +64,13 @@ import freemarker.template.TemplateException;
 final class SwitchBlock extends TemplateElement {
 
     private Case defaultCase;
-    private Expression testExpression;
+    private final Expression searched;
 
     /**
-     * @param testExpression the expression to be tested.
+     * @param searched the expression to be tested.
      */
-    SwitchBlock(Expression testExpression) {
-        this.testExpression = testExpression;
+    SwitchBlock(Expression searched) {
+        this.searched = searched;
         nestedElements = new LinkedList();
     }
 
@@ -78,7 +78,7 @@ final class SwitchBlock extends TemplateElement {
      * @param cas a Case element.
      */
     void addCase(Case cas) {
-        if (cas.isDefault) {
+        if (cas.condition == null) {
             defaultCase = cas;
         }
         nestedElements.add(cas);
@@ -97,11 +97,11 @@ final class SwitchBlock extends TemplateElement {
                 // Fall through if a previous case tested true.
                 if (processedCase) {
                     processCase = true;
-                } else if (!cas.isDefault) {
+                } else if (cas.condition != null) {
                     // Otherwise, if this case isn't the default, test it.
                     processCase = EvalUtil.compare(
-                            testExpression,
-                            EvalUtil.CMP_OP_EQUALS, "case==", cas.expression, cas.expression, env);
+                            searched,
+                            EvalUtil.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
                 }
                 if (processCase) {
                     env.visitByHiddingParent(cas);
@@ -121,17 +121,36 @@ final class SwitchBlock extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
         if (canonical) buf.append('<');
-        buf.append("#switch ");
-        buf.append(testExpression.getCanonicalForm());
+        buf.append(getNodeTypeSymbol());
+        buf.append(' ');
+        buf.append(searched.getCanonicalForm());
         if (canonical) {
             buf.append('>');
             for (int i = 0; i<nestedElements.size(); i++) {
                 Case cas = (Case) nestedElements.get(i);
                 buf.append(cas.getCanonicalForm());
             }
-            buf.append("</#switch>");
+            buf.append("</").append(getNodeTypeSymbol()).append('>');
         }
         return buf.toString();
+    }
+
+    String getNodeTypeSymbol() {
+        return "#switch";
+    }
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return searched;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.VALUE;
     }
     
 }

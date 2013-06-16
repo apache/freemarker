@@ -58,7 +58,7 @@ import freemarker.core.Expression.ReplacemenetState;
 import freemarker.template.TemplateException;
 
 /**
- * Representation of the compile-time Escape directive.
+ * Representation of the compile-time #escape directive.
  * @author Attila Szegedi
  */
 class EscapeBlock extends TemplateElement {
@@ -93,15 +93,39 @@ class EscapeBlock extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        sb.append("#escape ").append(variable).append(" as ").append(expr.getCanonicalForm());
+        sb.append(getNodeTypeSymbol()).append(' ').append(variable).append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
-            sb.append('>').append(nestedBlock.getCanonicalForm()).append("</#escape>");
+            sb.append('>').append(nestedBlock.getCanonicalForm()).append("</").append(getNodeTypeSymbol()).append('>');
         }
         return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#escape";
     }
     
     boolean isShownInStackTrace() {
         return false;
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return variable;
+        case 1: return expr;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.PLACEHOLDER_VARIABLE;
+        case 1: return ParameterRole.EXPRESSION_TEMPLATE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }    
     
 }

@@ -82,7 +82,11 @@ final class Dot extends Expression {
     }
 
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + "." + key;
+        return target.getCanonicalForm() + getNodeTypeSymbol() + key;
+    }
+    
+    String getNodeTypeSymbol() {
+        return ".";
     }
     
     boolean isLiteral() {
@@ -94,6 +98,18 @@ final class Dot extends Expression {
     	return new Dot(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
     	        key);
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        return idx == 0 ? (Object) target : (Object) key;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
     boolean onlyHasIdentifiers() {

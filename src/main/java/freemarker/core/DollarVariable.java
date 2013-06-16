@@ -86,6 +86,10 @@ final class DollarVariable extends TemplateElement {
         }
         return sb.toString();
     }
+    
+    String getNodeTypeSymbol() {
+        return "${...}";
+    }
 
     boolean heedsOpeningWhitespace() {
         return true;
@@ -93,6 +97,20 @@ final class DollarVariable extends TemplateElement {
 
     boolean heedsTrailingWhitespace() {
         return true;
+    }
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return expression;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.CONTENT;
     }
     
 }

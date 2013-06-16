@@ -65,7 +65,7 @@ final class Assignment extends TemplateElement {
 
     private String variableName;
     private Expression value, namespaceExp;
-    private int scope;
+    private int/*enum*/ scope;
 
     static final int NAMESPACE = 1;
     static final int LOCAL = 2;
@@ -133,7 +133,7 @@ final class Assignment extends TemplateElement {
 
     protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
-        String dn = parent instanceof AssignmentInstruction ? null : getDirectiveName(scope);
+        String dn = parent instanceof AssignmentInstruction ? null : getNodeTypeSymbol();
         if (dn != null) {
             if (canonical) buf.append("<");
             buf.append(dn);
@@ -153,6 +153,10 @@ final class Assignment extends TemplateElement {
         return result;
     }
     
+    String getNodeTypeSymbol() {
+        return getDirectiveName(scope);
+    }
+    
     static String getDirectiveName(int scope) {
         if (scope == Assignment.LOCAL) {
             return "#local";
@@ -162,6 +166,30 @@ final class Assignment extends TemplateElement {
             return "#assign";
         } else {
             return "#{unknown_assignment_type}";
+        }
+    }
+    
+    int getParameterCount() {
+        return 4;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return variableName;
+        case 1: return value;
+        case 2: return new Integer(scope);
+        case 3: return namespaceExp;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.ASSIGNMENT_TARGET;
+        case 1: return ParameterRole.ASSIGNMENT_SOURCE;
+        case 2: return ParameterRole.VARIABLE_SCOPE;
+        case 3: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
         }
     }
     

@@ -76,6 +76,25 @@ public final class Comment extends TemplateElement {
             return "comment " + StringUtil.jQuote(text.trim());
         }
     }
+    
+    String getNodeTypeSymbol() {
+        return "#--...--";
+    }
+    
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return text;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.CONTENT;
+    }
 
     public String getText() {
         return text;

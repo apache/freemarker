@@ -57,6 +57,11 @@ package freemarker.core;
  * and trailing whitespace on this line should be trimmed.
  */
 final class TrimInstruction extends TemplateElement {
+    
+    private final int TYPE_T = 0;  
+    private final int TYPE_LT = 1;  
+    private final int TYPE_RT = 2;  
+    private final int TYPE_NT = 3;  
 
     final boolean left, right;
 
@@ -72,20 +77,49 @@ final class TrimInstruction extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        if (left && right) {
-            sb.append("#t");
-        } else if (left) {
-            sb.append("#lt");
-        } else if (right) {
-            sb.append("#rt");
-        } else {
-            sb.append("#nt");
-        }
+        sb.append(getNodeTypeSymbol());
         if (canonical) sb.append("/>");
         return sb.toString();
     }
-
+    
+    String getNodeTypeSymbol() {
+        if (left && right) {
+            return "#t";
+        } else if (left) {
+            return "#lt";
+        } else if (right) {
+            return "#rt";
+        } else {
+            return "#nt";
+        }
+    }
+    
     boolean isIgnorable() {
         return true;
     }
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        int type;
+        if (left && right) {
+            type = TYPE_T;
+        } else if (left) {
+            type = TYPE_LT;
+        } else if (right) {
+            type = TYPE_RT;
+        } else {
+            type = TYPE_NT;
+        }
+        return new Integer(type);
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.AST_NODE_SUBTYPE;
+    }
+    
 }

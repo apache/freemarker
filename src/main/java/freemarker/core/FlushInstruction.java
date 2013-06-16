@@ -64,7 +64,23 @@ final class FlushInstruction extends TemplateElement {
     }
 
     protected String dump(boolean canonical) {
-        return canonical ? "<#flush/>" : "#flush";
+        return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#flush";
+    }
+ 
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
     }
     
 }

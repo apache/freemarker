@@ -108,7 +108,8 @@ final class VisitNode extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        sb.append("#visit ");
+        sb.append(getNodeTypeSymbol());
+        sb.append(' ');
         sb.append(targetNode.getCanonicalForm());
         if (namespaces != null) {
             sb.append(" using ");
@@ -116,6 +117,30 @@ final class VisitNode extends TemplateElement {
         }
         if (canonical) sb.append("/>");
         return sb.toString();
+    }
+
+    String getNodeTypeSymbol() {
+        return "#visit";
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return targetNode;
+        case 1: return namespaces;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.NODE;
+        case 1: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
     
 }

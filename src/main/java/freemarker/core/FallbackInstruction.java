@@ -63,7 +63,23 @@ final class FallbackInstruction extends TemplateElement {
     }
 
     protected String dump(boolean canonical) {
-        return canonical ? "<#fallback/>" : "#fallback";
+        return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#fallback";
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
     }
     
 }

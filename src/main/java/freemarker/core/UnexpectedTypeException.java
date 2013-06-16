@@ -41,7 +41,7 @@ public class UnexpectedTypeException extends TemplateException {
         if (model == null) throw InvalidReferenceException.getInstance(blamed, env);
         return new _ErrorDescriptionBuilder(
                 unexpectedTypeErrorDescription(expectedType, model))
-                .blame(blamed);
+                .blame(blamed).showBlamer(true);
     }
 
     private static Object[] unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {

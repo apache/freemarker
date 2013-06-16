@@ -80,9 +80,12 @@ final class AttemptBlock extends TemplateElement {
 
     protected String dump(boolean canonical) {
         if (!canonical) {
-            return "#attempt";
+            return getNodeTypeSymbol();
         } else {
-            StringBuffer buf = new StringBuffer("<#attempt>");
+            StringBuffer buf = new StringBuffer();
+            buf.append("<");
+            buf.append(getNodeTypeSymbol());
+            buf.append(">");
             if (attemptBlock != null) {
                 buf.append(attemptBlock.getCanonicalForm());            
             }
@@ -91,6 +94,24 @@ final class AttemptBlock extends TemplateElement {
             }
             return buf.toString();
         }
+    }
+    
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return recoveryBlock;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.ERROR_HANDLER;
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#attempt";
     }
     
     boolean isShownInStackTrace() {

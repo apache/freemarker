@@ -69,6 +69,10 @@ final class NotExpression extends BooleanExpression {
     public String getCanonicalForm() {
         return "!" + target.getCanonicalForm();
     }
+ 
+    String getNodeTypeSymbol() {
+        return "!";
+    }
     
     boolean isLiteral() {
         return target.isLiteral();
@@ -78,5 +82,19 @@ final class NotExpression extends BooleanExpression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new NotExpression(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    }
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return target;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.RIGHT_HAND_OPERAND;
     }
 }

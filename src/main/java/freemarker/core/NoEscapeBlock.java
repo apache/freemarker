@@ -73,10 +73,26 @@ class NoEscapeBlock extends TemplateElement {
 
     protected String dump(boolean canonical) {
         if (canonical) {
-            return "<#noescape>" + nestedBlock.getCanonicalForm() + "</#noescape>";
+            return "<" + getNodeTypeSymbol() + '>' + nestedBlock.getCanonicalForm() + "</" + getNodeTypeSymbol() + '>';
         } else {
-            return "#noescape";
+            return getNodeTypeSymbol();
         }
     }
+
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
     
+    String getNodeTypeSymbol() {
+        return "#noescape";
+    }
+        
 }

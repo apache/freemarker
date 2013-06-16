@@ -112,19 +112,16 @@ import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * The ? operator used to get the
- * functionality of built-in unary operators
+ * The {@code ?} operator used for things like {@code foo?upper_case}.
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 abstract class BuiltIn extends Expression implements Cloneable {
-    Expression target;
-    String key;
+    
+    protected Expression target;
+    protected String key;
 
     static final HashMap builtins = new HashMap();
-
     static {
-        // These are the only ones we have now.
-        // We throw a parse exception if it's not one of these.
         builtins.put("abs", new absBI());
         builtins.put("ancestors", new ancestorsBI());
         builtins.put("byte", new byteBI());
@@ -322,7 +319,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
     }
 
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + "?" + key;
+        return target.getCanonicalForm() + getNodeTypeSymbol();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "?" + key;
     }
 
     boolean isLiteral() {
@@ -393,6 +394,26 @@ abstract class BuiltIn extends Expression implements Cloneable {
         }
         catch (CloneNotSupportedException e) {
             throw new RuntimeException("Internal error: " + e);
+        }
+    }
+
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return target;
+        case 1: return key;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.LEFT_HAND_OPERAND;
+        case 1: return ParameterRole.RIGHT_HAND_OPERAND;
+        default: throw new IndexOutOfBoundsException();
         }
     }
     

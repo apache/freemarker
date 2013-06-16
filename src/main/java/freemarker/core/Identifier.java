@@ -87,9 +87,25 @@ final class Identifier extends Expression {
     public String getCanonicalForm() {
         return name;
     }
+    
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
 
     boolean isLiteral() {
         return false;
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
     }
 
     protected Expression deepCloneWithIdentifierReplaced_inner(

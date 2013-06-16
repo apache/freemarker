@@ -129,6 +129,10 @@ final class NumericalOutput extends TemplateElement {
         buf.append("}");
         return buf.toString();
     }
+    
+    String getNodeTypeSymbol() {
+        return "#{...}";
+    }
 
     boolean heedsOpeningWhitespace() {
         return true;
@@ -145,6 +149,28 @@ final class NumericalOutput extends TemplateElement {
         FormatHolder(NumberFormat format, Locale locale) {
             this.format = format;
             this.locale = locale;
+        }
+    }
+
+    int getParameterCount() {
+        return 3;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return expression;
+        case 1: return new Integer(minFracDigits);
+        case 2: return new Integer(maxFracDigits);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.CONTENT;
+        case 1: return ParameterRole.MINIMUM_DECIMALS;
+        case 2: return ParameterRole.MAXIMUM_DECIMALS;
+        default: throw new IndexOutOfBoundsException();
         }
     }
 }

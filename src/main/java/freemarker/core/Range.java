@@ -60,25 +60,25 @@ import freemarker.template.TemplateModel;
  */
 final class Range extends Expression {
 
-    final Expression left;
-    final Expression right;
+    final Expression lho;
+    final Expression rho;
 
-    Range(Expression left, Expression right) {
-        this.left = left;
-        this.right = right;
+    Range(Expression lho, Expression rho) {
+        this.lho = lho;
+        this.rho = rho;
     }
     
-    boolean hasRhs() {
-        return right != null;
+    boolean hasRho() {
+        return rho != null;
     }
 
     TemplateModel _eval(Environment env) 
         throws TemplateException
     {
-        int min = left.evalToNumber(env).intValue();
+        int min = lho.evalToNumber(env).intValue();
         int max = 0;
-        if (right != null) {
-            max = right.evalToNumber(env).intValue();
+        if (rho != null) {
+            max = rho.evalToNumber(env).intValue();
             return new NumericalRange(min, max);
         }
         return new NumericalRange(min);
@@ -90,19 +90,40 @@ final class Range extends Expression {
     }
 
     public String getCanonicalForm() {
-        String rhs = right != null ? right.getCanonicalForm() : "";
-        return left.getCanonicalForm() + ".." + rhs;
+        String rhs = rho != null ? rho.getCanonicalForm() : "";
+        return lho.getCanonicalForm() + ".." + rhs;
+    }
+    
+    String getNodeTypeSymbol() {
+        return "..";
     }
     
     boolean isLiteral() {
-        boolean rightIsLiteral = right == null || right.isLiteral();
-        return constantValue != null || (left.isLiteral() && rightIsLiteral);
+        boolean rightIsLiteral = rho == null || rho.isLiteral();
+        return constantValue != null || (lho.isLiteral() && rightIsLiteral);
     }
     
     protected Expression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new Range(
-                left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+                lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return lho;
+        case 1: return rho;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
+    
 }

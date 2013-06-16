@@ -106,6 +106,10 @@ final class ComparisonExpression extends BooleanExpression {
     public String getCanonicalForm() {
         return left.getCanonicalForm() + ' ' + opString + ' ' + right.getCanonicalForm();
     }
+    
+    String getNodeTypeSymbol() {
+        return opString;
+    }
 
     boolean isLiteral() {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
@@ -118,4 +122,17 @@ final class ComparisonExpression extends BooleanExpression {
     	        right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
     	        opString);
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        return idx == 0 ? left : right;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
+    
 }

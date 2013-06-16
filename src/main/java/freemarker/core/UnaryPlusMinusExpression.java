@@ -58,6 +58,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 
 final class UnaryPlusMinusExpression extends Expression {
+    
+    private final int TYPE_MINUS = 0;
+    private final int TYPE_PLUS = 1;
 
     private final Expression target;
     private final boolean isMinus;
@@ -89,6 +92,10 @@ final class UnaryPlusMinusExpression extends Expression {
         String op = isMinus ? "-" : "+";
         return op + target.getCanonicalForm();
     }
+
+    String getNodeTypeSymbol() {
+        return isMinus ? "-..." : "+...";
+    }
     
     boolean isLiteral() {
         return target.isLiteral();
@@ -100,4 +107,30 @@ final class UnaryPlusMinusExpression extends Expression {
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
     	        isMinus);
     }
+    
+    
+    boolean isIgnorable() {
+        return true;
+    }
+
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return target;
+        case 1: return new Integer(isMinus ? TYPE_MINUS : TYPE_PLUS);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.RIGHT_HAND_OPERAND;
+        case 1: return ParameterRole.AST_NODE_SUBTYPE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

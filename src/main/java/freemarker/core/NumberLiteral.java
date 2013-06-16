@@ -89,6 +89,10 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         return value.toString();
     }
     
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
+    
     boolean isLiteral() {
         return true;
     }
@@ -97,5 +101,17 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new NumberLiteral(value);
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
 
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

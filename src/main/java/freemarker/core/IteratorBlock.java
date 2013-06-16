@@ -69,8 +69,8 @@ import freemarker.template.TemplateSequenceModel;
  */
 final class IteratorBlock extends TemplateElement {
 
-    private Expression listExpression;
-    private String indexName;
+    private Expression listSource;
+    private String loopVariableName;
     private boolean isForEach;
 
     /**
@@ -83,59 +83,75 @@ final class IteratorBlock extends TemplateElement {
                   TemplateElement nestedBlock,
                   boolean isForEach) 
     {
-        this.listExpression = listExpression;
-        this.indexName = indexName;
+        this.listSource = listExpression;
+        this.loopVariableName = indexName;
         this.isForEach = isForEach;
         this.nestedBlock = nestedBlock;
     }
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        TemplateModel baseModel = listExpression.eval(env);
+        TemplateModel baseModel = listSource.eval(env);
         if (baseModel == null) {
             if (env.isClassicCompatible()) {
                 // Classic behavior of simply ignoring null references.
                 return;
             }
-            listExpression.assertNonNull(baseModel, env);
+            listSource.assertNonNull(baseModel, env);
         }
 
         env.visitIteratorBlock(new Context(baseModel));
     }
 
     protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append(getNodeTypeSymbol());
+        buf.append(' ');
         if (isForEach) {
-            StringBuffer buf = new StringBuffer();
-            if (canonical) buf.append('<');
-            buf.append("#foreach ");
-            buf.append(indexName);
+            buf.append(loopVariableName);
             buf.append(" in ");
-            buf.append(listExpression.getCanonicalForm());
-            if (canonical) {
-                buf.append(">");
-                if (nestedBlock != null) {
-                    buf.append(nestedBlock.getCanonicalForm());
-                }
-                buf.append("</#foreach>");
-            }
-            return buf.toString();
+            buf.append(listSource.getCanonicalForm());
         }
         else {
-            StringBuffer buf = new StringBuffer();
-            if (canonical) buf.append('<');
-            buf.append("#list ");
-            buf.append(listExpression.getCanonicalForm());
+            buf.append(listSource.getCanonicalForm());
             buf.append(" as ");
-            buf.append(indexName);
-            if (canonical) {
-                buf.append(">");
-                if (nestedBlock != null) {
-                    buf.append(nestedBlock.getCanonicalForm());            
-                }
-                buf.append("</#list>");
-            }
-            return buf.toString();
+            buf.append(loopVariableName);
         }
+        if (canonical) {
+            buf.append(">");
+            if (nestedBlock != null) {
+                buf.append(nestedBlock.getCanonicalForm());
+            }
+            buf.append("</");
+            buf.append(getNodeTypeSymbol());
+            buf.append('>');
+        }
+        return buf.toString();
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return listSource;
+        case 1: return loopVariableName;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.LIST_SOURCE;
+        case 1: return ParameterRole.TARGET_LOOP_VARIABLE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }    
+    
+    String getNodeTypeSymbol() {
+        return isForEach ? "#foreach" : "#list";
     }
 
     /**
@@ -186,13 +202,13 @@ final class IteratorBlock extends TemplateElement {
             }
             else {
                 throw new UnexpectedTypeException(
-                        listExpression, list, "collection or sequence", env);
+                        listSource, list, "collection or sequence", env);
             }
         }
 
         public TemplateModel getLocalVariable(String name) {
-            if (name.startsWith(indexName)) {
-                switch(name.length() - indexName.length()) {
+            if (name.startsWith(loopVariableName)) {
+                switch(name.length() - loopVariableName.length()) {
                     case 0: 
                         return loopVar;
                     case 6: 
@@ -213,9 +229,9 @@ final class IteratorBlock extends TemplateElement {
         public Collection getLocalVariableNames() {
             if(variableNames == null) {
                 variableNames = new ArrayList(3);
-                variableNames.add(indexName);
-                variableNames.add(indexName + "_index");
-                variableNames.add(indexName + "_has_next");
+                variableNames.add(loopVariableName);
+                variableNames.add(loopVariableName + "_index");
+                variableNames.add(loopVariableName + "_has_next");
             }
             return variableNames;
         }

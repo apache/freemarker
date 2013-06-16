@@ -392,17 +392,21 @@ class EvalUtil
             // this before TemplateScalarModel.
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
             int compatMode = env.getClassicCompatibleAsInt();
-            if (compatMode == 1) {
-                return booleanValue ? "true" : "";
-            } else if (compatMode == 2) {
-                if (tm instanceof BeanModel) {
-                    // In 2.1, bean-wrapped booleans where strings, so that has overridden the boolean behavior: 
-                    return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
-                } else {
-                    return booleanValue ? "true" : "";
-                }
+            if (compatMode == 0) {
+                return env.formatBoolean(booleanValue);
             } else {
-                throw new RuntimeException("Unsupported classic_compatible variation: " + compatMode);
+                if (compatMode == 1) {
+                    return booleanValue ? "true" : "";
+                } else if (compatMode == 2) {
+                    if (tm instanceof BeanModel) {
+                        // In 2.1, bean-wrapped booleans where strings, so that has overridden the boolean behavior: 
+                        return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
+                    } else {
+                        return booleanValue ? "true" : "";
+                    }
+                } else {
+                    throw new RuntimeException("Unsupported classic_compatible variation: " + compatMode);
+                }
             }
         } else {
             if (env.isClassicCompatible() && tm instanceof BeanModel) {

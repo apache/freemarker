@@ -143,7 +143,7 @@ final class BlockAssignment extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append("<");
-        sb.append(Assignment.getDirectiveName(scope));
+        sb.append(getNodeTypeSymbol());
         sb.append(' ');
         sb.append(varName);
         if (namespaceExp != null) {
@@ -154,12 +154,38 @@ final class BlockAssignment extends TemplateElement {
             sb.append('>');
             sb.append(nestedBlock == null ? "" : nestedBlock.getCanonicalForm());
             sb.append("</");
-            sb.append(Assignment.getDirectiveName(scope));
+            sb.append(getNodeTypeSymbol());
             sb.append('>');
         } else {
             sb.append(" = .nested_output");
         }
         return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return Assignment.getDirectiveName(scope);
+    }
+    
+    int getParameterCount() {
+        return 3;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return varName;
+        case 1: return new Integer(scope);
+        case 2: return namespaceExp;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.ASSIGNMENT_TARGET;
+        case 1: return ParameterRole.VARIABLE_SCOPE;
+        case 2: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
 
     boolean isIgnorable() {

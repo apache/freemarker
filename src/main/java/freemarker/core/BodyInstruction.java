@@ -96,7 +96,7 @@ final class BodyInstruction extends TemplateElement {
     protected String dump(boolean canonical) {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
-        sb.append("#nested");
+        sb.append(getNodeTypeSymbol());
         if (bodyParameters != null) {
             for (int i = 0; i<bodyParameters.size(); i++) {
                 sb.append(' ');
@@ -105,6 +105,30 @@ final class BodyInstruction extends TemplateElement {
         }
         if (canonical) sb.append('>');
         return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#nested";
+    }
+    
+    int getParameterCount() {
+        return bodyParameters != null ? bodyParameters.size() : 0;
+    }
+
+    Object getParameterValue(int idx) {
+        checkIndex(idx);
+        return bodyParameters.get(idx);
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        checkIndex(idx);
+        return ParameterRole.PASSED_VALUE;
+    }
+
+    private void checkIndex(int idx) {
+        if (bodyParameters == null || idx >= bodyParameters.size()) {
+            throw new IndexOutOfBoundsException();
+        }
     }
     
     /*
