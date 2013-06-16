@@ -82,7 +82,21 @@ public class DebugBreak extends TemplateElement
     }
 
     protected String dump(boolean canonical) {
-        return canonical ? nestedBlock.getCanonicalForm() : nestedBlock.getDescription();
+        if (canonical) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("<#-- ");
+            sb.append("debug break");
+            if (nestedBlock == null) {
+                sb.append(" /-->");
+            } else {
+                sb.append(" -->");
+                sb.append(nestedBlock.getCanonicalForm());                
+                sb.append("<#--/ debug break -->");
+            }
+            return sb.toString();
+        } else {
+            return "debug break";
+        }
     }
     
 }
