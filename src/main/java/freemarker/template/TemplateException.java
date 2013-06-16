@@ -61,10 +61,10 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 
 import freemarker.core.Environment;
-import freemarker.core._CoreAPI;
-import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
+import freemarker.core._CoreAPI;
+import freemarker.core._ErrorDescriptionBuilder;
 
 /**
  * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
@@ -264,9 +264,14 @@ public class TemplateException extends Exception {
         if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshotTop != null) {
             if (renderedFtlInstructionStackSnapshotTop == null) {
                 int stackSize = ftlInstructionStackSnapshot.length;
-                String s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
+                String s;
+                if (stackSize == 0) {
+                    s = "";
+                } else {
+                    s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
                         + ":\n==> "
                         + _CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
+                }
                 synchronized (lock) {
                     if (renderedFtlInstructionStackSnapshotTop == null) {
                         renderedFtlInstructionStackSnapshotTop = s;
@@ -274,7 +279,7 @@ public class TemplateException extends Exception {
                     }
                 }
             }
-            return renderedFtlInstructionStackSnapshotTop;
+            return renderedFtlInstructionStackSnapshotTop.length() != 0 ? renderedFtlInstructionStackSnapshotTop : null;
         } else {
             return null;
         }
