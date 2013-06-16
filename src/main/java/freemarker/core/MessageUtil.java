@@ -1,5 +1,7 @@
 package freemarker.core;
 
+import java.util.ArrayList;
+
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -149,45 +151,45 @@ class MessageUtil {
     }
     
     static TemplateModelException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
-        StringBuffer sb = new StringBuffer();
+        ArrayList/*<Object>*/ desc = new ArrayList(20);
         
-        sb.append(methodName);
+        desc.add(methodName);
         
-        sb.append('(');
-        if (maxCnt != 0) sb.append("...");
-        sb.append(") expects ");
+        desc.add("(");
+        if (maxCnt != 0) desc.add("...");
+        desc.add(") expects ");
         
         if (minCnt == maxCnt) {
             if (maxCnt == 0) {
-                sb.append("no");
+                desc.add("no");
             } else {
-                sb.append(maxCnt);
+                desc.add(new Integer(maxCnt));
             }
         } else if (maxCnt - minCnt == 1) {
-            sb.append(minCnt);
-            sb.append(" or ");
-            sb.append(maxCnt);
+            desc.add(new Integer(minCnt));
+            desc.add(" or ");
+            desc.add(new Integer(maxCnt));
         } else {
-            sb.append(minCnt);
+            desc.add(new Integer(minCnt));
             if (maxCnt != Integer.MAX_VALUE) {
-                sb.append(" to ");
-                sb.append(maxCnt);
+                desc.add(" to ");
+                desc.add(new Integer(maxCnt));
             } else {
-                sb.append(" or more (unlimited)");
+                desc.add(" or more (unlimited)");
             }
         }
-        sb.append(" argument");
-        if (maxCnt > 1) sb.append('s');
+        desc.add(" argument");
+        if (maxCnt > 1) desc.add("s");
         
-        sb.append(" but has received ");
+        desc.add(" but has received ");
         if (argCnt == 0) {
-            sb.append("none");
+            desc.add("none");
         } else {
-            sb.append(argCnt);
+            desc.add(new Integer(argCnt));
         }
-        sb.append(".");
+        desc.add(".");
         
-        return new _TemplateModelException(sb.toString());
+        return new _TemplateModelException(desc.toArray());
     }
 
     static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
