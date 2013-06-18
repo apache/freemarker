@@ -753,7 +753,7 @@ public final class Environment extends Configurable {
 
         // Log the exception
         if(logger.isErrorEnabled()) {
-            logger.error("Template processing error; see exception.", te);
+            logger.error("Error executing FreeMarker template", te);
         }
 
         // Stop exception is not passed to the handler, but
