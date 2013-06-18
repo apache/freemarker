@@ -296,12 +296,20 @@ public class TemplateException extends Exception {
         if (description == null) {
             synchronized (lock) {
                 if (description == null && descriptionBuilder != null) {
-                    description = descriptionBuilder.toString();
+                    description = descriptionBuilder.toString(getFailingInstruction());
                     descriptionBuilder = null;
                 }
             }
         }
         return description;
+    }
+
+    private TemplateElement getFailingInstruction() {
+        if (ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length > 0) {
+            return ftlInstructionStackSnapshot[0];
+        } else {
+            return null;
+        }
     }
 
     /**

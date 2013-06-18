@@ -1,5 +1,6 @@
 package freemarker.core;
 
+import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
@@ -9,9 +10,12 @@ import freemarker.template.Template;
  */
 public class _ErrorDescriptionBuilder {
 
+    private static final Logger logger = Logger.getLogger("freemarker.runtime");
+    
     private final String description;
     private final Object[] descriptionParts;
-    private Expression blame;
+    private Expression blamed;
+    private boolean showBlamer;
     private Object/*String|Object[]*/ tip;
     private Object[]/*String[]|Object[][]*/ tips;
     private Template template;
@@ -24,7 +28,7 @@ public class _ErrorDescriptionBuilder {
     /**
      * @param descriptionParts These will be concatenated to a single {@link String} in {@link #toString()}.
      *      {@link String} array items that look like FTL tag (must start with {@code "&lt;"} and end with {@code ">"})
-     *      will be converted to the actual template syntax if {@link #blame} or {@link #template} was set.
+     *      will be converted to the actual template syntax if {@link #blamed} or {@link #template} was set.
      */
     public _ErrorDescriptionBuilder(Object[] descriptionParts) {
         this.descriptionParts = descriptionParts;
@@ -32,17 +36,40 @@ public class _ErrorDescriptionBuilder {
     }
 
     public String toString() {
-        if (blame == null && tips == null && tip == null && descriptionParts == null) return description;
+        return toString(null);
+    }
+    
+    public String toString(TemplateElement parentElement) {
+        if (blamed == null && tips == null && tip == null && descriptionParts == null) return description;
+
+        StringBuffer sb = new StringBuffer(200);
         
-        StringBuffer sb;
+        if (parentElement != null && blamed != null && showBlamer) {
+            try {
+                Blaming blaming = findBlaming(parentElement, blamed, 0);
+                if (blaming != null) {
+                    sb.append("For ");
+                    String nss = blaming.blamer.getNodeTypeSymbol();
+                    char q = nss.indexOf('"') == -1 ? '\"' : '`';
+                    sb.append(q).append(nss).append(q);
+                    sb.append(" ").append(blaming.roleOfblamed).append(": ");
+                }
+            } catch (Throwable e) {
+                // Should not happen. But we rather give a not-so-good error message than replace it with another...
+                // So we ignore this.
+                logger.error("Error when searching blamer for better error message.", e);
+            }
+        }
+        
+        
+        
         if (description != null) {
-            sb = new StringBuffer(description);
+            sb.append(description);
         } else {
-            sb = new StringBuffer(200);
             appendParts(sb, descriptionParts);
         }
         
-        if (blame != null) {
+        if (blamed != null) {
             // Right-trim:
             for (int idx = sb.length() - 1; idx >= 0 && Character.isWhitespace(sb.charAt(idx)); idx --) {
                 sb.deleteCharAt(idx);
@@ -56,9 +83,9 @@ public class _ErrorDescriptionBuilder {
                 sb.append("The blamed expression:\n");
             }
             sb.append("==> ");
-            sb.append(blame);
+            sb.append(blamed);
             sb.append("  [");
-            sb.append(blame.getStartLocation());
+            sb.append(blamed.getStartLocation());
             sb.append(']');
         }
         
@@ -80,8 +107,28 @@ public class _ErrorDescriptionBuilder {
         return sb.toString();
     }
 
+    private Blaming findBlaming(TemplateObject parent, Expression blamed, int recursionDepth) {
+        // Just in case a loop ever gets into the AST somehow, try not fill the stack and such: 
+        if (recursionDepth > 50) return null;
+        
+        int paramCnt = parent.getParameterCount();
+        for (int i = 0; i < paramCnt; i++) {
+            Object paramValue = parent.getParameterValue(i);
+            if (paramValue == blamed) {
+                Blaming blaming = new Blaming();
+                blaming.blamer = parent;
+                blaming.roleOfblamed = parent.getParameterRole(i);
+                return blaming;
+            } else if (paramValue instanceof TemplateObject) {
+                Blaming blaming = findBlaming((TemplateObject) paramValue, blamed, recursionDepth + 1);
+                if (blaming != null) return blaming;
+            }
+        }
+        return null;
+    }
+
     private void appendParts(StringBuffer sb, Object[] parts) {
-        Template template = this.template != null ? this.template : (blame != null ? blame.getTemplate() : null); 
+        Template template = this.template != null ? this.template : (blamed != null ? blamed.getTemplate() : null); 
         for (int i = 0; i < parts.length; i++) {
             Object partObj = parts[i];
             if (partObj instanceof Object[]) {
@@ -114,7 +161,7 @@ public class _ErrorDescriptionBuilder {
     }
     
     /**
-     * Needed for description <em>parts</em> that look like an FTL tag to be converted, if there's no {@link #blame}.
+     * Needed for description <em>parts</em> that look like an FTL tag to be converted, if there's no {@link #blamed}.
      */
     public _ErrorDescriptionBuilder template(Template template) {
         this.template = template;
@@ -122,7 +169,12 @@ public class _ErrorDescriptionBuilder {
     }
 
     public _ErrorDescriptionBuilder blame(Expression blamedExpr) {
-        this.blame = blamedExpr;
+        this.blamed = blamedExpr;
+        return this;
+    }
+    
+    public _ErrorDescriptionBuilder showBlamer(boolean showBlamer) {
+        this.showBlamer = showBlamer;
         return this;
     }
     
@@ -144,6 +196,11 @@ public class _ErrorDescriptionBuilder {
     public _ErrorDescriptionBuilder tips(String[][] tips) {
         this.tips = tips;
         return this;
+    }
+    
+    private static class Blaming {
+        TemplateObject blamer;
+        ParameterRole roleOfblamed;
     }
     
 }
