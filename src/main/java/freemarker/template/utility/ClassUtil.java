@@ -156,6 +156,8 @@ public class ClassUtil
                         return "f.t" + cn.substring(19);
                     } else if (cn.startsWith("freemarker.ext.beans.")) {
                         return "f.e.b" + cn.substring(20);
+                    } else if (cn.startsWith("freemarker.core.")) {
+                        return "f.c" + cn.substring(15);
                     } else if (cn.startsWith("freemarker.ext.")) {
                         return "f.e" + cn.substring(14);
                     } else if (cn.startsWith("freemarker.")) {
