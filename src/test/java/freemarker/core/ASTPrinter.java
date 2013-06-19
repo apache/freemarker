@@ -53,6 +53,10 @@ public class ASTPrinter {
 
     private static final String INDENTATION = "    ";
 
+    public static String getASTAsString(String ftl) throws IOException {
+        return getASTAsString(null, ftl);
+    }
+    
     public static String getASTAsString(String templateName, String ftl) throws IOException {
         Configuration cfg = new Configuration();
         Template t = new Template(templateName, new StringReader(ftl), cfg);
