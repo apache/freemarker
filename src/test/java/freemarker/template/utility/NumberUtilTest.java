@@ -1,4 +1,4 @@
-package freemarker.test.templatesuite;
+package freemarker.template.utility;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
