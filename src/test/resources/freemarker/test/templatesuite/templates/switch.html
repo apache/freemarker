@@ -32,5 +32,90 @@
 </p>
 </#foreach>
 
+<#-- Nesting and no-match -->
+<#list [ 1, 2, 3 ] as x>
+  <#switch x>
+    <#case 1>
+      1
+      <#switch x*2>
+        <#case 1>
+          i1
+          <#break>
+        <#case 2>
+          i2
+          <#break>
+        <#case 3>
+          i3
+          <#break>
+        <#case 4>
+          i4
+          <#break>
+        <#case 6>
+          i6
+          <#break>
+      </#switch>
+      <#break>     
+    <#case 2>
+      2
+      <#switch x*2>
+        <#case 1>
+          i1
+          <#break>
+        <#case 2>
+          i2
+          <#break>
+        <#case 3>
+          i3
+          <#break>
+        <#case 4>
+          i4
+          <#-- falls through -->
+        <#case 5>
+          ft
+          <#-- falls through -->
+      </#switch>
+      ft
+      <#-- falls through -->     
+    <#case 3>
+      3
+      <#switch x*2>
+        <#case 1>
+          i1
+          <#break>
+        <#case 2>
+          i2
+          <#break>
+        <#case 3>
+          i3
+          <#break>
+        <#case 4>
+          i4
+          <#break>
+        <#case 6>
+          i6
+          <#break>
+      </#switch>
+      <#break>     
+  </#switch>
+</#list>
+
+<#-- No match -->
+[<#switch 213>
+  <#case 1>sadas
+</#switch>]
+
+<#-- Fall-through -->
+<#list [ 0, 1, 2, 3, 4 ] as x>
+  "<#switch x><#case 1>1<#case 2>2<#case 3>3<#case 4>4</#switch>"
+</#list>
+
+<#-- Legacy parser bug: #default might not be the last, but it doesn't fall through if called directly -->
+<#list [1, 2, 3, 4, 5] as x>
+  "<#switch x><#case 1>1<#case 2>2<#default>default<#case 4>4<#case 5>5</#switch>"
+</#list>
+
+<#-- two #default-s are parsing error -->
+<@assertFails message="can only have one default"><@"<#switch 1><#case 1><#default><#default></#switch>"?interpret /></@>
+
 </body>
 </html>

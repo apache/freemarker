@@ -106,7 +106,7 @@
    <testcase name="string-builtins-regexps" />
    <testcase name="stringbimethods" />
    <testcase name="stringliteral" filename="stringliteral.html"/>
-   <testcase name="switch-case" filename="switch.html" />
+   <testcase name="switch" filename="switch.html" />
    <testcase name="transforms" filename="transformation.html"/>
    <testcase name="type-builtins" filename="typebuiltins.txt"/>
    <testcase name="var-layers" filename="varlayers.txt"/>
