@@ -99,7 +99,7 @@ public class TemplateException extends Exception {
     private String renderedFtlInstructionStackSnapshot;  // clalc. from ftlInstructionStackSnapshot 
     private String renderedFtlInstructionStackSnapshotTop; // clalc. from ftlInstructionStackSnapshot
     private String description;  // calc. from descriptionBuilder, or set by the construcor
-    private transient String stackTraceMessage;
+    private transient String messageWithoutStackTop;
     private transient String message; 
 
     // Concurrency:
@@ -190,20 +190,20 @@ public class TemplateException extends Exception {
         String description = getDescription();
         
         if(description != null && description.length() != 0) {
-            stackTraceMessage = description;
+            messageWithoutStackTop = description;
         } else if (getCause() != null) {
-            stackTraceMessage = "No error description was specified for this error; low-level message: "
+            messageWithoutStackTop = "No error description was specified for this error; low-level message: "
                     + getCause().getClass().getName() + ": " + getCause().getMessage();
         } else {
-            stackTraceMessage = "[No error description was available.]";
+            messageWithoutStackTop = "[No error description was available.]";
         }
         
         String stackTop = getFTLInstructionStackTop();
         if (stackTop != null) {
-            message = stackTraceMessage + "\n\n" + THE_FAILING_INSTRUCTION + stackTop;
-            stackTraceMessage = message.substring(0, stackTraceMessage.length());  // to reuse the backing char[]
+            message = messageWithoutStackTop + "\n\n" + THE_FAILING_INSTRUCTION + stackTop;
+            messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse the backing char[]
         } else {
-            message = stackTraceMessage;
+            message = messageWithoutStackTop;
         }
     }
     
@@ -369,7 +369,7 @@ public class TemplateException extends Exception {
             if (ftlStackTrace) {
                 String stackTrace = getFTLInstructionStack();
                 if (stackTrace != null) {
-                    out.println(getStackTraceMessage());  // Not getMessage()!
+                    out.println(getMessageWithoutStackTop());  // Not getMessage()!
                     out.println();
                     out.print(THE_FAILING_INSTRUCTION);
                     out.println(" (FTL stack trace):");
@@ -447,20 +447,6 @@ public class TemplateException extends Exception {
         super.printStackTrace(pw);
     }
 
-    /**
-     * Similar to {@link #getMessage()}, but it doesn't contain the position of the failing instruction at then end
-     * of the text. It might contains the position of the failing <em>expression</em> though as part of the expression
-     * quotation, as that's the part of the description. 
-     */
-    private String getStackTraceMessage() {
-        if (stackTraceMessage == null) {
-            synchronized (lock) {
-                if (stackTraceMessage == null) renderMessages();
-            }
-        }
-        return stackTraceMessage;
-    }
-    
     public String getMessage() {
         if (messageWasAlreadyPrintedForThisTrace != null && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
             return "[... Exception message was already printed; see it above ...]";
@@ -472,6 +458,20 @@ public class TemplateException extends Exception {
             }
             return message;
         }
+    }
+    
+    /**
+     * Similar to {@link #getMessage()}, but it doesn't contain the position of the failing instruction at then end
+     * of the text. It might contains the position of the failing <em>expression</em> though as part of the expression
+     * quotation, as that's the part of the description. 
+     */
+    public String getMessageWithoutStackTop() {
+        if (messageWithoutStackTop == null) {
+            synchronized (lock) {
+                if (messageWithoutStackTop == null) renderMessages();
+            }
+        }
+        return messageWithoutStackTop;
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {

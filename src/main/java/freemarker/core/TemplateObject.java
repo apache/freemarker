@@ -63,6 +63,11 @@ public abstract class TemplateObject {
     
     private Template template;
     int beginColumn, beginLine, endColumn, endLine;
+    
+    /** This is needed for an ?eval hack; the expression AST nodes will be the descendants of the template, however,
+     *  we can't give their position in the template, only in the dynamic string that's evaluated. That's signaled
+     *  by a negative line numbers, starting from this constant as line 1. */
+    static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
     final void setLocation(Template template, Token begin, Token end)
     throws

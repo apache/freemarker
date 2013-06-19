@@ -130,7 +130,10 @@ class Interpret extends BuiltIn
         catch(IOException e)
         {
             throw new _MiscTemplateException(this, e, env, new Object[] {
-                        "\"?", key, "\" has failed with this parsing error:\n", new _DelayedGetMessage(e),
+                        "Template parsing with \"?", key, "\" has failed with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        MessageUtil.EMBEDDED_MESSAGE_END,
                         "\n\nThe failed expression:" });
         }
         
@@ -164,9 +167,10 @@ class Interpret extends BuiltIn
             catch(Exception e)
             {
                 throw new _TemplateModelException(e, new Object[] {
-                        "Template created with \"?", key, "\" has stopped with error:\n--begin-message--\n",
+                        "Template created with \"?", key, "\" has stopped with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        "\n--end-message--\n\nThe interpreted template was created here:" });
+                        MessageUtil.EMBEDDED_MESSAGE_END });
             }
     
             return new Writer(out)

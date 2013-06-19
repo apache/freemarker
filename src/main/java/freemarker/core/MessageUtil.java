@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -29,6 +28,10 @@ class MessageUtil {
             UNKNOWN_DATE_TYPE_ERROR_TIPS[0],
             UNKNOWN_DATE_TYPE_ERROR_TIPS[1]
     };
+
+    static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";
+
+    static final String EMBEDDED_MESSAGE_END = "\n---end-message---";
 
     // Can't be instantiated
     private MessageUtil() { }
@@ -77,9 +80,16 @@ class MessageUtil {
             String preposition, String templateName,
             String macroOrFuncName, boolean isFunction,
             int line, int column) {
-        String templateDesc = templateName != null
+        String templateDesc;
+        if (line < 0) {
+            templateDesc = "?eval-ed string";
+            line -= TemplateObject.RUNTIME_EVAL_LINE_DISPLACEMENT - 1;
+            macroOrFuncName = null;
+        } else { 
+            templateDesc = templateName != null
                 ? "template " + StringUtil.jQuoteNoXSS(templateName)
                 : "nameless template";
+        }
         return "in " + templateDesc
               + (macroOrFuncName != null
                       ? " in " + (isFunction ? "function " : "macro ") + StringUtil.jQuote(macroOrFuncName)

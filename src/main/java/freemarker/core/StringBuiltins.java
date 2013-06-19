@@ -179,8 +179,7 @@ class StringBuiltins {
         TemplateModel calculateResult(String s, Environment env) throws TemplateException 
         {
             SimpleCharStream scs = new SimpleCharStream(
-                    new StringReader("(" + s + ")"), target.beginLine, 
-                    target.beginColumn, s.length() + 2);
+                    new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.incompatibleImprovements = env.getConfiguration().getIncompatibleImprovements().intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
@@ -193,14 +192,24 @@ class StringBuiltins {
                 } catch (TokenMgrError e) {
                     throw e.toParseException(getTemplate());
                 }
-            } catch (ParseException pe) {
-                pe.setTemplateName(getTemplate().getName());
+            } catch (ParseException e) {
                 throw new _MiscTemplateException(this, new Object[] {
-                        "Failed to parse string value:\n",
-                        new _DelayedGetMessage(pe),
+                        "Failed to \"?", key, "\" string with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        MessageUtil.EMBEDDED_MESSAGE_END,
                         "\n\nThe failing expression:" });
             }
-            return exp.eval(env);
+            try {
+                return exp.eval(env);
+            } catch (TemplateException e) {
+                throw new _MiscTemplateException(this, new Object[] {
+                        "Failed to \"?", key, "\" string with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessageWithoutStackTop(e),
+                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        "\n\nThe failing expression:" });
+            }
         }
     }
 
