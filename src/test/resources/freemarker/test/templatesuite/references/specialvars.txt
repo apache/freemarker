@@ -1,7 +1,7 @@
 en == en
 en_US == en_US
 utf-8 == utf-8
-specialvars.txt == specialvars.txt
+specialvars.ftl == specialvars.ftl
 iso-8859-1 == iso-8859-1
 x == x
 true == true

@@ -1,4 +1,4 @@
-<#import "varlayers_lib.txt" as lib>
+<#import "varlayers_lib.ftl" as lib>
 <@foo 1/>
 ${x} = ${.data_model.x} = ${.globals.x}
 <#assign x = 5>

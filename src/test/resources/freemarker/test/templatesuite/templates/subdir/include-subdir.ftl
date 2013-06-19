@@ -1,9 +1,9 @@
-<p>This is include-subdir.html</p>
+<p>This is include-subdir.ftl</p>
 <p>Testing including from same directory</p>
-<#include "include-subdir2.html">
+<#include "include-subdir2.ftl">
 <p>Testing including from relative parent</p>
-<#include "../included.html">
+<#include "../included.ftl">
 <p>Testing including from loader root</p>
-<#include "/included.html">
+<#include "/included.ftl">
 <p>Testing including through acquisition</p>
-<#include "*/subdir/include-subdir2.html">
+<#include "*/subdir/include-subdir2.ftl">

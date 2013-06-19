@@ -8,24 +8,15 @@
 
 ${message}
 
-<#if message?exists>
+<if message>
 	<p>Message exists!
-</#if>
+</if>
 
 <p>Test normal includes:</p>
-<#include "included.html">
-
-${foo}
-${nestedMessage}
+<include "../bogus/included.ftl">
 
 <p>Test unparsed includes:</p>
-<#include "included.html" parse=false>
-<@twice>
-Kilroy
-</@twice>
+<include "../bogus/included.ftl" parse="n">
 
-<p>Test subdir includes:</p>
-<#include "subdir/include-subdir.html">
 </body>
 </html>
-

@@ -114,13 +114,15 @@ public class TemplateTestCase extends FileTestCase {
     private HashMap dataModel = new HashMap();
     
     private final String templateName;
+    private final String expectedFileName;
     private final boolean noOutput;
     
     private Configuration conf = new Configuration();
     
-    public TemplateTestCase(String name, String templateName, boolean noOutput) {
+    public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
         super(name);
         this.templateName = templateName;
+        this.expectedFileName = expectedFileName;
         this.noOutput = noOutput;
     }
     
@@ -417,7 +419,7 @@ public class TemplateTestCase extends FileTestCase {
         }
         
         if (out != null) {
-            assertExpectedFileEqualsString(templateName, out.toString());
+            assertExpectedFileEqualsString(getName(), out.toString());
         }
     }
     
@@ -429,6 +431,11 @@ public class TemplateTestCase extends FileTestCase {
     @Override
     protected String getDefaultCharset() {
         return conf.getOutputEncoding() != null ? conf.getOutputEncoding() : "UTF-8";
+    }
+    
+    @Override
+    protected File getExpectedFileFor(String testCaseFileName) throws IOException {
+        return new File(getExpectedFileDirectory(), expectedFileName);
     }
 
     static class TestBoolean implements TemplateBooleanModel, TemplateScalarModel {

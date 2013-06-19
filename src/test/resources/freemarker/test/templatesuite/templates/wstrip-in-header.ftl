@@ -5,4 +5,4 @@
 a
 <#assign x = 1>
 b
-<#include "wsstripinheader_inc.txt">
+<#include "wsstripinheader_inc.ftl">

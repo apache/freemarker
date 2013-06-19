@@ -162,16 +162,19 @@ public class TemplateTestSuite extends TestSuite {
      * filtered out. If the class is not specified by the DOM node,
      * it defaults to {@link TemplateTestCase} class. If the class is specified,
      * it must extend {@link TestCase} and have a constructor with the same parameters as of
-     * {@link TemplateTestCase#TemplateTestCase(String, String, boolean)}.
+     * {@link TemplateTestCase#TemplateTestCase(String, String, String, boolean)}.
      */
     private TestCase createTestCaseFromNode(Element e, Pattern filter) throws Exception {
         String name = StringUtil.emptyToNull(e.getAttribute("name"));
         if (name == null) throw new Exception("Invalid XML: the \"name\" attribute is mandatory.");
         if (filter != null && !filter.matcher(name).matches()) return null;
         
-        String filename = StringUtil.emptyToNull(e.getAttribute("filename"));
-        if (filename == null) filename = name + ".txt";
+        String templateName = StringUtil.emptyToNull(e.getAttribute("template"));
+        if (templateName == null) templateName = name + ".ftl";
 
+        String expectedFileName = StringUtil.emptyToNull(e.getAttribute("expected"));
+        if (expectedFileName == null) expectedFileName = name + ".txt";
+        
         String noOutputStr = StringUtil.emptyToNull(e.getAttribute("nooutput"));
         boolean noOutput = noOutputStr == null ? false : StringUtil.getYesNo(noOutputStr);
         
@@ -179,10 +182,12 @@ public class TemplateTestSuite extends TestSuite {
         
         if (classname != null) {
             Class cl = Class.forName(classname);
-            Constructor cons = cl.getConstructor(new Class[] {String.class, String.class, boolean.class});
-            return (TestCase) cons.newInstance(new Object [] {name, filename, Boolean.valueOf(noOutput)});
+            Constructor cons = cl.getConstructor(new Class[] {
+                    String.class, String.class, String.class, boolean.class});
+            return (TestCase) cons.newInstance(new Object [] {
+                    name, templateName, expectedFileName, Boolean.valueOf(noOutput)});
         } else { 
-	        TemplateTestCase result = new TemplateTestCase(name, filename, noOutput);
+	        TemplateTestCase result = new TemplateTestCase(name, templateName, expectedFileName, noOutput);
 	        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
 	            Map.Entry entry = (Map.Entry) it.next();
 	            result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());

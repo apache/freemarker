@@ -4,6 +4,6 @@
 </head>
 <body>
 ιαυϋ
-<#include "charsetinheader_inc1.html">
-<#include "charsetinheader_inc2.html">
+<#include "charset-in-header_inc1.ftl">
+<#include "charset-in-header_inc2.ftl">
 </body>

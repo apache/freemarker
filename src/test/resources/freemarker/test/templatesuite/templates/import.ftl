@@ -1,5 +1,5 @@
 --
-<#-- import "/import_lib.txt" as my -->
+<#-- import "/import_lib.ftl" as my -->
 --
 
 <#if mail?exists || test?exists>
@@ -19,7 +19,7 @@ ${my.mail}
 ${my.mail}
 <@my.test foo="bar"/>
 
-<#import "/import_lib.txt" as my2>
+<#import "/import_lib.ftl" as my2>
 ${my2.mail}
 <#assign mail="jsmith@other3.com" in my2>
 ${my.mail}
