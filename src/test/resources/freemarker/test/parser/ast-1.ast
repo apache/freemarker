@@ -25,38 +25,21 @@
             - content: "y"  // String
     #text  // f.c.TextBlock
         - content: "\n3 "  // String
-    #if-#elseif-#else-container  // f.c.IfBlock
-        #if  // f.c.ConditionalBlock
-            - condition: ==  // f.c.ComparisonExpression
-                - left-hand operand: +  // f.c.AddConcatExpression
-                    - left-hand operand: x  // f.c.Identifier
-                    - right-hand operand: 1  // f.c.NumberLiteral
-                - right-hand operand: 0  // f.c.NumberLiteral
-            - AST-node subtype: "0"  // Integer
-            #text  // f.c.TextBlock
-                - content: "foo"  // String
-            ${...}  // f.c.DollarVariable
-                - content: y  // f.c.Identifier
-            #text  // f.c.TextBlock
-                - content: "bar"  // String
-        #else  // f.c.ConditionalBlock
-            - condition: null  // Null
-            - AST-node subtype: "1"  // Integer
-            ${...}  // f.c.DollarVariable
-                - content: "static"  // f.c.StringLiteral
-                    - embedded template: null  // Null
-            ${...}  // f.c.DollarVariable
-                - content: dynamic "..."  // f.c.StringLiteral
-                    - embedded template: #mixed_content  // f.c.MixedContent
-                        #text  // f.c.TextBlock
-                            - content: "x"  // String
-                        ${...}  // f.c.DollarVariable
-                            - content: *  // f.c.ArithmeticExpression
-                                - left-hand operand: baaz  // f.c.Identifier
-                                - right-hand operand: 10  // f.c.NumberLiteral
-                                - AST-node subtype: "1"  // Integer
-                        #text  // f.c.TextBlock
-                            - content: "y"  // String
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 123  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 123  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: ns  // f.c.Identifier
+    #global  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 123  // f.c.NumberLiteral
+        - variable scope: "3"  // Integer
+        - namespace: null  // Null
     #text  // f.c.TextBlock
         - content: "\n4 "  // String
     #if-#elseif-#else-container  // f.c.IfBlock
@@ -137,6 +120,11 @@
         - parameter default: null  // Null
         - catch-all parameter name: null  // Null
         - AST-node subtype: "1"  // Integer
+        #local  // f.c.Assignment
+            - assignment target: "x"  // String
+            - assignment source: 123  // f.c.NumberLiteral
+            - variable scope: "2"  // Integer
+            - namespace: null  // Null
         #return  // f.c.ReturnInstruction
             - value: 1  // f.c.NumberLiteral
     #text  // f.c.TextBlock
