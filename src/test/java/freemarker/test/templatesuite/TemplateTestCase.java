@@ -53,19 +53,11 @@
 package freemarker.test.templatesuite;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
@@ -80,8 +72,6 @@ import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import junit.framework.TestCase;
 
 import org.xml.sax.InputSource;
 
@@ -115,44 +105,27 @@ import freemarker.test.templatesuite.models.VarArgTestModel;
 import freemarker.test.utility.AssertDirective;
 import freemarker.test.utility.AssertEqualsDirective;
 import freemarker.test.utility.AssertFailsDirective;
+import freemarker.test.utility.FileTestCase;
 
 
-public class TemplateTestCase extends TestCase {
+public class TemplateTestCase extends FileTestCase {
     
     private Template template;
     private HashMap dataModel = new HashMap();
     
-    private final String filename, testName;
+    private final String templateName;
     private final boolean noOutput;
-    private File outputDir;
     
     private Configuration conf = new Configuration();
     
-    public TemplateTestCase(String name, String filename, boolean noOutput) {
+    public TemplateTestCase(String name, String templateName, boolean noOutput) {
         super(name);
-        this.testName = name;
-        this.filename = filename;
+        this.templateName = templateName;
         this.noOutput = noOutput;
     }
     
-    public void setTemplateDirectory(String dirname) throws IOException {
-        URL url = getClass().getResource("TemplateTestCase.class");
-        File parent = new File(url.getFile()).getParentFile();
-        File dir = new File(parent, dirname);
-        conf.setDirectoryForTemplateLoading(dir);
-    }
-    
-    public void setReferenceDirectory(String dirname) {
-        URL url = getClass().getResource("TemplateTestCase.class");
-        File parent = new File(url.getFile()).getParentFile();
-        this.outputDir = new File(parent, dirname);
-    }
-
     public void setConfigParam(String param, String value) throws IOException {
-        if ("templatedir".equals(param)) {
-            setTemplateDirectory(value);
-        }
-        else if ("auto_import".equals(param)) {
+        if ("auto_import".equals(param)) {
             StringTokenizer st = new StringTokenizer(value);
             if (!st.hasMoreTokens()) fail("Expecting libname");
             String libname = st.nextToken();
@@ -170,9 +143,6 @@ public class TemplateTestCase extends TestCase {
         }
         else if ("input_encoding".equals(param)) {
             conf.setDefaultEncoding(value);
-        }
-        else if ("referencedir".equals(param)) {
-            setReferenceDirectory(value);
         }
         else {
             try {
@@ -195,12 +165,15 @@ public class TemplateTestCase extends TestCase {
      */
     
     public void setUp() throws Exception {
+        conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
+        
         dataModel.put("assert", AssertDirective.INSTANCE);
         dataModel.put("assertEquals", AssertEqualsDirective.INSTANCE);
         dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
         
         dataModel.put("message", "Hello, world!");
         
+        final String testName = getName();
         if (testName.equals("bean-maps")) {
             BeansWrapper w1 = new BeansWrapper();
             BeansWrapper w2 = new BeansWrapper();
@@ -427,77 +400,37 @@ public class TemplateTestCase extends TestCase {
     
     public void runTest() {
         try {
-            template = conf.getTemplate(filename);
+            template = conf.getTemplate(templateName);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            fail("Could not load template " + filename + "\n" + sw.toString());
+            fail("Could not load template " + StringUtil.jQuote(templateName) + "\n" + sw.toString());
         }
         
-        File refFile = noOutput ? null : new File (outputDir, filename);
-        File outFile = noOutput ? null : new File (outputDir, filename+".out");
-        String encoding = conf.getOutputEncoding() != null ? conf.getOutputEncoding() : "UTF-8";
-        
-        Writer out;
-        if (outFile == null) {
-            out = NullWriter.INSTANCE;
-        } else {
-            try {
-                out = new OutputStreamWriter(new FileOutputStream(outFile), encoding);
-            } catch (IOException ioe) {
-                fail("Cannot write to file: " + outFile + "\n" + ioe.getMessage());
-                out = null;  // never reached
-            }
-        }
-        
+        StringWriter out = noOutput ? null : new StringWriter();
         try {
-            template.process(dataModel, out);
-            out.close();
+            template.process(dataModel, out != null ? out : NullWriter.INSTANCE);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            fail("Could not process template " + filename + "\n" + sw.toString());
+            fail("Could not process template " + templateName + "\n" + sw.toString());
         }
         
-        if (outFile != null) {
-            try {
-                Reader ref = new InputStreamReader(new FileInputStream(refFile), 
-                        encoding);
-                Reader output = new InputStreamReader(new FileInputStream(outFile), 
-                        encoding);
-                System.out.println("Comparing with output file: " + outFile);
-                compare(ref, output);
-                outFile.delete();
-            } catch (IOException e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                fail("Error comparing files " + refFile + " and " + outFile + "\n" + sw.toString());
-            }
+        if (out != null) {
+            assertExpectedFileEqualsString(templateName, out.toString());
         }
-    }
-
-    static public void compare(Reader reference, Reader output) throws IOException {
-        LineNumberReader ref = new LineNumberReader(reference);
-        LineNumberReader out = new LineNumberReader(output);
-        String refLine = "", outLine = "";
-        while (refLine != null || outLine != null) {
-            if (refLine == null) {
-                fail("Output text is longer than reference text");
-            }
-            if (outLine == null) {
-                fail("Output text is shorter than reference text");
-            }
-            refLine = ref.readLine();
-            outLine = out.readLine();
-            if (refLine != null && outLine != null & !refLine.equals(outLine)) {
-                fail("Difference found on line " + ref.getLineNumber() + 
-                                            ".\nReference text is: " + refLine +
-                                            "\nOutput text is: " + outLine);
-            }
-        } 
     }
     
+    @Override
+    protected File getExpectedFileDirectory() throws IOException {
+        return new File(super.getExpectedFileDirectory(), "references");
+    }
+
+    @Override
+    protected String getDefaultCharset() {
+        return conf.getOutputEncoding() != null ? conf.getOutputEncoding() : "UTF-8";
+    }
+
     static class TestBoolean implements TemplateBooleanModel, TemplateScalarModel {
         public boolean getAsBoolean() {
             return true;
@@ -554,4 +487,5 @@ public class TemplateTestCase extends TestCase {
             return 7;
         }
     }
+    
 }

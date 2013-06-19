@@ -50,15 +50,11 @@
  * http://www.visigoths.org/
  */
 
-package freemarker.test.templatesuite.servlets;
+package freemarker.test.servlet;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.security.Principal;
@@ -85,41 +81,26 @@ import javax.servlet.http.HttpSessionContext;
 
 import junit.framework.TestCase;
 import freemarker.ext.servlet.FreemarkerServlet;
-import freemarker.template.TemplateException;
-import freemarker.test.templatesuite.TemplateTestCase;
+import freemarker.test.utility.FileTestCase;
 
 /**
  * @author Attila Szegedi
  */
-public class TestJspTaglibs extends TestCase {
+public class JspTaglibsTest extends FileTestCase {
     
-    File refFile;
-    
-    public TestJspTaglibs(String name) {
+    public JspTaglibsTest(String name) {
         super(name);
     }
     
-    public TestJspTaglibs(String name, String filename, boolean noOutput) {
-        super(name);
-    }
-
-    public void setUp() throws Exception {
-        URL url = TestJspTaglibs.class.getResource("TestJspTaglibs.class");
-        File thisDir = new File(url.getFile()).getParentFile();
-        refFile = new File(thisDir, "reference/test-jsptaglibs.txt");
-    }
-
-    public void runTest() throws Exception {
+    public void test() throws Exception {
         ServletConfig cfg = new MockServletConfig();
         FreemarkerServlet servlet = new FreemarkerServlet();
         servlet.init(cfg);
         MockRequest req = new MockRequest("test-jsptaglibs.txt");
         MockResponse resp = new MockResponse();
         servlet.doGet(req, resp);
-        StringReader output = new StringReader(resp.toString());
-        Reader reference = new FileReader(refFile);
-        System.out.println(resp.toString());
-        TemplateTestCase.compare(reference,output);
+        
+        assertExpectedFileEqualsString("reference/test-jsptaglibs.txt", resp.toString());
     }
 
     private static class MockServletConfig
@@ -717,7 +698,7 @@ public class TestJspTaglibs extends TestCase {
     /** Bootstrap for the self-test code.
      */
     public static void main( String[] argc ) throws Exception {
-        TestCase test = new TestJspTaglibs( "test-jsptaglibs.txt" );
+        TestCase test = new JspTaglibsTest( "test-jsptaglibs.txt" );
         test.run();
     }
 }

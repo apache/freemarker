@@ -50,7 +50,7 @@
  * http://www.visigoths.org/
  */
 
-package freemarker.test.templatesuite.servlets;
+package freemarker.test.servlet;
 
 import java.io.IOException;
 import javax.servlet.jsp.JspException;

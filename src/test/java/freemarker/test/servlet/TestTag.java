@@ -50,35 +50,84 @@
  * http://www.visigoths.org/
  */
 
-package freemarker.test.templatesuite.servlets;
+package freemarker.test.servlet;
 
 import java.io.IOException;
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
 
 /**
  * @author Attila Szegedi
  */
-public class TestTag3 extends TagSupport
+public class TestTag extends BodyTagSupport implements TryCatchFinally
 {
+    private boolean throwException;
+    private int repeatCount;
+    
+    public void setRepeatCount(int repeatCount) {
+        this.repeatCount = repeatCount;
+    }
+
+    public void setThrowException(boolean throwException) {
+        this.throwException = throwException;
+    }
+
     public int doStartTag() throws JspException {
         try {
-            pageContext.getOut().println("TestTag3.doStartTag() called here");
-            return Tag.EVAL_BODY_INCLUDE;
+            pageContext.getOut().println("doStartTag() called here");
+            if(throwException) {
+                throw new JspException("throwException==true");
+            }
+            return repeatCount == 0 ? Tag.SKIP_BODY : BodyTag.EVAL_BODY_BUFFERED;
         }
         catch(IOException e) {
             throw new JspException(e);
         }
     }
 
+    public int doAfterBody() throws JspException {
+        try {
+            getPreviousOut().println("doAfterBody() called here");
+            getBodyContent().writeOut(getPreviousOut());
+            getBodyContent().clear();
+            return --repeatCount == 0 ? Tag.SKIP_BODY : IterationTag.EVAL_BODY_AGAIN;
+        }
+        catch(IOException e) {
+            throw new JspException(e);
+        }
+    }
+    
     public int doEndTag() throws JspException {
         try {
-            pageContext.getOut().println("TestTag3.doEndTag() called here");
+            pageContext.getOut().println("doEndTag() called here");
             return Tag.EVAL_PAGE;
         }
         catch(IOException e) {
             throw new JspException(e);
         }
     }
+    
+    public void doCatch(Throwable t) throws Throwable {
+        pageContext.getOut().println("doCatch() called here with " + t.getClass() + ": " + getFirstLine(t.getMessage()));
+    }
+
+    public void doFinally() {
+        try {
+            pageContext.getOut().println("doFinally() called here");
+        }
+        catch(IOException e) {
+            throw new Error(); // Shouldn't happen
+        }
+    }
+    
+    private static final String getFirstLine(String s) {
+        int brIdx = s.indexOf('\n');
+        if (brIdx == -1) brIdx = s.indexOf('\r');
+        return brIdx == -1 ? s : s.substring(0, brIdx);
+    }
+    
 }

@@ -9,6 +9,6 @@
   <uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld</uri>
   <tag>
     <name>simpletag</name>
-    <tagclass>freemarker.test.templatesuite.servlets.TestSimpleTag2</tagclass>
+    <tagclass>freemarker.test.servlet.TestSimpleTag2</tagclass>
   </tag>
 </taglib>

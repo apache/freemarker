@@ -22,18 +22,12 @@
             strict_syntax (Y|N) #IMPLIED
             new_builtin_class_resolver CDATA #IMPLIED
             url_escaping_charset CDATA #IMPLIED
-            templatedir CDATA #IMPLIED
-            referencedir CDATA #IMPLIED
             incompatible_improvements CDATA #IMPLIED
       >
 ]>
 
 <testcases>
-   <config templatedir="templates"
-           referencedir="references"
-           input_encoding="UTF-8"
-           output_encoding="UTF-8"
-   />
+   <config input_encoding="UTF-8" output_encoding="UTF-8" />
    
    <testcase name="arithmetic" filename="arithmetic.html" />
    <testcase name="bean-maps" filename="bean-maps.html"/>
@@ -64,8 +58,6 @@
    <testcase name="include" filename="include.html" />
    <testcase name="interpret" filename="interpret.html"/>
    <testcase name="iterators" filename="listiterators.html"/>
-   <testcase name="jsptaglibs" filename="jsptaglibs.txt" 
-             class="freemarker.test.templatesuite.servlets.TestJspTaglibs"/>
    <testcase name="lastcharacter" filename="lastcharacter.html"/>
    <testcase name="list" filename="extlist.html" />
    <testcase name="listliteral" filename="listliteral.html" />

@@ -1,4 +1,4 @@
-package freemarker.test.templatesuite.servlets;
+package freemarker.test.servlet;
 
 import java.io.IOException;
 
