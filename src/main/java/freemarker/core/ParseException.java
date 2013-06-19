@@ -384,7 +384,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
       } else if (kind == END_IF || kind == ELSE_IF || kind == ELSE) {
           return "Found unexpected directive: "
               + nextToken
-              + "\nCheck whether you have a well-formed if-else block.";
+              + "\nCheck whether you have a valid #if-#elseif-#else structure.";
       }
       return null;
   }

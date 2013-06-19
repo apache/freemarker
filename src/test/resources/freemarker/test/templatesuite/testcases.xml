@@ -106,6 +106,7 @@
    <testcase name="string-builtins-regexps" />
    <testcase name="stringbimethods" />
    <testcase name="stringliteral" filename="stringliteral.html"/>
+   <testcase name="if" />
    <testcase name="switch" filename="switch.html" />
    <testcase name="transforms" filename="transformation.html"/>
    <testcase name="type-builtins" filename="typebuiltins.txt"/>
