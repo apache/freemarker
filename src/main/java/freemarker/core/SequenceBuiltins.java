@@ -815,43 +815,39 @@ class SequenceBuiltins {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
-                return new BIMethodForCollection((TemplateCollectionModel) model);
-            } else if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
-                return new BIMethodForSequence((TemplateSequenceModel) model);
+                return new BIMethodForCollection(env, (TemplateCollectionModel) model);
+            } else if (model instanceof TemplateSequenceModel) {
+                return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
             } else {
                 throw new UnexpectedTypeException(target, model, "sequence or collection", env);
             }
         }
 
-        private abstract class BIMethod implements TemplateMethodModelEx {
+        private class BIMethodForCollection implements TemplateMethodModelEx {
+            
+            private final Environment env;
+            private final TemplateCollectionModel coll;
+
+            private BIMethodForCollection(Environment env, TemplateCollectionModel coll) {
+                this.env = env;
+                this.coll = coll;
+            }
 
             public Object exec(List args)
                     throws TemplateModelException {
                 checkMethodArgCount(args, 1, 3);
-                return execJoin(
-                        getStringMethodArg(args, 0),
-                        getOptStringMethodArg(args, 1),
-                        getOptStringMethodArg(args, 2));
-            }
-
-            protected abstract Object execJoin(String separator, String whenEmpty, String afterLast) throws TemplateModelException;
-
-        }
-        
-        private class BIMethodForSequence extends BIMethod {
-            
-            private final TemplateSequenceModel m_seq;
-
-            private BIMethodForSequence(TemplateSequenceModel seq) {
-                m_seq = seq;
-            }
-
-            protected Object execJoin(String separator, String whenEmpty, String afterLast) throws TemplateModelException {
+                final String separator = getStringMethodArg(args, 0);
+                final String whenEmpty = getOptStringMethodArg(args, 1);
+                final String afterLast = getOptStringMethodArg(args, 2);
+                
                 StringBuffer sb = new StringBuffer();
-                int size = m_seq.size();
+                
+                TemplateModelIterator it = coll.iterator();
+                
+                int idx = 0;
                 boolean hadItem = false;
-                for (int i = 0; i < size; i++) {
-                    TemplateModel item = m_seq.get(i);
+                while (it.hasNext()) {
+                    TemplateModel item = it.next();
                     if (item != null) {
                         if (hadItem) {
                             sb.append(separator);
@@ -859,14 +855,16 @@ class SequenceBuiltins {
                             hadItem = true;
                         }
                         try {
-                            sb.append(EvalUtil.coerceModelToString(item, null, null, null));
-                        } catch (TemplateModelException e) {
-                            throw e;
+                            sb.append(EvalUtil.coerceModelToString(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e, new Object[] {
-                                    "?", key, " failed at index ", new Integer(i), ":" });
+                                    "\"?", key, "\" failed at index ", new Integer(idx), " with this error:\n\n",
+                                    MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                                    new _DelayedGetMessageWithoutStackTop(e),
+                                    MessageUtil.EMBEDDED_MESSAGE_END });
                         }
                     }
+                    idx++;
                 }
                 if (hadItem) {
                     if (afterLast != null) sb.append(afterLast);
@@ -877,22 +875,7 @@ class SequenceBuiltins {
            }
 
         }
-    
-        private class BIMethodForCollection extends BIMethod {
-            
-            private TemplateCollectionModel m_coll;
-
-            private BIMethodForCollection(TemplateCollectionModel coll) {
-                m_coll = coll;
-            }
-
-            protected Object execJoin(String separator, String whenEmpty, String afterLast) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
-        }
-    
+   
     }
     
 }

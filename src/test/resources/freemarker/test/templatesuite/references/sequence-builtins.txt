@@ -362,3 +362,20 @@ columns = 3, fill = -:
   Rows: 0
   
 
+
+
+Join
+----
+
+- 1, two, three, 4
+- 
+- 1, two, three, 4.
+- (empty)
+- a, c
+- a, c
+- a, c.
+- 
+- (empty)
+- (empty)
+- a, b, c.
+- a, b, c.

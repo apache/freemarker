@@ -313,3 +313,22 @@ Chunk
   </#list>
   
 </#macro>
+
+
+Join
+----
+
+<#assign xs = [1, "two", "three", 4]>
+- ${xs?join(", ")}
+- ${[]?join(", ")}
+- ${xs?join(", ", "(empty)", ".")}
+- ${[]?join(", ", "(empty)", ".")}
+- ${listWithNull?join(", ")}
+- ${listWithNull?join(", ", "(empty)")}
+- ${listWithNull?join(", ", "(empty)", ".")}
+- ${listWithNullsOnly?join(", ")}
+- ${listWithNullsOnly?join(", ", "(empty)")}
+- ${listWithNullsOnly?join(", ", "(empty)", ".")}
+- ${abcSet?join(", ", "(empty)", ".")}
+- ${abcCollection?join(", ", "(empty)", ".")}
+<@assertFails message="index 1">${['a', [], 'c']?join(", ", "(empty)", ".")}</@>

@@ -215,6 +215,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("iso_h_nz", new iso_BI(
                 /* showOffset = */ false, DateUtil.ACCURACY_HOURS));
         builtins.put("j_string", new j_stringBI());
+        builtins.put("join", new SequenceBuiltins.joinBI());
         builtins.put("js_string", new js_stringBI());
         builtins.put("json_string", new json_stringBI());
         builtins.put("keys", new HashBuiltins.keysBI());

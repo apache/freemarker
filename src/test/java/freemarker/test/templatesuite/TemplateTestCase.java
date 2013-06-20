@@ -165,7 +165,6 @@ public class TemplateTestCase extends FileTestCase {
      * We really might as well just expose pretty much 
      * the same tree to all our tests. (JR)
      */
-    
     public void setUp() throws Exception {
         conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
         
@@ -336,6 +335,14 @@ public class TemplateTestCase extends FileTestCase {
             listWithNull.add(null);
             listWithNull.add("c");
             dataModel.put("listWithNull", listWithNull);
+            
+            List listWithNullsOnly = new ArrayList();
+            listWithNull.add(null);
+            listWithNull.add(null);
+            listWithNull.add(null);
+            dataModel.put("listWithNullsOnly", listWithNullsOnly);
+            
+            dataModel.put("abcCollection", new SimpleCollection(abcSet));
         }
         
         else if (testName.equals("iso8601")) {
