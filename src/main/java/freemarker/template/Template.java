@@ -511,6 +511,8 @@ public class Template extends Configurable {
                             int endColumn,
                             int endLine)
     {
+        if (beginLine < 1 || endLine < 1) return null;  // dynamically ?eval-ed expressions has no source available
+        
         // Our container is zero-based.
         --beginLine;
         --beginColumn;

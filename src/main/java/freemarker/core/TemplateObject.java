@@ -153,19 +153,25 @@ public abstract class TemplateObject {
     }
     
     public final String getSource() {
+        String s;
         if (template != null) {
-            return template.getSource(beginColumn, beginLine, endColumn, endLine);
+            s = template.getSource(beginColumn, beginLine, endColumn, endLine);
         } else {
-            return getCanonicalForm();
+            s = null;
         }
+
+        // Can't just return null for backward-compatibility... 
+        return s != null ? s : getCanonicalForm();
     }
 
     public String toString() {
+        String s;
     	try {
-    		return getSource();
+    		s = getSource();
     	} catch (Exception e) { // REVISIT: A bit of a hack? (JR)
-    		return getCanonicalForm();
+    	    s = null;
     	}
+    	return s != null ? s : getCanonicalForm();
     }
 
     /**
