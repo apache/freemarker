@@ -62,14 +62,13 @@ public class _ErrorDescriptionBuilder {
             }
         }
         
-        
-        
         if (description != null) {
             sb.append(description);
         } else {
             appendParts(sb, descriptionParts);
         }
-        
+
+        String extraTip = null;
         if (blamed != null) {
             // Right-trim:
             for (int idx = sb.length() - 1; idx >= 0 && Character.isWhitespace(sb.charAt(idx)); idx --) {
@@ -93,17 +92,40 @@ public class _ErrorDescriptionBuilder {
             sb.append("  [");
             sb.append(blamed.getStartLocation());
             sb.append(']');
+            
+            
+            if (containsSingleInterpolatoinLiteral(blamed, 0)) {
+                extraTip = "It has been noticed that you are using ${...} as the sole content of a quoted string. That "
+                        + "does nothing but forcably converts the value inside ${...} to string (as it inserts it into "
+                        + "the enclosing string). "
+                        + "If that's not what you meant, just remove the quotation marks, ${ and }; you don't need "
+                        + "them. If you indeed wanted to convert to string, use myExpression?string instead.";
+            }
         }
         
-        Object[] tips = this.tips != null ? this.tips : (tip != null ? new Object[] { tip } : null);
-        if (tips != null && tips.length > 0) {
+        int allTipsLen = (tips != null ? tips.length : 0) + (tip != null ? 1 : 0) + (extraTip != null ? 1 : 0);
+        Object[] allTips;
+        if (tips != null && allTipsLen == tips.length) {
+            allTips = tips;
+        } else {
+            allTips = new Object[allTipsLen];
+            int dst = 0;
+            if (tip != null) allTips[dst++] = tip; 
+            if (tips != null) {
+                for (int i = 0; i < tips.length; i++) {
+                    allTips[dst++] = tips[i]; 
+                }
+            }
+            if (extraTip != null) allTips[dst++] = extraTip; 
+        }
+        if (allTips != null && allTips.length > 0) {
             sb.append("\n\n");
-            for (int i = 0; i < tips.length; i++) {
+            for (int i = 0; i < allTips.length; i++) {
                 if (i != 0) sb.append('\n');
                 sb.append("Tip: ");
-                Object tip = tips[i];
+                Object tip = allTips[i];
                 if (!(tip instanceof Object[])) {
-                    sb.append(tips[i]);
+                    sb.append(allTips[i]);
                 } else {
                     appendParts(sb, (Object[]) tip);
                 }
@@ -111,6 +133,26 @@ public class _ErrorDescriptionBuilder {
         }
         
         return sb.toString();
+    }
+
+    private boolean containsSingleInterpolatoinLiteral(Expression exp, int recursionDepth) {
+        if (exp == null) return false;
+        
+        // Just in case a loop ever gets into the AST somehow, try not fill the stack and such: 
+        if (recursionDepth > 20) return false;
+        
+        if (exp instanceof StringLiteral && ((StringLiteral) exp).isSingleInterpolationLiteral()) return true;
+        
+        int paramCnt = exp.getParameterCount();
+        for (int i = 0; i < paramCnt; i++) {
+            Object paramValue = exp.getParameterValue(i);
+            if (paramValue instanceof Expression) {
+                boolean result = containsSingleInterpolatoinLiteral((Expression) paramValue, recursionDepth + 1);
+                if (result) return true;
+            }
+        }
+        
+        return false;
     }
 
     private Blaming findBlaming(TemplateObject parent, Expression blamed, int recursionDepth) {

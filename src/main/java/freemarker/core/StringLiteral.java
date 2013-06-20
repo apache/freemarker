@@ -97,6 +97,14 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         return value;
     }
     
+    /**
+     * Tells if this is something like <tt>"${foo}"</tt>, which is usually a user mistake.
+     */
+    boolean isSingleInterpolationLiteral() {
+        return dynamicValue != null && dynamicValue.getChildCount() == 1
+                && dynamicValue.getChildAt(0) instanceof DollarVariable;
+    }
+    
     String evalAndCoerceToString(Environment env) throws TemplateException {
         if (dynamicValue == null) {
             return value;

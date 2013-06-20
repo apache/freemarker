@@ -807,6 +807,17 @@ TOKEN:
   |
   < ID: <LETTER> (<LETTER>|<DIGIT>)* >
   |
+  < OPEN_MISPLACED_INTERPOLATION : "${" | "#{" >  {
+    if ("".length() == 0) {  // prevents unreachabe "break" compilation error in generated Java
+      char c = matchedToken.image.charAt(0);	  throw new TokenMgrError(
+	      "You can't use \"" + c + "{\" here as you are already in FreeMarker-expression-mode. Thus, instead "
+	      + "of " + c + "{myExpression}, just write myExpression. "
+	      + "(" + c + "{...} is only needed where otherwise static text is expected, i.e, outside FreeMarker tags and "
+	      + "${...}-s.)",
+	      TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
+    }
+  }
+  |
   < #LETTER:
       [
        "\u0024",
