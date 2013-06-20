@@ -253,6 +253,11 @@ public abstract class TemplateObject {
      * that corresponds to the role of the parameter instead. This also means that when a parameter is omitted, the
      * index of the other parameters won't shift.
      *
+     *  @return {@code null} or any kind of {@link Object}, very often an {@link Expression}. However, if there's
+     *      a {@link TemplateObject} stored inside the returned value, it must itself be be a {@link TemplateObject}
+     *      too, otherwise the AST couldn't be (easily) fully traversed. That is, non-{@link TemplateObject} values
+     *      can only be used for leafs. 
+     *  
      *  @throws IndexOutOfBoundsException if {@code idx} is less than 0 or not less than {@link #getParameterCount()}. 
      */
     abstract Object getParameterValue(int idx);
