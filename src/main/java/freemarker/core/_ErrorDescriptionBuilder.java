@@ -3,6 +3,7 @@ package freemarker.core;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Used internally only, might changes without notice!
@@ -82,8 +83,13 @@ public class _ErrorDescriptionBuilder {
             if (lastChar != ':') {
                 sb.append("The blamed expression:\n");
             }
-            sb.append("==> ");
-            sb.append(blamed);
+            
+            String[] lines = splitToLines(blamed.toString());
+            for (int i = 0; i < lines.length; i++) {
+                sb.append(i == 0 ? "==> " : "\n    ");
+                sb.append(lines[i]);
+            }
+            
             sb.append("  [");
             sb.append(blamed.getStartLocation());
             sb.append(']');
@@ -158,6 +164,13 @@ public class _ErrorDescriptionBuilder {
                 }
             }
         }
+    }
+
+    private String[] splitToLines(String s) {
+        s = StringUtil.replace(s, "\r\n", "\n");
+        s = StringUtil.replace(s, "\r", "\n");
+        String[] lines = StringUtil.split(s, '\n');
+        return lines;
     }
     
     /**
