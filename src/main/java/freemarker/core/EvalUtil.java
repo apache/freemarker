@@ -294,7 +294,7 @@ class EvalUtil
             if (leftDateType != rightDateType) {
                 ;
                 throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
-                        "Can't compare dates of different types. Left date tpye is ",
+                        "Can't compare dates of different types. Left date type is ",
                         TemplateDateModel.TYPE_NAMES.get(leftDateType), ", right date type is ",
                         TemplateDateModel.TYPE_NAMES.get(rightDateType), "." });
             }
