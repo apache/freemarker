@@ -140,7 +140,7 @@ final class Assignment extends TemplateElement {
             buf.append(' ');
         }
         buf.append (variableName);
-        buf.append('=');
+        buf.append(" = ");
         buf.append(value.getCanonicalForm());
         if (dn != null) {
             if (namespaceExp != null) {
