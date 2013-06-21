@@ -20569,8 +20569,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>New <literal>Template</literal> method,
               <literal>getActualTagSyntax()</literal>: Tells if the template
-              is using traditional or square-bracket syntax (this can be the
-              result of auto-detection).</para>
+              is using traditional or square-bracket syntax (as this can be
+              decided by auto-detection, it wasn't trivial to tell till
+              now).</para>
             </listitem>
 
             <listitem>
