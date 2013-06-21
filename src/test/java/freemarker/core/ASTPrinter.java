@@ -9,6 +9,7 @@ import java.util.Enumeration;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
@@ -54,52 +55,79 @@ public class ASTPrinter {
     private static final String INDENTATION = "    ";
 
     public static String getASTAsString(String ftl) throws IOException {
-        return getASTAsString(null, ftl);
+        return getASTAsString(ftl, (Options) null);
     }
     
+    public static String getASTAsString(String ftl, Options opts) throws IOException {
+        return getASTAsString(null, ftl, opts);
+    }
+
     public static String getASTAsString(String templateName, String ftl) throws IOException {
+        return getASTAsString(templateName, ftl, null);
+    }
+    
+    public static String getASTAsString(String templateName, String ftl, Options opts) throws IOException {
         Configuration cfg = new Configuration();
         Template t = new Template(templateName, new StringReader(ftl), cfg);
-        return getASTAsString(t);
+        return getASTAsString(t, opts);
     }
 
     public static String getASTAsString(Template t) throws IOException {
+        return getASTAsString(t, null);
+    }
+
+    public static String getASTAsString(Template t, Options opts) throws IOException {
         StringWriter out = new StringWriter();
-        printNode(t.getRootTreeNode(), "", null, out);
+        printNode(t.getRootTreeNode(), "", null, opts != null ? opts : Options.DEFAULT_INSTANCE, out);
         return out.toString();
     }
     
-    private static void printNode(Object node, String ind, ParameterRole paramRole, Writer out) throws IOException {
+    private static void printNode(Object node, String ind, ParameterRole paramRole, Options opts, Writer out) throws IOException {
         if (node instanceof TemplateObject) {
             TemplateObject tObj = (TemplateObject) node;
 
             printNodeLineStart(paramRole, ind, out);
             out.write(tObj.getNodeTypeSymbol());
-            printNodeLineEnd(node, out);
+            printNodeLineEnd(node, out, opts);
+            
+            if (opts.getShowConstantValue() && node instanceof Expression) {
+                TemplateModel tm = ((Expression) node).constantValue;
+                if (tm != null) {
+                    out.write(INDENTATION);
+                    out.write(ind);
+                    out.write("= const ");
+                    out.write(ClassUtil.getFTLTypeDescription(tm));
+                    out.write(' ');
+                    out.write(tm.toString());
+                    out.write('\n');
+                }
+            }
             
             int paramCnt = tObj.getParameterCount();
             for (int i = 0; i < paramCnt; i++) {
                 ParameterRole role = tObj.getParameterRole(i);
                 if (role == null) throw new NullPointerException("parameter role");
                 Object value = tObj.getParameterValue(i);
-                printNode(value, ind + INDENTATION, role, out);
+                printNode(value, ind + INDENTATION, role, opts, out);
             }
             if (tObj instanceof TemplateElement) {
                 Enumeration enu = ((TemplateElement) tObj).children();
                 while (enu.hasMoreElements()) {
-                    printNode(enu.nextElement(), INDENTATION + ind, null, out);
+                    printNode(enu.nextElement(), INDENTATION + ind, null, opts, out);
                 }
             }
         } else {
             printNodeLineStart(paramRole, ind, out);
             out.write(StringUtil.jQuote(node));
-            printNodeLineEnd(node, out);
+            printNodeLineEnd(node, out, opts);
         }
     }
 
-    protected static void printNodeLineEnd(Object node, Writer out) throws IOException {
-        out.write("  // ");
-        out.write(ClassUtil.getShortClassNameOfObject(node, true));
+    protected static void printNodeLineEnd(Object node, Writer out, Options opts) throws IOException {
+        if (opts.getShowJavaClass()) {
+            out.write("  // ");
+            out.write(ClassUtil.getShortClassNameOfObject(node, true));
+        }
         out.write('\n');
     }
 
@@ -110,6 +138,31 @@ public class ASTPrinter {
             out.write(paramRole.toString());
             out.write(": ");
         }
+    }
+    
+    public static class Options {
+        
+        private final static Options DEFAULT_INSTANCE = new Options(); 
+        
+        private boolean showJavaClass = true;
+        private boolean showConstantValue = false;
+        
+        public boolean getShowJavaClass() {
+            return showJavaClass;
+        }
+        
+        public void setShowJavaClass(boolean showJavaClass) {
+            this.showJavaClass = showJavaClass;
+        }
+        
+        public boolean getShowConstantValue() {
+            return showConstantValue;
+        }
+        
+        public void setShowConstantValue(boolean showConstantValue) {
+            this.showConstantValue = showConstantValue;
+        }
+        
     }
 
 }
