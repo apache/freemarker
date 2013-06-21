@@ -652,7 +652,7 @@ public class Configuration extends Configurable implements Cloneable {
     public Template getTemplate(String name, Locale locale, String encoding, boolean parse) throws IOException {
         Template result = cache.getTemplate(name, locale, encoding, parse);
         if (result == null) {
-            throw new FileNotFoundException("Template " + name + " not found.");
+            throw new FileNotFoundException("Template " + StringUtil.jQuote(name) + " not found.");
         }
         return result;
     }
