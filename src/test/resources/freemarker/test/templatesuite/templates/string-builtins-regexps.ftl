@@ -23,8 +23,9 @@ ${"test\nFoo"?matches('.*\n^foo', 'im')?string} == true
 ${"test\nFoo"?matches('.*\n^foo', 'mi')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'ism')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'smi')?string} == true
-<@assert test=false?matches('[eslaf]+') />
-<@assert test='false'?matches('[eslaf]+') />
+<#setting boolean_format="True,False">
+<@assert test=false?matches('[eslaF]+') />
+<@assert test='False'?matches('[eslaF]+') />
 
 <#assign s = "Code without test coverage\nis considered to be BROKEN">
 
@@ -70,12 +71,12 @@ Lower c-word with follower in the same line:
 </#list>
 
 <#attempt>
-  Ignored but logged in 2.3: ${s?matches('broken', 'I')?string} == false
+  Ignored but logged in 2.3: ${s?matches('broken', 'I')?string} == False
 <#recover>
   Fails in 2.4
 </#attempt>
 <#attempt>
-  Ignored but logged in 2.3: ${s?matches('broken', 'f')?string} == false
+  Ignored but logged in 2.3: ${s?matches('broken', 'f')?string} == False
 <#recover>
   Fails in 2.4
 </#attempt>
@@ -96,8 +97,8 @@ ${"foobar"?replace("fo+", "FOO", "")} == foobar
 ${"foobar"?replace("fo+", "FOO", "r")} == FOObar
 ${"foobarfOo"?replace("fo+", "FOO", "ri")} == FOObarFOO
 ${"foobarfOo"?replace("fo+", "FOO", "rif")} == FOObarfOo
-${false?replace('a', 'A')} == fAlse
-${false?replace('[abc]', 'A', 'r')} == fAlse
+${false?replace('a', 'A')} == FAlse
+${false?replace('[abc]', 'A', 'r')} == FAlse
 
 <#attempt>
   Ignored but logged in 2.3: ${"foobar"?replace("foo", "FOO", "c")}
@@ -113,5 +114,5 @@ ${false?replace('[abc]', 'A', 'r')} == fAlse
 <@dumpList "fooXbarxbaaz"?split("X", "ri") /> == [foo, bar, baaz]
 <@dumpList "fooXXbarxxbaaz"?split("X+", "i") /> == [fooXXbarxxbaaz]
 <@dumpList "fooXXbarxxbaaz"?split("X+", "ri") /> == [foo, bar, baaz]
-<@dumpList false?split("[ae]", "r") /> == [f, ls]
-<@dumpList false?split("e") /> == [fals, ]
+<@dumpList false?split("[ae]", "r") /> == [F, ls]
+<@dumpList false?split("e") /> == [Fals, ]

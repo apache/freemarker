@@ -11046,7 +11046,8 @@ End book</programlisting>
           </listitem>
 
           <listitem>
-            <para><link linkend="ref_builtin_c">c</link></para>
+            <para>c <link linkend="ref_builtin_c">for strings</link>, <link
+            linkend="ref_builtin_c_boolean">for booleans</link></para>
           </listitem>
 
           <listitem>
@@ -12766,7 +12767,7 @@ rif: foo XYr baar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_c">
-          <title>c</title>
+          <title>c (when used with numerical value)</title>
 
           <indexterm>
             <primary>c built-in</primary>
@@ -12790,14 +12791,14 @@ rif: foo XYr baar</programlisting>
             <para>This built-in exists since FreeMarker 2.3.3.</para>
           </note>
 
-          <para>This built-in converts a number to string for ``computer
-          audience'' as opposed to human audience. That is, it formats with
-          the rules that programming languages used to use, which is
-          independent of all the locale and number format settings of
-          FreeMarker. It always uses dot as decimal separator, and it never
-          uses grouping separators (like 3,000,000), nor exponential form
-          (like 5E20), nor superfluous leading or trailing 0-s (like 03 or
-          1.0), nor + sign (like +1). It will print at most 16 digits after
+          <para>This built-in converts a number to string for a
+          <quote>computer language</quote> as opposed to for human audience.
+          That is, it formats with the rules that programming languages used
+          to use, which is independent of all the locale and number format
+          settings of FreeMarker. It always uses dot as decimal separator, and
+          it never uses grouping separators (like 3,000,000), nor exponential
+          form (like 5E20), nor superfluous leading or trailing 0-s (like 03
+          or 1.0), nor + sign (like +1). It will print at most 16 digits after
           the decimal dot, and thus numbers whose absolute value is less than
           1E-16 will be shown as 0. This built-in is crucial because be
           default (like with <literal>${x}</literal>) numbers are converted to
@@ -12813,6 +12814,10 @@ rif: foo XYr baar</programlisting>
           the decimal point is not dot, but comma in many countries) and the
           value of the number (like big numbers are possibly ``damaged'' by
           grouping separators).</para>
+
+          <para>Note that this built-in <link
+          linkend="ref_builtin_c_boolean">also works on
+          booleans</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_string_for_number">
@@ -13536,6 +13541,44 @@ The usual variations are supported:
           <secondary>built-ins</secondary>
         </indexterm>
 
+        <section xml:id="ref_builtin_c_boolean">
+          <title>c (when used with boolean)</title>
+
+          <indexterm>
+            <primary>c built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>type-casting</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting between types</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>boolean</secondary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.20.</para>
+          </note>
+
+          <para>This built-in converts a boolean to string for a
+          <quote>computer language</quote> as opposed to for human audience.
+          The result will be <literal>"true"</literal> or
+          <literal>"false"</literal>, regardless of the
+          <literal>boolean_format</literal> setting. When generating
+          JavaScript and such, this should be used, as otherwise changing the
+          <literal>boolean_format</literal> can break the generated
+          computer-language output.</para>
+
+          <para>Note that this built-in <link linkend="ref_builtin_c">also
+          works on strings</link>.</para>
+        </section>
+
         <section xml:id="ref_builtin_string_for_boolean">
           <title>string (when used with a boolean value)</title>
 
@@ -13568,27 +13611,38 @@ The usual variations are supported:
 
           <itemizedlist>
             <listitem>
-              <para>As <literal>foo?string</literal>: This will convert the
-              boolean to string using the default strings for representing
-              true and false values. By default, true is rendered as
-              <literal>"true"</literal> and false is rendered as
-              <literal>"false"</literal>. This is mostly useful if you
-              generate source code with FreeMarker, since the values are not
-              locale (language, country) sensitive. To change these default
-              strings, you can use the <literal>boolean_format</literal> <link
-              linkend="ref_directive_setting">setting</link>. Note, that if
-              the variable is multi-type variable that is both boolean and
-              string, then the string value of the variable will be
-              returned.</para>
-            </listitem>
-
-            <listitem>
               <para>As <literal>foo?string("yes", "no")</literal>: This will
               return the first parameter (here: <literal>"yes"</literal>) if
               the boolean is true, otherwise the second parameter (here:
               <literal>"no"</literal>). Note that the return value is always a
               string; if the parameters were numbers, they would be converted
               to strings first.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>foo?string</literal>: <emphasis>Deprecated
+              starting from FreeMarker 2.3.20: use <link
+              linkend="ref_builtin_c_boolean"><literal>?c</literal></link>
+              instead, or set the <literal>boolean_format</literal> <link
+              linkend="ref_directive_setting">setting</link> to something like
+              <literal>"yes,no"</literal> and then the conversion can happen
+              automatically</emphasis>. If you still need to know about this,
+              this will convert the boolean to string using the default
+              strings for representing true and false values. By default, true
+              is rendered as <literal>"true"</literal> and false is rendered
+              as <literal>"false"</literal>. This is mostly useful if you
+              generate source code with FreeMarker <emphasis>(but use
+              <literal>?c</literal> for that starting from 2.3.20)</emphasis>,
+              since the values are not locale (language, country) sensitive.
+              To change these default strings, you can use the
+              <literal>boolean_format</literal> <link
+              linkend="ref_directive_setting">setting</link>.</para>
+
+              <para role="forProgrammers">Note, that in the very rare case
+              when a value is multi-typed and is both a boolean and a string,
+              then the string value of the variable will be returned, and so
+              the <literal>boolean_format</literal> setting will have no
+              effect.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -20253,44 +20307,63 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Boolean values will be automatically converted to string
-              where a string value is expected by the template language,
-              instead of giving an error. Thus, you don't have to use
-              <literal>?string</literal> anymore after booleans on those
-              places. This is exactly the same logic as with numbers, which
-              were automatically converted to string earlier too. The most
-              important consequence of this is that instead of
-              <literal>${someBoolean?string}</literal> now you can just write
-              <literal>${someBoolean}</literal>, and it will format the
-              boolean according the current <literal>boolean_format</literal>
-              setting (by default "true" and "false"), just like
-              <literal>?string</literal> did. Note that just like with
-              numbers, automatic conversion doesn't happen in these
-              cases:</para>
+              <para>Changes regarding boolean to string conversions and
+              formatting:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>Comparisons, i.e., <literal>someBoolean ==
-                  'true'</literal> is still an error</para>
+                  <para>If the <literal>boolean_format</literal> setting is
+                  set to anything but the default
+                  <literal>"true,false"</literal> value, boolean values will
+                  be automatically converted to string where a string value is
+                  expected by the template language, instead of giving an
+                  error. This helps you spare
+                  those<literal>?string</literal>-s after boolean values. This
+                  is the same logic as with numbers and dates, which were
+                  always automatically converted to string, according the
+                  corresponding format setting. Except, the provided default
+                  boolean format is useless for automatic conversion (but it's
+                  still there for <literal>?string</literal>, for backward
+                  compatibility), hence it must be set manually. (We certainly
+                  couldn't come up with a sensible default anyway, as for
+                  booleans it depends too much on the application, not to
+                  mention the localisation issues.)</para>
+
+                  <para>Exactly like with numbers and dates, automatic
+                  conversion doesn't happen in these cases:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Comparisons, i.e., <literal>someBoolean ==
+                      'true'</literal> is still an error</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Method calls where the declared type of the
+                      parameter is <literal>String</literal> but the actual
+                      value is a boolean; still an error</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>When the boolean value is used as key in
+                      <literal><replaceable>expr</replaceable>[<replaceable>key</replaceable>]</literal>,
+                      it's still an error (there was no automatic conversion
+                      there for other types either, as numerical and string
+                      keys have different meaning)</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>The opposite direction, i.e., string to boolean
+                      conversion; won't happen</para>
+                    </listitem>
+                  </itemizedlist>
                 </listitem>
 
                 <listitem>
-                  <para>Method calls where the declared type of the parameter
-                  is <literal>String</literal> but the actual value is a
-                  boolean; still an error</para>
-                </listitem>
-
-                <listitem>
-                  <para>When the boolean value is used as key in
-                  <literal><replaceable>expr</replaceable>[<replaceable>key</replaceable>]</literal>,
-                  it's still an error (there was no automatic conversion there
-                  for other types either, as numerical and string keys have
-                  different meaning)</para>
-                </listitem>
-
-                <listitem>
-                  <para>The opposite direction, i.e., string to boolean
-                  conversion; still won't happen</para>
+                  <para><literal>?c</literal> (computer-language formatting)
+                  now works with booleans too, always giving
+                  <literal>"true"</literal> or <literal>"false"</literal>
+                  regardless of the <literal>boolean_format</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20301,7 +20374,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <itemizedlist>
                 <listitem>
                   <para>Many messages become more helpful, especially for
-                  users who are not very experienced with FreeMarker.</para>
+                  users who are not experienced with FreeMarker. For example,
+                  some of the most common user mistakes are recognized and
+                  tips are shown to fix them, reducing support costs.</para>
                 </listitem>
 
                 <listitem>
@@ -20358,9 +20433,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (<literal>&lt;foo bar="${val}"&gt;</literal>), they might
               produce HTML/XML that's not well-formed. Note that
               <literal>?html</literal> didn't do this because long ago there
-              was no cross-browser way of doing this, but it's not a concern
-              anymore. Also note that this will be the default behavior
-              starting from 2.4.</para>
+              was no cross-browser way of doing this, but it's not a real
+              concern anymore. Also note that this will be the default
+              behavior starting from 2.4.</para>
             </listitem>
 
             <listitem>
@@ -20572,14 +20647,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               is using traditional or square-bracket syntax (as this can be
               decided by auto-detection, it wasn't trivial to tell till
               now).</para>
-            </listitem>
-
-            <listitem>
-              <para>Added new convenience methods to
-              <literal>Configurable</literal> classes to set boolean format
-              true and false values independently:
-              <literal>set</literal>/<literal>getTrueStringValue</literal>,
-              <literal>set</literal>/<literal>getFalseStringValue</literal>.</para>
             </listitem>
 
             <listitem>

@@ -72,7 +72,7 @@ final class BooleanLiteral extends Expression {
     }
 
     public String getCanonicalForm() {
-        return val ? "true" : "false";
+        return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
     }
 
     String getNodeTypeSymbol() {
@@ -80,7 +80,7 @@ final class BooleanLiteral extends Expression {
     }
     
     public String toString() {
-        return val ? "true" : "false";
+        return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
     }
 
     TemplateModel _eval(Environment env) {

@@ -58,7 +58,6 @@ import java.util.Date;
 
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
-import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
@@ -248,22 +247,6 @@ class NumericalBuiltins {
     static class is_infiniteBI extends NumberBuiltIn {
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             return NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        }
-    }
-    
-    // Doesn't extend NumberBuiltIn because "calculateResult" would need the Environment.
-    static class cBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
-            TemplateModel model = target.eval(env);
-            Number num = target.modelToNumber(model, env);
-            if (num instanceof Integer || num instanceof Long) {
-                // Accelerate these fairly common cases
-                return new SimpleScalar(num.toString());
-            } else {
-                return new SimpleScalar(env.getCNumberFormat().format(num));
-            }
         }
     }
     

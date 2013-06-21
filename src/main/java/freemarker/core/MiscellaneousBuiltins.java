@@ -293,7 +293,11 @@ class MiscellaneousBuiltins {
                 if (bool instanceof TemplateScalarModel) {
                     return ((TemplateScalarModel) bool).getAsString();
                 } else {
-                    return env.formatBoolean(bool.getAsBoolean());
+                    try {
+                        return env.formatBoolean(bool.getAsBoolean(), true);
+                    } catch (TemplateException e) {
+                        throw new TemplateModelException(e);
+                    }
                 }
             }
     
@@ -443,6 +447,26 @@ class MiscellaneousBuiltins {
                 throw new UnexpectedTypeException(target, tm, "macro or function", env);
             } else {
                 return env.getMacroNamespace((Macro) tm);
+            }
+        }
+    }
+
+    static class cBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateNumberModel) {
+                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+                if (num instanceof Integer || num instanceof Long) {
+                    // Accelerate these fairly common cases
+                    return new SimpleScalar(num.toString());
+                } else {
+                    return new SimpleScalar(env.getCNumberFormat().format(num));
+                }
+            } else if (model instanceof TemplateBooleanModel) {
+                return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
+                        ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
+            } else {
+                throw new UnexpectedTypeException(target, model, "number or boolean", env);
             }
         }
     }

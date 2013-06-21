@@ -95,6 +95,8 @@ import freemarker.template.utility.StringUtil;
  */
 public class Configurable
 {
+    static final String C_TRUE_FALSE = "true,false";
+    
     public static final String LOCALE_KEY = "locale";
     public static final String NUMBER_FORMAT_KEY = "number_format";
     public static final String TIME_FORMAT_KEY = "time_format";
@@ -114,8 +116,6 @@ public class Configurable
     /** @since 2.3.17 */
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
 
-    private static final char COMMA = ',';
-    
     private Configurable parent;
     private Properties properties;
     private HashMap customAttributes;
@@ -126,8 +126,9 @@ public class Configurable
     private String dateFormat;
     private String dateTimeFormat;
     private TimeZone timeZone;
-    private String trueStringValue;
-    private String falseStringValue;
+    private String booleanFormat;
+    private String trueStringValue;  // deduced from booleanFormat
+    private String falseStringValue;  // deduced from booleanFormat
     private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
@@ -151,8 +152,6 @@ public class Configurable
         timeFormat = "";
         dateFormat = "";
         dateTimeFormat = "";
-        trueStringValue = "true";
-        falseStringValue = "false";
         classicCompatible = new Integer(0);
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
@@ -172,11 +171,12 @@ public class Configurable
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
-        properties.setProperty(BOOLEAN_FORMAT_KEY, "true,false");
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
         // as outputEncoding and urlEscapingCharset defaults to null, 
         // they are not set
+
+        setBooleanFormat(C_TRUE_FALSE);
         
         customAttributes = new HashMap();
     }
@@ -189,8 +189,6 @@ public class Configurable
         this.parent = parent;
         locale = null;
         numberFormat = null;
-        trueStringValue = null;
-        falseStringValue = null;
         classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
@@ -255,8 +253,8 @@ public class Configurable
     
     private String classicCompatibilityIntToString(Integer i) {
         if (i == null) return null;
-        else if (i.intValue() == 0) return "false";
-        else if (i.intValue() == 1) return "true";
+        else if (i.intValue() == 0) return MiscUtil.C_FALSE;
+        else if (i.intValue() == 1) return MiscUtil.C_TRUE;
         else return i.toString();
     }
     
@@ -372,71 +370,96 @@ public class Configurable
 
     /**
      * Corresponds to the {@code "boolean_format"} setting in {@link #setSettings(Properties)}.
-     * @see #setTrueStringValue(String)
-     * @see #setFalseStringValue(String)
      */
     public void setBooleanFormat(String booleanFormat) {
         NullArgumentException.check("booleanFormat", booleanFormat);
         
-        int comma = booleanFormat.indexOf(COMMA);
-        if(comma == -1) {
+        int commaIdx = booleanFormat.indexOf(',');
+        if(commaIdx == -1) {
             throw new IllegalArgumentException(
                     "Setting \"boolean_format\" must consist of two comma-separated values for true and false," +
                     "respectively.");
         }
-        trueStringValue = booleanFormat.substring(0, comma);
-        falseStringValue = booleanFormat.substring(comma + 1);
+        
+        this.booleanFormat = booleanFormat; 
         properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
+        
+        if (booleanFormat.equals(C_TRUE_FALSE)) {
+            // C_TRUE_FALSE is the default for BC, but it's not a good default for human audience formatting, so we
+            // pretend that it wasn't set.
+            trueStringValue = null; 
+            falseStringValue = null;
+        } else {
+            trueStringValue = booleanFormat.substring(0, commaIdx); 
+            falseStringValue = booleanFormat.substring(commaIdx + 1);
+        }
     }
     
     public String getBooleanFormat() {
-        if(trueStringValue == null) {
-            return parent.getBooleanFormat(); 
-        }
-        return trueStringValue + COMMA + falseStringValue;
+        return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
     }
     
-    String formatBoolean(boolean value) {
-        return value ? getTrueStringValue() : getFalseStringValue(); 
-    }
-
-    /**
-     * @since 2.3.20
-     */
-    public String getTrueStringValue() {
-        return trueStringValue != null ? trueStringValue : parent.getTrueStringValue(); 
-    }
-
-    /**
-     * Corresponds to the boolean true half of the {@code "boolean_format"} setting in {@link #setSettings(Properties)}.
-     * @since 2.3.20
-     */
-    public void setTrueStringValue(String trueStringValue) {
-        NullArgumentException.check("trueStringValue", trueStringValue);
-        if (trueStringValue.indexOf(',') != -1) {
-            throw new IllegalArgumentException("Boolean string values can't contain comma.");
+    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
+        if (value) {
+            String s = getTrueStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_TRUE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        } else {
+            String s = getFalseStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_FALSE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
         }
-        this.trueStringValue = trueStringValue; 
     }
-    
-    /**
-     * @since 2.3.20
-     */
-    public String getFalseStringValue() {
-        return falseStringValue != null ? falseStringValue : parent.getFalseStringValue(); 
+
+    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
+        return new _ErrorDescriptionBuilder(new Object[] {
+                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
+                new _DelayedJQuote(getBooleanFormat()), 
+                (getBooleanFormat().equals(C_TRUE_FALSE)
+                    ? ", which is the legacy default computer-language format, and hence isn't accepted."
+                    : ".") }).tips(new Object[] {
+                 "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
+                 + "use \"?c\", like ${myBool?c}.",
+                 "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
+                 new Object[] {
+                     "If you need the same two values on most places, the programmers should set the \"",
+                     BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
+                 });
     }
 
     /**
-     * Corresponds to the boolean false half of the {@code "boolean_format"} setting in
-     * {@link #setSettings(Properties)}.
+     * Returns the string to which {@code true} is coerced for human audience, or {@code null} if automatic coercion
+     * is not allowed. The default value is {@code null}. This value comes from the {@code "boolean_format"} setting.
+     * Confusingly, for backward compatibility (at least until 2.4) that defaults to {@code "true,false"}, yet this
+     * defaults to {@code null}. That's so because {@code "true,false"} is treated exceptionally in this regard.
      * @since 2.3.20
      */
-    public void setFalseStringValue(String falseStringValue) {
-        NullArgumentException.check("falseStringValue", falseStringValue);
-        if (falseStringValue.indexOf(',') != -1) {
-            throw new IllegalArgumentException("Boolean string values can't contain comma.");
-        }
-        this.falseStringValue = falseStringValue; 
+    String getTrueStringValue() {
+        // The first step deliberately tests booleanFormat instead of trueStringValue! 
+        return booleanFormat != null ? trueStringValue : (parent != null ? parent.getTrueStringValue() : null); 
+    }
+
+    /**
+     * Same as {@link #getTrueStringValue()} but with {@code false}. 
+     * @since 2.3.20
+     */
+    String getFalseStringValue() {
+        // The first step deliberately tests booleanFormat instead of falseStringValue! 
+        return booleanFormat != null ? falseStringValue : (parent != null ? parent.getFalseStringValue() : null); 
     }
 
     /**

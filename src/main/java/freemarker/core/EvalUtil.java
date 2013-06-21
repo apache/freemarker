@@ -393,16 +393,16 @@ class EvalUtil
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
             int compatMode = env.getClassicCompatibleAsInt();
             if (compatMode == 0) {
-                return env.formatBoolean(booleanValue);
+                return env.formatBoolean(booleanValue, false);
             } else {
                 if (compatMode == 1) {
-                    return booleanValue ? "true" : "";
+                    return booleanValue ? MiscUtil.C_TRUE : "";
                 } else if (compatMode == 2) {
                     if (tm instanceof BeanModel) {
                         // In 2.1, bean-wrapped booleans where strings, so that has overridden the boolean behavior: 
                         return _BeansAPI.getAsClassicCompatibleString((BeanModel) tm);
                     } else {
-                        return booleanValue ? "true" : "";
+                        return booleanValue ? MiscUtil.C_TRUE : "";
                     }
                 } else {
                     throw new RuntimeException("Unsupported classic_compatible variation: " + compatMode);
