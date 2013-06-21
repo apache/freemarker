@@ -661,6 +661,9 @@ public class TemplateCache
             }
             tokpath.add(pathToken);
         }
+        if (lastAsterisk == -1) {  // if there was no real "*" step after all
+            return templateLoader.findTemplateSource(path);
+        }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
         if(resourcePath.endsWith("/"))

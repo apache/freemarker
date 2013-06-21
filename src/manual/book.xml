@@ -20622,6 +20622,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fix [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/391/">391</link>]:
+              If a template name has contained <literal>*</literal> that was
+              not the only character in the path step, it threw
+              <literal>NegativeArraySizeException</literal> instead of
+              <literal>FileNotFoundException</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>With default arithmetic engine, performance optimizations
               of comparison operations when some of the numbers is 0, and when
               the sign of the numbers differ.</para>
