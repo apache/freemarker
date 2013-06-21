@@ -11167,6 +11167,10 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_join">join</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_js_string">js_string</link></para>
           </listitem>
@@ -13608,6 +13612,71 @@ The usual variations are supported:
 
           <para>The first subvariable of the sequence. Template processing
           will die with error if the sequence is empty.</para>
+        </section>
+
+        <section xml:id="ref_builtin_join">
+          <title>join</title>
+
+          <indexterm>
+            <primary>join built-in</primary>
+          </indexterm>
+
+          <para>Concatenates the items of a sequence to a single string, with
+          the given separator. For example:</para>
+
+          <programlisting role="template">&lt;#assign colors = ["red", "green", "blue"]&gt;
+${colors?join(", ")}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">red, green, blue</programlisting>
+
+          <para>Sequence items that are not strings will be converted to
+          string with the same conversion rules as of
+          <literal>${<replaceable>...</replaceable>}</literal> (except, of
+          course, no automatic escaping is applied at this stage).</para>
+
+          <para><literal>?join(<replaceable>...</replaceable>)</literal> can
+          have up to 3 parameters:</para>
+
+          <orderedlist>
+            <listitem>
+              <para>Separator, required: The string that is inserted between
+              items</para>
+            </listitem>
+
+            <listitem>
+              <para>Empty value, defaults to <literal>""</literal> (empty
+              string): The value used if the sequence contains 0 value.</para>
+            </listitem>
+
+            <listitem>
+              <para>List ending, defaults to <literal>""</literal> (empty
+              string): The value printed after the last value, if the list
+              sequence wasn't empty.</para>
+            </listitem>
+          </orderedlist>
+
+          <para>So this (where <literal>[]</literal> means an empty
+          sequence):</para>
+
+          <programlisting role="template">${colors?join(", ", "-")}
+${[]?join(", ", "-")}
+
+${colors?join(", ", "-", ".")}
+${[]?join(", ", "-", ".")}</programlisting>
+
+          <para>will output:</para>
+
+          <programlisting role="output">red, green, blue
+-
+
+red, green, blue.
+-</programlisting>
+
+          <para role="forProgrammers">Sequences coming from Java might contain
+          <literal>null</literal> values. Those values will be ignored by this
+          built-in, exactly like if they were removed from the list.</para>
         </section>
 
         <section xml:id="ref_builtin_last">
@@ -20267,6 +20336,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               linkend="ref_builtin_is_nan"><literal>is_nan</literal></link>,
               <link
               linkend="ref_builtin_is_infinite"><literal>is_infinite</literal></link></para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in for sequences: <link
+              linkend="ref_builtin_join"><literal>join</literal></link>. Like
+              <literal>[1, 2, 3]?join(", ")</literal> will give the string
+              <literal>"1, 2, 3"</literal>.</para>
             </listitem>
 
             <listitem>
