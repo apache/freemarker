@@ -67,6 +67,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 
 

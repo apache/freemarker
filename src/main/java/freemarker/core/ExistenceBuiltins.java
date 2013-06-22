@@ -11,7 +11,7 @@ import freemarker.template.TemplateModelException;
 /**
  * A holder for builtins that deal with null left-hand values.
  */
-public class ExistenceBuiltins {
+class ExistenceBuiltins {
 
     // Can't be instantiated
     private ExistenceBuiltins() { }

@@ -56,8 +56,7 @@ import freemarker.core.Environment;
 import freemarker.core._ErrorDescriptionBuilder;
 
 /**
- * Template model implementation classes should throw this exception if
- * requested data cannot be retrieved.  
+ * {@link TemplateModel} methods throw this exception if the requested data can't be retrieved.  
  */
 public class TemplateModelException extends TemplateException {
 

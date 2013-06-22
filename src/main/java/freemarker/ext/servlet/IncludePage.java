@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import freemarker.core.Environment;
 import freemarker.core._DelayedFTLTypeDescription;
-import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core._MiscTemplateException;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDirectiveBody;

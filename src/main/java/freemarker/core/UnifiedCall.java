@@ -268,7 +268,7 @@ final class UnifiedCall extends TemplateElement {
             if (res != null) return res;
         }
         
-        List res = MessageUtil.sortMapOfExpressions(namedArgs);
+        List res = MiscUtil.sortMapOfExpressions(namedArgs);
         sortedNamedArgsCache = new SoftReference(res);
         return res;
     }

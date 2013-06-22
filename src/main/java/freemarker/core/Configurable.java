@@ -75,6 +75,7 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -834,7 +835,7 @@ public class Configurable
      *       See: {@link Configuration#setTemplateUpdateDelay}
      *   <li><code>"tag_syntax"</code>: Must be one of:
      *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
-     *       <code>"square_bracket"</code>.
+     *       <code>"square_bracket"</code>. See: {@link Configuration#setTagSyntax(int)}.
      *   <li><code>"incompatible_improvements"</code>: The FreeMarker version
      *       where the desired non-backward-compatible improvements were already available (but maybe not active by
      *       default). See: {@link Configuration#setIncompatibleImprovements(Version)}.

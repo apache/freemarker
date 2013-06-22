@@ -1,9 +1,8 @@
-package freemarker.core;
+package freemarker.template;
 
 import java.io.Serializable;
 import java.util.Date;
 
-import freemarker.template.Configuration;
 import freemarker.template.utility.StringUtil;
 
 /**

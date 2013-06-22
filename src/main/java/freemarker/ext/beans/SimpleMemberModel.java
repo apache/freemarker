@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import freemarker.core._DelayedFTLTypeDescription;
-import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;

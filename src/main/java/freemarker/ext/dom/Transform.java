@@ -69,10 +69,7 @@ import freemarker.template.Template;
 /**
  * A class that contains a main() method for command-line invocation
  * of a FreeMarker XML transformation.
- *
- * $id$
  */
-
 public class Transform {
     
     private File inputFile, ftlFile, outputFile;

@@ -1,6 +1,7 @@
 package freemarker.core;
 
 import freemarker.template.Configuration;
+import freemarker.template.Version;
 
 /**
  * An object that has another older version that's used below a certain

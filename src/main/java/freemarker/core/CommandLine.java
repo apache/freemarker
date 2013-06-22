@@ -53,6 +53,7 @@
 package freemarker.core;
 
 import freemarker.template.Configuration;
+import freemarker.template.Version;
 import freemarker.template.utility.DateUtil;
 
 /**

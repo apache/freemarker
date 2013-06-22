@@ -55,8 +55,6 @@ package freemarker.debug.impl;
 import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.rmi.NoSuchObjectException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
 import java.rmi.server.UnicastRemoteObject;
@@ -69,17 +67,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import freemarker.cache.CacheStorage;
-import freemarker.cache.SoftCacheStorage;
 import freemarker.core.DebugBreak;
 import freemarker.core.Environment;
 import freemarker.core.TemplateElement;
 import freemarker.debug.Breakpoint;
 import freemarker.debug.DebuggerListener;
 import freemarker.debug.EnvironmentSuspendedEvent;
-import freemarker.ext.util.IdentityHashMap;
 import freemarker.template.Template;
 import freemarker.template.utility.UndeclaredThrowableException;
 

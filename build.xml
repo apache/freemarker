@@ -524,6 +524,8 @@
         <exclude name="**/core/ReturnInstruction.java" />
         <exclude name="**/core/TokenMgrError.java" />
         <exclude name="**/template/EmptyMap.java" />
+        <exclude name="**/log/SLF4JLoggerFactory.java" />
+        <exclude name="**/log/CommonsLoggingLoggerFactory.java" />
       </fileset>
     </copy>
     <!-- conf="IDE": as that has to contain all depedencies -->

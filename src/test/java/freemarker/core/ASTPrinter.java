@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateModel;
+import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 

@@ -101,7 +101,6 @@ import freemarker.core.StringBuiltins.substringBI;
 import freemarker.core.StringBuiltins.uncap_firstBI;
 import freemarker.core.StringBuiltins.upper_caseBI;
 import freemarker.core.StringBuiltins.word_listBI;
-import freemarker.core.MiscellaneousBuiltins.cBI;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
