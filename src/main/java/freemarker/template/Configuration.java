@@ -82,12 +82,11 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.core.ParseException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
-import freemarker.core.ParseException;
-import freemarker.core.Version;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
@@ -98,19 +97,37 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.XmlEscape;
 
 /**
- * Main entry point into the FreeMarker API, this class encapsulates the 
- * various configuration parameters with which FreeMarker is run, as well
- * as serves as a central template loading and caching point.
- * 
- * Note that this class uses a default strategy for loading and caching templates.
- * The default template loader is deprecated, so you should plug in a replacement
- * template loading mechanism with {@link #setTemplateLoader(TemplateLoader)}.
- * The caching strategy can be replaced with {@link #setCacheStorage(CacheStorage)}.
+ * Main entry point into the FreeMarker API, this class encapsulates the various configuration
+ * settings of FreeMarker, as well as serves as a central {@link Template template} loading and caching point.
  *
- * <p>This object is <em>not synchronized</em>. Thus, the settings must not be changed
- * after you have started to access the object from multiple threads. If you use multiple
- * threads, set everything directly after you have instantiated the <code>Configuration</code>
- * object, and don't change the settings anymore.
+ * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at beginning of the
+ * application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
+ * setter methods or by loading a {@code .properties} file), and then use that single instance everywhere in your
+ * application. Frequently re-creating {@link Configuration} is a typical and grave mistake from performance standpoint,
+ * as the {@link Configuration} holds the template cache, and often also the class introspection cache, which then will
+ * be lost. (Note that, naturally, having multiple long-lived instances, like one per component that internally uses
+ * FreeMarker is fine.)  
+ * 
+ * <p>A couple of settings that you should not leave on its default are:
+ * <ul>
+ *   <li>{@link #setTemplateLoader(TemplateLoader) template_loader}: The default value is deprecated and in fact quite
+ *       useless.
+ *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is installation dependent, which makes it dangerous.
+ *       Should be set to "UTF-8" nowadays. 
+ *   <li>{@link #setIncompatibleImprovements(Version) incompatible_improvements}: As far the 1st and 2nd version number
+ *       remains, it's quite safe to set it as high as possible, so for new or actively developed products it's
+ *       recommended.
+ *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
+ *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
+ *       {@link TemplateExceptionHandler#RETHROW_HANDLER} is safer to use.
+ *   <!-- 2.4: recommend the new object wrapper here -->
+ * </ul>
+ * 
+ * <p>After settings, the most frequently used API is {@link #getTemplate(String)} (and its overloads).
+ * 
+ * <p>A {@link Configuration} object is thread-safe only after you have stopped modify the configuration settings.
+ * Generally, you set everything directly after you have instantiated the {@link Configuration} object, then don't
+ * change the settings anymore, so then it's safe to make it accessible from multiple threads.
  *
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @author Attila Szegedi
@@ -611,7 +628,9 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Equivalent to <tt>getTemplate(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
+     * Equivalent to {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, getLocale(), getEncoding(getLocale()), true)}.
+     * See {@link Template} for an example of basic usage.
      */
     public Template getTemplate(String name) throws IOException {
         Locale loc = getLocale();
@@ -619,32 +638,38 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Equivalent to <tt>getTemplate(name, locale, thisCfg.getEncoding(locale), true)</tt>.
+     * Equivalent to {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, locale, getEncoding(locale), true)}.
      */
     public Template getTemplate(String name, Locale locale) throws IOException {
         return getTemplate(name, locale, getEncoding(locale), true);
     }
 
     /**
-     * Equivalent to <tt>getTemplate(name, thisCfg.getLocale(), encoding, true)</tt>.
+     * Equivalent to {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, getLocale(), encoding, true)}.
      */
     public Template getTemplate(String name, String encoding) throws IOException {
         return getTemplate(name, getLocale(), encoding, true);
     }
 
     /**
-     * Equivalent to <tt>getTemplate(name, locale, encoding, true)</tt>.
+     * Equivalent to {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, locale, encoding, true)}.
      */
     public Template getTemplate(String name, Locale locale, String encoding) throws IOException {
         return getTemplate(name, locale, encoding, true);
     }
 
     /**
-     * Retrieves a template specified by a name and locale, interpreted using
+     * Retrieves a template specified by a name and locale (from cache if possible), interpreted using
      * the specified character encoding, either parsed or unparsed. For the
-     * exact semantics of parameters, see 
-     * {@link TemplateCache#getTemplate(String, Locale, String, boolean)}.
+     * exact semantics of parameters, see {@link TemplateCache#getTemplate(String, Locale, String, boolean)}.
+     * 
+     * See {@link Template} for an example of basic usage.
+     * 
      * @return the requested template.
+     * 
      * @throws FileNotFoundException if the template could not be found.
      * @throws IOException if there was a problem loading the template.
      * @throws ParseException (extends <code>IOException</code>) if the template is syntactically bad.
@@ -684,22 +709,27 @@ public class Configuration extends Configurable implements Cloneable {
      * @return the preferred character encoding for the locale.
      */
     public String getEncoding(Locale loc) {
-        // Try for a full name match (may include country and variant)
-        String charset = (String) encodingMap.get(loc.toString());
-        if (charset == null) {
-            if (loc.getVariant().length() > 0) {
-                Locale l = new Locale(loc.getLanguage(), loc.getCountry());
-                charset = (String) encodingMap.get(l.toString());
+        if (encodingMap.isEmpty()) {
+            return defaultEncoding;
+        } else {
+            // Try for a full name match (may include country and variant)
+            String charset = (String) encodingMap.get(loc.toString());
+            if (charset == null) {
+                if (loc.getVariant().length() > 0) {
+                    Locale l = new Locale(loc.getLanguage(), loc.getCountry());
+                    charset = (String) encodingMap.get(l.toString());
+                    if (charset != null) {
+                        encodingMap.put(loc.toString(), charset);
+                    }
+                } 
+                charset = (String) encodingMap.get(loc.getLanguage());
                 if (charset != null) {
                     encodingMap.put(loc.toString(), charset);
                 }
-            } 
-            charset = (String) encodingMap.get(loc.getLanguage());
-            if (charset != null) {
-                encodingMap.put(loc.toString(), charset);
             }
+            return charset != null ? charset : defaultEncoding;
         }
-        return charset != null ? charset : defaultEncoding;
+        
     }
 
     /**
@@ -1135,7 +1165,7 @@ public class Configuration extends Configurable implements Cloneable {
 	}
 	
     /**
-     * Returns the names of the supported "built-ins" ({@code expr?builtin_name}-like things). As of this
+     * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
      * to be future-proof, it's an instance method. 
      * 

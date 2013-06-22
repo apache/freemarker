@@ -67,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.sun.corba.se.impl.orbutil.ObjectWriter;
+
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
@@ -79,33 +81,30 @@ import freemarker.core.TokenMgrError;
 import freemarker.debug.impl.DebuggerService;
 
 /**
- * <p>A core FreeMarker API that represents a compiled template.
- * Typically, you will use a {@link Configuration} object to instantiate a template.
- *
- * <PRE>
-      Configuration cfg = new Configuration();
-      ...
-      Template myTemplate = cfg.getTemplate("myTemplate.html");
-   </PRE>
- *
- * <P>However, you can also construct a template directly by passing in to
- * the appropriate constructor a java.io.Reader instance that is set to
- * read the raw template text. The compiled template is
- * stored in an an efficient data structure for later use.
- *
- * <p>To render the template, i.e. to merge it with a data model, and
- * thus produce "cooked" output, call the <tt>process</tt> method.
- *
- * <p>Any error messages from exceptions thrown during compilation will be
- * included in the output stream and thrown back to the calling code.
- * To change this behavior, you can install custom exception handlers using
- * {@link Configurable#setTemplateExceptionHandler(TemplateExceptionHandler)} on
- * a Configuration object (for all templates belonging to a configuration) or on
- * a Template object (for a single template).
- * 
- * <p>It's not legal to modify the values of FreeMarker settings: a) while the
- * template is executing; b) if the template object is already accessible from
+ * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
  * multiple threads.
+ * 
+ * <p>Typically, you will use a {@link Configuration#getTemplate(String)} to create/get {@link Template} objects:
+ * 
+ * <pre>
+ *  // Where the application is initialized; do this only once in the application life-cycle!
+ *  Configuration cfg = new Configuration();
+ *  ...
+ *  // Whenever the application needs a template (so you may call this a lot):
+ *  Template myTemplate = cfg.getTemplate("myTemplate.html");
+ *  // ... and then to actually render the output:
+ *  myTemplate.process(dataModel, out);</pre>
+ *
+ * <p>You can also construct a template directly by passing in
+ * a {@link Reader} or a {@link String}, from which the constructor gets the template source code. But then it's
+ * important to know that while the resulting {@link Template} is efficient for later processing, creating a new
+ * {@link Template} itself is relatively expensive. So try to re-use {@link Template} objects if possible.
+ * {@link Configuration#getTemplate(String)} does that (caching {@link Template}-s) for you, but the constructor of
+ * course doesn't, so it's up to you to solve then.
+ *
+ * <p>Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods
+ * for changing FreeMarker settings. Those must not be used (a) while the template is being processed, or (b) if the
+ * template object is already accessible from multiple threads.
  */
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
@@ -242,54 +241,42 @@ public class Template extends Configurable {
     }
 
     /**
-     * Processes the template, using data from the map, and outputs
-     * the resulting text to the supplied <tt>Writer</tt> The elements of the
-     * map are converted to template models using the default object wrapper
-     * returned by the {@link Configuration#getObjectWrapper() getObjectWrapper()}
-     * method of the <tt>Configuration</tt>.
-     * @param rootMap the root node of the data model.  If null, an
-     * empty data model is used. Can be any object that the effective object
-     * wrapper can turn into a <tt>TemplateHashModel</tt>. Basically, simple and
-     * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-     * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as
-     * any object that implements <tt>__getitem__</tt> into a template hash.
-     * Naturally, you can pass any object directly implementing
-     * <tt>TemplateHashModel</tt> as well.
-     * @param out a <tt>Writer</tt> to output the text to.
-     * @throws TemplateException if an exception occurs during template processing
-     * @throws IOException if an I/O exception occurs during writing to the writer.
-     */
-    public void process(Object rootMap, Writer out)
-    throws TemplateException, IOException
-    {
-        createProcessingEnvironment(rootMap, out, null).process();
-    }
-
-    /**
-     * Processes the template, using data from the root map object, and outputs
-     * the resulting text to the supplied writer, using the supplied
-     * object wrapper to convert map elements to template models.
-     * @param rootMap the root node of the data model.  If null, an
-     * empty data model is used. Can be any object that the effective object
-     * wrapper can turn into a <tt>TemplateHashModel</tt> Basically, simple and
-     * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-     * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as any
-     * object that implements <tt>__getitem__</tt> into a template hash.
-     * Naturally, you can pass any object directly implementing
-     * <tt>TemplateHashModel</tt> as well.
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper retrieved
-     * by {@link Configurable#getObjectWrapper()} is used.
-     * @param out the writer to output the text to.
-     * @param rootNode The root node for recursive processing, this may be null.
+     * Executes template, using the data-model provided, writing the generated output
+     * to the supplied {@link Writer}.
+     * 
+    * @param dataModel the holder of the variables visible from the template (name-value pairs); usually a
+    *     {@code Map<String, Object>} or a Java Bean (where the JavaBeans properties will be the variables).
+    *     Can be any object that the {@link ObjectWrapper} in use turns into a {@link TemplateHashModel}.
+    *     You can also use an object that already implements {@link TemplateHashModel}; in that case it won't be
+    *     wrapped. If it's {@code null}, an empty data model is used.
+    * @param out The {@link Writer} where the output of the template will go. Note that unless you have used
+    *    {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at the
+    *    when the template processing was finished. {@link Writer#close()} is not called.
      * 
      * @throws TemplateException if an exception occurs during template processing
      * @throws IOException if an I/O exception occurs during writing to the writer.
      */
-    public void process(Object rootMap, Writer out, ObjectWrapper wrapper, TemplateNodeModel rootNode)
+    public void process(Object dataModel, Writer out)
     throws TemplateException, IOException
     {
-        Environment env = createProcessingEnvironment(rootMap, out, wrapper);
+        createProcessingEnvironment(dataModel, out, null).process();
+    }
+
+    /**
+     * Like {@link #process(Object, Writer)}, but also sets a (XML-)node to be recursively processed by the template.
+     * That node is accessed in the template with <tt>.node</tt>, <tt>#recurse</tt>, etc. See the
+     * <a href="http://freemarker.org/docs/xgui_declarative.html" target="_blank">Declarative XML Processing</a> as a
+     * typical example of recursive node processing.
+     * 
+     * @param rootNode The root node for recursive processing or {@code null}.
+     * 
+     * @throws TemplateException if an exception occurs during template processing
+     * @throws IOException if an I/O exception occurs during writing to the writer.
+     */
+    public void process(Object dataModel, Writer out, ObjectWrapper wrapper, TemplateNodeModel rootNode)
+    throws TemplateException, IOException
+    {
+        Environment env = createProcessingEnvironment(dataModel, out, wrapper);
         if (rootNode != null) {
             env.setCurrentVisitorNode(rootNode);
         }
@@ -297,116 +284,98 @@ public class Template extends Configurable {
     }
     
     /**
-     * Processes the template, using data from the root map object, and outputs
-     * the resulting text to the supplied writer, using the supplied
-     * object wrapper to convert map elements to template models.
-     * @param rootMap the root node of the data model.  If null, an
-     * empty data model is used. Can be any object that the effective object
-     * wrapper can turn into a <tt>TemplateHashModel</tt> Basically, simple and
-     * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-     * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as any
-     * object that implements <tt>__getitem__</tt> into a template hash.
-     * Naturally, you can pass any object directly implementing
-     * <tt>TemplateHashModel</tt> as well.
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper retrieved
-     * by {@link Configurable#getObjectWrapper()} is used.
-     * @param out the writer to output the text to.
+     * Like {@link #process(Object, Writer)}, but overrides the {@link Configuration#getObjectWrapper()}.
      * 
-     * @throws TemplateException if an exception occurs during template processing
-     * @throws IOException if an I/O exception occurs during writing to the writer.
+     * @param wrapper The {@link ObjectWrapper} to be used instead of what {@link Configuration#getObjectWrapper()}
+     *      provides, or {@code null} if you don't want to override that. 
      */
-    public void process(Object rootMap, Writer out, ObjectWrapper wrapper)
+    public void process(Object dataModel, Writer out, ObjectWrapper wrapper)
     throws TemplateException, IOException
     {
-        process(rootMap, out, wrapper, null);
+        createProcessingEnvironment(dataModel, out, wrapper).process();
     }
     
    /**
-    * Creates a {@link freemarker.core.Environment Environment} object,
-    * using this template, the data model provided as the root map object, and
-    * the supplied object wrapper to convert map elements to template models.
-    * You can then call Environment.process() on the returned environment
-    * to set off the actual rendering.
-    * Use this method if you want to do some special initialization on the environment
-    * before template processing, or if you want to read the environment after template
-    * processing.
+    * Creates a {@link freemarker.core.Environment Environment} object, using this template, the data-model provided as
+    * parameter. You have to call {@link Environment#process()} on the return value to set off the actual rendering.
+    * 
+    * <p>Use this method if you want to do some special initialization on the {@link Environment} before template
+    * processing, or if you want to read the {@link Environment} after template processing. Otherwise using
+    * {@link Template#process(Object, Writer)} is simpler.
     *
     * <p>Example:
     *
-    * <p>This:
     * <pre>
     * Environment env = myTemplate.createProcessingEnvironment(root, out, null);
-    * env.process();
-    * </pre>
-    * is equivalent with this:
+    * env.process();</pre>
+    * 
+    * <p>The above is equivalent with this:
+    * 
     * <pre>
-    * myTemplate.process(root, out);
-    * </pre>
-    * But with <tt>createProcessingEnvironment</tt>, you can manipulate the environment
+    * myTemplate.process(root, out);</pre>
+    * 
+    * <p>But with <tt>createProcessingEnvironment</tt>, you can manipulate the environment
     * before and after the processing:
+    * 
     * <pre>
     * Environment env = myTemplate.createProcessingEnvironment(root, out);
     * env.include("include/common.ftl", null, true);  // before processing
     * env.process();
-    * TemplateModel x = env.getVariable("x");  // after processing
-    * </pre>
+    * TemplateModel x = env.getVariable("x");  // after processing</pre>
     *
-    * @param rootMap the root node of the data model.  If null, an
-    * empty data model is used. Can be any object that the effective object
-    * wrapper can turn into a <tt>TemplateHashModel</tt> Basically, simple and
-    * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-    * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as any
-    * object that implements <tt>__getitem__</tt> into a template hash.
-    * Naturally, you can pass any object directly implementing
-    * <tt>TemplateHashModel</tt> as well.
-    * @param wrapper The object wrapper to use to wrap objects into
-    * {@link TemplateModel} instances. If null, the default wrapper retrieved
-    * by {@link Configurable#getObjectWrapper()} is used.
-    * @param out the writer to output the text to.
-    * @return the {@link freemarker.core.Environment Environment} object created for processing
+    * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
+    *     more details.
+    * @param wrapper The {@link ObjectWrapper} to use to wrap objects into {@link TemplateModel}
+    *     instances. Normally you left it {@code null}, in which case {@link Configurable#getObjectWrapper()} will be
+    *     used.
+    * @param out The {@link Writer} where the output of the template will go; see {@link #process(Object, Writer)} for
+    *     more details.
+    *     
+    * @return the {@link Environment} object created for processing. Call {@link Environment#process()} to process the
+    *    template.
+    * 
     * @throws TemplateException if an exception occurs while setting up the Environment object.
     * @throws IOException if an exception occurs doing any auto-imports
     */
-    public Environment createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)
+    public Environment createProcessingEnvironment(Object dataModel, Writer out, ObjectWrapper wrapper)
     throws TemplateException, IOException {
-        final TemplateHashModel root;
-        if (rootMap instanceof TemplateHashModel) {
-            root = (TemplateHashModel) rootMap;
+        final TemplateHashModel dataModelHash;
+        if (dataModel instanceof TemplateHashModel) {
+            dataModelHash = (TemplateHashModel) dataModel;
         } else {
             if(wrapper == null) {
                 wrapper = getObjectWrapper();
             }
 
-            if (rootMap == null) {
-                root = new SimpleHash(wrapper);
+            if (dataModel == null) {
+                dataModelHash = new SimpleHash(wrapper);
             } else {
-                TemplateModel wrappedRootMap = wrapper.wrap(rootMap);
-                if (wrappedRootMap instanceof TemplateHashModel) {
-                    root = (TemplateHashModel) wrappedRootMap;
-                } else if (wrappedRootMap == null) {
+                TemplateModel wrappedDataModel = wrapper.wrap(dataModel);
+                if (wrappedDataModel instanceof TemplateHashModel) {
+                    dataModelHash = (TemplateHashModel) wrappedDataModel;
+                } else if (wrappedDataModel == null) {
                     throw new IllegalArgumentException(
-                            wrapper.getClass().getName() + " converted " + rootMap.getClass().getName() + " to null.");
+                            wrapper.getClass().getName() + " converted " + dataModel.getClass().getName() + " to null.");
                 } else {
                     throw new IllegalArgumentException(
-                            wrapper.getClass().getName() + " didn't convert " + rootMap.getClass().getName()
+                            wrapper.getClass().getName() + " didn't convert " + dataModel.getClass().getName()
                             + " to a TemplateHashModel. Generally, you want to use a Map<String, Object> or a "
                             + "Java Bean as the root-map (aka. data-model) parameter. The Map key-s or Java Bean "
                             + "property names will be the variable names in the template.");
                 }
             }
         }
-        return new Environment(this, root, out);
+        return new Environment(this, dataModelHash, out);
     }
 
     /**
-     * Same as <code>createProcessingEnvironment(rootMap, out, null)</code>.
-     * @see #createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)
+     * Same as {@link #createProcessingEnvironment(Object, Writer, ObjectWrapper)
+     * createProcessingEnvironment(dataModel, out, null)}.
      */
-    public Environment createProcessingEnvironment(Object rootMap, Writer out)
+    public Environment createProcessingEnvironment(Object dataModel, Writer out)
     throws TemplateException, IOException
     {
-        return createProcessingEnvironment(rootMap, out, null);
+        return createProcessingEnvironment(dataModel, out, null);
     }
     
     /**
@@ -502,8 +471,7 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the template source at the location
-     * specified by the coordinates given.
+     * Returns the template source at the location specified by the coordinates given, or {@code null} if unavailable.
      * @param beginColumn the first column of the requested source, 1-based
      * @param beginLine the first line of the requested source, 1-based
      * @param endColumn the last column of the requested source, 1-based
