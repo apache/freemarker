@@ -369,27 +369,31 @@ public class Template extends Configurable {
     * @throws IOException if an exception occurs doing any auto-imports
     */
     public Environment createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)
-    throws TemplateException, IOException
-    {
-        TemplateHashModel root = null;
-        if(rootMap instanceof TemplateHashModel) {
-            root = (TemplateHashModel)rootMap;
-        }
-        else {
+    throws TemplateException, IOException {
+        final TemplateHashModel root;
+        if (rootMap instanceof TemplateHashModel) {
+            root = (TemplateHashModel) rootMap;
+        } else {
             if(wrapper == null) {
                 wrapper = getObjectWrapper();
             }
 
-            try {
-                root = rootMap != null
-                    ? (TemplateHashModel)wrapper.wrap(rootMap)
-                    : new SimpleHash(wrapper);
-                if(root == null) {
-                    throw new IllegalArgumentException(wrapper.getClass().getName() + " converted " + rootMap.getClass().getName() + " to null.");
+            if (rootMap == null) {
+                root = new SimpleHash(wrapper);
+            } else {
+                TemplateModel wrappedRootMap = wrapper.wrap(rootMap);
+                if (wrappedRootMap instanceof TemplateHashModel) {
+                    root = (TemplateHashModel) wrappedRootMap;
+                } else if (wrappedRootMap == null) {
+                    throw new IllegalArgumentException(
+                            wrapper.getClass().getName() + " converted " + rootMap.getClass().getName() + " to null.");
+                } else {
+                    throw new IllegalArgumentException(
+                            wrapper.getClass().getName() + " didn't convert " + rootMap.getClass().getName()
+                            + " to a TemplateHashModel. Generally, you want to use a Map<String, Object> or a "
+                            + "Java Bean as the root-map (aka. data-model) parameter. The Map key-s or Java Bean "
+                            + "property names will be the variable names in the template.");
                 }
-            }
-            catch(ClassCastException e) {
-                throw new IllegalArgumentException(wrapper.getClass().getName() + " could not convert " + rootMap.getClass().getName() + " to a TemplateHashModel.");
             }
         }
         return new Environment(this, root, out);
