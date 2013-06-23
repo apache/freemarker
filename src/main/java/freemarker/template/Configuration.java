@@ -98,8 +98,8 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.XmlEscape;
 
 /**
- * The main entry point into the FreeMarker API, this class encapsulates the various configuration
- * settings of FreeMarker, as well as serves as a central {@link Template template} loading and caching service.
+ * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
+ * also serves as a central template-loading and caching service.
  *
  * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at the beginning of
  * the application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
@@ -228,7 +228,8 @@ public class Configuration extends Configurable implements Cloneable {
      * encodings for most languages.
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
-     * <table>
+     * 
+     * <table border="1">
      *   <tr><td>ar</td><td>ISO-8859-6</td></tr>
      *   <tr><td>be</td><td>ISO-8859-5</td></tr>
      *   <tr><td>bg</td><td>ISO-8859-5</td></tr>
@@ -269,8 +270,10 @@ public class Configuration extends Configurable implements Cloneable {
      *   <tr><td>zh</td><td>GB2312</td></tr>
      *   <tr><td>zh_TW</td><td>Big5</td></tr>
      * </table>
-     * @see #clearEncodingMap
-     * @see #setEncoding
+     * 
+     * @see #clearEncodingMap()
+     * @see #setEncoding(Locale, String)
+     * @see #setDefaultEncoding(String)
      */
     public void loadBuiltInEncodingMap() {
         localeToCharsetMap.clear();

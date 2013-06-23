@@ -7,10 +7,13 @@ import freemarker.core.Environment;
 import freemarker.template.utility.DeepUnwrap;
 
 /**
- * Objects that implement this interface can be used as user-defined directives 
- * (much like macros). They can do arbitrary actions, write arbitrary
- * text to the template output, and trigger rendering of their nested content
+ * "directive" template language data type: used as user-defined directives 
+ * (much like macros) in templates. They can do arbitrary actions, write arbitrary
+ * text to the template output, and trigger rendering of their nested content for
  * any number of times.
+ * 
+ * <p>They are used in templates like {@code <@myDirective foo=1 bar="wombat">...</@myDirective>} (or as
+ * {@code <@myDirective foo=1 bar="wombat" />} - the nested content is optional).
  *
  * @since 2.3.11
  * @author Attila Szegedi

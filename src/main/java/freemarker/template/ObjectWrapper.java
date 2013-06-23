@@ -100,13 +100,14 @@ public interface ObjectWrapper {
     ObjectWrapper SIMPLE_WRAPPER = SimpleObjectWrapper.instance;
     
     /**
-     * Maps a Java object to the type-system of the FreeMarker Template Language.
+     * Makes a {@link TemplateModel} out of a non-{@link TemplateModel} object, usually by "wrapping" it into a
+     * {@link TemplateModel} implementation that delegates to the original object.
      * 
      * @param obj The object to wrap into a {@link TemplateModel}. If the it already implements {@link TemplateModel},
-     *      usually it should just return the object as is. 
+     *      it should just return the object as is.
      * 
      * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the
-     * return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.
+     *     return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.
      */
     TemplateModel wrap(Object obj) throws TemplateModelException;
     

@@ -53,14 +53,11 @@
 package freemarker.template;
 
 /**
- * This interface can be implemented by a class to make a variable "foreach-able", 
- * i.e. the model can be used as the list in a &lt;foreach...&gt;
- * or a &lt;list...&gt; directive. Use this model when 
- * your collection does not support index-based access and possibly,
- * the size cannot be known in advance. If you need index-based
- * access, use a {@link TemplateSequenceModel} instead.
- * @see SimpleSequence
- * @see SimpleCollection
+ * "collection" template language data type: a collection of values that can be enumerated, repeatedly (not just once).
+ * This is very similar to {@link TemplateSequenceModel}, but it doesn't support indexed (random) access and
+ * its size can't be queried.
+ *  
+ * <p>They are mostly used in template languages like {@code <#list myCollection as i>...</#list>}.  
  *
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */

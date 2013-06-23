@@ -53,13 +53,13 @@
 package freemarker.template;
 
 /**
- * Convenience base class for containers that wrap arbitrary Java objects into 
+ * Convenience base-class for containers that wrap arbitrary Java objects into 
  * {@link TemplateModel} instances.
  */
 abstract public class WrappingTemplateModel {
 
-    private static ObjectWrapper defaultObjectWrapper = 
-        DefaultObjectWrapper.instance;
+    private static ObjectWrapper defaultObjectWrapper = DefaultObjectWrapper.instance;
+    
     private ObjectWrapper objectWrapper;
     
     /**
@@ -131,4 +131,5 @@ abstract public class WrappingTemplateModel {
     protected final TemplateModel wrap(Object obj) throws TemplateModelException {
         return objectWrapper.wrap(obj);
     }
+    
 }

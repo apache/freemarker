@@ -53,16 +53,15 @@
 package freemarker.template;
 
 /**
- * Objects that will be interpreted as true/false in the appropriate
- * context must implement this interface.
+ * "boolean" template language data type; same as in Java; either {@code true} or {@code false}.
  */
 public interface TemplateBooleanModel extends TemplateModel {
 
     /**
      * @return whether to interpret this object as true or false in a boolean context
      */
-
     boolean getAsBoolean() throws TemplateModelException;
+    
     /**
      * A singleton object to represent boolean false
      */
@@ -86,4 +85,5 @@ public interface TemplateBooleanModel extends TemplateModel {
             return TRUE;
         }
     };
+    
 }

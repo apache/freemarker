@@ -53,24 +53,11 @@
 package freemarker.template;
 
 /**
- * Corresponds to the "extended hash" template language data-type; extends {@link TemplateHashModel} by allowing
+ * "extended hash" template language data type; extends {@link TemplateHashModel} by allowing
  * iterating through its keys and values.
  * 
- * <p>If a class
- * implements this interface, then the built-in operators <code>?size</code>,
- * <code>?keys</code>, and <code>?values</code> can be applied to its
- * instances in the template.</p>
- *
- * <p>As of version 2.2.2, the engine will automatically wrap the
- * collections returned by <code>keys</code> and <code>values</code> to
- * present them as sequences to the template.  For performance, you may
- * wish to return objects that implement both TemplateCollectionModel
- * and {@link TemplateSequenceModel}. Note that the wrapping to sequence happens
- * on demand; if the template does not try to use the variable returned by
- * <code>?keys</code> or <code>?values</code> as sequence (<code>theKeys?size</code>, or <code>theKeys[x]</code>,
- * or <code>theKeys?sort</code>, etc.), just iterates over the variable
- * (<code>&lt;#list foo?keys as k>...</code>), then no wrapping to
- * sequence will happen, thus there will be no overhead. 
+ * <p>In templates they are used like hashes, but these will also work (among others):
+ * {@code myExtHash?size}, {@code myExtHash?keys}, {@code myExtHash?values}.
  * 
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @see SimpleHash
@@ -84,13 +71,14 @@ public interface TemplateHashModelEx extends TemplateHashModel {
 
     /**
      * @return a collection containing the keys in the hash. Every element of 
-     * the returned collection must implement the {@link TemplateScalarModel}
-     * (as the keys of hashes are always strings).
+     *      the returned collection must implement the {@link TemplateScalarModel}
+     *      (as the keys of hashes are always strings).
      */
     TemplateCollectionModel keys() throws TemplateModelException;
 
     /**
-     * @return a collection containing the values in the hash.
+     * @return a collection containing the values in the hash. The elements of the
+     * returned collection can be any kind of {@link TemplateModel}-s.
      */
     TemplateCollectionModel values() throws TemplateModelException;
 }

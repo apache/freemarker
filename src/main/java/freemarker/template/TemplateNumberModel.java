@@ -55,9 +55,9 @@ package freemarker.template;
 import freemarker.core.ArithmeticEngine;
 
 /**
- * Corresponds to the "number" template language data-type; an object that stores a number. There's only one numerical
- * type as far as the template language is concerned, but it can store its value using whatever Java number type it
- * likes. Making operations between numbers (and so the coercion rules) is up to the {@link ArithmeticEngine}. 
+ * "number" template language data type; an object that stores a number. There's only one numerical
+ * type as far as the template language is concerned, but it can store its value using whatever Java number type.
+ * Making operations between numbers (and so the coercion rules) is up to the {@link ArithmeticEngine}. 
  *
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */

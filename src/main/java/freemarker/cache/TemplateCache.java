@@ -177,9 +177,9 @@ public class TemplateCache
     }
     
     /**
-     * Retrieves a template from this cache, loads it into it first if it's missing/staled, for the given name and
-     * locale (and according the specified further parameters).
-     *
+     * Retrieves the template with the given name (and according the specified further parameters) from the
+     * template cache, loading it into the cache first if it's missing/staled.
+     * 
      * <p>For the meaning of the parameters see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
      *
      * @return the loaded template, or {@code null} if the template was not found.

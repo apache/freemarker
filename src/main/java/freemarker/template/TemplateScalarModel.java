@@ -53,9 +53,9 @@
 package freemarker.template;
 
 /**
- * Corresponds to the "string" template language data-type; an object that basically like {@link String} in Java.
- * (The name of this interface should be {@code TemplateStringModel}. The bad name was inherited from the
- * ancient times, when there was only 1 kind of scalar in FreeMarker.)
+ * "string" template language data-type; like in Java, an unmodifiable UNICODE character sequence.
+ * (The name of this interface should be {@code TemplateStringModel}. The misnomer is inherited from the
+ * old times, when this was the only single-value type in FreeMarker.)
  */
 public interface TemplateScalarModel extends TemplateModel {
 
@@ -65,9 +65,8 @@ public interface TemplateScalarModel extends TemplateModel {
     public TemplateModel EMPTY_STRING = new SimpleScalar("");
 
     /**
-     * Returns the string representation of this model. Don't return {@code null}. In classic-compatible
-     * mode the engine will convert {@code null} into empty string, but in the default mode returning {@code null} will
-     * cause an exception.
+     * Returns the string representation of this model. Don't return {@code null}, as that will cause exception.
+     * (In classic-compatible mode the engine will convert {@code null} into empty string, though.)
      */
     public String getAsString() throws TemplateModelException;
 

@@ -59,45 +59,9 @@ import java.util.Map;
 import freemarker.template.utility.DeepUnwrap;
 
 /**
- * Objects that implement this interface can be used as user-defined directives 
- * (much like macros); you should rather use the newer {@link TemplateDirectiveModel}
- * instead. Altough implementing output filters is more handy with this interface,
- * this interface will be certainly deprecated as superfluous, starting from
- * FreeMarker 2.4. But as far as the template engine is concerned, you can use both
- * equivalently as a user-defined directive.
- *
- * <P>Note that, as of FreeMarker 2.1, <tt>TemplateTransformModel</tt>
- * has changed. This is a more powerful implementation. 
- * There is a quick-and-dirty way to patch any legacy
- * TemplateTransformModel so that it implements the new API.
- * You simply add the following as your implementation 
- * of the getWriter() call:
- * <PRE>
- * 
- *    public Writer getWriter(final Writer out, 
- *                            Map args) 
- *    {
- *       final StringBuffer buf = new StringBuffer();
- *       return new Writer() {
- *           public void write(char cbuf[], int off, int len) {
- *               buf.append(cbuf, off, len);
- *           }
- *
- *           public void flush() throws IOException {
- *               out.flush();
- *           }
- * 
- *           public void close() throws IOException {
- *               StringReader sr = new StringReader(buf.toString());
- *               StringWriter sw = new StringWriter();
- *               transform(sr, sw);
- *               out.write(sw.toString());
- *           }
- *       };
- *   }
- *
- * 
- * </PRE>
+ * "transform" template language data type: user-defined directives 
+ * (much like macros) specialized on filtering output; you should rather use the newer {@link TemplateDirectiveModel}
+ * instead. This certainly will be deprecated in FreeMarker 2.4.
  * 
  * @author Attila Szegedi
  */

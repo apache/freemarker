@@ -52,9 +52,27 @@
 
 package freemarker.template;
 
+import freemarker.template.utility.ClassUtil;
+
 /**
- * This is the super-interface of all template language data-types. Mapping plain Java objects to
- * {@link TemplateModel}-s is the responsibility of the {@link ObjectWrapper}.
+ * The common super-interface of the interfaces that stand for the FreeMarker Template Language data types.
+ * The template language only deals with {@link TemplateModel}-s, not with plain objects. This is why the data-model
+ * (aka. the "template context" in other languages) is (automatically) mapped to a tree of {@link TemplateModel}-s.
+ * 
+ * <p>Mapping the plain Java objects to {@link TemplateModel}-s (or the other way around sometimes) is the
+ * responsibility of the {@link ObjectWrapper} (can be set via {@link Configuration#setObjectWrapper(ObjectWrapper)}).
+ * But not all {@link TemplateModel}-s are for wrapping a plain object. For example, a value created within a template
+ * is not made to wrap an earlier existing object; it's a value that has always existed in the template language's
+ * domain. Users can also write {@link TemplateModel} implementations and put them directly into the data-model for
+ * full control over how that object is seen from the template. Certain {@link TemplateModel} interfaces may doesn't
+ * even have equivalent in Java. For example the directive type ({@link TemplateDirectiveModel}) is like that.
+ * 
+ * <p>Because {@link TemplateModel} "subclasses" are all interfaces, a value in the template language can have multiple
+ * types. However, to prevent ambiguous situations, it's not recommended to make values that implement more than one of
+ * these types: string, number, boolean, date. The intended applications are like string+hash, string+method,
+ * hash+sequence, etc.
+ * 
+ * @see ClassUtil#getFTLTypeDescription(TemplateModel)
  */
 public interface TemplateModel {
     

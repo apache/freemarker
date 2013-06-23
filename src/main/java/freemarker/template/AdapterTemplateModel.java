@@ -1,13 +1,14 @@
 package freemarker.template;
 
 /**
- * Supplemental interface that can be implemented by classes that also implement
- * any of the {@link TemplateModel} interfaces. A class implementing this 
- * interface usually serves as an adapter that provides bridging between a 
- * different object model and FreeMarker template models. It provides a 
- * capability to retrieve the underlying object. This interface is rarely 
- * implemented by applications. It is typically implemented by adapter classes
- * used for wrapping in various object wrapper implementation.  
+ * A {@link TemplateModel} that can be unwrapped and then it considers a provided desired (hint) class. This is
+ * useful when multiple languages has to communicate with each other through FreeMarker. For example, if we have a
+ * model that wraps a Jython object, then we have to unwrap that differently when we pass it to plain Java method and
+ * when we pass it to a Jython method.
+ * 
+ * <p>This is rarely implemented by applications. It is typically implemented by the model classes belonging to
+ * {@link ObjectWrapper}-s.
+ *   
  * @author Attila Szegedi
  */
 public interface AdapterTemplateModel extends TemplateModel {

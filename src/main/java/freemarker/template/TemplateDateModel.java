@@ -58,18 +58,17 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Date values in a template data model must implement this interface.
- * Contrary to Java, FreeMarker actually distinguishes values that represent
- * only a time, only a date, or a combined date and time. All three are
- * represented using this single interface, however there's a method that
+ * "date" template language data type: similar to {@link java.util.Date}; a time-zone-independent date-only, time-only
+ * or date-time value. Contrary to Java, FreeMarker distinguishes values that represent only a time, only a date, or a
+ * combined date and time.
  *
  * @author Attila Szegedi
  */
-public interface TemplateDateModel extends TemplateModel
-{
+public interface TemplateDateModel extends TemplateModel {
+    
     /**
-     * It is not known whether the date model represents a time-only,
-     * a date-only, or a datetime value.
+     * It is not known whether the date represents a time-only, a date-only, or a date-time value.
+     * This often leads to exceptions in templates due to ambiguities it causes, so avoid it if possible.
      */
     public static final int UNKNOWN = 0;
 
@@ -84,7 +83,7 @@ public interface TemplateDateModel extends TemplateModel
     public static final int DATE = 2;
 
     /**
-     * The date model represents a datetime value.
+     * The date model represents a date-time value.
      */
     public static final int DATETIME = 3;
     
@@ -95,8 +94,7 @@ public interface TemplateDateModel extends TemplateModel
                     "UNKNOWN", "TIME", "DATE", "DATETIME"
                 }));
     /**
-     * Returns the date value. The return value must not be null.
-     * @return the {@link Date} instance associated with this date model.
+     * Returns the date value. The return value must not be {@code null}.
      */
     public Date getAsDate() throws TemplateModelException;
 
@@ -105,4 +103,5 @@ public interface TemplateDateModel extends TemplateModel
      * <tt>DATE</tt>, or <tt>DATETIME</tt>.
      */
     public int getDateType();
+    
 }

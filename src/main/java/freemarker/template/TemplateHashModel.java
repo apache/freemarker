@@ -53,10 +53,10 @@
 package freemarker.template;
 
 /**
- * Corresponds to the "hash" template language data-type; an object that contains other objects accessible through
- * string keys (sub-variable names).
+ * "hash" template language data type: an object that contains other objects accessible through string keys
+ * (sub-variable names).
  * 
- * <p>In a tempaltes they are used like {@code myHash.myKey} or {@code myHash[myDynamicKey]}. 
+ * <p>In templates they are used like {@code myHash.myKey} or {@code myHash[myDynamicKey]}. 
  */
 public interface TemplateHashModel extends TemplateModel {
     
