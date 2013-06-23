@@ -53,8 +53,10 @@
 package freemarker.template;
 
 /**
- * List values in a template data model whose elements are accessed by the 
- * index operator should implement this interface. In addition to
+ * Corresponds to the "sequence" template language data-type; an object that contains other objects accessible through
+ * an integer 0-based index.
+ * 
+ * <p>In addition to
  * accessing elements by index and querying size using the <code>?size</code>
  * built-in, objects that implement this interface can be iterated in 
  * <code>&lt;#foreach ...></code> and <code>&lt;#list ...></code> directives. The 

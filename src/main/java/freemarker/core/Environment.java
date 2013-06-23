@@ -1067,8 +1067,8 @@ public final class Environment extends Configurable {
                 // Add format to global format cache. Note this is
                 // globally done once per locale per pattern.
                 StringTokenizer tok = new StringTokenizer(pattern, "_");
-                int style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
-                if(style != -1) {
+                int dateStyle = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
+                if(dateStyle != -1) {
                     switch(dateType) {
                         case TemplateDateModel.UNKNOWN: {
                             throw new _TemplateModelException(new _ErrorDescriptionBuilder(
@@ -1077,17 +1077,17 @@ public final class Environment extends Configurable {
                                     .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                         }
                         case TemplateDateModel.TIME: {
-                            format = DateFormat.getTimeInstance(style, locale);
+                            format = DateFormat.getTimeInstance(dateStyle, locale);
                             break;
                         }
                         case TemplateDateModel.DATE: {
-                            format = DateFormat.getDateInstance(style, locale);
+                            format = DateFormat.getDateInstance(dateStyle, locale);
                             break;
                         }
                         case TemplateDateModel.DATETIME: {
-                            int timestyle = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : style;
-                            if(timestyle != -1) {
-                                format = DateFormat.getDateTimeInstance(style, timestyle, locale);
+                            int timeStyle = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : dateStyle;
+                            if(timeStyle != -1) {
+                                format = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
                             }
                             break;
                         }

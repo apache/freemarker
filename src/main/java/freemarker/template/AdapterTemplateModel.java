@@ -6,7 +6,7 @@ package freemarker.template;
  * interface usually serves as an adapter that provides bridging between a 
  * different object model and FreeMarker template models. It provides a 
  * capability to retrieve the underlying object. This interface is rarely 
- * implemented by applications. It is tipically implemented by adapter classes
+ * implemented by applications. It is typically implemented by adapter classes
  * used for wrapping in various object wrapper implementation.  
  * @author Attila Szegedi
  */

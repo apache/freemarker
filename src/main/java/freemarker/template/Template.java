@@ -67,8 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import com.sun.corba.se.impl.orbutil.ObjectWriter;
-
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
@@ -84,26 +82,16 @@ import freemarker.debug.impl.DebuggerService;
  * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
  * multiple threads.
  * 
- * <p>Typically, you will use a {@link Configuration#getTemplate(String)} to create/get {@link Template} objects:
- * 
- * <pre>
- *  // Where the application is initialized; do this only once in the application life-cycle!
- *  Configuration cfg = new Configuration();
- *  ...
- *  // Whenever the application needs a template (so you may call this a lot):
- *  Template myTemplate = cfg.getTemplate("myTemplate.html");
- *  // ... and then to actually render the output:
- *  myTemplate.process(dataModel, out);</pre>
- *
- * <p>You can also construct a template directly by passing in
- * a {@link Reader} or a {@link String}, from which the constructor gets the template source code. But then it's
+ * <p>Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so
+ * you don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String}
+ * that contains the template source code. But then it's
  * important to know that while the resulting {@link Template} is efficient for later processing, creating a new
  * {@link Template} itself is relatively expensive. So try to re-use {@link Template} objects if possible.
  * {@link Configuration#getTemplate(String)} does that (caching {@link Template}-s) for you, but the constructor of
  * course doesn't, so it's up to you to solve then.
- *
+ * 
  * <p>Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods
- * for changing FreeMarker settings. Those must not be used (a) while the template is being processed, or (b) if the
+ * for changing FreeMarker settings. Those must not be used while the template is being processed, or if the
  * template object is already accessible from multiple threads.
  */
 public class Template extends Configurable {
@@ -244,14 +232,17 @@ public class Template extends Configurable {
      * Executes template, using the data-model provided, writing the generated output
      * to the supplied {@link Writer}.
      * 
-    * @param dataModel the holder of the variables visible from the template (name-value pairs); usually a
-    *     {@code Map<String, Object>} or a Java Bean (where the JavaBeans properties will be the variables).
-    *     Can be any object that the {@link ObjectWrapper} in use turns into a {@link TemplateHashModel}.
-    *     You can also use an object that already implements {@link TemplateHashModel}; in that case it won't be
-    *     wrapped. If it's {@code null}, an empty data model is used.
-    * @param out The {@link Writer} where the output of the template will go. Note that unless you have used
-    *    {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at the
-    *    when the template processing was finished. {@link Writer#close()} is not called.
+     * <p>For finer control over the runtime environment setup, such as per-HTTP-request configuring of FreeMarker
+     * settings, you may need to use {@link #createProcessingEnvironment(Object, Writer)} instead. 
+     * 
+     * @param dataModel the holder of the variables visible from the template (name-value pairs); usually a
+     *     {@code Map<String, Object>} or a JavaBean (where the JavaBean properties will be the variables).
+     *     Can be any object that the {@link ObjectWrapper} in use turns into a {@link TemplateHashModel}.
+     *     You can also use an object that already implements {@link TemplateHashModel}; in that case it won't be
+     *     wrapped. If it's {@code null}, an empty data model is used.
+     * @param out The {@link Writer} where the output of the template will go. Note that unless you have used
+     *    {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at the
+     *    when the template processing was finished. {@link Writer#close()} is not called.
      * 
      * @throws TemplateException if an exception occurs during template processing
      * @throws IOException if an I/O exception occurs during writing to the writer.
@@ -319,9 +310,13 @@ public class Template extends Configurable {
     * 
     * <pre>
     * Environment env = myTemplate.createProcessingEnvironment(root, out);
-    * env.include("include/common.ftl", null, true);  // before processing
-    * env.process();
-    * TemplateModel x = env.getVariable("x");  // after processing</pre>
+    * 
+    * env.setLocale(myUsersPreferredLocale);
+    * env.setTimeZone(myUsersPreferredTimezone);
+    * 
+    * env.process();  // output is rendered here
+    * 
+    * TemplateModel x = env.getVariable("x");  // read back a variable set by the template</pre>
     *
     * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
     *     more details.
@@ -360,7 +355,7 @@ public class Template extends Configurable {
                     throw new IllegalArgumentException(
                             wrapper.getClass().getName() + " didn't convert " + dataModel.getClass().getName()
                             + " to a TemplateHashModel. Generally, you want to use a Map<String, Object> or a "
-                            + "Java Bean as the root-map (aka. data-model) parameter. The Map key-s or Java Bean "
+                            + "JavaBean as the root-map (aka. data-model) parameter. The Map key-s or JavaBean "
                             + "property names will be the variable names in the template.");
                 }
             }

@@ -53,7 +53,10 @@
 package freemarker.template;
 
 /**
- * <p>An extended hash interface with a couple of extra hooks. If a class
+ * Corresponds to the "extended hash" template language data-type; extends {@link TemplateHashModel} by allowing
+ * iterating through its keys and values.
+ * 
+ * <p>If a class
  * implements this interface, then the built-in operators <code>?size</code>,
  * <code>?keys</code>, and <code>?values</code> can be applied to its
  * instances in the template.</p>

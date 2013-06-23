@@ -53,7 +53,7 @@
 package freemarker.template;
 
 /**
- * String values in the data-model must implement this interface.
+ * Corresponds to the "string" template language data-type; an object that basically like {@link String} in Java.
  * (The name of this interface should be {@code TemplateStringModel}. The bad name was inherited from the
  * ancient times, when there was only 1 kind of scalar in FreeMarker.)
  */

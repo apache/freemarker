@@ -61,13 +61,16 @@ import java.util.Map;
 /**
  * A {@link TemplateLoader} that uses a set of other loaders to load the templates.
  * On every request, loaders are queried in the order of their appearance in the
- * array of loaders that this Loader owns. If a request for some template name 
- * was already satisfied in the past by one of the loaders, that Loader is queried 
+ * array of loaders provided to the constructor. However, if a request for some template
+ * name was already satisfied in the past by one of the loaders, that Loader is queried 
  * first (a soft affinity).
- * This class is <em>NOT</em> thread-safe. If it's accessed from multiple
+ * 
+ * <p>This class is <em>not</em> thread-safe. If it's accessed from multiple
  * threads concurrently, proper synchronization must be provided by the callers.
- * Note that {@link TemplateCache}, the natural user of this class provides the
- * necessary synchronizations when it uses the class.
+ * Note that {@link TemplateCache}, the natural user of this class, provides the
+ * necessary synchronizations when it uses this class, so then you don't have to worry
+ * this.
+ * 
  * @author Attila Szegedi, szegedia at freemail dot hu
  */
 public class MultiTemplateLoader implements StatefulTemplateLoader

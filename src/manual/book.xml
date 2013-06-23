@@ -5132,21 +5132,35 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">Configuration cfg = new Configuration();
-// At least in new projects, specify that you want the fixes that aren't
-// 100% backward compatible too (these are very low-risk changes):
-cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20
-// Specify the data source where the template files come from.
-// Here I set a file directory for it:
-cfg.setDirectoryForTemplateLoading(
-        new File("<replaceable>/where/you/store/templates</replaceable>"));
-// Specify how templates will see the data-model. This is an advanced topic...
-// but just use this:
-cfg.setObjectWrapper(new DefaultObjectWrapper());</programlisting>
 
-        <para>From now you should use this single configuration instance. Note
-        however that if a system has multiple independent components that use
-        FreeMarker, then of course they will use their own private
-        <literal>Configuration</literal> instance.</para>
+// Specify the data source where the template files come from. Here I set a
+// plain directory for it, but non-file-system are possible too:
+cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
+
+// Specify how templates will see the data-model. This is an advanced topic...
+// for now just use this:
+cfg.setObjectWrapper(new DefaultObjectWrapper());
+
+// Set your preferred charset template files are stored in. UTF-8 is
+// a good choice in most applications:
+cfg.setDefaultEncoding("UTF-8");
+
+// Sets how errors will appear. Here we assume we are developing HTML pages.
+// For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
+cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+
+// At least in new projects, specify that you want the fixes that aren't
+// 100% backward compatible too (these are very low-risk changes as far as the
+// 1st and 2nd version number remains):
+cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20</programlisting>
+
+        <para>From now you should use this <emphasis>single</emphasis>
+        configuration instance (i.e., its a singleton). Note however that if a
+        system has multiple independent components that use FreeMarker, then
+        of course they will use their own private
+        <literal>Configuration</literal> instances. Do not needlessly
+        re-create configuration instances; it's expensive as you lose the
+        caches.</para>
       </section>
 
       <section xml:id="pgui_quickstart_createdatamodel">
@@ -5189,7 +5203,8 @@ cfg.setObjectWrapper(new DefaultObjectWrapper());</programlisting>
           <listitem>
             <para>Use your custom bean class for hashes where the items
             correspond to the bean properties. For example the
-            <literal>price</literal> property of <literal>product</literal>
+            <literal>price</literal> property
+            (<literal>getProperty()</literal>) of <literal>product</literal>
             can be get as <literal>product.price</literal>. (The actions of
             the beans can be exposed as well; see much later <link
             linkend="pgui_misc_beanwrapper">here</link>)</para>
@@ -5225,11 +5240,13 @@ root.put("latestProduct", latest);
 latest.put("url", "products/greenmouse.html");
 latest.put("name", "green mouse");</programlisting>
 
-        <para>For the <literal>latestProduct</literal> you migh as well use a
+        <para>For the <literal>latestProduct</literal> you might as well use a
         Java Bean that has <literal>url</literal> and <literal>name</literal>
         properties (that is, an object that has public <literal>String
         getURL()</literal> and <literal>String getName()</literal> methods);
-        it's the same from viewpoint of the template.</para>
+        it's the same from viewpoint of the template. Similarly, the root
+        could be a Java Bean with <literal>user</literal> and
+        <literal>lastestProduct</literal> properties.</para>
       </section>
 
       <section xml:id="pgui_quickstart_gettemplate">
@@ -5290,8 +5307,7 @@ latest.put("name", "green mouse");</programlisting>
         the standard output:</para>
 
         <programlisting role="unspecified">Writer out = new OutputStreamWriter(System.out);
-temp.process(root, out);
-out.flush();</programlisting>
+temp.process(root, out);</programlisting>
 
         <para>This will print to your terminal the output what you have seen
         in the <link linkend="example.first">first example</link> of the
@@ -5320,19 +5336,20 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
         
-        /* ------------------------------------------------------------------- */    
-        /* You should do this ONLY ONCE in the whole application life-cycle:   */    
+        /* ----------------------------------------------------------------------- */    
+        /* You should do this ONLY ONCE in the whole application life-cycle:       */    
     
         /* Create and adjust the configuration */
         Configuration cfg = new Configuration();
 
-        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
-        cfg.setDirectoryForTemplateLoading(
-                new File("<replaceable>/where/you/store/templates</replaceable>"));
+        cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setObjectWrapper(new DefaultObjectWrapper());
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
 
-        /* ------------------------------------------------------------------- */    
-        /* You usually do these for many times in the application life-cycle:  */    
+        /* ----------------------------------------------------------------------- */    
+        /* You usually do these for many times in the application life-cycle:      */    
                 
         /* Get or create a template */
         Template temp = cfg.getTemplate("test.ftl");
@@ -5348,7 +5365,6 @@ public class Test {
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);
         temp.process(root, out);
-        out.flush();
     }
 }</programlisting>
 
