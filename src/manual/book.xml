@@ -20693,8 +20693,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>NullPointerException</literal> in
               <literal>BeansWrapper</literal> when the Java implementation
               legally returns <literal>null</literal> for some
-              <literal>BeanInfo</literal> getters (actually happens on IBM J9
-              VM).</para>
+              <literal>BeanInfo</literal> getters (happens on IBM J9 VM, not
+              on the Sun/Oracle implementation).</para>
+            </listitem>
 
             <listitem>
               <para>Bug fix: Cloning a <literal>Configuration</literal> didn't
@@ -20847,13 +20848,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>FreeMarker development has moved to GitHub (<link
-              xlink:href="???">https://github.com/freemarker/freemarker</link>),
-              and switched to an Ivy-based build.</para>
+              <para>Various internal code cleanups.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Many JavaDoc improvements, mostly in the documentation of
+              the basic (most frequently used) classes.</para>
             </listitem>
 
             <listitem>
-              <para>Various internal code cleanups.</para>
+              <para>FreeMarker development has moved to GitHub (<link
+              xlink:href="???">https://github.com/freemarker/freemarker</link>),
+              and switched to an Ivy-based build.</para>
             </listitem>
           </itemizedlist>
         </section>
