@@ -205,6 +205,9 @@ public class Configuration extends Configurable implements Cloneable {
             Configuration copy = (Configuration)super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
             copy.localeToCharsetMap = new HashMap(localeToCharsetMap);
+            copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
+            copy.autoImports = (ArrayList) autoImports.clone();
+            copy.autoIncludes = (ArrayList) autoIncludes.clone();
             copy.createTemplateCache(cache.getTemplateLoader(), cache.getCacheStorage());
             return copy;
         } catch (CloneNotSupportedException e) {

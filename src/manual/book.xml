@@ -20695,6 +20695,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               legally returns <literal>null</literal> for some
               <literal>BeanInfo</literal> getters (actually happens on IBM J9
               VM).</para>
+
+            <listitem>
+              <para>Bug fix: Cloning a <literal>Configuration</literal> didn't
+              deep-clone the data structures storing the
+              <literal>auto_imports</literal> and
+              <literal>auto_includes</literal> settings.</para>
             </listitem>
 
             <listitem>
