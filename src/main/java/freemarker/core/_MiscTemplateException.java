@@ -40,7 +40,7 @@ public class _MiscTemplateException extends TemplateException {
     }
     
     public _MiscTemplateException(Throwable cause, Environment env, String description) {
-        super(cause, env, description, true);
+        super(description, cause, env);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
