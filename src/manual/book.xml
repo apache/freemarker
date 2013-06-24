@@ -20595,6 +20595,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>HTML_DEBUG_HANDLER</literal>.</para>
             </listitem>
 
+            <listitem>
+              <para>Added convenience constructor <literal>Template(String
+              name, String sourceCode, Configuration cfg)</literal>.</para>
+            </listitem>
+
             <listitem xml:id="version_2_3_20_ide">
               <para>Mostly concerning tool (like IDE plugin) authors:</para>
 

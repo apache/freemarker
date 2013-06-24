@@ -137,6 +137,14 @@ public class Template extends Configurable {
      * non-null (It's not actually necessary because we are using a Reader) then it's
      * checked against the encoding specified in the FTL header -- assuming that is specified,
      * and if they don't match a WrongEncodingException is thrown.
+    
+    /**
+     * Convenience constructor for {@link #Template(String, Reader, Configuration)
+     * Template(name, new StringReader(reader), cfg)}.
+     */
+    public Template(String name, String sourceCode, Configuration cfg) throws IOException {
+        this(name, new StringReader(sourceCode), cfg, null);
+    }
      */
     public Template(String name, Reader reader, Configuration cfg, String encoding)
     throws IOException
