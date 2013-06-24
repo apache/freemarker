@@ -69,7 +69,7 @@ public class ASTPrinter {
     
     public static String getASTAsString(String templateName, String ftl, Options opts) throws IOException {
         Configuration cfg = new Configuration();
-        Template t = new Template(templateName, new StringReader(ftl), cfg);
+        Template t = new Template(templateName, ftl, cfg);
         return getASTAsString(t, opts);
     }
 

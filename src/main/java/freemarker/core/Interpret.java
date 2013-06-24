@@ -53,7 +53,6 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.Writer;
 import java.util.Map;
 
@@ -124,7 +123,7 @@ class Interpret extends BuiltIn
         {
             interpretedTemplate = new Template(
                     (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
-                    new StringReader(templateSource),
+                    templateSource,
                     parentTemplate.getConfiguration());
         }
         catch(IOException e)

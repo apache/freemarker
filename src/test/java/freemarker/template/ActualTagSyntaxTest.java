@@ -1,7 +1,6 @@
 package freemarker.template;
 
 import java.io.IOException;
-import java.io.StringReader;
 
 import junit.framework.TestCase;
 
@@ -41,7 +40,7 @@ public class ActualTagSyntaxTest extends TestCase {
     private int getActualTagSyntax(String ftl, int cfgTagSyntax) throws IOException {
         Configuration cfg = new Configuration();
         cfg.setTagSyntax(cfgTagSyntax);
-        return new Template(null, new StringReader(ftl), cfg).getActualTagSyntax();
+        return new Template(null, ftl, cfg).getActualTagSyntax();
     }
     
 }
