@@ -125,14 +125,32 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Constructs a TemplateException with the given underlying Exception,
-     * but no detail message.
-     *
-     * @param cause the underlying <code>Exception</code> that caused this
-     * exception to be raised
+     * The same as {@link #TemplateException(Throwable, Environment)}; it's exists only for binary
+     * backward-compatibility.
      */
     public TemplateException(Exception cause, Environment env) {
         this((String) null, cause, env);
+    }
+
+    /**
+     * Constructs a TemplateException with the given underlying Exception,
+     * but no detail message.
+     *
+     * @param cause the underlying {@link Exception} that caused this
+     * exception to be raised
+     * 
+     * @since 2.3.20
+     */
+    public TemplateException(Throwable cause, Environment env) {
+        this((String) null, cause, env);
+    }
+    
+    /**
+     * The same as {@link #TemplateException(String, Throwable, Environment)}; it's exists only for binary
+     * backward-compatibility.
+     */
+    public TemplateException(String description, Exception cause, Environment env) {
+        this(description, cause, env, null);
     }
 
     /**
@@ -142,18 +160,10 @@ public class TemplateException extends Exception {
      *
      * @param description the description of the error that occurred
      * @param cause the underlying {@link Exception} that caused this exception to be raised
+     * 
+     * @since 2.3.20
      */
-    public TemplateException(String description, Exception cause, Environment env) {
-        this(description, cause, env, null);
-    }
-
-    /**
-     * Don't use this; this is to be used internally by FreeMarker.
-     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
-     *     backward-compatibility
-     */
-    protected TemplateException(Throwable cause, Environment env, String description,
-            boolean preventAmbiguity) {
+    public TemplateException(String description, Throwable cause, Environment env) {
         this(description, cause, env, null);
     }
     
@@ -213,9 +223,9 @@ public class TemplateException extends Exception {
      * <p><b>Note:</b><br />
      * avoided calling it <code>getCause</code> to avoid name clash with
      * JDK 1.4 method. This would be problematic because the JDK 1.4 method
-     * returns a <code>Throwable</code> rather than an <code>Exception</code>.</p>
+     * returns a <code>Throwable</code> rather than an {@link Exception}.</p>
      *
-     * @return the underlying <code>Exception</code>, if any, that caused this
+     * @return the underlying {@link Exception}, if any, that caused this
      * exception to be raised
      * 
      * @deprecated Use {@link #getCause()} instead, as this can't return runtime exceptions and errors as is.
@@ -229,9 +239,10 @@ public class TemplateException extends Exception {
     /**
      * Returns the cause exception.
      *
-     * @see Throwable#getCause()
-     * @return the underlying <code>Exception</code>, if any, that caused this
+     * @return the underlying {@link Exception}, if any, that caused this
      * exception to be raised
+     * 
+     * @see Throwable#getCause()
      */
     public Throwable getCause() {
         return causeException;

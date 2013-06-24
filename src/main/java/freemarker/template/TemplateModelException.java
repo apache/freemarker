@@ -79,14 +79,31 @@ public class TemplateModelException extends TemplateException {
     }
 
     /**
-     * Constructs a <tt>TemplateModelException</tt> with the given underlying
-     * Exception, but no detail message.
-     *
-     * @param cause the underlying <code>Exception</code> that caused this
-     * exception to be raised
+     * The same as {@link #TemplateModelException(Throwable)}; it's exists only for binary
+     * backward-compatibility.
      */
     public TemplateModelException(Exception cause) {
         this((String) null, cause);
+    }
+
+    /**
+     * Constructs a <tt>TemplateModelException</tt> with the given underlying
+     * Exception, but no detail message.
+     *
+     * @param cause the underlying {@link Exception} that caused this
+     * exception to be raised
+     */
+    public TemplateModelException(Throwable cause) {
+        this((String) null, cause);
+    }
+
+    
+    /**
+     * The same as {@link #TemplateModelException(String, Throwable)}; it's exists only for binary
+     * backward-compatibility.
+     */
+    public TemplateModelException(String description, Exception cause) {
+        super(description, cause, null);
     }
 
     /**
@@ -95,10 +112,10 @@ public class TemplateModelException extends TemplateException {
      * to be raised.
      *
      * @param description the description of the error that occurred
-     * @param cause the underlying <code>Exception</code> that caused this
+     * @param cause the underlying {@link Exception} that caused this
      * exception to be raised
      */
-    public TemplateModelException(String description, Exception cause) {
+    public TemplateModelException(String description, Throwable cause) {
         super(description, cause, null);
     }
 
@@ -109,7 +126,7 @@ public class TemplateModelException extends TemplateException {
      */
     protected TemplateModelException(Throwable cause, Environment env, String description,
             boolean preventAmbiguity) {
-        super(cause, env, description, true);
+        super(description, cause, env);
     }
     
     /**

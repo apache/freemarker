@@ -20317,6 +20317,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: [FIXME]</para>
 
+        <para>The most important improvement in this release is the better
+        error messages. It may sounds </para>
+
         <para>If you are IDE/tools author, <link
         linkend="version_2_3_20_ide">note these changes</link>.</para>
 
@@ -20598,6 +20601,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Added convenience constructor <literal>Template(String
               name, String sourceCode, Configuration cfg)</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>TemplateException</literal>-s and
+              <literal>TemplateModelExcepton</literal>-s now can have
+              <literal>Throwable</literal> cause, not just
+              <literal>Exception</literal> (it was an old oversight).</para>
             </listitem>
 
             <listitem xml:id="version_2_3_20_ide">
