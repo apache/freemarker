@@ -109,7 +109,7 @@ import freemarker.template.utility.SecurityUtilities;
  * templates using the <tt>models</tt> attribute.</li>
  * </ul>
  * <p>It supports the following attributes:</p>
- * <table border="1" cellpadding="2" cellspacing="0">
+ * <table style="width: auto; border-collapse: collapse" border="1">
  *   <tr>
  *     <th valign="top" align="left">Attribute</th>
  *     <th valign="top" align="left">Description</th>
@@ -215,7 +215,8 @@ import freemarker.template.utility.SecurityUtilities;
  * </table>
  * 
  * <p>It supports the following nesed elements:</p>
- * <table border="1" cellpadding="2" cellspacing="0">
+ * 
+ * <table style="width: auto; border-collapse: collapse" border="1">
  *   <tr>
  *     <th valign="top" align="left">Element</th>
  *     <th valign="top" align="left">Description</th>

@@ -246,7 +246,7 @@ implements
      * Returns a new NodeListModel containing the nodes that result from applying
      * an operator to this model's nodes.
      * @param key the operator to apply to nodes. Available operators are:
-     * <table border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1">
      *   <thead>
      *     <tr>
      *       <th align="left">Key name</th>

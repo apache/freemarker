@@ -822,13 +822,13 @@ public class Configurable
      *             with {@code "allowed_classes:"} and/or
      *             {@code "trusted_templates:"}. Examples of valid values:
      *             
-     *             <table border="1">
+     *             <table style="width: auto; border-collapse: collapse" border="1">
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
      *               <tr>
      *                 <td>
-                         {@code allowed_classes: com.example.C1, com.example.C2,
+     *                   {@code allowed_classes: com.example.C1, com.example.C2,
      *                   trusted_templates: lib/*, safe.ftl}                 
      *                 <td>
      *                   Only allow instantiating the {@code com.example.C1} and
@@ -901,7 +901,7 @@ public class Configurable
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table border=1 cellpadding=4>
+     *       <table style="width: auto; border-collapse: collapse" border="1">
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
      *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}

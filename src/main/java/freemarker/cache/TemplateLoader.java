@@ -135,8 +135,7 @@ public interface TemplateLoader {
      * @param encoding the character encoding used to translate source bytes
      * to characters. Some loaders may not have access to the byte
      * representation of the template stream, and instead directly obtain a 
-     * character stream. These loaders will - quite naturally - ignore the 
-     * encoding parameter.
+     * character stream. These loaders will should ignore the encoding parameter.
      * @return a reader representing the template character stream. The
      * framework will call <code>close()</code>.
      * @throws IOException if an I/O error occurs while accessing the stream.
@@ -147,7 +146,7 @@ public interface TemplateLoader {
     
     /**
      * Closes the template source. This is the last method that is called by
-     * the TemplateCache for a templateSource. The framework guarantees that
+     * the {@link TemplateCache} for a template source. The framework guarantees that
      * this method will be called on every object that is returned from
      * {@link #findTemplateSource(String)}.
      * @param templateSource the template source that should be closed.

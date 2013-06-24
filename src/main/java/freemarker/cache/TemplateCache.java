@@ -553,25 +553,35 @@ public class TemplateCache
                 + (parse ? ",parsed] " : ",unparsed]");
     }    
 
-    public static String getFullTemplatePath(Environment env, String parentTemplateDir, String templateNameString)
+    /**
+     * Resolves a path-like reference to a template (like the one used in {@code #include} or {@code #import}), assuming
+     * a current directory. This gives a full, even if non-normalized template name, that could be used for
+     * {@link #getTemplate(String, Locale, String, boolean)}. This is mostly used when a template refers to another
+     * template.
+     * 
+     * @param targetTemplatePath If starts with "/" or contains "://", it's an absolute path and {@code currentDir}
+     *     will be ignored, otherwise it's interpreted as relative to {@code currentDir}
+     * @param currentTemplateDir must end with "/", might contains "://".  
+     */
+    public static String getFullTemplatePath(Environment env, String currentTemplateDir, String targetTemplatePath)
     {
         if (!env.isClassicCompatible()) {
-            if (templateNameString.indexOf("://") >0) {
+            if (targetTemplatePath.indexOf("://") >0) {
                 ;
             }
-            else if (templateNameString.length() > 0 && templateNameString.charAt(0) == '/')  {
-                int protIndex = parentTemplateDir.indexOf("://");
+            else if (targetTemplatePath.length() > 0 && targetTemplatePath.charAt(0) == '/')  {
+                int protIndex = currentTemplateDir.indexOf("://");
                 if (protIndex >0) {
-                    templateNameString = parentTemplateDir.substring(0, protIndex + 2) + templateNameString;
+                    targetTemplatePath = currentTemplateDir.substring(0, protIndex + 2) + targetTemplatePath;
                 } else {
-                    templateNameString = templateNameString.substring(1);
+                    targetTemplatePath = targetTemplatePath.substring(1);
                 }
             }
             else {
-                templateNameString = parentTemplateDir + templateNameString;
+                targetTemplatePath = currentTemplateDir + targetTemplatePath;
             }
         }
-        return templateNameString;
+        return targetTemplatePath;
     }
 
     private Object findTemplateSource(String name, Locale locale)

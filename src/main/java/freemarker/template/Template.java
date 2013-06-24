@@ -57,6 +57,7 @@ import java.io.FilterReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import freemarker.cache.TemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
@@ -121,22 +123,32 @@ public class Template extends Configurable {
         super(cfg != null ? cfg : Configuration.getDefaultConfiguration());
         this.name = name;
     }
+    
 
     /**
-     * Constructs a template from a character stream.
+     * Constructs a template from a character stream. Note that this is a relatively expensive operation; where
+     * higher performance matters, you should re-use (cache) {@link Template} instances instead of re-creating them from
+     * the same source again and again.
      *
-     * @param name the path of the template file relative to the directory what you use to store
-     *        the templates. See {@link #getName} for more details.
-     * @param reader the character stream to read from. It will always be closed (Reader.close()).
+     * @param name the path of the template file relatively to the (virtual) directory that you use to store
+     *        the templates. Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}.
+     *        Check {@link #getName()} to see how the name will be used. The name should be independent of the
+     *        actual storage mechanism and physical location as far as possible. Even when the templates are stored
+     *        straightforwardly in real files (they often aren't; see {@link TemplateLoader}), the name shouldn't be an
+     *        absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and you
+     *        are using {@code "/www/templates/"} as the template root directory via
+     *        {@link Configuration#setDirectoryForTemplateLoading(java.io.File)}, then the template name will be
+     *        {@code "forum/main.ftl"}.
+     * @param reader the character stream to read from. It will always be closed ({@link Reader#close()}).
      * @param cfg the Configuration object that this Template is associated with.
-     *        If this is null, the "default" {@link Configuration} object is used,
+     *        If this is {@code null}, the "default" {@link Configuration} object is used,
      *        which is highly discouraged, because it can easily lead to
-     *        erroneous, unpredictable behaviour.
+     *        erroneous, unpredictable behavior.
      *        (See more {@link Configuration#getDefaultConfiguration() here...})
-     * @param encoding This is the encoding that we are supposed to be using. If this is
-     * non-null (It's not actually necessary because we are using a Reader) then it's
-     * checked against the encoding specified in the FTL header -- assuming that is specified,
-     * and if they don't match a WrongEncodingException is thrown.
+     */
+    public Template(String name, Reader reader, Configuration cfg) throws IOException {
+        this(name, reader, cfg, null);
+    }
     
     /**
      * Convenience constructor for {@link #Template(String, Reader, Configuration)
@@ -145,20 +157,33 @@ public class Template extends Configurable {
     public Template(String name, String sourceCode, Configuration cfg) throws IOException {
         this(name, new StringReader(sourceCode), cfg, null);
     }
+    
+    /**
+     * Same as {@link #Template(String, Reader, Configuration)}, but also specifies the template's encoding.
+     *
+     * @param encoding This is the encoding that we are supposed to be using. But it's not really necessary because we
+     *        have a {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
+     *        {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding will
+     *        be this. But this behavior of said directives is considered to be harmful, and will be probably phased
+     *        out. Until that, it's better to leave this on {@code null}, so that the encoding will come from the
+     *        {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header with
+     *        encoding, they must match, or else a {@link WrongEncodingException} is thrown. 
+     *        
+     * @deprecated Use {@link #Template(String, Reader, Configuration)} instead.
      */
     public Template(String name, Reader reader, Configuration cfg, String encoding)
     throws IOException
     {
         this(name, cfg);
         this.encoding = encoding;
-
-        if (!(reader instanceof BufferedReader)) {
-            reader = new BufferedReader(reader, 0x1000);
-        }
-        LineTableBuilder ltb = new LineTableBuilder(reader);
         try {
+            if (!(reader instanceof BufferedReader)) {
+                reader = new BufferedReader(reader, 0x1000);
+            }
+            reader = new LineTableBuilder(reader);
+            
             try {
-                parser = new FMParser(this, ltb,
+                parser = new FMParser(this, reader,
                         getConfiguration().getStrictSyntaxMode(),
                         getConfiguration().getWhitespaceStripping(),
                         getConfiguration().getTagSyntax(),
@@ -180,7 +205,7 @@ public class Template extends Configurable {
             throw e;
         }
         finally {
-            ltb.close();
+            reader.close();
         }
         DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
@@ -188,22 +213,11 @@ public class Template extends Configurable {
     }
 
     /**
-     * This is equivalent to Template(name, reader, cfg, null)
-     */
-
-    public Template(String name, Reader reader, Configuration cfg) throws IOException {
-        this(name, reader, cfg, null);
-    }
-
-
-    /**
-     * Constructs a template from a character stream.
-     *
-     * This is the same as the 3 parameter version when you pass null
-     * as the cfg parameter.
+     * Equivalent to {@link #Template(String, Reader, Configuration)
+     * Template(name, reader, null)}.
      * 
      * @deprecated This constructor uses the "default" {@link Configuration}
-     * instance, which can easily lead to erroneous, unpredictable behaviour.
+     * instance, which can easily lead to erroneous, unpredictable behavior.
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
     public Template(String name, Reader reader) throws IOException {
@@ -211,7 +225,7 @@ public class Template extends Configurable {
     }
 
     /**
-     * This constructor is only used internally.
+     * Only used internally.
      */
     Template(String name, TemplateElement root, Configuration config) {
         this(name, config);
@@ -397,14 +411,25 @@ public class Template extends Configurable {
 
 
     /**
-     * The path of the template "file" relatively to the "directory" that you use to store the templates, or
-     * possibly {@code null} for non-stored templates.
-     * For example, if the real path of template is <tt>"/www/templates/forum/main.fm"</tt>,
-     * and you use "<tt>"/www/templates"</tt> as
-     * {@link Configuration#setDirectoryForTemplateLoading "directoryForTemplateLoading"},
-     * then <tt>name</tt> should be <tt>"forum/main.fm"</tt>. The <tt>name</tt> is used for example when you
-     * use <tt>&lt;include ...></tt> and you give a path that is relative to the current
-     * template, or in error messages when FreeMarker logs an error while it processes the template.
+     * The usually path-like (or URL-like) identifier of the template, or possibly {@code null} for non-stored
+     * templates. It usually looks like a relative UN*X path; it should use {@code /}, not {@code \}, and shouldn't
+     * start with {@code /} (but there are no hard guarantees). It's not a real path in a file-system, it's just
+     * a name that a {@link TemplateLoader} used to load the backing resource. Or, it can also be a name that was never
+     * used to load the template (directly created with {@link #Template(String, Reader, Configuration)}).
+     * Even if the templates are stored straightforwardly in files, this is relative to the base directory of the
+     * {@link TemplateLoader}. So it really could be anything, except that it has importance in these situations:
+     * 
+     * <ul>
+     *   <li><p>Relative paths to other templates in this template will be resolved relatively to the directory part of
+     *       this. Like if the template name is {@link "foo/this.ftl"}, then {@code <#include "other.ftl">} gets
+     *       the template with name {@link "foo/other.ftl"}.
+     *   <li><p>It's shown in error messages. So it should be something based on which the user can find the template.
+     *   <li><p>Some tools, like an IDE plugin, uses this to identify (and find) templates.
+     * </ul>
+     * 
+     * <p>Some frameworks use URL-like template names like {@code "someSchema://foo/bar.ftl"}. FreeMarker understands
+     * this notation, so an absolute path like {@code "/baaz.ftl"} in that template will be resolved too
+     * {@code "someSchema://baaz.ftl"}.
      */
     public String getName() {
         return name;

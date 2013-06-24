@@ -976,7 +976,7 @@ public class StringUtil {
      * 
      * The escaped characters are:
      * 
-     * <table border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1">
      * <tr>
      *   <th>Input
      *   <th>Output

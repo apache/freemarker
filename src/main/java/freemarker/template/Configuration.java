@@ -145,7 +145,6 @@ import freemarker.template.utility.XmlEscape;
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @author Attila Szegedi
  */
-
 public class Configuration extends Configurable implements Cloneable {
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
@@ -229,7 +228,7 @@ public class Configuration extends Configurable implements Cloneable {
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
      * 
-     * <table border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1">
      *   <tr><td>ar</td><td>ISO-8859-6</td></tr>
      *   <tr><td>be</td><td>ISO-8859-5</td></tr>
      *   <tr><td>bg</td><td>ISO-8859-5</td></tr>
@@ -700,8 +699,8 @@ public class Configuration extends Configurable implements Cloneable {
      *     is interpreted by the underlying {@link TemplateLoader}, but the
      *     cache makes some assumptions. First, the name is expected to be
      *     a hierarchical path, with path components separated by a slash
-     *     character (not with backslash!). The path (the name) must <em>not</em> begin with slash;
-     *     the path is always relative to the "template root directory".
+     *     character (not with backslash!). The path (the name) given here must <em>not</em> begin with slash;
+     *     it's always interpreted relative to the "template root directory".
      *     Then, the {@code ..} and {@code .} path meta-elements will be resolved.
      *     For example, if the name is {@code a/../b/./c.ftl}, then it will be
      *     simplified to {@code b/c.ftl}. The rules regarding this are same as with conventional
