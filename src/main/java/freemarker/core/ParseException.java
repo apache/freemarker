@@ -71,9 +71,6 @@ import freemarker.template.utility.SecurityUtilities;
  */
 public class ParseException extends java.io.IOException implements FMParserConstants {
 
-   // This was no part of Throwable on J2SE 1.2
-   private final Throwable cause;
-   
    /**
     * This is the last token that has been consumed successfully.  If
     * this object has been created due to a parse error, the token
@@ -81,8 +78,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
     */
    public Token currentToken;
    public String cachedUnexpectedTokenMessage;
-
-   private String templateName;
    
    public int columnNumber, lineNumber;
 
@@ -99,7 +94,19 @@ public class ParseException extends java.io.IOException implements FMParserConst
     * defined in the generated ...Constants interface.
     */
    public String[] tokenImage;
+
+   /**
+    * The end of line string for this machine.
+    */
+   protected String eol = SecurityUtilities.getSystemProperty("line.separator", "\n");
    
+   /** @deprecated Will be remove without replacement in 2.4. */
+   protected boolean specialConstructor;  
+
+   // This was no part of Throwable on J2SE 1.2; remove in Java 5
+   private final Throwable cause;
+
+   private String templateName;
 
   /**
    * This constructor is used by the method "generateParseException"
@@ -119,6 +126,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
     super("");
     cause = null;
     currentToken = currentTokenVal;
+    specialConstructor = true;
     expectedTokenSequences = expectedTokenSequencesVal;
     tokenImage = tokenImageVal;
     lineNumber = currentToken.next.beginLine;
@@ -388,11 +396,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
       }
       return null;
   }
-
-  /**
-   * The end of line string for this machine.
-   */
-  protected final String eol = SecurityUtilities.getSystemProperty("line.separator", "\n");
 
   /**
    * Used to convert raw characters to their escaped version
