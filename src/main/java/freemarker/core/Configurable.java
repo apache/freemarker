@@ -71,7 +71,6 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.jython.JythonWrapper;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
@@ -781,7 +780,7 @@ public class Configurable
      *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means {@link BeansWrapper#DEFAULT_WRAPPER}),
-     *       {@code "jython"} (means {@link JythonWrapper#DEFAULT_WRAPPER})
+     *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
      *   
