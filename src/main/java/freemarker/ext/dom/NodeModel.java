@@ -103,7 +103,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     
     static private DocumentBuilderFactory docBuilderFactory;
     
-    static private Map xpathSupportMap = Collections.synchronizedMap(new WeakHashMap());
+    static private final Map xpathSupportMap = Collections.synchronizedMap(new WeakHashMap());
     
     static private XPathSupport jaxenXPathSupport;
     
@@ -143,9 +143,10 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      */
     static public DocumentBuilderFactory getDocumentBuilderFactory() {
         if (docBuilderFactory == null) {
-            docBuilderFactory = DocumentBuilderFactory.newInstance();
-            docBuilderFactory.setNamespaceAware(true);
-            docBuilderFactory.setIgnoringElementContentWhitespace(true);
+            DocumentBuilderFactory newFactory = DocumentBuilderFactory.newInstance();
+            newFactory.setNamespaceAware(true);
+            newFactory.setIgnoringElementContentWhitespace(true);
+            docBuilderFactory = newFactory;
         }
         return docBuilderFactory;
     }
