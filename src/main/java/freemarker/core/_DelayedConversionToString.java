@@ -12,14 +12,11 @@ public abstract class _DelayedConversionToString {
         this.object = object;
     }
 
-    public String toString() {
+    public synchronized String toString() {
+        // Switch to double-check + volatile with Java 5
         if (stringValue == NOT_SET) {
-            synchronized (this) {
-                if (stringValue == NOT_SET) {
-                    stringValue = doConversion(object);
-                    this.object = null;
-                }
-            }
+            stringValue = doConversion(object);
+            this.object = null;
         }
         return stringValue;
     }

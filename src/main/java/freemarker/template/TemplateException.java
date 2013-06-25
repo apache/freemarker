@@ -252,47 +252,47 @@ public class TemplateException extends Exception {
      * Returns the snapshot of the FTL stack strace at the time this exception was created.
      */
     public String getFTLInstructionStack() {
-        if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshot != null) {
-            if (renderedFtlInstructionStackSnapshot == null) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, pw);
-                pw.close();
-                synchronized (lock) {
+        synchronized (lock) {
+            if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshot != null) {
+                if (renderedFtlInstructionStackSnapshot == null) {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, pw);
+                    pw.close();
                     if (renderedFtlInstructionStackSnapshot == null) {
                         renderedFtlInstructionStackSnapshot = sw.toString();
                         deleteFTLInstructionStackSnapshotIfNotNeeded();
                     }
                 }
+                return renderedFtlInstructionStackSnapshot;
+            } else {
+                return null;
             }
-            return renderedFtlInstructionStackSnapshot;
-        } else {
-            return null;
         }
     }
     
     private String getFTLInstructionStackTop() {
-        if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshotTop != null) {
-            if (renderedFtlInstructionStackSnapshotTop == null) {
-                int stackSize = ftlInstructionStackSnapshot.length;
-                String s;
-                if (stackSize == 0) {
-                    s = "";
-                } else {
-                    s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
-                        + ":\n==> "
-                        + _CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
-                }
-                synchronized (lock) {
+        synchronized (lock) {
+            if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshotTop != null) {
+                if (renderedFtlInstructionStackSnapshotTop == null) {
+                    int stackSize = ftlInstructionStackSnapshot.length;
+                    String s;
+                    if (stackSize == 0) {
+                        s = "";
+                    } else {
+                        s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
+                            + ":\n==> "
+                            + _CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
+                    }
                     if (renderedFtlInstructionStackSnapshotTop == null) {
                         renderedFtlInstructionStackSnapshotTop = s;
                         deleteFTLInstructionStackSnapshotIfNotNeeded();
                     }
                 }
+                return renderedFtlInstructionStackSnapshotTop.length() != 0 ? renderedFtlInstructionStackSnapshotTop : null;
+            } else {
+                return null;
             }
-            return renderedFtlInstructionStackSnapshotTop.length() != 0 ? renderedFtlInstructionStackSnapshotTop : null;
-        } else {
-            return null;
         }
     }
     
@@ -304,15 +304,15 @@ public class TemplateException extends Exception {
     }
     
     private String getDescription() {
-        if (description == null) {
-            synchronized (lock) {
+        synchronized (lock) {
+            if (description == null) {
                 if (description == null && descriptionBuilder != null) {
                     description = descriptionBuilder.toString(getFailingInstruction());
                     descriptionBuilder = null;
                 }
             }
+            return description;
         }
-        return description;
     }
 
     private TemplateElement getFailingInstruction() {
@@ -462,12 +462,10 @@ public class TemplateException extends Exception {
         if (messageWasAlreadyPrintedForThisTrace != null && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
             return "[... Exception message was already printed; see it above ...]";
         } else {
-            if (message == null) {
-                synchronized (lock) {
-                    if (message == null) renderMessages();
-                }
+            synchronized (lock) {  // Switch to double-check + volatile with Java 5
+                if (message == null) renderMessages();
+                return message;
             }
-            return message;
         }
     }
     
@@ -477,12 +475,10 @@ public class TemplateException extends Exception {
      * quotation, as that's the part of the description. 
      */
     public String getMessageWithoutStackTop() {
-        if (messageWithoutStackTop == null) {
-            synchronized (lock) {
-                if (messageWithoutStackTop == null) renderMessages();
-            }
+        synchronized (lock) {
+            if (messageWithoutStackTop == null) renderMessages();
+            return messageWithoutStackTop;
         }
-        return messageWithoutStackTop;
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {

@@ -108,14 +108,10 @@ public final class Version implements Serializable {
     /**
      * Contains the major.minor.micor numbers and the extraInfo part, not the other information.
      */
-    public String toString() {
+    public synchronized String toString() {  // Switch to double-check + volatile with Java 5
         if (stringValue == null) {
-            synchronized (this) {
-                if (stringValue == null) {
-                    stringValue = major + "." + minor + "." + micro;
-                    if (extraInfo != null) stringValue += "-" + extraInfo; 
-                }
-            }
+            stringValue = major + "." + minor + "." + micro;
+            if (extraInfo != null) stringValue += "-" + extraInfo; 
         }
         return stringValue;
     }
@@ -213,12 +209,6 @@ public final class Version implements Serializable {
         if (gaeCompliant == null) {
             if (other.gaeCompliant != null) return false;
         } else if (!gaeCompliant.equals(other.gaeCompliant)) {
-            return false;
-        }
-        
-        if (stringValue == null) {
-            if (other.stringValue != null) return false;
-        } else if (!stringValue.equals(other.stringValue)) {
             return false;
         }
         
