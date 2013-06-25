@@ -377,7 +377,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
                       name = "(";
                       break;
                   case UNIFIED_CALL_END:
-                      name = "@<user_directive>";
+                      name = "@...";
                       break;
                   default:
                       name = null;
