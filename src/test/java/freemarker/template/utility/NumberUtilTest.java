@@ -3,7 +3,6 @@ package freemarker.template.utility;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import freemarker.template.utility.NumberUtil;
 import junit.framework.TestCase;
 
 public class NumberUtilTest extends TestCase {

@@ -52,7 +52,10 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.

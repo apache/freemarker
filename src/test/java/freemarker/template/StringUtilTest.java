@@ -1,7 +1,7 @@
 package freemarker.template;
 
-import freemarker.template.utility.StringUtil;
 import junit.framework.TestCase;
+import freemarker.template.utility.StringUtil;
 
 public class StringUtilTest extends TestCase {
 

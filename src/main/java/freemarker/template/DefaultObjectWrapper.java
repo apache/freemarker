@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import freemarker.ext.dom.NodeModel;
-import freemarker.log.Logger;
 
 /**
  * <p>The default implementation of the ObjectWrapper

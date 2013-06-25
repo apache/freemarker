@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import freemarker.cache.StringTemplateLoader;
 import junit.framework.TestCase;
+import freemarker.cache.StringTemplateLoader;
 
 public class TestIncudeFromNameless extends TestCase {
 

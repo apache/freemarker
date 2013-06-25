@@ -53,7 +53,9 @@
 package freemarker.test.templatesuite.models;
 
 import java.util.List;
-import freemarker.template.*;
+
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateMethodModel;
 
 /**
  * A simple method model used as a test bed.

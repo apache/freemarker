@@ -52,8 +52,10 @@
 
 package freemarker.test.templatesuite.models;
 
-import java.util.*;
-import freemarker.template.*;
+import java.util.Iterator;
+import java.util.List;
+
+import freemarker.template.TemplateMethodModel;
 
 /**
  * Another test of the interaction between MethodModels and TransformModels.

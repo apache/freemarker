@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Locale;
 
-import freemarker.cache.StringTemplateLoader;
-import freemarker.cache.StrongCacheStorage;
-import freemarker.cache.TemplateCache;
-import freemarker.cache.TemplateLoader;
-import freemarker.template.Configuration;
 import junit.framework.TestCase;
+import freemarker.template.Configuration;
 
 public class TemplateCacheTest extends TestCase
 {

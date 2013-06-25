@@ -52,9 +52,14 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
+
+import freemarker.template.TemplateTransformModel;
 
 /**
  * A TemplateTransformModel that includes properties. These properties can be

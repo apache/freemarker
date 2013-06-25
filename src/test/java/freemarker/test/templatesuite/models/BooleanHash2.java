@@ -52,7 +52,8 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
 
 /**
  * Tests the impact that the isEmpty() has on template hash models.

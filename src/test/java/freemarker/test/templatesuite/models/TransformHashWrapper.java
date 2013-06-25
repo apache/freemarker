@@ -52,8 +52,13 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
-import freemarker.template.utility.*;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.HtmlEscape;
+import freemarker.template.utility.StandardCompress;
 
 /**
  * Part of the TestTransform testcase suite.

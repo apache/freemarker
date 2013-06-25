@@ -52,9 +52,11 @@
 
 package freemarker.test.templatesuite.models;
 
-import java.util.*;
-import freemarker.template.*;
-import freemarker.template.utility.*;
+import java.util.List;
+
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.utility.HtmlEscape;
+import freemarker.template.utility.XmlEscape;
 
 /**
  * Simple test of the interaction between MethodModels and TransformModels.

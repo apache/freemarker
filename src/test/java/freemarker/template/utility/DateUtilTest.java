@@ -7,11 +7,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
-import freemarker.template.utility.UnrecognizedTimeZoneException;
-
 import junit.framework.TestCase;
+import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 
 public class DateUtilTest extends TestCase {
 

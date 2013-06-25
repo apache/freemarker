@@ -52,7 +52,9 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * Model for testing list models. Every
