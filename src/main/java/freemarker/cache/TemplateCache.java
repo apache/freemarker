@@ -337,7 +337,9 @@ public class TemplateCache
             return t;
         }
         catch(RuntimeException e) {
-            storeNegativeLookup(tk, cachedTemplate, e);
+            if (cachedTemplate != null) {
+                storeNegativeLookup(tk, cachedTemplate, e);
+            }
             throw e;
         }
         catch(IOException e) {
