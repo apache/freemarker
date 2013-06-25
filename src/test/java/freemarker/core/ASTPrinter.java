@@ -1,11 +1,20 @@
 package freemarker.core;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Enumeration;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -19,15 +28,30 @@ import freemarker.template.utility.StringUtil;
  */
 public class ASTPrinter {
 
+    private final Configuration cfg;
+    private int successfulCounter;
+    private int failedCounter;
+    
     static public void main(String[] args) throws IOException {
         if (args.length == 0) {
             usage();
-            return;
+            System.exit(-1);
         }
         
-        Configuration cfg = new Configuration();
+        ASTPrinter astp = new ASTPrinter(); 
+        if (args[0].equalsIgnoreCase("-r")) {
+            astp.mainRecursive(args);
+        } else {
+            astp.mainSingleTemplate(args);
+        }
+    }
+    
+    private ASTPrinter() {
+        cfg = new Configuration();
         cfg.setIncompatibleImprovements(new Version(2, 3, 20));
-        
+    }
+    
+    private void mainSingleTemplate(String[] args) throws IOException, FileNotFoundException {
         final String templateFileName;
         final String templateContent;
         if (args[0].startsWith("ftl:")) {
@@ -43,14 +67,96 @@ public class ASTPrinter {
                 templateFileName == null ? new StringReader(templateContent) : new FileReader(templateFileName),
                 cfg);
         
-        System.out.println(getASTAsString(t));
+        p(getASTAsString(t));
+    }
+
+    private void mainRecursive(String[] args) throws IOException {
+        if (args.length != 4) {
+            p("Number of arguments must be 4, but was: " + args.length);
+            usage();
+            System.exit(-1);
+        }
+        
+        File srcDir = new File(args[1]);
+        if (!srcDir.isDirectory()) {
+            p(StringUtil.jQuote(args[1]) + " must be a directory");
+            System.exit(-1);
+        }
+        
+        Pattern fnPattern;
+        try {
+            fnPattern = Pattern.compile(args[2]);
+        } catch (PatternSyntaxException e) {
+            p(StringUtil.jQuote(args[2]) + " is not a valid regular expression");
+            System.exit(-1);
+            return;
+        }
+        
+        File dstDir = new File(args[3]);
+        if (!dstDir.isDirectory()) {
+            p(StringUtil.jQuote(args[3]) + " must be a directory");
+            System.exit(-1);
+        }
+        
+        recurse(srcDir, fnPattern, dstDir);
+        
+        p("Successfully processed " + successfulCounter + ", failed  " + failedCounter + ".");
     }
     
+    private void recurse(File srcDir, Pattern fnPattern, File dstDir) throws IOException {
+        File[] files = srcDir.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                recurse(file, fnPattern, new File(dstDir, file.getName()));
+            } else {
+                if (fnPattern.matcher(file.getName()).matches()) {
+                    File dstFile = new File(dstDir, file.getName());
+                    String res;
+                    try {
+                        Template t;
+                        Reader r = new InputStreamReader(new FileInputStream(file), "ISO-8859-1");
+                        try {
+                                t = new Template(file.getPath().replace('\\', '/'), r, cfg);
+                        } finally {
+                            r.close();
+                        }
+                        res = getASTAsString(t);
+                        successfulCounter++;
+                    } catch (ParseException e) {
+                        res = "<<<FAILED>>>\n" + e.getMessage();
+                        failedCounter++;
+                        p("");
+                        p("-------------------------failed-------------------------");
+                        p("Error message was saved into: " + dstFile.getAbsolutePath());
+                        p("");
+                        p(e.getMessage());
+                    }
+                    save(res, dstFile);
+                }
+            }
+        }
+    }
+
+    private void save(String astStr, File file) throws IOException {
+        File parentDir = file.getParentFile();
+        if (!parentDir.isDirectory() && !parentDir.mkdirs()) {
+            throw new IOException("Failed to create parent directory: " + parentDir);
+        }
+        
+        Writer w = new BufferedWriter(new FileWriter(file));
+        try {
+            w.write(astStr);
+        } finally {
+            w.close();
+        }
+    }
+
     private static void usage() {
-        System.err.println("Prints template Abstract Syntax Tree (AST) as plain text.");
-        System.err.println("Usage:");
-        System.err.println("    java freemarker.core.PrintAST <templateFile>");
-        System.err.println("    java freemarker.core.PrintAST ftl:<templateSource>");
+        p("Prints template Abstract Syntax Tree (AST) as plain text.");
+        p("Usage:");
+        p("    java freemarker.core.PrintAST <templateFile>");
+        p("    java freemarker.core.PrintAST ftl:<templateSource>");
+        p("    java freemarker.core.PrintAST -r <src-directory> <regexp> <dst-directory>");
     }
 
     private static final String INDENTATION = "    ";
@@ -164,6 +270,10 @@ public class ASTPrinter {
             this.showConstantValue = showConstantValue;
         }
         
+    }
+    
+    private static void p(Object obj) {
+        System.out.println(obj);
     }
 
 }
