@@ -318,7 +318,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             final int argDescsEnd = paramNames.length * 2 + 1;
             if (idx < argDescsEnd) {
                 String paramName = paramNames[(idx - 1) / 2];
-                if (idx % 2 == 1) {
+                if (idx % 2 != 0) {
                     return paramName;
                 } else {
                     return paramDefaults.get(paramName);
@@ -339,7 +339,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         } else {
             final int argDescsEnd = paramNames.length * 2 + 1;
             if (idx < argDescsEnd) {
-                if (idx % 2 == 1) {
+                if (idx % 2 != 0) {
                     return ParameterRole.PARAMETER_NAME;
                 } else {
                     return ParameterRole.PARAMETER_DEFAULT;
