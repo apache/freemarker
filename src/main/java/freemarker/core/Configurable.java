@@ -954,7 +954,11 @@ public class Configurable
                 setTimeZone(TimeZone.getTimeZone(value));
             } else if (CLASSIC_COMPATIBLE_KEY.equals(name)) {
                 char firstChar;
-                if (value != null && value.length() > 0) firstChar =  value.charAt(0); else firstChar = 0;
+                if (value != null && value.length() > 0) {
+                    firstChar =  value.charAt(0);
+                } else {
+                    firstChar = 0;
+                }
                 if (Character.isDigit(firstChar) || firstChar == '+' || firstChar == '-') {
                     setClassicCompatibleAsInt(Integer.parseInt(value));
                 } else {
