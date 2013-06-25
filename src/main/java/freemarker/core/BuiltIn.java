@@ -101,6 +101,7 @@ import freemarker.core.StringBuiltins.substringBI;
 import freemarker.core.StringBuiltins.uncap_firstBI;
 import freemarker.core.StringBuiltins.upper_caseBI;
 import freemarker.core.StringBuiltins.word_listBI;
+import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
@@ -115,6 +116,8 @@ import freemarker.template.utility.StringUtil;
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 abstract class BuiltIn extends Expression implements Cloneable {
+    
+    private static final Logger logger = Logger.getLogger("freemarker.runtime");
     
     protected Expression target;
     protected String key;
@@ -267,7 +270,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
             builtins.put("groups", instantiateBI("freemarker.core._RegexBuiltins$groupsBI"));
             builtins.put("replace", instantiateBI("freemarker.core._RegexBuiltins$replace_reBI"));
             builtins.put("split", instantiateBI("freemarker.core._RegexBuiltins$split_reBI"));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            logger.debug("Regular expression built-ins won't be avilable", e);
+        }
     }
 
     private static Object instantiateBI(String className) throws Exception
