@@ -129,7 +129,7 @@ public abstract class FileTestCase extends TestCase {
     }
    
     protected final File getTestClassDirectory() throws IOException {
-        URL url = this.getClass().getResource(".");
+        URL url = this.getClass().getResource(".");  // Deliberately gets the package URL of the subclass
         if (url == null) throw new IOException("Couldn't get resource URL for \".\"");
         return new File(url.getFile());
     }

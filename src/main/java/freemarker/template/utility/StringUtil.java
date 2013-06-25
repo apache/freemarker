@@ -1055,7 +1055,7 @@ public class StringUtil {
                                 dangerous = true;
                             } else {
                                 final char prevPrevC = s.charAt(i - 2);
-                                dangerous = prevPrevC == prevC || prevPrevC == prevC;
+                                dangerous = prevPrevC == prevC;
                             }
                         } else {
                             dangerous = false;
