@@ -36,7 +36,7 @@ class JythonModelCache extends ModelCache
     protected TemplateModel create(Object obj) {
         boolean asHash = false;
         boolean asSequence = false;
-        JythonVersionAdapter versionAdapter = JythonVersionAdapter.getInstance();
+        JythonVersionAdapter versionAdapter = JythonVersionAdapterHolder.INSTANCE;
         if(versionAdapter.isPyInstance(obj)) {
             Object jobj = versionAdapter.pyInstanceToJava(obj);
             // FreeMarker-aware, Jython-wrapped Java objects are left intact 

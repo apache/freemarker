@@ -138,7 +138,7 @@ implements
         }
         throw new TemplateModelException(
                 "'?keys' is not supported as there is no 'keys' nor 'keySet' attribute on an instance of "
-                + JythonVersionAdapter.getInstance().getPythonClassName(object));
+                + JythonVersionAdapterHolder.INSTANCE.getPythonClassName(object));
     }
 
     /**
@@ -160,6 +160,6 @@ implements
         }
         throw new TemplateModelException(
                 "'?values' is not supported as there is no 'values' attribute on an instance of "
-                + JythonVersionAdapter.getInstance().getPythonClassName(object));
+                + JythonVersionAdapterHolder.INSTANCE.getPythonClassName(object));
     }
 }
