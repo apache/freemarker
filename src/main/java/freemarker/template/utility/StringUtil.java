@@ -1512,19 +1512,6 @@ public class StringUtil {
     }
 
     /**
-     * Makes {@code "&lt;#foo bar>"} or {@code "[#foo bar]"} from {@code "#foo bar"}, depending on the template syntax.
-     * Mostly useful for showing examples in error messages.
-     * 
-     * @since 2.4
-     */
-    public static String encloseAsTag(Template t, String tagContent) {
-        return t != null && t.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX
-                ? "[" + tagContent + "]"
-                : "<" + tagContent + ">";
-                
-    }
-
-    /**
      * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
      * Also, it return {@code null} for {@code null} parameter.
      * 
