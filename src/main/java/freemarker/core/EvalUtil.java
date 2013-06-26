@@ -334,7 +334,7 @@ class EvalUtil
             }
             throw new _MiscTemplateException(defaultBlamed, env, new Object[] {
                             "Can't compare values of these types. ",
-                            "Allowed comparisons are between two numbers, two strings, or two dates.\n",
+                            "Allowed comparisons are between two numbers, two strings, two dates, or two booleans.\n",
                             "Left hand operand is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
                             "Right hand operand is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)), "." });
         }
