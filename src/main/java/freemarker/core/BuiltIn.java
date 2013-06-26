@@ -284,9 +284,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
             StringBuffer buf = new StringBuffer(
-                    "Unknown built-in: " + StringUtil.jQuote(key) + ".\n"
-                    + "About the supported built-ins see: http://freemarker.org/docs/ref_builtins.html\n" 
-                    + "The alphabetical list of built-ins (as of FreeMarker " + Configuration.getVersion() + "):");
+                    "Unknown built-in: " + StringUtil.jQuote(key) + ". "
+                    + "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
+                    + "you're using FreeMarker " + Configuration.getVersion() + ".\n" 
+                    + "The alphabetical list of built-ins:");
             List names = new ArrayList(builtins.keySet().size());
             names.addAll(builtins.keySet());
             Collections.sort(names);

@@ -20318,7 +20318,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Date of release: [FIXME]</para>
 
         <para>The most important improvement in this release is the better
-        error messages. It may sounds </para>
+        error messages. It may sounds</para>
 
         <para>If you are IDE/tools author, <link
         linkend="version_2_3_20_ide">note these changes</link>.</para>
@@ -20610,6 +20610,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Exception</literal> (it was an old oversight).</para>
             </listitem>
 
+            <listitem>
+              <para>Parsing error messages under the JBoss Tools FreeMarker
+              IDE now doesn't contain the usual location line, so that the
+              actual error description is immediately visible in the Eclipse
+              <quote>Problems</quote> panel. (It's a <quote>hack</quote> in
+              FreeMarler itself; it tries to detect if it runs under the
+              plugin and then changes its behavior.)</para>
+            </listitem>
+
             <listitem xml:id="version_2_3_20_ide">
               <para>Mostly concerning tool (like IDE plugin) authors:</para>
 
@@ -20628,6 +20637,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Fixed bug where <literal>ParseException</literal> has
                   contained 0 as line and column number for lexical
                   errors.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added
+                  <literal>ParseException.getEditorMessage()</literal>: As
+                  IDE-s the error markers show the error location to the user
+                  already, the location should not be repeated in the error
+                  message. So in IDE-s you should use this method instead of
+                  <literal>getMessage()</literal>. (Note for JBoss Tools
+                  FreeMarker IDE maintainers: FreeMarker now
+                  <emphasis>tries</emphasis> to detect if it runs under the
+                  plugin, and so it already does this, short of. But it
+                  shouldn't be the final solution of course.)</para>
                 </listitem>
 
                 <listitem>

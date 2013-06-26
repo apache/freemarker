@@ -55,6 +55,7 @@ package freemarker.core;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.SecurityUtilities;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Parsing-time exception in a template (as opposed to runtime: {@link TemplateException}). This usually signals
@@ -71,384 +72,449 @@ import freemarker.template.utility.SecurityUtilities;
  */
 public class ParseException extends java.io.IOException implements FMParserConstants {
 
-   /**
-    * This is the last token that has been consumed successfully.  If
-    * this object has been created due to a parse error, the token
-    * following this token will (therefore) be the first error token.
-    */
-   public Token currentToken;
-   public String cachedUnexpectedTokenMessage;
-   
-   public int columnNumber, lineNumber;
+    /**
+     * This is the last token that has been consumed successfully.  If
+     * this object has been created due to a parse error, the token
+     * following this token will (therefore) be the first error token.
+     */
+    public Token currentToken;
 
-   /**
-    * Each entry in this array is an array of integers.  Each array
-    * of integers represents a sequence of tokens (by their ordinal
-    * values) that is expected at this point of the parse.
-    */
-   public int[][] expectedTokenSequences;
+    private static volatile Boolean jbossToolsMode;
 
-   /**
-    * This is a reference to the "tokenImage" array of the generated
-    * parser within which the parse error occurred.  This array is
-    * defined in the generated ...Constants interface.
-    */
-   public String[] tokenImage;
+    private boolean messageAndDescriptionRendered;
+    private String message;
+    private String description; 
 
-   /**
-    * The end of line string for this machine.
-    */
-   protected String eol = SecurityUtilities.getSystemProperty("line.separator", "\n");
-   
-   /** @deprecated Will be remove without replacement in 2.4. */
-   protected boolean specialConstructor;  
+    public int columnNumber, lineNumber;
 
-   // This was no part of Throwable on J2SE 1.2; remove in Java 5
-   private final Throwable cause;
+    /**
+     * Each entry in this array is an array of integers.  Each array
+     * of integers represents a sequence of tokens (by their ordinal
+     * values) that is expected at this point of the parse.
+     */
+    public int[][] expectedTokenSequences;
 
-   private String templateName;
+    /**
+     * This is a reference to the "tokenImage" array of the generated
+     * parser within which the parse error occurred.  This array is
+     * defined in the generated ...Constants interface.
+     */
+    public String[] tokenImage;
 
-  /**
-   * This constructor is used by the method "generateParseException"
-   * in the generated parser.  Calling this constructor generates
-   * a new object of this type with the fields "currentToken",
-   * "expectedTokenSequences", and "tokenImage" set.
-   * This constructor calls its super class with the empty string
-   * to force the "toString" method of parent class "Throwable" to
-   * print the error message in the form:
-   *     ParseException: <result of getMessage>
-   */
-  public ParseException(Token currentTokenVal,
-                        int[][] expectedTokenSequencesVal,
-                        String[] tokenImageVal
-                       )
-  {
-    super("");
-    cause = null;
-    currentToken = currentTokenVal;
-    specialConstructor = true;
-    expectedTokenSequences = expectedTokenSequencesVal;
-    tokenImage = tokenImageVal;
-    lineNumber = currentToken.next.beginLine;
-    columnNumber = currentToken.next.beginColumn;
-  }
+    /**
+     * The end of line string for this machine.
+     */
+    protected String eol = SecurityUtilities.getSystemProperty("line.separator", "\n");
 
-  /**
-   * The following constructors are for use by you for whatever
-   * purpose you can think of.  Constructing the exception in this
-   * manner makes the exception behave in the normal way - i.e., as
-   * documented in the class "Throwable".  The fields "errorToken",
-   * "expectedTokenSequences", and "tokenImage" do not contain
-   * relevant information.  The JavaCC generated code does not use
-   * these constructors.
-   */
-  protected ParseException() {
-    super();
-    cause = null;
-  }
+    /** @deprecated Will be remove without replacement in 2.4. */
+    protected boolean specialConstructor;  
 
-  /**
-   * @deprecated Use a constructor to which you can also pass the template.
-   */
-  public ParseException(String details, int lineNumber, int columnNumber) {
-      this(details, (Template) null, lineNumber, columnNumber, null);
-  }
+    // This was no part of Throwable on J2SE 1.2; remove in Java 5
+    private final Throwable cause;
 
-  /**
-   * @since 2.3.20
-   */
-  public ParseException(String details, Template template, int lineNumber, int columnNumber) {
-      this(details, template, lineNumber, columnNumber, null);      
-  }
-  
-  /**
-   * @since 2.3.20
-   */
-  public ParseException(String details, Template template, int lineNumber, int columnNumber, Throwable cause) {
-      this(details,
-              template == null ? null : template.getName(),
-              lineNumber, columnNumber,
-              cause);      
-  }
+    private String templateName;
 
-  /**
-   * @since 2.3.20
-   */
-  public ParseException(String details, Template template, Token tk) {
-      this(details, template, tk, null);
-  }
-  
-  /**
-   * @since 2.3.20
-   */
-  public ParseException(String details, Template template, Token tk, Throwable cause) {
-      this(details,
-              template == null ? null : template.getName(),
-              tk.beginLine, tk.beginColumn,
-              cause);
-  }
+    /**
+     * This constructor is used by the method "generateParseException"
+     * in the generated parser.  Calling this constructor generates
+     * a new object of this type with the fields "currentToken",
+     * "expectedTokenSequences", and "tokenImage" set.
+     * This constructor calls its super class with the empty string
+     * to force the "toString" method of parent class "Throwable" to
+     * print the error message in the form:
+     *     ParseException: <result of getMessage>
+     */
+    public ParseException(Token currentTokenVal,
+            int[][] expectedTokenSequencesVal,
+            String[] tokenImageVal
+            )
+    {
+        super("");
+        cause = null;
+        currentToken = currentTokenVal;
+        specialConstructor = true;
+        expectedTokenSequences = expectedTokenSequencesVal;
+        tokenImage = tokenImageVal;
+        lineNumber = currentToken.next.beginLine;
+        columnNumber = currentToken.next.beginColumn;
+    }
 
-  /**
-   * @since 2.3.20
-   */
-  public ParseException(String details, TemplateObject tobj) {
-      this(details, tobj, null);
-  }
+    /**
+     * The following constructors are for use by you for whatever
+     * purpose you can think of.  Constructing the exception in this
+     * manner makes the exception behave in the normal way - i.e., as
+     * documented in the class "Throwable".  The fields "errorToken",
+     * "expectedTokenSequences", and "tokenImage" do not contain
+     * relevant information.  The JavaCC generated code does not use
+     * these constructors.
+     */
+    protected ParseException() {
+        super();
+        cause = null;
+    }
 
-  /**
-   * @since 2.3.20
-   */
-  public ParseException(String details, TemplateObject tobj, Throwable cause) {
-      this(details,
-              tobj.getTemplate() == null ? null : tobj.getTemplate().getName(),
-              tobj.beginLine, tobj.beginColumn,
-              cause);
-  }
+    /**
+     * @deprecated Use a constructor to which you can also pass the template.
+     */
+    public ParseException(String description, int lineNumber, int columnNumber) {
+        this(description, (Template) null, lineNumber, columnNumber, null);
+    }
 
-  private ParseException(String details, String templateName, int lineNumber, int columnNumber, Throwable cause) {
-      super(formatMessage(details, templateName, lineNumber, columnNumber));
-      this.cause = cause;
-      
-      this.templateName = templateName;
-      this.lineNumber = lineNumber;
-      this.columnNumber = columnNumber;
-  }
-  
-  private static String formatMessage(String details, String templateName, int lineNumber, int columnNumber) {
-      return "Parsing error "
-              + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
-              + ":\n" + details;      
-  }
+    /**
+     * @since 2.3.20
+     */
+    public ParseException(String description, Template template, int lineNumber, int columnNumber) {
+        this(description, template, lineNumber, columnNumber, null);      
+    }
 
-  /**
-   * Sets the name of the template that contains the error.
-   * This is needed as the constructor that JavaCC automatically calls doesn't pass in the template, so we
-   * set it somewhere later in an exception handler. 
-   */
-  public void setTemplateName(String templateName) {
-      this.templateName = templateName;
-      cachedUnexpectedTokenMessage = null;
-  }
-  
-  /**
-   * This method has the standard behavior when this object has been
-   * created using the standard constructors.  Otherwise, it uses
-   * "currentToken" and "expectedTokenSequences" to generate a parse
-   * error message and returns it.  If this object has been created
-   * due to a parse error, and you do not catch it (it gets thrown
-   * from the parser), then this method is called during the printing
-   * of the final stack trace, and hence the correct error message
-   * gets displayed.
-   */
-  public String getMessage() {
-    if (currentToken == null) {
-      return super.getMessage();
+    /**
+     * @since 2.3.20
+     */
+    public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
+        this(description,
+                template == null ? null : template.getName(),
+                        lineNumber, columnNumber,
+                        cause);      
+    }
+
+    /**
+     * @since 2.3.20
+     */
+    public ParseException(String description, Template template, Token tk) {
+        this(description, template, tk, null);
+    }
+
+    /**
+     * @since 2.3.20
+     */
+    public ParseException(String description, Template template, Token tk, Throwable cause) {
+        this(description,
+                template == null ? null : template.getName(),
+                        tk.beginLine, tk.beginColumn,
+                        cause);
+    }
+
+    /**
+     * @since 2.3.20
+     */
+    public ParseException(String description, TemplateObject tobj) {
+        this(description, tobj, null);
+    }
+
+    /**
+     * @since 2.3.20
+     */
+    public ParseException(String description, TemplateObject tobj, Throwable cause) {
+        this(description,
+                tobj.getTemplate() == null ? null : tobj.getTemplate().getName(),
+                        tobj.beginLine, tobj.beginColumn,
+                        cause);
+    }
+
+    private ParseException(String description, String templateName, int lineNumber, int columnNumber, Throwable cause) {
+        super(description);  // but we override getMessage, so it will be different
+        this.cause = cause;
+        this.description = description; 
+        this.templateName = templateName;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+    }
+
+    /**
+     * Should be used internally only; sets the name of the template that contains the error.
+     * This is needed as the constructor that JavaCC automatically calls doesn't pass in the template, so we
+     * set it somewhere later in an exception handler. 
+     */
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+        synchronized (this) {
+            messageAndDescriptionRendered = false;
+            message = null;
+        }
+    }
+
+    public Throwable getCause() {
+        return cause;
+    }
+
+    /**
+     * Returns the error location plus the error description.
+     * 
+     * @see #getDescription()
+     * @see #getTemplateName()
+     * @see #getLineNumber()
+     * @see #getColumnNumber()
+     */
+    public String getMessage() {
+        synchronized (this) {
+            if (messageAndDescriptionRendered) return message;
+        }
+        renderMessageAndDescription();
+        synchronized (this) {
+            return message;
+        }
+    }
+
+    private String getDescription() {
+        synchronized (this) {
+            if (messageAndDescriptionRendered) return description;
+        }
+        renderMessageAndDescription();
+        synchronized (this) {
+            return description;
+        }
     }
     
-    if (cachedUnexpectedTokenMessage == null) {
-        String details = getCustomUnexpectedTokenDetails();
-        if (details == null) {
-            // The default JavaCC message generation stuff follows.
-            StringBuffer expected = new StringBuffer();
-            int maxSize = 0;
-            for (int i = 0; i < expectedTokenSequences.length; i++) {
-              if (i != 0) {
-                  expected.append(eol);
-              }
-              expected.append("    ");
-              if (maxSize < expectedTokenSequences[i].length) {
-                maxSize = expectedTokenSequences[i].length;
-              }
-              for (int j = 0; j < expectedTokenSequences[i].length; j++) {
-                if (j != 0) expected.append(' ');
-                expected.append(tokenImage[expectedTokenSequences[i][j]]);
-              }
-            }
-            details = "Encountered \"";
-            Token tok = currentToken.next;
-            for (int i = 0; i < maxSize; i++) {
-              if (i != 0) details += " ";
-              if (tok.kind == 0) {
-                details += tokenImage[0];
-                break;
-              }
-              details += add_escapes(tok.image);
-              tok = tok.next;
-            }
-            details += "\"" + eol;
-            
-            if (expectedTokenSequences.length == 1) {
-              details += "Was expecting:" + eol;
-            } else {
-              details += "Was expecting one of:" + eol;
-            }
-            details += expected;
-        }
-        cachedUnexpectedTokenMessage = formatMessage(details, templateName, lineNumber, columnNumber);
+    /**
+     * Returns the description of the error without error location or source quotations, or {@code null} if there's no
+     * description available. This is useful in editors (IDE-s) where the error markers and the editor window itself
+     * already carry this information, so it's redundant the repeat in the error dialog.
+     */
+    public String getEditorMessage() {
+        return getDescription();
     }
-    return cachedUnexpectedTokenMessage;
-  }
-  
-  /**
-   * Returns the name (template-root relative path) of the template whose parsing was failed.
-   * Maybe {@code null} if this is a non-stored template. 
-   * 
-   * @since 2.3.20
-   */
-  public String getTemplateName() {
-      return templateName;
-  }
 
-  /**
-   * 1-based line number of the failing token.
-   */
-  public int getLineNumber() {
-      return lineNumber;
-  }
+    /**
+     * Returns the name (template-root relative path) of the template whose parsing was failed.
+     * Maybe {@code null} if this is a non-stored template. 
+     * 
+     * @since 2.3.20
+     */
+    public String getTemplateName() {
+        return templateName;
+    }
 
-  /**
-   * 1-based column number of the failing token.
-   */
-  public int getColumnNumber() {
-      return columnNumber;
-  }
+    /**
+     * 1-based line number of the failing token.
+     */
+    public int getLineNumber() {
+        return lineNumber;
+    }
 
-  // Custom message generation
+    /**
+     * 1-based column number of the failing token.
+     */
+    public int getColumnNumber() {
+        return columnNumber;
+    }
 
-  private String getCustomUnexpectedTokenDetails() {
-      final Token nextToken = currentToken.next;
-      final int kind = nextToken.kind;
-      if (kind == EOF) {
-          StringBuffer buf = new StringBuffer("Unexpected end of file reached.\n");
-          for (int i = 0; i < expectedTokenSequences.length; i++) {
-              int[] sequence = expectedTokenSequences[i];
-              String name;
-              switch (sequence[0]) {
-                  case END_FOREACH :
-                      name = "#foreach";
-                      buf.append("Unclosed \"foreach\" directive.");
-                      break;
-                  case END_LIST :
-                      name = "#list";
-                      break;
-                  case END_SWITCH :
-                      name = "#switch";
-                      break;
-                  case END_IF :
-                      name = "#if";
-                      break;
-                  case END_COMPRESS :
-                      name = "#compress";
-                      break;
-                  case END_MACRO :
-                      name = "#macro";
-                      break;
-                  case END_FUNCTION :
-                      name = "#function";
-                      break;
-                  case END_TRANSFORM :
-                      name = "#transform";
-                      break;
-                  case END_ESCAPE :
-                      name = "#escape";
-                      break;
-                  case END_NOESCAPE :
-                      name = "#noescape";
-                      break;
-                  case END_ASSIGN:
-                      name = "#assign";
-                      break;
-                  case END_LOCAL:
-                      name = "#local";
-                      break;
-                  case END_GLOBAL:
-                      name = "#global";
-                      break;
-                  case END_ATTEMPT:
-                      name = "#attempt";
-                      break;
-                  case CLOSE_BRACE:
-                      name = "{";
-                      break;
-                  case CLOSE_BRACKET:
-                      name = "[";
-                      break;
-                  case CLOSE_PAREN:
-                      name = "(";
-                      break;
-                  case UNIFIED_CALL_END:
-                      name = "@...";
-                      break;
-                  default:
-                      name = null;
-              }
-              if (name != null) {
-                  buf.append("Had an unclosed \"");
-                  buf.append(name);
-                  buf.append("\".");
-              }
-          }
-          return buf.toString();
-      } else if (kind == END_IF || kind == ELSE_IF || kind == ELSE) {
-          return "Found unexpected directive: "
-              + nextToken
-              + "\nCheck whether you have a valid #if-#elseif-#else structure.";
-      }
-      return null;
-  }
+    private void renderMessageAndDescription() {
+        String desc = getOrRenderDescription();
 
-  /**
-   * Used to convert raw characters to their escaped version
-   * when these raw version cannot be used as part of an ASCII
-   * string literal.
-   */
-  protected String add_escapes(String str) {
-      StringBuffer retval = new StringBuffer();
-      char ch;
-      for (int i = 0; i < str.length(); i++) {
-        switch (str.charAt(i))
-        {
-           case 0 :
-              continue;
-           case '\b':
-              retval.append("\\b");
-              continue;
-           case '\t':
-              retval.append("\\t");
-              continue;
-           case '\n':
-              retval.append("\\n");
-              continue;
-           case '\f':
-              retval.append("\\f");
-              continue;
-           case '\r':
-              retval.append("\\r");
-              continue;
-           case '\"':
-              retval.append("\\\"");
-              continue;
-           case '\'':
-              retval.append("\\\'");
-              continue;
-           case '\\':
-              retval.append("\\\\");
-              continue;
-           default:
-              if ((ch = str.charAt(i)) < 0x20 || ch > 0x7e) {
-                 String s = "0000" + Integer.toString(ch, 16);
-                 retval.append("\\u" + s.substring(s.length() - 4, s.length()));
-              } else {
-                 retval.append(ch);
-              }
-              continue;
+        String prefix;
+        if (!isInJBossToolsMode()) {
+            prefix = "Parsing error "
+                    + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
+                    + ":\n";  
+        } else {
+            prefix = "[col. " + columnNumber + "] ";
         }
-      }
-      return retval.toString();
-   }
-  
-  public Throwable getCause() {
-      return cause;
-  }
+
+        String msg = prefix + desc;
+        desc = msg.substring(prefix.length());  // so we reuse the backing char[]
+
+        synchronized (this) {
+            message = msg;
+            description = desc;
+            messageAndDescriptionRendered = true;
+        }
+    }
+
+    private boolean isInJBossToolsMode() {
+        if (jbossToolsMode == null) {
+            try {
+                jbossToolsMode =
+                        ParseException.class.getClassLoader().toString().indexOf(
+                                "[org.jboss.ide.eclipse.freemarker:") != -1
+                                ? Boolean.TRUE : Boolean.FALSE;
+            } catch (Throwable e) {
+                jbossToolsMode = Boolean.FALSE;
+            }
+        }
+        return jbossToolsMode.booleanValue();
+    }
+
+    /**
+     * Returns the description of the error without the error location, or {@code null} if there's no description
+     * available.
+     */
+    private String getOrRenderDescription() {
+        synchronized (this) {
+            if (description != null) return description;  // When we already have it from the constructor
+        }
+
+        String tokenErrDesc;
+        if (currentToken != null) {
+            tokenErrDesc = getCustomTokenErrorDescription();
+            if (tokenErrDesc == null) {
+                // The default JavaCC message generation stuff follows.
+                StringBuffer expected = new StringBuffer();
+                int maxSize = 0;
+                for (int i = 0; i < expectedTokenSequences.length; i++) {
+                    if (i != 0) {
+                        expected.append(eol);
+                    }
+                    expected.append("    ");
+                    if (maxSize < expectedTokenSequences[i].length) {
+                        maxSize = expectedTokenSequences[i].length;
+                    }
+                    for (int j = 0; j < expectedTokenSequences[i].length; j++) {
+                        if (j != 0) expected.append(' ');
+                        expected.append(tokenImage[expectedTokenSequences[i][j]]);
+                    }
+                }
+                tokenErrDesc = "Encountered \"";
+                Token tok = currentToken.next;
+                for (int i = 0; i < maxSize; i++) {
+                    if (i != 0) tokenErrDesc += " ";
+                    if (tok.kind == 0) {
+                        tokenErrDesc += tokenImage[0];
+                        break;
+                    }
+                    tokenErrDesc += add_escapes(tok.image);
+                    tok = tok.next;
+                }
+                tokenErrDesc += "\", but ";
+
+                if (expectedTokenSequences.length == 1) {
+                    tokenErrDesc += "was expecting:" + eol;
+                } else {
+                    tokenErrDesc += "was expecting one of:" + eol;
+                }
+                tokenErrDesc += expected;
+            }
+        } else {
+            tokenErrDesc = null;
+        }
+        return tokenErrDesc;
+    }
+
+    private String getCustomTokenErrorDescription() {
+        final Token nextToken = currentToken.next;
+        final int kind = nextToken.kind;
+        if (kind == EOF) {
+            for (int i = 0; i < expectedTokenSequences.length; i++) {
+                int[] sequence = expectedTokenSequences[i];
+                String name;
+                switch (sequence[0]) {
+                case END_FOREACH :
+                    name = "#foreach";
+                    break;
+                case END_LIST :
+                    name = "#list";
+                    break;
+                case END_SWITCH :
+                    name = "#switch";
+                    break;
+                case END_IF :
+                    name = "#if";
+                    break;
+                case END_COMPRESS :
+                    name = "#compress";
+                    break;
+                case END_MACRO :
+                    name = "#macro";
+                    break;
+                case END_FUNCTION :
+                    name = "#function";
+                    break;
+                case END_TRANSFORM :
+                    name = "#transform";
+                    break;
+                case END_ESCAPE :
+                    name = "#escape";
+                    break;
+                case END_NOESCAPE :
+                    name = "#noescape";
+                    break;
+                case END_ASSIGN:
+                    name = "#assign";
+                    break;
+                case END_LOCAL:
+                    name = "#local";
+                    break;
+                case END_GLOBAL:
+                    name = "#global";
+                    break;
+                case END_ATTEMPT:
+                    name = "#attempt";
+                    break;
+                case CLOSE_BRACE:
+                    name = "{";
+                    break;
+                case CLOSE_BRACKET:
+                    name = "[";
+                    break;
+                case CLOSE_PAREN:
+                    name = "(";
+                    break;
+                case UNIFIED_CALL_END:
+                    name = "@...";
+                    break;
+                default:
+                    name = null;
+                }
+                if (name != null) {
+                    return "Unclosed \"" + name + "\" when the end of the file was reached.";
+                }
+            }
+            return "Unexpected end of file reached.";
+        } else if (kind == END_IF || kind == ELSE_IF || kind == ELSE) {
+            return "Unexpected directive, "
+                    + StringUtil.jQuote(nextToken)
+                    + ". Check whether you have a valid #if-#elseif-#else structure.";
+        }
+        return null;
+    }
+
+    /**
+     * Used to convert raw characters to their escaped version
+     * when these raw version cannot be used as part of an ASCII
+     * string literal.
+     */
+    protected String add_escapes(String str) {
+        StringBuffer retval = new StringBuffer();
+        char ch;
+        for (int i = 0; i < str.length(); i++) {
+            switch (str.charAt(i))
+            {
+            case 0 :
+                continue;
+            case '\b':
+                retval.append("\\b");
+                continue;
+            case '\t':
+                retval.append("\\t");
+                continue;
+            case '\n':
+                retval.append("\\n");
+                continue;
+            case '\f':
+                retval.append("\\f");
+                continue;
+            case '\r':
+                retval.append("\\r");
+                continue;
+            case '\"':
+                retval.append("\\\"");
+                continue;
+            case '\'':
+                retval.append("\\\'");
+                continue;
+            case '\\':
+                retval.append("\\\\");
+                continue;
+            default:
+                if ((ch = str.charAt(i)) < 0x20 || ch > 0x7e) {
+                    String s = "0000" + Integer.toString(ch, 16);
+                    retval.append("\\u" + s.substring(s.length() - 4, s.length()));
+                } else {
+                    retval.append(ch);
+                }
+                continue;
+            }
+        }
+        return retval.toString();
+    }
 
 }

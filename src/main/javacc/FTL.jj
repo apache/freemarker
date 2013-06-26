@@ -158,7 +158,7 @@ public class FMParser {
   private void notStringLiteral(Expression exp, String expected) throws ParseException {
       if (exp instanceof StringLiteral) {
          throw new ParseException(
-                     "Found string literal: " + exp + "\nExpecting: " + expected,
+                     "Found string literal: " + exp + ". Expecting: " + expected,
                      exp);
       }
   }
@@ -170,7 +170,7 @@ public class FMParser {
   private void notNumberLiteral(Expression exp, String expected) throws ParseException {
       if (exp instanceof NumberLiteral) {
          throw new ParseException(
-                     "Found number literal: " + exp.getCanonicalForm() + "\nExpecting " + expected,
+                     "Found number literal: " + exp.getCanonicalForm() + ". Expecting " + expected,
                      exp);
       }
   }
@@ -181,7 +181,7 @@ public class FMParser {
    */
   private void notBooleanLiteral(Expression exp, String expected) throws ParseException {
       if (exp instanceof BooleanLiteral) {
-         throw new ParseException("Found: " + exp.getCanonicalForm() + "\nExpecting " + expected, exp);
+         throw new ParseException("Found: " + exp.getCanonicalForm() + ". Expecting " + expected, exp);
       }
   }
 
@@ -192,7 +192,7 @@ public class FMParser {
   private void notHashLiteral(Expression exp, String expected) throws ParseException {
         if (exp instanceof HashLiteral) {
          throw new ParseException(
-                     "Found hash literal: " + exp.getCanonicalForm() + "\nExpecting " + expected,
+                     "Found hash literal: " + exp.getCanonicalForm() + ". Expecting " + expected,
                      exp);
       }
   }
@@ -207,7 +207,7 @@ public class FMParser {
   {
         if (exp instanceof ListLiteral) {
          throw new ParseException(
-         	    "Found list literal: " + exp.getCanonicalForm() + "\nExpecting " + expected,
+         	    "Found list literal: " + exp.getCanonicalForm() + ". Expecting " + expected,
                 exp);
       }
   }
@@ -645,12 +645,12 @@ TOKEN:
 			               + "(http://freemarker.org/docs/ref_directive_list.html).";
 			    }
 			    else
-			    {			        tip = "Check the Directive Reference in the manual: "
-			      		   + "http://freemarker.org/docs/ref_directive_alphaidx.html. If the name is there, "
-			      		   + "check the version; you are using FreeMarker " + Configuration.getVersion() +")";
+			    {			        tip = "Help (latest version): "
+			      		   + "http://freemarker.org/docs/ref_directive_alphaidx.html; "
+			      		   + "you're using FreeMarker " + Configuration.getVersion() +".";
 			    }
 			    throw new TokenMgrError(
-			      		"Unknown directive: " + s + (tip != null ? "\nTip: " + tip : ""),
+			      		"Unknown directive: " + s + (tip != null ? ". " + tip : ""),
 			      		TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
 			}
         }
