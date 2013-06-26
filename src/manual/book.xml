@@ -20315,10 +20315,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_20">
         <title>2.3.20</title>
 
-        <para>Date of release: [FIXME]</para>
-
-        <para>The most important improvement in this release is the better
-        error messages. It may sounds</para>
+        <para>Date of release: 2013-06-27</para>
 
         <para>If you are IDE/tools author, <link
         linkend="version_2_3_20_ide">note these changes</link>.</para>
@@ -20328,10 +20325,59 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Error message quality improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Many error messages are now more helpful, especially
+                  for users who are not experienced with FreeMarker. For
+                  example, some of the most common user mistakes are
+                  recognized and tips are shown to fix them, reducing support
+                  costs or the time employees spend to figure them out.</para>
+                </listitem>
+
+                <listitem>
+                  <para>It's now ensured that the error location in the
+                  template is included in the message returned by
+                  <literal>TemplateException.getMessage()</literal>. The stack
+                  trace always showed this information anyway, but some users
+                  only see the <quote>message</quote>, not the stack trace,
+                  and that often didn't contained the location.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The template language part of the stack trace is now
+                  more detailed, and easier to understand. This is especially
+                  helpful in applications that use a complex library of macros
+                  and functions.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Several smaller bugs were fixed that made the error
+                  information wrong or lacking.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The layout of the error messages is now more
+                  consistent, and generally easier to read.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Changes regarding boolean to string conversions and
               formatting:</para>
 
               <itemizedlist>
+                <listitem>
+                  <para><literal>?c</literal> (computer-language formatting)
+                  now works with booleans too, always giving
+                  <literal>"true"</literal> or <literal>"false"</literal>
+                  regardless of the <literal>boolean_format</literal>. This
+                  way it's safe for generating JavaScript in a context where
+                  human-readable text is also rendered.</para>
+                </listitem>
+
                 <listitem>
                   <para>If the <literal>boolean_format</literal> setting is
                   set to anything but the default
@@ -20379,50 +20425,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     </listitem>
                   </itemizedlist>
                 </listitem>
-
-                <listitem>
-                  <para><literal>?c</literal> (computer-language formatting)
-                  now works with booleans too, always giving
-                  <literal>"true"</literal> or <literal>"false"</literal>
-                  regardless of the <literal>boolean_format</literal>.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Error message quality improvements:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Many messages become more helpful, especially for
-                  users who are not experienced with FreeMarker. For example,
-                  some of the most common user mistakes are recognized and
-                  tips are shown to fix them, reducing support costs.</para>
-                </listitem>
-
-                <listitem>
-                  <para>It's now ensured that the error location is included
-                  in the message returned by
-                  <literal>TemplateException.getMessage()</literal>. The stack
-                  trace always showed this information anyway, but some users
-                  only see the <quote>message</quote>, not the stack trace,
-                  and that often didn't contained the location.</para>
-                </listitem>
-
-                <listitem>
-                  <para>The template language part of the stack trace is now
-                  more detailed, and easier to understand.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Several smaller bugs were fixed that made the error
-                  information wrong or lacking.</para>
-                </listitem>
-
-                <listitem>
-                  <para>The layout of the error messages is now more
-                  consistent, and generally easier to read.</para>
-                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -20431,7 +20433,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               linkend="ref_builtin_abs"><literal>abs</literal></link>, <link
               linkend="ref_builtin_is_nan"><literal>is_nan</literal></link>,
               <link
-              linkend="ref_builtin_is_infinite"><literal>is_infinite</literal></link></para>
+              linkend="ref_builtin_is_infinite"><literal>is_infinite</literal></link>.
+              Like <literal>n?abs</literal> will give the absolute value of
+              <literal>n</literal>.</para>
             </listitem>
 
             <listitem>
@@ -20490,9 +20494,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>index_of</literal>, <literal>last_index_of</literal>,
               <literal>left_pad</literal>, <literal>right_pad</literal>,
               <literal>matches</literal>, <literal>replace</literal>,
-              <literal>split</literal>, <literal>new</literal>. (The other
-              string built-ins already did this conversion for a long
-              time.)</para>
+              <literal>split</literal>, <literal>new</literal>. The other
+              string built-ins already did this conversion for a long time;
+              this was an accidental inconsistency.</para>
             </listitem>
 
             <listitem>
@@ -20545,8 +20549,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Bug fix [<link
                   xlink:href="https://sourceforge.net/p/freemarker/bugs/361/">361</link>]:
                   There was a small chance of deadlock when class-reloading
-                  was detected. The locking logic was refactored to prevent
-                  such oversights in the future.</para>
+                  was detected. Locking was redesigned to prevent such
+                  oversights in the future.</para>
                 </listitem>
 
                 <listitem>
@@ -20562,10 +20566,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Nameless templates couldn't include or import other
-              templates, and thrown a <literal>NullPointerException</literal>
-              when they tried to. Now they resolve relative paths as if they
-              where in the template root directory.</para>
+              <para>Nameless templates (those directly created with
+              <literal>new Template(null,
+              <replaceable>...</replaceable>)</literal> instead of loaded
+              through <literal>Configuration</literal>) couldn't include or
+              import other templates, and thrown a
+              <literal>NullPointerException</literal> when they tried to. Now
+              they resolve relative paths as if they were in the template root
+              directory.</para>
             </listitem>
 
             <listitem>
@@ -20587,15 +20595,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added new method,
-              <literal>Environment.isInAttemptBlock()</literal>, to check if
-              we are within an <literal>#attempt</literal> block. This can be
+              <literal>Environment.isInAttemptBlock()</literal> to check if we
+              are within an <literal>#attempt</literal> block. This can be
               useful for <literal>TemplateExceptionHandler</literal>-s, as
-              then they may don't want to print the error to the output, as
+              then they don't need to print the error to the output since
               <literal>#attempt</literal> will roll it back anyway. This is
-              already utilized by the stock
-              <literal>TemplateExceptionHandler</literal>-s,
-              <literal>DEBUG_HANDLER</literal> and
-              <literal>HTML_DEBUG_HANDLER</literal>.</para>
+              already utilized by the built-in
+              <literal>TemplateExceptionHandler</literal>-s
+              (<literal>DEBUG_HANDLER</literal> and
+              <literal>HTML_DEBUG_HANDLER</literal>).</para>
             </listitem>
 
             <listitem>
@@ -20607,14 +20615,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para><literal>TemplateException</literal>-s and
               <literal>TemplateModelExcepton</literal>-s now can have
               <literal>Throwable</literal> cause, not just
-              <literal>Exception</literal> (it was an old oversight).</para>
+              <literal>Exception</literal> (it was an old oversight that
+              somehow wasn't fixed so far).</para>
             </listitem>
 
             <listitem>
               <para>Parsing error messages under the JBoss Tools FreeMarker
               IDE now doesn't contain the usual location line, so that the
               actual error description is immediately visible in the Eclipse
-              <quote>Problems</quote> panel. (It's a <quote>hack</quote> in
+              <quote>Problems</quote> view. (It's a <quote>hack</quote> in
               FreeMarler itself; it tries to detect if it runs under the
               plugin and then changes its behavior.)</para>
             </listitem>
@@ -20624,32 +20633,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para><emphasis>Attention!</emphasis> The error message
-                  formats (what <literal>Throwable.getMessage()</literal>
-                  returns) were heavily changed for
-                  <literal>TemplateException</literal>-s, and somewhat for
-                  <literal>ParseException</literal>-s. It's unlikely that
-                  anybody depends on these, but if you tried to parse these
-                  messages, be aware of this.</para>
+                  <para>The error message formats (what
+                  <literal>Throwable.getMessage()</literal> returns) were
+                  heavily changed for <literal>TemplateException</literal>-s,
+                  and somewhat for <literal>ParseException</literal>-s. It's
+                  unlikely that anybody depends on these, but if you tried to
+                  parse these messages, be aware of this.</para>
                 </listitem>
 
                 <listitem>
                   <para>Fixed bug where <literal>ParseException</literal> has
-                  contained 0 as line and column number for lexical
-                  errors.</para>
+                  contained 0 as line and column number for lexical errors.
+                  Now it contains the correct information.</para>
                 </listitem>
 
                 <listitem>
                   <para>Added
-                  <literal>ParseException.getEditorMessage()</literal>: As
+                  <literal>ParseException.getEditorMessage()</literal>: As in
                   IDE-s the error markers show the error location to the user
                   already, the location should not be repeated in the error
                   message. So in IDE-s you should use this method instead of
-                  <literal>getMessage()</literal>. (Note for JBoss Tools
-                  FreeMarker IDE maintainers: FreeMarker now
-                  <emphasis>tries</emphasis> to detect if it runs under the
-                  plugin, and so it already does this, short of. But it
-                  shouldn't be the final solution of course.)</para>
+                  <literal>getMessage()</literal>. (Under JBoss Tools:
+                  FreeMarker now <emphasis>tries</emphasis> to detect that it
+                  runs under the plugin, and then it already does this, except
+                  that it still shows the column number as that's missing from
+                  the error marker location.)</para>
                 </listitem>
 
                 <listitem>
@@ -20662,9 +20670,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>Configuration.getSupportedBuiltInNames()</literal>.
                   As new built-ins
                   (<literal><replaceable>expr</replaceable>?<replaceable>builtin_name</replaceable></literal>)
-                  are very often added to new FreeMarker versions, syntax
-                  highlighting should use this set instead of a set of names
-                  entered into the tool source code.</para>
+                  are very often added to new FreeMarker versions,
+                  auto-completion or syntax highlighting should use this set
+                  instead of a fixed set of a names.</para>
                 </listitem>
 
                 <listitem>
@@ -20672,17 +20680,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateElement.getDescription()</literal> was
                   heavily changed. It's what FTL stack traces and maybe some
                   outline views (tree-views) show. It was always for human
-                  reading (and was too inconsistent for anything else), so
-                  it's unlikely that this breaks anything.</para>
+                  reading (and till now was too inconsistent for anything
+                  else), so it's unlikely that this breaks anything.</para>
+                </listitem>
+
+                <listitem>
+                  <para>There were some smaller changes in
+                  <literal>freemarker.debug</literal>, and it's expected that
+                  there will be more, so it was marked as experimental. As far
+                  as we know, nobody used it, so it shouldn't break
+                  anything.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>In experimental status only, but
+              <para>In <emphasis>experimental status only</emphasis>, but
               <literal>freemarker.jar</literal> is now an OSGi bundle (see
               <literal>freemarker.jar/META-INF/MANIFEST.MF</literal>).
-              Depending on user feedback, the bundle description can change in
+              Depending on user feedback, the bundle description may change in
               the future. So please give feedback, especially if you are an
               OSGi expert!</para>
             </listitem>
@@ -20692,16 +20708,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>HTML_DEBUG_HANDLER</literal> (the
               red-on-yellow-background error message). Most importantly, now
               it will word-wrap. Other changes are minor, like now it can
-              break out of CDATA sections, or now it has less glaring
+              break out of CDATA sections, or now it has less intense
               colors.</para>
             </listitem>
 
             <listitem>
               <para>New <literal>Template</literal> method,
               <literal>getActualTagSyntax()</literal>: Tells if the template
-              is using traditional or square-bracket syntax (as this can be
-              decided by auto-detection, it wasn't trivial to tell till
-              now).</para>
+              is using traditional or square-bracket syntax. As the syntax can
+              be overridden in the template, also it's possibly decided by
+              auto-detection, it wasn't trivial to it tell till now.</para>
             </listitem>
 
             <listitem>
@@ -20709,8 +20725,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               error messages in custom directives:
               <literal>ClassUtil.getFTLTypeDescription(TemplateModel)</literal>,
               <literal>getShortClassName</literal>,
-              <literal>getShortClassNameOfObject</literal>,
-              <literal>StringUtil.encloseAsTag</literal></para>
+              <literal>getShortClassNameOfObject</literal></para>
             </listitem>
 
             <listitem>
@@ -20720,25 +20735,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               to <literal>TemplateDirectiveModel</literal>-s if there are no
               parameters) now allows <literal>remove(key)</literal>,
               <literal>clear()</literal> and
-              <literal>putAll(anyEmptyMap)</literal>, as these are
-              non-destructive operations.</para>
+              <literal>putAll(anyEmptyMap)</literal> as these do nothing
+              anyway.</para>
             </listitem>
 
             <listitem>
               <para>Bug fix [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/375/">375</link>]:
-              <literal>NullPointerException</literal> in
-              <literal>BeansWrapper</literal> when the Java implementation
-              legally returns <literal>null</literal> for some
-              <literal>BeanInfo</literal> getters (happens on IBM J9 VM, not
-              on the Sun/Oracle implementation).</para>
+              <literal>NullPointerException</literal> on IBM J9 VM (not on the
+              Sun/Oracle implementation) in <literal>BeansWrapper</literal>
+              when the Java implementation legally returns
+              <literal>null</literal> for some <literal>BeanInfo</literal>
+              getters.</para>
             </listitem>
 
             <listitem>
               <para>Bug fix: Cloning a <literal>Configuration</literal> didn't
               deep-clone the data structures storing the
               <literal>auto_imports</literal> and
-              <literal>auto_includes</literal> settings.</para>
+              <literal>auto_includes</literal> settings, hence possibly
+              leading to aliasing problems.</para>
             </listitem>
 
             <listitem>
@@ -20779,7 +20795,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>When a macro was called with an
+                  <para>When a macro was called with a
                   <literal>null</literal>/missing parameter value, it has
                   caused error like in FreeMarker 2.3</para>
                 </listitem>
@@ -20794,7 +20810,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>When a sequence literal contained reference to a
                   <literal>null</literal>/missing variable, like in
-                  <literal>[1, missingVar</literal>], it has caused an error
+                  <literal>[1, missingVar]</literal>, it has caused an error
                   like in 2.3</para>
                 </listitem>
 
@@ -20827,8 +20843,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>false</literal> (alias <literal>0</literal>).
                   <literal>2</literal> means <literal>true</literal> but with
                   emulating bugs in early 2.x classic-compatibility mode.
-                  Currently this affects how booleans are converted to string;
-                  with <literal>1</literal> it's always
+                  Currently this only affects how booleans are converted to
+                  string; with <literal>1</literal> it's always
                   <literal>"true"</literal>/<literal>""</literal>, but with
                   <literal>2</literal> it's <literal>"true"/"false"</literal>
                   for values wrapped by <literal>BeansWrapper</literal> as
@@ -20849,9 +20865,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               existence built-ins in the case when the
               <literal>null</literal>/missing variable is not the last step
               inside the parenthesis. In that case it's about 30 times faster
-              on Java 6 now. In other cases (when all variables exists, or the
-              the last step is missing) the performance is abut the same as
-              before.</para>
+              now, measured on Java 6. In other cases (when all variables
+              exists, or the the last step is missing) the performance is
+              about the same (relatively fast) as before.</para>
             </listitem>
 
             <listitem>
@@ -20860,19 +20876,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <itemizedlist>
                 <listitem>
                   <para>The form of the nightly build version numbers has
-                  changed to Maven/JSR 277 compliant. What earlier was
-                  <literal>2.3.20mod</literal> is now something like
-                  <literal>2.3.21-nightly_20130605T130506Z</literal> (note how
+                  changed to be Maven/JSR 277 compliant. What earlier was
+                  <literal>2.3.19mod</literal> is now something like
+                  <literal>2.3.20-nightly_20130605T130506Z</literal> (note how
                   the last points to the target release version instead of the
                   last release version).</para>
                 </listitem>
 
                 <listitem>
                   <para>The form of the Release Candidate and Preview version
-                  numbers where changed to Maven/JSP 277 compliant:
+                  numbers where changed to be Maven/JSP 277 compliant:
                   <literal>2.4pre2</literal> is now
                   <literal>2.4.0-pre02</literal>, <literal>2.4rc1</literal> is
-                  now <literal>2.4-rc01</literal>.</para>
+                  now <literal>2.4.0-rc01</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -20900,9 +20916,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>FreeMarker development has moved to GitHub (<link
+              <para>FreeMarker source code has moved to GitHub (<link
               xlink:href="???">https://github.com/freemarker/freemarker</link>),
-              and switched to an Ivy-based build.</para>
+              other project resources has remained on sourceforge.net.</para>
+            </listitem>
+
+            <listitem>
+              <para>Project structure cleanup, Ivy-based build script.</para>
             </listitem>
           </itemizedlist>
         </section>
