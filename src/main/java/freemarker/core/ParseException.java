@@ -52,6 +52,8 @@
 
 package freemarker.core;
 
+import java.util.Arrays;
+
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.SecurityUtilities;
@@ -413,10 +415,9 @@ public class ParseException extends java.io.IOException implements FMParserConst
                     name = "#compress";
                     break;
                 case END_MACRO :
-                    name = "#macro";
-                    break;
                 case END_FUNCTION :
-                    name = "#function";
+                    // It gives [..., [END_FUNCTION, ...], [END_MACRO, ...], ...] for both. 
+                    name = "#macro or #function";
                     break;
                 case END_TRANSFORM :
                     name = "#transform";
@@ -455,7 +456,8 @@ public class ParseException extends java.io.IOException implements FMParserConst
                     name = null;
                 }
                 if (name != null) {
-                    return "Unclosed \"" + name + "\" when the end of the file was reached.";
+                    if (!name.startsWith("#") && !name.startsWith("@")) name = StringUtil.jQuote(name);
+                    return "Unclosed " + name + " when the end of the file was reached.";
                 }
             }
             return "Unexpected end of file reached.";
