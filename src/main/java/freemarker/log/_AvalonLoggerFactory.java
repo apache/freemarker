@@ -55,9 +55,12 @@ package freemarker.log;
 import org.apache.log.Hierarchy;
 
 /**
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * @author Attila Szegedi
  */
-class AvalonLoggerFactory implements LoggerFactory
+public class _AvalonLoggerFactory implements LoggerFactory
 {
     public Logger getLogger(String category)
     {

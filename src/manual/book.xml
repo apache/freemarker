@@ -20577,6 +20577,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fix: Regular expression built-ins and some logger
+              libraries (most importantly Log4J) were unavailable on the
+              Google App Engine platform. This fix is only present in the
+              GAE-compatible build, 2.3.20-gae.</para>
+            </listitem>
+
+            <listitem>
               <para>Added new method to <literal>Configuration</literal>:
               <literal>CacheStorage getCacheStorage()</literal></para>
             </listitem>

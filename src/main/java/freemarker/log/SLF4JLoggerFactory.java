@@ -58,6 +58,7 @@ import org.slf4j.spi.LocationAwareLogger;
  * Internal class, don't use it; no backward-compatibility guarantees. This class was left public accidentally, but
  * fixing it would be non-BC.
  */
+//2.4: rename to _*
 public class SLF4JLoggerFactory implements LoggerFactory {
 	
 	public Logger getLogger(String category) {

@@ -124,10 +124,10 @@ public abstract class Logger
      */
     private static final String[] LIBINIT =
     {
-        "freemarker.log.Logger", "Null",
-        "java.util.logging.Logger", "JDK14",
-        "org.apache.log.Logger",    "Avalon",
-        "org.apache.log4j.Logger",  "Log4J",
+        "freemarker.log.Logger", "_Null",
+        "java.util.logging.Logger", "_JDK14",
+        "org.apache.log.Logger",    "_Avalon",
+        "org.apache.log4j.Logger",  "_Log4J",
         /* In 2.3.x this two is skipped by LIBRARY_AUTO: */
         "org.apache.commons.logging.Log",  "CommonsLogging",
         "org.slf4j.Logger",  "SLF4J",
@@ -309,7 +309,7 @@ public abstract class Logger
                 }
             }
             System.err.println("*** WARNING: FreeMarker logging suppressed.");
-            return new NullLoggerFactory();
+            return new _NullLoggerFactory();
         }
         else
         {

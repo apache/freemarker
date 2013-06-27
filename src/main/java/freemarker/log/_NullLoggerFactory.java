@@ -53,11 +53,14 @@
 package freemarker.log;
 
 /**
+ * Don't use this class; it's only public to work around Google App Engine Java
+ * compliance issues. FreeMarker developers only: treat this class as package-visible.
+ * 
  * @author Attila Szegedi
  */
-class NullLoggerFactory implements LoggerFactory
+public class _NullLoggerFactory implements LoggerFactory
 {
-    NullLoggerFactory()
+    _NullLoggerFactory()
     {
     }
     
