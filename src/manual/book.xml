@@ -18992,47 +18992,49 @@ or
               <listitem>
                 <para>It potentially hides accidental mistakes, like a typo in
                 a variable name, or when the template author refers to a
-                variable that the programmer doesn't put into the data-model,
-                or for which the programmer uses a different name. Human is
-                prone to do such accidental mistakes, computers are not, so
-                missing this opportunity that the template engine can show
-                these errors is a bad business. Even if you very carefully
-                check the output of the templates during development, it is
-                easy to look over mistakes like <literal>&lt;#if
-                hasDetp&gt;<replaceable>print dept
+                variable that the programmer doesn't put into the data-model
+                for that template, or for which the programmer uses a
+                different name. Human beings are prone to do such mistakes,
+                while computers are not, so missing this opportunity that the
+                template engine can show these errors is a bad business. Even
+                if you very carefully check the output of the templates during
+                development, it is easy to look over mistakes like
+                <literal>&lt;#if hasWarnigs&gt;<replaceable>print warnings
                 here...</replaceable>&lt;/#if&gt;</literal>, which would then
-                silently never print the dept of the visitor, since you have
-                mistyped the variable name (it should be
-                <literal>hasDept</literal>). Also think about maintenance,
-                when you later modify your application... most probably you
-                will not re-check templates that carefully each time.</para>
+                silently never print the warnings, since you have mistyped the
+                variable name. Also think about maintenance, when you later
+                modify your application; probably you will not re-check
+                templates (many applications has hundreds of them) that
+                carefully each time, for all possible scenarios. Unit tests
+                typically doesn't cover web page content very good either (if
+                you have them at all...); they mostly only checks certain
+                manually set patterns in the web page, so they will often
+                gloss though changes that are actually bugs. But if the page
+                fails with exception, that's something human testers will
+                notice and unit sets will notice, and in production the
+                maintainers will notice (assuming somebody check error
+                logs).</para>
               </listitem>
 
               <listitem>
                 <para>Makes dangerous assumptions. The script language or
                 template engine knows nothing about the application domain, so
-                when it decides the value of something it don't know to be
-                0/false, it is a quite irresponsible and arbitrary thing. Just
-                because it is not know what's your current bank account
-                balance, can we just say it is $0 (and how easy it is to
-                accidentally write <literal>Balance: ${balanace}</literal>)?
-                Just because it is not known if a patient has penicillin
-                allergy, we can just say he/she doesn't have (and how easy it
-                is to accidentally write <literal>&lt;#if
-                hasPenicilinAllergy&gt;<replaceable>Warning...</replaceable>&lt;#else&gt;<replaceable>Allow...</replaceable>&lt;/#if&gt;</literal>;
-                there is a typo in this, if you didn't see)? Just consider the
-                implications of such mistakes for a moment. They can be quite
-                severe and troubling. Showing an error page is often better
-                than showing incorrect information that formally looks
-                good.</para>
+                when it decides the value of something that it doesn't know to
+                be 0/false, it is a quite irresponsible and arbitrary thing.
+                Just because it's not know what's your current balance at your
+                bank, can we just say it's $0? Just because it is not known if
+                a patient has penicillin allergy, we can just say he/she
+                doesn't have it? Just consider the implications of such
+                mistakes. Showing an error page is often better than showing
+                incorrect information that formally looks good.</para>
               </listitem>
             </itemizedlist>
 
             <para>Being not picky is mostly sweeping under the carpet in this
             case (not facing with the problems), which of course most people
-            feels more convenient, but still... we believe that in most cases
+            feels more convenient, but still, we believe that in most cases
             being strict will save your time and increase your software
-            quality in the long run.</para>
+            quality on the long run.</para>
 
             <para>On the other hand, we recognize that there are cases where
             you don't want FreeMarker to be that picky with good reason, and
@@ -19044,25 +19046,30 @@ or
                 <literal>null</literal>-s or have optional variables. In such
                 cases use <link linkend="dgui_template_exp_missing">these
                 operators</link>. If you use them too often, try to rethink
-                your data-model, because depending on them too much is not
-                just results in awkward verbose templates, but increases the
-                probability of hiding errors and printing arbitrary incorrect
-                output (for the reasons described earlier).</para>
+                your data-model, because depending on them too much won't just
+                make the templates too verbose, but increases the probability
+                of hiding errors and printing arbitrary incorrect output (for
+                the reasons described earlier).</para>
               </listitem>
 
               <listitem>
-                <para>On a production server you may rather want to show an
+                <para>In some application you may rather want to show an
                 incomplete/damaged page than an error page. In this case you
-                can <link linkend="pgui_config_errorhandling">use other error
-                handler</link> than the default. Error handlers can be made
-                that rather skip the problematic part than abort the whole
-                page rendering. Note, however, that although the error
+                can <link linkend="pgui_config_errorhandling">use another
+                error handler</link> than the default one. A custom error
+                handler can skip the problematic part instead of aborting the
+                whole page rendering. Note, however, that although the error
                 handlers don't give arbitrary default values to variables, for
                 pages that show critical information it's maybe still better
-                to show an error page. (Another feature you may interested in:
-                <link linkend="ref_directive_attempt">the
+                to show an error page.</para>
+              </listitem>
+
+              <listitem>
+                <para>If the pages contain parts that aren't critically
+                important (like side bars), another feature you may interested
+                in is <link linkend="ref_directive_attempt">the
                 <literal>attempt</literal>/<literal>recover</literal>
-                directives</link>)</para>
+                directives</link>.</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -19085,22 +19092,28 @@ or
             <para>Are you sure that the Java class loader finds the same
             <literal>freemarker.jar</literal> that you expect to use? Maybe
             there is an older version of <literal>freemarker.jar</literal>
-            around (such as in the Ant <literal>lib</literal> directory),
-            which has higher priority. To check this, try to print the version
-            number in a template with <literal>${.version}</literal>. If it
-            dies with ``Unknown built-in variable: version'' error message,
-            then you use a release before 2.3-final or 2.2.8, but you can
-            still try to get the version number in the Java code of your
+            around, which has higher priority. To check this, try to print the
+            version number in a template with <literal>${.version}</literal>.
+            If it dies with ``Unknown built-in variable: version'' error
+            message, then you use a release before 2.3-final or 2.2.8, but you
+            can still try to get the version number in the Java code of your
             application with
             <literal>Configuration.getVersionNumber()</literal>. If this
             method is not present either, then you are using an early
             2.3-preview, or a version before 2.2.6.</para>
 
+            <para>If you suspect that the problem is that you have multiple
+            <literal>freemarker.jar</literal>-s, the typical culprit is that
+            some module has a Maven dependency with group ID
+            <literal>freemarker</literal>, as opposed to
+            <literal>org.freemarker</literal>, while you have declared a
+            dependency on <literal>org.freemarker</literal>. In this case you
+            will have to exclude the <literal>freemarker</literal>
+            dependency.</para>
+
             <para>If you think that the documentation or FreeMarker is wrong,
-            please report it using the bug tracker, or the mailing list, or
-            the forums on <link
-            xlink:href="http://sourceforge.net/projects/freemarker/">http://sourceforge.net/projects/freemarker/</link>.
-            Thank you!</para>
+            please report it using the bug tracker, or the mailing list. Thank
+            you!</para>
           </answer>
         </qandaentry>
 
@@ -19125,9 +19138,10 @@ or
             <para>Note however than humans often find it hard to read big
             numbers without grouping separator. So in general it is
             recommended to keep them, and in cases where the numbers are for
-            ''computer audience'' that is confused on the grouping separators,
-            use the <link linkend="ref_builtin_c"><literal>c</literal>
-            built-in</link>. For example:</para>
+            ''computer audience'' (which is confused on the grouping
+            separators), use the <link
+            linkend="ref_builtin_c"><literal>c</literal> built-in</link>. For
+            example:</para>
 
             <programlisting role="template">&lt;a href="/shop/productdetails?id=${<emphasis>product.id?c</emphasis>}"&gt;Details...&lt;/a&gt;</programlisting>
           </answer>
@@ -19179,10 +19193,34 @@ or
             of formatting a boolean is like <literal>${washable?string("yes",
             "no")}</literal>, <literal>${caching?string("Enabled",
             "Disabled")}</literal>, <literal>${heating?string("on",
-            "off")}</literal>, etc. However, for generating source code
-            <literal>${washable?string("true", "false")}</literal> would be
-            very often used, so <literal>${washable?string}</literal> (i.e.,
-            omitting the parameter list) is equivalent with that.</para>
+            "off")}</literal>, etc.</para>
+
+            <para>However, there are two cases where this gets
+            impractical:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>When printing boolean to generate computer language
+                output, and hence you want
+                <literal>true</literal>/<literal>false</literal>, use
+                <literal>${<replaceable>someBoolean</replaceable>?c}</literal>.
+                (This requires at least FreeMarker 2.3.20. Before that, the
+                common practice was writing
+                <literal>${<replaceable>someBoolean</replaceable>?string}</literal>,
+                however that's dangerous because its output depends on the
+                boolean format settings, whose default is
+                <literal>"true"</literal>/<literal>"false"</literal>.)</para>
+              </listitem>
+
+              <listitem>
+                <para>When you have format most of the booleans on the same
+                way. In this case you can set the
+                <literal>boolean_format</literal> setting
+                (<literal>Configuration.setBooleanFormat</literal>) to reflect
+                that, and then since FreeMarker 2.3.20 you can just write
+                <literal>${<replaceable>someBoolean</replaceable>}</literal>.</para>
+              </listitem>
+            </itemizedlist>
           </answer>
         </qandaentry>
 
@@ -20261,8 +20299,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <primary>build</primary>
       </indexterm>
 
-      <para>You need Apache Ant and Ivy installed. (As of this writing it was
-      tested with Ant 1.8.1 and Ivy 2.3.0.)</para>
+      <para>You need Apache Ant and Ivy be installed. (As of this writing it
+      was tested with Ant 1.8.1 and Ivy 2.3.0.)</para>
 
       <para>If you need to ensure compliance with certain J2SE versions, copy
       <literal>build.properties.sample</literal> into
