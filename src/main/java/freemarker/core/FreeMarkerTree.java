@@ -90,14 +90,12 @@ public class FreeMarkerTree extends JTree {
         this.invalidate();
     }
 
-
     public String convertValueToText(Object value, boolean selected,
                                      boolean expanded, boolean leaf, int row,
                                      boolean hasFocus) 
     {
-        // FIX THIS
-        if (value instanceof TemplateElement) {
-            return ((TemplateElement) value).getDescription();
+        if (value instanceof TemplateElementTreeNode) {
+            return ((TemplateElementTreeNode) value).element.getDescription();
         }
         return value.toString();
     }
@@ -144,5 +142,7 @@ public class FreeMarkerTree extends JTree {
         public boolean isLeaf() {
             return element.isLeaf();
         }
+        
+        
     }
 }
