@@ -18883,7 +18883,7 @@ or
               </listitem>
 
               <listitem>
-                <para>Locale sensitive number and date formatting by default.
+                <para>Locale-sensitive number and date formatting by default.
                 Since we mostly output for a human audience all you need to do
                 is just write <literal>${x}</literal> rather than
                 <literal>&lt;fmt:formatNumber value="${x}" /&gt;</literal>.
@@ -18892,7 +18892,8 @@ or
               </listitem>
 
               <listitem>
-                <para>Easier to define ad-hoc macros and functions.</para>
+                <para>Much easier to define ad-hoc macros and
+                functions.</para>
               </listitem>
 
               <listitem>
@@ -18939,9 +18940,9 @@ or
               <listitem>
                 <para>Not a ``standard''. There are fewer tools and IDE
                 integrations, fewer developers knows it and there's much less
-                industry support in general. (However, JSP tag libraries work
-                without modification in FreeMarker templates, if they are not
-                using <literal>.tag</literal> files.)</para>
+                industry support in general. (However, JSP tag libraries can
+                work in FreeMarker templates with the proper setup, unless
+                they are using <literal>.tag</literal> files.)</para>
               </listitem>
 
               <listitem>
@@ -18964,27 +18965,6 @@ or
 
             <para>You may read this if you are considering replacing JSP with
             FreeMarker: <xref linkend="pgui_misc_servlet_model2"/></para>
-          </answer>
-        </qandaentry>
-
-        <qandaentry xml:id="faq_jsp_vs_velocity">
-          <question>
-            <para>Velocity versus FreeMarker?</para>
-
-            <indexterm>
-              <primary>Velocity</primary>
-            </indexterm>
-          </question>
-
-          <answer>
-            <para><link
-            xlink:href="http://jakarta.apache.org/velocity/index.html">Velocity</link>
-            is a simpler, more lightweight tool. Thus, it does not address
-            many tasks that FreeMarker does, and its template language is less
-            powerful in general, but it is simpler; visit <link
-            xlink:href="http://freemarker.org/fmVsVel.html">http://freemarker.org/fmVsVel.html</link>
-            for details. Currently (2005) Velocity has wider third party
-            support and larger user community.</para>
           </answer>
         </qandaentry>
 
