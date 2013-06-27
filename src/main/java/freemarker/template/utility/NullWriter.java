@@ -54,11 +54,11 @@ public final class NullWriter extends Writer {
         // Do nothing
         return this;
     }
-    */
 
     public Writer append(char c) throws IOException {
         // Do nothing
         return this;
     }
+    */
 
 }
