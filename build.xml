@@ -712,38 +712,39 @@
   -->
   <target name="maven-upload" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
-      <project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>org.freemarker</groupId>
-        <artifactId>freemarker</artifactId>
-        <version>${version}</version>
-        <packaging>jar</packaging>
-        <name>FreeMarker</name>
-        <description>
-        FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
-        </description>
-        <url>http://freemarker.org</url>
-        <licenses>
-        <license>
-          <name>BSD-style license</name>
-          <url>http://freemarker.org/LICENSE.txt</url>
-        </license>
-        </licenses>
-        <scm>
-        <url>http://freemarker.svn.sourceforge.net/viewvc/freemarker/</url>
-        <connection>scm:svn:https://freemarker.svn.sourceforge.net/svnroot/freemarker</connection>
-        </scm>
-        <dependencies>
-        <!-- no required dependencies -->
-        </dependencies>
-      </project>
-    ]]></echo>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.freemarker</groupId>
+  <artifactId>freemarker-gae</artifactId>
+  <version>${version}</version>
+  <packaging>jar</packaging>
+  <name>FreeMarker</name>
+  <description>
+    FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
+  </description>
+  <url>http://freemarker.org</url>
+  <licenses>
+    <license>
+      <name>BSD-style license</name>
+      <url>http://freemarker.org/LICENSE.txt</url>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/freemarker/freemarker</url>
+    <connection>scm:git:git://github.com/freemarker/freemarker.git</connection>
+  </scm>
+  <dependencies>
+    <!-- no required dependencies -->
+  </dependencies>
+</project>
+]]></echo>
     
-    <jar destfile="build/maven-source-attachment.jar"
-         basedir="src/main/java"
-    />
+    <jar destfile="build/maven-source-attachment.jar">
+      <fileset dir="src/main/java" />
+      <fileset dir="src/main/resources" />
+    </jar>
 
     <artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
    
@@ -752,7 +753,7 @@
        addproperty="mavenUpload.answer"
     >
 You are about uploading
-${dist.dir.versioned}/freemarker.jar
+${dist.dir}/freemarker.jar
 into the Maven central repostiry sync. directory.
 Be sure that's the final (released) variation there,
 and that the version number is correct.
