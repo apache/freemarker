@@ -52,11 +52,17 @@
 
 package freemarker.ext.ant;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.w3c.dom.*;
-import org.xml.sax.SAXParseException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -65,11 +71,19 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
-import freemarker.ext.xml.NodeListModel;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXParseException;
+
 import freemarker.ext.dom.NodeModel;
+import freemarker.ext.xml.NodeListModel;
+import freemarker.template.Configuration;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNodeModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.SecurityUtilities;
-import freemarker.template.*;
 
 
 /**
@@ -95,7 +109,7 @@ import freemarker.template.*;
  * templates using the <tt>models</tt> attribute.</li>
  * </ul>
  * <p>It supports the following attributes:</p>
- * <table border="1" cellpadding="2" cellspacing="0">
+ * <table style="width: auto; border-collapse: collapse" border="1">
  *   <tr>
  *     <th valign="top" align="left">Attribute</th>
  *     <th valign="top" align="left">Description</th>
@@ -201,7 +215,8 @@ import freemarker.template.*;
  * </table>
  * 
  * <p>It supports the following nesed elements:</p>
- * <table border="1" cellpadding="2" cellspacing="0">
+ * 
+ * <table style="width: auto; border-collapse: collapse" border="1">
  *   <tr>
  *     <th valign="top" align="left">Element</th>
  *     <th valign="top" align="left">Description</th>
@@ -248,7 +263,6 @@ import freemarker.template.*;
  * @author Attila Szegedi
  * @author Jonathan Revusky, jon@revusky.com
  * @deprecated <a href="http://fmpp.sourceforge.net">FMPP</a> is a more complete solution.
- * @version $Id: FreemarkerXmlTask.java,v 1.58.2.1 2006/04/26 11:07:58 revusky Exp $
  */
 public class FreemarkerXmlTask
 extends

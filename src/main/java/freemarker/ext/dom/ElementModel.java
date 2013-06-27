@@ -52,10 +52,19 @@
  
 package freemarker.ext.dom;
 
-import org.w3c.dom.*;
-import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import freemarker.core.Environment;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.StringUtil;
 
 class ElementModel extends NodeModel implements TemplateScalarModel {
     
@@ -113,7 +122,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 return new SimpleScalar(buf.toString().trim());
             }
             if (StringUtil.isXMLID(key.substring(1))) {
-                Attr att = getAttribute(key.substring(1), Environment.getCurrentEnvironment());
+                Attr att = getAttribute(key.substring(1));
                 if (att == null) { 
                     return new NodeListModel(this);
                 }
@@ -182,7 +191,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return prefix + nodeName;
     }
     
-    private Attr getAttribute(String qname, Environment env) {
+    private Attr getAttribute(String qname) {
         Element element = (Element) node;
         Attr result = element.getAttributeNode(qname);
         if (result != null)

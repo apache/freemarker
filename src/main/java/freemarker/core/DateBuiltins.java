@@ -65,28 +65,30 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UnrecognizedTimeZoneException;
 
 /**
- * A holder for built-ins that operate exclusively on {@link TemplateDateModel}-a.
+ * A holder for built-ins that operate exclusively on date left-hand values.
  */
-abstract class DateBuiltins {
-    abstract static class DateBuiltin extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+class DateBuiltins {
+    
+    // Can't be instantiated
+    private DateBuiltins() { }
+    
+    private abstract static class DateBuiltin extends BuiltIn {
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (model instanceof TemplateDateModel) {
                 TemplateDateModel tdm = (TemplateDateModel) model;
-                return calculateResult(EvaluationUtil.getDate(tdm, target, env), tdm.getDateType(), env);
+                return calculateResult(EvalUtil.modelToDate(tdm, target), tdm.getDateType(), env);
             } else {
                 if(model == null) {
-                    throw new InvalidReferenceException(target + " is undefined.", env);
+                    throw InvalidReferenceException.getInstance(target, env);
+                } else {
+                    throw new NonDateException(target, model, "date", env);
                 }
-                throw new NonDateException(
-                        target + " should be a date, time, or date+time, but it's a(n) "
-                        + model.getClass().getName(), env);                
             }
         }
 
@@ -98,26 +100,21 @@ abstract class DateBuiltins {
     }
 
     static abstract class AbstractISOBI extends DateBuiltin {
-        protected final String biName;
         protected final boolean showOffset;
         protected final int accuracy;
 
-        protected AbstractISOBI(String biName,
-                boolean showOffset, int accuracy) {
-            this.biName = biName;
+        protected AbstractISOBI(boolean showOffset, int accuracy) {
             this.showOffset = showOffset;
             this.accuracy = accuracy;
         }
         
-        protected void checkDateTypeNotUnknown(int dateType, Environment env)
+        protected void checkDateTypeNotUnknown(int dateType)
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
-                throw new TemplateException(
-                        "Unknown date type: ?" + biName + " needs a date value "
-                        + "where it's known if it's a date-only, time-only, or "
-                        + "date+time value. Use ?time, ?date or ?datetime "
-                        + "before ? " + biName + " to estabilish that.",
-                        env);
+                throw new _MiscTemplateException(new _ErrorDescriptionBuilder(new Object[] {
+                            "The value of the following has unknown date type, but ?", key,
+                            " needs a date value where it's known if it's a date-only, time-only, or date+time value:"                        
+                        }).blame(target).tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
             }
         }
     }
@@ -130,16 +127,15 @@ abstract class DateBuiltins {
         
         private final boolean useUTC;
         
-        iso_tz_BI(String biName,
-                boolean showOffset, int accuracy, boolean useUTC) {
-            super(biName, showOffset, accuracy);
+        iso_tz_BI(boolean showOffset, int accuracy, boolean useUTC) {
+            super(showOffset, accuracy);
             this.useUTC = useUTC;
         }
 
         protected TemplateModel calculateResult(
                 Date date, int dateType, Environment env)
         throws TemplateException {
-            checkDateTypeNotUnknown(dateType, env);
+            checkDateTypeNotUnknown(dateType);
             return new SimpleScalar(DateUtil.dateToISO8601String(
                     date,
                     dateType != TemplateDateModel.TIME,
@@ -157,15 +153,14 @@ abstract class DateBuiltins {
      */
     static class iso_BI extends AbstractISOBI {
         
-        iso_BI(String biName,
-                boolean showOffset, int accuracy) {
-            super(biName, showOffset, accuracy);
+        iso_BI(boolean showOffset, int accuracy) {
+            super(showOffset, accuracy);
         }
 
         protected TemplateModel calculateResult(
                 Date date, int dateType, Environment env)
         throws TemplateException {
-            checkDateTypeNotUnknown(dateType, env);
+            checkDateTypeNotUnknown(dateType);
             return new Result(date, dateType, env);
         }
         
@@ -181,11 +176,7 @@ abstract class DateBuiltins {
             }
 
             public Object exec(List args) throws TemplateModelException {
-                if (args.size() != 1) {
-                    throw new TemplateModelException(
-                        "?" + biName + "(...) expects exactly 1 argument, but had "
-                        + args.size() + ".");
-                }
+                checkMethodArgCount(args, 1);
                 
                 TemplateModel tzArgTM = (TemplateModel) args.get(0);
                 TimeZone tzArg; 
@@ -197,23 +188,19 @@ abstract class DateBuiltins {
                             instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;                    
                 } else if (tzArgTM instanceof TemplateScalarModel) {
-                    String tzName = ((TemplateScalarModel) tzArgTM).getAsString();
+                    String tzName = EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
                     try {
                         tzArg = DateUtil.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
-                        throw new TemplateModelException(
-                                "The time zone string specified for ?" + biName +
-                                "(...) is not recognized as a valid time zone name: " +
-                                StringUtil.jQuote(tzName));
+                        throw new _TemplateModelException(new Object[] {
+                                "The time zone string specified for ?", key,
+                                "(...) is not recognized as a valid time zone name: ",
+                                new _DelayedJQuote(tzName) });
                     }
  
                 } else {
-                    throw new TemplateModelException(
-                            "The argument to ?" + biName +
-                            "(...) must be a String or a " +
-                            "java.util.TimeZone but it was a " +
-                            (tzArgTM != null ? tzArgTM.getClass().getName() : "null") +
-                            ".");
+                    throw MessageUtil.newMethodArgUnexpectedTypeException(
+                            "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
                 }
                 
                 return new SimpleScalar(DateUtil.dateToISO8601String(

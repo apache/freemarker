@@ -65,7 +65,6 @@ import freemarker.template.TemplateNumberModel;
 /**
  * Model for Jython numeric objects ({@link org.python.core.PyInteger}, {@link org.python.core.PyLong},
  * {@link org.python.core.PyFloat}).
- * @version $Id: JythonNumberModel.java,v 1.10 2003/11/12 21:53:40 ddekany Exp $
  * @author Attila Szegedi
  */
 public class JythonNumberModel

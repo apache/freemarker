@@ -52,14 +52,22 @@
 
 package freemarker.ext.servlet;
 
-import freemarker.template.*;
-import java.util.*;
-import javax.servlet.http.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import freemarker.template.SimpleCollection;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest parameters.
  * @author Attila Szegedi
- * @version $Id: HttpRequestParametersHashModel.java,v 1.21 2005/05/05 07:50:25 vsajip Exp $
  */
 
 public class HttpRequestParametersHashModel

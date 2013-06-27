@@ -52,14 +52,14 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import java.io.IOException;
+
+import freemarker.template.TemplateException;
 import freemarker.template.utility.StandardCompress;
-import java.io.*;
 
 /**
  * An instruction that reduces all sequences of whitespace to a single
  * space or newline. In addition, leading and trailing whitespace is removed.
- * @version $Id: CompressedBlock.java,v 1.1 2003/04/22 21:05:00 revusky Exp $
  * @see freemarker.template.utility.StandardCompress
  */
 final class CompressedBlock extends TemplateElement {
@@ -70,21 +70,37 @@ final class CompressedBlock extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         if (nestedBlock != null) {
-            env.visit(nestedBlock, StandardCompress.INSTANCE, null);
+            env.visitAndTransform(nestedBlock, StandardCompress.INSTANCE, null);
         }
     }
 
-    public String getCanonicalForm() {
-        String nested = nestedBlock != null ? nestedBlock.getCanonicalForm() : "";
-        return "<#compress>" + nested + "</#compress>";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            String nested = nestedBlock != null ? nestedBlock.getCanonicalForm() : "";
+            return "<" + getNodeTypeSymbol() + ">" + nested + "</" + getNodeTypeSymbol() + ">";
+        } else {
+            return getNodeTypeSymbol();
+        }
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#compress";
+    }
+    
+    int getParameterCount() {
+        return 0;
     }
 
-    public String getDescription() {
-        return "compressed block";
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
     }
 
     boolean isIgnorable() {
         return nestedBlock == null || nestedBlock.isIgnorable();
     }
+    
 }
-

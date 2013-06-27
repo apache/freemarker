@@ -57,7 +57,6 @@ import java.io.Serializable;
 /**
  * Represents a breakpoint location consisting of a template name and a line number.
  * @author Attila Szegedi
- * @version $Id: Breakpoint.java,v 1.1.2.1 2006/11/27 07:54:19 szegedia Exp $
  */
 public class Breakpoint implements Serializable, Comparable
 {

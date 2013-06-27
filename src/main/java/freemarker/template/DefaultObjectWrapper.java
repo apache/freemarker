@@ -57,13 +57,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
 import freemarker.ext.dom.NodeModel;
 
 /**
  * <p>The default implementation of the ObjectWrapper
  * interface.
- *
- * @version $Id: DefaultObjectWrapper.java,v 1.23 2005/06/08 00:06:19 revusky Exp $
  */
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
@@ -83,7 +82,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             JYTHON_WRAPPER = (ObjectWrapper) Class.forName(
                     "freemarker.ext.jython.JythonWrapper")
                     .getField("INSTANCE").get(null);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
     public TemplateModel wrap(Object obj) throws TemplateModelException {

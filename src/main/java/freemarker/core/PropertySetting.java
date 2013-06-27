@@ -78,6 +78,7 @@ final class PropertySetting extends TemplateElement {
         ParseException
     {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
+        
         if (!key.equals(Configurable.LOCALE_KEY) &&
             !key.equals(Configurable.NUMBER_FORMAT_KEY) &&
             !key.equals(Configurable.TIME_FORMAT_KEY) &&
@@ -89,16 +90,15 @@ final class PropertySetting extends TemplateElement {
             !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY)) 
         {
             throw new ParseException(
-                    "Error " + getStartLocation()
-                    + "\nInvalid setting name, or it is not allowed to change "
+                    "Invalid setting name, or it's not allowed to change "
                     + "the value of the setting with FTL: "
                     + key,
-                    beginLine, beginColumn);
+                    template, beginLine, beginColumn);
         }
     }
 
     void accept(Environment env) throws TemplateException {
-        TemplateModel mval = value.getAsTemplateModel(env);
+        TemplateModel mval = value.eval(env);
         String strval;
         if (mval instanceof TemplateScalarModel) {
             strval = ((TemplateScalarModel) mval).getAsString();
@@ -107,17 +107,45 @@ final class PropertySetting extends TemplateElement {
         } else if (mval instanceof TemplateNumberModel) {
             strval = ((TemplateNumberModel) mval).getAsNumber().toString();
         } else {
-            strval = value.getStringValue(env);
+            strval = value.evalAndCoerceToString(env);
         }
         env.setSetting(key, strval);
     }
-
-    public String getCanonicalForm() {
-        return "<#setting " + key + "=" + value.getCanonicalForm() + "/>";
+    
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol());
+        sb.append(' ');
+        sb.append(key);
+        sb.append('=');
+        sb.append(value.getCanonicalForm());
+        if (canonical) sb.append("/>");
+        return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#setting";
     }
 
-    public String getDescription() {
-        return "setting " + key + " set to " + "\"" + value + "\" "
-	    + "[" + getStartLocation() + "]";
+    int getParameterCount() {
+        return 2;
     }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return key;
+        case 1: return value;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.ITEM_KEY;
+        case 1: return ParameterRole.ITEM_VALUE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

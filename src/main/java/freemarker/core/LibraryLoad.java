@@ -79,18 +79,17 @@ public final class LibraryLoad extends TemplateElement {
     {
         this.namespace = namespace;
         String templatePath1 = template.getName();
+        if (templatePath1 == null) {
+            // This can be the case if the template wasn't created throuh a TemplateLoader. 
+            templatePath1 = "";
+        }
         int lastSlash = templatePath1.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath1.substring(0, lastSlash + 1);
         this.templateName = templateName;
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = templateName.getStringValue(env);
-        if( templateNameString == null ) {
-            String msg = "Error " + getStartLocation()
-                        + "The expression " + templateName + " is undefined.";
-            throw new InvalidReferenceException(msg, env);
-        }
+        String templateNameString = templateName.evalAndCoerceToString(env);
         Template importedTemplate;
         try {
             if(!env.isClassicCompatible()) {
@@ -112,31 +111,52 @@ public final class LibraryLoad extends TemplateElement {
             importedTemplate = env.getTemplateForImporting(templateNameString);
         }
         catch (ParseException pe) {
-            String msg = "Error parsing imported template "
-                        + templateNameString;
-            throw new TemplateException(msg, pe, env);
+            throw new _MiscTemplateException(pe, env, new Object[] {
+                    "Error parsing imported template ", templateNameString });
         }
         catch (IOException ioe) {
-            String msg = "Error reading imported file "
-                        + templateNameString;
-            throw new TemplateException(msg, ioe, env);
+            throw new _MiscTemplateException(ioe, env, new Object[] {
+                    "Error reading imported template ", templateNameString });
         }
         env.importLib(importedTemplate, namespace);
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#import ");
+    protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append(getNodeTypeSymbol());
+        buf.append(' ');
         buf.append(templateName);
         buf.append(" as ");
         buf.append(namespace);
-        buf.append("/>");
+        if (canonical) buf.append("/>");
         return buf.toString();
     }
 
-    public String getDescription() {
-        return "import " + templateName + " as " + namespace;
+    String getNodeTypeSymbol() {
+        return "#import";
+    }
+    
+    int getParameterCount() {
+        return 2;
     }
 
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return templateName;
+        case 1: return namespace;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.TEMPLATE_NAME;
+        case 1: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }    
+    
     public String getTemplateName() {
         return templateName.toString();
     }

@@ -74,7 +74,6 @@ import freemarker.log.Logger;
  * the <tt>web.xml</tt> descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
  * @author Attila Szegedi
- * @version $Id: EventForwarding.java,v 1.5 2003/01/24 10:19:33 szegedia Exp $
  */
 public class EventForwarding
     implements

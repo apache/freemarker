@@ -70,13 +70,15 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * A class that performs caching and on-demand loading of the templates.
- * The actual loading is delegated to a {@link TemplateLoader}. Also,
- * various constructors provide you with convenient caches with predefined
- * behavior. Typically you don't use this class directly - in normal
- * circumstances it is hidden behind a {@link Configuration}. However,
- * the {@link CacheStorage} it uses can be set with
- * {@link freemarker.template.Configuration#setCacheStorage(CacheStorage)}
+ * Performs caching and on-demand loading of the templates.
+ * The actual template "file" loading is delegated to a {@link TemplateLoader} that you can specify in the constructor.
+ * Some aspects of caching is delegated to a {@link CacheStorage} that you can also specify in the constructor.
+ * 
+ * <p>Typically you don't instantiate or otherwise use this class directly. The {@link Configuration} embeds an
+ * instance of this class, that you access indirectly through {@link Configuration#getTemplate(String)} and other
+ * {@link Configuration} API-s. Then {@link TemplateLoader} and {@link CacheStorage} can be set with
+ * {@link Configuration#setTemplateLoader(TemplateLoader)} and
+ * {@link Configuration#setCacheStorage(CacheStorage)}.
  *
  * @author Attila Szegedi
  */
@@ -108,7 +110,9 @@ public class TemplateCache
      * Returns a template cache that will first try to load a template from
      * the file system relative to the current user directory (i.e. the value
      * of the system property <code>user.dir</code>), then from the classpath.
-     * This default template cache suits many applications.
+     * 
+     * @deprecated Use {@link #TemplateCache(TemplateLoader)} instead. The default loader is useless in most
+     *     applications, also it can mean a security risk.
      */
     public TemplateCache()
     {
@@ -127,28 +131,28 @@ public class TemplateCache
     /**
      * Creates a new template cache with a custom template loader that is used
      * to load the templates.
-     * @param loader the template loader to use.
+     * @param templateLoader the template loader to use.
      */
-    public TemplateCache(TemplateLoader loader)
+    public TemplateCache(TemplateLoader templateLoader)
     {
-        this(loader, new SoftCacheStorage());
+        this(templateLoader, new SoftCacheStorage());
     }
     
     /**
      * Creates a new template cache with a custom template loader that is used
      * to load the templates.
-     * @param loader the template loader to use.
+     * @param templateLoader the template loader to use.
      */
-    public TemplateCache(TemplateLoader loader, CacheStorage storage)
+    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage)
     {
-        this.templateLoader = loader;
-        this.storage = storage;
-        if(storage == null) 
+        this.templateLoader = templateLoader;
+        this.storage = cacheStorage;
+        if(cacheStorage == null) 
         {
             throw new IllegalArgumentException("storage == null");
         }
-        isStorageConcurrent = storage instanceof ConcurrentCacheStorage &&
-            ((ConcurrentCacheStorage)storage).isConcurrent();
+        isStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
+            ((ConcurrentCacheStorage)cacheStorage).isConcurrent();
     }
 
     /**
@@ -173,48 +177,14 @@ public class TemplateCache
     }
     
     /**
-     * Loads a template with the given name, in the specified locale and
-     * using the specified character encoding.
+     * Retrieves the template with the given name (and according the specified further parameters) from the
+     * template cache, loading it into the cache first if it's missing/staled.
+     * 
+     * <p>For the meaning of the parameters see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
      *
-     * @param name the name of the template. Can't be null. The exact syntax of the name
-     * is interpreted by the underlying {@link TemplateLoader}, but the
-     * cache makes some assumptions. First, the name is expected to be
-     * a hierarchical path, with path components separated by a slash
-     * character (not with backslash!). The path (the name) must <em>not</em> begin with slash;
-     * the path is always relative to the "template root directory".
-     * Then, the <tt>..</tt> and <tt>.</tt> path metaelements will be resolved.
-     * For example, if the name is <tt>a/../b/./c.ftl</tt>, then it will be
-     * simplified to <tt>b/c.ftl</tt>. The rules regarding this are same as with conventional
-     * UN*X paths. The path must not reach outside the template root directory, that is,
-     * it can't be something like <tt>"../templates/my.ftl"</tt> (not even if the pervious path
-     * happens to be equivalent with <tt>"/my.ftl"</tt>).
-     * Further, the path is allowed to contain at most
-     * one path element whose name is <tt>*</tt> (asterisk). This path metaelement triggers the
-     * <i>acquisition mechanism</i>. If the template is not found in
-     * the location described by the concatenation of the path left to the
-     * asterisk (called base path) and the part to the right of the asterisk
-     * (called resource path), the cache will attempt to remove the rightmost
-     * path component from the base path ("go up one directory") and concatenate
-     * that with the resource path. The process is repeated until either a
-     * template is found, or the base path is completely exhausted.
-     *
-     * @param locale the requested locale of the template. Can't be null.
-     * Assuming you have specified <code>en_US</code> as the locale and
-     * <code>myTemplate.html</code> as the name of the template, the cache will
-     * first try to retrieve <code>myTemplate_en_US.html</code>, then
-     * <code>myTemplate.html_en.html</code>, and finally
-     * <code>myTemplate.html</code>.
-     *
-     * @param encoding the character encoding used to interpret the template
-     * source bytes. Can't be null.
-     *
-     * @param parse if true, the loaded template is parsed and interpreted
-     * as a regular FreeMarker template. If false, the loaded template is
-     * treated as an unparsed block of text.
-     *
-     * @return the loaded template, or null if the template is not found.
+     * @return the loaded template, or {@code null} if the template was not found.
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parse)
+    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
     throws IOException
     {
         if (name == null) {
@@ -232,7 +202,7 @@ public class TemplateCache
         }
         Template result = null;
         if (templateLoader != null) {
-            result = getTemplate(templateLoader, name, locale, encoding, parse);
+            result = getTemplate(templateLoader, name, locale, encoding, parseAsFTL);
         }
         return result;
     }    
@@ -367,7 +337,9 @@ public class TemplateCache
             return t;
         }
         catch(RuntimeException e) {
-            storeNegativeLookup(tk, cachedTemplate, e);
+            if (cachedTemplate != null) {
+                storeNegativeLookup(tk, cachedTemplate, e);
+            }
             throw e;
         }
         catch(IOException e) {
@@ -397,7 +369,7 @@ public class TemplateCache
         IOException ioe;
         if(INIT_CAUSE != null) {
             ioe = new IOException("There was an error loading the " +
-                "template on an earlier attempt; it is attached as a cause");
+                "template on an earlier attempt; it's attached as a cause");
             try {
                 INIT_CAUSE.invoke(ioe, new Object[] { e });
             } catch(RuntimeException ex) {
@@ -583,25 +555,35 @@ public class TemplateCache
                 + (parse ? ",parsed] " : ",unparsed]");
     }    
 
-    public static String getFullTemplatePath(Environment env, String parentTemplateDir, String templateNameString)
+    /**
+     * Resolves a path-like reference to a template (like the one used in {@code #include} or {@code #import}), assuming
+     * a current directory. This gives a full, even if non-normalized template name, that could be used for
+     * {@link #getTemplate(String, Locale, String, boolean)}. This is mostly used when a template refers to another
+     * template.
+     * 
+     * @param targetTemplatePath If starts with "/" or contains "://", it's an absolute path and {@code currentDir}
+     *     will be ignored, otherwise it's interpreted as relative to {@code currentDir}
+     * @param currentTemplateDir must end with "/", might contains "://".  
+     */
+    public static String getFullTemplatePath(Environment env, String currentTemplateDir, String targetTemplatePath)
     {
         if (!env.isClassicCompatible()) {
-            if (templateNameString.indexOf("://") >0) {
+            if (targetTemplatePath.indexOf("://") >0) {
                 ;
             }
-            else if (templateNameString.length() > 0 && templateNameString.charAt(0) == '/')  {
-                int protIndex = parentTemplateDir.indexOf("://");
+            else if (targetTemplatePath.length() > 0 && targetTemplatePath.charAt(0) == '/')  {
+                int protIndex = currentTemplateDir.indexOf("://");
                 if (protIndex >0) {
-                    templateNameString = parentTemplateDir.substring(0, protIndex + 2) + templateNameString;
+                    targetTemplatePath = currentTemplateDir.substring(0, protIndex + 2) + targetTemplatePath;
                 } else {
-                    templateNameString = templateNameString.substring(1);
+                    targetTemplatePath = targetTemplatePath.substring(1);
                 }
             }
             else {
-                templateNameString = parentTemplateDir + templateNameString;
+                targetTemplatePath = currentTemplateDir + targetTemplatePath;
             }
         }
-        return templateNameString;
+        return targetTemplatePath;
     }
 
     private Object findTemplateSource(String name, Locale locale)
@@ -660,6 +642,9 @@ public class TemplateCache
                 lastAsterisk = tokpath.size();
             }
             tokpath.add(pathToken);
+        }
+        if (lastAsterisk == -1) {  // if there was no real "*" step after all
+            return templateLoader.findTemplateSource(path);
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());

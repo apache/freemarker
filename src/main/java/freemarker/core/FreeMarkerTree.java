@@ -49,14 +49,17 @@
  * information on the Visigoth Software Society, please see
  * http://www.visigoths.org/
  */
-
 package freemarker.core;
 
-import freemarker.template.*;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 
-abstract public class FreeMarkerTree extends JTree {
+import freemarker.template.Template;
+
+/**
+ * Allows exposure of a FreeMarker template's AST as a Swing tree.
+ */
+public class FreeMarkerTree extends JTree {
 
     public FreeMarkerTree(Template template) {
         super(template.getRootTreeNode());
@@ -67,7 +70,6 @@ abstract public class FreeMarkerTree extends JTree {
         this.invalidate();
     }
 
-
     public String convertValueToText(Object value, boolean selected,
                                      boolean expanded, boolean leaf, int row,
                                      boolean hasFocus) 
@@ -77,4 +79,5 @@ abstract public class FreeMarkerTree extends JTree {
         }
         return value.toString();
     }
+    
 }

@@ -54,19 +54,14 @@ package freemarker.template;
 
 import java.util.List;
 
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateSequenceModel;
-
 /**
- * Sequence that wraps a <code>java.util.List</code> of already wrapped objects
- * directly, with minimal resource usage. Warning! It does not copy the original
- * list.
- *
- * @author Daniel Dekany
- * @version $Id: TemplateModelListSequence.java,v 1.2 2004/01/06 17:06:43 szegedia Exp $
+ * A sequence that wraps a {@link List} of {@link TemplateModel}-s. It does not copy the original
+ * list. It's mostly useful when implementing {@link TemplateMethodModelEx}-es that collect items from other
+ * {@link TemplateModel}-s.
  */
 public class TemplateModelListSequence implements TemplateSequenceModel {
-    private List list;
+    
+    private List/*<TemplateModel>*/ list;
 
     public TemplateModelListSequence(List list) {
         this.list = list;
@@ -80,7 +75,11 @@ public class TemplateModelListSequence implements TemplateSequenceModel {
         return list.size();
     }
 
+    /**
+     * Returns the original {@link List} of {@link TemplateModel}-s, so it's not a fully unwrapped value.
+     */
     public Object getWrappedObject() {
         return list;
     }
+    
 }

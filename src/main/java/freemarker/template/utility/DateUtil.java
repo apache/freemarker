@@ -142,7 +142,7 @@ public class DateUtil {
                 !(
                        (c1 == 'U' || c1 == 'u')
                     && (c2 == 'T' || c2 == 't')
-                    && (c3 == '1' || c3 == '1')
+                    && (c3 == '1')
                 )
                 ) {
             return false;

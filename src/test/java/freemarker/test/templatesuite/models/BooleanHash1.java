@@ -52,13 +52,15 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
 
 /**
  * Tests the impact that the isEmpty() has on template hash models.
  *
  * @author  <a href="mailto:run2000@users.sourceforge.net">Nicholas Cull</a>
- * @version $Id: BooleanHash1.java,v 1.15 2004/01/06 17:06:44 szegedia Exp $
  */
 public class BooleanHash1 implements TemplateHashModel {
 

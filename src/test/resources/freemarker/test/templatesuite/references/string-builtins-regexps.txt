@@ -59,8 +59,8 @@ c-word with follower in the same line:
 Lower c-word with follower in the same line:
 - considered to
 
-  Ignored but logged in 2.3: false == false
-  Ignored but logged in 2.3: false == false
+  Ignored but logged in 2.3: False == False
+  Ignored but logged in 2.3: False == False
 
 FOObar == FOObar
 Foobar == Foobar
@@ -78,6 +78,8 @@ foobar == foobar
 FOObar == FOObar
 FOObarFOO == FOObarFOO
 FOObarfOo == FOObarfOo
+FAlse == FAlse
+FAlse == FAlse
 
   Ignored but logged in 2.3: FOObar
 
@@ -88,3 +90,5 @@ FOObarfOo == FOObarfOo
 [foo, bar, baaz] == [foo, bar, baaz]
 [fooXXbarxxbaaz] == [fooXXbarxxbaaz]
 [foo, bar, baaz] == [foo, bar, baaz]
+[F, ls] == [F, ls]
+[Fals, ] == [Fals, ]

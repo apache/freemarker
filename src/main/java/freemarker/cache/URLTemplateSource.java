@@ -55,13 +55,12 @@ package freemarker.cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.JarURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
 
 /**
  * Wraps a <code>java.net.URL</code>, and implements methods required for a typical template source.
- * @version $Id: URLTemplateSource.java,v 1.4 2003/04/02 11:43:18 szegedia Exp $
  * @author Daniel Dekany
  * @author TJ Laurenzo
  */

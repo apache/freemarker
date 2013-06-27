@@ -52,9 +52,15 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 
 final class UnaryPlusMinusExpression extends Expression {
+    
+    private final int TYPE_MINUS = 0;
+    private final int TYPE_PLUS = 1;
 
     private final Expression target;
     private final boolean isMinus;
@@ -65,18 +71,18 @@ final class UnaryPlusMinusExpression extends Expression {
         this.isMinus = isMinus;
     }
     
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         TemplateNumberModel targetModel = null;
+        TemplateModel tm = target.eval(env);
         try {
-            targetModel = (TemplateNumberModel) target.getAsTemplateModel(env);
+            targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {
-            String msg = "Error " + getStartLocation();
-            msg += "\nExpression " + target + " is not numerical.";
-            throw new NonNumericalException(msg, env);
+            throw new NonNumericalException(target, tm, env);
         }
         if (!isMinus) {
             return targetModel;
         }
+        target.assertNonNull(targetModel, env);
         Number n = targetModel.getAsNumber();
         n = ArithmeticEngine.CONSERVATIVE_ENGINE.multiply(MINUS_ONE, n);
         return new SimpleNumber(n);
@@ -86,12 +92,45 @@ final class UnaryPlusMinusExpression extends Expression {
         String op = isMinus ? "-" : "+";
         return op + target.getCanonicalForm();
     }
+
+    String getNodeTypeSymbol() {
+        return isMinus ? "-..." : "+...";
+    }
     
     boolean isLiteral() {
         return target.isLiteral();
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new UnaryPlusMinusExpression(target.deepClone(name, subst), isMinus);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new UnaryPlusMinusExpression(
+    	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        isMinus);
     }
+    
+    
+    boolean isIgnorable() {
+        return true;
+    }
+
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return target;
+        case 1: return new Integer(isMinus ? TYPE_MINUS : TYPE_PLUS);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.RIGHT_HAND_OPERAND;
+        case 1: return ParameterRole.AST_NODE_SUBTYPE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

@@ -52,6 +52,8 @@
 
 package freemarker.core;
 
+import freemarker.template.utility.StringUtil;
+
 /**
  * A template element where the content is ignored, a Comment.
  */
@@ -64,22 +66,38 @@ public final class Comment extends TemplateElement {
     }
 
     void accept(Environment env) {
-    // do nothing, skip the body
+        // do nothing, skip the body
     }
 
-    public String getCanonicalForm() {
-        return "<#--" + text + "-->";
-    }
-
-    public String getDescription() {
-        String s = text.trim();
-        if (s.length() > 20) {
-            s = s.substring(0, 20) + "...";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            return "<#--" + text + "-->";
+        } else {
+            return "comment " + StringUtil.jQuote(text.trim());
         }
-        return "comment (" + s + ")";
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#--...--";
+    }
+    
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return text;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.CONTENT;
     }
 
     public String getText() {
         return text;
     }
+    
 }

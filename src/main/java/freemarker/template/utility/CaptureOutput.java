@@ -52,10 +52,16 @@
 
 package freemarker.template.utility;
 
-import freemarker.template.*;
-import freemarker.core.Environment;
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
+
+import freemarker.core.Environment;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateTransformModel;
 
 /**
  * A transform that captures the output of a block of FTL code and stores that in a variable.
@@ -84,8 +90,6 @@ import java.util.Map;
  * common usage pattern.</p>
  *
  * @deprecated Use block-assignments instead, as <code>&lt;assign x>...&lt;/assign></code>.
- *
- * @version $Id: CaptureOutput.java,v 1.31 2004/01/06 17:06:43 szegedia Exp $
  */
 public class CaptureOutput implements TemplateTransformModel {
 

@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>FreeMarker: Switch-Case Test</title>
+</head>
+<body>
+
+<p>Here we iterate over a list of animals.</p>
+
+<p>Animal is: aardvark.<br />
+        This is the HTML for other animals.
+</p>
+<p>Animal is: kiwi.<br />
+        This is the HTML for the user's favorite animal.
+</p>
+<p>Animal is: gecko.<br />
+        This is the HTML for small animals.
+</p>
+<p>Animal is: cat.<br />
+        This is the HTML for other animals.
+</p>
+<p>Animal is: dog.<br />
+        This is the HTML for other animals.
+</p>
+<p>Animal is: elephant.<br />
+        This is the HTML for large animals.
+</p>
+<p>Animal is: squirrel.<br />
+        This is the HTML for small animals.
+</p>
+<p>Animal is: zebra.<br />
+        This is the HTML for a large stripey animal.
+        This is the HTML for large animals.
+</p>
+
+      1
+          i2
+      2
+          i4
+          ft
+      ft
+      3
+          i4
+      3
+          i6
+
+[]
+
+  ""
+  "1234"
+  "234"
+  "34"
+  "4"
+
+  "12default45"
+  "2default45"
+  "default"
+  "45"
+  "5"
+
+
+</body>
+</html>

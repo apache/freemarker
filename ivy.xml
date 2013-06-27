@@ -68,8 +68,6 @@
     
     <conf name="manual" description="for generating the manual with Docgen" />
     
-    <conf name="site" description="for integrating website into a distro" />
-    
     <conf name="emma" description="for generating EMMA reports" />
     
     <conf name="bnd" description="for creating OSGi bundle" />
@@ -78,6 +76,7 @@
     <conf name="example.webapp1" extends="example.servlet" />
     <conf name="example.webapp2" extends="example.servlet" />
     <conf name="example.struts-webapp" extends="example.servlet" />
+    <conf name="example.ant" />
   </configurations>
   <publications>
     <artifact name="freemarker" type="jar" conf="runtime" ext="jar" />
@@ -131,10 +130,6 @@
     <!-- docs -->
     
     <dependency org="org.freemarker" name="docgen" rev="1.0-branch-head" conf="manual->default" changing="true" />
-    
-    <!-- website -->
-    
-    <dependency org="org.freemarker" name="site" rev="1.0-branch-head" conf="site->default" changing="true" />
     
     <!-- EMMA -->
     

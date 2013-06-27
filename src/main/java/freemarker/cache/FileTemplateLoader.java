@@ -72,7 +72,6 @@ import freemarker.template.utility.SecurityUtilities;
  * It compares canonical paths for this, so templates that are symbolically
  * linked into the template directory from outside of it won't work either.
  * @author Attila Szegedi, szegedia at freemail dot hu
- * @version $Id: FileTemplateLoader.java,v 1.26 2004/03/29 08:06:22 szegedia Exp $
  */
 public class FileTemplateLoader implements TemplateLoader
 {

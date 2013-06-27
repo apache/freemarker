@@ -56,11 +56,16 @@
 
 package freemarker.core;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Writer;
-import freemarker.template.*;
-import java.io.IOException;
+
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.utility.NullWriter;
 
 
 /**
@@ -81,9 +86,9 @@ final class MethodCall extends Expression {
         this.arguments = arguments;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
+    TemplateModel _eval(Environment env) throws TemplateException
     {
-        TemplateModel targetModel = target.getAsTemplateModel(env);
+        TemplateModel targetModel = target.eval(env);
         if (targetModel instanceof TemplateMethodModel) {
             TemplateMethodModel targetMethod = (TemplateMethodModel)targetModel;
             List argumentStrings = 
@@ -97,12 +102,12 @@ final class MethodCall extends Expression {
             Macro func = (Macro) targetModel;
             env.setLastReturnValue(null);
             if (!func.isFunction) {
-                throw new TemplateException("A macro cannot be called in an expression.", env);
+                throw new _MiscTemplateException(env, "A macro cannot be called in an expression.");
             }
             Writer prevOut = env.getOut();
             try {
-                env.setOut(Environment.NULL_WRITER);
-                env.visit(func, null, arguments.values, null, null);
+                env.setOut(NullWriter.INSTANCE);
+                env.visit(func, null, arguments.items, null, null);
             } catch (IOException ioe) {
                 throw new InternalError("This should be impossible.");
             } finally {
@@ -111,7 +116,7 @@ final class MethodCall extends Expression {
             return env.getLastReturnValue();
         }
         else {
-            throw invalidTypeException(targetModel, target, env, "method");
+            throw new UnexpectedTypeException(target, targetModel, "method", env);
         }
     }
 
@@ -125,6 +130,10 @@ final class MethodCall extends Expression {
         return buf.toString();
     }
 
+    String getNodeTypeSymbol() {
+        return "...(...)";
+    }
+    
     TemplateModel getConstantValue() {
         return null;
     }
@@ -133,8 +142,35 @@ final class MethodCall extends Expression {
         return false;
     }
 
-    Expression _deepClone(String name, Expression subst) {
-        return new MethodCall(target.deepClone(name, subst), (ListLiteral)arguments.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new MethodCall(
+                target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                (ListLiteral)arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    }
+
+    int getParameterCount() {
+        return 1 + arguments.items.size();
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx == 0) {
+            return target;
+        } else if (idx < getParameterCount()) {
+            return arguments.items.get(idx - 1);
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx == 0) {
+            return ParameterRole.CALLEE;
+        } else if (idx < getParameterCount()) {
+            return ParameterRole.ARGUMENT_VALUE;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
 }

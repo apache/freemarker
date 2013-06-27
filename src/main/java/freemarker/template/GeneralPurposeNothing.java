@@ -52,8 +52,8 @@
 
 package freemarker.template;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Singleton object representing nothing, used by ?if_exists built-in.

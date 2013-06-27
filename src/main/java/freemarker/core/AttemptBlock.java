@@ -54,13 +54,18 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import freemarker.template.*;
 
+import freemarker.template.TemplateException;
+
+/**
+ * #attempt element; might has a nested {@link RecoveryBlock}.
+ */
 final class AttemptBlock extends TemplateElement {
     
-    private TemplateElement attemptBlock, recoveryBlock;
+    private TemplateElement attemptBlock;
+    private RecoveryBlock recoveryBlock;
     
-    AttemptBlock(TemplateElement attemptBlock, TemplateElement recoveryBlock) {
+    AttemptBlock(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) {
         this.attemptBlock = attemptBlock;
         this.recoveryBlock = recoveryBlock;
         nestedElements = new ArrayList();
@@ -70,21 +75,47 @@ final class AttemptBlock extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        env.visit(attemptBlock, recoveryBlock);
+        env.visitAttemptRecover(attemptBlock, recoveryBlock);
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#attempt>");
-        if (attemptBlock != null) {
-            buf.append(attemptBlock.getCanonicalForm());            
+    protected String dump(boolean canonical) {
+        if (!canonical) {
+            return getNodeTypeSymbol();
+        } else {
+            StringBuffer buf = new StringBuffer();
+            buf.append("<");
+            buf.append(getNodeTypeSymbol());
+            buf.append(">");
+            if (attemptBlock != null) {
+                buf.append(attemptBlock.getCanonicalForm());            
+            }
+            if (recoveryBlock != null) {
+                buf.append(recoveryBlock.getCanonicalForm());
+            }
+            return buf.toString();
         }
-        if (recoveryBlock != null) {
-            buf.append(recoveryBlock.getCanonicalForm());
-        }
-        return buf.toString();
+    }
+    
+    int getParameterCount() {
+        return 1;
     }
 
-    public String getDescription() {
-        return "attempt block";
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return recoveryBlock;
     }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.ERROR_HANDLER;
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#attempt";
+    }
+    
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
 }

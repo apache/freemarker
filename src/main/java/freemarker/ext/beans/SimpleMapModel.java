@@ -74,7 +74,6 @@ import freemarker.template.WrappingTemplateModel;
  * underlying map (does not copy like {@link freemarker.template.SimpleHash}),
  * and a method interface to non-string keys.
  * @author Chris Nokleberg
- * @version $Id: SimpleMapModel.java,v 1.9 2005/06/12 19:03:04 szegedia Exp $
  */
 public class SimpleMapModel extends WrappingTemplateModel 
 implements TemplateHashModelEx, TemplateMethodModelEx, AdapterTemplateModel, 

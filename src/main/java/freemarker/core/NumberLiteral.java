@@ -52,7 +52,9 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 
 /**
  * A simple implementation of the <tt>TemplateNumberModel</tt>
@@ -67,11 +69,11 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         this.value = value;
     }
     
-    TemplateModel _getAsTemplateModel(Environment env) {
+    TemplateModel _eval(Environment env) {
         return new SimpleNumber(value);
     }
 
-    public String getStringValue(Environment env) {
+    public String evalAndCoerceToString(Environment env) {
         return env.formatNumber(value);
     }
 
@@ -87,12 +89,29 @@ final class NumberLiteral extends Expression implements TemplateNumberModel {
         return value.toString();
     }
     
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
+    
     boolean isLiteral() {
         return true;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new NumberLiteral(value);
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
 
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

@@ -11,7 +11,6 @@ import freemarker.debug.DebuggerListener;
 
 /**
  * @author Attila Szegedi
- * @version $Id: RmiDebuggerImpl.java,v 1.2.2.1 2006/11/27 07:54:49 szegedia Exp $
  */
 class RmiDebuggerImpl
 extends

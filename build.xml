@@ -104,6 +104,12 @@
     <delete dir="build" />
   </target>
 
+  <target name="clean-classes" description="get rid of compiled classes">
+    <delete dir="build/classes" />
+    <delete dir="build/test-classes" />
+    <delete dir="build/coverage/classes" />
+  </target>
+
   <condition property="deps.available">
     <available file=".ivy" />
   </condition>
@@ -178,6 +184,10 @@
       file="${_javaccOutputDir}/ParseException.java"
       tofile="${_javaccOutputDir}/ParseException.java.ignore"
     />
+    <move 
+      file="${_javaccOutputDir}/TokenMgrError.java"
+      tofile="${_javaccOutputDir}/TokenMgrError.java.ignore"
+    />
   </target>
    
   <target name="compile" depends="javacc">
@@ -212,16 +222,16 @@
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath.j2se1.2}"
       excludes="
-        freemarker/log/JDK14LoggerFactory.java,
-        freemarker/core/RegexBuiltins.java,
+        freemarker/log/_JDK14LoggerFactory.java,
+        freemarker/core/_RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java,
         
-        freemarker/ext/beans/Internal_EnumModels.java,
+        freemarker/ext/beans/_EnumModels.java,
         freemarker/ext/dom/SunInternalXalanXPathSupport.java,
         
         freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/Internal_FreeMarkerPageContext1.java,
-        freemarker/ext/jsp/Internal_FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/_FreeMarkerPageContext1.java,
+        freemarker/ext/jsp/_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java,
         
@@ -248,8 +258,8 @@
       classpathref="ivy.dep.j2se1.4"
       bootclasspath="${boot.classpath.j2se1.4}"
       includes="
-        freemarker/log/JDK14LoggerFactory.java,
-        freemarker/core/RegexBuiltins.java,
+        freemarker/log/_JDK14LoggerFactory.java,
+        freemarker/core/_RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java"
     />
 
@@ -260,7 +270,7 @@
       classpathref="ivy.dep.j2se1.5"
       bootclasspath="${boot.classpath.j2se1.5}"
       includes="
-        freemarker/ext/beans/Internal_EnumModels.java,
+        freemarker/ext/beans/_EnumModels.java,
         freemarker/ext/dom/SunInternalXalanXPathSupport.java"
     />
     
@@ -272,7 +282,7 @@
       bootclasspath="${boot.classpath.j2se1.2}"
       includes="
         freemarker/ext/jsp/TaglibFactory.java,
-        freemarker/ext/jsp/Internal_FreeMarkerPageContext1.java"
+        freemarker/ext/jsp/_FreeMarkerPageContext1.java"
     />
     
     <!-- There's no build.jsp2.0, as those classes are part of the common build subset. -->
@@ -284,7 +294,7 @@
       classpathref="ivy.dep.jsp2.1"
       bootclasspath="${boot.classpath.j2se1.2}"
       includes="
-        freemarker/ext/jsp/Internal_FreeMarkerPageContext21.java,
+        freemarker/ext/jsp/_FreeMarkerPageContext21.java,
         freemarker/ext/jsp/FreeMarkerJspFactory21.java,
         freemarker/ext/jsp/FreeMarkerJspApplicationContext.java"
     />
@@ -300,8 +310,8 @@
         freemarker/template/utility/JythonRuntime.java,
         freemarker/ext/jython/**"
       excludes="
-        freemarker/ext/jython/Internal_Jython22VersionAdapter.java,
-        freemarker/ext/jython/Internal_Jython25VersionAdapter.java"
+        freemarker/ext/jython/_Jython22VersionAdapter.java,
+        freemarker/ext/jython/_Jython25VersionAdapter.java"
     />
     
     <ivy:cachepath conf="build.jython2.2" pathid="ivy.dep.jython2.2" />
@@ -311,7 +321,7 @@
       classpathref="ivy.dep.jython2.2"
       bootclasspath="${boot.classpath.j2se1.2}"
       includes="
-        freemarker/ext/jython/Internal_Jython22VersionAdapter.java"
+        freemarker/ext/jython/_Jython22VersionAdapter.java"
     />
     
     <ivy:cachepath conf="build.jython2.5" pathid="ivy.dep.jython2.5" />
@@ -321,7 +331,7 @@
       classpathref="ivy.dep.jython2.5"
       bootclasspath="${boot.classpath.j2se1.5}"
       includes="
-        freemarker/ext/jython/Internal_Jython25VersionAdapter.java"
+        freemarker/ext/jython/_Jython25VersionAdapter.java"
     />
     
     <rmic base="build/classes" classpathref="ivy.dep"
@@ -496,8 +506,26 @@
     <!-- javadoc with <fileset> has bugs, so we create a filtered copy: -->
     <copy todir="build/javadoc-sources">
       <fileset dir="src/main/java">
-        <exclude name="**/Internal_*.java" />
+        <exclude name="**/_*.java" />
         <exclude name="**/SunInternalXalanXPathSupport.java" />
+        <!-- Remove classes that are, I suppose, only accidentally public: -->
+        <exclude name="**/core/LocalContext.java" />
+        <exclude name="**/core/CollectionAndSequence.java" />
+        <exclude name="**/core/Comment.java" />
+        <exclude name="**/core/DebugBreak.java" />
+        <exclude name="**/core/Expression.java" />
+        <exclude name="**/core/LibraryLoad.java" />
+        <exclude name="**/core/Macro.java" />
+        <exclude name="**/core/ReturnInstruction.java" />
+        <exclude name="**/core/StringArraySequence.java" />
+        <exclude name="**/core/TemplateElement.java" />
+        <exclude name="**/core/TemplateObject.java" />
+        <exclude name="**/core/TextBlock.java" />
+        <exclude name="**/core/ReturnInstruction.java" />
+        <exclude name="**/core/TokenMgrError.java" />
+        <exclude name="**/template/EmptyMap.java" />
+        <exclude name="**/log/SLF4JLoggerFactory.java" />
+        <exclude name="**/log/CommonsLoggingLoggerFactory.java" />
       </fileset>
     </copy>
     <!-- conf="IDE": as that has to contain all depedencies -->
@@ -518,6 +546,14 @@
       classpathref="ivy.dep"
     />
     <delete dir="build/javadoc-sources" />
+    
+    <available file="build/api/resources/titlebar.gif" property="titlebar.found"/>
+    <fail unless="titlebar.found"><!--
+    -->build/api/resources/titlebar.gif doesn't exist, which probably means <!--
+    -->that the API documentaton was generated with JDK 6 or earlier. Ensure <!--
+    -->that Ant uses JDK 7 or later (you may need to set JAVA_HOME), as the <!--
+    -->HTML output was significantly improved with JDK 7.<!--
+    --></fail>
   </target>
 
   <target name="manual" depends="init" description="Build the Manual" >
@@ -618,7 +654,33 @@
     <!-- Copy jars and sources and such into the distro -->
     <delete dir="${dist.dir}" />
     <mkdir dir="${dist.dir}" />
+    
+    <!-- Copy txt-s -->
     <copy todir="${dist.dir}" includeEmptyDirs="no">
+      <fileset dir="." defaultexcludes="no">
+        <include name="*.txt" />
+      </fileset>
+    </copy>
+    <replace
+      file="${dist.dir}/README.txt"
+      token="{version}"
+      value="${version}"
+    />
+
+    <!-- Copy binary -->
+    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />
+
+    <!-- Copy documentation -->
+    <mkdir dir="${dist.dir}/documentation" />
+    <copy file="src/dist/index.html" todir="${dist.dir}/documentation" />
+    <copy todir="${dist.dir}/documentation/_html" includeEmptyDirs="no">
+      <fileset dir="build/manual" />
+    </copy>
+    <copy todir="${dist.dir}/documentation/_html/api" includeEmptyDirs="no">
+      <fileset dir="build/api" />
+    </copy>
+    
+    <copy todir="${dist.dir}/source" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <exclude name="**/*.bak" />
         <exclude name="**/*.~*" />
@@ -631,27 +693,8 @@
         <include name="osgi.bnd" />
         <include name=".classpath" />
         <include name=".project" />
+        <include name=".git*" />
       </fileset>
-    </copy>
-    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />
-    <replace
-      file="${dist.dir}/README.txt"
-      token="{version}"
-      value="${version}"
-    />
-
-    <!-- Generate website pages and copy them into distro -->
-    <ivy:retrieve conf="site" pattern="build/site/[artifact].[ext]" />
-    <untar compression="gzip" src="build/site/site.tar.gz" dest="${dist.dir}/docs" />
-
-    <!-- Copy Manual -->
-    <copy todir="${dist.dir}/docs/docs" includeEmptyDirs="no">
-      <fileset dir="build/manual" />
-    </copy>
-    
-    <!-- Copy javadocs -->
-    <copy todir="${dist.dir}/docs/docs/api" includeEmptyDirs="no">
-      <fileset dir="build/api" />
     </copy>
     
     <!-- Package the distro -->
@@ -676,38 +719,39 @@
   -->
   <target name="maven-upload" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
-      <project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>org.freemarker</groupId>
-        <artifactId>freemarker</artifactId>
-        <version>${version}</version>
-        <packaging>jar</packaging>
-        <name>FreeMarker</name>
-        <description>
-        FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
-        </description>
-        <url>http://freemarker.org</url>
-        <licenses>
-        <license>
-          <name>BSD-style license</name>
-          <url>http://freemarker.org/LICENSE.txt</url>
-        </license>
-        </licenses>
-        <scm>
-        <url>http://freemarker.svn.sourceforge.net/viewvc/freemarker/</url>
-        <connection>scm:svn:https://freemarker.svn.sourceforge.net/svnroot/freemarker</connection>
-        </scm>
-        <dependencies>
-        <!-- no required dependencies -->
-        </dependencies>
-      </project>
-    ]]></echo>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.freemarker</groupId>
+  <artifactId>freemarker-gae</artifactId>
+  <version>${version}</version>
+  <packaging>jar</packaging>
+  <name>FreeMarker</name>
+  <description>
+    FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
+  </description>
+  <url>http://freemarker.org</url>
+  <licenses>
+    <license>
+      <name>BSD-style license</name>
+      <url>http://freemarker.org/LICENSE.txt</url>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/freemarker/freemarker</url>
+    <connection>scm:git:git://github.com/freemarker/freemarker.git</connection>
+  </scm>
+  <dependencies>
+    <!-- no required dependencies -->
+  </dependencies>
+</project>
+]]></echo>
     
-    <jar destfile="build/maven-source-attachment.jar"
-         basedir="src/main/java"
-    />
+    <jar destfile="build/maven-source-attachment.jar">
+      <fileset dir="src/main/java" />
+      <fileset dir="src/main/resources" />
+    </jar>
 
     <artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
    
@@ -716,7 +760,7 @@
        addproperty="mavenUpload.answer"
     >
 You are about uploading
-${dist.dir.versioned}/freemarker.jar
+${dist.dir}/freemarker.jar
 into the Maven central repostiry sync. directory.
 Be sure that's the final (released) variation there,
 and that the version number is correct.
@@ -999,5 +1043,24 @@ Proceed? </input>
     </ivy:publish>
     <delete file="build/ivy.xml" />  <!-- ivy:publish makes this -->
   </target>
-  
+
+  <target name="archive" depends=""
+    description='Archives project with Git repo into the "archive" directory.'
+  >
+    <mkdir dir="archive" />
+    <tstamp>
+      <format property="tstamp" pattern="yyyyMMdd-HHmm" />
+    </tstamp>
+    <delete file="archive/freemarker-git-${tstamp}.tar" />
+    <delete file="archive/freemarker-git-${tstamp}.tar.bz2" />
+    <tar tarfile="archive/freemarker-git-${tstamp}.tar"
+      basedir="."
+      longfile="gnu"
+      excludes="build/** .build/** .bin/** .ivy/**  archive/**"
+    />
+    <bzip2 src="archive/freemarker-git-${tstamp}.tar"
+        zipfile="archive/freemarker-git-${tstamp}.tar.bz2" />
+    <delete file="archive/freemarker-git-${tstamp}.tar" />
+  </target>
+    
 </project>

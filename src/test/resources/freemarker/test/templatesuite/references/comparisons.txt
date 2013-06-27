@@ -1,0 +1,75 @@
+<html>
+<head>
+<title>FreeMarker: Numeric Operations Test</title>
+</head>
+<body>
+
+<p>A simple test follows:</p>
+
+<p>Hello, world!</p>
+
+<p>Start with the increment operator:</p>
+<p>a1 = 0</p>
+<p>a1 = 1</p>
+<p>a1 = 2</p>
+
+<p>Now the decrement operator:</p>
+<p>a2 = 5</p>
+<p>a2 = 4</p>
+<p>a2 = 3</p>
+<p>a2 = 2</p>
+<p>a2 = 1</p>
+<p>a2 = 0</p>
+<p>a2 = -1</p>
+
+<p>Now the add operator:</p>
+<p>op1 = 5, op2 = 3, op3 = 8</p>
+<p>op3 = 11</p>
+
+<p>And the subtract operator:</p>
+<p>op1 = 5, op2 = 3, op3 = 2</p>
+<p>op3 = -1</p>
+
+<p>The comparison operators:</p>
+   <p>Item is: 0</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is: 1</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is: 2</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is: 3</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 4</p>
+   <p>Item is less than five.</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 5</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 6</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 7</p>
+   <p>Item is less than or equals to seven.</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 8</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 9</p>
+   <p>Item is greater than two.</p>
+   <p>Item is: 10</p>
+   <p>Item is greater than two.</p>
+   <p>Item is greater than or equal to ten.</p>
+   <p>Item is: 11</p>
+   <p>Item is greater than two.</p>
+   <p>Item is greater than or equal to ten.</p>
+   <p>Item is: 12</p>
+   <p>Item is greater than two.</p>
+   <p>Item is greater than or equal to ten.</p>
+
+</body>
+</html>

@@ -61,7 +61,6 @@ import java.io.Serializable;
  *
  * <p>This class is thread-safe.
  *
- * @version $Id: SimpleScalar.java,v 1.38 2004/09/10 20:50:45 ddekany Exp $
  * @see SimpleSequence
  * @see SimpleHash
  */

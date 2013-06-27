@@ -7,7 +7,6 @@ package freemarker.template;
  * directly. It is usually implemented by unwrapping adapter classes of various 
  * object wrapper implementations.
  * @author Attila Szegedi
- * @version $Id: TemplateModelAdapter.java,v 1.1 2005/06/12 19:03:07 szegedia Exp $
  */
 public interface TemplateModelAdapter {
     /**

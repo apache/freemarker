@@ -52,13 +52,20 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.StringUtil;
 
 final class StringLiteral extends Expression implements TemplateScalarModel {
     
     private final String value;
-    private TemplateElement interpolatedOutput;
+    private TemplateElement dynamicValue;
     
     StringLiteral(String value) {
         this.value = value;
@@ -70,9 +77,9 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.onlyTextOutput = true;
             FMParser parser = new FMParser(token_source);
-            parser.template = getTemplate();
+            parser.setTemplate(getTemplate());
             try {
-                interpolatedOutput = parser.FreeMarkerText();
+                dynamicValue = parser.FreeMarkerText();
             }
             catch(ParseException e) {
                 e.setTemplateName(getTemplate().getName());
@@ -82,26 +89,34 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         }
     }
     
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-        return new SimpleScalar(getStringValue(env));
+    TemplateModel _eval(Environment env) throws TemplateException {
+        return new SimpleScalar(evalAndCoerceToString(env));
     }
 
     public String getAsString() {
         return value;
     }
     
-    String getStringValue(Environment env) throws TemplateException {
-        if (interpolatedOutput == null) {
+    /**
+     * Tells if this is something like <tt>"${foo}"</tt>, which is usually a user mistake.
+     */
+    boolean isSingleInterpolationLiteral() {
+        return dynamicValue != null && dynamicValue.getChildCount() == 1
+                && dynamicValue.getChildAt(0) instanceof DollarVariable;
+    }
+    
+    String evalAndCoerceToString(Environment env) throws TemplateException {
+        if (dynamicValue == null) {
             return value;
         } 
         else {
             TemplateExceptionHandler teh = env.getTemplateExceptionHandler();
             env.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             try {
-               return env.renderElementToString(interpolatedOutput);
+               return env.renderElementToString(dynamicValue);
             }
             catch (IOException ioe) {
-                throw new TemplateException(ioe, env);
+                throw new _MiscTemplateException(ioe, env);
             }
             finally {
                 env.setTemplateExceptionHandler(teh);
@@ -110,33 +125,37 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
 
     public String getCanonicalForm() {
-//        return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
-        return "\"" + escapeString(value) + "\"";
+        return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
+    }
+    
+    String getNodeTypeSymbol() {
+        return dynamicValue == null ? getCanonicalForm() : "dynamic \"...\"";
     }
     
     boolean isLiteral() {
-        return interpolatedOutput == null;
+        return dynamicValue == null;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         StringLiteral cloned = new StringLiteral(value);
-        cloned.interpolatedOutput = this.interpolatedOutput;
+        // FIXME: replacedIdentifier should be searched inside interpolatedOutput too:
+        cloned.dynamicValue = this.dynamicValue;
         return cloned;
     }
 
-    static private String escapeString(String s) {
-        if (s.indexOf('"') == -1) {
-            return s;
-        }
-        java.util.StringTokenizer st = new java.util.StringTokenizer(s, "\"", true);
-        StringBuffer buf = new StringBuffer();
-        while (st.hasMoreTokens()) {
-            String tok = st.nextToken();
-            if (tok.equals("\"")) {
-                buf.append('\\');
-            }
-            buf.append(tok);
-        }
-        return buf.toString();
+    int getParameterCount() {
+        return 1;
     }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return dynamicValue;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.EMBEDDED_TEMPLATE;
+    }
+    
 }

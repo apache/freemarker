@@ -52,16 +52,19 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
+
+import freemarker.template.TemplateTransformModel;
 
 /**
  * A TemplateTransformModel that includes properties. These properties can be
  * set at model construction time, or, for the purposes of this demonstration,
  * can be passed in from a wrapper TemplateMethodModel.
- *
- * @version $Id: TransformModel1.java,v 1.21 2003/01/12 23:40:25 revusky Exp $
  */
 public class TransformModel1 implements TemplateTransformModel {
 

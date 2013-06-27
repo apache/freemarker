@@ -1,7 +1,6 @@
 package freemarker.ext.beans;
 
 import junit.framework.TestCase;
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;

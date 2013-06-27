@@ -70,7 +70,6 @@ import freemarker.template.TemplateModelException;
  * template models are implemented by the mirrored object.
  *  
  * @author Attila Szegedi
- * @version $Id: DebugModel.java,v 1.2 2003/06/08 00:58:16 herbyderby Exp $
  */
 public interface DebugModel extends Remote
 {

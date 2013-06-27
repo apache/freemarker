@@ -67,7 +67,6 @@ import freemarker.template.TemplateSequenceModel;
  * and {@link TemplateSequenceModel} interfaces. It supports element retrieval through the <tt>array[index]</tt>
  * syntax and can be iterated as a list.
  * @author Attila Szegedi
- * @version $Id: ArrayModel.java,v 1.26 2003/06/03 13:21:32 szegedia Exp $
  */
 public class ArrayModel
 extends
@@ -102,7 +101,7 @@ implements
         super(array, wrapper);
         Class clazz = array.getClass();
         if(!clazz.isArray())
-            throw new IllegalArgumentException("Object is not an array, it is " + array.getClass().getName());
+            throw new IllegalArgumentException("Object is not an array, it's " + array.getClass().getName());
         length = Array.getLength(array);
     }
 

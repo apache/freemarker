@@ -4,16 +4,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
 import freemarker.template.TemplateModel;
 
 public class BeansModelCache extends ModelCache
 {
-    private final Map classToFactory = ConcurrentMapFactory.newMaybeConcurrentHashMap();
+    private final Map classToFactory = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
     private final boolean classToFactoryIsConcurrent
-            = ConcurrentMapFactory.isConcurrent(classToFactory);
+            = _ConcurrentMapFactory.isConcurrent(classToFactory);
     private final Set mappedClassNames = new HashSet();
 
     private final BeansWrapper wrapper;

@@ -53,7 +53,8 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 final class RecoveryBlock extends TemplateElement {
     
@@ -64,20 +65,38 @@ final class RecoveryBlock extends TemplateElement {
     void accept(Environment env) throws TemplateException, IOException 
     {
         if (nestedBlock != null) {
-		env.visit(nestedBlock);
-	}
-    }
-
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#recover>");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());            
+            env.visitByHiddingParent(nestedBlock);
         }
-        buf.append("/#recover");
-        return buf.toString();
     }
 
-    public String getDescription() {
-        return "recover block";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            StringBuffer buf = new StringBuffer();
+            buf.append('<').append(getNodeTypeSymbol()).append('>');
+            if (nestedBlock != null) {
+                buf.append(nestedBlock.getCanonicalForm());            
+            }
+            buf.append("</").append(getNodeTypeSymbol()).append('>');
+            return buf.toString();
+        } else {
+            return getNodeTypeSymbol();
+        }
     }
+
+    String getNodeTypeSymbol() {
+        return "#recover";
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

@@ -69,25 +69,47 @@ final class Dot extends Expression {
         this.key = key;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException
+    TemplateModel _eval(Environment env) throws TemplateException
     {
-        TemplateModel leftModel = target.getAsTemplateModel(env);
+        TemplateModel leftModel = target.eval(env);
         if(leftModel instanceof TemplateHashModel) {
             return ((TemplateHashModel) leftModel).get(key);
         }
-        throw invalidTypeException(leftModel, target, env, "hash");
+        if (leftModel == null && env.isClassicCompatible()) {
+            return null; // ${noSuchVar.foo} has just printed nothing in FM 1.
+        }
+        throw new UnexpectedTypeException(target, leftModel, "hash", env);
     }
 
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + "." + key;
+        return target.getCanonicalForm() + getNodeTypeSymbol() + key;
+    }
+    
+    String getNodeTypeSymbol() {
+        return ".";
     }
     
     boolean isLiteral() {
         return target.isLiteral();
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new Dot(target.deepClone(name, subst), key);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new Dot(
+    	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        key);
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        return idx == 0 ? (Object) target : (Object) key;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
     boolean onlyHasIdentifiers() {

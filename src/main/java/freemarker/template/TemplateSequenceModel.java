@@ -53,15 +53,12 @@
 package freemarker.template;
 
 /**
- * List values in a template data model whose elements are accessed by the 
- * index operator should implement this interface. In addition to
- * accessing elements by index and querying size using the <code>?size</code>
- * built-in, objects that implement this interface can be iterated in 
- * <code>&lt;#foreach ...></code> and <code>&lt;#list ...></code> directives. The 
- * iteration is implemented by calling the {@link #get(int)} method 
- * repeatedly starting from zero and going to <tt>{@link #size()} - 1</tt>.
+ * "sequence" template language data type; an object that contains other objects accessible through
+ * an integer 0-based index.
+ * 
+ * <p>Used in templates like: {@code mySeq[index]}, {@code <#list mySeq as i>...</#list>}, {@code mySeq?size}, etc. 
+ * 
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
- * @version $Id: TemplateSequenceModel.java,v 1.10 2004/11/27 14:49:57 ddekany Exp $
  */
 public interface TemplateSequenceModel extends TemplateModel {
 

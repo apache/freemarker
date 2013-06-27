@@ -54,9 +54,10 @@ package freemarker.core;
 
 import java.io.IOException;
 
+import freemarker.template.utility.StringUtil;
+
 /**
  * A TemplateElement representing a block of plain text.
- * @version $Id: TextBlock.java,v 1.17 2004/01/06 17:06:42 szegedia Exp $
  */
 public final class TextBlock extends TemplateElement {
     private static final char[] EMPTY_CHAR_ARRAY = new char[0];
@@ -91,27 +92,36 @@ public final class TextBlock extends TemplateElement {
         env.getOut().write(text);
     }
 
-    public String getCanonicalForm() {
-        String text = new String(this.text);
-        if (unparsed) {
-            return "<#noparse>" + text + "</#noparse>";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            String text = new String(this.text);
+            if (unparsed) {
+                return "<#noparse>" + text + "</#noparse>";
+            }
+            return text;
+        } else {
+            return "text " + StringUtil.jQuote(new String(text));
         }
-        return text;
-    }
-
-    public String getDescription() {
-        String s = new String(text).trim();
-        if (s.length() == 0) {
-            return "whitespace";
-        }
-        if (s.length() > 20) {
-            s = s.substring(0,20) + "...";
-            s = s.replace('\n', ' ');
-            s = s.replace('\r', ' ');
-        }
-        return "text block (" + s + ")";
     }
     
+    String getNodeTypeSymbol() {
+        return "#text";
+    }
+    
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return new String(text);
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.CONTENT;
+    }
+
     TemplateElement postParseCleanup(boolean stripWhitespace) {
         if (text.length == 0) return this;
         int openingCharsToStrip = 0, trailingCharsToStrip=0;

@@ -24,7 +24,6 @@ import freemarker.template.TemplateTransformModel;
 
 /**
  * @author Attila Szegedi
- * @version $Id: RmiDebugModelImpl.java,v 1.2.2.1 2006/11/27 07:54:49 szegedia Exp $
  */
 class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel
 {

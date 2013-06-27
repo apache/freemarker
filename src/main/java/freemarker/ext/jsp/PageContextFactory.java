@@ -9,7 +9,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: PageContextFactory.java,v 1.2 2005/06/11 21:21:09 szegedia Exp $
  */
 class PageContextFactory {
     private static final Class pageContextImpl = getPageContextImpl();
@@ -18,15 +17,15 @@ class PageContextFactory {
         try {
             try {
                 PageContext.class.getMethod("getELContext", (Class[]) null);
-                return Class.forName("freemarker.ext.jsp.Internal_FreeMarkerPageContext21");
+                return Class.forName("freemarker.ext.jsp._FreeMarkerPageContext21");
             }
             catch(NoSuchMethodException e1) {
                 try {
                     PageContext.class.getMethod("getExpressionEvaluator", (Class[]) null);
-                    return Class.forName("freemarker.ext.jsp.Internal_FreeMarkerPageContext2");
+                    return Class.forName("freemarker.ext.jsp._FreeMarkerPageContext2");
                 }
                 catch(NoSuchMethodException e2) {
-                    return Class.forName("freemarker.ext.jsp.Internal_FreeMarkerPageContext1");
+                    return Class.forName("freemarker.ext.jsp._FreeMarkerPageContext1");
                 }
             }
         }

@@ -57,14 +57,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.StringUtil;
+import freemarker.template.utility.ClassUtil;
 
 /**
  * This class is used for constructors and as a base for non-overloaded methods
  * @author Attila Szegedi
- * @version $Id: $
  */
 class SimpleMemberModel
 {
@@ -122,6 +123,9 @@ class SimpleMemberModel
             if(unwrappedArgVal == BeansWrapper.CAN_NOT_UNWRAP) {
                 throw createArgumentTypeMismarchException(argIdx, argVal, argType);
             }
+            if (unwrappedArgVal == null && argType.isPrimitive()) {
+                throw createNullToPrimitiveArgumentException(argIdx, argType); 
+            }
             
             unwrappedArgs[argIdx++] = unwrappedArgVal;
         }
@@ -157,8 +161,7 @@ class SimpleMemberModel
                         }
                         
                         if (unwrappedVarargVal == null && varargItemType.isPrimitive()) {
-                            throw createArgumentTypeMismarchException(
-                                    argIdx + varargIdx, unwrappedVarargVal, varargItemType);
+                            throw createNullToPrimitiveArgumentException(argIdx + varargIdx, varargItemType); 
                         }
                         Array.set(varargArray, varargIdx, unwrappedVarargVal);
                     }
@@ -171,16 +174,17 @@ class SimpleMemberModel
     }
 
     private static TemplateModelException createArgumentTypeMismarchException(
-            int argIdx, Object argVal, Class targetType) {
-        return new TemplateModelException(
-                "Argument type mismatch; can not unwrap argument #"
-                + (argIdx + 1)
-                + " (" + (argVal == null
-                        ? "value: null"
-                        : "class: " + argVal.getClass().getName()
-                          + ", toString: " + StringUtil.jQuote(argVal))
-                + ") to "
-                + targetType);
+            int argIdx, TemplateModel argVal, Class targetType) {
+        return new _TemplateModelException(new Object[] {
+                "Argument type mismatch; can't convert (unwrap) argument #", new Integer(argIdx + 1),
+                " value of type ", new _DelayedFTLTypeDescription(argVal),
+                " to ", ClassUtil.getShortClassName(targetType), "." });
+    }
+
+    private static TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
+        return new _TemplateModelException(new Object[] {
+                "Argument type mismatch; argument #", new Integer(argIdx + 1),
+                " is null, which can't be converted to primitive type ", targetType.getName(), "." });
     }
     
     protected Member getMember() {

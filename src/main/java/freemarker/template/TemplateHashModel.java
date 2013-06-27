@@ -53,11 +53,10 @@
 package freemarker.template;
 
 /**
- * Hashes in a data model must implement this interface. Hashes
- * are FreeMarker data objects that contain other objects through key-value 
- * mappings.
- *
- * @version $Id: TemplateHashModel.java,v 1.13 2005/06/08 02:13:34 revusky Exp $
+ * "hash" template language data type: an object that contains other objects accessible through string keys
+ * (sub-variable names).
+ * 
+ * <p>In templates they are used like {@code myHash.myKey} or {@code myHash[myDynamicKey]}. 
  */
 public interface TemplateHashModel extends TemplateModel {
     

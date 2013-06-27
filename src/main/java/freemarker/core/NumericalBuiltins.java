@@ -58,24 +58,28 @@ import java.util.Date;
 
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
-import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.NumberUtil;
 
 /**
- * A holder for builtins that operate exclusively on TemplateSequenceModels.
+ * A holder for builtins that operate exclusively on number left-hand value.
  */
-
-abstract class NumericalBuiltins {
-    abstract static class NumberBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+class NumericalBuiltins {
+    
+    // Can't be instantiated
+    private NumericalBuiltins() { }
+    
+    private abstract static class NumberBuiltIn extends BuiltIn {
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
-            return calculateResult(EvaluationUtil.getNumber(model, target, env), model);
+            TemplateModel model = target.eval(env);
+            return calculateResult(target.modelToNumber(model, env), model);
         }
         
         abstract TemplateModel calculateResult(Number num, TemplateModel model)
@@ -111,16 +115,16 @@ abstract class NumericalBuiltins {
 
     // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
     static class longBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = EvaluationUtil.getDate((TemplateDateModel) model, target, env);
+                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target);
                 return new SimpleNumber(date.getTime());
             } else {
-                Number num = EvaluationUtil.getNumber(model, target, env);
+                Number num = target.modelToNumber(model, env);
                 if (num instanceof Long) {
                     return model;
                 }
@@ -169,20 +173,80 @@ abstract class NumericalBuiltins {
         }
     }
 
- 
-    // Doesn't extend NumberBuiltIn because "calculateResult" would need the Environment.
-    static class cBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
-                throws TemplateException
-        {
-            TemplateModel model = target.getAsTemplateModel(env);
-            Number num = EvaluationUtil.getNumber(model, target, env);
+    static class absBI extends NumberBuiltIn {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             if (num instanceof Integer) {
-                // We accelerate this fairly common case
-                return new SimpleScalar(num.toString());
+                int n = ((Integer) num).intValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof BigDecimal) {
+                BigDecimal n = (BigDecimal) num;
+                if (n.signum() < 0) {
+                    return new SimpleNumber(n.negate());
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Double) {
+                double n = ((Double) num).doubleValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Float) {
+                float n = ((Float) num).floatValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Long) {
+                long n = ((Long) num).longValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Short) {
+                short n = ((Short) num).shortValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof Byte) {
+                byte n = ((Byte) num).byteValue();
+                if (n < 0) {
+                    return new SimpleNumber(-n);
+                } else {
+                    return model;
+                }
+            } else if (num instanceof BigInteger) {
+                BigInteger n = (BigInteger) num;
+                if (n.signum() < 0) {
+                    return new SimpleNumber(n.negate());
+                } else {
+                    return model;
+                }
             } else {
-                return new SimpleScalar(env.getCNumberFormat().format(num));
-            }
+                throw new _TemplateModelException(new Object[] {
+                        "Unsupported number class: ", num.getClass() });
+            }            
+        }
+    }
+    
+    static class is_nanBI extends NumberBuiltIn {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            return NumberUtil.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
+    static class is_infiniteBI extends NumberBuiltIn {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            return NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
     
@@ -195,46 +259,40 @@ abstract class NumericalBuiltins {
         if (num instanceof Double) {
             double d = Math.round(((Double) num).doubleValue());
             if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
-                throw new TemplateModelException(
-                        "Number doesn't fit into a 64 bit signed integer (long): "
-                        + d);
+                throw new _TemplateModelException(new Object[] {
+                        "Number doesn't fit into a 64 bit signed integer (long): ", new Double(d) });
             } else {
                 return (long) d;
             }
         } else if (num instanceof Float) {
             float f = Math.round(((Float) num).floatValue());
             if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
-                throw new TemplateModelException(
-                        "Number doesn't fit into a 64 bit signed integer (long): "
-                        + f);
+                throw new _TemplateModelException(new Object[] {
+                        "Number doesn't fit into a 64 bit signed integer (long): ", new Float(f) });
             } else {
                 return (long) f;
             }
         } else if (num instanceof BigDecimal) {
             BigDecimal bd = ((BigDecimal) num).setScale(0, BigDecimal.ROUND_HALF_UP);
             if (bd.compareTo(BIG_DECIMAL_LONG_MAX) > 0 || bd.compareTo(BIG_DECIMAL_LONG_MIN) < 0) {
-                throw new TemplateModelException(
-                        "Number doesn't fit into a 64 bit signed integer (long): "
-                        + bd);
+                throw new _TemplateModelException(new Object[] {
+                        "Number doesn't fit into a 64 bit signed integer (long): ", bd });
             } else {
                 return bd.longValue();
             }
         } else if (num instanceof BigInteger) {
             BigInteger bi = (BigInteger) num;
             if (bi.compareTo(BIG_INTEGER_LONG_MAX) > 0 || bi.compareTo(BIG_INTEGER_LONG_MIN) < 0) {
-                throw new TemplateModelException(
-                        "Number doesn't fit into a 64 bit signed integer (long): "
-                        + bi);
+                throw new _TemplateModelException(new Object[] {
+                        "Number doesn't fit into a 64 bit signed integer (long): ", bi });
             } else {
                 return bi.longValue();
             }
-        } else if (num instanceof Long || num instanceof Integer
-                || num instanceof Byte || num instanceof Short) {
-            // Should add Atomic* types in 2.4...
+        } else if (num instanceof Long || num instanceof Integer || num instanceof Byte || num instanceof Short) {
             return num.longValue();
         } else {
-            throw new TemplateModelException(
-                    "Unsupported number type: " + num.getClass());
+            // Should add Atomic* types in 2.4...
+            throw new _TemplateModelException(new Object[] { "Unsupported number type: ", num.getClass() });
         }
     }
     

@@ -56,7 +56,6 @@ import java.io.IOException;
 
 /**
  * An instruction that flushes the output stream.
- * @version $Id: FlushInstruction.java,v 1.2 2004/01/06 17:06:42 szegedia Exp $
  */
 final class FlushInstruction extends TemplateElement {
 
@@ -64,11 +63,24 @@ final class FlushInstruction extends TemplateElement {
         env.getOut().flush();
     }
 
-    public String getCanonicalForm() {
-        return "<#flush/>";
+    protected String dump(boolean canonical) {
+        return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#flush";
+    }
+ 
+    int getParameterCount() {
+        return 0;
     }
 
-    public String getDescription() {
-        return "flush instruction";
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
     }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

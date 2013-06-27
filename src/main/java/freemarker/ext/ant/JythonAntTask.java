@@ -52,7 +52,7 @@
 
 package freemarker.ext.ant;
 
-import java.io.*;
+import java.io.File;
 import java.util.Map;
 
 import org.apache.tools.ant.BuildException;

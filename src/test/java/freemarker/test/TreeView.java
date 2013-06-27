@@ -60,6 +60,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 
+import freemarker.core.FreeMarkerTree;
 import freemarker.template.Template;
 
 public class TreeView {
@@ -81,7 +82,7 @@ public class TreeView {
     }
 
     static void showTree(Template t) {
-        JTree tree = new JTree(t.getRootTreeNode());
+        JTree tree = new FreeMarkerTree(t);
         JFrame jf = new JFrame(t.getName());
         jf.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -95,7 +96,7 @@ public class TreeView {
     }
 
     static void usage() {
-        System.err.println("little toy program to display a compiled template as a tree.");
+        System.err.println("Little toy program to display a compiled template as a tree.");
         System.err.println("Usage: java freemarker.testcase.TreeView <templatefile>");
     }
 }

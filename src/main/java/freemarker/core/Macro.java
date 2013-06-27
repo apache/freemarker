@@ -53,17 +53,30 @@
 package freemarker.core;
 
 import java.io.IOException;
-import java.util.*;
-import freemarker.template.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 
 /**
  * An element representing a macro declaration.
  */
 public final class Macro extends TemplateElement implements TemplateModel {
+    
+    final int TYPE_MACRO = 0;
+    final int TYPE_FUNCTION = 1;
+    
     private final String name;
-    private final String[] argumentNames;
-    private Map args;
-    private String catchAll;
+    private final String[] paramNames;
+    private Map paramDefaults;
+    private String catchAllParamName;
     boolean isFunction;
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
             Collections.EMPTY_LIST, 
@@ -74,30 +87,30 @@ public final class Macro extends TemplateElement implements TemplateModel {
             TemplateElement nestedBlock) 
     {
         this.name = name;
-        this.argumentNames = (String[])argumentNames.toArray(
+        this.paramNames = (String[])argumentNames.toArray(
                 new String[argumentNames.size()]);
-        this.args = args;
+        this.paramDefaults = args;
         this.nestedBlock = nestedBlock;
     }
 
     public String getCatchAll() {
-        return catchAll;
+        return catchAllParamName;
     }
     
     public void setCatchAll(String value) {
-        catchAll = value;
+        catchAllParamName = value;
     }
 
     public String[] getArgumentNames() {
-        return (String[])argumentNames.clone();
+        return (String[])paramNames.clone();
     }
 
     String[] getArgumentNamesInternal() {
-        return argumentNames;
+        return paramNames;
     }
 
     boolean hasArgNamed(String name) {
-        return args.containsKey(name);
+        return paramDefaults.containsKey(name);
     }
 
     public String getName() {
@@ -108,34 +121,58 @@ public final class Macro extends TemplateElement implements TemplateModel {
         env.visitMacroDef(this);
     }
 
-    public String getCanonicalForm() {
-        String directiveName = isFunction ? "function" : "macro";
-        StringBuffer buf = new StringBuffer("<#");
-        buf.append(directiveName);
-        buf.append(' ');
-        buf.append(name);
-        buf.append('(');
-        int size = argumentNames.length;
-        for (int i = 0; i<size; i++) {
-            buf.append(argumentNames[i]);
-            if (i != (size-1)) {
-                buf.append(",");
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol());
+        sb.append(' ');
+        sb.append(name);
+        sb.append(isFunction ? '(' : ' ');
+        int argCnt = paramNames.length;
+        for (int i = 0; i < argCnt; i++) {
+            if (i != 0) {
+                if (isFunction) {
+                    sb.append(", ");
+                } else {
+                    sb.append(' ');
+                }
+            }
+            String argName = paramNames[i];
+            sb.append(argName);
+            if (paramDefaults != null && paramDefaults.get(argName) != null) {
+                sb.append('=');
+                Expression defaultExpr = (Expression) paramDefaults.get(argName);
+                if (isFunction) {
+                    sb.append(defaultExpr.getCanonicalForm());
+                } else {
+                    MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
+                }
             }
         }
-        buf.append(")>");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
+        if (catchAllParamName != null) {
+            if (argCnt != 0) sb.append(", ");
+            sb.append(catchAllParamName);
+            sb.append("...");
         }
-        buf.append("</#");
-        buf.append(directiveName);
-        buf.append('>');
-        return buf.toString();
+        if (isFunction) sb.append(')');
+        if (canonical) {
+            sb.append('>');
+            if (nestedBlock != null) {
+                sb.append(nestedBlock.getCanonicalForm());
+            }
+            sb.append("</").append(getNodeTypeSymbol()).append('>');
+        }
+        return sb.toString();
     }
-
-    public String getDescription() {
-        return (isFunction() ? "function " : "macro ") + name;
+    
+    String getNodeTypeSymbol() {
+        return isFunction ? "#function" : "#macro";
     }
-
+    
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
     public boolean isFunction() {
         return isFunction;
     }
@@ -182,13 +219,13 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 firstUnresolvedExpression = null;
                 firstReferenceException = null;
                 resolvedAnArg = hasUnresolvedArg = false;
-                for(int i = 0; i < argumentNames.length; ++i) {
-                    String argName = argumentNames[i];
+                for(int i = 0; i < paramNames.length; ++i) {
+                    String argName = paramNames[i];
                     if(localVars.get(argName) == null) {
-                        Expression valueExp = (Expression) args.get(argName);
+                        Expression valueExp = (Expression) paramDefaults.get(argName);
                         if (valueExp != null) {
                             try {
-                                TemplateModel tm = valueExp.getAsTemplateModel(env);
+                                TemplateModel tm = valueExp.eval(env);
                                 if(tm == null) {
                                     if(!hasUnresolvedArg) {
                                         firstUnresolvedExpression = valueExp;
@@ -207,8 +244,27 @@ public final class Macro extends TemplateElement implements TemplateModel {
                                 }
                             }
                         }
-                        else {
-                            throw new TemplateException("Error executing macro: " + name + "\nrequired parameter: " + argName + " is not specified.", env);
+                        else if (!env.isClassicCompatible()) {
+                            boolean argWasSpecified = localVars.containsKey(argName);
+                            throw new _MiscTemplateException(env,
+                                    new _ErrorDescriptionBuilder(new Object[] {
+                                            "When calling macro ", new _DelayedJQuote(name), 
+                                            ", required parameter ", new _DelayedJQuote(argName),
+                                            " (parameter #", new Integer(i + 1), ") was ", 
+                                            (argWasSpecified
+                                                    ? "specified, but had null/missing value."
+                                                    : "not specified.") 
+                                    }).tip(argWasSpecified
+                                            ? new Object[] {
+                                                    "If the parameter value expression on the caller side is known to "
+                                                    + "be legally null/missing, you may want to specify a default "
+                                                    + "value for it with the \"!\" operator, like "
+                                                    + "paramValue!defaultValue." }
+                                            : new Object[] { 
+                                                    "If the omission was deliberate, you may consider making the "
+                                                    + "parameter optional in the macro by specifying a default value "
+                                                    + "for it, like ", "<#macro macroName paramName=defaultExpr>", ")" }
+                                            ));
                         }
                     }
                 }
@@ -217,9 +273,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
             if(hasUnresolvedArg) {
                 if(firstReferenceException != null) {
                     throw firstReferenceException;
-                }
-                else {
-                    assertNonNull(null, firstUnresolvedExpression, env);
+                } else if (!env.isClassicCompatible()) {
+                    throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
                 }
             }
         }
@@ -251,4 +306,52 @@ public final class Macro extends TemplateElement implements TemplateModel {
             return result;
         }
     }
+
+    int getParameterCount() {
+        return 1/*name*/ + paramNames.length * 2/*name=default*/ + 1/*catchAll*/ + 1/*type*/;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx == 0) {
+            return name;
+        } else {
+            final int argDescsEnd = paramNames.length * 2 + 1;
+            if (idx < argDescsEnd) {
+                String paramName = paramNames[(idx - 1) / 2];
+                if (idx % 2 != 0) {
+                    return paramName;
+                } else {
+                    return paramDefaults.get(paramName);
+                }
+            } else if (idx == argDescsEnd) {
+                return catchAllParamName;
+            } else if (idx == argDescsEnd + 1) {
+                return new Integer(isFunction ? TYPE_FUNCTION : TYPE_MACRO);
+            } else {
+                throw new IndexOutOfBoundsException();
+            }
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx == 0) {
+            return ParameterRole.ASSIGNMENT_TARGET;
+        } else {
+            final int argDescsEnd = paramNames.length * 2 + 1;
+            if (idx < argDescsEnd) {
+                if (idx % 2 != 0) {
+                    return ParameterRole.PARAMETER_NAME;
+                } else {
+                    return ParameterRole.PARAMETER_DEFAULT;
+                }
+            } else if (idx == argDescsEnd) {
+                return ParameterRole.CATCH_ALL_PARAMETER_NAME;
+            } else if (idx == argDescsEnd + 1) {
+                return ParameterRole.AST_NODE_SUBTYPE;
+            } else {
+                throw new IndexOutOfBoundsException();
+            }
+        }
+    }
+    
 }

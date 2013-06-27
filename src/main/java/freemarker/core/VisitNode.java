@@ -53,7 +53,13 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 
 /**
@@ -69,12 +75,12 @@ final class VisitNode extends TemplateElement {
     }
 
     void accept(Environment env) throws IOException, TemplateException {
-        TemplateModel node = targetNode.getAsTemplateModel(env);
-        assertNonNull(node, targetNode, env);
+        TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
-            throw new TemplateException("Expecting an XML node here", env);
+            throw new UnexpectedTypeException(targetNode, node, "node", env);
         }
-        TemplateModel nss = namespaces == null ? null : namespaces.getAsTemplateModel(env);
+        
+        TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
         if (namespaces instanceof StringLiteral) {
             nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
         }
@@ -88,20 +94,53 @@ final class VisitNode extends TemplateElement {
                 nss = ss;
             }
             else if (!(nss instanceof TemplateSequenceModel)) {
-                throw new TemplateException("Expecting a sequence of namespaces after 'using'", env);
+                if (namespaces != null) {
+                    throw new UnexpectedTypeException(namespaces, nss, "sequence", env);
+                } else {
+                    // Should not occur
+                    throw new _MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");
+                }
             }
         }
         env.visit((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
-    public String getCanonicalForm() {
-        if (namespaces == null) {
-            return "<#visit " + targetNode.getCanonicalForm() + "/>";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol());
+        sb.append(' ');
+        sb.append(targetNode.getCanonicalForm());
+        if (namespaces != null) {
+            sb.append(" using ");
+            sb.append(namespaces.getCanonicalForm());
         }
-        return "<#visit " + targetNode.getCanonicalForm() + " using " + namespaces.getCanonicalForm() + "/>";
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
 
-    public String getDescription() {
-        return "visit instruction";
+    String getNodeTypeSymbol() {
+        return "#visit";
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return targetNode;
+        case 1: return namespaces;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.NODE;
+        case 1: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

@@ -52,7 +52,10 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * A class that represents a Range between two integers.
@@ -83,7 +86,8 @@ class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
     public TemplateModel get(int i) throws TemplateModelException {
         int index = descending ? (upper -i) : (lower + i);
         if ((norhs && index > upper) || index <lower) {
-            throw new TemplateModelException("out of bounds of range");
+            throw new _TemplateModelException(new Object[] {
+                    "Range item index ", new Integer(i), " is out of bounds." });
         }
         return new SimpleNumber(index);
     }

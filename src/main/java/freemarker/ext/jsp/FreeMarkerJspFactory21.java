@@ -5,7 +5,6 @@ import javax.servlet.jsp.JspApplicationContext;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 class FreeMarkerJspFactory21 extends FreeMarkerJspFactory
 {

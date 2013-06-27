@@ -88,7 +88,7 @@ public interface TemplateLoader {
      * path components are separated by a slash (not backslash). Backslashes
      * (or any other OS specific separator character) are not considered as separators by
      * FreeMarker, and thus they will not be replaced with slash before passing to this method,
-     * so it is up to the template loader to handle them (say, be throwing and exception that
+     * so it's up to the template loader to handle them (say, be throwing and exception that
      * tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
      * typical mistake of Windows users).
      * The passed names are always considered relative to some loader-defined root
@@ -128,15 +128,14 @@ public interface TemplateLoader {
     /**
      * Returns the character stream of a template represented by the specified
      * template source. This method is called after <code>getLastModified()</code>
-     * if it is determined that a cached copy of the template is unavailable
+     * if it's determined that a cached copy of the template is unavailable
      * or stale.
      * @param templateSource an object representing a template source, obtained
      * through a prior call to {@link #findTemplateSource(String)}.
      * @param encoding the character encoding used to translate source bytes
      * to characters. Some loaders may not have access to the byte
      * representation of the template stream, and instead directly obtain a 
-     * character stream. These loaders will - quite naturally - ignore the 
-     * encoding parameter.
+     * character stream. These loaders will should ignore the encoding parameter.
      * @return a reader representing the template character stream. The
      * framework will call <code>close()</code>.
      * @throws IOException if an I/O error occurs while accessing the stream.
@@ -147,7 +146,7 @@ public interface TemplateLoader {
     
     /**
      * Closes the template source. This is the last method that is called by
-     * the TemplateCache for a templateSource. The framework guarantees that
+     * the {@link TemplateCache} for a template source. The framework guarantees that
      * this method will be called on every object that is returned from
      * {@link #findTemplateSource(String)}.
      * @param templateSource the template source that should be closed.

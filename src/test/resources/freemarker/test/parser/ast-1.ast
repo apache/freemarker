@@ -1,0 +1,138 @@
+#mixed_content  // f.c.MixedContent
+    #text  // f.c.TextBlock
+        - content: "1 "  // String
+    @  // f.c.UnifiedCall
+        - callee: foo  // f.c.Identifier
+        - argument name: "x"  // String
+        - argument value: 1  // f.c.NumberLiteral
+        - argument name: "y"  // String
+        - argument value: 2  // f.c.NumberLiteral
+        - target loop variable: "b1"  // String
+        - target loop variable: "b2"  // String
+        #text  // f.c.TextBlock
+            - content: "x"  // String
+    #text  // f.c.TextBlock
+        - content: "\n2 "  // String
+    @  // f.c.UnifiedCall
+        - callee: .  // f.c.Dot
+            - left-hand operand: ns  // f.c.Identifier
+            - right-hand operand: "bar"  // String
+        - argument value: 1  // f.c.NumberLiteral
+        - argument value: 2  // f.c.NumberLiteral
+        - target loop variable: "b1"  // String
+        - target loop variable: "b2"  // String
+        #text  // f.c.TextBlock
+            - content: "y"  // String
+    #text  // f.c.TextBlock
+        - content: "\n3 "  // String
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 123  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 123  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: ns  // f.c.Identifier
+    #global  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: 123  // f.c.NumberLiteral
+        - variable scope: "3"  // Integer
+        - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n4 "  // String
+    #if-#elseif-#else-container  // f.c.IfBlock
+        #if  // f.c.ConditionalBlock
+            - condition: ==  // f.c.ComparisonExpression
+                - left-hand operand: +  // f.c.AddConcatExpression
+                    - left-hand operand: x  // f.c.Identifier
+                    - right-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: 0  // f.c.NumberLiteral
+            - AST-node subtype: "0"  // Integer
+            #text  // f.c.TextBlock
+                - content: "foo"  // String
+            ${...}  // f.c.DollarVariable
+                - content: y  // f.c.Identifier
+            #text  // f.c.TextBlock
+                - content: "bar"  // String
+        #else  // f.c.ConditionalBlock
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            ${...}  // f.c.DollarVariable
+                - content: "static"  // f.c.StringLiteral
+                    - embedded template: null  // Null
+            ${...}  // f.c.DollarVariable
+                - content: dynamic "..."  // f.c.StringLiteral
+                    - embedded template: #mixed_content  // f.c.MixedContent
+                        #text  // f.c.TextBlock
+                            - content: "x"  // String
+                        ${...}  // f.c.DollarVariable
+                            - content: *  // f.c.ArithmeticExpression
+                                - left-hand operand: baaz  // f.c.Identifier
+                                - right-hand operand: 10  // f.c.NumberLiteral
+                                - AST-node subtype: "1"  // Integer
+                        #text  // f.c.TextBlock
+                            - content: "y"  // String
+    #text  // f.c.TextBlock
+        - content: "\n5 "  // String
+    #switch  // f.c.SwitchBlock
+        - value: x  // f.c.Identifier
+        #case  // f.c.Case
+            - condition: 1  // f.c.NumberLiteral
+            - AST-node subtype: "0"  // Integer
+            #text  // f.c.TextBlock
+                - content: "one"  // String
+        #case  // f.c.Case
+            - condition: 2  // f.c.NumberLiteral
+            - AST-node subtype: "0"  // Integer
+            #text  // f.c.TextBlock
+                - content: "two"  // String
+        #default  // f.c.Case
+            - condition: null  // Null
+            - AST-node subtype: "1"  // Integer
+            #text  // f.c.TextBlock
+                - content: "more"  // String
+    #text  // f.c.TextBlock
+        - content: "\n6 "  // String
+    #macro  // f.c.Macro
+        - assignment target: "foo"  // String
+        - parameter name: "x"  // String
+        - parameter default: null  // Null
+        - parameter name: "y"  // String
+        - parameter default: 2  // f.c.NumberLiteral
+        - parameter name: "z"  // String
+        - parameter default: +  // f.c.AddConcatExpression
+            - left-hand operand: y  // f.c.Identifier
+            - right-hand operand: 1  // f.c.NumberLiteral
+        - catch-all parameter name: "q"  // String
+        - AST-node subtype: "0"  // Integer
+        #nested  // f.c.BodyInstruction
+            - passed value: x  // f.c.Identifier
+            - passed value: y  // f.c.Identifier
+    #text  // f.c.TextBlock
+        - content: "\n7 "  // String
+    #function  // f.c.Macro
+        - assignment target: "foo"  // String
+        - parameter name: "x"  // String
+        - parameter default: null  // Null
+        - parameter name: "y"  // String
+        - parameter default: null  // Null
+        - catch-all parameter name: null  // Null
+        - AST-node subtype: "1"  // Integer
+        #local  // f.c.Assignment
+            - assignment target: "x"  // String
+            - assignment source: 123  // f.c.NumberLiteral
+            - variable scope: "2"  // Integer
+            - namespace: null  // Null
+        #return  // f.c.ReturnInstruction
+            - value: 1  // f.c.NumberLiteral
+    #text  // f.c.TextBlock
+        - content: "\n8 "  // String
+    #list  // f.c.IteratorBlock
+        - list source: xs  // f.c.Identifier
+        - target loop variable: "x"  // String
+    #text  // f.c.TextBlock
+        - content: "\n9 "  // String
+    #--...--  // f.c.Comment
+        - content: " A comment "  // String

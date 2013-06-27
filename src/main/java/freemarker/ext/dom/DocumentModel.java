@@ -52,9 +52,13 @@
  
 package freemarker.ext.dom; 
  
-import org.w3c.dom.*;
-import freemarker.template.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import freemarker.core.Environment;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**

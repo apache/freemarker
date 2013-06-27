@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>FreeMarker: Include Instruction Test</title>
+</head>
+<body>
+
+<p>A simple test follows:</p>
+
+Hello, world!
+
+
+	<p>Message exists!
+
+
+<p>Test normal includes:</p>
+freemarker.template.TemplateException: Template "../bogus/included.html" not found in cache.
+	at freemarker.template.compiler.Include.process(Include.java:90)
+	at freemarker.template.compiler.NestedTemplateElements.process(NestedTemplateElements.java:70)
+	at freemarker.template.Template.process(Template.java:363)
+	at freemarker.test.TestInclude2.runTest(TestInclude2.java:89)
+	at junit.framework.TestCase.runBare(TestCase.java:140)
+	at junit.framework.TestResult$1.protect(TestResult.java:106)
+	at junit.framework.TestResult.runProtected(TestResult.java:124)
+	at junit.framework.TestResult.run(TestResult.java:109)
+	at junit.framework.TestCase.run(TestCase.java:131)
+	at junit.framework.TestSuite.runTest(TestSuite.java:173)
+	at junit.framework.TestSuite.run(TestSuite.java:168)
+	at junit.swingui.TestRunner$17.run(TestRunner.java:644)

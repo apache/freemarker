@@ -52,13 +52,13 @@
 
 package freemarker.test.templatesuite.models;
 
-import java.util.*;
-import freemarker.template.*;
+import java.util.Iterator;
+import java.util.List;
+
+import freemarker.template.TemplateMethodModel;
 
 /**
  * Another test of the interaction between MethodModels and TransformModels.
- *
- * @version $Id: TransformMethodWrapper2.java,v 1.12 2004/01/06 17:06:44 szegedia Exp $
  */
 public class TransformMethodWrapper2 implements TemplateMethodModel {
 

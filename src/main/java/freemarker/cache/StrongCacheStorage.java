@@ -54,14 +54,14 @@ package freemarker.cache;
 
 import java.util.Map;
 
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core._ConcurrentMapFactory;
 
 /**
  * Strong cache storage is a cache storage that simply wraps a {@link Map}.
  * It holds a strong reference to all objects it was passed, therefore prevents
  * the cache from being purged during garbage collection.
  * This class is thread-safe to the extent that its underlying map is. The 
- * default implementation uses a concurrent map on Java 5 and above, so it is
+ * default implementation uses a concurrent map on Java 5 and above, so it's
  * thread-safe in that case.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
@@ -70,13 +70,13 @@ import freemarker.core.ConcurrentMapFactory;
  */
 public class StrongCacheStorage implements ConcurrentCacheStorage
 {
-    private final Map map = ConcurrentMapFactory.newMaybeConcurrentHashMap();
+    private final Map map = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
 
     /**
      * Returns true if the underlying Map is a {@code ConcurrentMap}.
      */
     public boolean isConcurrent() {
-        return ConcurrentMapFactory.isConcurrent(map);
+        return _ConcurrentMapFactory.isConcurrent(map);
     }
     
     public Object get(Object key) {

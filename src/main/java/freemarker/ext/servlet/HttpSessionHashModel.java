@@ -66,7 +66,6 @@ import freemarker.template.TemplateModelException;
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.
  * @author Attila Szegedi
- * @version $Id: HttpSessionHashModel.java,v 1.14.4.1 2006/04/19 16:16:43 szegedia Exp $
  */
 
 public final class HttpSessionHashModel implements TemplateHashModel, Serializable
@@ -98,7 +97,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
     /**
      * Use this constructor when the session isn't already created. It is passed
      * enough parameters so that the session can be properly initialized after
-     * it is detected that it was created.
+     * it's detected that it was created.
      * @param servlet the FreemarkerServlet that created this model. If the
      * model is not created through FreemarkerServlet, leave this argument as
      * null.

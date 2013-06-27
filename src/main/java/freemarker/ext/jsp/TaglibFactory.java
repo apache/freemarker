@@ -95,7 +95,6 @@ import freemarker.template.utility.StringUtil;
  * {@link freemarker.ext.servlet.FreemarkerServlet} under key
  * <tt>JspTaglibs</tt>. It can be added to custom servlets as well to enable JSP
  * taglib integration in them as well.
- * @version $Id: TaglibFactory.java,v 1.26.2.1 2007/05/16 12:13:04 szegedia Exp $
  * @author Attila Szegedi
  */
 public class TaglibFactory implements TemplateHashModel {
@@ -134,7 +133,7 @@ public class TaglibFactory implements TemplateHashModel {
      * @param uri the URI that describes the JSP taglib. It can be any of the
      * three forms allowed by the JSP specification: absolute URI, root relative
      * URI and non-root relative URI. Note that if a non-root relative URI is
-     * used it is resolved relative to the URL of the current request. In this
+     * used it's resolved relative to the URL of the current request. In this
      * case, the current request is obtained by looking up a
      * {@link HttpRequestHashModel} object named <tt>Request</tt> in the root
      * data model. FreemarkerServlet provides this object under the expected
@@ -185,7 +184,7 @@ public class TaglibFactory implements TemplateHashModel {
                         // Intentional fallthrough
                     }
                     case ROOT_REL_URI: {
-                        // If it is a .jar or .zip, add default TLD entry within it.
+                        // If it's a .jar or .zip, add default TLD entry within it.
                         if(uri.endsWith(".jar") || uri.endsWith(".zip")) {
                             return loadTaglib(new TldPath(uri, DEFAULT_JAR_TLD), uri);
                         }

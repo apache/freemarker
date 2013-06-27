@@ -65,7 +65,6 @@ import java.io.IOException;
  * body evaluation.
  *
  * @author Attila Szegedi
- * @version $Id: TransformControl.java,v 1.11 2005/06/16 18:13:58 ddekany Exp $
  */
 public interface TransformControl
 {

@@ -56,6 +56,7 @@ package freemarker.ext.dom;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +93,6 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * A base class for wrapping a W3C DOM Node as a FreeMarker template model.
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
- * @version $Id: NodeModel.java,v 1.80 2005/06/22 11:33:31 ddekany Exp $
  */
 abstract public class NodeModel
 implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
@@ -100,10 +100,12 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
 {
 
     static final Logger logger = Logger.getLogger("freemarker.dom");
+
+    private static final Object STATIC_LOCK = new Object();
     
     static private DocumentBuilderFactory docBuilderFactory;
     
-    static private Map xpathSupportMap = Collections.synchronizedMap(new WeakHashMap());
+    static private final Map xpathSupportMap = Collections.synchronizedMap(new WeakHashMap());
     
     static private XPathSupport jaxenXPathSupport;
     
@@ -134,7 +136,9 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      * objects from XML files.
      */
     static public void setDocumentBuilderFactory(DocumentBuilderFactory docBuilderFactory) {
-        NodeModel.docBuilderFactory = docBuilderFactory;
+        synchronized (STATIC_LOCK) {
+            NodeModel.docBuilderFactory = docBuilderFactory;
+        }
     }
     
     /**
@@ -142,19 +146,33 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      * building NodeModel objects from XML files.
      */
     static public DocumentBuilderFactory getDocumentBuilderFactory() {
-        if (docBuilderFactory == null) {
-            docBuilderFactory = DocumentBuilderFactory.newInstance();
-            docBuilderFactory.setNamespaceAware(true);
-            docBuilderFactory.setIgnoringElementContentWhitespace(true);
+        synchronized (STATIC_LOCK) {
+            if (docBuilderFactory == null) {
+                DocumentBuilderFactory newFactory = DocumentBuilderFactory.newInstance();
+                newFactory.setNamespaceAware(true);
+                newFactory.setIgnoringElementContentWhitespace(true);
+                docBuilderFactory = newFactory;  // We only write it out when the initialization was full 
+            }
+            return docBuilderFactory;
         }
-        return docBuilderFactory;
     }
     
     /**
      * sets the error handler to use when parsing the document.
      */
     static public void setErrorHandler(ErrorHandler errorHandler) {
-        NodeModel.errorHandler = errorHandler;
+        synchronized (STATIC_LOCK) {
+            NodeModel.errorHandler = errorHandler;
+        }
+    }
+
+    /**
+     * @since 2.3.20 
+     */
+    static public ErrorHandler getErrorHandler() {
+        synchronized (STATIC_LOCK) {
+            return NodeModel.errorHandler;
+        }
     }
     
     /**
@@ -169,8 +187,23 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         throws SAXException, IOException, ParserConfigurationException 
     {
         DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
+        ErrorHandler errorHandler = getErrorHandler();
         if (errorHandler != null) builder.setErrorHandler(errorHandler);
-        Document doc = builder.parse(is);
+        final Document doc;
+        try {
+        	doc = builder.parse(is);
+        } catch (MalformedURLException e) {
+    		// This typical error has an error message that is hard to understand, so let's translate it:
+        	if (is.getSystemId() == null && is.getCharacterStream() == null && is.getByteStream() == null) {
+        		throw new MalformedURLException(
+        				"The SAX InputSource has systemId == null && characterStream == null && byteStream == null. "
+        				+ "This is often because it was created with a null InputStream or Reader, which is often because "
+        				+ "the XML file it should point to was not found. "
+        				+ "(The original exception was: " + e + ")");
+        	} else {
+        		throw e;
+        	}
+        }
         if (removeComments && removePIs) {
             simplify(doc);
         } else {
@@ -207,6 +240,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         throws SAXException, IOException, ParserConfigurationException 
     {
         DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
+        ErrorHandler errorHandler = getErrorHandler();
         if (errorHandler != null) builder.setErrorHandler(errorHandler);
         Document doc = builder.parse(f);
         if (removeComments) {
@@ -517,22 +551,24 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      * this FreeMarker version on this system.
      */
     static public void useDefaultXPathSupport() {
-        xpathSupportClass = null;
-        jaxenXPathSupport = null;
-        try {
-            useXalanXPathSupport();
-        } catch (Exception e) {
-            ; // ignore
-        }
-        if (xpathSupportClass == null) try {
-        	useSunInternalXPathSupport();
-        } catch (Exception e) {
-        	; // ignore
-        }
-        if (xpathSupportClass == null) try {
-            useJaxenXPathSupport();
-        } catch (Exception e) {
-            ; // ignore
+        synchronized (STATIC_LOCK) {
+            xpathSupportClass = null;
+            jaxenXPathSupport = null;
+            try {
+                useXalanXPathSupport();
+            } catch (Exception e) {
+                ; // ignore
+            }
+            if (xpathSupportClass == null) try {
+            	useSunInternalXPathSupport();
+            } catch (Exception e) {
+            	; // ignore
+            }
+            if (xpathSupportClass == null) try {
+                useJaxenXPathSupport();
+            } catch (Exception e) {
+                ; // ignore
+            }
         }
     }
     
@@ -544,10 +580,12 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         Class.forName("org.jaxen.dom.DOMXPath");
         Class c = Class.forName("freemarker.ext.dom.JaxenXPathSupport");
         jaxenXPathSupport = (XPathSupport) c.newInstance();
+        synchronized (STATIC_LOCK) {
+            xpathSupportClass = c;
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Using Jaxen classes for XPath support");
         }
-        xpathSupportClass = c;
     }
     
     /**
@@ -557,21 +595,24 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     static public void useXalanXPathSupport() throws Exception {
         Class.forName("org.apache.xpath.XPath");
         Class c = Class.forName("freemarker.ext.dom.XalanXPathSupport");
+        synchronized (STATIC_LOCK) {
+            xpathSupportClass = c;
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Using Xalan classes for XPath support");
         }
-        xpathSupportClass = c;
     }
     
     static public void useSunInternalXPathSupport() throws Exception {
         Class.forName("com.sun.org.apache.xpath.internal.XPath");
         Class c = Class.forName("freemarker.ext.dom.SunInternalXalanXPathSupport");
+        synchronized (STATIC_LOCK) {
+            xpathSupportClass = c;
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Using Sun's internal Xalan classes for XPath support");
         }
-        xpathSupportClass = c;
     }
-
     
     /**
      * Set an alternative implementation of freemarker.ext.dom.XPathSupport to use
@@ -583,7 +624,9 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
             throw new RuntimeException("Class " + cl.getName()
                     + " does not implement freemarker.ext.dom.XPathSupport");
         }
-        xpathSupportClass = cl;
+        synchronized (STATIC_LOCK) {
+            xpathSupportClass = cl;
+        }
     }
 
     /**
@@ -591,7 +634,9 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
      * Returns <code>null</code> if XPath support is disabled.
      */
     static public Class getXPathSupportClass() {
-        return xpathSupportClass;
+        synchronized (STATIC_LOCK) {
+            return xpathSupportClass;
+        }
     }
 
     static private String getText(Node node) {

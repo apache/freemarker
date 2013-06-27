@@ -55,7 +55,6 @@ package freemarker.ext.xml;
 import java.util.List;
 
 /**
- * @version $Id: NodeOperator.java,v 1.1 2003/01/22 23:05:55 szegedia Exp $
  * @author Attila Szegedi
  */
 interface NodeOperator {

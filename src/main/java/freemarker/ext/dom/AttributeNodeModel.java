@@ -52,9 +52,10 @@
  
 package freemarker.ext.dom;
 
-import freemarker.template.*;
+import org.w3c.dom.Attr;
+
 import freemarker.core.Environment;
-import org.w3c.dom.*;
+import freemarker.template.TemplateScalarModel;
 
 class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
     

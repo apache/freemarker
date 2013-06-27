@@ -57,7 +57,6 @@ package freemarker.template;
  * interface. Note that this class is immutable.
  * <p>This class is thread-safe.
  * 
- * @version $Id: SimpleDate.java,v 1.11 2004/03/13 13:05:09 ddekany Exp $
  * @author Attila Szegedi
  */
 public class SimpleDate implements TemplateDateModel

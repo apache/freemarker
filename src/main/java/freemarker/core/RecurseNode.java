@@ -53,7 +53,14 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 
 /**
@@ -69,16 +76,17 @@ final class RecurseNode extends TemplateElement {
     }
 
     void accept(Environment env) throws IOException, TemplateException {
-        TemplateModel node = targetNode == null ? null : targetNode.getAsTemplateModel(env);
-        TemplateModel nss = namespaces == null ? null : namespaces.getAsTemplateModel(env);
+        TemplateModel node = targetNode == null ? null : targetNode.eval(env);
+        if (node != null && !(node instanceof TemplateNodeModel)) {
+            throw new UnexpectedTypeException(targetNode, node, "node", env);
+        }
+        
+        TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
         if (namespaces instanceof StringLiteral) {
             nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
         }
         else if (namespaces instanceof ListLiteral) {
             nss = ((ListLiteral) namespaces).evaluateStringsToNamespaces(env);
-        }
-        if (node != null && !(node instanceof TemplateNodeModel)) {
-            throw new TemplateException("Expecting an XML node here, for expression: " + targetNode + ", found a: " + node.getClass().getName(), env);
         }
         if (nss != null) {
             if (nss instanceof TemplateHashModel) {
@@ -87,21 +95,56 @@ final class RecurseNode extends TemplateElement {
                 nss = ss;
             }
             else if (!(nss instanceof TemplateSequenceModel)) {
-                throw new TemplateException("Expecting a sequence of namespaces after 'using'", env);
+                if (namespaces != null) {
+                    throw new UnexpectedTypeException(namespaces, nss, "sequence", env);
+                } else {
+                    // Should not occur
+                    throw new _MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");
+                }
             }
         }
         
         env.recurse((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
-    public String getCanonicalForm() {
-        String result = "<#recurse";
-        if (targetNode != null) result += (" " + targetNode.getCanonicalForm());
-        if (namespaces != null) result += (" using " + namespaces.getCanonicalForm());
-        return result + "/>";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol());
+        if (targetNode != null) {
+            sb.append(' ');
+            sb.append(targetNode.getCanonicalForm());
+        }
+        if (namespaces != null) {
+            sb.append(" using ");
+            sb.append(namespaces.getCanonicalForm());
+        }
+        if (canonical) sb.append("/>");
+        return sb.toString();
     }
 
-    public String getDescription() {
-        return "recurse instruction";
+    String getNodeTypeSymbol() {
+        return "#recurse";
     }
+
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return targetNode;
+        case 1: return namespaces;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.NODE;
+        case 1: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

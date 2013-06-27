@@ -53,20 +53,44 @@
 package freemarker.core;
 
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
- * A subclass of TemplateException that 
+ * A {@link TemplateException} that 
  * indicates that the internals expected an expression
  * to evaluate to a boolean value and it didn't.
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
-public class NonBooleanException extends TemplateException {
+public class NonBooleanException extends UnexpectedTypeException {
 
     public NonBooleanException(Environment env) {
-        super("expecting boolean value here", env);
+        super(env, "Expecting boolean value here");
     }
 
     public NonBooleanException(String description, Environment env) {
-        super(description, env);
+        super(env, description);
     }
+
+    NonBooleanException(Environment env, _ErrorDescriptionBuilder description) {
+        super(env, description);
+    }
+
+    NonBooleanException(
+            Expression blamed, TemplateModel model, Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, "boolean", env);
+    }
+
+    NonBooleanException(
+            Expression blamed, TemplateModel model, String tip,
+            Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, "boolean", tip, env);
+    }
+
+    NonBooleanException(
+            Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
+        super(blamed, model, "boolean", tips, env);
+    }    
+
 }

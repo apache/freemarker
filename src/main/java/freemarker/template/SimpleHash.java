@@ -73,7 +73,6 @@ import freemarker.ext.beans.BeansWrapper;
  * As of 2.0, this class is unsynchronized by default.
  * To obtain a synchronized wrapper, call the {@link #synchronizedWrapper} method.</p>
  *
- * @version $Id: SimpleHash.java,v 1.72.2.2 2006/02/26 18:26:18 revusky Exp $
  * @see SimpleSequence
  * @see SimpleScalar
  */
@@ -190,7 +189,7 @@ implements TemplateHashModelEx, Serializable {
 
     public TemplateModel get(String key) throws TemplateModelException {
         Object result = map.get(key);
-        // The key to use for putting -- it is the key that already exists in
+        // The key to use for putting -- it's the key that already exists in
         // the map (either key or charKey below). This way, we'll never put a 
         // new key in the map, avoiding spurious ConcurrentModificationException
         // from another thread iterating over the map, see bug #1939742 in 
@@ -233,6 +232,13 @@ implements TemplateHashModelEx, Serializable {
         return tm;
     }
 
+    /**
+     * Tells if the map contains a key or not, regardless if the associated value is {@code null} or not.
+     * @since 2.3.20
+     */
+    public boolean containsKey(String key) {
+        return map.containsKey(key);
+    }
 
     /**
      * Removes the given key from the underlying map.

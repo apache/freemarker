@@ -14,7 +14,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: RhinoFunctionModel.java,v 1.2.2.1 2006/12/27 16:10:48 szegedia Exp $
  */
 public class RhinoFunctionModel extends RhinoScriptableModel 
 implements TemplateMethodModelEx {

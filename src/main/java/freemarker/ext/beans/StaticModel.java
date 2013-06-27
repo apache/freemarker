@@ -73,7 +73,6 @@ import freemarker.template.TemplateModelException;
  * Unfortunately, there is currently no support for bean property-style
  * calls of static methods, similar to that in {@link BeanModel}.
  * @author Attila Szegedi
- * @version $Id: StaticModel.java,v 1.24.2.1 2006/11/12 10:23:02 szegedia Exp $
  */
 final class StaticModel implements TemplateHashModelEx
 {
@@ -193,15 +192,15 @@ final class StaticModel implements TemplateHashModelEx
                     Object obj = map.get(name);
                     if (obj instanceof Method)
                     {
-                        MethodMap methodMap = new MethodMap(name, wrapper);
-                        methodMap.addMember((Method) obj);
-                        methodMap.addMember(method);
-                        map.put(name, methodMap);
+                        OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper);
+                        overloadedMethods.addMember((Method) obj);
+                        overloadedMethods.addMember(method);
+                        map.put(name, overloadedMethods);
                     }
-                    else if(obj instanceof MethodMap)
+                    else if(obj instanceof OverloadedMethods)
                     {
-                        MethodMap methodMap = (MethodMap) obj;
-                        methodMap.addMember(method);
+                        OverloadedMethods overloadedMethods = (OverloadedMethods) obj;
+                        overloadedMethods.addMember(method);
                     }
                     else
                     {
@@ -227,10 +226,10 @@ final class StaticModel implements TemplateHashModelEx
                     entry.setValue(new SimpleMethodModel(null, method, 
                             method.getParameterTypes(), wrapper));
                 }
-                else if (value instanceof MethodMap)
+                else if (value instanceof OverloadedMethods)
                 {
-                    entry.setValue(new OverloadedMethodModel(null, 
-                            (MethodMap)value));
+                    entry.setValue(new OverloadedMethodsModel(null, 
+                            (OverloadedMethods)value));
                 }
             }
         }

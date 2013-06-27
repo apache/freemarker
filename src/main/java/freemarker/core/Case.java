@@ -53,54 +53,70 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 /**
  * Represents a case in a switch statement.
  */
 final class Case extends TemplateElement {
 
+    final int TYPE_CASE = 0;
+    final int TYPE_DEFAULT = 1;
+    
+    Expression condition;
 
-    // might as well just make these package-visible 
-    // so the Switch can use them, no need to be too anal-retentive
-    boolean isDefault;
-    Expression expression;
-
-    Case(Expression expression, TemplateElement nestedBlock, boolean isDefault) 
+    Case(Expression matchingValue, TemplateElement nestedBlock) 
     {
-        this.expression = expression;
+        this.condition = matchingValue;
         this.nestedBlock = nestedBlock;
-        this.isDefault = isDefault;
     }
 
     void accept(Environment env) 
         throws TemplateException, IOException 
     {
         if (nestedBlock != null) {
-            env.visit(nestedBlock);
+            env.visitByHiddingParent(nestedBlock);
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
-        if (isDefault) {
-            buf.append("<#default>");
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol());
+        if (condition != null) {
+            sb.append(' ');
+            sb.append(condition.getCanonicalForm());
         }
-        else {
-            buf.append("<#case ");
-            buf.append(expression.getCanonicalForm());
-            buf.append(">");
+        if (canonical) {
+            sb.append('>');
+            if (nestedBlock != null) sb.append(nestedBlock.getCanonicalForm());
         }
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
-        }
-        return buf.toString();
+        return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return condition != null ? "#case" : "#default";
     }
 
-    public String getDescription() {
-        if (isDefault) {
-            return "default case";
-        } 
-        return "case " + expression;
+    int getParameterCount() {
+        return 2;
     }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return condition;
+        case 1: return new Integer(condition != null ? TYPE_CASE : TYPE_DEFAULT);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.CONDITION;
+        case 1: return ParameterRole.AST_NODE_SUBTYPE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+        
 }

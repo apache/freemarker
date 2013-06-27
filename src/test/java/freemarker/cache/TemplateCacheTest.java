@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Locale;
 
-import freemarker.cache.StringTemplateLoader;
-import freemarker.cache.StrongCacheStorage;
-import freemarker.cache.TemplateCache;
-import freemarker.cache.TemplateLoader;
-import freemarker.template.Configuration;
 import junit.framework.TestCase;
+import freemarker.template.Configuration;
 
 public class TemplateCacheTest extends TestCase
 {
@@ -42,7 +38,7 @@ public class TemplateCacheTest extends TestCase
             {
                 // Still 1 - returned cached exception
                 assertEquals("There was an error loading the template on an " +
-                        "earlier attempt; it is attached as a cause", e2.getMessage());
+                        "earlier attempt; it's attached as a cause", e2.getMessage());
                 assertSame(e, e2.getCause());
                 assertEquals(1, loader.getFindCount());
                 try

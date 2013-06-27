@@ -63,7 +63,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateTransformModel;
 
 /**
- * @version $Id: BlockAssignment.java,v 1.4 2004/07/07 21:11:12 szegedia Exp $
+ * Like [#local x]...[/#local].
  */
 final class BlockAssignment extends TemplateElement {
 
@@ -80,11 +80,11 @@ final class BlockAssignment extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException {
         if (nestedBlock != null) {
-            env.visit(nestedBlock, new CaptureOutput(env), null);
+            env.visitAndTransform(nestedBlock, new CaptureOutput(env), null);
         } else {
 			TemplateModel value = new SimpleScalar("");
 			if (namespaceExp != null) {
-				Environment.Namespace ns = (Environment.Namespace) namespaceExp.getAsTemplateModel(env);
+				Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
 				ns.put(varName, value);
  			} else if (scope == Assignment.NAMESPACE) {
 				env.setVariable(varName, value);
@@ -104,12 +104,9 @@ final class BlockAssignment extends TemplateElement {
             this.env = env;
             TemplateModel nsModel = null;
             if(namespaceExp != null) {
-                nsModel = namespaceExp.getAsTemplateModel(env);
+                nsModel = namespaceExp.eval(env);
                 if (!(nsModel instanceof Environment.Namespace)) {
-                    throw new TemplateException(
-                        "namespace parameter does not specify "
-                        + "a namespace. It is a " 
-                        + nsModel.getClass().getName(), env);
+                    throw new UnexpectedTypeException(namespaceExp, nsModel, "namespace", env);
                 }
             }
             fnsModel = (Environment.Namespace )nsModel; 
@@ -143,34 +140,55 @@ final class BlockAssignment extends TemplateElement {
         }
     }
     
-    public String getCanonicalForm() {
-        String key;
-        switch(scope) {
-            case Assignment.LOCAL: {
-                key = "local";
-                break;
-            }
-            case Assignment.GLOBAL: {
-                key = "global";
-                break;
-            }
-            default: {
-                key = "assign";
-                break;
-            }
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append("<");
+        sb.append(getNodeTypeSymbol());
+        sb.append(' ');
+        sb.append(varName);
+        if (namespaceExp != null) {
+            sb.append(" in ");
+            sb.append(namespaceExp.getCanonicalForm());
         }
-	String block = nestedBlock == null ? "" : nestedBlock.getCanonicalForm();
-        return "<#" + key + " " + varName + 
-            (namespaceExp != null ? " in " + namespaceExp.getCanonicalForm() : "") 
-            + ">" +block + "</#" + key + ">";
+        if (canonical) {
+            sb.append('>');
+            sb.append(nestedBlock == null ? "" : nestedBlock.getCanonicalForm());
+            sb.append("</");
+            sb.append(getNodeTypeSymbol());
+            sb.append('>');
+        } else {
+            sb.append(" = .nested_output");
+        }
+        return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return Assignment.getDirectiveName(scope);
+    }
+    
+    int getParameterCount() {
+        return 3;
     }
 
-    public String getDescription() {
-        return "block assignment to variable: " + varName;
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return varName;
+        case 1: return new Integer(scope);
+        case 2: return namespaceExp;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.ASSIGNMENT_TARGET;
+        case 1: return ParameterRole.VARIABLE_SCOPE;
+        case 2: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
 
     boolean isIgnorable() {
         return false;
     }
 }
-

@@ -59,7 +59,6 @@ import freemarker.template.Template;
  * a template, or environment. It works pretty much like {@link ThreadLocal}, a
  * class that allows one to associate custom data with a thread.
  * @author Attila Szegedi
- * @version $Id: CustomAttribute.java,v 1.3 2003/11/10 14:05:22 ddekany Exp $
  */
 public class CustomAttribute
 {

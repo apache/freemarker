@@ -52,8 +52,7 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
+import freemarker.template.Template;
 
 /**
  * Objects that represent instructions or expressions
@@ -61,9 +60,14 @@ import freemarker.template.utility.StringUtil;
  * all descend from this abstract base class.
  */
 public abstract class TemplateObject {
-
+    
     private Template template;
     int beginColumn, beginLine, endColumn, endLine;
+    
+    /** This is needed for an ?eval hack; the expression AST nodes will be the descendants of the template, however,
+     *  we can't give their position in the template, only in the dynamic string that's evaluated. That's signaled
+     *  by a negative line numbers, starting from this constant as line 1. */
+    static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
     final void setLocation(Template template, Token begin, Token end)
     throws
@@ -93,6 +97,17 @@ public abstract class TemplateObject {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
+    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
+    throws
+        ParseException
+    {
+        this.template = template;
+        this.beginColumn = beginColumn;
+        this.beginLine = beginLine;
+        this.endColumn = endColumn;
+        this.endLine = endLine;
+    }
+    
     public final int getBeginColumn() {
         return beginColumn;
     }
@@ -109,108 +124,55 @@ public abstract class TemplateObject {
         return endLine;
     }
 
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
-    throws
-        ParseException
-    {
-        this.template = template;
-        this.beginColumn = beginColumn;
-        this.beginLine = beginLine;
-        this.endColumn = endColumn;
-        this.endLine = endLine;
-    }
-    
-    static void assertNonNull(TemplateModel model, Expression exp, Environment env) throws InvalidReferenceException {
-        if (model == null) {
-            throw new InvalidReferenceException(
-                "Expression " + exp + " is undefined " +
-                exp.getStartLocation() + ".", env);
-        }
-    }
-
-    static TemplateException invalidTypeException(TemplateModel model, Expression exp, Environment env, String expected)
-    throws
-        TemplateException
-    {
-        assertNonNull(model, exp, env);
-        return new TemplateException(
-            "Expected " + expected + ". " + 
-            exp + " evaluated instead to " + 
-            model.getClass().getName() + " " +
-            exp.getStartLocation() + ".", env);
-    }
     /**
      * Returns a string that indicates
      * where in the template source, this object is.
      */
     public String getStartLocation() {
-        String templateName = template != null ? template.getName() : "input";
-        return "on line " 
-              + beginLine 
-              + ", column " 
-              + beginColumn
-              + " in "
-              + templateName;
+        return MessageUtil.formatLocationForEvaluationError(template, beginLine, beginColumn);
     }
 
     /**
-     * Same as {@link #getStartLocation}, but quotes the template name with
-     * {@link StringUtil#jQuoteNoXSS(String)}. If the template name is unknown,
-     * it uses <code>"input"</code> as the template name without quotation
-     * marks.  
+     * As of 2.3.20. the same as {@link #getStartLocation}. Meant to be used where there's a risk of XSS
+     * when viewing error messages.
      */
     public String getStartLocationQuoted() {
-        String templateName = template != null ? StringUtil.jQuoteNoXSS(template.getName()) : "input";
-        return "on line " 
-              + beginLine 
-              + ", column " 
-              + beginColumn
-              + " in "
-              + templateName;
+        return getStartLocation();
     }
 
     public String getEndLocation() {
-        String templateName = template != null ? template.getName() : "input";
-        return "on line " 
-              + endLine
-              + ", column "
-              + endColumn
-              + " in "
-              + templateName;
+        return MessageUtil.formatLocationForEvaluationError(template, endLine, endColumn);
     }
 
     /**
-     * Same as {@link #getStartLocation}, but quotes the template name with
-     * {@link StringUtil#jQuoteNoXSS(String)}. If the template name is unknown,
-     * it uses <code>"input"</code> as the template name without quotation
-     * marks.  
+     * As of 2.3.20. the same as {@link #getEndLocation}. Meant to be used where there's a risk of XSS
+     * when viewing error messages.
      */
     public String getEndLocationQuoted() {
-        String templateName = template != null ? StringUtil.jQuoteNoXSS(template.getName()) : "input";
-        return "on line " 
-              + endLine
-              + ", column "
-              + endColumn
-              + " in "
-              + templateName;
+        return getEndLocation();
     }
     
     public final String getSource() {
+        String s;
         if (template != null) {
-            return template.getSource(beginColumn, beginLine, endColumn, endLine);
+            s = template.getSource(beginColumn, beginLine, endColumn, endLine);
         } else {
-            return getCanonicalForm();
+            s = null;
         }
+
+        // Can't just return null for backward-compatibility... 
+        return s != null ? s : getCanonicalForm();
     }
 
     public String toString() {
+        String s;
     	try {
-    		return getSource();
+    		s = getSource();
     	} catch (Exception e) { // REVISIT: A bit of a hack? (JR)
-    		return getCanonicalForm();
+    	    s = null;
     	}
+    	return s != null ? s : getCanonicalForm();
     }
-
 
     /**
      * @return whether the point in the template file specified by the 
@@ -248,5 +210,66 @@ public abstract class TemplateObject {
         return this;
     }    
 
+    /**
+     * FTL generated from the AST of the node, which must be parseable to an AST that does the same as the original
+     * source, assuming we turn off automatic white-space removal when parsing the canonical form.
+     * 
+     * @see TemplateElement#getDescription()
+     * @see #getNodeTypeSymbol()
+     */
     abstract public String getCanonicalForm();
+    
+    /**
+     * A very sort single-line string that describes what kind of AST node this is, without describing any 
+     * embedded expression or child element. Examples: {@code "#if"}, {@code "+"}, <tt>"${...}</tt>. These values should
+     * be suitable as tree node labels in a tree view. Yet, they should be consistent and complete enough so that an AST
+     * that is equivalent with the original could be reconstructed from the tree view. Thus, for literal values that are
+     * leaf nodes the symbols should be the canonical form of value.
+     * 
+     * Note that {@link TemplateElement#getDescription()} has similar role, only it doesn't go under the element level
+     * (i.e. down to the expression level), instead it always prints the embedded expressions itself.
+     * 
+     * @see #getCanonicalForm()
+     * @see TemplateElement#getDescription()
+     */
+    abstract String getNodeTypeSymbol();
+    
+    /**
+     * Returns highest valid parameter index + 1. So one should scan indexes with {@link #getParameterValue(int)}
+     * starting from 0 up until but excluding this. For example, for the binary "+" operator this will give 2, so the
+     * legal indexes are 0 and 1. Note that if a parameter is optional in a template-object-type and happens to be
+     * omitted in an instance, this will still return the same value and the value of that parameter will be
+     * {@code null}.
+     */
+    abstract int getParameterCount();
+    
+    /**
+     * Returns the value of the parameter identified by the index. For example, the binary "+" operator will have an
+     * LHO {@link Expression} at index 0, and and RHO {@link Expression} at index 1. Or, the binary "." operator will
+     * have an LHO {@link Expression} at index 0, and an RHO {@link String}(!) at index 1. Or, the {@code #include}
+     * directive will have a path {@link Expression} at index 0, a "parse" {@link Expression} at index 1, etc.
+     * 
+     * <p>The index value doesn't correspond to the source-code location in general. It's an arbitrary identifier
+     * that corresponds to the role of the parameter instead. This also means that when a parameter is omitted, the
+     * index of the other parameters won't shift.
+     *
+     *  @return {@code null} or any kind of {@link Object}, very often an {@link Expression}. However, if there's
+     *      a {@link TemplateObject} stored inside the returned value, it must itself be be a {@link TemplateObject}
+     *      too, otherwise the AST couldn't be (easily) fully traversed. That is, non-{@link TemplateObject} values
+     *      can only be used for leafs. 
+     *  
+     *  @throws IndexOutOfBoundsException if {@code idx} is less than 0 or not less than {@link #getParameterCount()}. 
+     */
+    abstract Object getParameterValue(int idx);
+
+    /**
+     *  Returns the role of the parameter at the given index, like {@link ParameterRole#LEFT_HAND_OPERAND}.
+     *  
+     *  As of this writing (2013-06-17), for directive parameters it will always give {@link ParameterRole#UNKNOWN},
+     *  because there was no need to be more specific so far. This should be improved as need.
+     *  
+     *  @throws IndexOutOfBoundsException if {@code idx} is less than 0 or not less than {@link #getParameterCount()}. 
+     */
+    abstract ParameterRole getParameterRole(int idx);
+    
 }

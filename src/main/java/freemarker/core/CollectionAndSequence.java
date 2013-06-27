@@ -52,9 +52,14 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import java.util.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * Add sequence capabilities to an existing collection, or

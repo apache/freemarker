@@ -57,6 +57,7 @@ import java.io.FilterReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ import java.util.Vector;
 
 import javax.swing.tree.TreePath;
 
+import freemarker.cache.TemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
@@ -81,45 +83,34 @@ import freemarker.core.TokenMgrError;
 import freemarker.debug.impl.DebuggerService;
 
 /**
- * <p>A core FreeMarker API that represents a compiled template.
- * Typically, you will use a {@link Configuration} object to instantiate a template.
- *
- * <PRE>
-      Configuration cfg = new Configuration();
-      ...
-      Template myTemplate = cfg.getTemplate("myTemplate.html");
-   </PRE>
- *
- * <P>However, you can also construct a template directly by passing in to
- * the appropriate constructor a java.io.Reader instance that is set to
- * read the raw template text. The compiled template is
- * stored in an an efficient data structure for later use.
- *
- * <p>To render the template, i.e. to merge it with a data model, and
- * thus produce "cooked" output, call the <tt>process</tt> method.
- *
- * <p>Any error messages from exceptions thrown during compilation will be
- * included in the output stream and thrown back to the calling code.
- * To change this behavior, you can install custom exception handlers using
- * {@link Configurable#setTemplateExceptionHandler(TemplateExceptionHandler)} on
- * a Configuration object (for all templates belonging to a configuration) or on
- * a Template object (for a single template).
- * 
- * <p>It's not legal to modify the values of FreeMarker settings: a) while the
- * template is executing; b) if the template object is already accessible from
+ * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
  * multiple threads.
  * 
- * @version $Id: Template.java,v 1.216.2.3 2006/03/10 17:49:02 revusky Exp $
+ * <p>Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so
+ * you don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String}
+ * that contains the template source code. But then it's
+ * important to know that while the resulting {@link Template} is efficient for later processing, creating a new
+ * {@link Template} itself is relatively expensive. So try to re-use {@link Template} objects if possible.
+ * {@link Configuration#getTemplate(String)} does that (caching {@link Template}-s) for you, but the constructor of
+ * course doesn't, so it's up to you to solve then.
+ * 
+ * <p>Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods
+ * for changing FreeMarker settings. Those must not be used while the template is being processed, or if the
+ * template object is already accessible from multiple threads.
  */
-
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
+    
+    /** This is only non-null during parsing. It's used internally to make some information available through the
+     *  Template API-s earlier than the parsing was finished. */
+    private transient FMParser parser;
 
     private Map macros = new HashMap();
     private List imports = new Vector();
     private TemplateElement rootElement;
     private String encoding, defaultNS;
+    private int actualTagSyntax;
     private final String name;
     private final ArrayList lines = new ArrayList();
     private Map prefixToNamespaceURILookup = new HashMap();
@@ -134,44 +125,81 @@ public class Template extends Configurable {
         super(cfg != null ? cfg : Configuration.getDefaultConfiguration());
         this.name = name;
     }
+    
 
     /**
-     * Constructs a template from a character stream.
+     * Constructs a template from a character stream. Note that this is a relatively expensive operation; where
+     * higher performance matters, you should re-use (cache) {@link Template} instances instead of re-creating them from
+     * the same source again and again.
      *
-     * @param name the path of the template file relative to the directory what you use to store
-     *        the templates. See {@link #getName} for more details.
-     * @param reader the character stream to read from. It will always be closed (Reader.close()).
+     * @param name the path of the template file relatively to the (virtual) directory that you use to store
+     *        the templates. Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}.
+     *        Check {@link #getName()} to see how the name will be used. The name should be independent of the
+     *        actual storage mechanism and physical location as far as possible. Even when the templates are stored
+     *        straightforwardly in real files (they often aren't; see {@link TemplateLoader}), the name shouldn't be an
+     *        absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and you
+     *        are using {@code "/www/templates/"} as the template root directory via
+     *        {@link Configuration#setDirectoryForTemplateLoading(java.io.File)}, then the template name will be
+     *        {@code "forum/main.ftl"}.
+     * @param reader the character stream to read from. It will always be closed ({@link Reader#close()}).
      * @param cfg the Configuration object that this Template is associated with.
-     *        If this is null, the "default" {@link Configuration} object is used,
+     *        If this is {@code null}, the "default" {@link Configuration} object is used,
      *        which is highly discouraged, because it can easily lead to
-     *        erroneous, unpredictable behaviour.
+     *        erroneous, unpredictable behavior.
      *        (See more {@link Configuration#getDefaultConfiguration() here...})
-     * @param encoding This is the encoding that we are supposed to be using. If this is
-     * non-null (It's not actually necessary because we are using a Reader) then it is
-     * checked against the encoding specified in the FTL header -- assuming that is specified,
-     * and if they don't match a WrongEncodingException is thrown.
+     */
+    public Template(String name, Reader reader, Configuration cfg) throws IOException {
+        this(name, reader, cfg, null);
+    }
+    
+    /**
+     * Convenience constructor for {@link #Template(String, Reader, Configuration)
+     * Template(name, new StringReader(reader), cfg)}.
+     */
+    public Template(String name, String sourceCode, Configuration cfg) throws IOException {
+        this(name, new StringReader(sourceCode), cfg, null);
+    }
+    
+    /**
+     * Same as {@link #Template(String, Reader, Configuration)}, but also specifies the template's encoding.
+     *
+     * @param encoding This is the encoding that we are supposed to be using. But it's not really necessary because we
+     *        have a {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
+     *        {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding will
+     *        be this. But this behavior of said directives is considered to be harmful, and will be probably phased
+     *        out. Until that, it's better to leave this on {@code null}, so that the encoding will come from the
+     *        {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header with
+     *        encoding, they must match, or else a {@link WrongEncodingException} is thrown. 
+     *        
+     * @deprecated Use {@link #Template(String, Reader, Configuration)} instead.
      */
     public Template(String name, Reader reader, Configuration cfg, String encoding)
     throws IOException
     {
         this(name, cfg);
         this.encoding = encoding;
-
-        if (!(reader instanceof BufferedReader)) {
-            reader = new BufferedReader(reader, 0x1000);
-        }
-        LineTableBuilder ltb = new LineTableBuilder(reader);
         try {
+            if (!(reader instanceof BufferedReader)) {
+                reader = new BufferedReader(reader, 0x1000);
+            }
+            reader = new LineTableBuilder(reader);
+            
             try {
-                FMParser parser = new FMParser(this, ltb,
+                parser = new FMParser(this, reader,
                         getConfiguration().getStrictSyntaxMode(),
                         getConfiguration().getWhitespaceStripping(),
                         getConfiguration().getTagSyntax(),
-                        getConfiguration().getParsedIncompatibleEnhancements());
+                        getConfiguration().getIncompatibleImprovements().intValue());
                 this.rootElement = parser.Root();
+                this.actualTagSyntax = parser._getLastTagSyntax();
             }
             catch (TokenMgrError exc) {
-                throw new ParseException("Token manager error: " + exc, 0, 0);
+                // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
+                // to ParseException
+                throw exc.toParseException(this);
+            }
+            finally {
+                parser = null;
             }
         }
         catch(ParseException e) {
@@ -179,7 +207,7 @@ public class Template extends Configurable {
             throw e;
         }
         finally {
-            ltb.close();
+            reader.close();
         }
         DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
@@ -187,22 +215,11 @@ public class Template extends Configurable {
     }
 
     /**
-     * This is equivalent to Template(name, reader, cfg, null)
-     */
-
-    public Template(String name, Reader reader, Configuration cfg) throws IOException {
-        this(name, reader, cfg, null);
-    }
-
-
-    /**
-     * Constructs a template from a character stream.
-     *
-     * This is the same as the 3 parameter version when you pass null
-     * as the cfg parameter.
+     * Equivalent to {@link #Template(String, Reader, Configuration)
+     * Template(name, reader, null)}.
      * 
      * @deprecated This constructor uses the "default" {@link Configuration}
-     * instance, which can easily lead to erroneous, unpredictable behaviour.
+     * instance, which can easily lead to erroneous, unpredictable behavior.
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
     public Template(String name, Reader reader) throws IOException {
@@ -210,7 +227,7 @@ public class Template extends Configurable {
     }
 
     /**
-     * This constructor is only used internally.
+     * Only used internally.
      */
     Template(String name, TemplateElement root, Configuration config) {
         this(name, config);
@@ -236,54 +253,45 @@ public class Template extends Configurable {
     }
 
     /**
-     * Processes the template, using data from the map, and outputs
-     * the resulting text to the supplied <tt>Writer</tt> The elements of the
-     * map are converted to template models using the default object wrapper
-     * returned by the {@link Configuration#getObjectWrapper() getObjectWrapper()}
-     * method of the <tt>Configuration</tt>.
-     * @param rootMap the root node of the data model.  If null, an
-     * empty data model is used. Can be any object that the effective object
-     * wrapper can turn into a <tt>TemplateHashModel</tt>. Basically, simple and
-     * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-     * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as
-     * any object that implements <tt>__getitem__</tt> into a template hash.
-     * Naturally, you can pass any object directly implementing
-     * <tt>TemplateHashModel</tt> as well.
-     * @param out a <tt>Writer</tt> to output the text to.
-     * @throws TemplateException if an exception occurs during template processing
-     * @throws IOException if an I/O exception occurs during writing to the writer.
-     */
-    public void process(Object rootMap, Writer out)
-    throws TemplateException, IOException
-    {
-        createProcessingEnvironment(rootMap, out, null).process();
-    }
-
-    /**
-     * Processes the template, using data from the root map object, and outputs
-     * the resulting text to the supplied writer, using the supplied
-     * object wrapper to convert map elements to template models.
-     * @param rootMap the root node of the data model.  If null, an
-     * empty data model is used. Can be any object that the effective object
-     * wrapper can turn into a <tt>TemplateHashModel</tt> Basically, simple and
-     * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-     * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as any
-     * object that implements <tt>__getitem__</tt> into a template hash.
-     * Naturally, you can pass any object directly implementing
-     * <tt>TemplateHashModel</tt> as well.
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper retrieved
-     * by {@link Configurable#getObjectWrapper()} is used.
-     * @param out the writer to output the text to.
-     * @param rootNode The root node for recursive processing, this may be null.
+     * Executes template, using the data-model provided, writing the generated output
+     * to the supplied {@link Writer}.
+     * 
+     * <p>For finer control over the runtime environment setup, such as per-HTTP-request configuring of FreeMarker
+     * settings, you may need to use {@link #createProcessingEnvironment(Object, Writer)} instead. 
+     * 
+     * @param dataModel the holder of the variables visible from the template (name-value pairs); usually a
+     *     {@code Map<String, Object>} or a JavaBean (where the JavaBean properties will be the variables).
+     *     Can be any object that the {@link ObjectWrapper} in use turns into a {@link TemplateHashModel}.
+     *     You can also use an object that already implements {@link TemplateHashModel}; in that case it won't be
+     *     wrapped. If it's {@code null}, an empty data model is used.
+     * @param out The {@link Writer} where the output of the template will go. Note that unless you have used
+     *    {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at the
+     *    when the template processing was finished. {@link Writer#close()} is not called.
      * 
      * @throws TemplateException if an exception occurs during template processing
      * @throws IOException if an I/O exception occurs during writing to the writer.
      */
-    public void process(Object rootMap, Writer out, ObjectWrapper wrapper, TemplateNodeModel rootNode)
+    public void process(Object dataModel, Writer out)
     throws TemplateException, IOException
     {
-        Environment env = createProcessingEnvironment(rootMap, out, wrapper);
+        createProcessingEnvironment(dataModel, out, null).process();
+    }
+
+    /**
+     * Like {@link #process(Object, Writer)}, but also sets a (XML-)node to be recursively processed by the template.
+     * That node is accessed in the template with <tt>.node</tt>, <tt>#recurse</tt>, etc. See the
+     * <a href="http://freemarker.org/docs/xgui_declarative.html" target="_blank">Declarative XML Processing</a> as a
+     * typical example of recursive node processing.
+     * 
+     * @param rootNode The root node for recursive processing or {@code null}.
+     * 
+     * @throws TemplateException if an exception occurs during template processing
+     * @throws IOException if an I/O exception occurs during writing to the writer.
+     */
+    public void process(Object dataModel, Writer out, ObjectWrapper wrapper, TemplateNodeModel rootNode)
+    throws TemplateException, IOException
+    {
+        Environment env = createProcessingEnvironment(dataModel, out, wrapper);
         if (rootNode != null) {
             env.setCurrentVisitorNode(rootNode);
         }
@@ -291,112 +299,102 @@ public class Template extends Configurable {
     }
     
     /**
-     * Processes the template, using data from the root map object, and outputs
-     * the resulting text to the supplied writer, using the supplied
-     * object wrapper to convert map elements to template models.
-     * @param rootMap the root node of the data model.  If null, an
-     * empty data model is used. Can be any object that the effective object
-     * wrapper can turn into a <tt>TemplateHashModel</tt> Basically, simple and
-     * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-     * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as any
-     * object that implements <tt>__getitem__</tt> into a template hash.
-     * Naturally, you can pass any object directly implementing
-     * <tt>TemplateHashModel</tt> as well.
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper retrieved
-     * by {@link Configurable#getObjectWrapper()} is used.
-     * @param out the writer to output the text to.
+     * Like {@link #process(Object, Writer)}, but overrides the {@link Configuration#getObjectWrapper()}.
      * 
-     * @throws TemplateException if an exception occurs during template processing
-     * @throws IOException if an I/O exception occurs during writing to the writer.
+     * @param wrapper The {@link ObjectWrapper} to be used instead of what {@link Configuration#getObjectWrapper()}
+     *      provides, or {@code null} if you don't want to override that. 
      */
-    public void process(Object rootMap, Writer out, ObjectWrapper wrapper)
+    public void process(Object dataModel, Writer out, ObjectWrapper wrapper)
     throws TemplateException, IOException
     {
-        process(rootMap, out, wrapper, null);
+        createProcessingEnvironment(dataModel, out, wrapper).process();
     }
     
    /**
-    * Creates a {@link freemarker.core.Environment Environment} object,
-    * using this template, the data model provided as the root map object, and
-    * the supplied object wrapper to convert map elements to template models.
-    * You can then call Environment.process() on the returned environment
-    * to set off the actual rendering.
-    * Use this method if you want to do some special initialization on the environment
-    * before template processing, or if you want to read the environment after template
-    * processing.
+    * Creates a {@link freemarker.core.Environment Environment} object, using this template, the data-model provided as
+    * parameter. You have to call {@link Environment#process()} on the return value to set off the actual rendering.
+    * 
+    * <p>Use this method if you want to do some special initialization on the {@link Environment} before template
+    * processing, or if you want to read the {@link Environment} after template processing. Otherwise using
+    * {@link Template#process(Object, Writer)} is simpler.
     *
     * <p>Example:
     *
-    * <p>This:
     * <pre>
     * Environment env = myTemplate.createProcessingEnvironment(root, out, null);
-    * env.process();
-    * </pre>
-    * is equivalent with this:
+    * env.process();</pre>
+    * 
+    * <p>The above is equivalent with this:
+    * 
     * <pre>
-    * myTemplate.process(root, out);
-    * </pre>
-    * But with <tt>createProcessingEnvironment</tt>, you can manipulate the environment
+    * myTemplate.process(root, out);</pre>
+    * 
+    * <p>But with <tt>createProcessingEnvironment</tt>, you can manipulate the environment
     * before and after the processing:
+    * 
     * <pre>
     * Environment env = myTemplate.createProcessingEnvironment(root, out);
-    * env.include("include/common.ftl", null, true);  // before processing
-    * env.process();
-    * TemplateModel x = env.getVariable("x");  // after processing
-    * </pre>
+    * 
+    * env.setLocale(myUsersPreferredLocale);
+    * env.setTimeZone(myUsersPreferredTimezone);
+    * 
+    * env.process();  // output is rendered here
+    * 
+    * TemplateModel x = env.getVariable("x");  // read back a variable set by the template</pre>
     *
-    * @param rootMap the root node of the data model.  If null, an
-    * empty data model is used. Can be any object that the effective object
-    * wrapper can turn into a <tt>TemplateHashModel</tt> Basically, simple and
-    * beans wrapper can turn <tt>java.util.Map</tt> objects into hashes
-    * and the Jython wrapper can turn both a <tt>PyDictionary</tt> as well as any
-    * object that implements <tt>__getitem__</tt> into a template hash.
-    * Naturally, you can pass any object directly implementing
-    * <tt>TemplateHashModel</tt> as well.
-    * @param wrapper The object wrapper to use to wrap objects into
-    * {@link TemplateModel} instances. If null, the default wrapper retrieved
-    * by {@link Configurable#getObjectWrapper()} is used.
-    * @param out the writer to output the text to.
-    * @return the {@link freemarker.core.Environment Environment} object created for processing
+    * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
+    *     more details.
+    * @param wrapper The {@link ObjectWrapper} to use to wrap objects into {@link TemplateModel}
+    *     instances. Normally you left it {@code null}, in which case {@link Configurable#getObjectWrapper()} will be
+    *     used.
+    * @param out The {@link Writer} where the output of the template will go; see {@link #process(Object, Writer)} for
+    *     more details.
+    *     
+    * @return the {@link Environment} object created for processing. Call {@link Environment#process()} to process the
+    *    template.
+    * 
     * @throws TemplateException if an exception occurs while setting up the Environment object.
     * @throws IOException if an exception occurs doing any auto-imports
     */
-    public Environment createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)
-    throws TemplateException, IOException
-    {
-        TemplateHashModel root = null;
-        if(rootMap instanceof TemplateHashModel) {
-            root = (TemplateHashModel)rootMap;
-        }
-        else {
+    public Environment createProcessingEnvironment(Object dataModel, Writer out, ObjectWrapper wrapper)
+    throws TemplateException, IOException {
+        final TemplateHashModel dataModelHash;
+        if (dataModel instanceof TemplateHashModel) {
+            dataModelHash = (TemplateHashModel) dataModel;
+        } else {
             if(wrapper == null) {
                 wrapper = getObjectWrapper();
             }
 
-            try {
-                root = rootMap != null
-                    ? (TemplateHashModel)wrapper.wrap(rootMap)
-                    : new SimpleHash(wrapper);
-                if(root == null) {
-                    throw new IllegalArgumentException(wrapper.getClass().getName() + " converted " + rootMap.getClass().getName() + " to null.");
+            if (dataModel == null) {
+                dataModelHash = new SimpleHash(wrapper);
+            } else {
+                TemplateModel wrappedDataModel = wrapper.wrap(dataModel);
+                if (wrappedDataModel instanceof TemplateHashModel) {
+                    dataModelHash = (TemplateHashModel) wrappedDataModel;
+                } else if (wrappedDataModel == null) {
+                    throw new IllegalArgumentException(
+                            wrapper.getClass().getName() + " converted " + dataModel.getClass().getName() + " to null.");
+                } else {
+                    throw new IllegalArgumentException(
+                            wrapper.getClass().getName() + " didn't convert " + dataModel.getClass().getName()
+                            + " to a TemplateHashModel. Generally, you want to use a Map<String, Object> or a "
+                            + "JavaBean as the root-map (aka. data-model) parameter. The Map key-s or JavaBean "
+                            + "property names will be the variable names in the template.");
                 }
             }
-            catch(ClassCastException e) {
-                throw new IllegalArgumentException(wrapper.getClass().getName() + " could not convert " + rootMap.getClass().getName() + " to a TemplateHashModel.");
-            }
         }
-        return new Environment(this, root, out);
+        return new Environment(this, dataModelHash, out);
     }
 
     /**
-     * Same as <code>createProcessingEnvironment(rootMap, out, null)</code>.
-     * @see #createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)
+     * Same as {@link #createProcessingEnvironment(Object, Writer, ObjectWrapper)
+     * createProcessingEnvironment(dataModel, out, null)}.
      */
-    public Environment createProcessingEnvironment(Object rootMap, Writer out)
+    public Environment createProcessingEnvironment(Object dataModel, Writer out)
     throws TemplateException, IOException
     {
-        return createProcessingEnvironment(rootMap, out, null);
+        return createProcessingEnvironment(dataModel, out, null);
     }
     
     /**
@@ -415,13 +413,25 @@ public class Template extends Configurable {
 
 
     /**
-     * The path of the template file relative to the directory what you use to store the templates.
-     * For example, if the real path of template is <tt>"/www/templates/community/forum.fm"</tt>,
-     * and you use "<tt>"/www/templates"</tt> as
-     * {@link Configuration#setDirectoryForTemplateLoading "directoryForTemplateLoading"},
-     * then <tt>name</tt> should be <tt>"community/forum.fm"</tt>. The <tt>name</tt> is used for example when you
-     * use <tt>&lt;include ...></tt> and you give a path that is relative to the current
-     * template, or in error messages when FreeMarker logs an error while it processes the template.
+     * The usually path-like (or URL-like) identifier of the template, or possibly {@code null} for non-stored
+     * templates. It usually looks like a relative UN*X path; it should use {@code /}, not {@code \}, and shouldn't
+     * start with {@code /} (but there are no hard guarantees). It's not a real path in a file-system, it's just
+     * a name that a {@link TemplateLoader} used to load the backing resource. Or, it can also be a name that was never
+     * used to load the template (directly created with {@link #Template(String, Reader, Configuration)}).
+     * Even if the templates are stored straightforwardly in files, this is relative to the base directory of the
+     * {@link TemplateLoader}. So it really could be anything, except that it has importance in these situations:
+     * 
+     * <ul>
+     *   <li><p>Relative paths to other templates in this template will be resolved relatively to the directory part of
+     *       this. Like if the template name is {@link "foo/this.ftl"}, then {@code <#include "other.ftl">} gets
+     *       the template with name {@link "foo/other.ftl"}.
+     *   <li><p>It's shown in error messages. So it should be something based on which the user can find the template.
+     *   <li><p>Some tools, like an IDE plugin, uses this to identify (and find) templates.
+     * </ul>
+     * 
+     * <p>Some frameworks use URL-like template names like {@code "someSchema://foo/bar.ftl"}. FreeMarker understands
+     * this notation, so an absolute path like {@code "/baaz.ftl"} in that template will be resolved too
+     * {@code "someSchema://baaz.ftl"}.
      */
     public String getName() {
         return name;
@@ -437,7 +447,7 @@ public class Template extends Configurable {
     /**
      * Sets the character encoding to use for
      * included files. Usually you don't set this value manually,
-     * instead it is assigned to the template upon loading.
+     * instead it's assigned to the template upon loading.
      */
 
     public void setEncoding(String encoding) {
@@ -449,6 +459,15 @@ public class Template extends Configurable {
      */
     public String getEncoding() {
         return this.encoding;
+    }
+
+    /**
+     * Returns the tag syntax the parser has chosen for this template: {@link Configuration#SQUARE_BRACKET_TAG_SYNTAX}
+     * or {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax couldn't be determined (like because there was
+     * no tags in the template), this returns whatever the default is in the current configuration.
+     */
+    public int getActualTagSyntax() {
+        return actualTagSyntax;
     }
 
     /**
@@ -482,8 +501,7 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the template source at the location
-     * specified by the coordinates given.
+     * Returns the template source at the location specified by the coordinates given, or {@code null} if unavailable.
      * @param beginColumn the first column of the requested source, 1-based
      * @param beginLine the first line of the requested source, 1-based
      * @param endColumn the last column of the requested source, 1-based
@@ -495,6 +513,8 @@ public class Template extends Configurable {
                             int endColumn,
                             int endLine)
     {
+        if (beginLine < 1 || endLine < 1) return null;  // dynamically ?eval-ed expressions has no source available
+        
         // Our container is zero-based.
         --beginLine;
         --beginColumn;
@@ -603,7 +623,7 @@ public class Template extends Configurable {
             throw new IllegalArgumentException("Cannot map empty string prefix");
         }
         if (prefix.equals(NO_NS_PREFIX)) {
-            throw new IllegalArgumentException("The prefix: " + prefix + " cannot be registered, it is reserved for special internal use.");
+            throw new IllegalArgumentException("The prefix: " + prefix + " cannot be registered, it's reserved for special internal use.");
         }
         if (prefixToNamespaceURILookup.containsKey(prefix)) {
             throw new IllegalArgumentException("The prefix: '" + prefix + "' was repeated. This is illegal.");

@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * A reference to a top-level variable
@@ -65,14 +66,14 @@ final class Identifier extends Expression {
         this.name = name;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         try {
             return env.getVariable(name);
         } catch (NullPointerException e) {
             if (env == null) {
-                throw new TemplateException("Variables are not available "
-                + "(certainly you are in a parse-time executed directive). The name of the variable "
-                + "you tried to read: " + name, null);
+                throw new _MiscTemplateException(new Object[] {
+                        "Variables are not available (certainly you are in a parse-time executed directive). "
+                        + "The name of the variable you tried to read: ", name });
             } else {
                 throw e;
             }
@@ -86,16 +87,41 @@ final class Identifier extends Expression {
     public String getCanonicalForm() {
         return name;
     }
+    
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
 
     boolean isLiteral() {
         return false;
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
 
-    Expression _deepClone(String name, Expression subst) {
-        if(this.name.equals(name)) {
-        	return subst.deepClone(null, null);
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        if(this.name.equals(replacedIdentifier)) {
+            if (replacementState.replacementAlreadyInUse) {
+                Expression clone = replacement.deepCloneWithIdentifierReplaced(null, null, replacementState);
+                clone.copyLocationFrom(replacement);
+                return clone;
+            } else {
+                replacementState.replacementAlreadyInUse = true;
+                return replacement;
+            }
+        } else {
+            return new Identifier(this.name);
         }
-        return new Identifier(this.name);
     }
 
 }

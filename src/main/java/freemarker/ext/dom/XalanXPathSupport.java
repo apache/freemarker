@@ -52,21 +52,34 @@
  
 package freemarker.ext.dom;
 
-import freemarker.template.*;
-import freemarker.core.Environment;
-import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeIterator;
-import org.apache.xpath.*;
-import org.apache.xpath.objects.*;
-import org.apache.xml.utils.PrefixResolver;
 import java.util.List;
+
 import javax.xml.transform.TransformerException;
+
+import org.apache.xml.utils.PrefixResolver;
+import org.apache.xpath.XPath;
+import org.apache.xpath.XPathContext;
+import org.apache.xpath.objects.XBoolean;
+import org.apache.xpath.objects.XNodeSet;
+import org.apache.xpath.objects.XNull;
+import org.apache.xpath.objects.XNumber;
+import org.apache.xpath.objects.XObject;
+import org.apache.xpath.objects.XString;
+import org.w3c.dom.Node;
+import org.w3c.dom.traversal.NodeIterator;
+
+import freemarker.core.Environment;
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * Some glue code that bridges the Xalan XPath stuff (that is built into the JDK 1.4.x)
  * with FreeMarker TemplateModel semantics
  * @author Jonathan Revusky
- * @version $Id: XalanXPathSupport.java,v 1.20 2004/01/02 20:20:23 ddekany Exp $
  */
 
 class XalanXPathSupport implements XPathSupport {

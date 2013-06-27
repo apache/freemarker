@@ -7,7 +7,6 @@ import org.zeroturnaround.javarebel.ReloaderFactory;
 
 /**
  * @author Attila Szegedi
- * @version $Id: $
  */
 class JavaRebelIntegration
 {

@@ -71,8 +71,6 @@ import freemarker.template.TemplateSequenceModel;
  * Starting from FreeMarker 2.4 they should be copyed (not moved!) into the
  * {@link TemplateModel} sub-interfaces, and this class should be marked as
  * deprecated.</p>
- * 
- * @version $Id: Constants.java,v 1.2 2004/11/28 12:58:34 ddekany Exp $
  */
 public class Constants {
 

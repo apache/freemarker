@@ -53,17 +53,20 @@
 package freemarker.template;
 
 /**
- * Describes objects that are nodes in a tree.
- * If you have a tree of objects, they can be recursively
- * <em>visited</em> using the &lt;#visit...&gt; and &lt;#recurse...&gt;
- * FTL directives. This API is largely based on the W3C Document Object Model
- * (DOM) API. However, it is meant to be generally useful for describing
+ * "node" template language data type: an object that is a node in a tree.
+ * A tree of nodes can be recursively <em>visited</em> using the &lt;#visit...&gt; and &lt;#recurse...&gt;
+ * directives. This API is largely based on the W3C Document Object Model
+ * (DOM) API. However, it's meant to be generally useful for describing
  * any tree of objects that you wish to navigate using a recursive visitor
- * design pattern.
+ * design pattern (or simply through being able to get the parent
+ * and child nodes).
+ * 
+ * <p>See the <a href="http://freemarker.org/docs/xgui.html" target="_blank">XML
+ * Processing Guide</a> for a concrete application.
+ *
  * @since FreeMarker 2.3
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
-
 public interface TemplateNodeModel extends TemplateModel {
     
     /**

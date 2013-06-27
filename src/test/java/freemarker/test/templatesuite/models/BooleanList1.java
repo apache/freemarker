@@ -52,14 +52,16 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * Model for testing the impact of isEmpty() on template list models. Every
  * other method simply delegates to a SimpleList model.
  *
  * @author  <a href="mailto:run2000@users.sourceforge.net">Nicholas Cull</a>
- * @version $Id: BooleanList1.java,v 1.16 2004/01/06 17:06:44 szegedia Exp $
  */
 public class BooleanList1 implements TemplateSequenceModel {
 

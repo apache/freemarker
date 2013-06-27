@@ -52,6 +52,11 @@
 
 package freemarker.log;
 
+/**
+ * Internal class, don't use it; no backward-compatibility guarantees. This class was left public accidentally, but
+ * fixing it would be non-BC.
+ */
+// 2.4: rename to _*
 public class CommonsLoggingLoggerFactory implements LoggerFactory {
 
 	public Logger getLogger(String category) {

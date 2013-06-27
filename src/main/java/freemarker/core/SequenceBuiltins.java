@@ -62,34 +62,38 @@ import java.util.List;
 
 import freemarker.ext.beans.CollectionModel;
 import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateModelListSequence;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.TemplateCollectionModel;
-import freemarker.template.TemplateModelIterator;
 import freemarker.template.utility.Constants;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A holder for builtins that operate exclusively on TemplateSequenceModels.
+ * A holder for builtins that operate exclusively on sequence or collection left-hand value.
  */
-
-abstract class SequenceBuiltins {
-    abstract static class SequenceBuiltIn extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+class SequenceBuiltins {
+    
+    // Can't be instantiated
+    private SequenceBuiltins() { }
+    
+    private abstract static class SequenceBuiltIn extends BuiltIn {
+        TemplateModel _eval(Environment env)
                 throws TemplateException
         {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateSequenceModel)) {
-                throw invalidTypeException(model, target, env, "sequence");
+                throw new UnexpectedTypeException(target, model, "sequence", env);
             }
             return calculateResult((TemplateSequenceModel) model);
         }
@@ -165,18 +169,19 @@ abstract class SequenceBuiltins {
             return sort(seq, null);
         }
 
-        static String startErrorMessage(int keyNamesLn) {
-            return (keyNamesLn == 0 ? "?sort" : "?sort_by(...)") + " failed: ";
+        static Object[] startErrorMessage(int keyNamesLn) {
+            return new Object[] { (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"), " failed: " };
         }
 
-        static String startErrorMessage(int keyNamesLn, int index) {
-            return (keyNamesLn == 0 ? "?sort" : "?sort_by(...)")
-                    + " failed at sequence index " + index
-                    + (index == 0 ? ": " : " (0-based): ");
+        static Object[] startErrorMessage(int keyNamesLn, int index) {
+            return new Object[] {
+                    (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"),
+                    " failed at sequence index ", new Integer(index),
+                    (index == 0 ? ": " : " (0-based): ") };
         }
         
         static TemplateModelException newInconsistentSortKeyTypeException(
-                int keyNamesLn, String firstType, String firstTypePlural, int index) {
+                int keyNamesLn, String firstType, String firstTypePlural, int index, TemplateModel key) {
             String valueInMsg;
             String valuesInMsg;
             if (keyNamesLn == 0) {
@@ -186,12 +191,13 @@ abstract class SequenceBuiltins {
                 valueInMsg  = "key value";
                 valuesInMsg  = "key values";
             }
-            return new TemplateModelException(
-                    startErrorMessage(keyNamesLn, index)
-                    + "All " + valuesInMsg + " in the sequence must be "
-                    + firstTypePlural + ", because the first " + valueInMsg
-                    + " was that. However, the " + valueInMsg
-                    + " of the current item isn't a " + firstType + ".");
+            return new _TemplateModelException(new Object[] {
+                    startErrorMessage(keyNamesLn, index),
+                    "All ", valuesInMsg, " in the sequence must be ",
+                    firstTypePlural, ", because the first ", valueInMsg,
+                    " was that. However, the ", valueInMsg,
+                    " of the current item isn't a ", firstType, " but a ",
+                    new _DelayedFTLTypeDescription(key), "."});
         }
         
         /**
@@ -220,32 +226,30 @@ abstract class SequenceBuiltins {
             int keyType = KEY_TYPE_NOT_YET_DETECTED;
             Comparator keyComparator = null;
             for (int i = 0; i < ln; i++) {
-                TemplateModel item = seq.get(i);
-                
-                Object key = item;
+                final TemplateModel item = seq.get(i);
+                TemplateModel key = item;
                 for (int keyNameI = 0; keyNameI < keyNamesLn; keyNameI++) {
                     try {
                         key = ((TemplateHashModel) key).get(keyNames[keyNameI]);
                     } catch (ClassCastException e) {
                         if (!(key instanceof TemplateHashModel)) {
-                            throw new TemplateModelException(
-                                    startErrorMessage(keyNamesLn, i)
-                                    + (keyNameI == 0
+                            throw new _TemplateModelException(new Object[] {
+                                    startErrorMessage(keyNamesLn, i),
+                                    (keyNameI == 0
                                             ? "Sequence items must be hashes when using ?sort_by. "
-                                            : "The " + StringUtil.jQuote(keyNames[keyNameI - 1])
-                                              + " subvariable is not a hash, so ?sort_by "
-                                              + "can't proceed with getting the "
-                                              + StringUtil.jQuote(keyNames[keyNameI])
-                                              + " subvariable."));
+                                            : "The " + StringUtil.jQuote(keyNames[keyNameI - 1])),
+                                    " subvariable is not a hash, so ?sort_by ",
+                                    "can't proceed with getting the ",
+                                    new _DelayedJQuote(keyNames[keyNameI]),
+                                    " subvariable." });
                         } else {
                             throw e;
                         }
                     }
                     if (key == null) {
-                        throw new TemplateModelException(
-                                startErrorMessage(keyNamesLn, i)
-                                + "The " + StringUtil.jQuote(keyNames[keyNameI])
-                                + " subvariable was not found.");
+                        throw new _TemplateModelException(new Object[] {
+                                startErrorMessage(keyNamesLn, i),
+                                "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found." });
                     }
                 } // for each key
                 
@@ -266,10 +270,9 @@ abstract class SequenceBuiltins {
                         keyType = KEY_TYPE_BOOLEAN;
                         keyComparator = new BooleanKVPComparator();
                     } else {
-                        throw new TemplateModelException(
-                                startErrorMessage(keyNamesLn, i)
-                                + "Values used for sorting must be numbers, strings, "
-                                + "date/times or booleans.");
+                        throw new _TemplateModelException(new Object[] {
+                                startErrorMessage(keyNamesLn, i),
+                                "Values used for sorting must be numbers, strings, date/times or booleans." });
                     }
                 }
                 switch(keyType) {
@@ -281,7 +284,7 @@ abstract class SequenceBuiltins {
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateScalarModel)) {
                                 throw newInconsistentSortKeyTypeException(
-                                        keyNamesLn, "string", "strings", i);
+                                        keyNamesLn, "string", "strings", i, key);
                             } else {
                                 throw e;
                             }
@@ -296,7 +299,7 @@ abstract class SequenceBuiltins {
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateNumberModel)) {
                                 throw newInconsistentSortKeyTypeException(
-                                        keyNamesLn, "number", "numbers", i);
+                                        keyNamesLn, "number", "numbers", i, key);
                             }
                         }
                         break;
@@ -309,7 +312,7 @@ abstract class SequenceBuiltins {
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateDateModel)) {
                                 throw newInconsistentSortKeyTypeException(
-                                        keyNamesLn, "date/time", "date/times", i);
+                                        keyNamesLn, "date/time", "date/times", i, key);
                             }
                         }
                         break;
@@ -323,7 +326,7 @@ abstract class SequenceBuiltins {
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateBooleanModel)) {
                                 throw newInconsistentSortKeyTypeException(
-                                        keyNamesLn, "boolean", "booleans", i);
+                                        keyNamesLn, "boolean", "booleans", i, key);
                             }
                         }
                         break;
@@ -337,9 +340,8 @@ abstract class SequenceBuiltins {
             try {
                 Collections.sort(res, keyComparator);
             } catch (Exception exc) {
-                throw new TemplateModelException(
-                        startErrorMessage(keyNamesLn)
-                        + "Unexpected error while sorting:" + exc, exc);
+                throw new _TemplateModelException(exc, new Object[] {
+                        startErrorMessage(keyNamesLn), "Unexpected error while sorting:" + exc });
             }
 
             // Convert the List[KVP] to List[V]:
@@ -424,21 +426,22 @@ abstract class SequenceBuiltins {
             return new BIMethod(seq);
         }
         
-        static class BIMethod implements TemplateMethodModelEx {
+        class BIMethod implements TemplateMethodModelEx {
             TemplateSequenceModel seq;
             
             BIMethod(TemplateSequenceModel seq) {
                 this.seq = seq;
             }
             
-            public Object exec(List params)
+            public Object exec(List args)
                     throws TemplateModelException {
-                if (params.size() == 0) {
-                    throw new TemplateModelException(
-                            "?sort_by(key) needs exactly 1 argument.");
-                }
+                // Should be:
+                // checkMethodArgCount(args, 1);
+                // But for BC:
+                if (args.size() < 1) throw MessageUtil.newArgCntError("?" + key, args.size(), 1);
+                
                 String[] subvars;
-                Object obj = params.get(0);
+                Object obj = args.get(0);
                 if (obj instanceof TemplateScalarModel) {
                     subvars = new String[]{((TemplateScalarModel) obj).getAsString()};
                 } else if (obj instanceof TemplateSequenceModel) {
@@ -452,19 +455,17 @@ abstract class SequenceBuiltins {
                                     .getAsString();
                         } catch (ClassCastException e) {
                             if (!(item instanceof TemplateScalarModel)) {
-                                throw new TemplateModelException(
-                                        "The argument to ?sort_by(key), when it "
-                                        + "is a sequence, must be a sequence of "
-                                        + "strings, but the item at index " + i
-                                        + " is not a string." );
+                                throw new _TemplateModelException(new Object[] {
+                                        "The argument to ?", key, "(key), when it's a sequence, must be a "
+                                        + "sequence of strings, but the item at index ", new Integer(i),
+                                        " is not a string."});
                             }
                         }
                     }
                 } else {
-                    throw new TemplateModelException(
-                            "The argument to ?sort_by(key) must be a string "
-                            + "(the name of the subvariable), or a sequence of "
-                            + "strings (the \"path\" to the subvariable).");
+                    throw new _TemplateModelException(new Object[] {
+                            "The argument to ?", key, "(key) must be a string (the name of the subvariable), or a "
+                            + "sequence of strings (the \"path\" to the subvariable)." });
                 }
                 return sort(seq, subvars); 
             }
@@ -479,9 +480,9 @@ abstract class SequenceBuiltins {
     }
     
     static class seq_containsBI extends BuiltIn {
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
-            TemplateModel model = target.getAsTemplateModel(env);
+            TemplateModel model = target.eval(env);
             // In 2.3.x only, we prefer TemplateSequenceModel for
             // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
             if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
@@ -489,11 +490,11 @@ abstract class SequenceBuiltins {
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
-                throw invalidTypeException(model, target, env, "sequence or collection");
+                throw new UnexpectedTypeException(target, model, "sequence or collection", env);
             }
         }
 
-        private static class BIMethodForSequence implements TemplateMethodModelEx {
+        private class BIMethodForSequence implements TemplateMethodModelEx {
             private TemplateSequenceModel m_seq;
             private Environment m_env;
 
@@ -504,12 +505,11 @@ abstract class SequenceBuiltins {
 
             public Object exec(List args)
                     throws TemplateModelException {
-                if (args.size() != 1)
-                    throw new TemplateModelException("?seq_contains(...) expects one argument.");
+                checkMethodArgCount(args, 1);
                 TemplateModel arg = (TemplateModel) args.get(0);
                 int size = m_seq.size();
                 for (int i = 0; i < size; i++) {
-                    if (modelsEqual(m_seq.get(i), arg, m_env))
+                    if (modelsEqual(i, m_seq.get(i), arg, m_env))
                         return TemplateBooleanModel.TRUE;
                 }
                 return TemplateBooleanModel.FALSE;
@@ -517,7 +517,7 @@ abstract class SequenceBuiltins {
 
         }
     
-        private static class BIMethodForCollection implements TemplateMethodModelEx {
+        private class BIMethodForCollection implements TemplateMethodModelEx {
             private TemplateCollectionModel m_coll;
             private Environment m_env;
 
@@ -528,13 +528,14 @@ abstract class SequenceBuiltins {
 
             public Object exec(List args)
                     throws TemplateModelException {
-                if (args.size() != 1)
-                    throw new TemplateModelException("?seq_contains(...) expects one argument.");
+                checkMethodArgCount(args, 1);
                 TemplateModel arg = (TemplateModel) args.get(0);
                 TemplateModelIterator it = m_coll.iterator();
+                int idx = 0;
                 while (it.hasNext()) {
-                    if (modelsEqual(it.next(), arg, m_env))
+                    if (modelsEqual(idx, it.next(), arg, m_env))
                         return TemplateBooleanModel.TRUE;
+                    idx++;
                 }
                 return TemplateBooleanModel.FALSE;
             }
@@ -551,7 +552,7 @@ abstract class SequenceBuiltins {
             m_dir = dir;
         }
 
-        TemplateModel _getAsTemplateModel(Environment env)
+        TemplateModel _eval(Environment env)
                 throws TemplateException {
             return new BIMethod(env);
         }
@@ -564,7 +565,7 @@ abstract class SequenceBuiltins {
 
             private BIMethod(Environment env)
                     throws TemplateException {
-                TemplateModel model = target.getAsTemplateModel(env);
+                TemplateModel model = target.eval(env);
                 m_seq = model instanceof TemplateSequenceModel
                             && !isBuggySeqButGoodCollection(model)
                         ? (TemplateSequenceModel) model
@@ -580,8 +581,7 @@ abstract class SequenceBuiltins {
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
-                    throw invalidTypeException(
-                            model, target, env, "sequence or collection");
+                    throw new UnexpectedTypeException(target, model, "sequence or collection", env);
                 }
                 
                 m_env = env;
@@ -589,22 +589,13 @@ abstract class SequenceBuiltins {
 
             public final Object exec(List args)
                     throws TemplateModelException {
-                int argcnt = args.size();
-                if (argcnt != 1 && argcnt != 2) {
-                    throw new TemplateModelException(
-                            getBuiltinTemplate() + " expects 1 or 2 arguments.");
-                }
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
                 
                 TemplateModel target = (TemplateModel) args.get(0);
                 int foundAtIdx;
-                if (argcnt > 1) {
-                    Object obj = args.get(1);
-                    if (!(obj instanceof TemplateNumberModel)) {
-                        throw new TemplateModelException(
-                                getBuiltinTemplate()
-                                + "expects a number as its second argument.");
-                    }
-                    int startIndex = ((TemplateNumberModel) obj).getAsNumber().intValue();
+                if (argCnt > 1) {
+                    int startIndex = getNumberMethodArg(args, 1).intValue();
                     // In 2.3.x only, we prefer TemplateSequenceModel for
                     // backward compatibility:
                     foundAtIdx = m_seq != null
@@ -618,10 +609,6 @@ abstract class SequenceBuiltins {
                             : findInCol(target);
                 }
                 return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
-            }
-
-            private final String getBuiltinTemplate() {
-                return m_dir == 1 ? "?seq_index_of(...)" : "?seq_last_index_of(...)";
             }
             
             public int findInSeq(TemplateModel target)
@@ -666,11 +653,11 @@ abstract class SequenceBuiltins {
                     throws TemplateModelException {
                 if (m_dir == 1) {
                     for (int i = scanStartIndex; i < seqSize; i++) {
-                        if (modelsEqual(m_seq.get(i), target, m_env)) return i;
+                        if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
                     }
                 } else {
                     for (int i = scanStartIndex; i >= 0; i--) {
-                        if (modelsEqual(m_seq.get(i), target, m_env)) return i;
+                        if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
                     }
                 }
                 return -1;
@@ -703,7 +690,7 @@ abstract class SequenceBuiltins {
                     
                     TemplateModel current = it.next();
                     if (idx >= allowedRangeStart) {
-                        if (modelsEqual(current, target, m_env)) {
+                        if (modelsEqual(idx, current, target, m_env)) {
                             foundAtIdx = idx;
                             if (m_dir == 1) break searchItem; // "find first"
                             // Otherwise it's "find last".
@@ -723,7 +710,7 @@ abstract class SequenceBuiltins {
             return new BIMethod(tsm);
         }
 
-        private static class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateMethodModelEx {
             
             private final TemplateSequenceModel tsm;
 
@@ -732,23 +719,13 @@ abstract class SequenceBuiltins {
             }
 
             public Object exec(List args) throws TemplateModelException {
-                int numArgs = args.size();
-                if (numArgs != 1 && numArgs !=2) {
-                    throw new TemplateModelException(
-                            "?chunk(...) expects 1 or 2 arguments.");
-                }
-                
-                Object chunkSize = args.get(0);
-                if (!(chunkSize instanceof TemplateNumberModel)) {
-                    throw new TemplateModelException(
-                            "?chunk(...) expects a number as "
-                            + "its 1st argument.");
-                }
+                checkMethodArgCount(args, 1, 2);
+                int chunkSize = getNumberMethodArg(args, 0).intValue();
                 
                 return new ChunkedSequence(
                         tsm,
-                        ((TemplateNumberModel) chunkSize).getAsNumber().intValue(),
-                        numArgs > 1 ? (TemplateModel) args.get(1) : null);
+                        chunkSize,
+                        args.size() > 1 ? (TemplateModel) args.get(1) : null);
             }
         }
         
@@ -766,8 +743,8 @@ abstract class SequenceBuiltins {
                     TemplateSequenceModel wrappedTsm, int chunkSize, TemplateModel fillerItem)
                     throws TemplateModelException {
                 if (chunkSize < 1) {
-                    throw new TemplateModelException(
-                            "The 1st argument to ?chunk(...) must be at least 1.");
+                    throw new _TemplateModelException(new Object[] {
+                            "The 1st argument to ?', key, ' (...) must be at least 1." });
                 }
                 this.wrappedTsm = wrappedTsm;
                 this.chunkSize = chunkSize;
@@ -814,69 +791,91 @@ abstract class SequenceBuiltins {
         
     }
     
-    /*
-     * WARNING! This algorithm is duplication of ComparisonExpression.isTrue(...).
-     * Thus, if you update this method, then you have to update that too!
-     */
-    public static boolean modelsEqual(TemplateModel model1, TemplateModel model2,
-                                Environment env)
+    public static boolean modelsEqual(
+            int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
+            Environment env)
             throws TemplateModelException {
-        if (env.isClassicCompatible()) {
-            if (model1 == null) {
-                model1 = TemplateScalarModel.EMPTY_STRING;
-            }
-            if (model2 == null) {
-                model2 = TemplateScalarModel.EMPTY_STRING;
+        try {
+            return EvalUtil.compare(
+                    seqItem, null,
+                    EvalUtil.CMP_OP_EQUALS, null,
+                    searchedItem, null,
+                    null,
+                    true, true, true, // The last one is true to emulate an old bug for BC 
+                    env);
+        } catch (TemplateException ex) {
+            throw new _TemplateModelException(ex, new Object[] {
+                    "This error has occured when comparing sequence item at 0-based index ", new Integer(seqItemIndex),
+                    " to the searched item:\n", new _DelayedGetMessage(ex) });
+        }
+    }
+ 
+    static class joinBI extends BuiltIn {
+        
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateCollectionModel) {
+                return new BIMethodForCollection(env, (TemplateCollectionModel) model);
+            } else if (model instanceof TemplateSequenceModel) {
+                return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
+            } else {
+                throw new UnexpectedTypeException(target, model, "sequence or collection", env);
             }
         }
 
-        int comp = -1;
-        if(model1 instanceof TemplateNumberModel && model2 instanceof TemplateNumberModel) {
-            Number first = ((TemplateNumberModel) model1).getAsNumber();
-            Number second = ((TemplateNumberModel) model2).getAsNumber();
-            ArithmeticEngine ae = env.getArithmeticEngine();
-            try {
-                comp = ae.compareNumbers(first, second);
-            } catch (TemplateException ex) {
-                throw new TemplateModelException(ex);
-            }
-        }
-        else if(model1 instanceof TemplateDateModel && model2 instanceof TemplateDateModel) {
-            TemplateDateModel ltdm = (TemplateDateModel)model1;
-            TemplateDateModel rtdm = (TemplateDateModel)model2;
-            int ltype = ltdm.getDateType();
-            int rtype = rtdm.getDateType();
-            if(ltype != rtype) {
-                throw new TemplateModelException(
-                    "Can not compare dates of different type. Left date is of "
-                    + TemplateDateModel.TYPE_NAMES.get(ltype)
-                    + " type, right date is of "
-                    + TemplateDateModel.TYPE_NAMES.get(rtype) + " type.");
-            }
-            if(ltype == TemplateDateModel.UNKNOWN) {
-                throw new TemplateModelException(
-                    "Left date is of UNKNOWN type, and can not be compared.");
-            }
-            if(rtype == TemplateDateModel.UNKNOWN) {
-                throw new TemplateModelException(
-                    "Right date is of UNKNOWN type, and can not be compared.");
-            }
-            Date first = ltdm.getAsDate();
-            Date second = rtdm.getAsDate();
-            comp = first.compareTo(second);
-        }
-        else if(model1 instanceof TemplateScalarModel && model2 instanceof TemplateScalarModel) {
-            String first = ((TemplateScalarModel) model1).getAsString();
-            String second = ((TemplateScalarModel) model2).getAsString();
-            comp = env.getCollator().compare(first, second);
-        }
-        else if(model1 instanceof TemplateBooleanModel && model2 instanceof TemplateBooleanModel) {
-            boolean first = ((TemplateBooleanModel)model1).getAsBoolean();
-            boolean second = ((TemplateBooleanModel)model2).getAsBoolean();
-            comp = (first ? 1 : 0) - (second ? 1 : 0);
-        }
+        private class BIMethodForCollection implements TemplateMethodModelEx {
+            
+            private final Environment env;
+            private final TemplateCollectionModel coll;
 
-        return (comp == 0);
+            private BIMethodForCollection(Environment env, TemplateCollectionModel coll) {
+                this.env = env;
+                this.coll = coll;
+            }
+
+            public Object exec(List args)
+                    throws TemplateModelException {
+                checkMethodArgCount(args, 1, 3);
+                final String separator = getStringMethodArg(args, 0);
+                final String whenEmpty = getOptStringMethodArg(args, 1);
+                final String afterLast = getOptStringMethodArg(args, 2);
+                
+                StringBuffer sb = new StringBuffer();
+                
+                TemplateModelIterator it = coll.iterator();
+                
+                int idx = 0;
+                boolean hadItem = false;
+                while (it.hasNext()) {
+                    TemplateModel item = it.next();
+                    if (item != null) {
+                        if (hadItem) {
+                            sb.append(separator);
+                        } else {
+                            hadItem = true;
+                        }
+                        try {
+                            sb.append(EvalUtil.coerceModelToString(item, null, null, env));
+                        } catch (TemplateException e) {
+                            throw new _TemplateModelException(e, new Object[] {
+                                    "\"?", key, "\" failed at index ", new Integer(idx), " with this error:\n\n",
+                                    MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                                    new _DelayedGetMessageWithoutStackTop(e),
+                                    MessageUtil.EMBEDDED_MESSAGE_END });
+                        }
+                    }
+                    idx++;
+                }
+                if (hadItem) {
+                    if (afterLast != null) sb.append(afterLast);
+                } else {
+                    if (whenEmpty != null) sb.append(whenEmpty);
+                }
+                return new SimpleScalar(sb.toString());
+           }
+
+        }
+   
     }
     
 }

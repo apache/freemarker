@@ -52,12 +52,15 @@
 
 package freemarker.core;
 
-import java.math.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.utility.NumberUtil;
 import freemarker.template.utility.OptimizerUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Class to perform arithmetic operations.
@@ -139,9 +142,20 @@ public abstract class ArithmeticEngine {
         ArithmeticEngine    
     {
         public int compareNumbers(Number first, Number second) {
-            BigDecimal left = toBigDecimal(first);
-            BigDecimal right = toBigDecimal(second);
-            return left.compareTo(right);
+            // We try to find the result based on the sign (+/-/0) first, because:
+            // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
+            // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
+            int firstSignum = NumberUtil.getSignum(first); 
+            int secondSignum = NumberUtil.getSignum(second);
+            if (firstSignum != secondSignum) {
+                return firstSignum < secondSignum ? -1 : (firstSignum > secondSignum ? 1 : 0); 
+            } else if (firstSignum == 0 && secondSignum == 0) {
+                return 0;
+            } else {
+                BigDecimal left = toBigDecimal(first);
+                BigDecimal right = toBigDecimal(second);
+                return left.compareTo(right);
+            }
         }
     
         public Number add(Number first, Number second) {
@@ -456,7 +470,7 @@ public abstract class ArithmeticEngine {
                     return n1.mod(n2);
                 }
                 case BIGDECIMAL: {
-                    throw new TemplateException("Can't calculate remainder on BigDecimals", Environment.getCurrentEnvironment());
+                    throw new _MiscTemplateException("Can't calculate remainder on BigDecimals");
                 }
             }
             // Make the compiler happy. getCommonClassCode() is guaranteed to 
@@ -488,9 +502,11 @@ public abstract class ArithmeticEngine {
             }
             catch(NullPointerException e) {
                 if(num == null) {
-                    throw new TemplateException("Unknown number type null", Environment.getCurrentEnvironment());
+                    throw new _MiscTemplateException("The Number object was null.");
+                } else {
+                    throw new _MiscTemplateException(new Object[] {
+                            "Unknown number type ", num.getClass().getName() });
                 }
-                throw new TemplateException("Unknown number type " + num.getClass().getName(), Environment.getCurrentEnvironment());
             }
         }
         
@@ -526,6 +542,11 @@ public abstract class ArithmeticEngine {
     }
 
     private static BigDecimal toBigDecimal(Number num) {
-        return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+        try {
+            return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+        } catch (NumberFormatException e) {
+            // The exception message is useless, so we add a new one:
+            throw new NumberFormatException("Can't parse this as BigDecimal number: " + StringUtil.jQuote(num));
+        }
     }
 }

@@ -53,11 +53,12 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.core.Expression.ReplacemenetState;
+import freemarker.template.TemplateException;
 
 /**
- * Representation of the compile-time Escape directive.
- * @version $Id: EscapeBlock.java,v 1.1 2003/04/22 21:05:01 revusky Exp $
+ * Representation of the compile-time #escape directive.
  * @author Attila Szegedi
  */
 class EscapeBlock extends TemplateElement {
@@ -85,21 +86,46 @@ class EscapeBlock extends TemplateElement {
         }
     }
 
-    Expression doEscape(Expression subst) {
-        return escapedExpr.deepClone(variable, subst);
+    Expression doEscape(Expression expression) {
+        return escapedExpr.deepCloneWithIdentifierReplaced(variable, expression, new ReplacemenetState());
     }
 
-    public String getDescription() {
-        return "escape " + variable + " as " + expr.toString();
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol()).append(' ').append(variable).append(" as ").append(expr.getCanonicalForm());
+        if (canonical) {
+            sb.append('>').append(nestedBlock.getCanonicalForm()).append("</").append(getNodeTypeSymbol()).append('>');
+        }
+        return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#escape";
+    }
+    
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
+    int getParameterCount() {
+        return 2;
     }
 
-    public String getCanonicalForm() {
-        return "<#escape "
-            + variable
-            + " as "
-            + expr.getCanonicalForm()
-            + ">"
-            + nestedBlock.getCanonicalForm()
-            + "</#escape>";
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return variable;
+        case 1: return expr;
+        default: throw new IndexOutOfBoundsException();
+        }
     }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.PLACEHOLDER_VARIABLE;
+        case 1: return ParameterRole.EXPRESSION_TEMPLATE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }    
+    
 }

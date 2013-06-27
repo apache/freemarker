@@ -52,8 +52,9 @@
 
 package freemarker.core;
 
-import java.util.*;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import freemarker.template.TemplateException;
 
 /**
@@ -93,22 +94,42 @@ final class MixedContent extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i<nestedElements.size(); i++) {
-            TemplateElement element = (TemplateElement) nestedElements.get(i);
-            buf.append(element.getCanonicalForm());
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            StringBuffer buf = new StringBuffer();
+            for (int i = 0; i<nestedElements.size(); i++) {
+                TemplateElement element = (TemplateElement) nestedElements.get(i);
+                buf.append(element.getCanonicalForm());
+            }
+            return buf.toString();
+        } else {
+            if (parent == null) {
+                return "root";
+            }
+            return getNodeTypeSymbol(); // MixedContent is uninteresting in a stack trace.
         }
-        return buf.toString();
     }
 
-    public String getDescription() {
-        if (parent == null) {
-            return "root element";
-        }
-        return "content"; // MixedContent is uninteresting in a stack trace.
+    String getNodeTypeSymbol() {
+        return "#mixed_content";
+    }
+    
+    int getParameterCount() {
+        return 0;
     }
 
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
     boolean isIgnorable() {
         return nestedElements == null || nestedElements.size() == 0;
     }

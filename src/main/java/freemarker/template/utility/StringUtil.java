@@ -60,12 +60,12 @@ import java.util.StringTokenizer;
 
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.Version;
 
 /**
  *  Some text related utilities.
- *
- *  @version $Id: StringUtil.java,v 1.48 2005/06/01 22:39:08 ddekany Exp $
  */
 public class StringUtil {
     private static final char[] ESCAPES = createEscapes();
@@ -75,8 +75,12 @@ public class StringUtil {
      */
 
     /**
-     *  HTML encoding (does not convert line breaks).
-     *  Replaces all '&gt;' '&lt;' '&amp;' and '"' with entity reference
+     *  HTML encoding (does not convert line breaks and apostrophe-quote).
+     *  Replaces all '&gt;' '&lt;' '&amp;' and '"' with entity reference, but not "'" (apostrophe-quote).
+     *  The last is not escaped as back then when this was written some user agents didn't understood 
+     *  "&amp;apos;" nor "&amp;#39;".
+     *    
+     *  @deprecated Use {@link #XHTMLEnc(String)} instead, because it escapes apostrophe-quote too.
      */
     public static String HTMLEnc(String s) {
         return XMLEncNA(s);
@@ -94,7 +98,7 @@ public class StringUtil {
      *  XHTML Encoding.
      *  Replaces all '&gt;' '&lt;' '&amp;', "'" and '"' with entity reference
      *  suitable for XHTML decoding in common user agents (including legacy
-     *  user agents, which do not decode "&apos;" to "'", so "&#39;" is used
+     *  user agents, which do not decode "&amp;apos;" to "'", so "&amp;#39;" is used
      *  instead [see http://www.w3.org/TR/xhtml1/#C_16])
      */
     public static String XHTMLEnc(String s) {
@@ -578,8 +582,9 @@ public class StringUtil {
     }
 
     public static Locale deduceLocale(String input) {
+       if (input == null) return null;
        Locale locale = Locale.getDefault();
-       if (input.charAt(0) == '"') input = input.substring(1, input.length() -1);
+       if (input.length() > 0 && input.charAt(0) == '"') input = input.substring(1, input.length() -1);
        StringTokenizer st = new StringTokenizer(input, ",_ ");
        String lang = "", country = "";
        if (st.hasMoreTokens()) {
@@ -691,6 +696,14 @@ public class StringUtil {
     }
 
     /**
+     * Same as {@link #replace(String, String, String, boolean, boolean)} with two {@code false} parameters. 
+     * @since 2.3.20
+     */
+    public static String replace(String text, String oldSub, String newSub) {
+        return replace(text, oldSub, newSub, false, false);
+    }
+    
+    /**
      * Replaces all occurrences of a sub-string in a string.
      * @param text The string where it will replace <code>oldsub</code> with
      *     <code>newsub</code>.
@@ -757,6 +770,15 @@ public class StringUtil {
     }
 
     /**
+     * Converts a 0-length string to null, leaves the string as is otherwise.
+     * @param s maybe {@code null}.
+     */
+    public static String emptyToNull(String s) {
+    	if (s == null) return null;
+    	return s.length() == 0 ? null : s;
+    }
+    
+    /**
      * Converts the parameter with <code>toString</code> (if not
      * <code>null</code>)and passes it to {@link #jQuote(String)}. 
      */
@@ -796,9 +818,9 @@ public class StringUtil {
                 } else {
                     b.append("\\u00");
                     int x = c / 0x10;
-                    b.append((char) (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                    b.append(toHexDigit(x));
                     x = c & 0xF;
-                    b.append((char) (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                    b.append(toHexDigit(x));
                 }
             } else {
                 b.append(c);
@@ -850,9 +872,9 @@ public class StringUtil {
                 } else {
                     b.append("\\u00");
                     int x = c / 0x10;
-                    b.append((char) (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                    b.append(toHexDigit(x));
                     x = c & 0xF;
-                    b.append((char) (x < 0xA ? x + '0' : x - 0xA + 'A'));
+                    b.append(toHexDigit(x));
                 }
             } else {
                 b.append(c);
@@ -864,7 +886,7 @@ public class StringUtil {
     
     /**
      * Escapes the <code>String</code> with the escaping rules of Java language
-     * string literals, so it is safe to insert the value into a string literal.
+     * string literals, so it's safe to insert the value into a string literal.
      * The resulting string will not be quoted.
      * 
      * <p>All characters under UCS code point 0x20 will be escaped.
@@ -920,139 +942,184 @@ public class StringUtil {
     }
     
     /**
-     * Escapes a <code>String</code> according the JavaScript string literal
-     * escaping rules. The resulting string will not be quoted.
-     * 
-     * <p>It escapes both <tt>'</tt> and <tt>"</tt>.
-     * In additional it escapes <tt>></tt> as <tt>\></tt> (to avoid
-     * <tt>&lt;/script></tt>).
-     * 
-     * <p>All characters under UCS code point 0x20 will be escaped.
-     * Where they have no dedicated escape sequence in JavaScript, they will
-     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
-     */ 
+     * Escapes a {@link String} to be safely insertable into a JavaScript string literal; for more see
+     * {@link #jsStringEnc(String, boolean) jsStringEnc(s, false)}.
+     */
     public static String javaScriptStringEnc(String s) {
-        int ln = s.length();
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            if (c == '"' || c == '\'' || c == '\\' || c == '>' || c < 0x20) {
-                StringBuffer b = new StringBuffer(ln + 4);
-                b.append(s.substring(0, i));
-                while (true) {
-                    if (c == '"') {
-                        b.append("\\\"");
-                    } else if (c == '\'') {
-                        b.append("\\'");
-                    } else if (c == '\\') {
-                        b.append("\\\\");
-                    } else if (c == '>') {
-                        b.append("\\>");
-                    } else if (c < 0x20) {
-                        if (c == '\n') {
-                            b.append("\\n");
-                        } else if (c == '\r') {
-                            b.append("\\r");
-                        } else if (c == '\f') {
-                            b.append("\\f");
-                        } else if (c == '\b') {
-                            b.append("\\b");
-                        } else if (c == '\t') {
-                            b.append("\\t");
-                        } else {
-                            b.append("\\x");
-                            int x = c / 0x10;
-                            b.append((char)
-                                    (x < 0xA ? x + '0' : x - 0xA + 'A'));
-                            x = c & 0xF;
-                            b.append((char)
-                                    (x < 0xA ? x + '0' : x - 0xA + 'A'));
-                        }
-                    } else {
-                        b.append(c);
-                    }
-                    i++;
-                    if (i >= ln) {
-                        return b.toString();
-                    }
-                    c = s.charAt(i);
-                }
-            } // if has to be escaped
-        } // for each characters
-        return s;
+        return jsStringEnc(s, false);
     }
 
     /**
-     * Escapes a <code>String</code> according the JSON string literal
-     * escaping rules. The resulting string will <em>not</em> be quoted;
-     * the caller have to ensure that they are there in the final output.
-     * 
-     * <p>Beware, it doesn't escape <tt>'</tt>, as JSON string must be delimited with
-     * <tt>"</tt>, and JSON has no <tt>\'</tt> escape either!
-     * 
-     * <p>It will escape <tt>/</tt> as <tt>\/</tt> if it's after <tt>&lt;</tt>,
-     * to avoid <tt>&lt;/script></tt>.
-     * 
-     * <p>It will escape <tt>></tt> as <tt>\</tt><tt>u003E</tt> if it's after
-     * <tt>]]</tt>, to avoid closing a CDATA section.
-     * 
-     * <p>All characters under UCS code point 0x20 will be escaped.
-     * Where they have no dedicated escape sequence in JSON, they will
-     * be replaced with hexadecimal escape (<tt>\</tt><tt>u<i>XXXX</i></tt>). 
+     * Escapes a {@link String} to be safely insertable into a JSON string literal; for more see
+     * {@link #jsStringEnc(String, boolean) jsStringEnc(s, true)}.
      */
     public static String jsonStringEnc(String s) {
-        int ln = s.length();
-        for (int i = 0; i < ln; i++) {
-            char c = s.charAt(i);
-            if (c == '"' || c == '\\' || c < 0x20
-                    || (c == '/' && i > 0 && s.charAt(i -1) == '<')
-                    || (c == '>' && i > 1
-                        && s.charAt(i - 1) == ']' && s.charAt(i - 2) == ']')) {
-                StringBuffer b = new StringBuffer(ln + 4);
-                b.append(s.substring(0, i));
-                while (true) {
-                    if (c == '"') {
-                        b.append("\\\"");
-                    } else if (c == '\\') {
-                        b.append("\\\\");
-                    } else if (c == '/' && i > 0 && s.charAt(i -1) == '<') {
-                        b.append("\\/");
-                    } else if (c == '>' && i > 1
-                            && s.charAt(i - 1) == ']' && s.charAt(i - 2) == ']') {
-                        b.append("\\u003E");
-                    } else if (c < 0x20) {
-                        if (c == '\n') {
-                            b.append("\\n");
-                        } else if (c == '\r') {
-                            b.append("\\r");
-                        } else if (c == '\f') {
-                            b.append("\\f");
-                        } else if (c == '\b') {
-                            b.append("\\b");
-                        } else if (c == '\t') {
-                            b.append("\\t");
-                        } else {
-                            b.append("\\u00");
-                            int x = c / 0x10;
-                            b.append((char)
-                                    (x < 0xA ? x + '0' : x - 0xA + 'A'));
-                            x = c & 0xF;
-                            b.append((char)
-                                    (x < 0xA ? x + '0' : x - 0xA + 'A'));
-                        }
-                    } else {
-                        b.append(c);
-                    }
-                    i++;
-                    if (i >= ln) {
-                        return b.toString();
-                    }
-                    c = s.charAt(i);
-                }
-            } // if has to be escaped
-        } // for each characters
-        return s;
+        return jsStringEnc(s, true);
     }
 
+    private static final int NO_ESC = 0;
+    private static final int ESC_HEXA = 1;
+    private static final int ESC_BACKSLASH = 3;
+    
+    /**
+     * Escapes a {@link String} to be safely insertable into a JavaScript or a JSON string literal.
+     * The resulting string will <em>not</em> be quoted; the caller must ensure that they are there in the final
+     * output. Note that for JSON, the quotation marks must be {@code "}, not {@code '}, because JSON doesn't escape
+     * {@code '}.
+     * 
+     * <p>The escaping rules guarantee that if the inside
+     * of the literal is from one or more touching sections of strings escaped with this, no character sequence will
+     * occur that closes the string literal or has special meaning in HTML/XML that can terminate the script section.
+     * (If, however, the escaped section is preceded by or followed by strings from other sources, this can't be
+     * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?js_string}"</tt> might closes the "script"
+     * element if {@code a} is is {@code "script>"}.)
+     * 
+     * The escaped characters are:
+     * 
+     * <table style="width: auto; border-collapse: collapse" border="1">
+     * <tr>
+     *   <th>Input
+     *   <th>Output
+     * <tr>
+     *   <td><tt>"</tt>
+     *   <td><tt>\"</tt>
+     * <tr>
+     *   <td><tt>'</tt> if not in JSON-mode
+     *   <td><tt>\'</tt>
+     * <tr>
+     *   <td><tt>\</tt>
+     *   <td><tt>\\</tt>
+     * <tr>
+     *   <td><tt>/</tt> if the method can't know that it won't be directly after <tt>&lt;</tt>
+     *   <td><tt>\/</tt>
+     * <tr>
+     *   <td><tt>></tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
+     *   <td>JavaScript: <tt>\></tt>; JSON: <tt>\<tt>u</tt>003E</tt>
+     * <tr>
+     *   <td><tt>&lt;</tt> if the method can't know that it won't be directly followed by <tt>!</tt> or <tt>?</tt> 
+     *   <td><tt><tt>\</tt>u003C</tt>
+     * <tr>
+     *   <td>
+     *     u0000-u001f (UNICODE control characters - disallowed by JSON)<br>
+     *     u007f-u009f (UNICODE control characters - disallowed by JSON)
+     *   <td><tt>\n</tt>, <tt>\r</tt> and such, or if there's no such dedicated escape:
+     *       JavaScript: <tt>\x<i>XX</i></tt>, JSON: <tt>\<tt>u</tt><i>XXXX</i></tt>
+     * <tr>
+     *   <td>
+     *     u2028 (Line separator - source code line-break in ECMAScript)<br>
+     *     u2029 (Paragraph separator - source code line-break in ECMAScript)<br>
+     *   <td><tt>\<tt>u</tt><i>XXXX</i></tt>
+     * </table>
+     * 
+     * @since 2.3.20
+     */
+    public static String jsStringEnc(String s, boolean json) {
+        NullArgumentException.check("s", s);
+        
+        int ln = s.length();
+        StringBuffer sb = null;
+        for (int i = 0; i < ln; i++) {
+            final char c = s.charAt(i);
+            final int escapeType;  // 
+            if (!(c > '>' && c < 0x7F && c != '\\') && c != ' ' && !(c >= 0xA0 && c < 0x2028))  {  // skip common chars
+                if (c <= 0x1F) {  // control chars range 1
+                    if (c == '\n') {
+                        escapeType = 'n';
+                    } else if (c == '\r') {
+                        escapeType = 'r';
+                    } else if (c == '\f') {
+                        escapeType = 'f';
+                    } else if (c == '\b') {
+                        escapeType = 'b';
+                    } else if (c == '\t') {
+                        escapeType = 't';
+                    } else {
+                        escapeType = ESC_HEXA;
+                    }
+                } else if (c == '"') {
+                    escapeType = ESC_BACKSLASH;
+                } else if (c == '\'') {
+                    escapeType = json ? NO_ESC : ESC_BACKSLASH; 
+                } else if (c == '\\') {
+                    escapeType = ESC_BACKSLASH; 
+                } else if (c == '/' && (i == 0 || s.charAt(i - 1) == '<')) {  // against closing elements
+                    escapeType = ESC_BACKSLASH; 
+                } else if (c == '>') {  // against "]]> and "-->"
+                    final boolean dangerous;
+                    if (i == 0) {
+                        dangerous = true;
+                    } else {
+                        final char prevC = s.charAt(i - 1);
+                        if (prevC == ']' || prevC == '-') {
+                            if (i == 1) {
+                                dangerous = true;
+                            } else {
+                                final char prevPrevC = s.charAt(i - 2);
+                                dangerous = prevPrevC == prevC;
+                            }
+                        } else {
+                            dangerous = false;
+                        }
+                    }
+                    escapeType = dangerous ? (json ? ESC_HEXA : ESC_BACKSLASH) : NO_ESC;
+                } else if (c == '<') {  // against "<!"
+                    final boolean dangerous;
+                    if (i == ln - 1) {
+                        dangerous = true;
+                    } else {
+                        char nextC = s.charAt(i + 1);
+                        dangerous = nextC == '!' || nextC == '?';
+                    }
+                    escapeType = dangerous ? ESC_HEXA : NO_ESC;
+                } else if ((c >= 0x7F && c <= 0x9F)  // control chars range 2
+                            || (c == 0x2028 || c == 0x2029)  // UNICODE line terminators
+                            ) {
+                    escapeType = ESC_HEXA;
+                } else {
+                    escapeType = NO_ESC;
+                }
+                
+                if (escapeType != NO_ESC) { // If needs escaping
+                    if (sb == null) {
+                        sb = new StringBuffer(ln + 6);
+                        sb.append(s.substring(0, i));
+                    }
+                    
+                    sb.append('\\');
+                    if (escapeType > 0x20) {
+                        sb.append((char) escapeType);
+                    } else if (escapeType == ESC_HEXA) {
+                        if (!json && c < 0x100) {
+                            sb.append('x');
+                            sb.append(toHexDigit(c >> 4));
+                            sb.append(toHexDigit(c & 0xF));
+                        } else {
+                            sb.append('u');
+                            int cp = c;
+                            sb.append(toHexDigit((cp >> 12) & 0xF));
+                            sb.append(toHexDigit((cp >> 8) & 0xF));
+                            sb.append(toHexDigit((cp >> 4) & 0xF));
+                            sb.append(toHexDigit(cp & 0xF));
+                        }
+                    } else {  // escapeType == ESC_BACKSLASH
+                        sb.append(c);
+                    }
+                    continue; 
+                }
+                // Falls through when escapeType == NO_ESC 
+            }
+            // Needs no escaping
+                
+            if (sb != null) sb.append(c);
+        } // for each characters
+        
+        return sb == null ? s : sb.toString();
+    }
+
+    private static char toHexDigit(int d) {
+        return (char) (d < 0xA ? d + '0' : d - 0xA + 'A');
+    }
+    
     /**
      * Parses a name-value pair list, where the pairs are separated with comma,
      * and the name and value is separated with colon.
@@ -1441,28 +1508,27 @@ public class StringUtil {
      * @return major * 1000000 + minor * 1000 + micro
      */
     public static int versionStringToInt(String version) {
-        version = version.trim();
+        return new Version(version).intValue();
+    }
+
+    /**
+     * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
+     * Also, it return {@code null} for {@code null} parameter.
+     * 
+     * @since 2.3.20
+     */
+    public static String tryToString(Object object) {
+        if (object == null) return null;
         
-        int[] parts = new int[3];
-        int partIdx = 0;
-        boolean valid = false;
-        for (int i = 0; i < version.length(); i++) {
-            char c = version.charAt(i);
-            if (c >= '0' && c <= '9') {
-                parts[partIdx] = parts[partIdx] * 10 + (c - '0');
-                valid = true;
-            } else {
-                if (c == '.') {
-                    if (partIdx == 2) break; else partIdx++;
-                } else {
-                    break;
-                }
+        try {
+            return object.toString();
+        } catch (Throwable e) {
+            try {
+                return "[toString() failed: " + e + "]";
+            } catch (Throwable e2) {
+                return "[toString() failed: " + e.getClass().getName() + "]";
             }
         }
-        if (!valid) throw new IllegalArgumentException(
-                "A version number string " + jQuote(version)
-                + " must start with a number.");
-        return parts[0] * 1000000 + parts[1] * 1000 + parts[2];
     }
     
 }

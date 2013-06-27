@@ -53,23 +53,16 @@
 package freemarker.test.templatesuite;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -80,11 +73,10 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.TestCase;
-
 import org.xml.sax.InputSource;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
@@ -99,49 +91,43 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
+import freemarker.test.templatesuite.models.BooleanAndStringTemplateModel;
 import freemarker.test.templatesuite.models.BooleanHash1;
 import freemarker.test.templatesuite.models.BooleanHash2;
 import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
+import freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import freemarker.test.templatesuite.models.MultiModel1;
+import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.VarArgTestModel;
+import freemarker.test.utility.AssertDirective;
+import freemarker.test.utility.AssertEqualsDirective;
+import freemarker.test.utility.AssertFailsDirective;
+import freemarker.test.utility.FileTestCase;
 
 
-public class TemplateTestCase extends TestCase {
+public class TemplateTestCase extends FileTestCase {
     
     private Template template;
     private HashMap dataModel = new HashMap();
     
-    private String filename, testName;
-    private File outputDir;
+    private final String templateName;
+    private final String expectedFileName;
+    private final boolean noOutput;
     
     private Configuration conf = new Configuration();
     
-    public TemplateTestCase(String name, String filename) {
+    public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
         super(name);
-        this.filename = filename;
-        this.testName = name;
+        this.templateName = templateName;
+        this.expectedFileName = expectedFileName;
+        this.noOutput = noOutput;
     }
     
-    public void setTemplateDirectory(String dirname) throws IOException {
-        URL url = getClass().getResource("TemplateTestCase.class");
-        File parent = new File(url.getFile()).getParentFile();
-        File dir = new File(parent, dirname);
-        conf.setDirectoryForTemplateLoading(dir);
-    }
-    
-    public void setReferenceDirectory(String dirname) {
-        URL url = getClass().getResource("TemplateTestCase.class");
-        File parent = new File(url.getFile()).getParentFile();
-        this.outputDir = new File(parent, dirname);
-    }
-
     public void setConfigParam(String param, String value) throws IOException {
-        if ("templatedir".equals(param)) {
-            setTemplateDirectory(value);
-        }
-        else if ("auto_import".equals(param)) {
+        if ("auto_import".equals(param)) {
             StringTokenizer st = new StringTokenizer(value);
             if (!st.hasMoreTokens()) fail("Expecting libname");
             String libname = st.nextToken();
@@ -159,9 +145,6 @@ public class TemplateTestCase extends TestCase {
         }
         else if ("input_encoding".equals(param)) {
             conf.setDefaultEncoding(value);
-        }
-        else if ("referencedir".equals(param)) {
-            setReferenceDirectory(value);
         }
         else {
             try {
@@ -182,10 +165,16 @@ public class TemplateTestCase extends TestCase {
      * We really might as well just expose pretty much 
      * the same tree to all our tests. (JR)
      */
-    
     public void setUp() throws Exception {
+        conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
+        
+        dataModel.put("assert", AssertDirective.INSTANCE);
+        dataModel.put("assertEquals", AssertEqualsDirective.INSTANCE);
+        dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
+        
         dataModel.put("message", "Hello, world!");
         
+        final String testName = getName();
         if (testName.equals("bean-maps")) {
             BeansWrapper w1 = new BeansWrapper();
             BeansWrapper w2 = new BeansWrapper();
@@ -275,7 +264,7 @@ public class TemplateTestCase extends TestCase {
         }
     
         else if (testName.equals("default-xmlns")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-defaultxmlns1.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
@@ -287,7 +276,7 @@ public class TemplateTestCase extends TestCase {
             dataModel.put("data", new MultiModel1());
         }
         
-        else if (testName.equals("test-stringbimethods")) {
+        else if (testName.equals("stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
         }
         
@@ -307,29 +296,29 @@ public class TemplateTestCase extends TestCase {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
             DocumentBuilder db = f.newDocumentBuilder();
-            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/test-xmlfragment.xml")));
+            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/xmlfragment.xml")));
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
         }
         
         else if (testName.equals("xmlns1")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
         else if (testName.equals("xmlns2")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns2.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns2.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
         else if (testName.equals("xmlns3") || testName.equals("xmlns4")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-xmlns3.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns3.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         else if (testName.equals("xmlns5")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/test-defaultxmlns1.xml"));
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
@@ -340,9 +329,23 @@ public class TemplateTestCase extends TestCase {
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
+            
+            List listWithNull = new ArrayList();
+            listWithNull.add("a");
+            listWithNull.add(null);
+            listWithNull.add("c");
+            dataModel.put("listWithNull", listWithNull);
+            
+            List listWithNullsOnly = new ArrayList();
+            listWithNull.add(null);
+            listWithNull.add(null);
+            listWithNull.add(null);
+            dataModel.put("listWithNullsOnly", listWithNullsOnly);
+            
+            dataModel.put("abcCollection", new SimpleCollection(abcSet));
         }
         
-        else if (testName.equals("test-iso8601")) {
+        else if (testName.equals("iso8601")) {
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
             dataModel.put("adaptedToStringScalar", new Object() {
@@ -352,82 +355,96 @@ public class TemplateTestCase extends TestCase {
             });
         }
         
-        else if (testName.equals("test-number-to-date")) {
+        else if (testName.equals("number-to-date")) {
           dataModel.put("bigInteger", new BigInteger("1305575275540"));
           dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
         }
         
-        else if (testName.equals("test-varargs")) {
+        else if (testName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
+        }
+        
+        else if (testName.startsWith("overloaded-methods-")) {
+          dataModel.put("obj", new OverloadedMethods());
+        }
+        
+        else if (testName.startsWith("boolean-formatting")) {
+          dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (BeansWrapper) conf.getObjectWrapper()));
+          dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
+          dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
+        }
+        
+        else if (testName.startsWith("number-math-builtins")) {
+            dataModel.put("fNan", Float.valueOf(Float.NaN));
+            dataModel.put("dNan", Double.valueOf(Double.NaN));
+            dataModel.put("fNinf", Float.valueOf(Float.NEGATIVE_INFINITY));
+            dataModel.put("dPinf", Double.valueOf(Double.POSITIVE_INFINITY));
+            
+            dataModel.put("fn", Float.valueOf(-0.05f));
+            dataModel.put("dn", Double.valueOf(-0.05));
+            dataModel.put("ineg", Integer.valueOf(-5));
+            dataModel.put("ln", Long.valueOf(-5));
+            dataModel.put("sn", Short.valueOf((short) -5));
+            dataModel.put("bn", Byte.valueOf((byte) -5));
+            dataModel.put("bin", BigInteger.valueOf(5));
+            dataModel.put("bdn", BigDecimal.valueOf(-0.05));
+            
+            dataModel.put("fp", Float.valueOf(0.05f));
+            dataModel.put("dp", Double.valueOf(0.05));
+            dataModel.put("ip", Integer.valueOf(5));
+            dataModel.put("lp", Long.valueOf(5));
+            dataModel.put("sp", Short.valueOf((short) 5));
+            dataModel.put("bp", Byte.valueOf((byte) 5));
+            dataModel.put("bip", BigInteger.valueOf(5));
+            dataModel.put("bdp", BigDecimal.valueOf(0.05));
+          }
+          
+        else if (testName.startsWith("classic-compatible")) {
+            dataModel.put("array", new String[] { "a", "b", "c" });
+            dataModel.put("beansArray", new BeansWrapper().wrap(new String[] { "a", "b", "c" }));
+            dataModel.put("beanTrue", new BeansWrapper().wrap(Boolean.TRUE));
+            dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
         }
     }
     
     public void runTest() {
         try {
-            template = conf.getTemplate(filename);
+            template = conf.getTemplate(templateName);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            fail("Could not load template " + filename + "\n" + sw.toString());
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Could not load template " + StringUtil.jQuote(templateName) + "\n" + sw.toString());
         }
-        File refFile = new File (outputDir, filename);
-        File outFile = new File (outputDir, filename+".out");
-        Writer out = null;
-        String encoding = conf.getOutputEncoding();
-        if (encoding == null) encoding = "UTF-8";
+        
+        StringWriter out = noOutput ? null : new StringWriter();
         try {
-            out = new OutputStreamWriter(new FileOutputStream(outFile), 
-                    encoding);
-        } catch (IOException ioe) {
-            fail("Cannot write to file: " + outFile + "\n" + ioe.getMessage());
-        }
-        try {
-            template.process(dataModel, out);
-            out.close();
+            template.process(dataModel, out != null ? out : NullWriter.INSTANCE);
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            fail("Could not process template " + filename + "\n" + sw.toString());
+            e.printStackTrace(new PrintWriter(sw));
+            fail("Could not process template " + templateName + "\n" + sw.toString());
         }
-        try {
-            Reader ref = new InputStreamReader(new FileInputStream(refFile), 
-                    encoding);
-            Reader output = new InputStreamReader(new FileInputStream(outFile), 
-                    encoding);
-            System.out.println(outFile);
-            compare(ref, output);
-            outFile.delete();
-        } catch (IOException e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            fail("Error comparing files " + refFile + " and " + outFile + "\n" + sw.toString());
+        
+        if (out != null) {
+            assertExpectedFileEqualsString(getName(), out.toString());
         }
-    }
-
-    static public void compare(Reader reference, Reader output) throws IOException {
-        LineNumberReader ref = new LineNumberReader(reference);
-        LineNumberReader out = new LineNumberReader(output);
-        String refLine = "", outLine = "";
-        while (refLine != null || outLine != null) {
-            if (refLine == null) {
-                fail("Output text is longer than reference text");
-            }
-            if (outLine == null) {
-                fail("Output text is shorter than reference text");
-            }
-            refLine = ref.readLine();
-            outLine = out.readLine();
-            if (refLine != null && outLine != null & !refLine.equals(outLine)) {
-                fail("Difference found on line " + ref.getLineNumber() + 
-                                            ".\nReference text is: " + refLine +
-                                            "\nOutput text is: " + outLine);
-            }
-        } 
     }
     
+    @Override
+    protected File getExpectedFileDirectory() throws IOException {
+        return new File(super.getExpectedFileDirectory(), "references");
+    }
+
+    @Override
+    protected String getDefaultCharset() {
+        return conf.getOutputEncoding() != null ? conf.getOutputEncoding() : "UTF-8";
+    }
+    
+    @Override
+    protected File getExpectedFileFor(String testCaseFileName) throws IOException {
+        return new File(getExpectedFileDirectory(), expectedFileName);
+    }
+
     static class TestBoolean implements TemplateBooleanModel, TemplateScalarModel {
         public boolean getAsBoolean() {
             return true;
@@ -484,4 +501,5 @@ public class TemplateTestCase extends TestCase {
             return 7;
         }
     }
+    
 }

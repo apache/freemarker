@@ -52,42 +52,63 @@
 
 package freemarker.template;
 
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.util.WrapperTemplateModel;
 
 /**
- * <p>An object that knows how to "wrap" a java object
- * as a TemplateModel instance.
- *
- * @version $Id: ObjectWrapper.java,v 1.15 2003/06/22 17:50:28 ddekany Exp $
+ * Maps Java objects to the type-system of FreeMarker Template Language (see the {@link TemplateModel}
+ * interfaces). Thus this is what decides what parts of the Java objects will be accessible in the templates and how.
+ * 
+ * <p>For example, with a {@link BeansWrapper} both the items of {@link Map} and the JavaBean properties (the getters)
+ * of an object are accessible in template uniformly with the {@code myObject.foo} syntax, where "foo" is the map key or
+ * the property name. This is because both kind of object is wrapped by {@link BeansWrapper} into a
+ * {@link TemplateHashModel} implementation that will call {@link Map#get(Object)} or the getter method, transparently
+ * to the template language.
+ * 
+ * @see Configuration#setObjectWrapper(ObjectWrapper)
  */
 public interface ObjectWrapper {
+    
     /**
-     * An ObjectWrapper that works similarly to {@link #SIMPLE_WRAPPER}, but
-     * exposes the objects methods and JavaBeans properties as hash elements
-     * and custom handling for Java Maps, ResourceBundles, etc.
+     * An {@link ObjectWrapper} that exposes the object methods and JavaBeans properties as hash elements, and has
+     * custom handling for Java {@link Map}-s, {@link ResourceBundle}-s, etc. It doesn't treat
+     * {@link org.w3c.dom.Node}-s and Jython objects specially, however.
      */
     ObjectWrapper BEANS_WRAPPER = BeansWrapper.getDefaultInstance();
 
     /**
-     * The default object wrapper implementation.
-     * Wraps Maps as SimpleHash and Lists as SimpleSequences, Strings and 
-     * Numbers as SimpleScalar and SimpleNumber respectively.
-     * Other objects are beans-wrapped, thus exposing reflection-based information.
+     * The default object wrapper implementation, focusing on backward compatibility and out-of-the box extra features.
+     * Extends {@link BeansWrapper} with the special handling of {@link org.w3c.dom.Node}-s (for XML processing) and
+     * Jython objects. However, for backward compatibility, it also somewhat downgrades {@link BeansWrapper} by using   
+     * {@link SimpleHash} for {@link Map}-s, {@link SimpleSequence} for {@link List}-s and collections/arrays.
+     * Furthermore it uses {@link SimpleScalar}, {@link SimpleNumber} to wrap {@link String}-s and {@link Number}-s,
+     * although this is not considered to be harmful.    
      */
     ObjectWrapper DEFAULT_WRAPPER = DefaultObjectWrapper.instance;
 
     /**
-     * Object wrapper that uses SimpleXXX wrappers only.
-     * This wrapper has far more restrictive semantics. It 
-     * behaves like the DEFAULT_WRAPPER, but for objects
-     * that it does not know how to wrap as a SimpleXXX, it 
+     * Object wrapper that uses {@code SimpleXXX} wrappers only.
+     * It behaves like the {@link #DEFAULT_WRAPPER}, but for objects
+     * that it does not know how to wrap as a {@code SimpleXXX} it 
      * throws an exception. It makes no use of reflection-based 
-     * exposure of methods. 
+     * exposure of anything, which may makes it a good candidate for security-restricted applications. 
      */
     ObjectWrapper SIMPLE_WRAPPER = SimpleObjectWrapper.instance;
     
     /**
-     * @return a TemplateModel wrapper of the object passed in.
+     * Makes a {@link TemplateModel} out of a non-{@link TemplateModel} object, usually by "wrapping" it into a
+     * {@link TemplateModel} implementation that delegates to the original object.
+     * 
+     * @param obj The object to wrap into a {@link TemplateModel}. If the it already implements {@link TemplateModel},
+     *      it should just return the object as is.
+     * 
+     * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the
+     *     return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.
      */
     TemplateModel wrap(Object obj) throws TemplateModelException;
+    
 }

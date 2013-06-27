@@ -89,7 +89,6 @@ import freemarker.template.utility.StringUtil;
  * access indexed properties. It uses Beans {@link java.beans.Introspector}
  * to dynamically discover the properties and methods. 
  * @author Attila Szegedi
- * @version $Id: BeanModel.java,v 1.49.2.4 2006/11/12 10:20:37 szegedia Exp $
  */
 
 public class BeanModel
@@ -141,7 +140,7 @@ implements
 
     /**
      * Uses Beans introspection to locate a property or method with name
-     * matching the key name. If a method or property is found, it is wrapped
+     * matching the key name. If a method or property is found, it's wrapped
      * into {@link freemarker.template.TemplateMethodModelEx} (for a method or
      * indexed property), or evaluated on-the-fly and the return value wrapped
      * into appropriate model (for a simple property) Models for various
@@ -221,7 +220,7 @@ implements
         catch(Exception e)
         {
             throw new TemplateModelException("get(" + key + ") failed on " +
-                "instance of " + object.getClass().getName(), e);
+                "instance of " + object.getClass().getName() + ". See cause exception.", e);
         }
     }
 
@@ -287,10 +286,10 @@ implements
             retval = member = new SimpleMethodModel(object, method, 
                     BeansWrapper.getArgTypes(classInfo, method), wrapper);
         }
-        else if(desc instanceof MethodMap)
+        else if(desc instanceof OverloadedMethods)
         {
             retval = member = 
-                new OverloadedMethodModel(object, (MethodMap)desc);
+                new OverloadedMethodsModel(object, (OverloadedMethods)desc);
         }
         
         // If new cacheable member was created, cache it
@@ -333,7 +332,7 @@ implements
 
     /**
      * Tells whether the model is empty. It is empty if either the wrapped 
-     * object is null, or it is a Boolean with false value.
+     * object is null, or it's a Boolean with false value.
      */
     public boolean isEmpty()
     {
@@ -376,6 +375,16 @@ implements
             values.add(get(key));
         }
         return new CollectionAndSequence(new SimpleSequence(values, wrapper));
+    }
+    
+    /**
+     * Used for {@code classic_compatbile} mode; don't use it for anything else.
+     * In FreeMarker 1.7 (and also at least in 2.1) {@link BeanModel} was a {@link TemplateScalarModel}. Some internal
+     * FreeMarker code tries to emulate FreeMarker classic by calling this method when a {@link TemplateScalarModel} is
+     * expected.
+     */
+    String getAsClassicCompatibleString() {
+        return object == null ? "null" : object.toString();        
     }
     
     public String toString() {

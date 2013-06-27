@@ -73,18 +73,22 @@ final class DollarVariable extends TemplateElement {
      * Outputs the string value of the enclosed expression.
      */
     void accept(Environment env) throws TemplateException, IOException {
-        env.getOut().write(escapedExpression.getStringValue(env));
+        env.getOut().write(escapedExpression.evalAndCoerceToString(env));
     }
 
-    public String getCanonicalForm() {
-        return "${" + expression.getCanonicalForm() + "}";
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("${");
+        sb.append(expression.getCanonicalForm());
+        sb.append("}");
+        if (!canonical && expression != escapedExpression) {
+            sb.append(" auto-escaped");            
+        }
+        return sb.toString();
     }
-
-    public String getDescription() {
-        return this.getSource()  +
-        (expression == escapedExpression 
-            ? "" 
-            : " escaped ${" + escapedExpression.getCanonicalForm() + "}");
+    
+    String getNodeTypeSymbol() {
+        return "${...}";
     }
 
     boolean heedsOpeningWhitespace() {
@@ -94,4 +98,19 @@ final class DollarVariable extends TemplateElement {
     boolean heedsTrailingWhitespace() {
         return true;
     }
+
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return expression;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.CONTENT;
+    }
+    
 }

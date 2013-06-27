@@ -73,7 +73,6 @@ import freemarker.template.TemplateModelIterator;
  * {@link #iterator()} method after it was already driven to the end once will 
  * throw an exception.</p>
  * @author Attila Szegedi
- * @version $Id: IteratorModel.java,v 1.26 2003/06/03 13:21:32 szegedia Exp $
  */
 
 public class IteratorModel

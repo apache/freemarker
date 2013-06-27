@@ -52,12 +52,23 @@
  
 package freemarker.ext.dom;
 
-import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
-import freemarker.core.Environment;
-import org.w3c.dom.*;
-import java.util.List; 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import freemarker.core.Environment;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.StringUtil;
 
 class NodeListModel extends SimpleSequence implements TemplateHashModel {
     

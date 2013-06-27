@@ -52,15 +52,16 @@
 
 package freemarker.core;
 
-import java.util.ArrayList;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import freemarker.template.TemplateException;
 
 /**
- * A instruction that handles if-elseif-else blocks.
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
+ * Container for a group of related #if, #elseif and #else elements.
+ * Each such block is a nested {@link ConditionalBlock}. Note that if an #if has no #else of #elseif,
+ * {@link ConditionalBlock} doesn't need this parent element. 
  */
-
 final class IfBlock extends TemplateElement {
 
     IfBlock(ConditionalBlock block)
@@ -77,7 +78,8 @@ final class IfBlock extends TemplateElement {
         for (int i = 0; i<nestedElements.size(); i++) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
             Expression condition = cblock.condition;
-            if (condition == null || condition.isTrue(env)) {
+            env.replaceElemetStackTop(cblock);
+            if (condition == null || condition.evalToBoolean(env)) {
                 if (cblock.nestedBlock != null) {
                     env.visit(cblock.nestedBlock);
                 }
@@ -86,22 +88,12 @@ final class IfBlock extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i<nestedElements.size(); i++) {
-            ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
-            buf.append(cblock.getCanonicalForm());
-        }
-        buf.append("</#if>");
-        return buf.toString();
-    }
-
     TemplateElement postParseCleanup(boolean stripWhitespace)
         throws ParseException 
     {
         if (nestedElements.size() == 1) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(0);
-            cblock.isSimple = true;
+            cblock.isLonelyIf = true;
             cblock.setLocation(getTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
         }
@@ -109,8 +101,39 @@ final class IfBlock extends TemplateElement {
             return super.postParseCleanup(stripWhitespace);
         }
     }
-
-    public String getDescription() {
-        return "if-else ";
+    
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            StringBuffer buf = new StringBuffer();
+            for (int i = 0; i < nestedElements.size(); i++) {
+                ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
+                buf.append(cblock.dump(canonical));
+            }
+            buf.append("</#if>");
+            return buf.toString();
+        } else {
+            return getNodeTypeSymbol();
+        }
     }
+    
+    String getNodeTypeSymbol() {
+        return "#if-#elseif-#else-container";
+    }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
+    boolean isShownInStackTrace() {
+        return false;
+    }
+    
 }

@@ -65,7 +65,6 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * Model for Jython sequence objects ({@link org.python.core.PySequence} descendants).
- * @version $Id: JythonSequenceModel.java,v 1.13 2003/11/12 21:53:40 ddekany Exp $
  * @author Attila Szegedi
  */
 public class JythonSequenceModel

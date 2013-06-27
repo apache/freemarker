@@ -11,9 +11,6 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 import freemarker.core.ParseException;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 
 public class ExceptionTest extends TestCase {
     

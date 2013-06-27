@@ -81,6 +81,7 @@ import org.jdom.Namespace;
 import org.jdom.ProcessingInstruction;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
+
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
@@ -117,7 +118,6 @@ import freemarker.template.utility.Collections12;
  * 
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
  * @author Attila Szegedi
- * @version $Id: NodeListModel.java,v 1.52.2.2 2006/11/14 10:39:58 szegedia Exp $
  */
 public class NodeListModel
 implements

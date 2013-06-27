@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>FreeMarker: Include Instruction Test</title>
+</head>
+<body>
+
+<p>A simple test follows:</p>
+
+Hello, world!
+
+	<p>Message exists!
+
+<p>Test normal includes:</p>
+<p>A test of included files:</p>
+
+	<p>Message exists!:<br />
+        Hello, world!</p>
+
+ Can you see me? 
+
+assigning from included template
+I'm here, mon!
+
+<p>Test unparsed includes:</p>
+<p>A test of included files:</p>
+
+<#if .globals.message?exists>
+	<p>Message exists!:<br />
+        ${.globals.message}</p>
+<#else>
+        <p>No message :(</p>
+</#if>
+
+<#assign foo="assigning from included template", bar=" Can you see me? ">
+<#macro twice><#nested/>${bar}<#nested/></#macro>
+<#include "nestedinclude.ftl">
+Kilroy
+ Can you see me? Kilroy
+
+<p>Test subdir includes:</p>
+<p>This is include-subdir.ftl</p>
+<p>Testing including from same directory</p>
+<p>This is include-subdir2.ftl</p>
+<p>Testing including from relative parent</p>
+<p>A test of included files:</p>
+
+	<p>Message exists!:<br />
+        Hello, world!</p>
+
+ Can you see me? 
+<p>Testing including from loader root</p>
+<p>A test of included files:</p>
+
+	<p>Message exists!:<br />
+        Hello, world!</p>
+
+ Can you see me? 
+<p>Testing including through acquisition</p>
+<p>This is include-subdir2.ftl</p>
+</body>
+</html>
+

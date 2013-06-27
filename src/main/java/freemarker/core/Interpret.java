@@ -52,9 +52,17 @@
 
 package freemarker.core;
 
-import java.io.*;
-import java.util.*;
-import freemarker.template.*;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Map;
+
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTransformModel;
 
 
 /**
@@ -66,7 +74,6 @@ import freemarker.template.*;
  * <tt>executingTemplate.getName() + "$anonymous_interpreted"</tt>. You can
  * specify another parameter to the method call in which case the
  * template name suffix is the specified id instead of "anonymous_interpreted".
- * @version $Id: Interpret.java,v 1.2 2005/06/16 18:13:56 ddekany Exp $
  * @author Attila Szegedi
  */
 class Interpret extends BuiltIn
@@ -86,10 +93,10 @@ class Interpret extends BuiltIn
      * a <tt>&lt;transform></tt> block will process the generated template
      * just as if it had been <tt>&lt;transform></tt>-ed at that point.
      */
-    TemplateModel _getAsTemplateModel(Environment env)
+    TemplateModel _eval(Environment env)
             throws TemplateException 
     {
-        TemplateModel model = target.getAsTemplateModel(env);
+        TemplateModel model = target.eval(env);
         Expression sourceExpr = null;
         String id = "anonymous_interpreted";
         if(model instanceof TemplateSequenceModel)
@@ -97,7 +104,7 @@ class Interpret extends BuiltIn
             sourceExpr = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(0))).copyLocationFrom(target));
             if(((TemplateSequenceModel)model).size() > 1)
             {
-                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).getStringValue(env);
+                id = ((Expression)new DynamicKeyName(target, new NumberLiteral(new Integer(1))).copyLocationFrom(target)).evalAndCoerceToString(env);
             }
         }
         else if (model instanceof TemplateScalarModel)
@@ -106,23 +113,34 @@ class Interpret extends BuiltIn
         }
         else
         {
-            throw invalidTypeException(model, target, env, "sequence or string");
+            throw new UnexpectedTypeException(target, model, "sequence or string", env);
         }
-        String templateSource = sourceExpr.getStringValue(env);
+        String templateSource = sourceExpr.evalAndCoerceToString(env);
         Template parentTemplate = env.getTemplate();
+        
+        final Template interpretedTemplate;
         try
         {
-            Template template = new Template(parentTemplate.getName() + "$" + id, new StringReader(templateSource), parentTemplate.getConfiguration());
-            template.setLocale(env.getLocale());
-            return new TemplateProcessorModel(template);
+            interpretedTemplate = new Template(
+                    (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
+                    templateSource,
+                    parentTemplate.getConfiguration());
         }
         catch(IOException e)
         {
-            throw new TemplateException("", e, env);
+            throw new _MiscTemplateException(this, e, env, new Object[] {
+                        "Template parsing with \"?", key, "\" has failed with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        "\n\nThe failed expression:" });
         }
+        
+        interpretedTemplate.setLocale(env.getLocale());
+        return new TemplateProcessorModel(interpretedTemplate);
     }
 
-    private static class TemplateProcessorModel
+    private class TemplateProcessorModel
     implements
         TemplateTransformModel
     {
@@ -138,23 +156,20 @@ class Interpret extends BuiltIn
             try
             {
                 Environment env = Environment.getCurrentEnvironment();
-                env.include(template);
-            }
-            catch(TemplateModelException e)
-            {
-                throw e;
-            }
-            catch(IOException e)
-            {
-                throw e;
-            }
-            catch(RuntimeException e)
-            {
-                throw e;
+                boolean lastFIRE = env.setFastInvalidReferenceExceptions(false);
+                try {
+                    env.include(template);
+                } finally {
+                    env.setFastInvalidReferenceExceptions(lastFIRE);
+                }
             }
             catch(Exception e)
             {
-                throw new TemplateModelException(e);
+                throw new _TemplateModelException(e, new Object[] {
+                        "Template created with \"?", key, "\" has stopped with this error:\n\n",
+                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        new _DelayedGetMessage(e),
+                        MessageUtil.EMBEDDED_MESSAGE_END });
             }
     
             return new Writer(out)

@@ -55,7 +55,8 @@ package freemarker.core;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 /**
  * An instruction that outputs the value of a numerical expression.
@@ -88,7 +89,7 @@ final class NumericalOutput extends TemplateElement {
 
     void accept(Environment env) throws TemplateException, IOException 
     {
-        Number num = EvaluationUtil.getNumber(expression, env);
+        Number num = expression.evalToNumber(env);
         
         FormatHolder fmth = formatCache;  // atomic sampling
         if (fmth == null || !fmth.locale.equals(env.getLocale())) {
@@ -115,7 +116,7 @@ final class NumericalOutput extends TemplateElement {
         env.getOut().write(fmth.format.format(num));
     }
 
-    public String getCanonicalForm() {
+    protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer("#{");
         buf.append(expression.getCanonicalForm());
         if (hasFormat) {
@@ -128,9 +129,9 @@ final class NumericalOutput extends TemplateElement {
         buf.append("}");
         return buf.toString();
     }
-
-    public String getDescription() {
-        return getSource();
+    
+    String getNodeTypeSymbol() {
+        return "#{...}";
     }
 
     boolean heedsOpeningWhitespace() {
@@ -148,6 +149,28 @@ final class NumericalOutput extends TemplateElement {
         FormatHolder(NumberFormat format, Locale locale) {
             this.format = format;
             this.locale = locale;
+        }
+    }
+
+    int getParameterCount() {
+        return 3;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return expression;
+        case 1: return new Integer(minFracDigits);
+        case 2: return new Integer(maxFracDigits);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.CONTENT;
+        case 1: return ParameterRole.MINIMUM_DECIMALS;
+        case 2: return ParameterRole.MAXIMUM_DECIMALS;
+        default: throw new IndexOutOfBoundsException();
         }
     }
 }

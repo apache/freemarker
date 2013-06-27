@@ -7,7 +7,6 @@ import java.util.EventListener;
 /**
  * An interface for components that wish to receive debugging events.
  * @author Attila Szegedi
- * @version $Id: DebuggerListener.java,v 1.1 2003/05/02 15:55:48 szegedia Exp $
  */
 public interface DebuggerListener extends Remote, EventListener
 {

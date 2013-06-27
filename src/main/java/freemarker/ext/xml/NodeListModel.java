@@ -95,7 +95,6 @@ import freemarker.template.utility.Collections12;
  * this model.</p>
  *
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
- * @version $Id: NodeListModel.java,v 1.15 2004/01/06 17:06:43 szegedia Exp $
  * @author Attila Szegedi
  */
 public class NodeListModel
@@ -163,7 +162,7 @@ implements
         if(useJaxenNamespaces) {
             try {
             	return (Namespaces)
-            			Class.forName("freemarker.ext.xml.Internal_JaxenNamespaces")
+            			Class.forName("freemarker.ext.xml._JaxenNamespaces")
             			.newInstance();
             }
             catch(Throwable t) {
@@ -247,7 +246,7 @@ implements
      * Returns a new NodeListModel containing the nodes that result from applying
      * an operator to this model's nodes.
      * @param key the operator to apply to nodes. Available operators are:
-     * <table border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1">
      *   <thead>
      *     <tr>
      *       <th align="left">Key name</th>
@@ -544,7 +543,7 @@ implements
     
     private static Navigator getNavigator(String navType) {
         try {
-            return (Navigator) ClassUtil.forName("freemarker.ext.xml.Internal_" + 
+            return (Navigator) ClassUtil.forName("freemarker.ext.xml._" + 
                     navType + "Navigator").newInstance();
         }
         catch(Throwable t) {

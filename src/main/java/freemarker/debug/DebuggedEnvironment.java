@@ -16,7 +16,6 @@ import java.rmi.RemoteException;
  * {@link freemarker.core.Configurable} objects. 
 
  * @author Attila Szegedi
- * @version $Id: DebuggedEnvironment.java,v 1.1 2003/05/02 15:55:48 szegedia Exp $
  */
 public interface DebuggedEnvironment extends DebugModel
 {

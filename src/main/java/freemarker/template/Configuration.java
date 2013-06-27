@@ -76,14 +76,18 @@ import freemarker.cache.CacheStorage;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MruCacheStorage;
+import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
-import freemarker.core.ConcurrentMapFactory;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
+import freemarker.core._ConcurrentMapFactory;
+import freemarker.core._CoreAPI;
+import freemarker.core._DelayedJQuote;
+import freemarker.core._MiscTemplateException;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
@@ -94,25 +98,53 @@ import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.XmlEscape;
 
 /**
- * Main entry point into the FreeMarker API, this class encapsulates the 
- * various configuration parameters with which FreeMarker is run, as well
- * as serves as a central template loading and caching point.
- * 
- * Note that this class uses a default strategy for loading and caching templates.
- * The default template loader is deprecated, so you should plug in a replacement
- * template loading mechanism with {@link #setTemplateLoader(TemplateLoader)}.
- * The caching strategy can be replaced with {@link #setCacheStorage(CacheStorage)}.
+ * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
+ * also serves as a central template-loading and caching service.
  *
- * <p>This object is <em>not synchronized</em>. Thus, the settings must not be changed
- * after you have started to access the object from multiple threads. If you use multiple
- * threads, set everything directly after you have instantiated the <code>Configuration</code>
- * object, and don't change the settings anymore.
+ * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at the beginning of
+ * the application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
+ * setter methods or by loading a {@code .properties} file), and then use that single instance everywhere in your
+ * application. Frequently re-creating {@link Configuration} is a typical and grave mistake from performance standpoint,
+ * as the {@link Configuration} holds the template cache, and often also the class introspection cache, which then will
+ * be lost. (Note that, naturally, having multiple long-lived instances, like one per component that internally uses
+ * FreeMarker is fine.)  
+ * 
+ * <p>The basic usage pattern is like:
+ * 
+ * <pre>
+ *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
+ *  Configuration cfg = new Configuration();
+ *  cfg.set<i>SomeSetting</i>(...);
+ *  cfg.set<i>OtherSetting</i>(...);
+ *  ...
+ *  
+ *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
+ *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.html");
+ *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
+ * 
+ * <p>A couple of settings that you should not leave on its default value are:
+ * <ul>
+ *   <li>{@link #setTemplateLoader(TemplateLoader) template_loader}: The default value is deprecated and in fact quite
+ *       useless. (Most user can use the convenience methods {@link #setDirectoryForTemplateLoading(File)},
+ *       {@link #setClassForTemplateLoading(Class, String)} too.)
+ *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
+ *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
+ *   <li>{@link #setIncompatibleImprovements(Version) incompatible_improvements}: As far the 1st and 2nd version number
+ *       remains, it's quite safe to set it as high as possible, so for new or actively developed products it's
+ *       recommended to do.
+ *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
+ *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
+ *       {@link TemplateExceptionHandler#RETHROW_HANDLER} is safer to use.
+ *   <!-- 2.4: recommend the new object wrapper here -->
+ * </ul>
+ * 
+ * <p>A {@link Configuration} object is thread-safe only after you have stopped modify the configuration settings.
+ * Generally, you set everything directly after you have instantiated the {@link Configuration} object, then you don't
+ * change the settings anymore, so then it's safe to make it accessible from multiple threads.
  *
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @author Attila Szegedi
- * @version $Id: Configuration.java,v 1.122.2.5 2006/04/26 21:25:19 ddekany Exp $
  */
-
 public class Configuration extends Configurable implements Cloneable {
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
@@ -123,32 +155,42 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
+    public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
+    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
     
-    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = "2.3.0"; // [2.4] 
-    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = StringUtil.versionStringToInt(DEFAULT_INCOMPATIBLE_ENHANCEMENTS); 
+    /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = new Version(2, 3, 0);
+    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
+    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
     private static Configuration defaultConfig = new Configuration();
     
+    private static boolean versionPropertiesLoaded;
+    /** @deprecated Use {@link #version} instead. */
     private static String versionNumber;
-    private static Date buildDate;
-    private static Boolean gaeCompliant;
+    private static Version version;
     
-    private boolean strictSyntax = true, localizedLookup = true, whitespaceStripping = true;
-    private String incompatibleEnhancements = DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
-    private int parsedIncompatibleEnhancements = PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS;
+    private boolean strictSyntax = true;
+    private volatile boolean localizedLookup = true;
+    private boolean whitespaceStripping = true;
+    private Version incompatibleImprovements = DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
-    private HashMap variables = new HashMap();
-    private Map encodingMap = ConcurrentMapFactory.newThreadSafeMap();
-    private Map autoImportMap = new HashMap();
-    private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList();
+    
+    private HashMap sharedVariables = new HashMap();
+    
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
-     
+    private Map localeToCharsetMap = _ConcurrentMapFactory.newThreadSafeMap();
+    
+    private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
+    private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
     public Configuration() {
         cache = new TemplateCache();
@@ -160,8 +202,11 @@ public class Configuration extends Configurable implements Cloneable {
     public Object clone() {
         try {
             Configuration copy = (Configuration)super.clone();
-            copy.variables = new HashMap(variables);
-            copy.encodingMap = new HashMap(encodingMap);
+            copy.sharedVariables = new HashMap(sharedVariables);
+            copy.localeToCharsetMap = new HashMap(localeToCharsetMap);
+            copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
+            copy.autoImports = (ArrayList) autoImports.clone();
+            copy.autoIncludes = (ArrayList) autoIncludes.clone();
             copy.createTemplateCache(cache.getTemplateLoader(), cache.getCacheStorage());
             return copy;
         } catch (CloneNotSupportedException e) {
@@ -170,11 +215,11 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     private void loadBuiltInSharedVariables() {
-        variables.put("capture_output", new CaptureOutput());
-        variables.put("compress", StandardCompress.INSTANCE);
-        variables.put("html_escape", new HtmlEscape());
-        variables.put("normalize_newlines", new NormalizeNewlines());
-        variables.put("xml_escape", new XmlEscape());
+        sharedVariables.put("capture_output", new CaptureOutput());
+        sharedVariables.put("compress", StandardCompress.INSTANCE);
+        sharedVariables.put("html_escape", new HtmlEscape());
+        sharedVariables.put("normalize_newlines", new NormalizeNewlines());
+        sharedVariables.put("xml_escape", new XmlEscape());
     }
     
     /**
@@ -182,7 +227,8 @@ public class Configuration extends Configurable implements Cloneable {
      * encodings for most languages.
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
-     * <table>
+     * 
+     * <table style="width: auto; border-collapse: collapse" border="1">
      *   <tr><td>ar</td><td>ISO-8859-6</td></tr>
      *   <tr><td>be</td><td>ISO-8859-5</td></tr>
      *   <tr><td>bg</td><td>ISO-8859-5</td></tr>
@@ -223,50 +269,52 @@ public class Configuration extends Configurable implements Cloneable {
      *   <tr><td>zh</td><td>GB2312</td></tr>
      *   <tr><td>zh_TW</td><td>Big5</td></tr>
      * </table>
-     * @see #clearEncodingMap
-     * @see #setEncoding
+     * 
+     * @see #clearEncodingMap()
+     * @see #setEncoding(Locale, String)
+     * @see #setDefaultEncoding(String)
      */
     public void loadBuiltInEncodingMap() {
-        encodingMap.clear();
-        encodingMap.put("ar", "ISO-8859-6");
-        encodingMap.put("be", "ISO-8859-5");
-        encodingMap.put("bg", "ISO-8859-5");
-        encodingMap.put("ca", "ISO-8859-1");
-        encodingMap.put("cs", "ISO-8859-2");
-        encodingMap.put("da", "ISO-8859-1");
-        encodingMap.put("de", "ISO-8859-1");
-        encodingMap.put("el", "ISO-8859-7");
-        encodingMap.put("en", "ISO-8859-1");
-        encodingMap.put("es", "ISO-8859-1");
-        encodingMap.put("et", "ISO-8859-1");
-        encodingMap.put("fi", "ISO-8859-1");
-        encodingMap.put("fr", "ISO-8859-1");
-        encodingMap.put("hr", "ISO-8859-2");
-        encodingMap.put("hu", "ISO-8859-2");
-        encodingMap.put("is", "ISO-8859-1");
-        encodingMap.put("it", "ISO-8859-1");
-        encodingMap.put("iw", "ISO-8859-8");
-        encodingMap.put("ja", "Shift_JIS");
-        encodingMap.put("ko", "EUC-KR");    
-        encodingMap.put("lt", "ISO-8859-2");
-        encodingMap.put("lv", "ISO-8859-2");
-        encodingMap.put("mk", "ISO-8859-5");
-        encodingMap.put("nl", "ISO-8859-1");
-        encodingMap.put("no", "ISO-8859-1");
-        encodingMap.put("pl", "ISO-8859-2");
-        encodingMap.put("pt", "ISO-8859-1");
-        encodingMap.put("ro", "ISO-8859-2");
-        encodingMap.put("ru", "ISO-8859-5");
-        encodingMap.put("sh", "ISO-8859-5");
-        encodingMap.put("sk", "ISO-8859-2");
-        encodingMap.put("sl", "ISO-8859-2");
-        encodingMap.put("sq", "ISO-8859-2");
-        encodingMap.put("sr", "ISO-8859-5");
-        encodingMap.put("sv", "ISO-8859-1");
-        encodingMap.put("tr", "ISO-8859-9");
-        encodingMap.put("uk", "ISO-8859-5");
-        encodingMap.put("zh", "GB2312");
-        encodingMap.put("zh_TW", "Big5");
+        localeToCharsetMap.clear();
+        localeToCharsetMap.put("ar", "ISO-8859-6");
+        localeToCharsetMap.put("be", "ISO-8859-5");
+        localeToCharsetMap.put("bg", "ISO-8859-5");
+        localeToCharsetMap.put("ca", "ISO-8859-1");
+        localeToCharsetMap.put("cs", "ISO-8859-2");
+        localeToCharsetMap.put("da", "ISO-8859-1");
+        localeToCharsetMap.put("de", "ISO-8859-1");
+        localeToCharsetMap.put("el", "ISO-8859-7");
+        localeToCharsetMap.put("en", "ISO-8859-1");
+        localeToCharsetMap.put("es", "ISO-8859-1");
+        localeToCharsetMap.put("et", "ISO-8859-1");
+        localeToCharsetMap.put("fi", "ISO-8859-1");
+        localeToCharsetMap.put("fr", "ISO-8859-1");
+        localeToCharsetMap.put("hr", "ISO-8859-2");
+        localeToCharsetMap.put("hu", "ISO-8859-2");
+        localeToCharsetMap.put("is", "ISO-8859-1");
+        localeToCharsetMap.put("it", "ISO-8859-1");
+        localeToCharsetMap.put("iw", "ISO-8859-8");
+        localeToCharsetMap.put("ja", "Shift_JIS");
+        localeToCharsetMap.put("ko", "EUC-KR");    
+        localeToCharsetMap.put("lt", "ISO-8859-2");
+        localeToCharsetMap.put("lv", "ISO-8859-2");
+        localeToCharsetMap.put("mk", "ISO-8859-5");
+        localeToCharsetMap.put("nl", "ISO-8859-1");
+        localeToCharsetMap.put("no", "ISO-8859-1");
+        localeToCharsetMap.put("pl", "ISO-8859-2");
+        localeToCharsetMap.put("pt", "ISO-8859-1");
+        localeToCharsetMap.put("ro", "ISO-8859-2");
+        localeToCharsetMap.put("ru", "ISO-8859-5");
+        localeToCharsetMap.put("sh", "ISO-8859-5");
+        localeToCharsetMap.put("sk", "ISO-8859-2");
+        localeToCharsetMap.put("sl", "ISO-8859-2");
+        localeToCharsetMap.put("sq", "ISO-8859-2");
+        localeToCharsetMap.put("sr", "ISO-8859-5");
+        localeToCharsetMap.put("sv", "ISO-8859-1");
+        localeToCharsetMap.put("tr", "ISO-8859-9");
+        localeToCharsetMap.put("uk", "ISO-8859-5");
+        localeToCharsetMap.put("zh", "GB2312");
+        localeToCharsetMap.put("zh_TW", "Big5");
     }
 
     /**
@@ -275,7 +323,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @see #setEncoding
      */
     public void clearEncodingMap() {
-        encodingMap.clear();
+        localeToCharsetMap.clear();
     }
 
     /**
@@ -311,21 +359,22 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Sets a {@link TemplateLoader} that is used to look up and load templates.
-     * By providing your own {@link TemplateLoader} implementation, you can
-     * customize the way templates are loaded.
+     * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
+     * storages, like from relational databases, NoSQL-storages, etc.
      * 
-     * Several convenience methods in this class exists tp install commonly used
-     * loaders:
+     * <p>Convenience methods exists to install commonly used loaders, instead of using this method:
      * {@link #setClassForTemplateLoading(Class, String)}, 
      * {@link #setDirectoryForTemplateLoading(File)}, and
      * {@link #setServletContextForTemplateLoading(Object, String)}.
      * 
-     * You should always set the template loader instead of relying on the default value.
+     * <p>You can chain several {@link TemplateLoader}-s together with {@link MultiTemplateLoader}.
+     * 
+     * <p>Default value: You should always set the template loader instead of relying on the default value.
      * The a default value is there only for backward compatibility, and it will be probably
-     * removed in the future. The default value is a multi-loader that first tries to load a
+     * removed in the future. It's a multi-loader that first tries to load a
      * template from the file in the current directory, then from a resource on the classpath.
      * 
-     * Note that setting the template loader will re-create the template cache, so
+     * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
      */
     public synchronized void setTemplateLoader(TemplateLoader loader) {
@@ -342,8 +391,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * @return the template loader that is used to look up and load templates.
-     * @see #setTemplateLoader
+     * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
     public TemplateLoader getTemplateLoader()
     {
@@ -355,9 +403,9 @@ public class Configuration extends Configurable implements Cloneable {
      * default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
      * objects is significant but most templates are used rarely, using a
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
-     * all, use {@link freemarker.cache.NullCacheStorage} (you can't use <tt>null</tt>).
+     * all, use {@link freemarker.cache.NullCacheStorage} (you can't use {@code null}).
      * 
-     * Note that setting the cache storage will re-create the template cache, so
+     * <p>Note that setting the cache storage will re-create the template cache, so
      * all its content will be lost.
      */
     public synchronized void setCacheStorage(CacheStorage storage) {
@@ -365,7 +413,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Returns the {@link CacheStorage} currently in use.
+     * The getter pair of {@link #setCacheStorage(CacheStorage)}.
      * 
      * @since 2.3.20
      */
@@ -443,86 +491,104 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the time in seconds that must elapse before checking whether there is a newer
-     * version of a template file.
+     * Sets the time in seconds that must elapse before checking whether there is a newer version of a template file
+     * than the cached one.
      * This method is thread-safe and can be called while the engine works.
      */
-    public void setTemplateUpdateDelay(int delay) {
-        cache.setDelay(1000L * delay);
+    public void setTemplateUpdateDelay(int seconds) {
+        cache.setDelay(1000L * seconds);
     }
-
+    
     /**
-     * Sets whether directives such as if, else, etcetera
-     * must be written as #if, #else, etcetera.
-     * Any tag not starting with &lt;# or &lt;/# is considered as plain text
+     * Sets whether directives such as {@code if}, {@code else}, etc must be written as {@code #if}, {@code #else}, etc.
+     * Defaults to {@code true}.
+     * 
+     * <p>When this is {@code true},
+     * any tag not starting with &lt;# or &lt;/# or &lt;@ or &lt;/@ is considered as plain text
      * and will go to the output as is. Tag starting with &lt# or &lt/# must
      * be valid FTL tag, or else the template is invalid (i.e. &lt;#noSuchDirective>
      * is an error).
+     * 
+     * @deprecated Only {@code true} (the default) value will be supported sometimes in the future.
      */
-
     public void setStrictSyntaxMode(boolean b) {
         strictSyntax = b;
     }
 
     /**
-     * Tells whether directives such as if, else, etcetera
-     * must be written as #if, #else, etcetera.
-     *
-     * @see #setStrictSyntaxMode
+     * The getter pair of {@link #setStrictSyntaxMode}.
      */
     public boolean getStrictSyntaxMode() {
         return strictSyntax;
     }
 
     /**
-     * Sets which of the <em>slightly</em> non-backward compatible
-     * bugfixes/enhancements should be enabled. The setting value is the
-     * FreeMarker release version number where the enhancements
-     * to enable were already present. The default is 2.3.0 in 2.3.x, 2.4.0 on
-     * 2.4.x, and so on, thus by default compatibility with the latest x.y.0
-     * release is kept with new releases. If you develop a new application with,
-     * for example, 2.3.25 and you need the non-backward compatible enhancements,
-     * you should set this to 2.3.25. Thus if you later update FreeMarker to a
-     * higher 2.3.x version, you will still only have the incompatible changes
-     * that you have tested your application with.
+     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
+     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
+     * active by default, as that would break backward-compatibility).
      * 
-     * <p>This setting doesn't affect non-backward
-     * compatible security fixes; they are always enabled. This setting also
-     * doesn't affect enhancements where there's a significant chance of
-     * breaking existing applications.
+     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
+     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
+     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
+     * low-risk changes, so usually they don't break anything in older applications either.
      * 
-     * <p>Using this setting is a good way of preparing for the next minor
-     * (2nd) version number increase. When that happens, not only the default
-     * value of this setting changes, but it's possible that older values become
-     * unsupported.
+     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
+     * enabled, regardless of what you set here.
      * 
-     * <p>Currently affected fixes/enhancements:
+     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
+     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
+     * set this setting to a low value, it might wont bring back the old behavior anymore.
+     * 
+     * <p>Currently the effects of this setting are:
      * <ul>
-     *   <li>
-     *     2.3.19: Bug fix: Wrong # tags were printed as static text instead of
-     *     causing parsing error if there was no correct # tag earlier in the
+     *   <li><p>
+     *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
+     *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
      *     same template.
+     *   </li>
+     *   <li><p>
+     *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
+     *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
+     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
+     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
+     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
+     *     concern anymore.
      *   </li>
      * </ul>
      *
-     * @since 2.3.19
+     * @since 2.3.20
      */
-    public void setIncompatibleEnhancements(String version) {
-        parsedIncompatibleEnhancements = StringUtil.versionStringToInt(version);
-        incompatibleEnhancements = version;
+    public void setIncompatibleImprovements(Version version) {
+        incompatibleImprovements = version;
     }
 
-    public String getIncompatibleEnhancements() {
-        return incompatibleEnhancements;
+    /**
+     * @see #setIncompatibleImprovements(Version) 
+     * @since 2.3.20
+     */
+    public Version getIncompatibleImprovements() {
+        return incompatibleImprovements;
     }
     
     /**
-     * Same as {@link #getIncompatibleEnhancements()}, but returns the version
-     * as an <tt>int</tt>, according to
-     * {@link StringUtil#versionStringToInt(String)}. 
+     * @deprecated Use {@link #setIncompatibleImprovements(Version)} instead.
+     */
+    public void setIncompatibleEnhancements(String version) {
+        setIncompatibleImprovements(new Version(version));
+    }
+    
+    /**
+     * @deprecated Use {@link #getIncompatibleImprovements()} instead.
+     */
+    public String getIncompatibleEnhancements() {
+        return incompatibleImprovements.toString();
+    }
+    
+    /**
+     * @deprecated Use {@link #getIncompatibleImprovements()} instead.
      */
     public int getParsedIncompatibleEnhancements() {
-        return parsedIncompatibleEnhancements;
+        return getIncompatibleImprovements().intValue();
     }
     
     /**
@@ -545,12 +611,12 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Determines the syntax of the template files (angle bracket VS square bracket)
-     * that has no <markup>ftl</markup> directive in it. The <code>tagSyntax</code>
+     * that has no {@code #ftl} in it. The {@code tagSyntax}
      * parameter must be one of:
      * <ul>
      *   <li>{@link Configuration#AUTO_DETECT_TAG_SYNTAX}:
-     *     use the syntax of the first FreeMarker tag (can be anything, like <tt>list</tt>,
-     *     <tt>include</tt>, user defined, ...etc)
+     *     use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
+     *     <tt>#include</tt>, user defined, etc.)
      *   <li>{@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}:
      *     use the angle bracket syntax (the normal syntax)
      *   <li>{@link Configuration#SQUARE_BRACKET_TAG_SYNTAX}:
@@ -559,11 +625,11 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p>In FreeMarker 2.3.x {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX} is the
      * default for better backward compatibility. Starting from 2.4.x {@link
-     * Configuration#AUTO_DETECT_TAG_SYNTAX} is the default, so it is recommended to use
+     * Configuration#AUTO_DETECT_TAG_SYNTAX} is the default, so it's recommended to use
      * that even for 2.3.x.
      * 
-     * <p>This setting is ignored for the templates that have <tt>ftl</tt> directive in
-     * it. For those templates the syntax used for the <tt>ftl</tt> directive determines
+     * <p>This setting is ignored for the templates that have {@code ftl} directive in
+     * it. For those templates the syntax used for the {@code ftl} directive determines
      * the syntax.
      */
     public void setTagSyntax(int tagSyntax) {
@@ -571,20 +637,28 @@ public class Configuration extends Configurable implements Cloneable {
             && tagSyntax != SQUARE_BRACKET_TAG_SYNTAX
             && tagSyntax != ANGLE_BRACKET_TAG_SYNTAX)
         {
-            throw new IllegalArgumentException("This can only be set to one of three settings: Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, or Configuration.SQAUARE_BRACKET_SYNTAX");
+            throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
+                    + "or Configuration.SQAUARE_BRACKET_SYNTAX");
         }
         this.tagSyntax = tagSyntax;
     }
     
     /**
-     * See {@link #setTagSyntax(int)} to see the returned number.
+     * The getter pair of {@link #setTagSyntax(int)}.
      */
     public int getTagSyntax() {
         return tagSyntax;
     }
     
     /**
-     * Equivalent to <tt>getTemplate(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
+     * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
+     * missing/staled.
+     * 
+     * <p>This is a shorthand for {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, getLocale(), getEncoding(getLocale()), true)}; see more details there.
+     * 
+     * <p>See {@link Configuration} for an example of basic usage.
      */
     public Template getTemplate(String name) throws IOException {
         Locale loc = getLocale();
@@ -592,40 +666,80 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Equivalent to <tt>getTemplate(name, locale, thisCfg.getEncoding(locale), true)</tt>.
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, locale, getEncoding(locale), true)}.
      */
     public Template getTemplate(String name, Locale locale) throws IOException {
         return getTemplate(name, locale, getEncoding(locale), true);
     }
 
     /**
-     * Equivalent to <tt>getTemplate(name, thisCfg.getLocale(), encoding, true)</tt>.
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, getLocale(), encoding, true)}.
      */
     public Template getTemplate(String name, String encoding) throws IOException {
         return getTemplate(name, getLocale(), encoding, true);
     }
 
     /**
-     * Equivalent to <tt>getTemplate(name, locale, encoding, true)</tt>.
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean)
+     * getTemplate(name, locale, encoding, true)}.
      */
     public Template getTemplate(String name, Locale locale, String encoding) throws IOException {
         return getTemplate(name, locale, encoding, true);
     }
 
     /**
-     * Retrieves a template specified by a name and locale, interpreted using
-     * the specified character encoding, either parsed or unparsed. For the
-     * exact semantics of parameters, see 
-     * {@link TemplateCache#getTemplate(String, Locale, String, boolean)}.
-     * @return the requested template.
+     * Retrieves the template with the given name (and according the specified further parameters) from the template
+     * cache, loading it into the cache first if it's missing/staled.
+     * 
+     * <p>See {@link Configuration} for an example of basic usage.
+     *
+     * @param name The name of the template. Can't be {@code null}. The exact syntax of the name
+     *     is interpreted by the underlying {@link TemplateLoader}, but the
+     *     cache makes some assumptions. First, the name is expected to be
+     *     a hierarchical path, with path components separated by a slash
+     *     character (not with backslash!). The path (the name) given here must <em>not</em> begin with slash;
+     *     it's always interpreted relative to the "template root directory".
+     *     Then, the {@code ..} and {@code .} path meta-elements will be resolved.
+     *     For example, if the name is {@code a/../b/./c.ftl}, then it will be
+     *     simplified to {@code b/c.ftl}. The rules regarding this are same as with conventional
+     *     UN*X paths. The path must not reach outside the template root directory, that is,
+     *     it can't be something like {@code "../templates/my.ftl"} (not even if this path
+     *     happens to be equivalent with {@code "/my.ftl"}).
+     *     Further, the path is allowed to contain at most
+     *     one path element whose name is {@code *} (asterisk). This path meta-element triggers the
+     *     <i>acquisition mechanism</i>. If the template is not found in
+     *     the location described by the concatenation of the path left to the
+     *     asterisk (called base path) and the part to the right of the asterisk
+     *     (called resource path), the cache will attempt to remove the rightmost
+     *     path component from the base path ("go up one directory") and concatenate
+     *     that with the resource path. The process is repeated until either a
+     *     template is found, or the base path is completely exhausted.
+     *
+     * @param locale The requested locale of the template. Can't be {@code null}.
+     *     Assuming you have specified {@code en_US} as the locale and
+     *     {@code myTemplate.ftl} as the name of the template, the cache will
+     *     first try to retrieve {@code myTemplate_en_US.html}, then
+     *     {@code myTemplate.en.ftl}, and finally {@code myTemplate.ftl}.
+     *
+     * @param encoding The charset used to interpret the template source code bytes. Can't be {@code null}.
+     *
+     * @param parseAsFTL If {@code true}, the loaded template is parsed and interpreted normally,
+     *     as a regular FreeMarker template. If {@code false}, the loaded template is
+     *     treated as a static text, so <code>${...}</code>, {@code <#...>} etc. will not have special meaning
+     *     in it.
+     * 
+     * @return the requested template; not {@code null}.
+     * 
      * @throws FileNotFoundException if the template could not be found.
      * @throws IOException if there was a problem loading the template.
      * @throws ParseException (extends <code>IOException</code>) if the template is syntactically bad.
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parse) throws IOException {
-        Template result = cache.getTemplate(name, locale, encoding, parse);
+    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
+        Template result = cache.getTemplate(name, locale, encoding, parseAsFTL);
         if (result == null) {
-            throw new FileNotFoundException("Template " + name + " not found.");
+            throw new FileNotFoundException("Template " + StringUtil.jQuote(name) + " not found.");
         }
         return result;
     }
@@ -633,7 +747,12 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Sets the default encoding for converting bytes to characters when
      * reading template files in a locale for which no explicit encoding
-     * was specified. Defaults to default system encoding.
+     * was specified.
+     * 
+     * <p>Defaults to the default system encoding, which can change from one server to
+     * another, so <b>you should always set this setting</b>.
+     * 
+     * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
     public void setDefaultEncoding(String encoding) {
         defaultEncoding = encoding;
@@ -653,26 +772,29 @@ public class Configuration extends Configurable implements Cloneable {
      * default encoding if no encoding is set explicitly for the specified
      * locale. You can associate encodings with locales using 
      * {@link #setEncoding(Locale, String)} or {@link #loadBuiltInEncodingMap()}.
-     * @param loc the locale
-     * @return the preferred character encoding for the locale.
      */
-    public String getEncoding(Locale loc) {
-        // Try for a full name match (may include country and variant)
-        String charset = (String) encodingMap.get(loc.toString());
-        if (charset == null) {
-            if (loc.getVariant().length() > 0) {
-                Locale l = new Locale(loc.getLanguage(), loc.getCountry());
-                charset = (String) encodingMap.get(l.toString());
+    public String getEncoding(Locale locale) {
+        if (localeToCharsetMap.isEmpty()) {
+            return defaultEncoding;
+        } else {
+            // Try for a full name match (may include country and variant)
+            String charset = (String) localeToCharsetMap.get(locale.toString());
+            if (charset == null) {
+                if (locale.getVariant().length() > 0) {
+                    Locale l = new Locale(locale.getLanguage(), locale.getCountry());
+                    charset = (String) localeToCharsetMap.get(l.toString());
+                    if (charset != null) {
+                        localeToCharsetMap.put(locale.toString(), charset);
+                    }
+                } 
+                charset = (String) localeToCharsetMap.get(locale.getLanguage());
                 if (charset != null) {
-                    encodingMap.put(loc.toString(), charset);
+                    localeToCharsetMap.put(locale.toString(), charset);
                 }
-            } 
-            charset = (String) encodingMap.get(loc.getLanguage());
-            if (charset != null) {
-                encodingMap.put(loc.toString(), charset);
             }
+            return charset != null ? charset : defaultEncoding;
         }
-        return charset != null ? charset : defaultEncoding;
+        
     }
 
     /**
@@ -685,17 +807,17 @@ public class Configuration extends Configurable implements Cloneable {
      * @see #loadBuiltInEncodingMap
      */
     public void setEncoding(Locale locale, String encoding) {
-        encodingMap.put(locale.toString(), encoding);
+        localeToCharsetMap.put(locale.toString(), encoding);
     }
 
     /**
      * Adds a shared variable to the configuration.
-     * Shared variables are variables that are visible
-     * as top-level variables for all templates which use this
+     * Shared sharedVariables are sharedVariables that are visible
+     * as top-level sharedVariables for all templates which use this
      * configuration, if the data model does not contain a
      * variable with the same name.
      *
-     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared variables,
+     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
      *
      * @param name the name used to access the data object from your template.
@@ -705,17 +827,17 @@ public class Configuration extends Configurable implements Cloneable {
      * @see #setAllSharedVariables
      */
     public void setSharedVariable(String name, TemplateModel tm) {
-        variables.put(name, tm);
+        sharedVariables.put(name, tm);
     }
 
     /**
-     * Returns the set containing the names of all defined shared variables.
+     * Returns the set containing the names of all defined shared sharedVariables.
      * The method returns a new Set object on each call that is completely
      * disconnected from the Configuration. That is, modifying the set will have
      * no effect on the Configuration object.
      */
     public Set getSharedVariableNames() {
-        return new HashSet(variables.keySet());
+        return new HashSet(sharedVariables.keySet());
     }
     
     /**
@@ -732,7 +854,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Adds all object in the hash as shared variable to the configuration.
      *
-     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared variables,
+     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
      *
      * @param hash a hash model whose objects will be copied to the
@@ -753,10 +875,10 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Gets a shared variable. Shared variables are variables that are 
+     * Gets a shared variable. Shared sharedVariables are sharedVariables that are 
      * available to all templates. When a template is processed, and an identifier
      * is undefined in the data model, a shared variable object with the same identifier
-     * is then looked up in the configuration. There are several predefined variables
+     * is then looked up in the configuration. There are several predefined sharedVariables
      * that are always available through this method, see the FreeMarker manual
      * for a comprehensive list of them.
      *
@@ -765,14 +887,14 @@ public class Configuration extends Configurable implements Cloneable {
      * @see #setAllSharedVariables
      */
     public TemplateModel getSharedVariable(String name) {
-        return (TemplateModel) variables.get(name);
+        return (TemplateModel) sharedVariables.get(name);
     }
     
     /**
-     * Removes all shared variables, except the predefined ones (compress, html_escape, etc.).
+     * Removes all shared sharedVariables, except the predefined ones (compress, html_escape, etc.).
      */
     public void clearSharedVariables() {
-        variables.clear();
+        sharedVariables.clear();
         loadBuiltInSharedVariables();
     }
     
@@ -836,8 +958,9 @@ public class Configuration extends Configurable implements Cloneable {
     }    
     
     /**
-     * Returns if localized template lookup is enabled or not.
-     * This method is thread-safe and can be called while the engine works.
+     * The getter pair of {@link #setLocalizedLookup(boolean)}.
+     * 
+     * <p>This method is thread-safe and can be called while the engine works.
      */
     public boolean getLocalizedLookup() {
         return cache.getLocalizedLookup();
@@ -845,80 +968,26 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Enables/disables localized template lookup. Enabled by default.
-     * This method is thread-safe and can be called while the engine works.
+     * 
+     * <p>Localized lookup works like this: Let's say your locale setting is "en_AU", and you call
+     * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the template
+     * under names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}.
+     * 
+     * <p>This method is thread-safe and can be called while the engine works.
      */
     public void setLocalizedLookup(boolean localizedLookup) {
         this.localizedLookup = localizedLookup;
         cache.setLocalizedLookup(localizedLookup);
     }
     
-    /**
-     * Sets a setting by name and string value.
-     *
-     * In additional to the settings understood by
-     * {@link Configurable#setSetting the super method}, it understands these:
-     * <ul>
-     *   <li><code>"auto_import"</code>: Sets the list of auto-imports. Example of valid value:
-     *       <br><code>/lib/form.ftl as f, /lib/widget as w, "/lib/evil name.ftl" as odd</code>
-     *       See: {@link #setAutoImports}
-     *   <li><code>"auto_include"</code>: Sets the list of auto-includes. Example of valid value:
-     *       <br><code>/include/common.ftl, "/include/evil name.ftl"</code>
-     *       See: {@link #setAutoIncludes}
-     *   <li><code>"default_encoding"</code>: The name of the charset, such as <code>"UTF-8"</code>.
-     *       See: {@link #setDefaultEncoding}
-     *   <li><code>"localized_lookup"</code>:
-     *       <code>"true"</code>, <code>"false"</code>, <code>"yes"</code>, <code>"no"</code>,
-     *       <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>.
-     *       Case insensitive.
-     *      See: {@link #setLocalizedLookup}
-     *   <li><code>"strict_syntax"</code>: <code>"true"</code>, <code>"false"</code>, etc.
-     *       See: {@link #setStrictSyntaxMode}
-     *   <li><code>"whitespace_stripping"</code>: <code>"true"</code>, <code>"false"</code>, etc.
-     *       See: {@link #setWhitespaceStripping}
-     *   <li><code>"cache_storage"</code>: If the value contains dot, then it is
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then a {@link freemarker.cache.MruCacheStorage} will be used with the
-     *       maximum strong and soft sizes specified with the setting value. Examples
-     *       of valid setting values:
-     *       <table border=1 cellpadding=4>
-     *         <tr><th>Setting value<th>max. strong size<th>max. soft size
-     *         <tr><td><code>"strong:50, soft:500"</code><td>50<td>500
-     *         <tr><td><code>"strong:100, soft"</code><td>100<td><code>Integer.MAX_VALUE</code>
-     *         <tr><td><code>"strong:100"</code><td>100<td>0
-     *         <tr><td><code>"soft:100"</code><td>0<td>100
-     *         <tr><td><code>"strong"</code><td><code>Integer.MAX_VALUE</code><td>0
-     *         <tr><td><code>"soft"</code><td>0<td><code>Integer.MAX_VALUE</code>
-     *       </table>
-     *       The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
-     *       entries is not significant.
-     *       For more details see: {@link #setCacheStorage}
-     *   <li><code>"template_update_delay"</code>: Valid positive integer, the
-     *       update delay measured in seconds.
-     *       See: {@link #setTemplateUpdateDelay}
-     *   <li><code>"tag_syntax"</code>: Must be one of:
-     *       <code>"auto_detect"</code>, <code>"angle_bracket"</code>,
-     *       <code>"square_bracket"</code>.
-     *   <li><code>"incompatible_enhancements"</code>: The FreeMarker version
-     *       number where the desired enhancements were already implemented.
-     *       See: {@link #setIncompatibleEnhancements(String)}.
-     * </ul>
-     *
-     * @param key the name of the setting.
-     * @param value the string that describes the new value of the setting.
-     *
-     * @throws UnknownSettingException if the key is wrong.
-     * @throws TemplateException if the new value of the setting can't be set
-     *     for any other reasons.
-     */
     public void setSetting(String key, String value) throws TemplateException {
-        if ("TemplateUpdateInterval".equalsIgnoreCase(key)) {
-            key = TEMPLATE_UPDATE_DELAY_KEY;
-        } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
-            key = DEFAULT_ENCODING_KEY;
-        }
-        boolean callSuper = false;
         try {
+            if ("TemplateUpdateInterval".equalsIgnoreCase(key)) {
+                key = TEMPLATE_UPDATE_DELAY_KEY;
+            } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
+                key = DEFAULT_ENCODING_KEY;
+            }
+            
             if (DEFAULT_ENCODING_KEY.equals(key)) {
                 setDefaultEncoding(value);
             } else if (LOCALIZED_LOOKUP_KEY.equals(key)) {
@@ -975,61 +1044,55 @@ public class Configuration extends Configurable implements Cloneable {
                 } else {
                     throw invalidSettingValueException(key, value);
                 }
+            } else if (INCOMPATIBLE_IMPROVEMENTS.equals(key)) {
+                setIncompatibleImprovements(new Version(value));
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(key)) {
                 setIncompatibleEnhancements(value);
             } else {
-                callSuper = true;
+                super.setSetting(key, value);
             }
         } catch(Exception e) {
-            throw new TemplateException(
-                    "Failed to set setting " + 
-                    StringUtil.jQuote(key) + " to value " + StringUtil.jQuote(value) +
-                    "; see cause exception.",
-                    e, getEnvironment());
-        }
-        if (callSuper) {
-            super.setSetting(key, value);
+            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
+                    "Failed to set setting ", new _DelayedJQuote(key),
+                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
     }
     
     /**
-     * Add an auto-imported template.
-     * The importing will happen at the top of any template that
-     * is vended by this Configuration object.
-     * @param namespace the name of the namespace into which the template is imported
-     * @param template the name of the template
+     * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
+     * templates. The order of the imports will be the same as the order in which they were added with this method.
      */
-    public synchronized void addAutoImport(String namespace, String template) {
-        autoImports.remove(namespace);
-        autoImports.add(namespace);
-        autoImportMap.put(namespace, template);
+    public synchronized void addAutoImport(String namespaceVarName, String templateName) {
+        autoImports.remove(namespaceVarName);
+        autoImports.add(namespaceVarName);
+        autoImportNsToTmpMap.put(namespaceVarName, templateName);
     }
     
     /**
-     * Remove an auto-imported template
-     * @param namespace the name of the namespace into which the template was imported
+     * Removes an auto-import; see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't
+     * exist.
      */
-    
-    public synchronized void removeAutoImport(String namespace) {
-        autoImports.remove(namespace);
-        autoImportMap.remove(namespace);
+    public synchronized void removeAutoImport(String namespaceVarName) {
+        autoImports.remove(namespaceVarName);
+        autoImportNsToTmpMap.remove(namespaceVarName);
     }
     
     /**
-     * set a map of namespace names to templates for auto-importing 
-     * a set of templates. Note that all previous auto-imports are removed.
+     * Removes all auto-imports, then calls {@link #addAutoImport(String, String)} for each {@link Map}-entry (the entry
+     * key is the {@code namespaceVarName}). The order of the auto-imports will be the same as {@link Map#keySet()}
+     * returns the keys, thus, it's not the best idea to use a {@link HashMap} (although the order of imports doesn't
+     * mater for properly designed libraries).
      */
-    
     public synchronized void setAutoImports(Map map) {
         autoImports = new ArrayList(map.keySet());
         if (map instanceof HashMap) {
-            autoImportMap = (Map) ((HashMap) map).clone();
+            autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
         } 
         else if (map instanceof SortedMap) {
-            autoImportMap = new TreeMap(map);             
+            autoImportNsToTmpMap = new TreeMap(map);             
         }
         else {
-            autoImportMap = new HashMap(map);
+            autoImportNsToTmpMap = new HashMap(map);
         }
     }
     
@@ -1038,7 +1101,7 @@ public class Configuration extends Configurable implements Cloneable {
     {
         for (int i=0; i<autoImports.size(); i++) {
             String namespace = (String) autoImports.get(i);
-            String templateName = (String) autoImportMap.get(namespace);
+            String templateName = (String) autoImportNsToTmpMap.get(namespace);
             env.importLib(templateName, namespace);
         }
         for (int i = 0; i < autoIncludes.size(); i++) {
@@ -1049,19 +1112,16 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * add a template to be automatically included at the top of any template that
-     * is vended by this Configuration object.
-     * @param templateName the lookup name of the template.
+     * Adds an invisible <code>#include <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
+     * templates. The order of the inclusions will be the same as the order in which they were added with this method.
      */
-     
     public synchronized void addAutoInclude(String templateName) {
         autoIncludes.remove(templateName);
         autoIncludes.add(templateName);
     }
 
     /**
-     * Sets the list of automatically included templates.
-     * Note that all previous auto-includes are removed.
+     * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
      */
     public synchronized void setAutoIncludes(List templateNames) {
         autoIncludes.clear();
@@ -1076,73 +1136,54 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * remove a template from the auto-include list.
-     * @param templateName the lookup name of the template in question.
+     * Removes a template from the auto-include list; see {@link #addAutoInclude(String)}. Does nothing if the template
+     * is not there.
      */
-     
     public synchronized void removeAutoInclude(String templateName) {
         autoIncludes.remove(templateName);
     }
 
     /**
      * Returns FreeMarker version number string. 
-     * Examples of possible return values:
-     * <code>"2.2.5"</code>, <code>"2.3pre13"</code>,
-     * <code>"2.3pre13mod"</code>, <code>"2.3rc1"</code>, <code>"2.3"</code>,
-     * <code>"3.0"</code>.
-     *
-     * <p>Notes on FreeMarker version numbering rules:
-     * <ul>
-     *   <li>"pre" and "rc" (lowercase!) means "preview" and "release
-     *       candidate" respectively. It is must be followed with a
-     *       number (as "1" for the first release candidate).
-     *   <li>The "mod" after the version number indicates that it's an
-     *       unreleased modified version of the released version.
-     *       After releases, the nighly builds are such releases. E.g.
-     *       the nightly build after releasing "2.2.1" but before releasing
-     *       "2.2.2" is "2.2.1mod".
-     *   <li>The 2nd version number must be present, and maybe 0,
-     *       as in "3.0".
-     *   <li>The 3rd version number is never 0. E.g. the version
-     *       number string for the first release of the 2.2 series
-     *       is "2.2", and NOT "2.2.0". 
-     *   <li>When only the 3rd version number increases
-     *       (2.2 -> 2.2.1, 2.2.1 -> 2.2.2 etc.), 100% backward compatiblity
-     *       with the previous version MUST be kept.
-     *       This means that <tt>freemarker.jar</tt> can be replaced in an
-     *       application without risk (as far as the application doesn't depend
-     *       on the presence of a FreeMarker bug).
-     *       Note that backward compatibility restrictions do not apply for
-     *       preview releases.
-     * </ul>
+     * 
+     * @deprecated Use {@link #getVersion()} instead.
      */
     public static String getVersionNumber() {
-        if (versionNumber == null) {
-            loadVersionProperties();
-        }
+        if (!versionPropertiesLoaded) loadVersionProperties();
         return versionNumber;
     }
-
+    
     /**
-     * Returns the date on which the current binary (the JAR) was built.
-     * @since 2.3.20 
-     */
-    public static Date getBuildDate() {
-        if (buildDate == null) {
-            loadVersionProperties();
-        }
-        return buildDate;
-    }
-
-    /**
-     * Returns if this is Google App Engine compliant variation.
-     * @since 2.3.20 
-     */
-    public static boolean isGAECompliant() {
-        if (gaeCompliant == null) {
-            loadVersionProperties();
-        }
-        return gaeCompliant.booleanValue();
+     * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers.
+     * 
+     * On FreeMarker version numbering rules:
+     * <ul>
+     *   <li>For final/stable releases the version number is like major.minor.micro, like 2.3.19. (Historically,
+     *       when micro was 0 the version strings was like major.minor instead of the proper major.minor.0, but that's
+     *       not like that anymore.)
+     *   <li>When only the micro version is increased, compatibility with previous versions with the same
+     *       major.minor is kept. Thus <tt>freemarker.jar</tt> can be replaced in an existing application without
+     *       breaking it.</li>
+     *   <li>For non-final/unstable versions (that almost nobody uses), the format is:
+     *       <ul>
+     *         <li>Starting from 2.3.20: major.minor.micro-extraInfo, like
+     *             2.3.20-nightly_20130506T123456Z, 2.4.0-RC01. The major.minor.micro
+     *             always indicates the target we move towards, so 2.3.20-nightly or 2.3.20-M01 is
+     *             after 2.3.19 and will eventually become to 2.3.20. "PRE", "M" and "RC" (uppercase!) means
+     *             "preview", "milestone" and "release candidate" respectively, and is always followed by a 2 digit
+     *             0-padded counter, like M03 is the 3rd milestone release of a given major.minor.micro.</li> 
+     *         <li>Before 2.3.20: The extraInfo wasn't preceded by a "-".
+     *             Instead of "nightly" there was "mod", where the major.minor.micro part has indicated where
+     *             are we coming from, so 2.3.19mod (read as: 2.3.19 modified) was after 2.3.19 but before 2.3.20.
+     *             Also, "pre" and "rc" was lowercase, and was followd by a number without 0-padding.</li>
+     *       </ul>
+     * </ul>
+     * 
+     * @since 2.3.20
+     */ 
+    public static Version getVersion() {
+        if (!versionPropertiesLoaded) loadVersionProperties();
+        return version;
     }
     
 	private static void loadVersionProperties() {
@@ -1159,23 +1200,43 @@ public class Configuration extends Configurable implements Cloneable {
                     ins.close();
                 }
                 
-                versionNumber = getRequiredVersionProperty(vp, "version");
+                String versionString  = getRequiredVersionProperty(vp, "version");
+                versionNumber = versionString;
                 
-                String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
-                if (buildDateStr.endsWith("Z")) {
-                	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                Date buildDate;
+                {
+                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                    if (buildDateStr.endsWith("Z")) {
+                    	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                    }
+                    try {
+    					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
+    				} catch (java.text.ParseException e) {
+    					buildDate = null;
+    				}
                 }
-                try {
-					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-				} catch (java.text.ParseException e) {
-                    throw new RuntimeException("Version file is corrupt: \"buildTimestamp\" couldn't be parsed: " + e);
-				}
                 
-                gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                
+                version = new Version(versionString, gaeCompliant, buildDate);
+                
+                versionPropertiesLoaded = true;
             }
+            
         } catch (IOException e) {
             throw new RuntimeException("Failed to load version file: " + e);
         }
+	}
+	
+    /**
+     * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
+     * writing, this information doesn't depend on the configuration options, so it could be a static method, but
+     * to be future-proof, it's an instance method. 
+     * 
+     * @return {@link Set} of {@link String}-s. 
+     */
+	public Set getSupportedBuiltInNames() {
+	    return _CoreAPI.getSupportedBuiltInNames();
 	}
 
 	private static String getRequiredVersionProperty(Properties vp, String properyName) {

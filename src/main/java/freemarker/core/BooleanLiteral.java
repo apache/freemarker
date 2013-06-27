@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModel;
 
 final class BooleanLiteral extends Expression {
 
@@ -66,19 +67,23 @@ final class BooleanLiteral extends Expression {
         return b? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }
 
-    boolean isTrue(Environment env) {
+    boolean evalToBoolean(Environment env) {
         return val;
     }
 
     public String getCanonicalForm() {
-        return val ? "true" : "false";
+        return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
     }
 
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
+    
     public String toString() {
-        return val ? "true" : "false";
+        return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) {
+    TemplateModel _eval(Environment env) {
         return val ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
     }
     
@@ -86,7 +91,21 @@ final class BooleanLiteral extends Expression {
         return true;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new BooleanLiteral(val);
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

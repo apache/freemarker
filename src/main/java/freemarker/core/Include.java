@@ -55,7 +55,10 @@ package freemarker.core;
 import java.io.IOException;
 
 import freemarker.cache.TemplateCache;
-import freemarker.template.*;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -66,7 +69,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 final class Include extends TemplateElement {
 
-    private Expression includedTemplateName, encodingExp, parseExp;
+    private Expression templateName, encodingExp, parseExp;
     private String encoding;
     private boolean parse;
     private final String templatePath;
@@ -74,7 +77,7 @@ final class Include extends TemplateElement {
     /**
      * @param template the template that this <tt>Include</tt> is a part of.
      * @param includedTemplateName the name of the template to be included.
-     * @param encodingExp the encoding to be used or null, if it is a default.
+     * @param encodingExp the encoding to be used or null, if it's a default.
      * @param parseExp whether the template should be parsed (or is raw text)
      */
     Include(Template template,
@@ -83,9 +86,13 @@ final class Include extends TemplateElement {
             Expression parseExp) throws ParseException
     {
         String templatePath1 = template.getName();
+        if (templatePath1 == null) {
+            // This can be the case if the template wasn't created throuh a TemplateLoader. 
+            templatePath1 = "";
+        }
         int lastSlash = templatePath1.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath1.substring(0, lastSlash + 1);
-        this.includedTemplateName = includedTemplateName;
+        this.templateName = includedTemplateName;
         if (encodingExp instanceof StringLiteral) {
             encoding = encodingExp.toString();
             encoding = encoding.substring(1, encoding.length() -1);
@@ -99,11 +106,11 @@ final class Include extends TemplateElement {
         else if(parseExp.isLiteral()) {
             try {
                 if (parseExp instanceof StringLiteral) {
-                    parse = StringUtil.getYesNo(parseExp.getStringValue(null));
+                    parse = StringUtil.getYesNo(parseExp.evalAndCoerceToString(null));
                 }
                 else {
                     try {
-                        parse = parseExp.isTrue(null);
+                        parse = parseExp.evalToBoolean(null);
                     }
                     catch(NonBooleanException e) {
                         throw new ParseException("Expected a boolean or string as the value of the parse attribute", parseExp);
@@ -121,33 +128,28 @@ final class Include extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = includedTemplateName.getStringValue(env);
-        if( templateNameString == null ) {
-            String msg = "Error " + getStartLocation()
-                        + "The expression " + includedTemplateName + " is undefined.";
-            throw new InvalidReferenceException(msg, env);
-        }
+        String templateNameString = templateName.evalAndCoerceToString(env);
         String enc = encoding;
         if (encoding == null && encodingExp != null) {
-            enc = encodingExp.getStringValue(env);
+            enc = encodingExp.evalAndCoerceToString(env);
         }
         
         boolean parse = this.parse;
         if (parseExp != null) {
-            TemplateModel tm = parseExp.getAsTemplateModel(env);
+            TemplateModel tm = parseExp.eval(env);
             if(tm == null) {
                 if(env.isClassicCompatible()) {
                     parse = false;
                 }
                 else {
-                    assertNonNull(tm, parseExp, env);
+                    parseExp.assertNonNull(tm, env);
                 }
             }
             if (tm instanceof TemplateScalarModel) {
-                parse = getYesNo(EvaluationUtil.getString((TemplateScalarModel)tm, parseExp, env));
+                parse = getYesNo(EvalUtil.modelToString((TemplateScalarModel)tm, parseExp, env));
             }
             else {
-                parse = parseExp.isTrue(env);
+                parse = parseExp.evalToBoolean(env);
             }
         }
         
@@ -157,50 +159,74 @@ final class Include extends TemplateElement {
             includedTemplate = env.getTemplateForInclusion(templateNameString, enc, parse);
         }
         catch (ParseException pe) {
-            String msg = "Error parsing included template "
-                        + templateNameString  + "\n" + pe.getMessage();
-            throw new TemplateException(msg, pe, env);
+            throw new _MiscTemplateException(pe, env, new Object[] {
+                    "Error parsing included template ",
+                    new _DelayedJQuote(templateNameString), ":\n",
+                    new _DelayedGetMessage(pe) });
         }
         catch (IOException ioe) {
-            String msg = "Error reading included file "
-                        + templateNameString;
-            throw new TemplateException(msg, ioe, env);
+            throw new _MiscTemplateException(ioe, env, new Object[] {
+                    "Error reading included file ", new _DelayedJQuote(templateNameString), ":\n",
+                    new _DelayedGetMessage(ioe) });
         }
         env.include(includedTemplate);
     }
-
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#include ");
-        buf.append(includedTemplateName);
+    
+    protected String dump(boolean canonical) {
+        StringBuffer buf = new StringBuffer();
+        if (canonical) buf.append('<');
+        buf.append(getNodeTypeSymbol());
+        buf.append(' ');
+        buf.append(templateName.getCanonicalForm());
         if (encoding != null) {
             buf.append(" encoding=\"");
             buf.append(encodingExp.getCanonicalForm());
-            buf.append("\"");
+            buf.append('"');
         }
         if(parseExp != null) {
             buf.append(" parse=" + parseExp.getCanonicalForm());
-        }
-        else if (!parse) {
+        } else if (!parse) {
             buf.append(" parse=false");
         }
-        buf.append("/>");
+        if (canonical) buf.append("/>");
         return buf.toString();
     }
 
-    public String getDescription() {
-        return "include " + includedTemplateName;
+    String getNodeTypeSymbol() {
+        return "#include";
     }
-
-    private boolean getYesNo(String s) throws ParseException {
+    
+    private boolean getYesNo(String s) throws TemplateException {
         try {
            return StringUtil.getYesNo(s);
         }
         catch (IllegalArgumentException iae) {
-            throw new ParseException("Error " + getStartLocation()
-                 + "\nValue of include parse parameter "
-                 + "must be boolean or one of these strings: "
-                 + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\""
-                 + "\nFound: " + parseExp, parseExp);
+            throw new _MiscTemplateException(parseExp, new Object[] {
+                     "Value of include parse parameter must be boolean (or one of these strings: "
+                     + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
+                     new _DelayedJQuote(s), "." });
+        }
+    }
+
+    int getParameterCount() {
+        return 3;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return templateName;
+        case 1: return new Boolean(parse);
+        case 2: return encoding;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.TEMPLATE_NAME;
+        case 1: return ParameterRole.PARSE_PARAMETER;
+        case 2: return ParameterRole.ENCODING_PARAMETER;
+        default: throw new IndexOutOfBoundsException();
         }
     }
 

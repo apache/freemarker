@@ -54,7 +54,8 @@ package freemarker.core;
 
 import java.util.Collection;
 
-import freemarker.template.*;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
   * An interface that represents a local context. This is used as the abstraction for  

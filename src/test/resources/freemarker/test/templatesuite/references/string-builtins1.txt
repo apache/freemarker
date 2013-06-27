@@ -1,0 +1,85 @@
+FreeMarker: Encoding string built-in tests
+
+  
+cap_first:    DieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  
+uncap_first:  dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  
+uncap_first:blah
+capitalize:   Diebugsdie! * Vazzze 123456 --cdc-- --<<--@ X ${"kigyo"?upper_case}  
+html:         dieBugsDie! * vazzZE 123456 --cdc-- --&lt;&lt;--@ x ${&quot;kigyo&quot;?upper_case}  
+length:     71
+lower_case:   diebugsdie! * vazzze 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  
+rtf:          dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x $\{"kigyo"?upper_case\}  
+trim:       dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}
+trim2:      foo bar
+trim3:      foo bar
+trim4:      foo bar
+upper_case:   DIEBUGSDIE! * VAZZZE 123456 --CDC-- --<<--@ X ${"KIGYO"?UPPER_CASE}  
+xml:          dieBugsDie! * vazzZE 123456 --cdc-- --&lt;&lt;--@ x ${&quot;kigyo&quot;?upper_case}  
+xhtml:      &quot;Blah&#39;s is &gt; 1 &amp; &lt; 2&quot;
+
+word_list:
+- dieBugsDie!
+- *
+- vazzZE
+- 123456
+- --cdc--
+- --<<--@
+- x
+- ${"kigyo"?upper_case}
+
+interpret:   dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x KIGYO  
+number: -122,35
+
+default constructor
+1
+xxx
+xxx:yyy
+
+
+In The Sacred, Holy beginning, God created The Sacred, Holy Heavens and The Sacred, Holy Earth. 
+In the very beginning, God created the Heavens and The Earth. 
+|I|n| |t|h|e| |b|e|g|i|n|n|i|n|g|,| |G|o|d| |c|r|e|a|t|e|d| |t|h|e| |H|e|a|v|e|n|s| |a|n|d| |T|h|e| |E|a|r|t|h|.| 
+|In the beginning, God created the Heavens and The Earth. 
+
+In the beginning, God created the sky and The Earth. 
+
+matches
+
+  the beginning
+  the sacred beginning
+  the Heavens
+  the sacred Heavens
+  The Earth
+  The sacred Earth
+
+In the beginning, God created the Heavens and The Earth.
+beginning
+the Heavens and The Earth.
+
+   foo
+   bar
+   baz
+       foobar
+
+
+FOOBAR
+
+[a] = [a]
+[a\\'x'\nb] = [a\\'x'\nb]
+[\u0001\u001a ] = [\u0001\u001a ]
+
+[a] = [a]
+[a\\\'x\'\nb] = [a\\\'x\'\nb]
+[\x01\x1A ] = [\x01\x1A ]
+[\x3C![CDATA[] = [\x3C![CDATA[]
+[]]\>] = []]\>]
+
+[a] = [a]
+[a\\'x'\nb] = [a\\'x'\nb]
+[\u0001\u001A ] = [\u0001\u001A ]
+[\n\r\t\f\b\"] = [\n\r\t\f\b\"]
+[\/] = [\/]
+[a/b] = [a/b]
+[<\/script>] = [<\/script>]
+[\u003C![CDATA[] = [\u003C![CDATA[]
+[]]\u003E] = []]\u003E]

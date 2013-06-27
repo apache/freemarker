@@ -53,10 +53,10 @@
 package freemarker.core;
 
 import java.io.IOException;
+
 import freemarker.template.TemplateException;
 
 /**
- * @version $Id: NoEscapeBlock.java,v 1.1 2003/04/22 21:05:04 revusky Exp $
  * @author Attila Szegedi
  */
 class NoEscapeBlock extends TemplateElement {
@@ -71,11 +71,28 @@ class NoEscapeBlock extends TemplateElement {
         }
     }
 
-    public String getCanonicalForm() {
-        return "<#noescape>" + nestedBlock.getCanonicalForm() + "</#noescape>";
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            return "<" + getNodeTypeSymbol() + '>' + nestedBlock.getCanonicalForm() + "</" + getNodeTypeSymbol() + '>';
+        } else {
+            return getNodeTypeSymbol();
+        }
     }
 
-    public String getDescription() {
-        return "noescape block";
+    int getParameterCount() {
+        return 0;
     }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#noescape";
+    }
+        
 }

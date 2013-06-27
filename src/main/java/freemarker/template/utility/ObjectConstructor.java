@@ -53,9 +53,10 @@
 package freemarker.template.utility;
 
 import java.util.List;
+
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.template.*;
-import freemarker.template.utility.ClassUtil;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModelException;
 
 /**
  * An object that you can make available in a template

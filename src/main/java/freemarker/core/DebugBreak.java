@@ -59,7 +59,6 @@ import freemarker.template.TemplateException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: DebugBreak.java,v 1.2 2004/09/11 13:11:14 stephanmueller Exp $
  */
 public class DebugBreak extends TemplateElement
 {
@@ -72,7 +71,7 @@ public class DebugBreak extends TemplateElement
     
     protected void accept(Environment env) throws TemplateException, IOException
     {
-        if(!DebuggerService.suspendEnvironment(env, nestedBlock.getBeginLine()))
+        if(!DebuggerService.suspendEnvironment(env, this.getTemplate().getName(), nestedBlock.getBeginLine()))
         {
             nestedBlock.accept(env);
         }
@@ -82,13 +81,38 @@ public class DebugBreak extends TemplateElement
         }
     }
 
-    public String getDescription()
-    {
-        return nestedBlock.getDescription();
+    protected String dump(boolean canonical) {
+        if (canonical) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("<#-- ");
+            sb.append("debug break");
+            if (nestedBlock == null) {
+                sb.append(" /-->");
+            } else {
+                sb.append(" -->");
+                sb.append(nestedBlock.getCanonicalForm());                
+                sb.append("<#--/ debug break -->");
+            }
+            return sb.toString();
+        } else {
+            return "debug break";
+        }
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#debug_break";
     }
 
-    public String getCanonicalForm()
-    {
-        return nestedBlock.getCanonicalForm();
+    int getParameterCount() {
+        return 0;
     }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+        
 }

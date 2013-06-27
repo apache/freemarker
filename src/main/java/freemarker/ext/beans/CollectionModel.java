@@ -68,7 +68,6 @@ import freemarker.template.TemplateSequenceModel;
  * and that implements the {@link TemplateCollectionModel} in order to be usable 
  * in a <tt>&lt;foreach></tt> block.</p>
  * @author Attila Szegedi
- * @version $Id: CollectionModel.java,v 1.22 2003/06/03 13:21:32 szegedia Exp $
  */
 public class CollectionModel
 extends

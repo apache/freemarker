@@ -81,7 +81,7 @@ final class BodyInstruction extends TemplateElement {
 
     /**
      * There is actually a subtle but essential point in the code below.
-     * A macro operates in the context in which it is defined. However, 
+     * A macro operates in the context in which it's defined. However, 
      * a nested block within a macro instruction is defined in the 
      * context in which the macro was invoked. So, we actually need to
      * temporarily switch the namespace and macro context back to
@@ -93,23 +93,45 @@ final class BodyInstruction extends TemplateElement {
         env.visit(bodyContext);
     }
 
-    public String getCanonicalForm() {
-        StringBuffer buf = new StringBuffer("<#nested");
+    protected String dump(boolean canonical) {
+        StringBuffer sb = new StringBuffer();
+        if (canonical) sb.append('<');
+        sb.append(getNodeTypeSymbol());
         if (bodyParameters != null) {
             for (int i = 0; i<bodyParameters.size(); i++) {
-                buf.append(' ');
-                buf.append(bodyParameters.get(i));
+                sb.append(' ');
+                sb.append(bodyParameters.get(i));
             }
         }
-        buf.append('>');
-        return buf.toString();
+        if (canonical) sb.append('>');
+        return sb.toString();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "#nested";
+    }
+    
+    int getParameterCount() {
+        return bodyParameters != null ? bodyParameters.size() : 0;
     }
 
-    public String getDescription() {
-        return "nested macro content";
+    Object getParameterValue(int idx) {
+        checkIndex(idx);
+        return bodyParameters.get(idx);
     }
 
-/*
+    ParameterRole getParameterRole(int idx) {
+        checkIndex(idx);
+        return ParameterRole.PASSED_VALUE;
+    }
+
+    private void checkIndex(int idx) {
+        if (bodyParameters == null || idx >= bodyParameters.size()) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+    
+    /*
     boolean heedsOpeningWhitespace() {
         return true;
     }
@@ -117,7 +139,8 @@ final class BodyInstruction extends TemplateElement {
     boolean heedsTrailingWhitespace() {
         return true;
     }
-*/
+    */
+    
     class Context implements LocalContext {
         Macro.Context invokingMacroContext;
         Environment.Namespace bodyVars;
@@ -128,7 +151,7 @@ final class BodyInstruction extends TemplateElement {
             if (bodyParameters != null) {
                 for (int i=0; i<bodyParameters.size(); i++) {
                     Expression exp = (Expression) bodyParameters.get(i);
-                    TemplateModel tm = exp.getAsTemplateModel(env);
+                    TemplateModel tm = exp.eval(env);
                     if (bodyParameterNames != null && i < bodyParameterNames.size()) {
                         String bodyParameterName = (String) bodyParameterNames.get(i);
                         if (bodyVars == null) {

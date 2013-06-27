@@ -55,12 +55,32 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.*;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TimeZone;
 
-import freemarker.template.*;
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.StringUtil;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.Configuration;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateModel;
+import freemarker.template.Version;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.NullArgumentException;
+import freemarker.template.utility.StringUtil;
 
 /**
  * This is a common superclass of {@link freemarker.template.Configuration},
@@ -74,11 +94,12 @@ import freemarker.ext.beans.BeansWrapper;
  * parent of a <code>Template</code> object is a <code>Configuration</code>
  * object.
  *
- * @version $Id: Configurable.java,v 1.23.2.2 2007/04/02 13:46:43 szegedia Exp $
  * @author Attila Szegedi
  */
 public class Configurable
 {
+    static final String C_TRUE_FALSE = "true,false";
+    
     public static final String LOCALE_KEY = "locale";
     public static final String NUMBER_FORMAT_KEY = "number_format";
     public static final String TIME_FORMAT_KEY = "time_format";
@@ -98,8 +119,6 @@ public class Configurable
     /** @since 2.3.17 */
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
 
-    private static final char COMMA = ',';
-    
     private Configurable parent;
     private Properties properties;
     private HashMap customAttributes;
@@ -110,9 +129,10 @@ public class Configurable
     private String dateFormat;
     private String dateTimeFormat;
     private TimeZone timeZone;
-    private String trueFormat;
-    private String falseFormat;
-    private Boolean classicCompatible;
+    private String booleanFormat;
+    private String trueStringValue;  // deduced from booleanFormat
+    private String falseStringValue;  // deduced from booleanFormat
+    private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
@@ -123,6 +143,10 @@ public class Configurable
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
     
+    /**
+     * Creates a top-level configurable, one that doesn't ingerit from a parent, and thus stores the default values.
+     * The only class that should use this is {@link Configuration}.
+     */
     public Configurable() {
         parent = null;
         locale = Locale.getDefault();
@@ -131,9 +155,7 @@ public class Configurable
         timeFormat = "";
         dateFormat = "";
         dateTimeFormat = "";
-        trueFormat = "true";
-        falseFormat = "false";
-        classicCompatible = Boolean.FALSE;
+        classicCompatible = new Integer(0);
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
@@ -152,11 +174,12 @@ public class Configurable
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
-        properties.setProperty(BOOLEAN_FORMAT_KEY, "true,false");
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
         // as outputEncoding and urlEscapingCharset defaults to null, 
         // they are not set
+
+        setBooleanFormat(C_TRUE_FALSE);
         
         customAttributes = new HashMap();
     }
@@ -169,8 +192,6 @@ public class Configurable
         this.parent = parent;
         locale = null;
         numberFormat = null;
-        trueFormat = null;
-        falseFormat = null;
         classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
@@ -212,10 +233,34 @@ public class Configurable
      * of this mode, see {@link #isClassicCompatible()}.
      */
     public void setClassicCompatible(boolean classicCompatibility) {
-        this.classicCompatible = classicCompatibility ? Boolean.TRUE : Boolean.FALSE;
-        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
+        this.classicCompatible = new Integer(classicCompatibility ? 1 : 0);
+        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatibilityIntToString(classicCompatible));
     }
 
+    /**
+     * Same as {@link #setClassicCompatible(boolean)}, but allows some extra values. 
+     * 
+     * @param classicCompatibility {@code 0} means {@code false}, {@code 1} means {@code true},
+     *     {@code 2} means {@code true} but with emulating bugs in early 2.x classic-compatibility mode. Currently
+     *     {@code 2} affects how booleans are converted to string; with {@code 1} it's always {@code "true"}/{@code ""},
+     *     but with {@code 2} it's {@code "true"}/{@code "false"} for values wrapped by {@link BeansWrapper} as then
+     *     {@link Boolean#toString()} prevails. Note that {@code someBoolean?string} will always consistently format the
+     *     boolean according the {@code boolean_format} setting, just like in FreeMarker 2.3 and later.
+     */
+    public void setClassicCompatibleAsInt(int classicCompatibility) {
+        if (classicCompatibility < 0 || classicCompatibility > 2) {
+            throw new IllegalArgumentException("Unsupported \"classicCompatibility\": " + classicCompatibility);
+        }
+        this.classicCompatible = new Integer(classicCompatibility);
+    }
+    
+    private String classicCompatibilityIntToString(Integer i) {
+        if (i == null) return null;
+        else if (i.intValue() == 0) return MiscUtil.C_FALSE;
+        else if (i.intValue() == 1) return MiscUtil.C_TRUE;
+        else return i.toString();
+    }
+    
     /**
      * Returns whether the engine runs in the "Classic Compatibile" mode.
      * When this mode is active, the engine behavior is altered in following
@@ -225,17 +270,22 @@ public class Configurable
      * <li>handle undefined expressions gracefully. Namely when an expression
      *   "expr" evaluates to null:
      *   <ul>
-     *     <li>as argument of the <tt>&lt;assign varname=expr></tt> directive, 
-     *       <tt>${expr}</tt> directive, <tt>otherexpr == expr</tt> or 
-     *       <tt>otherexpr != expr</tt> conditional expressions, or 
-     *       <tt>hash[expr]</tt> expression, then it is treated as empty string.
+     *     <li>
+     *       in <tt>&lt;assign varname=expr></tt> directive, 
+     *       or in <tt>${expr}</tt> directive,
+     *       or in <tt>otherexpr == expr</tt>,
+     *       or in <tt>otherexpr != expr</tt>, 
+     *       or in <tt>hash[expr]</tt>,
+     *       or in <tt>expr[keyOrIndex]</tt> (since 2.3.20),
+     *       or in <tt>expr.key</tt> (since 2.3.20),
+     *       then it's treated as empty string.
      *     </li>
      *     <li>as argument of <tt>&lt;list expr as item></tt> or 
      *       <tt>&lt;foreach item in expr></tt>, the loop body is not executed
      *       (as if it were a 0-length list)
      *     </li>
-     *     <li>as argument of <tt>&lt;if></tt> directive, or otherwise where a
-     *       boolean expression is expected, it is treated as false
+     *     <li>as argument of <tt>&lt;if></tt> directive, or on other places where a
+     *       boolean expression is expected, it's treated as false
      *     </li>
      *   </ul>
      * </li>
@@ -246,7 +296,9 @@ public class Configurable
      * <li>When boolean value is treated as a string (i.e. output in 
      *   <tt>${...}</tt> directive, or concatenated with other string), true 
      * values are converted to string "true", false values are converted to 
-     * empty string.
+     * empty string. Except, if the value of the setting is <tt>2</tt>, it will be
+     * formatted according the <tt>boolean_format</tt> setting, just like in
+     * 2.3.20 and later.
      * </li>
      * <li>Scalar models supplied to <tt>&lt;list></tt> and 
      *   <tt>&lt;foreach></tt> are treated as a one-element list consisting
@@ -260,32 +312,39 @@ public class Configurable
      * mode - you don't lose any of the new functionality by enabling it.
      */
     public boolean isClassicCompatible() {
-        return classicCompatible != null ? classicCompatible.booleanValue() : parent.isClassicCompatible();
+        return classicCompatible != null ? classicCompatible.intValue() != 0 : parent.isClassicCompatible();
     }
 
+    public int getClassicCompatibleAsInt() {
+        return classicCompatible != null ? classicCompatible.intValue() : parent.getClassicCompatibleAsInt();
+    }
+    
     /**
-     * Sets the locale to assume when searching for template files with no 
-     * explicit requested locale.
+     * Sets the default locale used for number and date formatting (among others), also the locale used for searching
+     * localized template variations when no locale was explicitly requested.
+     * 
+     * @see Configuration#getTemplate(String, Locale)
      */
     public void setLocale(Locale locale) {
-        if (locale == null) throw new IllegalArgumentException("Setting \"locale\" can't be null");
+        NullArgumentException.check("locale", locale);
         this.locale = locale;
         properties.setProperty(LOCALE_KEY, locale.toString());
     }
 
     /**
-     * Returns the time zone to use when formatting time values. Defaults to 
-     * system time zone.
+     * The getter pair of {@link #setTimeZone(TimeZone)}. 
      */
     public TimeZone getTimeZone() {
         return timeZone != null ? timeZone : parent.getTimeZone();
     }
 
     /**
-     * Sets the time zone to use when formatting time values. 
+     * Sets the time zone to use when formatting date/time values.
+     * Defaults to the system time zone (regardless of the "locale" FreeMarker setting), so in a server application you
+     * probably want to set it explicitly in the {@link Environment} to match the preferred time zone of the visitor.
      */
     public void setTimeZone(TimeZone timeZone) {
-        if (timeZone == null) throw new IllegalArgumentException("Setting \"time_zone\" can't be null");
+        NullArgumentException.check("timeZone", timeZone);
         this.timeZone = timeZone;
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
     }
@@ -302,7 +361,7 @@ public class Configurable
      * Sets the number format used to convert numbers to strings.
      */
     public void setNumberFormat(String numberFormat) {
-        if (numberFormat == null) throw new IllegalArgumentException("Setting \"number_format\" can't be null");
+        NullArgumentException.check("numberFormat", numberFormat);
         this.numberFormat = numberFormat;
         properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
     }
@@ -315,110 +374,210 @@ public class Configurable
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
     }
 
+    /**
+     * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
+     * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
+     * so {@code "yes, no"} is WRONG (unless you want that leading space before "no").
+     * 
+     * <p>For backward compatibility the default is {@code "true,false"}, but using that value is denied for automatic
+     * boolean-to-string conversion (like <code>${myBoolean}</code> will fail with it), only {@code myBool?string} will
+     * allow it, which is deprecated since FreeMarker 2.3.20.
+     * 
+     * <p>Note that automatic boolean-to-string conversion only exists since FreeMarker 2.3.20. Earlier this setting
+     * only influenced the result of {@code myBool?string}. 
+     */
     public void setBooleanFormat(String booleanFormat) {
-        if (booleanFormat == null) {
-            throw new IllegalArgumentException("Setting \"boolean_format\" can't be null");
-        } 
-        int comma = booleanFormat.indexOf(COMMA);
-        if(comma == -1) {
-            throw new IllegalArgumentException("Setting \"boolean_format\" must consist of two comma-separated values for true and false respectively");
+        NullArgumentException.check("booleanFormat", booleanFormat);
+        
+        int commaIdx = booleanFormat.indexOf(',');
+        if(commaIdx == -1) {
+            throw new IllegalArgumentException(
+                    "Setting \"boolean_format\" must consist of two comma-separated values for true and false," +
+                    "respectively.");
         }
-        trueFormat = booleanFormat.substring(0, comma);
-        falseFormat = booleanFormat.substring(comma + 1);
+        
+        this.booleanFormat = booleanFormat; 
         properties.setProperty(BOOLEAN_FORMAT_KEY, booleanFormat);
-    }
-    
-    public String getBooleanFormat() {
-        if(trueFormat == null) {
-            return parent.getBooleanFormat(); 
+        
+        if (booleanFormat.equals(C_TRUE_FALSE)) {
+            // C_TRUE_FALSE is the default for BC, but it's not a good default for human audience formatting, so we
+            // pretend that it wasn't set.
+            trueStringValue = null; 
+            falseStringValue = null;
+        } else {
+            trueStringValue = booleanFormat.substring(0, commaIdx); 
+            falseStringValue = booleanFormat.substring(commaIdx + 1);
         }
-        return trueFormat + COMMA + falseFormat;
     }
     
-    String getBooleanFormat(boolean value) {
-        return value ? getTrueFormat() : getFalseFormat(); 
+    /**
+     * The getter pair of {@link #setBooleanFormat(String)}.
+     */
+    public String getBooleanFormat() {
+        return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
     }
     
-    private String getTrueFormat() {
-        return trueFormat != null ? trueFormat : parent.getTrueFormat(); 
+    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
+        if (value) {
+            String s = getTrueStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_TRUE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        } else {
+            String s = getFalseStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_FALSE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        }
     }
-    
-    private String getFalseFormat() {
-        return falseFormat != null ? falseFormat : parent.getFalseFormat(); 
+
+    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
+        return new _ErrorDescriptionBuilder(new Object[] {
+                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
+                new _DelayedJQuote(getBooleanFormat()), 
+                (getBooleanFormat().equals(C_TRUE_FALSE)
+                    ? ", which is the legacy default computer-language format, and hence isn't accepted."
+                    : ".") }).tips(new Object[] {
+                 "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
+                 + "use \"?c\", like ${myBool?c}.",
+                 "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
+                 new Object[] {
+                     "If you need the same two values on most places, the programmers should set the \"",
+                     BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
+                 });
     }
 
     /**
-     * Sets the date format used to convert date models representing time-only
-     * values to strings.
+     * Returns the string to which {@code true} is converted to for human audience, or {@code null} if automatic
+     * coercion to string is not allowed. The default value is {@code null}.
+     * 
+     * <p>This value is deduced from the {@code "boolean_format"} setting.
+     * Confusingly, for backward compatibility (at least until 2.4) that defaults to {@code "true,false"}, yet this
+     * defaults to {@code null}. That's so because {@code "true,false"} is treated exceptionally, as that default is a
+     * historical mistake in FreeMarker, since it targets computer language output, not human writing. Thus it's
+     * ignored.
+     * 
+     * @since 2.3.20
+     */
+    String getTrueStringValue() {
+        // The first step deliberately tests booleanFormat instead of trueStringValue! 
+        return booleanFormat != null ? trueStringValue : (parent != null ? parent.getTrueStringValue() : null); 
+    }
+
+    /**
+     * Same as {@link #getTrueStringValue()} but with {@code false}. 
+     * @since 2.3.20
+     */
+    String getFalseStringValue() {
+        // The first step deliberately tests booleanFormat instead of falseStringValue! 
+        return booleanFormat != null ? falseStringValue : (parent != null ? parent.getFalseStringValue() : null); 
+    }
+
+    /**
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time-only (not date part) values.
+     * Possible values are patterns accepted by Java's {@link DateFormat}, also {@code "short"},
+     * {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning also defined by
+     * {@link DateFormat}.
+     *   
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
     public void setTimeFormat(String timeFormat) {
-        if (timeFormat == null) throw new IllegalArgumentException("Setting \"time_format\" can't be null");
+        NullArgumentException.check("timeFormat", timeFormat);
         this.timeFormat = timeFormat;
         properties.setProperty(TIME_FORMAT_KEY, timeFormat);
     }
 
     /**
-     * Returns the date format used to convert date models representing
-     * time-only dates to strings.
-     * Defaults to <tt>"time"</tt>
+     * The getter pair of {@link #setTimeFormat(String)}.
      */
     public String getTimeFormat() {
         return timeFormat != null ? timeFormat : parent.getTimeFormat();
     }
 
     /**
-     * Sets the date format used to convert date models representing date-only
-     * dates to strings.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-only (no time part) values.
+     * Possible values are patterns accepted by Java's {@link DateFormat}, also {@code "short"},
+     * {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning also defined by
+     * {@link DateFormat}.
+     *   
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
     public void setDateFormat(String dateFormat) {
-        if (dateFormat == null) throw new IllegalArgumentException("Setting \"date_format\" can't be null");
+        NullArgumentException.check("dateFormat", dateFormat);
         this.dateFormat = dateFormat;
         properties.setProperty(DATE_FORMAT_KEY, dateFormat);
     }
 
     /**
-     * Returns the date format used to convert date models representing 
-     * date-only dates to strings.
-     * Defaults to <tt>"date"</tt>
+     * The getter pair of {@link #setDateFormat(String)}.
      */
     public String getDateFormat() {
         return dateFormat != null ? dateFormat : parent.getDateFormat();
     }
 
     /**
-     * Sets the date format used to convert date models representing datetime
-     * dates to strings.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date+time values.
+     * Possible values are patterns accepted by Java's {@link DateFormat}, also {@code "short"},
+     * {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning also defined by
+     * {@link DateFormat}.
+     * It's also possible to give values like {@code "short_long"} (in any combinations), which will
+     * use {@code "short"} for the date part, and {@code "long"} for the time part.
+     *   
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
-        if (dateTimeFormat == null) throw new IllegalArgumentException("Setting \"datetime_format\" can't be null");
+        NullArgumentException.check("dateTimeFormat", dateTimeFormat);
         this.dateTimeFormat = dateTimeFormat;
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
     }
 
     /**
-     * Returns the date format used to convert date models representing datetime
-     * dates to strings.
-     * Defaults to <tt>"datetime"</tt>
+     * The getter pair of {@link #setDateTimeFormat(String)}.
      */
     public String getDateTimeFormat() {
         return dateTimeFormat != null ? dateTimeFormat : parent.getDateTimeFormat();
     }
 
     /**
-     * Sets the exception handler used to handle template exceptions. 
-     *
-     * @param templateExceptionHandler the template exception handler to use for 
-     * handling {@link TemplateException}s. By default, 
-     * {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER} is used.
+     * Sets the exception handler used to handle exceptions occurring inside templates.
+     * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:
+     * 
+     * <ul>
+     *   <li>In productions systems: {@link TemplateExceptionHandler#RETHROW_HANDLER}
+     *   <li>During development of HTML templates: {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}
+     *   <li>During development of non-HTML templates: {@link TemplateExceptionHandler#DEBUG_HANDLER}
+     * </ul>
+     * 
+     * <p>All of these will let the exception propagate further, so that you can catch it around
+     * {@link Template#process(Object, Writer)} for example. The difference is in what they print on the output before
+     * they do that.
+     * 
+     * <p>Note that the {@link TemplateExceptionHandler} is not meant to be used for generating HTTP error pages.
+     * Neither is it meant to be used to roll back the printed output. These should be solved outside template
+     * processing when the exception raises from {@link Template#process(Object, Writer) Template.process}.
+     * {@link TemplateExceptionHandler} meant to be used if you want to include special content <em>in</em> the template
+     * output, or if you want to suppress certain exceptions. 
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
-        if (templateExceptionHandler == null) throw new IllegalArgumentException("Setting \"template_exception_handler\" can't be null");
+        NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
         this.templateExceptionHandler = templateExceptionHandler;
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
     }
 
     /**
-     * Retrieves the exception handler used to handle template exceptions. 
+     * The getter pair of {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
      */
     public TemplateExceptionHandler getTemplateExceptionHandler() {
         return templateExceptionHandler != null
@@ -427,19 +586,16 @@ public class Configurable
 
     /**
      * Sets the arithmetic engine used to perform arithmetic operations.
-     *
-     * @param arithmeticEngine the arithmetic engine used to perform arithmetic
-     * operations.By default, {@link ArithmeticEngine#BIGDECIMAL_ENGINE} is 
-     * used.
+     * The default is {@link ArithmeticEngine#BIGDECIMAL_ENGINE}.
      */
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
-        if (arithmeticEngine == null) throw new IllegalArgumentException("Setting \"arithmetic_engine\" can't be null");
+        NullArgumentException.check("arithmeticEngine", arithmeticEngine);
         this.arithmeticEngine = arithmeticEngine;
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
     }
 
     /**
-     * Retrieves the arithmetic engine used to perform arithmetic operations.
+     * The getter pair of {@link #setArithmeticEngine(ArithmeticEngine)}.
      */
     public ArithmeticEngine getArithmeticEngine() {
         return arithmeticEngine != null
@@ -447,19 +603,17 @@ public class Configurable
     }
 
     /**
-     * Sets the object wrapper used to wrap objects to template models.
-     *
-     * @param objectWrapper the object wrapper used to wrap objects to template
-     * models.By default, {@link ObjectWrapper#DEFAULT_WRAPPER} is used.
+     * Sets the object wrapper used to wrap objects to {@link TemplateModel}-s.
+     * The default is {@link ObjectWrapper#DEFAULT_WRAPPER}.
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
-        if (objectWrapper == null) throw new IllegalArgumentException("Setting \"object_wrapper\" can't be null");
+        NullArgumentException.check("objectWrapper", objectWrapper);
         this.objectWrapper = objectWrapper;
         properties.setProperty(OBJECT_WRAPPER_KEY, objectWrapper.getClass().getName());
     }
 
     /**
-     * Retrieves the object wrapper used to wrap objects to template models.
+     * The getter pair of {@link #setObjectWrapper(ObjectWrapper)}.
      */
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper != null
@@ -467,8 +621,12 @@ public class Configurable
     }
     
     /**
-     * Sets the output encoding. Allows <code>null</code>, which means that the
-     * output encoding is not known.
+     * Informs FreeMarker about the charset used for the output. As FreeMarker outputs character stream (not
+     * byte stream), it's not aware of the output charset unless the software that encloses it tells it
+     * with this setting. Some templates may use FreeMarker features that require this information.
+     * Setting this to {@code null} means that the output encoding is not known.
+     * 
+     * <p>Defaults to {@code null} (unknown).
      */
     public void setOutputEncoding(String outputEncoding) {
         this.outputEncoding = outputEncoding;
@@ -488,8 +646,10 @@ public class Configurable
     }
     
     /**
-     * Sets the URL escaping charset. Allows <code>null</code>, which means that the
-     * output encoding will be used for URL escaping.
+     * Sets the URL escaping charset. If not set ({@code null}), the output encoding
+     * ({@link #setOutputEncoding(String)}) will be used for URL escaping.
+     * 
+     * Defaults to {@code null}.
      */
     public void setURLEscapingCharset(String urlEscapingCharset) {
         this.urlEscapingCharset = urlEscapingCharset;
@@ -522,8 +682,7 @@ public class Configurable
      * @since 2.3.17
      */
     public void setNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
-        if (newBuiltinClassResolver == null) throw new IllegalArgumentException(
-                "Setting \"" + NEW_BUILTIN_CLASS_RESOLVER_KEY + "\" can't be null.");
+        NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
         this.newBuiltinClassResolver = newBuiltinClassResolver;
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY,
                 newBuiltinClassResolver.getClass().getName());
@@ -576,127 +735,236 @@ public class Configurable
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
     /**
-     * Sets a setting by a name and string value.
+     * Sets a FreeMarker setting by a name and string value. If you can configure FreeMarker directly with Java (or
+     * other programming language), you should use the dedicated setter methods instead (like
+     * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used if you get the settings from somewhere
+     * as text. Regardless, below you will find an overview of the settings available no matter how you set them. 
      * 
-     * <p>List of supported names and their valid values:
+     * <p>The list of settings commonly supported in all {@link Configurable} subclasses:
      * <ul>
-     *   <li><code>"locale"</code>: local codes with the usual format, such as <code>"en_US"</code>.
-     *   <li><code>"classic_compatible"</code>:
-     *       <code>"true"</code>, <code>"false"</code>, <code>"yes"</code>, <code>"no"</code>,
-     *       <code>"t"</code>, <code>"f"</code>, <code>"y"</code>, <code>"n"</code>.
+     *   <li><p>{@code "locale"}:
+     *       See {@link #setLocale(Locale)}.
+     *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}.
+     *       
+     *   <li><p>{@code "classic_compatible"}:
+     *       See {@link #setClassicCompatible(boolean)} and {@link Configurable#setClassicCompatibleAsInt(int)}.
+     *       <br>String value: {@code "true"}, {@code "false"}, also since 2.3.20 {@code 0} or {@code 1} or {@code 2}.
+     *       (Also accepts {@code "yes"}, {@code "no"}, {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}.)
      *       Case insensitive.
-     *   <li><code>"template_exception_handler"</code>:  If the value contains dot, then it is
+     *       
+     *   <li><p>{@code "template_exception_handler"}:
+     *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
+     *       <br>String value: If the value contains dot, then it's
+     *       interpreted as a class name, and the object will be created with
+     *       its parameterless constructor. If the value does not contain dot,
+     *       then it must be one of these predefined values (case insensitive):
+     *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
+     *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
+     *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
+     *       {@code "ignore"}  (means {@link TemplateExceptionHandler#IGNORE_HANDLER}).
+     *       
+     *   <li><p>{@code "arithmetic_engine"}:
+     *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
+     *       <br>String value: If the value contains dot, then it's
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these special values:
-     *       <code>"rethrow"</code>, <code>"debug"</code>,
-     *       <code>"html_debug"</code>, <code>"ignore"</code> (case insensitive).
-     *   <li><code>"arithmetic_engine"</code>: If the value contains dot, then it is
+     *       then it must be one of these special values (case insensitive):
+     *       {@code "bigdecimal"}, {@code "conservative"}.
+     *       
+     *   <li><p>{@code "object_wrapper"}:
+     *       See {@link #setObjectWrapper(ObjectWrapper)}.
+     *       <br>String value: If the value contains dot, then it's
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these special values:
-     *       <code>"bigdecimal"</code>, <code>"conservative"</code> (case insensitive).  
-     *   <li><code>"object_wrapper"</code>: If the value contains dot, then it is
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these special values:
-     *       <code>"simple"</code>, <code>"beans"</code>, <code>"jython"</code> (case insensitive).
-     *   <li><code>"number_format"</code>: pattern as <code>java.text.DecimalFormat</code> defines.
-     *   <li><code>"boolean_format"</code>: the textual value for boolean true and false,
-     *       separated with comma. For example <code>"yes,no"</code>.
-     *   <li><code>"date_format", "time_format", "datetime_format"</code>: patterns as
-     *       <code>java.text.SimpleDateFormat</code> defines.
-     *   <li><code>"time_zone"</code>: time zone, with the format as
-     *       <code>java.util.TimeZone.getTimeZone</code> defines. For example <code>"GMT-8:00"</code> or
-     *       <code>"America/Los_Angeles"</code>
-     *   <li><code>"output_encoding"</code>: Informs FreeMarker about the charset
-     *       used for the output. As FreeMarker outputs character stream (not
-     *       byte stream), it is not aware of the output charset unless the
-     *       software that encloses it tells it explicitly with this setting.
-     *       Some templates may use FreeMarker features that require this.</code>
-     *   <li><code>"url_escaping_charset"</code>: If this setting is set, then it
-     *       overrides the value of the <code>"output_encoding"</code> setting when
-     *       FreeMarker does URL encoding.
-     *   <li><code>"auto_flush"</code>: see {@link #setAutoFlush(boolean)}.
+     *       then it must be one of these special values (case insensitive):
+     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}),
+     *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
+     *       {@code "beans"} (means {@link BeansWrapper#DEFAULT_WRAPPER}),
+     *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
+     *       
+     *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
+     *   
+     *   <li><p>{@code "boolean_format"}: See {@link #setBooleanFormat(String)} .
+     *   
+     *   <li><p>{@code "date_format", "time_format", "datetime_format"}:
+     *       See {@link #setDateFormat(String)}, {@link #setTimeFormat(String)}, {@link #setDateTimeFormat(String)}. 
+     *        
+     *   <li><p>{@code "time_zone"}:
+     *       See {@link #setTimeZone(TimeZone)}.
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it.
+     *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
+     *       
+     *   <li><p>{@code "output_encoding"}:
+     *       See {@link #setOutputEncoding(String)}.
+     *       
+     *   <li><p>{@code "url_escaping_charset"}:
+     *       See {@link #setURLEscapingCharset(String)}.
+     *       
+     *   <li><p>{@code "auto_flush"}:
+     *       See {@link #setAutoFlush(boolean)}.
      *       Since 2.3.17.
-     *   <li><code>"new_builtin_class_resolver"</code>:
-     *       see {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
-     *       Since 2.3.17. The value must be one of these (ignore the
-     *       quotation marks):
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       
+     *   <li><p>{@code "new_builtin_class_resolver"}:
+     *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
+     *       Since 2.3.17.
+     *       <br>String value: The value must be one of these (ignore the quotation marks):
      *       <ol>
-     *         <li><code>"unrestricted"</code>:
+     *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
-     *         <li><code>"safer"</code>:
+     *         <li><p>{@code "safer"}:
      *             Use {@link TemplateClassResolver#SAFER_RESOLVER}
-     *         <li><code>"allows_nothing"</code>:
+     *         <li><p>{@code "allows_nothing"}:
      *             Use {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}
-     *         <li>Something that contains colon will use
+     *         <li><p>Something that contains colon will use
      *             {@link OptInTemplateClassResolver} and is expected to
      *             store comma separated values (possibly quoted) segmented
-     *             with <code>"allowed_classes:"</code> and/or
-     *             <code>"trusted_templates:"</code>. Examples of valid values:
+     *             with {@code "allowed_classes:"} and/or
+     *             {@code "trusted_templates:"}. Examples of valid values:
      *             
-     *             <table border="1">
+     *             <table style="width: auto; border-collapse: collapse" border="1">
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
      *               <tr>
      *                 <td>
-                         <code>allowed_classes: com.example.C1, com.example.C2,
-     *                   trusted_templates: lib/*, safe.ftl</code>                 
+     *                   {@code allowed_classes: com.example.C1, com.example.C2,
+     *                   trusted_templates: lib/*, safe.ftl}                 
      *                 <td>
-     *                   Only allow instantiating the <code>com.example.C1</code> and
-     *                   <code>com.example.C2</code> classes. But, allow templates
-     *                   within the <code>lib/</code> directory (like
-     *                   <code>lib/foo/bar.ftl</code>) and template <code>safe.ftl</code>
-     *                   (that does not match <code>foo/safe.ftl</code>, only
-     *                   exactly <code>safe.ftl</code>) to instantiate anything
+     *                   Only allow instantiating the {@code com.example.C1} and
+     *                   {@code com.example.C2} classes. But, allow templates
+     *                   within the {@code lib/} directory (like
+     *                   {@code lib/foo/bar.ftl}) and template {@code safe.ftl}
+     *                   (that does not match {@code foo/safe.ftl}, only
+     *                   exactly {@code safe.ftl}) to instantiate anything
      *                   that {@link TemplateClassResolver#SAFER_RESOLVER} allows.
      *               <tr>
      *                 <td>
-     *                   <code>allowed_classes: com.example.C1, com.example.C2</code>
-     *                 <td>Only allow instantiating the <code>com.example.C1</code> and
-     *                   <code>com.example.C2</code> classes. There are no
+     *                   {@code allowed_classes: com.example.C1, com.example.C2}
+     *                 <td>Only allow instantiating the {@code com.example.C1} and
+     *                   {@code com.example.C2} classes. There are no
      *                   trusted templates.
      *               <tr>
      *                 <td>
-                         <code>trusted_templates: lib/*, safe.ftl</code>                 
+                         {@code trusted_templates: lib/*, safe.ftl}                 
      *                 <td>
      *                   Do not allow instantiating any classes, except in
-     *                   templates inside <code>lib/</code> or in template 
-     *                   <code>safe.ftl</code>.
+     *                   templates inside {@code lib/} or in template 
+     *                   {@code safe.ftl}.
      *             </table>
-     *             For more details see {@link OptInTemplateClassResolver}.
-     *         <li>Otherwise if the value contains dot, it's interpreted as
+     *             
+     *             <p>For more details see {@link OptInTemplateClassResolver}.
+     *             
+     *         <li><p>Otherwise if the value contains dot, it's interpreted as
      *             a full-qualified class name, and the object will be created
      *             with its parameterless constructor.
      *       </ol>
      * </ul>
      * 
-     * @param key the name of the setting.
+     * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
+     * <ul>
+     *   <li><p>{@code "auto_import"}:
+     *       See {@link Configuration#setAutoImports(Map)}
+     *       <br>String value is something like:
+     *       <br>{@code /lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd}
+     *       
+     *   <li><p>{@code "auto_include"}: Sets the list of auto-includes.
+     *       See {@link Configuration#setAutoIncludes(List)}
+     *       <br>String value is something like:
+     *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
+     *       
+     *   <li><p>{@code "default_encoding"}:
+     *       See {@link Configuration#setDefaultEncoding(String)}.
+     *       <br>As the default value is the system default, which can change
+     *       from one server to another, <b>you should always set this!</b>
+     *       
+     *   <li><p>{@code "localized_lookup"}:
+     *       See {@link Configuration#setLocalizedLookup}.
+     *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
+     *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
+     *       Case insensitive.
+     *       
+     *   <li><p>{@code "strict_syntax"}:
+     *       See {@link Configuration#setStrictSyntaxMode}. Deprecated.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
+     *       
+     *   <li><p>{@code "whitespace_stripping"}:
+     *       See {@link Configuration#setWhitespaceStripping}.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
+     *       
+     *   <li><p>{@code "cache_storage"}:
+     *       See {@link Configuration#setCacheStorage}.
+     *       <br>String value: If the value contains dot, then it's
+     *       interpreted as class name, and the object will be created with
+     *       its parameterless constructor. If the value does not contain dot,
+     *       then a {@link freemarker.cache.MruCacheStorage} will be used with the
+     *       maximum strong and soft sizes specified with the setting value. Examples
+     *       of valid setting values:
+     *       
+     *       <table style="width: auto; border-collapse: collapse" border="1">
+     *         <tr><th>Setting value<th>max. strong size<th>max. soft size
+     *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
+     *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}
+     *         <tr><td>{@code "strong:100"}<td>100<td>0
+     *         <tr><td>{@code "soft:100"}<td>0<td>100
+     *         <tr><td>{@code "strong"}<td>{@code Integer.MAX_VALUE}<td>0
+     *         <tr><td>{@code "soft"}<td>0<td>{@code Integer.MAX_VALUE}
+     *       </table>
+     *       
+     *       <p>The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
+     *       entries is not significant.
+     *       
+     *   <li><p>{@code "template_update_delay"}:
+     *       See {@link Configuration#setTemplateUpdateDelay}.
+     *       <br>String value: Valid positive integer, the update delay measured in seconds.
+     *       
+     *   <li><p>{@code "tag_syntax"}:
+     *       See {@link Configuration#setTagSyntax(int)}.
+     *       <br>String value: Must be one of
+     *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}. 
+     *       
+     *   <li><p>{@code "incompatible_improvements"}:
+     *       See {@link Configuration#setIncompatibleImprovements(Version)}.
+     *       <br>String value: version number like {@code 2.3.20}.
+     *       
+     *   <li><p>{@code "incompatible_enhancements"}:
+     *       See: {@link Configuration#setIncompatibleEnhancements(String)}.
+     *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
+     * </ul>
+     * 
+     * @param name the name of the setting.
      * @param value the string that describes the new value of the setting.
      * 
-     * @throws UnknownSettingException if the key is wrong.
-     * @throws TemplateException if the new value of the setting can't be set
-     *     for any other reasons.
+     * @throws UnknownSettingException if the name is wrong.
+     * @throws TemplateException if the new value of the setting can't be set for any other reasons.
      */
-    public void setSetting(String key, String value) throws TemplateException {
+    public void setSetting(String name, String value) throws TemplateException {
         try {
-            if (LOCALE_KEY.equals(key)) {
+            if (LOCALE_KEY.equals(name)) {
                 setLocale(StringUtil.deduceLocale(value));
-            } else if (NUMBER_FORMAT_KEY.equals(key)) {
+            } else if (NUMBER_FORMAT_KEY.equals(name)) {
                 setNumberFormat(value);
-            } else if (TIME_FORMAT_KEY.equals(key)) {
+            } else if (TIME_FORMAT_KEY.equals(name)) {
                 setTimeFormat(value);
-            } else if (DATE_FORMAT_KEY.equals(key)) {
+            } else if (DATE_FORMAT_KEY.equals(name)) {
                 setDateFormat(value);
-            } else if (DATETIME_FORMAT_KEY.equals(key)) {
+            } else if (DATETIME_FORMAT_KEY.equals(name)) {
                 setDateTimeFormat(value);
-            } else if (TIME_ZONE_KEY.equals(key)) {
+            } else if (TIME_ZONE_KEY.equals(name)) {
                 setTimeZone(TimeZone.getTimeZone(value));
-            } else if (CLASSIC_COMPATIBLE_KEY.equals(key)) {
-                setClassicCompatible(StringUtil.getYesNo(value));
-            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(key)) {
+            } else if (CLASSIC_COMPATIBLE_KEY.equals(name)) {
+                char firstChar;
+                if (value != null && value.length() > 0) {
+                    firstChar =  value.charAt(0);
+                } else {
+                    firstChar = 0;
+                }
+                if (Character.isDigit(firstChar) || firstChar == '+' || firstChar == '-') {
+                    setClassicCompatibleAsInt(Integer.parseInt(value));
+                } else {
+                    setClassicCompatible(StringUtil.getYesNo(value));
+                }
+            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     if ("debug".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
@@ -711,28 +979,28 @@ public class Configurable
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.RETHROW_HANDLER);
                     } else {
-                        throw invalidSettingValueException(key, value);
+                        throw invalidSettingValueException(name, value);
                     }
                 } else {
                     setTemplateExceptionHandler(
                             (TemplateExceptionHandler) ClassUtil.forName(value)
                             .newInstance());
                 }
-            } else if (ARITHMETIC_ENGINE_KEY.equals(key)) {
+            } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) { 
                     if ("bigdecimal".equalsIgnoreCase(value)) {
                         setArithmeticEngine(ArithmeticEngine.BIGDECIMAL_ENGINE);
                     } else if ("conservative".equalsIgnoreCase(value)) {
                         setArithmeticEngine(ArithmeticEngine.CONSERVATIVE_ENGINE);
                     } else {
-                        throw invalidSettingValueException(key, value);
+                        throw invalidSettingValueException(name, value);
                     }
                 } else {
                     setArithmeticEngine(
                             (ArithmeticEngine) ClassUtil.forName(value)
                             .newInstance());
                 }
-            } else if (OBJECT_WRAPPER_KEY.equals(key)) {
+            } else if (OBJECT_WRAPPER_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     if ("default".equalsIgnoreCase(value)) {
                         setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
@@ -746,24 +1014,24 @@ public class Configurable
                         setObjectWrapper(
                                 (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                     } else {
-                        throw invalidSettingValueException(key, value);
+                        throw invalidSettingValueException(name, value);
                     }
                     
                 } else {
                     setObjectWrapper((ObjectWrapper) ClassUtil.forName(value)
                             .newInstance());
                 }
-            } else if (BOOLEAN_FORMAT_KEY.equals(key)) {
+            } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
                 setBooleanFormat(value);
-            } else if (OUTPUT_ENCODING_KEY.equals(key)) {
+            } else if (OUTPUT_ENCODING_KEY.equals(name)) {
                 setOutputEncoding(value);
-            } else if (URL_ESCAPING_CHARSET_KEY.equals(key)) {
+            } else if (URL_ESCAPING_CHARSET_KEY.equals(name)) {
                 setURLEscapingCharset(value);
-            } else if (STRICT_BEAN_MODELS.equals(key)) {
+            } else if (STRICT_BEAN_MODELS.equals(name)) {
                 setStrictBeanModels(StringUtil.getYesNo(value));
-            } else if (AUTO_FLUSH_KEY.equals(key)) {
+            } else if (AUTO_FLUSH_KEY.equals(name)) {
                 setAutoFlush(StringUtil.getYesNo(value));
-            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(key)) {
+            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
                 } else if ("safer".equals(value)) {
@@ -795,17 +1063,15 @@ public class Configurable
                     setNewBuiltinClassResolver((TemplateClassResolver) ClassUtil.forName(value)
                             .newInstance());
                 } else {
-                    throw invalidSettingValueException(key, value);
+                    throw invalidSettingValueException(name, value);
                 }
             } else {
-                throw unknownSettingException(key);
+                throw unknownSettingException(name);
             }
         } catch(Exception e) {
-            throw new TemplateException(
-                    "Failed to set setting " + 
-                    StringUtil.jQuote(key) + " to value " + StringUtil.jQuote(value) +
-                    "; see cause exception.",
-                    e, getEnvironment());
+            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
+                    "Failed to set setting ", new _DelayedJQuote(name),
+                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
     }
 
@@ -858,12 +1124,14 @@ public class Configurable
     }
 
     protected TemplateException invalidSettingValueException(String name, String value) {
-        return new TemplateException("Invalid value for setting " + name + ": " + value, getEnvironment());
+        return new _MiscTemplateException(getEnvironment(), new Object[] {
+                "Invalid value for setting ", new _DelayedJQuote(name), ": ",
+                new _DelayedJQuote(value) });
     }
     
-    public static class UnknownSettingException extends TemplateException {
+    public static class UnknownSettingException extends _MiscTemplateException {
         private UnknownSettingException(String name, Environment env) {
-            super("Unknown setting: " + name, env);
+            super(env, new Object[] { "Unknown setting: ", new _DelayedJQuote(name) });
         }
     }
 

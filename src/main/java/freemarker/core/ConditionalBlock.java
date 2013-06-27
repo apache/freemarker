@@ -53,67 +53,91 @@
 package freemarker.core;
 
 import java.io.IOException;
-import freemarker.template.*;
+
+import freemarker.template.TemplateException;
 
 /**
- * An element that represents a conditionally executed block.
+ * An element that represents a conditionally executed block: #if, #elseif or #elseif. Note that when an #if has
+ * related #elseif-s or #else, an {@link IfBlock} parent must be used. For a lonely #if, no such parent is needed. 
+ * 
  * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 
 final class ConditionalBlock extends TemplateElement {
 
+    static final int TYPE_IF = 0;
+    static final int TYPE_ELSE = 1;
+    static final int TYPE_ELSE_IF = 2;
+    
     final Expression condition;
-    private final boolean isFirst;
-    boolean isSimple;
+    private final int type;
+    boolean isLonelyIf;
 
-    ConditionalBlock(Expression condition, TemplateElement nestedBlock, boolean isFirst)
+    ConditionalBlock(Expression condition, TemplateElement nestedBlock, int type)
     {
         this.condition = condition;
         this.nestedBlock = nestedBlock;
-        this.isFirst = isFirst;
+        this.type = type;
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        if (condition == null || condition.isTrue(env)) {
+        if (condition == null || condition.evalToBoolean(env)) {
             if (nestedBlock != null) {
-                env.visit(nestedBlock);
+                env.visitByHiddingParent(nestedBlock);
             }
         }
     }
-
-    public String getCanonicalForm() {
+    
+    protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
-        if (condition == null) {
-            buf.append("<#else");
-        }
-        else if (isFirst) {
-            buf.append("<#if ");
-        }
-        else {
-            buf.append("<#elseif ");
-        }
+        if (canonical) buf.append('<');
+        buf.append(getNodeTypeSymbol());
         if (condition != null) {
+            buf.append(' ');
             buf.append(condition.getCanonicalForm());
         }
-        buf.append(">");
-        if (nestedBlock != null) {
-            buf.append(nestedBlock.getCanonicalForm());
-        }
-        if (isSimple) {
-            buf.append("</#if>");
+        if (canonical) {
+            buf.append(">");
+            if (nestedBlock != null) {
+                buf.append(nestedBlock.getCanonicalForm());
+            }
+            if (isLonelyIf) {
+                buf.append("</#if>");
+            }
         }
         return buf.toString();
     }
-
-    public String getDescription() {
-        String s = "if ";
-        if (condition == null) {
-            s = "else ";
-        } 
-        else if (!isFirst) {
-            s = "elseif ";
+    
+    String getNodeTypeSymbol() {
+        if (type == TYPE_ELSE) {
+            return "#else";
+        } else if (type == TYPE_IF) {
+            return "#if";
+        } else if (type == TYPE_ELSE_IF) {
+            return "#elseif";
+        } else {
+            throw new RuntimeException("Unknown type");
         }
-        String cond = condition != null ? condition.toString() : "";
-        return s + cond;
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return condition;
+        case 1: return new Integer(type);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.CONDITION;
+        case 1: return ParameterRole.AST_NODE_SUBTYPE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

@@ -1,0 +1,31 @@
+a
+b
+c
+a
+b
+c
+a
+1
+a
+b
+c
+&lt;&amp;&gt;
+&amp;lt;&amp;amp;&amp;gt;
+&lt;&amp;&gt;
+---
+<Mooo> = <Mooo>
+  <MOOO> = <MOOO>
+    &LT;MOOO&GT; = &lt;MOOO&gt;
+      <MOOO> = <MOOO>
+    &LT;MOOO&GT; = &lt;MOOO&gt;
+  <MOOO> = <MOOO>
+    <Mooo> = <Mooo>
+      &lt;Mooo&gt; = &lt;Mooo&gt;
+        <Mooo> = <Mooo>
+      &lt;Mooo&gt; = &lt;Mooo&gt;
+    <Mooo> = <Mooo>
+  <MOOO> = <MOOO>
+  red green blue
+---
+  <A&amp;B>[a&b](A&B) <A&amp;B2>[a&b2](A&B2)
+    <{a&amp;b}A&amp;B>[{a&b}a&b]({a&b}A&B) <{a&amp;b2}A&amp;B2>[{a&b2}a&b2]({a&b2}A&B2)

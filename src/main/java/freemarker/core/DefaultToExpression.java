@@ -53,8 +53,15 @@
 package freemarker.core;
 
 
-import freemarker.template.*;
+import freemarker.template.SimpleCollection;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
+/** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class DefaultToExpression extends Expression {
 	
     private static final TemplateCollectionModel EMPTY_COLLECTION = new SimpleCollection(new java.util.ArrayList(0));
@@ -87,42 +94,70 @@ class DefaultToExpression extends Expression {
 	
 	static final TemplateModel EMPTY_STRING_AND_SEQUENCE = new EmptyStringAndSequence();
 	
-	private Expression lhs, rhs;
+	private final Expression lho, rho;
 	
-	DefaultToExpression(Expression lhs, Expression rhs) {
-		this.lhs = lhs;
-		this.rhs = rhs;
+	DefaultToExpression(Expression lho, Expression rho) {
+		this.lho = lho;
+		this.rho = rho;
 	}
 
-	TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-		TemplateModel left = null;		
-		try {
-			left = lhs.getAsTemplateModel(env);
-		} catch (InvalidReferenceException ire) {
-			if (!(lhs instanceof ParentheticalExpression)) {
-				throw ire;
-			}
+	TemplateModel _eval(Environment env) throws TemplateException {
+		TemplateModel left;
+		if (lho instanceof ParentheticalExpression) {
+            boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
+	        try {
+                left = lho.eval(env);
+	        } catch (InvalidReferenceException ire) {
+	            left = null;
+            } finally {
+                env.setFastInvalidReferenceExceptions(lastFIRE);
+	        }
+		} else {
+            left = lho.eval(env);
 		}
+		
 		if (left != null) return left;
-		if (rhs == null) return EMPTY_STRING_AND_SEQUENCE;
-		return rhs.getAsTemplateModel(env);
+		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE;
+		else return rho.eval(env);
 	}
 
 	boolean isLiteral() {
 		return false;
 	}
 
-	Expression _deepClone(String name, Expression subst) {
-		if (rhs == null) {
-			return new DefaultToExpression(lhs.deepClone(name, subst), null);
-		}
-		return new DefaultToExpression(lhs.deepClone(name, subst), rhs.deepClone(name, subst));
+	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new DefaultToExpression(
+                lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                rho != null
+                        ? rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState)
+                        : null);
 	}
 
 	public String getCanonicalForm() {
-		if (rhs == null) {
-			return lhs.getCanonicalForm() + "!";
+		if (rho == null) {
+			return lho.getCanonicalForm() + '!';
 		}
-		return lhs.getCanonicalForm() + "!" + rhs.getCanonicalForm();
+		return lho.getCanonicalForm() + '!' + rho.getCanonicalForm();
 	}
+	
+	String getNodeTypeSymbol() {
+        return "...!...";
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return lho;
+        case 1: return rho;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
+        
 }

@@ -7,18 +7,15 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
-import freemarker.template.utility.UnrecognizedTimeZoneException;
-
 import junit.framework.TestCase;
+import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 
 public class DateUtilTest extends TestCase {
 
-    private static final DateFormat DF
+    private final DateFormat df
             = new SimpleDateFormat("G yyyy-MM-dd HH:mm:ss:S Z", Locale.US);
-    static {
-        DF.setTimeZone(DateUtil.UTC);
+    {
+        df.setTimeZone(DateUtil.UTC);
     }
     
     private DateToISO8601CalendarFactory calendarFactory
@@ -32,58 +29,58 @@ public class DateUtilTest extends TestCase {
         assertEquals(
                 "1998-10-30T15:30:00.512Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 1998-10-30 19:30:00:512 +0400"), true));
+                        df.parse("AD 1998-10-30 19:30:00:512 +0400"), true));
         assertEquals(
                 "1998-10-30T15:30:00.5Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 1998-10-30 19:30:00:500 +0400"), true));
+                        df.parse("AD 1998-10-30 19:30:00:500 +0400"), true));
         assertEquals(
                 "1998-10-30T15:30:00.51Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 1998-10-30 19:30:00:510 +0400"), true));
+                        df.parse("AD 1998-10-30 19:30:00:510 +0400"), true));
         assertEquals(
                 "1998-10-30T15:30:00.1Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 1998-10-30 19:30:00:100 +0400"), true));
+                        df.parse("AD 1998-10-30 19:30:00:100 +0400"), true));
         assertEquals(
                 "1998-10-30T15:30:00.01Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 1998-10-30 19:30:00:10 +0400"), true));
+                        df.parse("AD 1998-10-30 19:30:00:10 +0400"), true));
         assertEquals(
                 "1998-10-30T15:30:00.001Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 1998-10-30 19:30:00:1 +0400"), true));
+                        df.parse("AD 1998-10-30 19:30:00:1 +0400"), true));
         assertEquals(
                 "2000-02-08T06:05:04Z",
                 dateToISO8601UTCDateTimeMSString(
-                        DF.parse("AD 2000-02-08 09:05:04:0 +0300"), true));
+                        df.parse("AD 2000-02-08 09:05:04:0 +0300"), true));
         assertEquals(
                 "0100-02-28T06:15:24Z",
                 dateToISO8601UTCDateTimeString(
-                        DF.parse(
+                        df.parse(
                         "AD 0100-02-28 09:15:24:0 +0300"), true));
         assertEquals(
                 "0010-02-28T06:15:24Z",
                 dateToISO8601UTCDateTimeString(
-                        DF.parse("AD 0010-02-28 09:15:24:0 +0300"), true));
+                        df.parse("AD 0010-02-28 09:15:24:0 +0300"), true));
         assertEquals(
                 "0001-02-28T06:15:24Z",
                 dateToISO8601UTCDateTimeString(
-                        DF.parse("AD 0001-02-28 09:15:24:0 +0300"), true));
+                        df.parse("AD 0001-02-28 09:15:24:0 +0300"), true));
         assertEquals(
                 "0000-02-28T06:15:24Z",
                 dateToISO8601UTCDateTimeString(
-                        DF.parse("BC 0001-02-28 09:15:24:0 +0300"), true));
+                        df.parse("BC 0001-02-28 09:15:24:0 +0300"), true));
         assertEquals(
                 "-1-02-28T06:15:24Z",
                 dateToISO8601UTCDateTimeString(
-                        DF.parse("BC 2-02-28 09:15:24:0 +0300"), true));
+                        df.parse("BC 2-02-28 09:15:24:0 +0300"), true));
         assertEquals(
                 "10000-02-28T06:15:24Z",
                 dateToISO8601UTCDateTimeString(
-                        DF.parse("AD 10000-02-28 09:15:24:0 +0300"), true));
+                        df.parse("AD 10000-02-28 09:15:24:0 +0300"), true));
 
-        Date d = DF.parse("AD 1998-10-30 19:30:00:512 +0400");
+        Date d = df.parse("AD 1998-10-30 19:30:00:512 +0400");
         assertEquals(
                 "1998-10-30",
                 dateToISO8601UTCDateString(d));
@@ -104,8 +101,8 @@ public class DateUtilTest extends TestCase {
     }
 
     public void testLocalTime() throws ParseException {
-        Date dsum = DF.parse("AD 2010-05-09 20:00:00:0 UTC");
-        Date dwin = DF.parse("AD 2010-01-01 20:00:00:0 UTC");
+        Date dsum = df.parse("AD 2010-05-09 20:00:00:0 UTC");
+        Date dwin = df.parse("AD 2010-01-01 20:00:00:0 UTC");
         
         TimeZone tzRome = TimeZone.getTimeZone("Europe/Rome");
         if (tzRome.getOffset(0) == 0) {
@@ -200,7 +197,7 @@ public class DateUtilTest extends TestCase {
     }
     
     public void testAccuracy() throws ParseException {
-        Date d = DF.parse("AD 2000-02-08 09:05:04:250 UTC"); 
+        Date d = df.parse("AD 2000-02-08 09:05:04:250 UTC"); 
         assertEquals("2000-02-08T09:05:04Z",
                 dateToISO8601UTCDateTimeString(d, true));
         assertEquals("2000-02-08T09:05:04.25Z",

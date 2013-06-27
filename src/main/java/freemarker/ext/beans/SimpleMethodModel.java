@@ -62,7 +62,9 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A class that will wrap a reflected method call into a
@@ -70,7 +72,6 @@ import freemarker.template.utility.Collections12;
  * It is used by {@link BeanModel} to wrap reflected method calls
  * for non-overloaded methods.
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
- * @version $Id: SimpleMethodModel.java,v 1.27 2005/06/11 12:12:04 szegedia Exp $
  */
 public final class SimpleMethodModel extends SimpleMemberModel
     implements
@@ -106,6 +107,10 @@ public final class SimpleMethodModel extends SimpleMemberModel
             return wrapper.invokeMethod(object, (Method)getMember(), 
                     unwrapArguments(arguments, wrapper));
         }
+        catch(TemplateModelException e)
+        {
+            throw e;
+        }
         catch(Exception e)
         {
             while(e instanceof InvocationTargetException)
@@ -122,13 +127,17 @@ public final class SimpleMethodModel extends SimpleMemberModel
             }
             if((getMember().getModifiers() & Modifier.STATIC) != 0)
             {
-                throw new TemplateModelException("Method " + getMember() + 
-                        " threw an exception", e);
+                throw new TemplateModelException("Method " + StringUtil.jQuote(getMember()) + 
+                        " threw an exception; see cause exception", e);
             }
             else
             {
-                throw new TemplateModelException("Method " + getMember() + 
-                        " threw an exception when invoked on " + object, e);
+                throw new TemplateModelException(
+                        "Method " + StringUtil.jQuote(getMember()) + 
+                        " threw an exception when invoked on "
+                        + object.getClass().getName() + " object "
+                        + StringUtil.jQuote(StringUtil.tryToString(object)) + ". See cause exception.",
+                        e);
             }
         }
     }
@@ -139,9 +148,14 @@ public final class SimpleMethodModel extends SimpleMemberModel
                 new SimpleNumber(new Integer(index))));
     }
 
-    public int size() throws TemplateModelException
-    {
-        throw new TemplateModelException("?size is unsupported for: " + getClass().getName());
+    public int size() throws TemplateModelException {
+        throw new TemplateModelException(
+                "Getting the number of items or enumerating the items is not supported on this "
+                + ClassUtil.getFTLTypeDescription(this) + " value.\n"
+                + "("
+                + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
+                + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."
+                + ")");
     }
     
     public String toString() {

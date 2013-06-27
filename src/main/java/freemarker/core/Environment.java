@@ -52,15 +52,54 @@
 
 package freemarker.core;
 
-import java.io.*;
-import java.text.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.text.Collator;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleHash;
+import freemarker.template.SimpleSequence;
+import freemarker.template.Template;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateDirectiveBody;
+import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.TemplateTransformModel;
+import freemarker.template.TransformControl;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
+import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -84,6 +123,8 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 public final class Environment extends Configurable {
 
+    static final String STACK_SECTION_SEPARATOR = "----------";
+
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
     private static final Logger logger = Logger.getLogger("freemarker.runtime");
@@ -104,7 +145,7 @@ public final class Environment extends Configurable {
     }
 
     private final TemplateHashModel rootDataModel;
-    private final ArrayList elementStack = new ArrayList();
+    private final ArrayList/*<TemplateElement>*/ instructionStack = new ArrayList();
     private final ArrayList recoveredErrorStack = new ArrayList();
 
     private NumberFormat numberFormat;
@@ -128,6 +169,7 @@ public final class Environment extends Configurable {
     private Namespace mainNamespace, currentNamespace, globalNamespace;
     private HashMap loadedLibs;
 
+    private boolean inAttemptBlock;
     private Throwable lastThrowable;
     
     private TemplateModel lastReturnValue;
@@ -142,6 +184,8 @@ public final class Environment extends Configurable {
     private String cachedURLEscapingCharset;
     private boolean urlEscapingCharsetCached;
 
+    private boolean fastInvalidReferenceExceptions;
+    
     /**
      * Retrieves the environment object associated with the current
      * thread. Data model implementations that need access to the
@@ -227,6 +271,29 @@ public final class Environment extends Configurable {
             popElement();
         }
     }
+    
+    /**
+     * Instead of pushing into the element stack, we replace the top element for the time the parameter element is
+     * visited, and then we restore the top element. The main purpose of this is to get rid of elements in the error
+     * stack trace that from user perspective shouldn't have a stack frame. These typical example is
+     * {@code [#if foo]...[@failsHere/]...[/#if]}, where the #if call shouldn't be in the stack trace. (Simply marking
+     * #if as hidden in stack traces would be wrong, because we still want to show #if when its test expression fails.)    
+     */
+    void visitByHiddingParent(TemplateElement element)
+    throws TemplateException, IOException {
+        TemplateElement parent = replaceTopElement(element);
+        try {
+            element.accept(this);
+        } catch (TemplateException te) {
+            handleTemplateException(te);
+        } finally {
+            replaceTopElement(parent);
+        }
+    }
+
+    private TemplateElement replaceTopElement(TemplateElement element) {
+        return (TemplateElement) instructionStack.set(instructionStack.size() - 1, element);
+    }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
     
@@ -288,7 +355,7 @@ public final class Environment extends Configurable {
      * through
      * @param args optional arguments fed to the transform
      */
-    void visit(TemplateElement element,
+    void visitAndTransform(TemplateElement element,
                TemplateTransformModel transform,
                Map args)
     throws TemplateException, IOException
@@ -307,7 +374,7 @@ public final class Environment extends Configurable {
                 if(tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
                     do {
                         if(element != null) {
-                            visit(element);
+                            visitByHiddingParent(element);
                         }
                     } while(tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
                 }
@@ -350,18 +417,22 @@ public final class Environment extends Configurable {
     /**
      * Visit a block using buffering/recovery
      */
-    
-     void visit(TemplateElement attemptBlock, TemplateElement recoveryBlock) 
+     void visitAttemptRecover(TemplateElement attemptBlock, RecoveryBlock recoveryBlock) 
      throws TemplateException, IOException {
          Writer prevOut = this.out;
          StringWriter sw = new StringWriter();
          this.out = sw;
          TemplateException thrownException = null;
+         boolean lastFIRE = setFastInvalidReferenceExceptions(false);
+         boolean lastInAttemptBlock = inAttemptBlock; 
          try {
-             visit(attemptBlock);
+             inAttemptBlock = true;
+             visitByHiddingParent(attemptBlock);
          } catch (TemplateException te) {
              thrownException = te;
          } finally {
+             inAttemptBlock = lastInAttemptBlock;
+             setFastInvalidReferenceExceptions(lastFIRE);
              this.out = prevOut;
          }
          if (thrownException != null) {
@@ -370,7 +441,7 @@ public final class Environment extends Configurable {
                          attemptBlock.getStartLocationQuoted(), thrownException);
              }
              try {
-                 recoveredErrorStack.add(thrownException.getMessage());
+                 recoveredErrorStack.add(thrownException);
                  visit(recoveryBlock);
              } finally {
                  recoveredErrorStack.remove(recoveredErrorStack.size() -1);
@@ -380,12 +451,22 @@ public final class Environment extends Configurable {
          }
      }
      
-     String getCurrentRecoveredErrorMesssage() throws TemplateException {
+     String getCurrentRecoveredErrorMessage() throws TemplateException {
          if(recoveredErrorStack.isEmpty()) {
-             throw new TemplateException(
-                 ".error is not available outside of a <#recover> block", this);
+             throw new _MiscTemplateException(this, ".error is not available outside of a #recover block");
          }
-         return (String) recoveredErrorStack.get(recoveredErrorStack.size() -1);
+         return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() -1)).getMessage();
+     }
+     
+     /**
+      * Tells if we are inside an <tt>#attempt</tt> block (but before <tt>#recover</tt>). This can be useful for
+      * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
+      * <tt>#attempt</tt> will roll it back anyway. 
+      * 
+      * @since 2.3.20
+      */
+     public boolean isInAttemptBlock() {
+         return inAttemptBlock;
      }
 
 
@@ -420,7 +501,7 @@ public final class Environment extends Configurable {
     /**
      * "visit" an IteratorBlock
      */
-    void visit(IteratorBlock.Context ictxt)
+    void visitIteratorBlock(IteratorBlock.Context ictxt)
     throws TemplateException, IOException
     {
         pushLocalContext(ictxt);
@@ -464,7 +545,7 @@ public final class Environment extends Configurable {
                 visit((Macro) macroOrTransform, null, null, null, null);
             }
             else if (macroOrTransform instanceof TemplateTransformModel) {
-                visit(null, (TemplateTransformModel) macroOrTransform, null); 
+                visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
             }
             else {
                 String nodeType = node.getNodeType();
@@ -483,35 +564,13 @@ public final class Environment extends Configurable {
                          && !nodeType.equals("comment") 
                          && !nodeType.equals("document_type")) 
                     {
-                        String nsBit = "";
-                        String ns = node.getNodeNamespace();
-                        if (ns != null) {
-                            if (ns.length() >0) {
-                                nsBit = " and namespace " + ns;
-                            } else {
-                                nsBit = " and no namespace";
-                            }
-                        }
-                        throw new TemplateException("No macro or transform defined for node named "  
-                                    + node.getNodeName() + nsBit
-                                    + ", and there is no fallback handler called @" + nodeType + " either.",
-                                    this);
+                        throw new _MiscTemplateException(
+                                this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), nodeType));
                     }
                 }
                 else {
-                    String nsBit = "";
-                    String ns = node.getNodeNamespace();
-                    if (ns != null) {
-                        if (ns.length() >0) {
-                            nsBit = " and namespace " + ns;
-                        } else {
-                            nsBit = " and no namespace";
-                        }
-                    }
-                    throw new TemplateException("No macro or transform defined for node with name " 
-                                + node.getNodeName() + nsBit 
-                                + ", and there is no macro or transform called @default either.",
-                                this);
+                    throw new _MiscTemplateException(
+                            this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), "default"));
                 }
             }
         } 
@@ -523,6 +582,25 @@ public final class Environment extends Configurable {
             this.nodeNamespaces = prevNodeNamespaces;
         }
     }
+
+    private Object[] noNodeHandlerDefinedDescription(
+            TemplateNodeModel node, String ns, String nodeType)
+    throws TemplateModelException {
+        String nsPrefix;
+        if (ns != null) {
+            if (ns.length() > 0) {
+                nsPrefix = " and namespace ";
+            } else {
+                nsPrefix = " and no namespace";
+            }
+        } else {
+            nsPrefix = "";
+            ns = "";
+        }
+        return new Object[] { "No macro or directive is defined for node named ",  
+                new _DelayedJQuote(node.getNodeName()), nsPrefix, ns,
+                ", and there is no fallback handler called @", nodeType, " either." };
+    }
     
     void fallback() throws TemplateException, IOException {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
@@ -530,7 +608,7 @@ public final class Environment extends Configurable {
             visit((Macro) macroOrTransform, null, null, null, null);
         }
         else if (macroOrTransform instanceof TemplateTransformModel) {
-            visit(null, (TemplateTransformModel) macroOrTransform, null); 
+            visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
         }
     }
     
@@ -565,15 +643,16 @@ public final class Environment extends Configurable {
                     boolean hasVar = macro.hasArgNamed(varName);
                     if (hasVar || catchAll != null) {
                         Expression arg = (Expression) entry.getValue();
-                        TemplateModel value = arg.getAsTemplateModel(this);
+                        TemplateModel value = arg.eval(this);
                         if (hasVar) {
                             mc.setLocalVar(varName, value);
                         } else {
                             ((SimpleHash)unknownVars).put(varName, value);
                         }
                     } else {
-                        String msg = "Macro " + macro.getName() + " has no such argument: " + varName;
-                        throw new TemplateException(msg, this);
+                        throw new _MiscTemplateException(this, new Object[] {
+                                "Macro ", new _DelayedJQuote(macro.getName()), " has no such argument: ",
+                                varName });
                     }
                 }
             }
@@ -583,12 +662,13 @@ public final class Environment extends Configurable {
                 String[] argumentNames = macro.getArgumentNamesInternal();
                 int size = positionalArgs.size();
                 if (argumentNames.length < size && catchAll == null) {
-                    throw new TemplateException("Macro " + macro.getName() 
-                      + " only accepts " + argumentNames.length + " parameters.", this);
+                    throw new _MiscTemplateException(this, new Object[] { 
+                            "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
+                            + argumentNames.length + " parameters." });
                 }
                 for (int i = 0; i < size; i++) {
                     Expression argExp = (Expression) positionalArgs.get(i);
-                    TemplateModel argModel = argExp.getAsTemplateModel(this);
+                    TemplateModel argModel = argExp.eval(this);
                     try {
                         if (i < argumentNames.length) {
                             String argName = argumentNames[i];
@@ -597,7 +677,7 @@ public final class Environment extends Configurable {
                             ((SimpleSequence)unknownVars).add(argModel);
                         }
                     } catch (RuntimeException re) {
-                        throw new TemplateException(re, this);
+                        throw new _MiscTemplateException(re, this);
                     }
                 }
             }
@@ -643,7 +723,7 @@ public final class Environment extends Configurable {
         if (node == null) {
             node = this.getCurrentVisitorNode();
             if (node == null) {
-                throw new TemplateModelException(
+                throw new _TemplateModelException(
                         "The target node of recursion is missing or null.");
             }
         }
@@ -673,7 +753,7 @@ public final class Environment extends Configurable {
 
         // Log the exception
         if(logger.isErrorEnabled()) {
-            logger.error("Template processing error: " + StringUtil.jQuoteNoXSS(te.getMessage()), te);
+            logger.error("Error executing FreeMarker template", te);
         }
 
         // Stop exception is not passed to the handler, but
@@ -716,7 +796,7 @@ public final class Environment extends Configurable {
     }
     
     /*
-     * Note that altough it is not allowed to set this setting with the
+     * Note that altough it's not allowed to set this setting with the
      * <tt>setting</tt> directive, it still must be allowed to set it from Java
      * code while the template executes, since some frameworks allow templates
      * to actually change the output encoding on-the-fly.
@@ -729,7 +809,7 @@ public final class Environment extends Configurable {
     /**
      * Returns the name of the charset that should be used for URL encoding.
      * This will be <code>null</code> if the information is not available.
-     * The function caches the return value, so it is quick to call it
+     * The function caches the return value, so it's quick to call it
      * repeately. 
      */
     String getEffectiveURLEscapingCharset() {
@@ -748,6 +828,68 @@ public final class Environment extends Configurable {
             collator = Collator.getInstance(getLocale());
         }
         return collator;
+    }
+    
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator.
+     * 
+     * @since 2.3.20
+     */
+    public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
+    }
+
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator, except that if the two types
+     *     are incompatible, they are treated as non-equal instead of throwing an exception. Comparing dates of
+     *     different types (date-only VS time-only VS date-time) will still throw an exception, however.
+     * 
+     * @since 2.3.20
+     */
+    public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvalUtil.compareLenient(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
+    }
+    
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     * 
+     * @since 2.3.20
+     */
+    public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN, rightValue, this);
+    }
+
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     * 
+     * @since 2.3.20
+     */
+    public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
+    }
+    
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL ">" operator.
+     * 
+     * @since 2.3.20
+     */
+    public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_GREATER_THAN, rightValue, this);
+    }
+
+    /**
+     * Compares two {@link TemplateModel}-s according the rules of the FTL ">=" operator.
+     * 
+     * @since 2.3.20
+     */
+    public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
+            throws TemplateException {
+        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
     }
 
     public void setOut(Writer out) {
@@ -773,7 +915,10 @@ public final class Environment extends Configurable {
     String formatDate(Date date, int type) throws TemplateModelException {
         DateFormat df = getDateFormatObject(type);
         if(df == null) {
-            throw new TemplateModelException("Can't convert the date to string, because it is not known which parts of the date variable are in use. Use ?date, ?time or ?datetime built-in, or ?string.<format> or ?string(format) built-in with this date.");
+            throw new _TemplateModelException(new _ErrorDescriptionBuilder(
+                    "Can't convert the date to string, because it's not known which parts of the date variable are "
+                    + "in use.")
+                    .tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
         }
         return df.format(date);
     }
@@ -888,7 +1033,8 @@ public final class Environment extends Configurable {
                 return dateTimeFormat;
             }
             default: {
-                throw new TemplateModelException("Unrecognized date type " + dateType);
+                throw new _TemplateModelException(new Object[] {
+                        "Unrecognized date type: ", new Integer(dateType) });
             }
         }
     }
@@ -921,30 +1067,27 @@ public final class Environment extends Configurable {
                 // Add format to global format cache. Note this is
                 // globally done once per locale per pattern.
                 StringTokenizer tok = new StringTokenizer(pattern, "_");
-                int style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
-                if(style != -1) {
+                int dateStyle = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
+                if(dateStyle != -1) {
                     switch(dateType) {
                         case TemplateDateModel.UNKNOWN: {
-                            throw new TemplateModelException(
-                                "Can't convert the date to string using a " +
-                                "built-in format, because it is not known which " +
-                                "parts of the date variable are in use. Use " +
-                                "?date, ?time or ?datetime built-in, or " +
-                                "?string.<format> or ?string(<format>) built-in "+
-                                "with explicit formatting pattern with this date.");
+                            throw new _TemplateModelException(new _ErrorDescriptionBuilder(
+                                    "Can't convert the date to string using a built-in format because it's not known "
+                                    + "which parts of the date are in use.")
+                                    .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                         }
                         case TemplateDateModel.TIME: {
-                            format = DateFormat.getTimeInstance(style, locale);
+                            format = DateFormat.getTimeInstance(dateStyle, locale);
                             break;
                         }
                         case TemplateDateModel.DATE: {
-                            format = DateFormat.getDateInstance(style, locale);
+                            format = DateFormat.getDateInstance(dateStyle, locale);
                             break;
                         }
                         case TemplateDateModel.DATETIME: {
-                            int timestyle = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : style;
-                            if(timestyle != -1) {
-                                format = DateFormat.getDateTimeInstance(style, timestyle, locale);
+                            int timeStyle = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : dateStyle;
+                            if(timeStyle != -1) {
+                                format = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
                             }
                             break;
                         }
@@ -955,7 +1098,8 @@ public final class Environment extends Configurable {
                         format = new SimpleDateFormat(pattern, locale);
                     }
                     catch(IllegalArgumentException e) {
-                        throw new TemplateModelException("Can't parse " + pattern + " to a date format.", e);
+                        throw new _TemplateModelException(e, new Object[] {
+                                "Can't parse ", new _DelayedJQuote(pattern), " to a date format, because:\n", e });
                     }
                 }
                 format.setTimeZone(timeZone);
@@ -1015,7 +1159,7 @@ public final class Environment extends Configurable {
 
     TemplateTransformModel getTransform(Expression exp) throws TemplateException {
         TemplateTransformModel ttm = null;
-        TemplateModel tm = exp.getAsTemplateModel(this);
+        TemplateModel tm = exp.eval(this);
         if (tm instanceof TemplateTransformModel) {
             ttm = (TemplateTransformModel) tm;
         }
@@ -1177,33 +1321,87 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Outputs the instruction stack. Useful for debugging.
-     * {@link TemplateException}s incorporate this information in their stack
-     * traces.
+     * Prints the current FTL stack trace. Useful for debugging.
+     * {@link TemplateException}s incorporate this information in their stack traces.
      */
     public void outputInstructionStack(PrintWriter pw) {
-        pw.println("----------");
-        ListIterator iter = elementStack.listIterator(elementStack.size());
-        if(iter.hasPrevious()) {
-            pw.print("==> ");
-            TemplateElement prev = (TemplateElement) iter.previous();
-            pw.print(prev.getDescription());
-            pw.print(" [");
-            pw.print(prev.getStartLocation());
-            pw.println("]");
+        outputInstructionStack(getInstructionStackSnapshot(), pw);
+        pw.flush();
+    }
+
+    /**
+     * Prints an FTL stack trace based on a stack trace snapshot.
+     * @see #getInstructionStackSnapshot()
+     * @since 2.3.20
+     */
+    static void outputInstructionStack(
+            TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
+        pw.println(STACK_SECTION_SEPARATOR);
+        if (instructionStackSnapshot != null) {
+            for (int i = 0; i < instructionStackSnapshot.length; i++) {
+                TemplateElement stackEl = instructionStackSnapshot[i];
+                pw.print(i == 0 ? "==> " : "    ");
+                pw.println(instructionStackItemToString(stackEl));
+            }
+        } else {
+            pw.println("[the stack was empty]");
         }
-        while(iter.hasPrevious()) {
-            TemplateElement prev = (TemplateElement) iter.previous();
-            if (prev instanceof UnifiedCall || prev instanceof Include) {
-                String location = prev.getDescription() + " [" + prev.getStartLocation() + "]";
-                if(location != null && location.length() > 0) {
-                    pw.print(" in ");
-                    pw.println(location);
-                }
+        pw.println(STACK_SECTION_SEPARATOR);
+    }
+    
+    /**
+     * Returns the snapshot of what would be printed as FTL stack trace.
+     * @since 2.3.20
+     */
+    TemplateElement[] getInstructionStackSnapshot() {
+        int requiredLength = 0;
+        int ln = instructionStack.size();
+        
+        for (int i = 0; i < ln; i++) {
+            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
+            if (i == ln || stackEl.isShownInStackTrace()) {
+                requiredLength++;
             }
         }
-        pw.println("----------");
-        pw.flush();
+        
+        if (requiredLength == 0) return null;
+        
+        TemplateElement[] result = new TemplateElement[requiredLength];
+        int dstIdx = requiredLength - 1;
+        for (int i = 0; i < ln; i++) {
+            TemplateElement stackEl = (TemplateElement) instructionStack.get(i);
+            if (i == ln || stackEl.isShownInStackTrace()) {
+                result[dstIdx--] = stackEl;
+            }
+        }
+        
+        return result;
+    }
+    
+    static String instructionStackItemToString(TemplateElement stackEl) {
+        StringBuffer sb = new StringBuffer(); 
+        sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
+        
+        sb.append("  [");
+        Macro enclosingMacro = getEnclosingMacro(stackEl);
+        if (enclosingMacro != null) {
+            sb.append(MessageUtil.formatLocationForEvaluationError(
+                    enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
+        } else {
+            sb.append(MessageUtil.formatLocationForEvaluationError(
+                    stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
+        }
+        sb.append("]");
+        
+        return sb.toString();
+    }
+
+    static private Macro getEnclosingMacro(TemplateElement stackEl) {
+        while (stackEl != null) {
+            if (stackEl instanceof Macro) return (Macro) stackEl;
+            stackEl = (TemplateElement) stackEl.getParent();
+        }
+        return null;
     }
 
     private void pushLocalContext(LocalContext localContext) {
@@ -1332,13 +1530,17 @@ public final class Environment extends Configurable {
     }
 
     private void pushElement(TemplateElement element) {
-        elementStack.add(element);
+        instructionStack.add(element);
     }
 
     private void popElement() {
-        elementStack.remove(elementStack.size() - 1);
+        instructionStack.remove(instructionStack.size() - 1);
     }
     
+    void replaceElemetStackTop(TemplateElement instr) {
+        instructionStack.set(instructionStack.size() - 1, instr);
+    }
+
     public TemplateNodeModel getCurrentVisitorNode() {
         return currentVisitorNode;
     }
@@ -1353,7 +1555,7 @@ public final class Environment extends Configurable {
     TemplateModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
         String nodeName = node.getNodeName();
         if (nodeName == null) {
-            throw new TemplateException("Node name is null.", this);
+            throw new _MiscTemplateException(this, "Node name is null.");
         }
         TemplateModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
     
@@ -1388,7 +1590,9 @@ public final class Environment extends Configurable {
             try {                                   
                 ns = (Namespace) nodeNamespaces.get(i);
             } catch (ClassCastException cce) {
-                throw new InvalidReferenceException("A using clause should contain a sequence of namespaces or strings that indicate the location of importable macro libraries.", this);
+                throw new _MiscTemplateException(this,
+                        "A \"using\" clause should contain a sequence of namespaces or strings that indicate the "
+                        + "location of importable macro libraries.");
             }
             result = getNodeProcessor(ns, nodeName, nsURI);
             if (result != null) 
@@ -1575,7 +1779,7 @@ public final class Environment extends Configurable {
             this.currentNamespace = newNamespace;
             loadedLibs.put(templateName, currentNamespace);
             Writer prevOut = out;
-            this.out = NULL_WRITER;
+            this.out = NullWriter.INSTANCE;
             try {
                 include(loadedTemplate);
             } finally {
@@ -1716,12 +1920,6 @@ public final class Environment extends Configurable {
         }
     }
 
-    static final Writer NULL_WRITER = new Writer() {
-            public void write(char cbuf[], int off, int len) {}
-            public void flush() {}
-            public void close() {}
-     };
-     
      private static final Writer EMPTY_BODY_WRITER = new Writer() {
     
         public void write(char[] cbuf, int off, int len) throws IOException {
@@ -1737,5 +1935,23 @@ public final class Environment extends Configurable {
         public void close() {
         }
     };
+    
+    /**
+     * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
+     */
+    boolean getFastInvalidReferenceExceptions() {
+        return fastInvalidReferenceExceptions;
+    }
+    
+    /**
+     * Sets if for invalid references {@link InvalidReferenceException#FAST_INSTANCE} should be thrown, or a new
+     * {@link InvalidReferenceException}. The "fast" instance is used if we know that the error will be handled
+     * so that its message will not be logged or shown anywhere.
+     */
+    boolean setFastInvalidReferenceExceptions(boolean b) {
+        boolean res = fastInvalidReferenceExceptions;
+        fastInvalidReferenceExceptions = b;
+        return res;
+    }
     
 }

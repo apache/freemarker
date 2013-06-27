@@ -63,7 +63,6 @@ import freemarker.template.TemplateSequenceModel;
  * not modify that after the model was made!
  *
  * @author Daniel Dekany
- * @version $Id: StringArraySequence.java,v 1.2 2004/01/06 17:06:42 szegedia Exp $
  */
 public class StringArraySequence implements TemplateSequenceModel {
     private String[] stringArray;

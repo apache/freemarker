@@ -64,8 +64,6 @@ import freemarker.template.TemplateTransformModel;
  *
  * <p>An instance of this tarnsform is initially visible as shared
  * variable called <tt>xml_escape</tt>.</p>
- * 
- * @version $Id: XmlEscape.java,v 1.29 2004/11/27 14:49:57 ddekany Exp $
  */
 public class XmlEscape implements TemplateTransformModel {
 

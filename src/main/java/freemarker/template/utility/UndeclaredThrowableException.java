@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 /**
  * The equivalent of JDK 1.3 UndeclaredThrowableException.
  * @author Attila Szegedi
- * @version $Id: UndeclaredThrowableException.java,v 1.2 2003/09/17 13:30:05 szegedia Exp $
  */
 public class UndeclaredThrowableException extends RuntimeException
 {

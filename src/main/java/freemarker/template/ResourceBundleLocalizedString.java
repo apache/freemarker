@@ -1,8 +1,8 @@
 package freemarker.template;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 /**
  * A concrete implementation of {@link LocalizedString} that gets 

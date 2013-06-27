@@ -52,13 +52,16 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
-import freemarker.template.utility.*;
+import freemarker.template.SimpleHash;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.HtmlEscape;
+import freemarker.template.utility.StandardCompress;
 
 /**
  * Part of the TestTransform testcase suite.
- *
- * @version $Id: TransformHashWrapper.java,v 1.15 2005/06/16 18:13:59 ddekany Exp $
  */
 public class TransformHashWrapper implements TemplateHashModel,
         TemplateScalarModel {

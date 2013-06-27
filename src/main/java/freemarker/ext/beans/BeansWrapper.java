@@ -84,7 +84,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -110,7 +110,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * Utility class that provides generic services to reflection classes.
  * It handles all polymorphism issues in the {@link #wrap(Object)} and {@link #unwrap(TemplateModel)} methods.
  * @author Attila Szegedi
- * @version $Id: BeansWrapper.java,v 1.91.2.13 2007/04/02 13:08:59 szegedia Exp $
  */
 public class BeansWrapper implements ObjectWrapper
 {
@@ -179,9 +178,9 @@ public class BeansWrapper implements ObjectWrapper
      * and {@link #enumModels}.
      */
     private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache
-            = ConcurrentMapFactory.newMaybeConcurrentHashMap();
+            = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
     private final boolean isGenericClassIntrospectionCacheConcurrentMap
-            = ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
+            = _ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
     private final Set/*<String>*/ genericClassIntrospectionCacheClassNames
             = new HashSet();
     private final Set/*<Class>*/ genericClassIntrospectionsInProgress
@@ -240,6 +239,9 @@ public class BeansWrapper implements ObjectWrapper
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper;
     private boolean strict = false;
+    
+    // I have commented this out, as it won't be in 2.3.20 yet.
+    //private Version overloadedMethodSelection;
     
     /**
      * Creates a new instance of BeansWrapper. The newly created instance
@@ -334,6 +336,31 @@ public class BeansWrapper implements ObjectWrapper
         return simpleMapWrapper;
     }
 
+    // I have commented this out, as it won't be in 2.3.20 yet.
+    /*
+    /**
+     * Tells which non-backward-compatible overloaded method selection fixes to apply;
+     * see {@link #setOverloadedMethodSelection(Version)}.
+     * /
+    public Version getOverloadedMethodSelection() {
+        return overloadedMethodSelection;
+    }
+
+    /**
+     * Sets which non-backward-compatible overloaded method selection fixes to apply.
+     * This has similar logic as {@link Configuration#setIncompatibleImprovements(Version)},
+     * but only applies to this aspect.
+     * 
+     * Currently significant values:
+     * <ul>
+     *   <li>2.3.21: Completetlly rewritten overloaded method selection, fixes several issues with the old one.</li>
+     * </ul>
+     * /
+    public void setOverloadedMethodSelection(Version version) {
+        overloadedMethodSelection = version;
+    }
+    */
+    
     /**
      * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
      * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
@@ -487,7 +514,7 @@ public class BeansWrapper implements ObjectWrapper
 
     /**
      * @deprecated override {@link #getModelFactory(Class)} instead. Using this
-     * method will now bypass wrapper caching (if it is enabled) and always 
+     * method will now bypass wrapper caching (if it's enabled) and always 
      * result in creation of a new wrapper. This method will be removed in 2.4
      * @param object
      * @param factory
@@ -880,6 +907,8 @@ public class BeansWrapper implements ObjectWrapper
         IllegalAccessException,
         TemplateModelException
     {
+        // TODO: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
+        // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
         return 
             method.getReturnType() == Void.TYPE 
@@ -949,11 +978,11 @@ public class BeansWrapper implements ObjectWrapper
                 ctor = (Constructor)smm.getMember();
                 objargs = smm.unwrapArguments(arguments, this);
             }
-            else if(ctors instanceof MethodMap)
+            else if(ctors instanceof OverloadedMethods)
             {
-                MethodMap methodMap = (MethodMap)ctors; 
+                OverloadedMethods overloadedConstructors = (OverloadedMethods) ctors; 
                 MemberAndArguments maa = 
-                    methodMap.getMemberAndArguments(arguments);
+                    overloadedConstructors.getMemberAndArguments(arguments);
                 objargs = maa.getArgs();
                 ctor = (Constructor)maa.getMember();
             }
@@ -1186,18 +1215,21 @@ public class BeansWrapper implements ObjectWrapper
     private void addBeanInfoToClassInrospectionData(Map introspData, Class clazz,
             Map accessibleMethods) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+        
         PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
-        MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
-
-        for(int i = pda.length - 1; i >= 0; --i) {
+        int pdaLength = pda != null ? pda.length : 0;
+        for(int i = pdaLength - 1; i >= 0; --i) {
             addPropertyDescriptorToClassIntrospectionData(
                     pda[i], clazz, accessibleMethods,
                     introspData);
         }
+        
         if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
         {
             MethodAppearanceDecision decision = new MethodAppearanceDecision();  
-            for(int i = mda.length - 1; i >= 0; --i)
+            MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
+            int mdaLength = mda != null ? mda.length : 0;  
+            for(int i = mdaLength - 1; i >= 0; --i)
             {
                 MethodDescriptor md = mda[i];
                 Method publicMethod = getAccessibleMethod(
@@ -1224,17 +1256,17 @@ public class BeansWrapper implements ObjectWrapper
                         if(previous instanceof Method)
                         {
                             // Overloaded method - replace method with a method map
-                            MethodMap methodMap = new MethodMap(methodKey, this);
-                            methodMap.addMember((Method)previous);
-                            methodMap.addMember(publicMethod);
-                            introspData.put(methodKey, methodMap);
+                            OverloadedMethods overloadedMethods = new OverloadedMethods(this);
+                            overloadedMethods.addMember((Method)previous);
+                            overloadedMethods.addMember(publicMethod);
+                            introspData.put(methodKey, overloadedMethods);
                             // remove parameter type information
                             getArgTypes(introspData).remove(previous);
                         }
-                        else if(previous instanceof MethodMap)
+                        else if(previous instanceof OverloadedMethods)
                         {
                             // Already overloaded method - add new overload
-                            ((MethodMap)previous).addMember(publicMethod);
+                            ((OverloadedMethods)previous).addMember(publicMethod);
                         }
                         else if (decision.getMethodShadowsProperty()
                                 || !(previous instanceof PropertyDescriptor))
@@ -1247,7 +1279,7 @@ public class BeansWrapper implements ObjectWrapper
                     }
                 }
             }
-        }
+        } // end if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(PropertyDescriptor pd,
@@ -1328,7 +1360,7 @@ public class BeansWrapper implements ObjectWrapper
             }
             else if(ctors.length > 1)
             {
-                MethodMap ctorMap = new MethodMap("<init>", this);
+                OverloadedMethods ctorMap = new OverloadedMethods(this);
                 for (int i = 0; i < ctors.length; i++)
                 {
                     ctorMap.addMember(ctors[i]);
@@ -1737,7 +1769,7 @@ public class BeansWrapper implements ObjectWrapper
             Class.forName("java.lang.Enum");
             // If they are, return the appropriate constructor for enum models
             return Class.forName(
-                "freemarker.ext.beans.Internal_EnumModels").getDeclaredConstructor(
+                "freemarker.ext.beans._EnumModels").getDeclaredConstructor(
                         new Class[] { BeansWrapper.class });
         }
         catch(Exception e) {

@@ -52,7 +52,8 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 final class ParentheticalExpression extends Expression {
 
@@ -62,24 +63,49 @@ final class ParentheticalExpression extends Expression {
         this.nested = nested;
     }
 
-    boolean isTrue(Environment env) throws TemplateException {
-        return nested.isTrue(env);
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        return nested.evalToBoolean(env);
     }
 
     public String getCanonicalForm() {
         return "(" + nested.getCanonicalForm() + ")";
     }
-
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException 
+    
+    String getNodeTypeSymbol() {
+        return "(...)";
+    }
+    
+    TemplateModel _eval(Environment env) throws TemplateException 
     {
-        return nested.getAsTemplateModel(env);
+        return nested.eval(env);
     }
     
     public boolean isLiteral() {
         return nested.isLiteral();
     }
-
-    Expression _deepClone(String name, Expression subst) {
-        return new ParentheticalExpression(nested.deepClone(name, subst));
+    
+    Expression getNestedExpression() {
+        return nested;
     }
+
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new ParentheticalExpression(
+                nested.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    }
+    
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return nested;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        if (idx != 0) throw new IndexOutOfBoundsException();
+        return ParameterRole.ENCLOSED_OPERAND;
+    }
+    
 }

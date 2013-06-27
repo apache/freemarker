@@ -64,7 +64,6 @@ import java.util.Set;
 /**
  * Implementation of missing JDK 1.3 collection features for JDK 1.2
  * @author Attila Szegedi
- * @version $Id: Collections12.java,v 1.2 2004/11/27 14:49:57 ddekany Exp $
  */
 public class Collections12
 {

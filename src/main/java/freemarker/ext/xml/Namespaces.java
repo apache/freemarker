@@ -51,16 +51,15 @@
  */
 
 package freemarker.ext.xml;
-import freemarker.template.TemplateMethodModel;
-import java.lang.String;
-import java.util.List;
-import freemarker.template.TemplateScalarModel;
-import freemarker.template.TemplateModelException;
 import java.util.HashMap;
+import java.util.List;
+
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * @author Attila Szegedi
- * @version $Id: Namespaces.java,v 1.4 2003/10/13 11:57:50 szegedia Exp $
  */
 class Namespaces
 implements

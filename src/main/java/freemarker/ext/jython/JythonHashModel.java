@@ -73,7 +73,6 @@ import freemarker.template.TemplateModelException;
  * <code>get()</code> method works for attributes as well. However, in practice
  * when you ask for <code>dict?keys</code> inside a template, you'll really
  * want to retrieve only items, not attributes so this is considered OK.
- * @version $Id: JythonHashModel.java,v 1.14 2003/11/12 21:53:40 ddekany Exp $
  * @author Attila Szegedi
  */
 public class JythonHashModel
@@ -139,7 +138,7 @@ implements
         }
         throw new TemplateModelException(
                 "'?keys' is not supported as there is no 'keys' nor 'keySet' attribute on an instance of "
-                + JythonVersionAdapter.getInstance().getPythonClassName(object));
+                + JythonVersionAdapterHolder.INSTANCE.getPythonClassName(object));
     }
 
     /**
@@ -161,6 +160,6 @@ implements
         }
         throw new TemplateModelException(
                 "'?values' is not supported as there is no 'values' attribute on an instance of "
-                + JythonVersionAdapter.getInstance().getPythonClassName(object));
+                + JythonVersionAdapterHolder.INSTANCE.getPythonClassName(object));
     }
 }

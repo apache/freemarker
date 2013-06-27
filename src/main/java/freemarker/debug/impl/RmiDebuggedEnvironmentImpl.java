@@ -1,12 +1,16 @@
 package freemarker.debug.impl;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.SoftCacheStorage;
@@ -27,7 +31,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * @author Attila Szegedi
- * @version $Id: RmiDebuggedEnvironmentImpl.java,v 1.3.2.2 2006/11/27 07:55:17 szegedia Exp $
  */
 class RmiDebuggedEnvironmentImpl
 extends
@@ -40,6 +43,8 @@ implements
     private static final CacheStorage storage = new SoftCacheStorage(new IdentityHashMap());
     private static final Object idLock = new Object();
     private static long nextId = 1;
+    private static Set remotes = new HashSet();
+
     
     private boolean stopped = false;
     private final long id;
@@ -89,6 +94,14 @@ implements
             {
                 value = new DebugConfigurationModel((Configuration)key);
             }
+        }
+        if(value != null)
+        {
+            storage.put(key, value);
+        }
+        if(value instanceof Remote)
+        {
+            remotes.add(value);
         }
         return value;
     }
@@ -348,6 +361,20 @@ implements
                 }
             }
             return super.get(key);
+        }
+    }
+
+    public static void cleanup() {
+        for(Iterator i = remotes.iterator(); i.hasNext();)
+        {
+            Object remoteObject = i.next();
+            try
+            {
+                UnicastRemoteObject.unexportObject((Remote) remoteObject, true);
+            }
+            catch (Exception e)
+            {
+            }
         }
     }
 }

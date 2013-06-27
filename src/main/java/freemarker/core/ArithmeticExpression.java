@@ -52,7 +52,9 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * An operator for arithmetic operations. Note that the + operator
@@ -61,69 +63,87 @@ import freemarker.template.*;
  */
 final class ArithmeticExpression extends Expression {
 
-    static final int SUBSTRACTION = 0;
-    static final int MULTIPLICATION = 1;
-    static final int DIVISION = 2;
-    static final int MODULUS = 3;
+    static final int TYPE_SUBSTRACTION = 0;
+    static final int TYPE_MULTIPLICATION = 1;
+    static final int TYPE_DIVISION = 2;
+    static final int TYPE_MODULO = 3;
 
-    private static final char[] OPERATORS = new char[] {'-','*','/','%'};
+    private static final char[] OPERATOR_IMAGES = new char[] { '-', '*', '/', '%' };
 
-    private final Expression left;
-    private final Expression right;
-    private final int operation;
+    private final Expression lho;
+    private final Expression rho;
+    private final int operator;
 
-    ArithmeticExpression(Expression left, Expression right, int operation) {
-        this.left = left;
-        this.right = right;
-        this.operation = operation;
+    ArithmeticExpression(Expression lho, Expression rho, int operator) {
+        this.lho = lho;
+        this.rho = rho;
+        this.operator = operator;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException 
+    TemplateModel _eval(Environment env) throws TemplateException 
     {
-        TemplateModel leftModel = left.getAsTemplateModel(env);
-        TemplateModel rightModel = right.getAsTemplateModel(env);
-        boolean leftIsNumber = (leftModel instanceof TemplateNumberModel);
-        boolean rightIsNumber = (rightModel instanceof TemplateNumberModel);
-        boolean bothNumbers = leftIsNumber && rightIsNumber;
-        if (!bothNumbers) {
-            String msg = "Error " + getStartLocation();
-            if (!leftIsNumber) {
-                msg += "\nExpression " + left + " is not numerical";
-            }
-            if (!rightIsNumber) {
-                msg += "\nExpression " + right + " is not numerical";
-            }
-            throw new NonNumericalException(msg, env);
-        }
-        Number first = EvaluationUtil.getNumber(leftModel, left, env);
-        Number second = EvaluationUtil.getNumber(rightModel, right, env);
+        Number lhoNumber = lho.evalToNumber(env);
+        Number rhoNumber = rho.evalToNumber(env);
+        
         ArithmeticEngine ae = 
             env != null 
                 ? env.getArithmeticEngine()
                 : getTemplate().getArithmeticEngine();
-        switch (operation) {
-            case SUBSTRACTION : 
-                return new SimpleNumber(ae.subtract(first, second));
-            case MULTIPLICATION :
-                return new SimpleNumber(ae.multiply(first, second));
-            case DIVISION :
-                return new SimpleNumber(ae.divide(first, second));
-            case MODULUS :
-                return new SimpleNumber(ae.modulus(first, second));
+        switch (operator) {
+            case TYPE_SUBSTRACTION : 
+                return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));
+            case TYPE_MULTIPLICATION :
+                return new SimpleNumber(ae.multiply(lhoNumber, rhoNumber));
+            case TYPE_DIVISION :
+                return new SimpleNumber(ae.divide(lhoNumber, rhoNumber));
+            case TYPE_MODULO :
+                return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
             default:
-                throw new TemplateException("unknown operation : " + operation, env);
+                throw new _MiscTemplateException(this, new Object[] {
+                        "Unknown operation: ", new Integer(operator) });
         }
     }
 
     public String getCanonicalForm() {
-        return left.getCanonicalForm() + ' ' + OPERATORS[operation] + ' ' + right.getCanonicalForm();
+        return lho.getCanonicalForm() + ' ' + OPERATOR_IMAGES[operator] + ' ' + rho.getCanonicalForm();
+    }
+    
+    String getNodeTypeSymbol() {
+        return String.valueOf(OPERATOR_IMAGES[operator]);
     }
     
     boolean isLiteral() {
-        return constantValue != null || (left.isLiteral() && right.isLiteral());
+        return constantValue != null || (lho.isLiteral() && rho.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new ArithmeticExpression(left.deepClone(name, subst), right.deepClone(name, subst), operation);
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new ArithmeticExpression(
+    	        lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        operator);
     }
+    
+    int getParameterCount() {
+        return 3;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return lho;
+        case 1: return rho;
+        case 2: return new Integer(operator);
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.LEFT_HAND_OPERAND;
+        case 1: return ParameterRole.RIGHT_HAND_OPERAND;
+        case 2: return ParameterRole.AST_NODE_SUBTYPE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

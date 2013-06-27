@@ -52,15 +52,22 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.ListIterator;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
 
 final class HashLiteral extends Expression {
 
     private final ArrayList keys, values;
     private final int size;
 
-    HashLiteral(ArrayList keys, ArrayList values) {
+    HashLiteral(ArrayList/*<Expression>*/ keys, ArrayList/*<Expression>*/ values) {
         this.keys = keys;
         this.values = values;
         this.size = keys.size();
@@ -68,7 +75,7 @@ final class HashLiteral extends Expression {
         values.trimToSize();
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         return new SequenceHash(env);
     }
 
@@ -87,6 +94,10 @@ final class HashLiteral extends Expression {
         buf.append("}");
         return buf.toString();
     }
+    
+    String getNodeTypeSymbol() {
+        return "{...}";
+    }
 
     boolean isLiteral() {
         if (constantValue != null) {
@@ -103,14 +114,17 @@ final class HashLiteral extends Expression {
     }
 
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
 		ArrayList clonedKeys = (ArrayList)keys.clone();
 		for (ListIterator iter = clonedKeys.listIterator(); iter.hasNext();) {
-            iter.set(((Expression)iter.next()).deepClone(name, subst));
+            iter.set(((Expression)iter.next()).deepCloneWithIdentifierReplaced(
+                    replacedIdentifier, replacement, replacementState));
         }
 		ArrayList clonedValues = (ArrayList)values.clone();
 		for (ListIterator iter = clonedValues.listIterator(); iter.hasNext();) {
-            iter.set(((Expression)iter.next()).deepClone(name, subst));
+            iter.set(((Expression)iter.next()).deepCloneWithIdentifierReplaced(
+                    replacedIdentifier, replacement, replacementState));
         }
     	return new HashLiteral(clonedKeys, clonedValues);
     }
@@ -127,9 +141,11 @@ final class HashLiteral extends Expression {
             for (int i = 0; i< size; i++) {
                 Expression keyExp = (Expression) keys.get(i);
                 Expression valExp = (Expression) values.get(i);
-                String key = keyExp.getStringValue(env);
-                TemplateModel value = valExp.getAsTemplateModel(env);
-                assertNonNull(value, valExp, env);
+                String key = keyExp.evalAndCoerceToString(env);
+                TemplateModel value = valExp.eval(env);
+                if (env == null || !env.isClassicCompatible()) {
+                    valExp.assertNonNull(value, env);
+                }
                 keyMap.put(key, value);
                 keyList.add(key);
                 valueList.add(value);
@@ -158,4 +174,25 @@ final class HashLiteral extends Expression {
             return size == 0;
         }
     }
+
+    int getParameterCount() {
+        return size * 2;
+    }
+
+    Object getParameterValue(int idx) {
+        checkIndex(idx);
+        return idx % 2 == 0 ? keys.get(idx / 2) : values.get(idx / 2);
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        checkIndex(idx);
+        return idx % 2 == 0 ? ParameterRole.ITEM_KEY : ParameterRole.ITEM_VALUE;
+    }
+
+    private void checkIndex(int idx) {
+        if (idx >= size * 2) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

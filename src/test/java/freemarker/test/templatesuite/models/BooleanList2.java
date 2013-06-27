@@ -52,14 +52,15 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * Model for testing list models. Every
  * other method simply delegates to a SimpleList model.
  *
  * @author  <a href="mailto:run2000@users.sourceforge.net">Nicholas Cull</a>
- * @version $Id: BooleanList2.java,v 1.12 2003/01/12 23:40:25 revusky Exp $
  */
 public class BooleanList2 implements TemplateSequenceModel {
 

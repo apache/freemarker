@@ -53,12 +53,10 @@
 package freemarker.template;
 
 import freemarker.core.Environment;
+import freemarker.core._ErrorDescriptionBuilder;
 
 /**
- * Template model implementation classes should throw this exception if
- * requested data cannot be retrieved.  
- *
- * @version $Id: TemplateModelException.java,v 1.14 2003/04/22 21:03:22 revusky Exp $
+ * {@link TemplateModel} methods throw this exception if the requested data can't be retrieved.  
  */
 public class TemplateModelException extends TemplateException {
 
@@ -67,7 +65,7 @@ public class TemplateModelException extends TemplateException {
      * specified detail message.
      */
     public TemplateModelException() {
-        this(null, null);
+        this((String) null, null);
     }
 
     /**
@@ -81,14 +79,31 @@ public class TemplateModelException extends TemplateException {
     }
 
     /**
+     * The same as {@link #TemplateModelException(Throwable)}; it's exists only for binary
+     * backward-compatibility.
+     */
+    public TemplateModelException(Exception cause) {
+        this((String) null, cause);
+    }
+
+    /**
      * Constructs a <tt>TemplateModelException</tt> with the given underlying
      * Exception, but no detail message.
      *
-     * @param cause the underlying <code>Exception</code> that caused this
+     * @param cause the underlying {@link Exception} that caused this
      * exception to be raised
      */
-    public TemplateModelException(Exception cause) {
-        this(null, cause);
+    public TemplateModelException(Throwable cause) {
+        this((String) null, cause);
+    }
+
+    
+    /**
+     * The same as {@link #TemplateModelException(String, Throwable)}; it's exists only for binary
+     * backward-compatibility.
+     */
+    public TemplateModelException(String description, Exception cause) {
+        super(description, cause, null);
     }
 
     /**
@@ -97,10 +112,32 @@ public class TemplateModelException extends TemplateException {
      * to be raised.
      *
      * @param description the description of the error that occurred
-     * @param cause the underlying <code>Exception</code> that caused this
+     * @param cause the underlying {@link Exception} that caused this
      * exception to be raised
      */
-    public TemplateModelException(String description, Exception cause) {
-        super( description, cause, Environment.getCurrentEnvironment() );
+    public TemplateModelException(String description, Throwable cause) {
+        super(description, cause, null);
     }
+
+    /**
+     * Don't use this; this is to be used internally by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
+     *     backward-compatibility
+     */
+    protected TemplateModelException(Throwable cause, Environment env, String description,
+            boolean preventAmbiguity) {
+        super(description, cause, env);
+    }
+    
+    /**
+     * Don't use this; this is to be used internally by FreeMarker.
+     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
+     *     backward-compatibility
+     */
+    protected TemplateModelException(
+            Throwable cause, Environment env, _ErrorDescriptionBuilder descriptionBuilder,
+            boolean preventAmbiguity) {
+        super(cause, env, descriptionBuilder, true);
+    }
+    
 }

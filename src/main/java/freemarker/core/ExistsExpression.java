@@ -53,27 +53,33 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
-
+/** {@code exp??} and {@code (exp)??} */
 class ExistsExpression extends Expression {
 	
-	private Expression exp;
-	
+	protected final Expression exp;
 	
 	ExistsExpression(Expression exp) {
 		this.exp = exp;
 	}
 
-	TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
-		TemplateModel tm = null;
-		try {
-			tm = exp.getAsTemplateModel(env);
-		} catch (InvalidReferenceException ire) {
-			if (!(exp instanceof ParentheticalExpression)) {
-				throw ire;
-			}
-		}
+	TemplateModel _eval(Environment env) throws TemplateException {
+        TemplateModel tm;
+	    if (exp instanceof ParentheticalExpression) {
+            boolean lastFIRE = env.setFastInvalidReferenceExceptions(true);
+            try {
+                tm = exp.eval(env);
+            } catch (InvalidReferenceException ire) {
+                tm = null;
+            } finally {
+                env.setFastInvalidReferenceExceptions(lastFIRE);
+            }
+	    } else {
+            tm = exp.eval(env);
+	    }
 		return tm == null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
 	}
 
@@ -81,12 +87,29 @@ class ExistsExpression extends Expression {
 		return false;
 	}
 
-	Expression _deepClone(String name, Expression subst) {
-		return new ExistsExpression(exp.deepClone(name, subst));
+	protected Expression deepCloneWithIdentifierReplaced_inner(String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+		return new ExistsExpression(
+		        exp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
 	}
 
 	public String getCanonicalForm() {
-		return exp.getCanonicalForm() + "??";
+		return exp.getCanonicalForm() + getNodeTypeSymbol();
 	}
+	
+	String getNodeTypeSymbol() {
+        return "??";
+    }
 
+    int getParameterCount() {
+        return 1;
+    }
+
+    Object getParameterValue(int idx) {
+        return exp;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.LEFT_HAND_OPERAND;
+    }
+	
 }

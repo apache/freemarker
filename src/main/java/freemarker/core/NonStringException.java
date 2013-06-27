@@ -53,20 +53,50 @@
 package freemarker.core;
 
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
- * A subclass of TemplateException that 
+ * A {@link TemplateException} that 
  * indicates that the internals expected an expression
  * to evaluate to a string or numeric value and it didn't.
  * @author Attila Szegedi
  */
-public class NonStringException extends TemplateException {
+public class NonStringException extends UnexpectedTypeException {
+
+    private static final String DEFAULT_DESCRIPTION
+            = "Expecting " + NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " value here";
+    
+    static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
+            = "string or something automatically convertible to string (number, date or boolean)";
 
     public NonStringException(Environment env) {
-        super("expecting string or numerical value here", env);
+        super(env, DEFAULT_DESCRIPTION);
     }
 
     public NonStringException(String description, Environment env) {
-        super(description, env);
+        super(env, description);
     }
+ 
+    NonStringException(Environment env, _ErrorDescriptionBuilder description) {
+        super(env, description);
+    }
+
+    NonStringException(
+            Expression blamed, TemplateModel model, Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, env);
+    }
+
+    NonStringException(
+            Expression blamed, TemplateModel model, String tip,
+            Environment env)
+            throws InvalidReferenceException {
+        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tip, env);
+    }
+
+    NonStringException(
+            Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
+        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tips, env);
+    }
+        
 }

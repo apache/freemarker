@@ -52,10 +52,19 @@
 
 package freemarker.core;
 
-import java.util.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.swing.tree.TreeNode;
-import freemarker.template.*;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
 
 /**
@@ -67,10 +76,8 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
 
     TemplateElement parent;
 
-// Only one of nestedBlock and nestedElements can be non-null.
-
+    // Only one of nestedBlock and nestedElements can be non-null.
     TemplateElement nestedBlock;
-
     List nestedElements; 
 
     /**
@@ -81,7 +88,48 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
      */
     abstract void accept(Environment env) throws TemplateException, IOException;
 
-    abstract public String getDescription();
+    /**
+     * One-line description of the element, that contain all the information that is used in
+     * {@link #getCanonicalForm()}, except the nested content (elements) of the element. The expressions inside the 
+     * element (the parameters) has to be shown. Meant to be used for stack traces, also for tree views that don't go
+     * down to the expression-level. There are no backward-compatibility guarantees regarding the format used ATM, but
+     * it must be regular enough to be machine-parseable, and it must contain all information necessary for restoring an
+     * AST equivalent to the original.
+     * 
+     * This final implementation calls {@link #dump(boolean) dump(false)}.
+     * 
+     * @see #getCanonicalForm()
+     * @see #getNodeTypeSymbol()
+     */
+    public final String getDescription() {
+        return dump(false);
+    }
+    
+    /**
+     * This final implementation calls {@link #dump(boolean) dump(false)}.
+     */
+    public final String getCanonicalForm() {
+        return dump(true);
+    }
+    
+    /**
+     * Tells if the element should show up in error stack traces. If you think you need to set this to {@code false} for
+     * an element, always consider if you should use {@link Environment#visitByHiddingParent(TemplateElement)} instead.
+     * 
+     * Note that this will be ignored for the top (current) element of a stack trace, as that's always shown.
+     */
+    boolean isShownInStackTrace() {
+        return true;
+    }
+
+    /**
+     * Brings the implementation of {@link #getCanonicalForm()} and {@link #getDescription()} to a single place.
+     * Don't call those methods in method on {@code this}, because that will result in infinite recursion! 
+     * 
+     * @param canonical if {@code true}, it calculates the return value of {@link #getCanonicalForm()},
+     *        otherwise of {@link #getDescription()}.
+     */
+    abstract protected String dump(boolean canonical);
     
 // Methods to implement TemplateNodeModel 
 

@@ -52,55 +52,78 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
 
 /**
  * A class that represents a Range between two integers.
  */
 final class Range extends Expression {
 
-    final Expression left;
-    final Expression right;
+    final Expression lho;
+    final Expression rho;
 
-    Range(Expression left, Expression right) {
-        this.left = left;
-        this.right = right;
+    Range(Expression lho, Expression rho) {
+        this.lho = lho;
+        this.rho = rho;
     }
     
-    boolean hasRhs() {
-        return right != null;
+    boolean hasRho() {
+        return rho != null;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) 
+    TemplateModel _eval(Environment env) 
         throws TemplateException
     {
-        int min = EvaluationUtil.getNumber(left, env).intValue();
+        int min = lho.evalToNumber(env).intValue();
         int max = 0;
-        if (right != null) {
-            max = EvaluationUtil.getNumber(right, env).intValue();
+        if (rho != null) {
+            max = rho.evalToNumber(env).intValue();
             return new NumericalRange(min, max);
         }
         return new NumericalRange(min);
     }
     
-    boolean isTrue(Environment env) throws TemplateException {
-        String msg = "Error " + getStartLocation() + ". " 
-                    + "\nExpecting a boolean here."
-                    + " Expression " + this + " is a range.";
-        throw new NonBooleanException(msg, env);
+    // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        throw new NonBooleanException(this, new NumericalRange(0, 0), env);
     }
 
     public String getCanonicalForm() {
-        String rhs = right != null ? right.getCanonicalForm() : "";
-        return left.getCanonicalForm() + ".." + rhs;
+        String rhs = rho != null ? rho.getCanonicalForm() : "";
+        return lho.getCanonicalForm() + ".." + rhs;
+    }
+    
+    String getNodeTypeSymbol() {
+        return "..";
     }
     
     boolean isLiteral() {
-        boolean rightIsLiteral = right == null || right.isLiteral();
-        return constantValue != null || (left.isLiteral() && rightIsLiteral);
+        boolean rightIsLiteral = rho == null || rho.isLiteral();
+        return constantValue != null || (lho.isLiteral() && rightIsLiteral);
     }
     
-    Expression _deepClone(String name, Expression subst) {
-        return new Range(left.deepClone(name, subst), right.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        return new Range(
+                lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return lho;
+        case 1: return rho;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
+    
 }

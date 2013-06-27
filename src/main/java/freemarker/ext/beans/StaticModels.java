@@ -62,7 +62,6 @@ import freemarker.template.TemplateModelException;
  * instantiate an arbitrary StaticModel using get syntax (i.e.
  * <tt>StaticModels["java.lang.System"].currentTimeMillis()</tt>).
  * @author Attila Szegedi
- * @version $Id: StaticModels.java,v 1.12.4.1 2006/11/12 10:23:02 szegedia Exp $
  */
 class StaticModels extends ClassBasedModelFactory {
     

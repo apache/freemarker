@@ -52,12 +52,16 @@
 
 package freemarker.core;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
-import freemarker.template.*;
+import freemarker.template.Configuration;
+import freemarker.template.SimpleDate;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * A reference to a built-in identifier, such as .root
@@ -109,7 +113,7 @@ final class BuiltinVariable extends Expression {
         }
     }
 
-    TemplateModel _getAsTemplateModel(Environment env) throws TemplateException {
+    TemplateModel _eval(Environment env) throws TemplateException {
         if (name == NAMESPACE) {
             return env.getCurrentNamespace();
         }
@@ -156,12 +160,12 @@ final class BuiltinVariable extends Expression {
             return s != null ? new SimpleScalar(s) : null;
         }
         if (name == ERROR) {
-            return new SimpleScalar(env.getCurrentRecoveredErrorMesssage());
+            return new SimpleScalar(env.getCurrentRecoveredErrorMessage());
         }
         if (name == NOW) {
             return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
         }
-        throw new TemplateException("Invalid built-in variable: " + this, env);
+        throw new _MiscTemplateException(this, new Object[] { "Invalid built-in variable: ", name });
     }
 
     public String toString() {
@@ -171,12 +175,17 @@ final class BuiltinVariable extends Expression {
     public String getCanonicalForm() {
         return "." + name;
     }
+    
+    String getNodeTypeSymbol() {
+        return getCanonicalForm();
+    }
 
     boolean isLiteral() {
         return false;
     }
 
-    Expression _deepClone(String name, Expression subst) {
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return this;
     }
 
@@ -196,4 +205,17 @@ final class BuiltinVariable extends Expression {
             return false;
         }
     }
+    
+    int getParameterCount() {
+        return 0;
+    }
+
+    Object getParameterValue(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+    
 }

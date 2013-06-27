@@ -56,7 +56,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -70,9 +70,9 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final BeansWrapper wrapper;
     
     private final Map/*<String,TemplateModel>*/ cache
-            = ConcurrentMapFactory.newMaybeConcurrentHashMap();
+            = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
     private final boolean isCacheConcurrentMap
-            = ConcurrentMapFactory.isConcurrent(cache);
+            = _ConcurrentMapFactory.isConcurrent(cache);
     private final Set classIntrospectionsInProgress = new HashSet();
     
     protected ClassBasedModelFactory(BeansWrapper wrapper) {

@@ -52,8 +52,18 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
 import freemarker.ext.beans.BeanModel;
+import freemarker.template.Template;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * An abstract class for nodes in the parse tree 
@@ -61,7 +71,12 @@ import freemarker.ext.beans.BeanModel;
  */
 abstract public class Expression extends TemplateObject {
 
-    abstract TemplateModel _getAsTemplateModel(Environment env) throws TemplateException;
+    /**
+     * @param env might be {@code null}, if this kind of expression can be evaluated during parsing (as opposed to
+     *     during template execution).
+     */
+    abstract TemplateModel _eval(Environment env) throws TemplateException;
+    
     abstract boolean isLiteral();
 
     // Used to store a constant return value for this expression. Only if it
@@ -78,78 +93,89 @@ abstract public class Expression extends TemplateObject {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {
-                constantValue = _getAsTemplateModel(null);
+                constantValue = _eval(null);
             } catch (Exception e) {
             // deliberately ignore.
             }
         }
     }
-    
+
+    /**
+     * @deprecated At the moment FreeMarker has no API for this with backward-compatibility promises.
+     */
     public final TemplateModel getAsTemplateModel(Environment env) throws TemplateException {
-        return constantValue != null ? constantValue : _getAsTemplateModel(env);
+        return eval(env);
     }
     
-    String getStringValue(Environment env) throws TemplateException {
-        return getStringValue(getAsTemplateModel(env), this, env);
+    final TemplateModel eval(Environment env) throws TemplateException {
+        return constantValue != null ? constantValue : _eval(env);
     }
     
-    static String getStringValue(TemplateModel referentModel, Expression exp, Environment env)
-    throws
-        TemplateException
-    {
-        if (referentModel instanceof TemplateNumberModel) {
-            return env.formatNumber(EvaluationUtil.getNumber((TemplateNumberModel) referentModel, exp, env));
-        }
-        if (referentModel instanceof TemplateDateModel) {
-            TemplateDateModel dm = (TemplateDateModel) referentModel;
-            return env.formatDate(EvaluationUtil.getDate(dm, exp, env), dm.getDateType());
-        }
-        if (referentModel instanceof TemplateScalarModel) {
-            return EvaluationUtil.getString((TemplateScalarModel) referentModel, exp, env);
-        }
-        if(env.isClassicCompatible()) {
-            if (referentModel instanceof TemplateBooleanModel) {
-                return ((TemplateBooleanModel)referentModel).getAsBoolean() ? "true" : "";
-            }
-            if (referentModel == null) {
-                return "";
-            }
-        }
-        assertNonNull(referentModel, exp, env);
-        
-        String msg = "Error " + exp.getStartLocation()
-                     +"\nExpecting a string, " 
-                     + (env.isClassicCompatible() ? "boolean, " : "" )
-                     + "date or number here, Expression " + exp 
-                     + " is instead a " 
-                     + referentModel.getClass().getName();
-        throw new NonStringException(msg, env);
+    String evalAndCoerceToString(Environment env) throws TemplateException {
+        return EvalUtil.coerceModelToString(eval(env), this, null, env);
     }
 
-    Expression deepClone(String name, Expression subst) {
-        Expression clone = _deepClone(name, subst);
-        clone.copyLocationFrom(this);
+    /**
+     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     */
+    String evalAndCoerceToString(Environment env, String seqTip) throws TemplateException {
+        return EvalUtil.coerceModelToString(eval(env), this, seqTip, env);
+    }
+    
+    static String coerceModelToString(TemplateModel tm, Expression exp, Environment env) throws TemplateException {
+        return EvalUtil.coerceModelToString(tm, exp, null, env);
+    }
+    
+    Number evalToNumber(Environment env) throws TemplateException {
+        TemplateModel model = eval(env);
+        return modelToNumber(model, env);
+    }
+
+    Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
+        if(model instanceof TemplateNumberModel) {
+            return EvalUtil.modelToNumber((TemplateNumberModel) model, this);
+        } else {
+            throw new NonNumericalException(this, model, env);
+        }
+    }
+    
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        TemplateModel model = eval(env);
+        return modelToBoolean(model, env);
+    }
+
+    boolean modelToBoolean(TemplateModel model, Environment env) throws TemplateException {
+        if (model instanceof TemplateBooleanModel) {
+            return ((TemplateBooleanModel) model).getAsBoolean();
+        } else if (env.isClassicCompatible()) {
+            return model != null && !isEmpty(model);
+        } else {
+            throw new NonBooleanException(this, model, env);
+        }
+    }
+    
+    final Expression deepCloneWithIdentifierReplaced(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+        Expression clone = deepCloneWithIdentifierReplaced_inner(replacedIdentifier, replacement, replacementState);
+        if (clone.beginLine == 0) {
+            clone.copyLocationFrom(this);
+        }
         return clone;
     }
-
-    abstract Expression _deepClone(String name, Expression subst);
-
-    boolean isTrue(Environment env) throws TemplateException {
-        TemplateModel referent = getAsTemplateModel(env);
-        if (referent instanceof TemplateBooleanModel) {
-            return ((TemplateBooleanModel) referent).getAsBoolean();
-        }
-        if (env.isClassicCompatible()) {
-            return referent != null && !isEmpty(referent);
-        }
-        assertNonNull(referent, this, env);
-        String msg = "Error " + getStartLocation()
-                     + "\nExpecting a boolean (true/false) expression here"
-                     + "\nExpression " + this + " does not evaluate to true/false "
-                     + "\nit is an instance of " + referent.getClass().getName();
-        throw new NonBooleanException(msg, env);
+    
+    static class ReplacemenetState {
+        /**
+         * If the replacement expression is not in use yet, we don't have to clone it.
+         */
+        boolean replacementAlreadyInUse; 
     }
 
+    /**
+     * This should return an equivalent new expression object (or an identifier replacement expression).
+     * The position need not be filled, unless it will be different from the position of what were cloning. 
+     */
+    protected abstract Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState);
 
     static boolean isEmpty(TemplateModel model) throws TemplateModelException
     {
@@ -160,6 +186,8 @@ abstract public class Expression extends TemplateObject {
         } else if (model instanceof TemplateScalarModel) {
             String s = ((TemplateScalarModel) model).getAsString();
             return (s == null || s.length() == 0);
+        } else if (model == null) {
+            return true;
         } else if (model instanceof TemplateCollectionModel) {
             return !((TemplateCollectionModel) model).iterator().hasNext();
         } else if (model instanceof TemplateHashModel) {
@@ -172,4 +200,9 @@ abstract public class Expression extends TemplateObject {
             return true;
         }
     }
+    
+    void assertNonNull(TemplateModel model, Environment env) throws InvalidReferenceException {
+        if (model == null) throw InvalidReferenceException.getInstance(this, env);
+    }
+    
 }

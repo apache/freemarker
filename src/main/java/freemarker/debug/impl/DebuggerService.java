@@ -65,7 +65,6 @@ import freemarker.template.utility.SecurityUtilities;
  * not usable for anyone outside the FreeMarker core classes. It is public only
  * as an implementation detail.
  * @author Attila Szegedi
- * @version $Id: DebuggerService.java,v 1.2 2003/05/30 16:51:53 szegedia Exp $
  */
 public abstract class DebuggerService
 {
@@ -74,7 +73,7 @@ public abstract class DebuggerService
     private static DebuggerService createInstance()
     {
         // Creates the appropriate service class. If the debugging is turned
-        // off, this is a fast no-op service, otherwise it is the real-thing
+        // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
         return 
             SecurityUtilities.getSystemProperty("freemarker.debug.password") == null
@@ -96,16 +95,23 @@ public abstract class DebuggerService
     
     abstract void registerTemplateSpi(Template template);
     
-    public static boolean suspendEnvironment(Environment env, int line)
+    public static boolean suspendEnvironment(Environment env, String templateName, int line)
     throws
         RemoteException
     {
-        return instance.suspendEnvironmentSpi(env, line);
+        return instance.suspendEnvironmentSpi(env, templateName, line);
     }
     
-    abstract boolean suspendEnvironmentSpi(Environment env, int line)
+    abstract boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
     throws
         RemoteException;
+
+    abstract void shutdownSpi();
+
+    public static void shutdown()
+    {
+        instance.shutdownSpi();
+    }
 
     private static class NoOpDebuggerService extends DebuggerService
     {
@@ -114,12 +120,16 @@ public abstract class DebuggerService
             return Collections.EMPTY_LIST;
         }
         
-        boolean suspendEnvironmentSpi(Environment env, int line)
+        boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
         {
             throw new UnsupportedOperationException();
         }
         
         void registerTemplateSpi(Template template)
+        {
+        }
+
+        void shutdownSpi()
         {
         }
     }

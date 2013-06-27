@@ -7,14 +7,16 @@ import freemarker.core.Environment;
 import freemarker.template.utility.DeepUnwrap;
 
 /**
- * Objects that implement this interface can be used as user-defined directives 
- * (much like macros). They can do arbitrary actions, write arbitrary
- * text to the template output, and trigger rendering of their nested content
+ * "directive" template language data type: used as user-defined directives 
+ * (much like macros) in templates. They can do arbitrary actions, write arbitrary
+ * text to the template output, and trigger rendering of their nested content for
  * any number of times.
+ * 
+ * <p>They are used in templates like {@code <@myDirective foo=1 bar="wombat">...</@myDirective>} (or as
+ * {@code <@myDirective foo=1 bar="wombat" />} - the nested content is optional).
  *
  * @since 2.3.11
  * @author Attila Szegedi
- * @version $Id: $
  */
 public interface TemplateDirectiveModel extends TemplateModel
 {
@@ -36,7 +38,7 @@ public interface TemplateDirectiveModel extends TemplateModel
      * number of loop-variables that the caller has specified.
      * Never <code>null</code>, but can be a zero-length array.
      * @param body an object that can be used to render the nested content (body) of
-     * the directive call. If the directive call has no nested content (i.e., it is like
+     * the directive call. If the directive call has no nested content (i.e., it's like
      * [@myDirective /] or [@myDirective][/@myDirective]), then this will be
      * <code>null</code>.
      *

@@ -52,17 +52,20 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
 
 /**
- * An instruction that assigns a literal or reference, to a single-identifier
- * variable.
+ * An instruction that makes a single assignment, like [#local x=1].
+ * This is also used as the child of {@link AssignmentInstruction}, if there are multiple assignments in the same tag,
+ * like in [#local x=1 x=2].
  */
 final class Assignment extends TemplateElement {
 
     private String variableName;
     private Expression value, namespaceExp;
-    private int scope;
+    private int/*enum*/ scope;
 
     static final int NAMESPACE = 1;
     static final int LOCAL = 2;
@@ -87,28 +90,26 @@ final class Assignment extends TemplateElement {
     }
 
     void accept(Environment env) throws TemplateException {
-        TemplateModel tm = value.getAsTemplateModel(env);
         Environment.Namespace namespace = null;
         if (namespaceExp != null) {
-            boolean oops = false;
+            TemplateModel namespaceTM = namespaceExp.eval(env);
             try {
-                namespace = (Environment.Namespace) namespaceExp.getAsTemplateModel(env);
-            } catch (ClassCastException cce) {
-                oops = true;
+                namespace = (Environment.Namespace) namespaceTM;
+            } catch (ClassCastException e) {
+                throw new UnexpectedTypeException(namespaceExp, namespaceTM, "namespace", env);
             }
-            if (oops || namespace==null) {
-                throw new InvalidReferenceException(getStartLocation() + "\nInvalid reference to namespace: " + namespaceExp, env);
+            if (namespace == null) {
+                throw InvalidReferenceException.getInstance(namespaceExp, env);
             }
         }
+        
+        TemplateModel tm = value.eval(env);
         if (tm == null) {
             if (env.isClassicCompatible()) {
                 tm = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                String msg = "Error " + getStartLocation()
-                            +"\n" + value + " is undefined."
-                            +"\nIt cannot be assigned to " + variableName;
-                throw new InvalidReferenceException(msg, env);
+                throw InvalidReferenceException.getInstance(value, env);
             }
         }
         if (scope == LOCAL) {
@@ -122,50 +123,74 @@ final class Assignment extends TemplateElement {
                 else if (scope == NAMESPACE) {
                     namespace = env.getCurrentNamespace();
                 }
+                else {
+                    throw new RuntimeException("Unexpected scope type: " + scope);
+                }
             }
             namespace.put(variableName, tm);
         }
     }
 
-    public String getCanonicalForm() {
+    protected String dump(boolean canonical) {
         StringBuffer buf = new StringBuffer();
-        if (!(parent instanceof AssignmentInstruction)) {
-            if (scope == LOCAL) {
-                buf.append("<#local ");
-            }
-            else if (scope ==GLOBAL) {
-                buf.append("<#global ");
-            }
-            else {
-                buf.append("<#assign ");
-            }
+        String dn = parent instanceof AssignmentInstruction ? null : getNodeTypeSymbol();
+        if (dn != null) {
+            if (canonical) buf.append("<");
+            buf.append(dn);
+            buf.append(' ');
         }
         buf.append (variableName);
-        buf.append('=');
+        buf.append(" = ");
         buf.append(value.getCanonicalForm());
-        if (!(parent instanceof AssignmentInstruction)) {
+        if (dn != null) {
             if (namespaceExp != null) {
                 buf.append(" in ");
                 buf.append(namespaceExp.getCanonicalForm());
             }
-            buf.append(">");
+            if (canonical) buf.append(">");
         }
-        return buf.toString();
+        String result = buf.toString();
+        return result;
+    }
+    
+    String getNodeTypeSymbol() {
+        return getDirectiveName(scope);
+    }
+    
+    static String getDirectiveName(int scope) {
+        if (scope == Assignment.LOCAL) {
+            return "#local";
+        } else if (scope == Assignment.GLOBAL) {
+            return "#global";
+        } else if (scope == Assignment.NAMESPACE) {
+            return "#assign";
+        } else {
+            return "#{unknown_assignment_type}";
+        }
+    }
+    
+    int getParameterCount() {
+        return 4;
     }
 
-    public String getDescription() {
-        String s ="";
-        if (!(parent instanceof AssignmentInstruction)) {
-            s = "assignment: ";
-            if (scope == LOCAL) {
-                s = "local " + s;
-            }
-            else if (scope == GLOBAL) {
-                s  = "global " + s;
-            }
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return variableName;
+        case 1: return value;
+        case 2: return new Integer(scope);
+        case 3: return namespaceExp;
+        default: throw new IndexOutOfBoundsException();
         }
-        return s + variableName 
-               + "=" 
-               + value; 
     }
+
+    ParameterRole getParameterRole(int idx) {
+        switch (idx) {
+        case 0: return ParameterRole.ASSIGNMENT_TARGET;
+        case 1: return ParameterRole.ASSIGNMENT_SOURCE;
+        case 2: return ParameterRole.VARIABLE_SCOPE;
+        case 3: return ParameterRole.NAMESPACE;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+    
 }

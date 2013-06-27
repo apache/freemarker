@@ -52,8 +52,22 @@
 
 package freemarker.core;
 
-import freemarker.template.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * An operator for the + operator. Note that this is treated
@@ -71,15 +85,15 @@ final class AddConcatExpression extends Expression {
         this.right = right;
     }
 
-    TemplateModel _getAsTemplateModel(Environment env)
+    TemplateModel _eval(Environment env)
             throws TemplateException
     {
-        TemplateModel leftModel = left.getAsTemplateModel(env);
-        TemplateModel rightModel = right.getAsTemplateModel(env);
+        TemplateModel leftModel = left.eval(env);
+        TemplateModel rightModel = right.eval(env);
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel)
         {
-            Number first = EvaluationUtil.getNumber((TemplateNumberModel) leftModel, left, env);
-            Number second = EvaluationUtil.getNumber((TemplateNumberModel) rightModel, right, env);
+            Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, left);
+            Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, right);
             ArithmeticEngine ae =
                 env != null
                     ? env.getArithmeticEngine()
@@ -93,9 +107,9 @@ final class AddConcatExpression extends Expression {
         else
         {
             try {
-                String s1 = getStringValue(leftModel, left, env);
+                String s1 = Expression.coerceModelToString(leftModel, left, env);
                 if(s1 == null) s1 = "null";
-                String s2 = getStringValue(rightModel, right, env);
+                String s2 = Expression.coerceModelToString(rightModel, right, env);
                 if(s2 == null) s2 = "null";
                 return new SimpleScalar(s1.concat(s2));
             } catch (NonStringException e) {
@@ -125,12 +139,31 @@ final class AddConcatExpression extends Expression {
         return constantValue != null || (left.isLiteral() && right.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new AddConcatExpression(left.deepClone(name, subst), right.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new AddConcatExpression(
+    	left.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	right.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 
     public String getCanonicalForm() {
         return left.getCanonicalForm() + " + " + right.getCanonicalForm();
+    }
+    
+    String getNodeTypeSymbol() {
+        return "+";
+    }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        return idx == 0 ? left : right;
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
     private static final class ConcatenatedSequence

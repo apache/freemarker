@@ -83,7 +83,6 @@ import freemarker.template.TemplateModelException;
  * for MessageFormat with arguments arg1, arg2 and arg3</li>
  * </ul>
  * @author Attila Szegedi
- * @version $Id: ResourceBundleModel.java,v 1.22.2.2 2007/04/02 13:19:37 szegedia Exp $
  */
 public class ResourceBundleModel
     extends

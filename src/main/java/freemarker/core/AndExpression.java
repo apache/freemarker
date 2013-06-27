@@ -56,27 +56,51 @@ import freemarker.template.TemplateException;
 
 final class AndExpression extends BooleanExpression {
 
-    private final Expression left;
-    private final Expression right;
+    private final Expression lho;
+    private final Expression rho;
 
-    AndExpression(Expression left, Expression right) {
-        this.left = left;
-        this.right = right;
+    AndExpression(Expression lho, Expression rho) {
+        this.lho = lho;
+        this.rho = rho;
     }
 
-    boolean isTrue(Environment env) throws TemplateException {
-        return left.isTrue(env) && right.isTrue(env);
+    boolean evalToBoolean(Environment env) throws TemplateException {
+        return lho.evalToBoolean(env) && rho.evalToBoolean(env);
     }
 
     public String getCanonicalForm() {
-        return left.getCanonicalForm() + " && " + right.getCanonicalForm();
+        return lho.getCanonicalForm() + " && " + rho.getCanonicalForm();
+    }
+
+    String getNodeTypeSymbol() {
+        return "&&";
     }
     
     boolean isLiteral() {
-        return constantValue != null || (left.isLiteral() && right.isLiteral());
+        return constantValue != null || (lho.isLiteral() && rho.isLiteral());
     }
 
-    Expression _deepClone(String name, Expression subst) {
-    	return new AndExpression(left.deepClone(name, subst), right.deepClone(name, subst));
+    protected Expression deepCloneWithIdentifierReplaced_inner(
+            String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
+    	return new AndExpression(
+    	        lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
+    
+    int getParameterCount() {
+        return 2;
+    }
+
+    Object getParameterValue(int idx) {
+        switch (idx) {
+        case 0: return lho;
+        case 1: return rho;
+        default: throw new IndexOutOfBoundsException();
+        }
+    }
+
+    ParameterRole getParameterRole(int idx) {
+        return ParameterRole.forBinaryOperatorOperand(idx);
+    }
+    
 }

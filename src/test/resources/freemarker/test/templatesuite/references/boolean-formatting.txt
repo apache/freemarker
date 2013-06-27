@@ -1,0 +1,10 @@
+Y Y Y
+N N N
+y y y
+n n n
+y y y
+n n n
+str:n str:n
+nein ja
+y y
+theStringValue theStringValue

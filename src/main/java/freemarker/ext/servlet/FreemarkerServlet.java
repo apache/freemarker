@@ -59,6 +59,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.Locale;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -81,7 +83,6 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
-import java.util.Locale;
 
 /**
  * <p>This is a general-purpose FreeMarker view servlet.</p>
@@ -169,7 +170,6 @@ import java.util.Locale;
  * </ul>
  * 
  * @author Attila Szegedi
- * @version $Id: FreemarkerServlet.java,v 1.82.2.5 2006/06/21 13:02:01 ddekany Exp $
  */
 
 public class FreemarkerServlet extends HttpServlet
@@ -581,7 +581,7 @@ public class FreemarkerServlet extends HttpServlet
      */
     protected String requestUrlToTemplatePath(HttpServletRequest request)
     {
-        // First, see if it is an included request
+        // First, see if it's an included request
         String includeServletPath  = (String) request.getAttribute("javax.servlet.include.servlet_path");
         if(includeServletPath != null)
         {
@@ -597,7 +597,7 @@ public class FreemarkerServlet extends HttpServlet
         if (path != null) return path;
         path = request.getServletPath();
         if (path != null) return path;
-        // Seems that it is a servlet mapped with prefix, and there was no extra path info.
+        // Seems that it's a servlet mapped with prefix, and there was no extra path info.
         return "";
     }
 
@@ -719,7 +719,7 @@ public class FreemarkerServlet extends HttpServlet
      * (that is, HttpSession-specific) attributes are not yet set.
      * This is a generic hook you might use in subclasses to perform a specific
      * action on first request in the session. By default it does nothing. It
-     * is only invoked on newly created sessions; it is not invoked when a
+     * is only invoked on newly created sessions; it's not invoked when a
      * replicated session is reinstantiated in another servlet container.
      * 
      * @param request the actual HTTP request

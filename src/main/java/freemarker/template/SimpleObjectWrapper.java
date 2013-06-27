@@ -53,10 +53,7 @@
 package freemarker.template;
 
 /**
- * <p>The default implementation of the ObjectWrapper
- * interface.
- *
- * @version $Id: SimpleObjectWrapper.java,v 1.24 2003/05/30 16:29:44 szegedia Exp $
+ * The default implementation of the ObjectWrapper interface.
  */
 public class SimpleObjectWrapper extends DefaultObjectWrapper {
     

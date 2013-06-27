@@ -60,7 +60,6 @@ import freemarker.log.Logger;
 
 /**
  * @author Attila Szegedi
- * @version $Id: SecurityUtilities.java,v 1.2 2004/11/11 13:27:39 szegedia Exp $
  */
 public class SecurityUtilities
 {

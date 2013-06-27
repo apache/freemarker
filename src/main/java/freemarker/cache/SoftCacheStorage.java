@@ -59,7 +59,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import freemarker.core.ConcurrentMapFactory;
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -68,7 +68,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * collector to purge the cache when it determines that it wants to free up
  * memory.
  * This class is thread-safe to the extent that its underlying map is. The 
- * default implementation uses a concurrent map on Java 5 and above, so it is
+ * default implementation uses a concurrent map on Java 5 and above, so it's
  * thread-safe in that case.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
@@ -84,7 +84,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage
     private final boolean concurrent;
     
     public SoftCacheStorage() {
-        this(ConcurrentMapFactory.newMaybeConcurrentHashMap());
+        this(_ConcurrentMapFactory.newMaybeConcurrentHashMap());
     }
     
     public boolean isConcurrent() {
@@ -93,7 +93,7 @@ public class SoftCacheStorage implements ConcurrentCacheStorage
     
     public SoftCacheStorage(Map backingMap) {
         map = backingMap;
-        this.concurrent = ConcurrentMapFactory.isConcurrent(map);
+        this.concurrent = _ConcurrentMapFactory.isConcurrent(map);
     }
     
     public Object get(Object key) {

@@ -52,8 +52,11 @@
 
 package freemarker.test.templatesuite.models;
 
-import freemarker.template.*;
-import java.util.*;
+import java.util.Iterator;
+
+import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * A little bridge class that subclasses the new SimpleList
