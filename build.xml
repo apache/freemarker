@@ -724,7 +724,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.freemarker</groupId>
-  <artifactId>freemarker-gae</artifactId>
+  <artifactId>freemarker</artifactId>
   <version>${version}</version>
   <packaging>jar</packaging>
   <name>FreeMarker</name>
