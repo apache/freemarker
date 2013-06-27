@@ -222,7 +222,7 @@
       classpathref="ivy.dep"
       bootclasspath="${boot.classpath.j2se1.2}"
       excludes="
-        freemarker/log/JDK14LoggerFactory.java,
+        freemarker/log/_JDK14LoggerFactory.java,
         freemarker/core/_RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java,
         
@@ -258,7 +258,7 @@
       classpathref="ivy.dep.j2se1.4"
       bootclasspath="${boot.classpath.j2se1.4}"
       includes="
-        freemarker/log/JDK14LoggerFactory.java,
+        freemarker/log/_JDK14LoggerFactory.java,
         freemarker/core/_RegexBuiltins.java,
         freemarker/template/utility/J2SE14TimeZoneOffsetCalculator.java"
     />
