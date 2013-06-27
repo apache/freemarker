@@ -37,10 +37,10 @@ See LICENSE.txt for more details.
 Documentation
 -------------
 
-Documentation is available in the docs directory of this distribution;
-open docs/index.html.
+The full documentation is available offline in this distribution, here:
+documentation/index.html
 
-Or, online: http://freemarker.org/docs/
+Or, you can read it online: http://freemarker.org/docs/
 (Mirror: http://freemarker.sourceforge.net/docs/)
 
 
@@ -74,7 +74,7 @@ application already uses the related library.
 Building
 --------
 
-You need Apache Ant and Ivy installed. (As of this writing it was
+You need Apache Ant and Ivy be installed. (As of this writing it was
 tested with Ant 1.8.1 and Ivy 2.3.0.)
 
 If you need to ensure compliance with certain J2SE versions, copy
@@ -102,9 +102,8 @@ IvyDE to resolve the dependencies.
 Change log
 ----------
 
-See:
-docs/docs/app_versions.html
+Open documentation/index.html, and you will find the link.
 
-Or, online:
+Online:
 http://freemarker.org/docs/app_versions.html
 (Mirror: http://freemarker.sourceforge.net/docs/app_versions.html)

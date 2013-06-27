@@ -654,7 +654,33 @@
     <!-- Copy jars and sources and such into the distro -->
     <delete dir="${dist.dir}" />
     <mkdir dir="${dist.dir}" />
+    
+    <!-- Copy txt-s -->
     <copy todir="${dist.dir}" includeEmptyDirs="no">
+      <fileset dir="." defaultexcludes="no">
+        <include name="*.txt" />
+      </fileset>
+    </copy>
+    <replace
+      file="${dist.dir}/README.txt"
+      token="{version}"
+      value="${version}"
+    />
+
+    <!-- Copy binary -->
+    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />
+
+    <!-- Copy documentation -->
+    <mkdir dir="${dist.dir}/documentation" />
+    <copy file="src/dist/index.html" todir="${dist.dir}/documentation" />
+    <copy todir="${dist.dir}/documentation/manual" includeEmptyDirs="no">
+      <fileset dir="build/manual" />
+    </copy>
+    <copy todir="${dist.dir}/documentation/api" includeEmptyDirs="no">
+      <fileset dir="build/api" />
+    </copy>
+    
+    <copy todir="${dist.dir}/source" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
         <exclude name="**/*.bak" />
         <exclude name="**/*.~*" />
@@ -667,27 +693,8 @@
         <include name="osgi.bnd" />
         <include name=".classpath" />
         <include name=".project" />
+        <include name=".git*" />
       </fileset>
-    </copy>
-    <copy file="build/freemarker.jar" tofile="${dist.dir}/freemarker.jar" />
-    <replace
-      file="${dist.dir}/README.txt"
-      token="{version}"
-      value="${version}"
-    />
-
-    <!-- Generate website pages and copy them into distro -->
-    <ivy:retrieve conf="site" pattern="build/site/[artifact].[ext]" />
-    <untar compression="gzip" src="build/site/site.tar.gz" dest="${dist.dir}/docs" />
-
-    <!-- Copy Manual -->
-    <copy todir="${dist.dir}/docs/docs" includeEmptyDirs="no">
-      <fileset dir="build/manual" />
-    </copy>
-    
-    <!-- Copy javadocs -->
-    <copy todir="${dist.dir}/docs/docs/api" includeEmptyDirs="no">
-      <fileset dir="build/api" />
     </copy>
     
     <!-- Package the distro -->
