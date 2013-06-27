@@ -673,10 +673,10 @@
     <!-- Copy documentation -->
     <mkdir dir="${dist.dir}/documentation" />
     <copy file="src/dist/index.html" todir="${dist.dir}/documentation" />
-    <copy todir="${dist.dir}/documentation/manual" includeEmptyDirs="no">
+    <copy todir="${dist.dir}/documentation/_html" includeEmptyDirs="no">
       <fileset dir="build/manual" />
     </copy>
-    <copy todir="${dist.dir}/documentation/api" includeEmptyDirs="no">
+    <copy todir="${dist.dir}/documentation/_html/api" includeEmptyDirs="no">
       <fileset dir="build/api" />
     </copy>
     
