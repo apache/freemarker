@@ -4,15 +4,18 @@
 }
 
 internalBookmarks: {
-  "Alphabetical Index": alphaidx
+  "Alpha. index": alphaidx
   "Glossary": gloss
-  "Reference": ref
+  "Expressions": exp_cheatsheet 
+  "?builtins": ref_builtins_alphaidx
+  "#directives": ref_directive_alphaidx
+  ".spec_vars": ref_specvar
   "FAQ": app_faq
 }
 
 externalBookmarks: {
-  "Java API": "api/index.html"
-  "FreeMarker Home": "../index.html"
+  "API": "api/index.html"
+  "Home": "../index.html"
 }
 
 validation: {
