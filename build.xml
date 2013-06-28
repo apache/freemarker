@@ -775,8 +775,8 @@
 ]]></echo>
     
     <jar destfile="build/maven-source-attachment.jar">
-      <fileset dir="src/main/java" />
-      <fileset dir="src/main/resources" />
+      <fileset dir="${dist.dir}/source/src/main/java" />
+      <fileset dir="${dist.dir}/source/src/main/resources" />
     </jar>
 
     <jar destfile="build/maven-javadoc-attachment.jar">
