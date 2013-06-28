@@ -717,21 +717,33 @@
     Note: maven-ant-tasks-x.x.x.jar must be added to ${ANT_HOME}/lib for
       this to work. Get it here: http://maven.apache.org/download.html
   -->
-  <target name="maven-upload" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <target name="maven-stage-dist"
+      description="Stage the last built distro on Sonatype"
+      xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  
   <groupId>org.freemarker</groupId>
   <artifactId>freemarker</artifactId>
   <version>${version}</version>
+  
   <packaging>jar</packaging>
+  
   <name>FreeMarker</name>
   <description>
+    Google App Engine compliant variation of FreeMarker.
     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
   </description>
-  <url>http://freemarker.org</url>
+  <url>http://freemarker.org/</url>
   <licenses>
     <license>
       <name>BSD-style license</name>
@@ -739,9 +751,23 @@
     </license>
   </licenses>
   <scm>
-    <url>https://github.com/freemarker/freemarker</url>
-    <connection>scm:git:git://github.com/freemarker/freemarker.git</connection>
+    <connection>scm:git:git@github.com:freemarker/freemarker.git</connection>
+    <developerConnection>scm:git:git@github.com:freemarker/freemarker.git</developerConnection>
+    <url>git@github.com:freemarker/freemarker.git</url>
   </scm>
+  <developers>
+    <developer>
+      <name>Attila Szegedi</name>
+    </developer>
+    <developer>
+      <name>Daniel Dekany</name>
+      <email>ddekany@freemail.hu</email>
+    </developer>
+    <developer>
+      <name>Jonathan Revusky</name>
+    </developer>
+  </developers>  
+  
   <dependencies>
     <!-- no required dependencies -->
   </dependencies>
@@ -753,46 +779,60 @@
       <fileset dir="src/main/resources" />
     </jar>
 
-    <artifact:install-provider artifactId="wagon-ssh" version="1.0-beta-2"/>
-   
+    <jar destfile="build/maven-javadoc-attachment.jar">
+      <fileset dir="${dist.dir}/documentation/_html/api" />
+    </jar>
+
     <input
        validargs="y,n"
        addproperty="mavenUpload.answer"
     >
 You are about uploading
-${dist.dir}/freemarker.jar
-into the Maven central repostiry sync. directory.
-Be sure that's the final (released) variation there,
-and that the version number is correct.
-Proceed? </input>
+${dist.dir}/freemarker.jar and its attachments
+into a Sonatype staging repo. Proceed? </input>
     <condition property="mavenUpload.yes">
       <equals arg1="y" arg2="${mavenUpload.answer}"/>
     </condition>
     <fail unless="mavenUpload.yes" message="Task aborted by user." />
-   
-    <input
-      message="Enter your SourceForge.net user name: "
-      addproperty="mavenUpload.user"
-    />
-    <input
-      message="Enter your SourceForge.net password (WILL BE DISPLAYED AS YOU TYPE IT!): "
-      addproperty="mavenUpload.password"
-    />
-   
-    <artifact:deploy file="${dist.dir}/freemarker.jar">
-      <remoteRepository url="sftp://web.sourceforge.net/home/groups/f/fr/freemarker/htdocs/maven2">
-        <authentication
-            username="${mavenUpload.user},freemarker"
-            password="${mavenUpload.password}"
-         />
-      </remoteRepository>
-      <pom file="build/pom.xml" />
-      <attach file="build/maven-source-attachment.jar" classifier="sources" />
-    </artifact:deploy>
     
-    <echo>**********************************************</echo>
-    <echo>CLEAR THE SCREEN, NOW! Your password is on it!</echo>
-    <echo>**********************************************</echo>
+    <property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
+    <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+    
+		<!-- Sign and deploy the main artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="-Durl=${maven-staging-repository-url}" />
+			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-DpomFile=build/pom.xml" />
+			<arg value="-Dfile=${dist.dir}/freemarker.jar" />
+      <arg value="-Pgpg" />
+		</artifact:mvn>
+
+		<!-- Sign and deploy the sources artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="-Durl=${maven-staging-repository-url}" />
+			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-DpomFile=build/pom.xml" />
+			<arg value="-Dfile=build/maven-source-attachment.jar" />
+			<arg value="-Dclassifier=sources" />
+      <arg value="-Pgpg" />
+		</artifact:mvn>
+
+		<!-- Sign and deploy the javadoc artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="-Durl=${maven-staging-repository-url}" />
+			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-DpomFile=build/pom.xml" />
+			<arg value="-Dfile=build/maven-javadoc-attachment.jar" />
+			<arg value="-Dclassifier=javadoc" />
+      <arg value="-Pgpg" />
+		</artifact:mvn>
+    
+    <echo>*****************************************************************</echo>
+    <echo>Now you can release the staged repo on https://oss.sonatype.org/.</echo>
+    <echo>*****************************************************************</echo>
   </target>
   
   
