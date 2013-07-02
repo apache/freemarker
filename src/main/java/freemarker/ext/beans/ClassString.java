@@ -204,7 +204,7 @@ final class ClassString
      * parameter classes represented by this ClassString object.
      */
     private boolean isApplicable(Member member, boolean varArg) {
-        final Class[] formalTypes = MethodUtilities.getParameterTypes(member);
+        final Class[] formalTypes = MethodUtilities.getParameterTypes(member);  // FXIME: getParameterTypes is slow 
         final int cl = classes.length;
         final int fl = formalTypes.length - (varArg ? 1 : 0);
         if(varArg) {

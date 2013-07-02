@@ -112,6 +112,7 @@ TemplateBooleanModel, TemplateNumberModel
     }
 
     public Object getAdaptedObject(Class hint) {
+        // FIXME: This does LS3 conversion, which is not very useful for us. Like it won't convert to List, Map, etc.  
         try {
             return NativeJavaObject.coerceType(hint, scriptable);
         }

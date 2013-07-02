@@ -348,8 +348,12 @@ implements
         return object == null || Boolean.FALSE.equals(object);
     }
     
+    /**
+     * Returns the same as {@link #getWrappedObject()}; to ensure that, this method will be final starting from 2.4.
+     * This behavior of {@link BeanModel} is assumed by some FreeMarker code. 
+     */
     public Object getAdaptedObject(Class hint) {
-        return object;
+        return object;  // return getWrappedObject(); starting from 2.4
     }
 
     public Object getWrappedObject() {
