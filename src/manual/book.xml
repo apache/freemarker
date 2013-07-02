@@ -5350,9 +5350,6 @@ public class Test {
 
         /* ----------------------------------------------------------------------- */    
         /* You usually do these for many times in the application life-cycle:      */    
-                
-        /* Get or create a template */
-        Template temp = cfg.getTemplate("test.ftl");
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -5361,6 +5358,9 @@ public class Test {
         root.put("latestProduct", latest);
         latest.put("url", "products/greenmouse.html");
         latest.put("name", "green mouse");
+
+        /* Get the template */
+        Template temp = cfg.getTemplate("test.ftl");
 
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);
