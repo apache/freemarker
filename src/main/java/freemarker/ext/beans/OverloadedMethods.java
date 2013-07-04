@@ -68,7 +68,7 @@ import freemarker.template.utility.ClassUtil;
 final class OverloadedMethods
 {
     private final BeansWrapper wrapper;
-    private final OverloadedMethodsSubset fixArgMethods = new OverloadedFixArgMethods();
+    private final OverloadedMethodsSubset fixArgMethods = new OverloadedFixArgsMethods();
     private OverloadedMethodsSubset varargMethods;
     
     OverloadedMethods(BeansWrapper wrapper) {
@@ -83,7 +83,7 @@ final class OverloadedMethods
         fixArgMethods.addMember(member);
         if(MethodUtilities.isVarArgs(member)) {
             if(varargMethods == null) {
-                varargMethods = new OverloadedVarargMethods();
+                varargMethods = new OverloadedVarArgsMethods();
             }
             varargMethods.addMember(member);
         }

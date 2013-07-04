@@ -60,18 +60,18 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
+ * Stores the non-varargs methods for a {@link OverloadedMethods} object.
  * @author Attila Szegedi
  */
-class OverloadedFixArgMethods extends OverloadedMethodsSubset
+class OverloadedFixArgsMethods extends OverloadedMethodsSubset
 {
-    void onAddSignature(Member member, Class[] argTypes) {
-    };
+    void beforeWideningUnwrappingHints(Member member, Class[] paramTypes) {
+        // Do nothing
+    }
     
-    void updateSignature(int l) {
-    };
-    
-    void afterSignatureAdded(int l) {
-    };
+    void afterWideningUnwrappingHints(int paramCount) {
+        // Do nothing
+    }
 
     Object getMemberAndArguments(List tmArgs, BeansWrapper w) 
     throws TemplateModelException {
@@ -80,11 +80,11 @@ class OverloadedFixArgMethods extends OverloadedMethodsSubset
             tmArgs = Collections.EMPTY_LIST;
         }
         final int argCount = tmArgs.size();
-        final Class[][] unwrappingArgTypesByArgCount = getUnwrappingArgTypesByArgCount();
-        if(unwrappingArgTypesByArgCount.length <= argCount) {
+        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
+        if(unwrappingHintsByParamCount.length <= argCount) {
             return NO_SUCH_METHOD;
         }
-        Class[] unwarppingArgumentTypes = unwrappingArgTypesByArgCount[argCount];
+        Class[] unwarppingArgumentTypes = unwrappingHintsByParamCount[argCount];
         if(unwarppingArgumentTypes == null) {
             return NO_SUCH_METHOD;
         }

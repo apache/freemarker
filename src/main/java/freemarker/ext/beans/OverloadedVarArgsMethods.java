@@ -63,47 +63,49 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
+ * Stores the varargs methods for a {@link OverloadedMethods} object.
  * @author Attila Szegedi
  */
-class OverloadedVarargMethods extends OverloadedMethodsSubset
+class OverloadedVarArgsMethods extends OverloadedMethodsSubset
 {
     private static final Map canoncialArgPackers = new HashMap();
     
     private final Map argPackers = new HashMap();
     
     private static class ArgumentPacker {
-        private final int argCount;
-        private final Class varArgType;
+        private final int paramCount;
+        private final Class varArgsParamCompType;
         
-        ArgumentPacker(Class[] argTypes) {
-            argCount = argTypes.length;
-            varArgType = argTypes[argCount - 1].getComponentType(); 
+        // TODO: Do we really need this class?
+        ArgumentPacker(Class[] paramTypes) {
+            paramCount = paramTypes.length;
+            varArgsParamCompType = paramTypes[paramCount - 1].getComponentType(); 
         }
         
         Object[] packArgs(Object[] args, List modelArgs, BeansWrapper w) 
         throws TemplateModelException {
-            final int actualArgCount = args.length;
-            final int fixArgCount = argCount - 1;
-            if(args.length != argCount) {
-                Object[] newargs = new Object[argCount];
-                System.arraycopy(args, 0, newargs, 0, fixArgCount);
-                Object array = Array.newInstance(varArgType, actualArgCount - fixArgCount);
-                for(int i = fixArgCount; i < actualArgCount; ++i) {
-                    Object val = w.unwrapInternal((TemplateModel)modelArgs.get(i), varArgType);
+            final int totalArgCount = args.length;
+            final int fixArgCount = paramCount - 1;
+            if(args.length != paramCount) {
+                Object[] packedArgs = new Object[paramCount];
+                System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
+                Object varargs = Array.newInstance(varArgsParamCompType, totalArgCount - fixArgCount);
+                for(int i = fixArgCount; i < totalArgCount; ++i) {
+                    Object val = w.unwrapInternal((TemplateModel)modelArgs.get(i), varArgsParamCompType);
                     if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                         return null;
                     }
-                    Array.set(array, i - fixArgCount, val);
+                    Array.set(varargs, i - fixArgCount, val);
                 }
-                newargs[fixArgCount] = array;
-                return newargs;
+                packedArgs[fixArgCount] = varargs;
+                return packedArgs;
             }
             else {
-                Object val = w.unwrapInternal((TemplateModel)modelArgs.get(fixArgCount), varArgType);
+                Object val = w.unwrapInternal((TemplateModel)modelArgs.get(fixArgCount), varArgsParamCompType);
                 if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                     return null;
                 }
-                Object array = Array.newInstance(varArgType, 1);
+                Object array = Array.newInstance(varArgsParamCompType, 1);
                 Array.set(array, 0, val);
                 args[fixArgCount] = array;
                 return args;
@@ -112,90 +114,102 @@ class OverloadedVarargMethods extends OverloadedMethodsSubset
         
         public boolean equals(Object obj) {
             if(obj instanceof ArgumentPacker) {
-        	ArgumentPacker p = (ArgumentPacker)obj;
-        	return argCount == p.argCount && varArgType == p.varArgType;
+                ArgumentPacker p = (ArgumentPacker)obj;
+                return paramCount == p.paramCount && varArgsParamCompType == p.varArgsParamCompType;
             }
             return false;
         }
         
         public int hashCode() {
-            return argCount ^ varArgType.hashCode();
+            return paramCount ^ varArgsParamCompType.hashCode();
         }
     }
 
-    void onAddSignature(Member member, Class[] argTypes) {
-	ArgumentPacker argPacker = new ArgumentPacker(argTypes);
-	synchronized(canoncialArgPackers) {
-	    ArgumentPacker canonical = (ArgumentPacker)
-	    canoncialArgPackers.get(argPacker);
-	    if(canonical == null) {
-	        canoncialArgPackers.put(argPacker, argPacker);
-	    }
-	    else {
-	        argPacker = canonical;
-	    }
-	}
+    void beforeWideningUnwrappingHints(Member member, Class[] paramTypes) {
+        ArgumentPacker argPacker = new ArgumentPacker(paramTypes);
+        synchronized(canoncialArgPackers) {
+            ArgumentPacker canonical = (ArgumentPacker) canoncialArgPackers.get(argPacker);
+            if(canonical == null) {
+                canoncialArgPackers.put(argPacker, argPacker);
+            }
+            else {
+                argPacker = canonical;
+            }
+        }
         argPackers.put(member, argPacker);
-        componentizeLastType(argTypes);
+        componentizeLastType(paramTypes);
     }
 
-    void updateSignature(int l) {
-	Class[][] marshalTypes = getUnwrappingArgTypesByArgCount();
-	Class[] newTypes = marshalTypes[l];
-        // First vararg marshal type spec with less parameters than the 
-        // current spec influences the types of the current marshal spec.
-        for(int i = l; i-->0;) {
-            Class[] previousTypes = marshalTypes[i];
+    void afterWideningUnwrappingHints(int paramCount) {
+        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
+        final Class[] newTypes = unwrappingHintsByParamCount[paramCount];
+
+        // Overview
+        // --------
+        //
+        // So far, m(t1, t2...) was treated by the hint updating like m(t1, t2). So now we have to continue hint
+        // type widening like if we had further methods:
+        // - m(t1), because a vararg array can be 0 long
+        // - m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ...
+        //
+        // But we can't do that for real, because we had to add infinite number of methods. Also, for efficiency we
+        // don't want to create unwrappingHintsByParamCount entries at the indices which are still unused.
+        // So we only update the already existing hints. Remember that we already have m(t1, t2) there.
+        
+        // The case of m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ..., where m is an *earlier* added method.
+        // When that was added, this method wasn't added yet, so it had no chance updating the hints of this method,
+        // so we do that now:
+        // FIXME: Only needed if m(t1, t2) was filled an empty slot, otherwise whatever was there was already
+        // widened by the preceding hints, so this will be a no-op.
+        for(int i = paramCount - 1; i >= 0; i--) {
+            Class[] previousTypes = unwrappingHintsByParamCount[i];
             if(previousTypes != null) {
-                varArgUpdate(newTypes, previousTypes);
+                widenToCommonSupertypes(newTypes, previousTypes);
                 break;
             }
         }
-        // Vararg marshal spec with exactly one parameter more than the current
-        // spec influences the types of the current spec
-        if(l + 1 < marshalTypes.length) {
-            Class[] oneLongerTypes = marshalTypes[l + 1];
-            if(oneLongerTypes != null) {
-                varArgUpdate(newTypes, oneLongerTypes);
+        // The case of m(t1), where m is an *earlier* added method.
+        // When that was added, this method wasn't added yet, so it had no chance updating the hints of this method,
+        // so we do that now:
+        // FIXME: Same as above; it's often unnecessary.
+        if(paramCount + 1 < unwrappingHintsByParamCount.length) {
+            Class[] oneLongerHints = unwrappingHintsByParamCount[paramCount + 1];
+            if(oneLongerHints != null) {
+                widenToCommonSupertypes(newTypes, oneLongerHints);
             }
         }
+        
+        // The case of m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ..., where m is the currently added method.
+        // Update the longer hints-arrays:  
+        // FIXME Shouldn't these use the original hint array instead of the widened one?
+        for(int i = paramCount + 1; i < unwrappingHintsByParamCount.length; ++i) {
+            Class[] longerUnwrappingHints = unwrappingHintsByParamCount[i];
+            if(longerUnwrappingHints != null) {
+                widenToCommonSupertypes(longerUnwrappingHints, newTypes);
+            }
+        }
+        // The case of m(t1) where m is the currently added method.
+        // update the one-shorter hints-array:  
+        if(paramCount > 0) {  // (should be always true, or else it wasn't a varags method)
+            Class[] oneShorterUnwrappingHints = unwrappingHintsByParamCount[paramCount - 1];
+            if(oneShorterUnwrappingHints != null) {
+                widenToCommonSupertypes(oneShorterUnwrappingHints, newTypes);
+            }
+        }
+        
     }
     
-    void afterSignatureAdded(int l) {
-	// Since this member is vararg, its types influence the types in all
-        // type specs longer than itself.
-	Class[][] marshalTypes = getUnwrappingArgTypesByArgCount();
-        Class[] newTypes = marshalTypes[l];
-        for(int i = l + 1; i < marshalTypes.length; ++i) {
-            Class[] existingTypes = marshalTypes[i];
-            if(existingTypes != null) {
-                varArgUpdate(existingTypes, newTypes);
-            }
-        }
-        // It also influences the types in the marshal spec that is exactly
-        // one argument shorter (as vararg methods can be invoked with 0
-        // variable arguments, that is, with k-1 cardinality).
-        if(l > 0) {
-            Class[] oneShorterTypes = marshalTypes[l - 1];
-            if(oneShorterTypes != null) {
-                varArgUpdate(oneShorterTypes, newTypes);
-            }
-        }
-    }
-    
-    private static void varArgUpdate(Class[] modifiedTypes, Class[] modifyingTypes) {
-        final int dl = modifiedTypes.length;
-        final int gl = modifyingTypes.length;
-        int min = Math.min(gl, dl);
+    private static void widenToCommonSupertypes(Class[] typesToWiden, Class[] wideningTypes) {
+        final int typesToWidenLen = typesToWiden.length;
+        final int wideningTypesLen = wideningTypes.length;
+        int min = Math.min(wideningTypesLen, typesToWidenLen);
         for(int i = 0; i < min; ++i) {
-            modifiedTypes[i] = MethodUtilities.getMostSpecificCommonType(modifiedTypes[i], 
-                    modifyingTypes[i]);
+            typesToWiden[i] = MethodUtilities.getMostSpecificCommonType(typesToWiden[i], wideningTypes[i]);
         }
-        if(dl > gl) {
-            Class varArgType = modifyingTypes[gl - 1];
-            for(int i = gl; i < dl; ++i) {
-                modifiedTypes[i] = MethodUtilities.getMostSpecificCommonType(modifiedTypes[i], 
-                        varArgType);
+        if(typesToWidenLen > wideningTypesLen) {
+            Class varargsComponentType = wideningTypes[wideningTypesLen - 1];
+            for(int i = wideningTypesLen; i < typesToWidenLen; ++i) {
+                typesToWiden[i] = MethodUtilities.getMostSpecificCommonType(typesToWiden[i], varargsComponentType);
             }
         }
     }
@@ -214,13 +228,13 @@ class OverloadedVarargMethods extends OverloadedMethodsSubset
             tmArgs = Collections.EMPTY_LIST;
         }
         int l = tmArgs.size();
-        Class[][] unwrappingArgTypesByArgCount = getUnwrappingArgTypesByArgCount();
+        Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         Object[] pojoArgs = new Object[l];
         // Starting from args.length + 1 as we must try to match against a case
         // where all specified args are fixargs, and the vararg portion 
         // contains zero args
-        outer:  for(int j = Math.min(l + 1, unwrappingArgTypesByArgCount.length - 1); j >= 0; --j) {
-            Class[] unwarappingArgTypes = unwrappingArgTypesByArgCount[j];
+        outer:  for(int j = Math.min(l + 1, unwrappingHintsByParamCount.length - 1); j >= 0; --j) {
+            Class[] unwarappingArgTypes = unwrappingHintsByParamCount[j];
             if(unwarappingArgTypes == null) {
                 if(j == 0) {
                     return NO_SUCH_METHOD;

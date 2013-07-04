@@ -68,7 +68,7 @@ abstract class OverloadedMethodsSubset {
     static final Object AMBIGUOUS_METHOD = new Object();
     static final Object[] EMPTY_ARGS = new Object[0];
 
-    private Class[/*number of args*/][/*arg index*/] unwrappingArgTypesByArgCount;
+    private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
     // TODO: make it not concurrent
     private final Map selectorCache = new HashMap();
     private final List/*<Constructor|Method>*/ members = new LinkedList();
@@ -77,44 +77,46 @@ abstract class OverloadedMethodsSubset {
     void addMember(Member member) {
         members.add(member);
 
-        Class[] argTypes = MethodUtilities.getParameterTypes(member);
-        final int argCount = argTypes.length;
-        signatures.put(member, argTypes.clone());
+        Class[] paramTypes = MethodUtilities.getParameterTypes(member);
+        final int paramCount = paramTypes.length;
+        signatures.put(member, paramTypes.clone());
+        // FIXME: clone() is needed above because of componentizeLastType(paramTypes) in varargs's onAddSignature.
+        // onAddSignature should return a new paramTypes instead. 
         
-        onAddSignature(member, argTypes);
+        beforeWideningUnwrappingHints(member, paramTypes);
         
-        if (unwrappingArgTypesByArgCount == null) {
-            unwrappingArgTypesByArgCount = new Class[argCount + 1][];
-            unwrappingArgTypesByArgCount[argCount] = argTypes;
-        } else if (unwrappingArgTypesByArgCount.length <= argCount) {
-            Class[][] newUnwrappingArgTypesByArgCount = new Class[argCount + 1][];
-            System.arraycopy(unwrappingArgTypesByArgCount, 0, newUnwrappingArgTypesByArgCount, 0, unwrappingArgTypesByArgCount.length);
-            unwrappingArgTypesByArgCount = newUnwrappingArgTypesByArgCount;
-            unwrappingArgTypesByArgCount[argCount] = argTypes;
+        // Here we widen the hints:
+        if (unwrappingHintsByParamCount == null) {
+            unwrappingHintsByParamCount = new Class[paramCount + 1][];
+            unwrappingHintsByParamCount[paramCount] = paramTypes;
+        } else if (unwrappingHintsByParamCount.length <= paramCount) {
+            Class[][] newUnwrappingHintsByParamCount = new Class[paramCount + 1][];
+            System.arraycopy(unwrappingHintsByParamCount, 0, newUnwrappingHintsByParamCount, 0, unwrappingHintsByParamCount.length);
+            unwrappingHintsByParamCount = newUnwrappingHintsByParamCount;
+            unwrappingHintsByParamCount[paramCount] = paramTypes;
         } else {
-            Class[] oldUnwrappingArgTypes = unwrappingArgTypesByArgCount[argCount]; 
-            if (oldUnwrappingArgTypes == null) {
-                unwrappingArgTypesByArgCount[argCount] = argTypes;
+            Class[] unwrappingHints = unwrappingHintsByParamCount[paramCount]; 
+            if (unwrappingHints == null) {
+                unwrappingHintsByParamCount[paramCount] = paramTypes;
             } else {
-                for(int i = 0; i < oldUnwrappingArgTypes.length; ++i) {
+                for(int i = 0; i < unwrappingHints.length; ++i) {
                     // DD: This can't be right. We suddenly unwrap to a different type, if a new overloaded
                     //     method was added (and hence the most specific common type might changed), which is possibly
                     //     irrelevant.
-                    oldUnwrappingArgTypes[i] = MethodUtilities.getMostSpecificCommonType(oldUnwrappingArgTypes[i], argTypes[i]);
+                    unwrappingHints[i] = MethodUtilities.getMostSpecificCommonType(unwrappingHints[i], paramTypes[i]);
                 }
             }
         }
-        updateSignature(argCount);
-
-        afterSignatureAdded(argCount);
+        
+        afterWideningUnwrappingHints(paramCount);
     }
     
     Class[] getSignature(Member member) {
         return (Class[]) signatures.get(member);
     }
     
-    Class[][] getUnwrappingArgTypesByArgCount() {
-        return unwrappingArgTypesByArgCount;
+    Class[][] getUnwrappingHintsByParamCount() {
+        return unwrappingHintsByParamCount;
     }
     
     Object getMemberForArgs(Object[] args, boolean varArg) {
@@ -134,9 +136,8 @@ abstract class OverloadedMethodsSubset {
         return members.iterator();
     }
     
-    abstract void onAddSignature(Member member, Class[] argTypes);
-    abstract void updateSignature(int l);
-    abstract void afterSignatureAdded(int l);
+    abstract void beforeWideningUnwrappingHints(Member member, Class[] paramTypes);
+    abstract void afterWideningUnwrappingHints(int paramCount);
     
     abstract Object getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
             BeansWrapper w) throws TemplateModelException;
