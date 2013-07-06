@@ -69,46 +69,56 @@ abstract class OverloadedMethodsSubset {
     static final Object[] EMPTY_ARGS = new Object[0];
 
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
-    // TODO: make it not concurrent
-    private final Map selectorCache = new HashMap();
+    private final Map selectorCache = new HashMap();  // Java 5: Use ConcurrentHashMap?
     private final List/*<Constructor|Method>*/ members = new LinkedList();
     private final Map/*<Constructor|Method, Class[]>*/ signatures = new HashMap();
+    protected final int beansWrapperVersion;
+    
+    OverloadedMethodsSubset(BeansWrapper beansWrapper) {
+        beansWrapperVersion = beansWrapper.getIncompatibleImprovements().intValue();
+    }
     
     void addMember(Member member) {
         members.add(member);
 
-        Class[] paramTypes = MethodUtilities.getParameterTypes(member);
+        final Class[] paramTypes = MethodUtilities.getParameterTypes(member);
         final int paramCount = paramTypes.length;
-        signatures.put(member, paramTypes.clone());
-        // FIXME: clone() is needed above because of componentizeLastType(paramTypes) in varargs's onAddSignature.
-        // onAddSignature should return a new paramTypes instead. 
+        signatures.put(member, paramTypes);
         
-        beforeWideningUnwrappingHints(member, paramTypes);
+        final Class[] preprocessedParamTypes = preprocessParameterTypes(member, paramTypes);
         
-        // Here we widen the hints:
+        final Class[] unwrappingHints = (Class[]) preprocessedParamTypes.clone();
+        // Merge these unwrapping hints with the existing table of hints:
         if (unwrappingHintsByParamCount == null) {
             unwrappingHintsByParamCount = new Class[paramCount + 1][];
-            unwrappingHintsByParamCount[paramCount] = paramTypes;
+            unwrappingHintsByParamCount[paramCount] = unwrappingHints;
         } else if (unwrappingHintsByParamCount.length <= paramCount) {
             Class[][] newUnwrappingHintsByParamCount = new Class[paramCount + 1][];
-            System.arraycopy(unwrappingHintsByParamCount, 0, newUnwrappingHintsByParamCount, 0, unwrappingHintsByParamCount.length);
+            System.arraycopy(unwrappingHintsByParamCount, 0, newUnwrappingHintsByParamCount, 0,
+                    unwrappingHintsByParamCount.length);
             unwrappingHintsByParamCount = newUnwrappingHintsByParamCount;
-            unwrappingHintsByParamCount[paramCount] = paramTypes;
+            unwrappingHintsByParamCount[paramCount] = unwrappingHints;
         } else {
-            Class[] unwrappingHints = unwrappingHintsByParamCount[paramCount]; 
-            if (unwrappingHints == null) {
-                unwrappingHintsByParamCount[paramCount] = paramTypes;
+            Class[] prevUnwrappingHints = unwrappingHintsByParamCount[paramCount]; 
+            if (prevUnwrappingHints == null) {
+                unwrappingHintsByParamCount[paramCount] = unwrappingHints;
             } else {
-                for(int i = 0; i < unwrappingHints.length; ++i) {
-                    // DD: This can't be right. We suddenly unwrap to a different type, if a new overloaded
-                    //     method was added (and hence the most specific common type might changed), which is possibly
-                    //     irrelevant.
-                    unwrappingHints[i] = MethodUtilities.getMostSpecificCommonType(unwrappingHints[i], paramTypes[i]);
+                for(int i = 0; i < prevUnwrappingHints.length; ++i) {
+                    // For each parameter list length, we merge the argument type arrays into a single Class[] that
+                    // stores the most specific common types of each position. Hence we will possibly use a too generic
+                    // hint for the unwrapping. For correct behavior, for each overloaded methods its own parameter
+                    // types should be used as a hint. But without unwrapping the arguments, we couldn't select the
+                    // overloaded method. So this is a circular reference problem. We could try selecting the
+                    // method based on the wrapped value, but that's quite tricky, and the result of such selection
+                    // is not cacheable (the TM types are not enough as cache key then. So we just use this
+                    // compromise.
+                    prevUnwrappingHints[i] = MethodUtilities.getMostSpecificCommonType(
+                            prevUnwrappingHints[i], unwrappingHints[i]);
                 }
             }
         }
         
-        afterWideningUnwrappingHints(paramCount);
+        afterWideningUnwrappingHints(beansWrapperVersion >= 2003021 ? preprocessedParamTypes : unwrappingHints);
     }
     
     Class[] getSignature(Member member) {
@@ -136,8 +146,8 @@ abstract class OverloadedMethodsSubset {
         return members.iterator();
     }
     
-    abstract void beforeWideningUnwrappingHints(Member member, Class[] paramTypes);
-    abstract void afterWideningUnwrappingHints(int paramCount);
+    abstract Class[] preprocessParameterTypes(Member member, Class[] paramTypes);
+    abstract void afterWideningUnwrappingHints(Class[] paramTypes);
     
     abstract Object getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
             BeansWrapper w) throws TemplateModelException;

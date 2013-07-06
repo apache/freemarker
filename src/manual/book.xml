@@ -20364,6 +20364,42 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               setting of the <literal>Configuration</literal>.)</para>
             </listitem>
 
+            <listitem>
+              <para>Fixes in the overloaded method selection rules when
+              <literal>BeansWrapper</literal> or
+              <literal>DefaultObjectWrapper</literal> is used (almost all
+              applications use these), but only if you create
+              <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
+              with constructor parameter <literal>Version(2, 3, 21)</literal>
+              (or higher). There's a very little chance that because of these
+              fixes, a different overloaded method will chosen than before,
+              which in theory could change the behavior of the application,
+              hence this is not automatically active (at least not unit
+              FreeMarker 2.4). But the fix mostly only effect calls that were
+              failing earlier, so it's recommended to active it. The fixes
+              are:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>TODO: null</para>
+                </listitem>
+
+                <listitem>
+                  <para>TODO: number conversions</para>
+                </listitem>
+
+                <listitem>
+                  <para>TODO: method order dependence</para>
+                </listitem>
+
+                <listitem>
+                  <para>Overloaded varargs methods might used less specific
+                  hint class for unwrapping the varargs argument than that was
+                  possible within the limitations of the intended
+                  algorithm.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

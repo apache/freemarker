@@ -1,0 +1,1 @@
+<@assertFails message="overloaded">${obj.mVarargs('a', obj.getNnS('b'), obj.getNnS('c'))}</@>

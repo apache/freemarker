@@ -69,17 +69,20 @@ import freemarker.template.TemplateModelException;
 class OverloadedVarArgsMethods extends OverloadedMethodsSubset
 {
     private static final Map canoncialArgPackers = new HashMap();
-    
     private final Map argPackers = new HashMap();
+
+    OverloadedVarArgsMethods(BeansWrapper beansWrapper) {
+        super(beansWrapper);
+    }
     
+    // TODO: Do we really need this class?
     private static class ArgumentPacker {
         private final int paramCount;
-        private final Class varArgsParamCompType;
+        private final Class varArgsCompType;
         
-        // TODO: Do we really need this class?
-        ArgumentPacker(Class[] paramTypes) {
-            paramCount = paramTypes.length;
-            varArgsParamCompType = paramTypes[paramCount - 1].getComponentType(); 
+        ArgumentPacker(int paramCount, Class varArgsCompType) {
+            this.paramCount = paramCount;
+            this.varArgsCompType = varArgsCompType; 
         }
         
         Object[] packArgs(Object[] args, List modelArgs, BeansWrapper w) 
@@ -89,9 +92,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             if(args.length != paramCount) {
                 Object[] packedArgs = new Object[paramCount];
                 System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
-                Object varargs = Array.newInstance(varArgsParamCompType, totalArgCount - fixArgCount);
+                Object varargs = Array.newInstance(varArgsCompType, totalArgCount - fixArgCount);
                 for(int i = fixArgCount; i < totalArgCount; ++i) {
-                    Object val = w.unwrapInternal((TemplateModel)modelArgs.get(i), varArgsParamCompType);
+                    Object val = w.unwrapInternal((TemplateModel)modelArgs.get(i), varArgsCompType);
                     if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                         return null;
                     }
@@ -101,11 +104,11 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 return packedArgs;
             }
             else {
-                Object val = w.unwrapInternal((TemplateModel)modelArgs.get(fixArgCount), varArgsParamCompType);
+                Object val = w.unwrapInternal((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
                 if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                     return null;
                 }
-                Object array = Array.newInstance(varArgsParamCompType, 1);
+                Object array = Array.newInstance(varArgsCompType, 1);
                 Array.set(array, 0, val);
                 args[fixArgCount] = array;
                 return args;
@@ -115,18 +118,23 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         public boolean equals(Object obj) {
             if(obj instanceof ArgumentPacker) {
                 ArgumentPacker p = (ArgumentPacker)obj;
-                return paramCount == p.paramCount && varArgsParamCompType == p.varArgsParamCompType;
+                return paramCount == p.paramCount && varArgsCompType == p.varArgsCompType;
             }
             return false;
         }
         
         public int hashCode() {
-            return paramCount ^ varArgsParamCompType.hashCode();
+            return paramCount ^ varArgsCompType.hashCode();
         }
     }
 
-    void beforeWideningUnwrappingHints(Member member, Class[] paramTypes) {
-        ArgumentPacker argPacker = new ArgumentPacker(paramTypes);
+    Class[] preprocessParameterTypes(Member member, Class[] paramTypes) {
+        final Class[] preprocessedParamTypes = (Class[]) paramTypes.clone();
+        int ln = preprocessedParamTypes.length;
+        final Class varArgsCompType = preprocessedParamTypes[ln - 1].getComponentType();
+        preprocessedParamTypes[ln - 1] = varArgsCompType;
+        
+        ArgumentPacker argPacker = new ArgumentPacker(ln, varArgsCompType);
         synchronized(canoncialArgPackers) {
             ArgumentPacker canonical = (ArgumentPacker) canoncialArgPackers.get(argPacker);
             if(canonical == null) {
@@ -137,18 +145,20 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             }
         }
         argPackers.put(member, argPacker);
-        componentizeLastType(paramTypes);
+        
+        return preprocessedParamTypes;
     }
 
-    void afterWideningUnwrappingHints(int paramCount) {
+    void afterWideningUnwrappingHints(Class[] paramTypes) {
+        final int paramCount = paramTypes.length;
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
-        final Class[] newTypes = unwrappingHintsByParamCount[paramCount];
+        final Class[] hints = unwrappingHintsByParamCount[paramCount];
 
         // Overview
         // --------
         //
-        // So far, m(t1, t2...) was treated by the hint updating like m(t1, t2). So now we have to continue hint
-        // type widening like if we had further methods:
+        // So far, m(t1, t2...) was treated by the hint widening like m(t1, t2). So now we have to continue hint
+        // widening like if we had further methods:
         // - m(t1), because a vararg array can be 0 long
         // - m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ...
         //
@@ -162,9 +172,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         // FIXME: Only needed if m(t1, t2) was filled an empty slot, otherwise whatever was there was already
         // widened by the preceding hints, so this will be a no-op.
         for(int i = paramCount - 1; i >= 0; i--) {
-            Class[] previousTypes = unwrappingHintsByParamCount[i];
-            if(previousTypes != null) {
-                widenToCommonSupertypes(newTypes, previousTypes);
+            Class[] previousHints = unwrappingHintsByParamCount[i];
+            if(previousHints != null) {
+                widenToCommonSupertypes(hints, previousHints);
                 break;
             }
         }
@@ -175,7 +185,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         if(paramCount + 1 < unwrappingHintsByParamCount.length) {
             Class[] oneLongerHints = unwrappingHintsByParamCount[paramCount + 1];
             if(oneLongerHints != null) {
-                widenToCommonSupertypes(newTypes, oneLongerHints);
+                widenToCommonSupertypes(hints, oneLongerHints);
             }
         }
         
@@ -183,9 +193,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         // Update the longer hints-arrays:  
         // FIXME Shouldn't these use the original hint array instead of the widened one?
         for(int i = paramCount + 1; i < unwrappingHintsByParamCount.length; ++i) {
-            Class[] longerUnwrappingHints = unwrappingHintsByParamCount[i];
-            if(longerUnwrappingHints != null) {
-                widenToCommonSupertypes(longerUnwrappingHints, newTypes);
+            Class[] longerHints = unwrappingHintsByParamCount[i];
+            if(longerHints != null) {
+                widenToCommonSupertypes(longerHints, paramTypes);
             }
         }
         // The case of m(t1) where m is the currently added method.
@@ -193,7 +203,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         if(paramCount > 0) {  // (should be always true, or else it wasn't a varags method)
             Class[] oneShorterUnwrappingHints = unwrappingHintsByParamCount[paramCount - 1];
             if(oneShorterUnwrappingHints != null) {
-                widenToCommonSupertypes(oneShorterUnwrappingHints, newTypes);
+                widenToCommonSupertypes(oneShorterUnwrappingHints, paramTypes);
             }
         }
         
@@ -212,13 +222,6 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 typesToWiden[i] = MethodUtilities.getMostSpecificCommonType(typesToWiden[i], varargsComponentType);
             }
         }
-    }
-    
-    private static void componentizeLastType(Class[] types) {
-        int l1 = types.length - 1;
-        //assert l1 >= 0;
-        //assert types[l1].isArray();
-        types[l1] = types[l1].getComponentType();
     }
     
     Object getMemberAndArguments(List tmArgs, BeansWrapper w) 

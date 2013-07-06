@@ -65,11 +65,16 @@ import freemarker.template.TemplateModelException;
  */
 class OverloadedFixArgsMethods extends OverloadedMethodsSubset
 {
-    void beforeWideningUnwrappingHints(Member member, Class[] paramTypes) {
-        // Do nothing
+    
+    OverloadedFixArgsMethods(BeansWrapper beansWrapper) {
+        super(beansWrapper);
+    }
+
+    Class[] preprocessParameterTypes(Member member, Class[] paramTypes) {
+        return paramTypes;
     }
     
-    void afterWideningUnwrappingHints(int paramCount) {
+    void afterWideningUnwrappingHints(Class[] paramTypes) {
         // Do nothing
     }
 
