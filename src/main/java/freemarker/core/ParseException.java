@@ -52,8 +52,6 @@
 
 package freemarker.core;
 
-import java.util.Arrays;
-
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.SecurityUtilities;
