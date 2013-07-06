@@ -209,11 +209,11 @@ final class ClassString
         final int fl = formalTypes.length - (varArg ? 1 : 0);
         if(varArg) {
             if(cl < fl) {
-        	return false;
+                return false;
             }
         } else {
             if(cl != fl) {
-        	return false;
+                return false;
             }
         }
         for(int i = 0; i < fl; ++i) {
@@ -224,7 +224,7 @@ final class ClassString
         if(varArg) {
             Class varArgType = formalTypes[fl].getComponentType();
             for(int i = fl; i < cl; ++i) {
-    		if(!isMethodInvocationConvertible(varArgType, classes[i])) {
+                if(!isMethodInvocationConvertible(varArgType, classes[i])) {
                     return false;
                 }
             }

@@ -266,7 +266,7 @@ public class BeansWrapper implements ObjectWrapper
      *     <li>
      *       2.3.21 (or higher):
      *       <ul>
-     *         <li>Overloaded methods use more specific type hinting when unwrapping varargs in some
+     *         <li>Overloaded varargs methods use more specific type hinting when unwrapping varargs in some
      *             rare cases. (For example, for m(File, String...) and m(String...), sometimes (unpredictably) it has
      *             unwrapped arguments with the hints [Object, Object, Object, etc.] instead of with 
      *             [Object, String, String, ...].)</li>

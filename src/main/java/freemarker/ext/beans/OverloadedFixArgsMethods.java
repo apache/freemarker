@@ -94,7 +94,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
             return NO_SUCH_METHOD;
         }
         //assert types.length == l;
-        // Marshal the arguments
+        // Unwrap the arguments
         Object[] pojoArgs = new Object[argCount];
         Iterator it = tmArgs.iterator();
         for(int i = 0; i < argCount; ++i) {
