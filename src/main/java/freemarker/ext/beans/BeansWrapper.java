@@ -91,6 +91,7 @@ import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -101,8 +102,10 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -186,13 +189,13 @@ public class BeansWrapper implements ObjectWrapper
     private final Set/*<Class>*/ genericClassIntrospectionsInProgress
             = new HashSet();
 
-    private final StaticModels staticModels = new StaticModels(this);
-    private final ClassBasedModelFactory enumModels = createEnumModels(this);
+    private final StaticModels staticModels;
+    private final ClassBasedModelFactory enumModels;
 
-    private final ModelCache modelCache = new BeansModelCache(this);
+    private final ModelCache modelCache;
     
-    private final BooleanModel FALSE = new BooleanModel(Boolean.FALSE, this);
-    private final BooleanModel TRUE = new BooleanModel(Boolean.TRUE, this);
+    private final BooleanModel FALSE;
+    private final BooleanModel TRUE;
 
     /**
      * At this level of exposure, all methods and properties of the
@@ -239,9 +242,7 @@ public class BeansWrapper implements ObjectWrapper
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper;
     private boolean strict = false;
-    
-    // I have commented this out, as it won't be in 2.3.20 yet.
-    //private Version overloadedMethodSelection;
+    private final Version incompatibleImprovements;
     
     /**
      * Creates a new instance of BeansWrapper. The newly created instance
@@ -250,11 +251,42 @@ public class BeansWrapper implements ObjectWrapper
      * model instances.
      */
     public BeansWrapper() {
+        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+    }
+    
+    /**
+     * @param incompatibleImprovements
+     *   Sets which of the non-backward-compatible bugfixes/improvements should be enabled. This is like
+     *   {@link Configuration#setIncompatibleEnhancements(String)}, except that it applies to the object wrapper only,
+     *   and the actual effects are as listed below. (As {@link ObjectWrapper} objects are often shared among multiple
+     *   {@link Configuration}-s, they can't use {@link Configuration#getIncompatibleEnhancements()} to decide
+     *   their own incompatible improvements setting.)
+     * 
+     *   <ul>
+     *     <li>
+     *     </li>
+     *   </ul>
+     *
+     * @since 2.3.21
+     */
+    public BeansWrapper(Version incompatibleImprovements) {
+        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        
+        this.incompatibleImprovements = incompatibleImprovements;
+        
+        staticModels = new StaticModels(this);
+        enumModels = createEnumModels(this);
+
+        modelCache = new BeansModelCache(this);
+        
+        FALSE = new BooleanModel(Boolean.FALSE, this);
+        TRUE = new BooleanModel(Boolean.TRUE, this);
+        
         if(javaRebelAvailable) {
             JavaRebelIntegration.registerWrapper(this);
         }
     }
-    
+
     /**
      * @see #setStrict(boolean)
      */
@@ -468,6 +500,14 @@ public class BeansWrapper implements ObjectWrapper
     {
         this.nullModel = nullModel;
     }
+    
+    /**
+     * See {@link #BeansWrapper(Version)}.
+     * @since 2.3.21
+     */
+    public Version getIncompatibleImprovements() {
+        return incompatibleImprovements;
+    }    
     
     /**
      * Returns the default instance of the wrapper. This instance is used

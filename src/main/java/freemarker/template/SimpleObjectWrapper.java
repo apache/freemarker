@@ -52,12 +52,27 @@
 
 package freemarker.template;
 
+import freemarker.ext.beans.BeansWrapper;
+
 /**
  * The default implementation of the ObjectWrapper interface.
  */
 public class SimpleObjectWrapper extends DefaultObjectWrapper {
     
     static final SimpleObjectWrapper instance = new SimpleObjectWrapper();
+    
+    public SimpleObjectWrapper() {
+        super();
+    }
+    
+    /**
+     * @param incompatibleImprovements see in {@link BeansWrapper#BeansWrapper(Version)}.
+     * 
+     * @since 2.3.21
+     */
+    public SimpleObjectWrapper(Version incompatibleImprovements) {
+        super(incompatibleImprovements);
+    }
     
     /**
      * Called if a type other than the simple ones we know about is passed in. 
