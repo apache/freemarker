@@ -240,7 +240,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             Class[] unwarappingArgTypes = unwrappingHintsByParamCount[j];
             if(unwarappingArgTypes == null) {
                 if(j == 0) {
-                    return NO_SUCH_METHOD;
+                    return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
                 }
                 continue;
             }
@@ -258,16 +258,17 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             break;
         }
         
-        Object objMember = getMemberForArgs(pojoArgs, true);
-        if(objMember instanceof Member) {
-            Member member = (Member)objMember;
-            pojoArgs = ((ArgumentPacker)argPackers.get(member)).packArgs(pojoArgs, tmArgs, w);
+        MaybeEmptyOverloadedMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, true);
+        if(maybeEmtpyMemberDesc instanceof OverloadedMemberDescriptor) {
+            OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) maybeEmtpyMemberDesc;
+            pojoArgs = ((ArgumentPacker)argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);
             if(pojoArgs == null) {
-                return NO_SUCH_METHOD;
+                return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
             }
-            BeansWrapper.coerceBigDecimals(getSignature(member), pojoArgs);
-            return new MemberAndArguments(member, pojoArgs);
+            BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+            return new MemberAndArguments(memberDesc.member, pojoArgs);
+        } else {
+            return maybeEmtpyMemberDesc; // either NOT_FOUND or AMBIGUOUS
         }
-        return objMember; // either NOT_FOUND or AMBIGUOUS
     }
 }

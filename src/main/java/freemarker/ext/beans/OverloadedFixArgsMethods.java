@@ -87,11 +87,11 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
         final int argCount = tmArgs.size();
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         if(unwrappingHintsByParamCount.length <= argCount) {
-            return NO_SUCH_METHOD;
+            return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
         }
         Class[] unwarppingArgumentTypes = unwrappingHintsByParamCount[argCount];
         if(unwarppingArgumentTypes == null) {
-            return NO_SUCH_METHOD;
+            return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
         }
         //assert types.length == l;
         // Unwrap the arguments
@@ -100,18 +100,18 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
         for(int i = 0; i < argCount; ++i) {
             Object pojo = w.unwrapInternal((TemplateModel)it.next(), unwarppingArgumentTypes[i]);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
-                return NO_SUCH_METHOD;
+                return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
             }
             pojoArgs[i] = pojo;
         }
         
-        Object objMember = getMemberForArgs(pojoArgs, false);
-        if(objMember instanceof Member) {
-            Member member = (Member) objMember;
-            BeansWrapper.coerceBigDecimals(getSignature(member), pojoArgs);
-            return new MemberAndArguments(member, pojoArgs);
+        MaybeEmptyOverloadedMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, false);
+        if(maybeEmtpyMemberDesc instanceof OverloadedMemberDescriptor) {
+            OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) maybeEmtpyMemberDesc;
+            BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+            return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
-            return objMember; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
+            return maybeEmtpyMemberDesc; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
         }
     }
 }

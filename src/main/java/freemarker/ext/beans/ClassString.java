@@ -51,11 +51,11 @@
  */
 package freemarker.ext.beans;
 
-import java.lang.reflect.Member;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 
 /**
  * 
@@ -109,27 +109,30 @@ final class ClassString
     private static final int LESS_SPECIFIC = 1;
     private static final int INDETERMINATE = 2;
     
-    Object getMostSpecific(List methods, boolean varArg)
+    /**
+     * @return Possibly {@link EmptyOverloadedMemberDescriptor#NO_SUCH_METHOD} or {@link EmptyOverloadedMemberDescriptor#AMBIGUOUS_METHOD}. 
+     */
+    MaybeEmptyOverloadedMemberDescriptor getMostSpecific(List/*<OverloadedMemberDescriptor>*/ memberDescs, boolean varArg)
     {
-        LinkedList applicables = getApplicables(methods, varArg);
+        LinkedList/*<OverloadedMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
         if(applicables.isEmpty()) {
-            return OverloadedMethodsSubset.NO_SUCH_METHOD;
+            return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
         }
         if(applicables.size() == 1) {
-            return applicables.getFirst();
+            return (OverloadedMemberDescriptor) applicables.getFirst();
         }
-        LinkedList maximals = new LinkedList();
+        LinkedList/*<OverloadedMemberDescriptor>*/ maximals = new LinkedList();
         for (Iterator it = applicables.iterator(); it.hasNext();)
         {
-            Member applicable = (Member)it.next();
-            Class[] appArgs = MethodUtilities.getParameterTypes(applicable);
+            OverloadedMemberDescriptor applicable = (OverloadedMemberDescriptor) it.next();
+            Class[] appParamTypes = applicable.paramTypes;
             boolean lessSpecific = false;
             for (Iterator maximal = maximals.iterator(); 
                 maximal.hasNext();)
             {
-                Member max = (Member)maximal.next();
-                Class[] maxArgs = MethodUtilities.getParameterTypes(max);
-                switch(moreSpecific(appArgs, maxArgs, varArg)) {
+                OverloadedMemberDescriptor max = (OverloadedMemberDescriptor) maximal.next();
+                Class[] maxParamTypes = max.paramTypes;
+                switch(moreSpecific(appParamTypes, maxParamTypes, varArg)) {
                     case MORE_SPECIFIC: {
                         maximal.remove();
                         break;
@@ -145,9 +148,9 @@ final class ClassString
             }
         }
         if(maximals.size() > 1) {
-            return OverloadedMethodsSubset.AMBIGUOUS_METHOD;
+            return EmptyOverloadedMemberDescriptor.AMBIGUOUS_METHOD;
         }
-        return maximals.getFirst();
+        return (OverloadedMemberDescriptor) maximals.getFirst();
     }
     
     private static int moreSpecific(Class[] c1, Class[] c2, boolean varArg) {
@@ -188,12 +191,12 @@ final class ClassString
      * Returns all methods that are applicable to actual
      * parameter classes represented by this ClassString object.
      */
-    LinkedList getApplicables(List methods, boolean varArg) {
-        LinkedList list = new LinkedList();
-        for (Iterator it = methods.iterator(); it.hasNext();) {
-            Member member = (Member)it.next();
-            if(isApplicable(member, varArg)) {
-                list.add(member);
+    LinkedList/*<OverloadedMemberDescriptor>*/ getApplicables(List/*<OverloadedMemberDescriptor>*/ memberDescs, boolean varArg) {
+        LinkedList/*<OverloadedMemberDescriptor>*/ list = new LinkedList();
+        for (Iterator it = memberDescs.iterator(); it.hasNext();) {
+            OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) it.next();
+            if(isApplicable(memberDesc, varArg)) {
+                list.add(memberDesc);
             }
         }
         return list;
@@ -203,8 +206,8 @@ final class ClassString
      * Returns true if the supplied method is applicable to actual
      * parameter classes represented by this ClassString object.
      */
-    private boolean isApplicable(Member member, boolean varArg) {
-        final Class[] formalTypes = MethodUtilities.getParameterTypes(member);  // FXIME: getParameterTypes is slow 
+    private boolean isApplicable(OverloadedMemberDescriptor memberDesc, boolean varArg) {
+        final Class[] formalTypes = memberDesc.paramTypes; 
         final int cl = classes.length;
         final int fl = formalTypes.length - (varArg ? 1 : 0);
         if(varArg) {

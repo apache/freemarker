@@ -6,6 +6,7 @@ import java.lang.reflect.Member;
  * @author Attila Szegedi
  */
 class MemberAndArguments {
+    
     private final Member member;
     private final Object[] args;
     

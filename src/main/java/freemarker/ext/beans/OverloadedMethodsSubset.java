@@ -64,14 +64,14 @@ import freemarker.template.TemplateModelException;
  * @author Attila Szegedi
  */
 abstract class OverloadedMethodsSubset {
-    static final Object NO_SUCH_METHOD = new Object();
-    static final Object AMBIGUOUS_METHOD = new Object();
+    
     static final Object[] EMPTY_ARGS = new Object[0];
 
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
-    private final Map selectorCache = new HashMap();  // Java 5: Use ConcurrentHashMap?
-    private final List/*<Constructor|Method>*/ members = new LinkedList();
-    private final Map/*<Constructor|Method, Class[]>*/ signatures = new HashMap();
+    // Java 5: Use ConcurrentHashMap:
+    private final Map/*<ClassString, MaybeEmptyOverloadedMemberDescriptor>*/ selectorCache = new HashMap();
+    private final List/*<OverloadedMemberDescriptor>*/ memberDescs = new LinkedList();
+    
     protected final int beansWrapperVersion;
     
     OverloadedMethodsSubset(BeansWrapper beansWrapper) {
@@ -79,11 +79,10 @@ abstract class OverloadedMethodsSubset {
     }
     
     void addMember(Member member) {
-        members.add(member);
-
         final Class[] paramTypes = MethodUtilities.getParameterTypes(member);
         final int paramCount = paramTypes.length;
-        signatures.put(member, paramTypes);
+        
+        memberDescs.add(new OverloadedMemberDescriptor(member, paramTypes));
         
         final Class[] preprocessedParamTypes = preprocessParameterTypes(member, paramTypes);
         
@@ -121,29 +120,25 @@ abstract class OverloadedMethodsSubset {
         afterWideningUnwrappingHints(beansWrapperVersion >= 2003021 ? preprocessedParamTypes : unwrappingHints);
     }
     
-    Class[] getSignature(Member member) {
-        return (Class[]) signatures.get(member);
-    }
-    
     Class[][] getUnwrappingHintsByParamCount() {
         return unwrappingHintsByParamCount;
     }
     
-    Object getMemberForArgs(Object[] args, boolean varArg) {
+    MaybeEmptyOverloadedMemberDescriptor getMemberForArgs(Object[] args, boolean varArg) {
         ClassString argTypes = new ClassString(args);
-        Object objMember;
+        MaybeEmptyOverloadedMemberDescriptor memberDesc;
         synchronized(selectorCache) {
-            objMember = selectorCache.get(argTypes);
-            if(objMember == null) {
-                objMember = argTypes.getMostSpecific(members, varArg);
-                selectorCache.put(argTypes, objMember);
+            memberDesc = (MaybeEmptyOverloadedMemberDescriptor) selectorCache.get(argTypes);
+            if(memberDesc == null) {
+                memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
+                selectorCache.put(argTypes, memberDesc);
             }
         }
-        return objMember;
+        return memberDesc;
     }
     
-    Iterator/*<Constructor|Method>*/ getMembers() {
-        return members.iterator();
+    Iterator/*<OverloadedMemberDescriptor>*/ getMemberDescriptors() {
+        return memberDescs.iterator();
     }
     
     abstract Class[] preprocessParameterTypes(Member member, Class[] paramTypes);
@@ -151,4 +146,5 @@ abstract class OverloadedMethodsSubset {
     
     abstract Object getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
             BeansWrapper w) throws TemplateModelException;
+    
 }

@@ -92,30 +92,33 @@ final class OverloadedMethods
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
     throws TemplateModelException {
-        Object memberAndArguments = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
-        if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
+        Object memberAndArgumentsOrError = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
+        
+        if(memberAndArgumentsOrError == EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD) {
             if(varargMethods != null) {
-                memberAndArguments = varargMethods.getMemberAndArguments(tmArgs, wrapper);
+                memberAndArgumentsOrError = varargMethods.getMemberAndArguments(tmArgs, wrapper);
             }
-            if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
+            if(memberAndArgumentsOrError == EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
                         "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are:\n" + memberListToString());
             }
         }
-        if(memberAndArguments == OverloadedMethodsSubset.AMBIGUOUS_METHOD) {
+        
+        if(memberAndArgumentsOrError == EmptyOverloadedMemberDescriptor.AMBIGUOUS_METHOD) {
             throw new TemplateModelException(
                     "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
                     "parameter values:\n" + getDeducedCallSignature(tmArgs)
                     + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
         }
-        return (MemberAndArguments)memberAndArguments;
+        
+        return (MemberAndArguments) memberAndArgumentsOrError;
     }
     
     private String memberListToString() {
-        Iterator fixArgMethodsIter = fixArgMethods.getMembers();
-        Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMembers() : null;
+        Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
+        Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
         
         boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
         if (hasMethods) {
@@ -123,12 +126,12 @@ final class OverloadedMethods
             while (fixArgMethodsIter.hasNext()) {
                 if (sb.length() != 0) sb.append(",\n");
                 sb.append("    ");
-                sb.append(methodOrConstructorToString((Member) fixArgMethodsIter.next()));
+                sb.append(methodOrConstructorToString(((OverloadedMemberDescriptor) fixArgMethodsIter.next()).member));
             }
             if (varargMethodsIter != null) {
                 while (varargMethodsIter.hasNext()) {
                     if (sb.length() != 0) sb.append(",\n");
-                    sb.append(methodOrConstructorToString((Member) varargMethodsIter.next()));
+                    sb.append(methodOrConstructorToString(((OverloadedMemberDescriptor) varargMethodsIter.next()).member));
                 }
             }
             return sb.toString();
@@ -142,13 +145,13 @@ final class OverloadedMethods
      */
     private String getDeducedCallSignature(List arguments) {
         final Member firstMember;
-        Iterator fixArgMethodsIter = fixArgMethods.getMembers();
+        Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         if (fixArgMethodsIter.hasNext()) {
-            firstMember = (Member) fixArgMethodsIter.next();
+            firstMember = ((OverloadedMemberDescriptor) fixArgMethodsIter.next()).member;
         } else {
-            Iterator varArgMethods = varargMethods != null ? varargMethods.getMembers() : null;
+            Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
             if (varArgMethods != null && varArgMethods.hasNext()) {
-                firstMember = (Member) varArgMethods.next();
+                firstMember = ((OverloadedMemberDescriptor) varArgMethods.next()).member;
             } else {
                 firstMember = null;
             }
