@@ -68,14 +68,18 @@ abstract class OverloadedMethodsSubset {
     static final Object[] EMPTY_ARGS = new Object[0];
 
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
+    
+    // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
+    // and such need to be fixed in this regard. 
     // Java 5: Use ConcurrentHashMap:
-    private final Map/*<ClassString, MaybeEmptyCallableMemberDescriptor>*/ selectorCache = new HashMap();
+    private final Map/*<ClassString, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache = new HashMap();
+    
     private final List/*<CallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
-    protected final int beansWrapperVersion;
+    protected final int incompatibleImprovements;
     
     OverloadedMethodsSubset(BeansWrapper beansWrapper) {
-        beansWrapperVersion = beansWrapper.getIncompatibleImprovements().intValue();
+        incompatibleImprovements = beansWrapper.getIncompatibleImprovements().intValue();
     }
     
     void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
@@ -116,21 +120,21 @@ abstract class OverloadedMethodsSubset {
             }
         }
         
-        afterWideningUnwrappingHints(beansWrapperVersion >= 2003021 ? preprocessedParamTypes : unwrappingHints);
+        afterWideningUnwrappingHints(incompatibleImprovements >= 2003021 ? preprocessedParamTypes : unwrappingHints);
     }
     
     Class[][] getUnwrappingHintsByParamCount() {
         return unwrappingHintsByParamCount;
     }
     
-    MaybeEmptyCallableMemberDescriptor getMemberForArgs(Object[] args, boolean varArg) {
-        ClassString argTypes = new ClassString(args);
+    MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
+        ClassString argTypes = new ClassString(args, incompatibleImprovements);
         MaybeEmptyCallableMemberDescriptor memberDesc;
-        synchronized(selectorCache) {
-            memberDesc = (MaybeEmptyCallableMemberDescriptor) selectorCache.get(argTypes);
+        synchronized(argTypesToMemberDescCache) {
+            memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
             if(memberDesc == null) {
                 memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
-                selectorCache.put(argTypes, memberDesc);
+                argTypesToMemberDescCache.put(argTypes, memberDesc);
             }
         }
         return memberDesc;

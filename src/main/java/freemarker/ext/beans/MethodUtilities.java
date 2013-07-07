@@ -64,7 +64,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 class MethodUtilities
 {
-    static final Class OBJECT_CLASS = Object.class;
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
     
@@ -123,7 +122,7 @@ outer:  for (Iterator it = a1.iterator(); it.hasNext();) {
             max.add(clazz);
         }
         if(max.size() > 1) {
-            return OBJECT_CLASS;
+            return Object.class;
         }
         return (Class)max.get(0);
     }

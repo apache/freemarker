@@ -58,23 +58,25 @@ import java.util.List;
 
 
 /**
- * 
  * @author Attila Szegedi
  */
 final class ClassString
 {
     private static final Class BIGDECIMAL_CLASS = BigDecimal.class;
     private static final Class NUMBER_CLASS = Number.class;
-
     private final Class[] classes;
+    private final int incompatibleImprovements;
     
-    ClassString(Object[] objects) {
+    ClassString(Object[] objects, int incompatibleImprovements) {
         int l = objects.length;
         classes = new Class[l];
         for(int i = 0; i < l; ++i) {
             Object obj = objects[i];
-            classes[i] = obj == null ? MethodUtilities.OBJECT_CLASS : obj.getClass();
+            classes[i] = obj == null
+                    ? (incompatibleImprovements > 2003020 ? Null.class : Object.class)
+                    : obj.getClass();
         }
+        this.incompatibleImprovements = incompatibleImprovements;
     }
     
     Class[] getClasses() {
@@ -105,10 +107,6 @@ final class ClassString
         return false;
     }
     
-    private static final int MORE_SPECIFIC = 0;
-    private static final int LESS_SPECIFIC = 1;
-    private static final int INDETERMINATE = 2;
-    
     /**
      * @return Possibly {@link EmptyCallableMemberDescriptor#NO_SUCH_METHOD} or {@link EmptyCallableMemberDescriptor#AMBIGUOUS_METHOD}. 
      */
@@ -121,23 +119,22 @@ final class ClassString
         if(applicables.size() == 1) {
             return (CallableMemberDescriptor) applicables.getFirst();
         }
+        
         LinkedList/*<CallableMemberDescriptor>*/ maximals = new LinkedList();
-        for (Iterator it = applicables.iterator(); it.hasNext();)
+        for (Iterator applicablesIter = applicables.iterator(); applicablesIter.hasNext();)
         {
-            CallableMemberDescriptor applicable = (CallableMemberDescriptor) it.next();
-            Class[] appParamTypes = applicable.paramTypes;
+            CallableMemberDescriptor applicable = (CallableMemberDescriptor) applicablesIter.next();
             boolean lessSpecific = false;
-            for (Iterator maximal = maximals.iterator(); 
-                maximal.hasNext();)
+            for (Iterator maximalsIter = maximals.iterator(); 
+                maximalsIter.hasNext();)
             {
-                CallableMemberDescriptor max = (CallableMemberDescriptor) maximal.next();
-                Class[] maxParamTypes = max.paramTypes;
-                switch(moreSpecific(appParamTypes, maxParamTypes, varArg)) {
-                    case MORE_SPECIFIC: {
-                        maximal.remove();
+                CallableMemberDescriptor maximal = (CallableMemberDescriptor) maximalsIter.next();
+                switch(compareParameterTypesSpecificity(applicable.paramTypes, maximal.paramTypes, varArg)) {
+                    case 1: {
+                        maximalsIter.remove();
                         break;
                     }
-                    case LESS_SPECIFIC: {
+                    case -1: {
                         lessSpecific = true;
                         break;
                     }
@@ -153,38 +150,39 @@ final class ClassString
         return (CallableMemberDescriptor) maximals.getFirst();
     }
     
-    private static int moreSpecific(Class[] c1, Class[] c2, boolean varArg) {
-        boolean c1MoreSpecific = false;
-        boolean c2MoreSpecific = false;
-        final int cl1 = c1.length;
-        final int cl2 = c2.length;
+    private static int compareParameterTypesSpecificity(Class[] paramTypes1, Class[] paramTypes2, boolean varArg) {
+        boolean paramTypes1HasAMoreSpecific = false;
+        boolean paramTypes2HasAMoreSpecific = false;
+        final int paramTypes1Len = paramTypes1.length;
+        final int paramTypes2Len = paramTypes2.length;
         //assert varArg || cl1 == cl2;
-        for(int i = 0; i < cl1; ++i) {
-            Class class1 = getClass(c1, cl1, i, varArg);
-            Class class2 = getClass(c2, cl2, i, varArg);
-            if(class1 != class2) {
-                c1MoreSpecific = 
-                    c1MoreSpecific ||
-                    MethodUtilities.isMoreSpecific(class1, class2);
-                c2MoreSpecific = 
-                    c2MoreSpecific ||
-                    MethodUtilities.isMoreSpecific(class2, class1);
+        
+        for(int i = 0; i < paramTypes1Len; ++i) {
+            Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
+            Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+            if(paramType1 != paramType2) {
+                paramTypes1HasAMoreSpecific = 
+                    paramTypes1HasAMoreSpecific
+                    || MethodUtilities.isMoreSpecific(paramType1, paramType2);
+                paramTypes2HasAMoreSpecific = 
+                    paramTypes2HasAMoreSpecific
+                    || MethodUtilities.isMoreSpecific(paramType2, paramType1);
             }
         }
-        if(c1MoreSpecific) {
-            if(c2MoreSpecific) {
-                return INDETERMINATE;
-            }
-            return MORE_SPECIFIC;
+        
+        if(paramTypes1HasAMoreSpecific) {
+            return paramTypes2HasAMoreSpecific ? 0 : 1;
+        } else if(paramTypes2HasAMoreSpecific) {
+            return -1;
+        } else {
+            return 0;
         }
-        if(c2MoreSpecific) {
-            return LESS_SPECIFIC;
-        }
-        return INDETERMINATE;
     }
     
-    private static Class getClass(Class[] classes, int l, int i, boolean varArg) {
-        return varArg && i >= l - 1 ? classes[l - 1].getComponentType() : classes[i];
+    private static Class getParamType(Class[] paramTypes, int paramTypesLen, int i, boolean varArg) {
+        return varArg && i >= paramTypesLen - 1
+                ? paramTypes[paramTypesLen - 1].getComponentType()
+                : paramTypes[i];
     }
     
     /**
@@ -252,11 +250,16 @@ final class ClassString
      * type or an object type of a primitive type that can be converted to
      * the formal type.
      */
-    static boolean isMethodInvocationConvertible(Class formal, Class actual) {
+    boolean isMethodInvocationConvertible(Class formal, Class actual) {
         // Check for identity or widening reference conversion
         if(formal.isAssignableFrom(actual)) {
             return true;
         }
+        
+        if (actual == Null.class && incompatibleImprovements > 2003020) {
+            return !formal.isPrimitive();
+        }
+        
         // Check for boxing with widening primitive conversion. Note that 
         // actual parameters are never primitives.
         if(formal.isPrimitive()) {

@@ -20381,7 +20381,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>TODO: null</para>
+                  <para><literal>null</literal> argument values has only
+                  matched overloaded methods where the corresponding parameter
+                  had <literal>Object</literal> type, not a subclass of
+                  it.</para>
                 </listitem>
 
                 <listitem>

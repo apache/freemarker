@@ -20,4 +20,20 @@ public class OverloadedMethods2 {
         return new NumberAndStringModel(s);
     }
     
+    public String mNull1(String a1) {
+        return "mNull1(String a1 = " + a1 + ")";
+    }
+
+    public String mNull1(int a1) {
+        return "mNull1(int a1 = " + a1 + ")";
+    }
+    
+    public String mNull2(String a1) {
+        return "mNull2(String a1 = " + a1 + ")";
+    }
+    
+    public String mNull2(Object a1) {
+        return "mNull2(Object a1 = " + a1 + ")";
+    }
+    
 }

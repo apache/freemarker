@@ -257,7 +257,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             break;
         }
         
-        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, true);
+        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, true);
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             pojoArgs = ((ArgumentPacker)argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);

@@ -104,7 +104,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
             pojoArgs[i] = pojo;
         }
         
-        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, false);
+        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, false);
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
