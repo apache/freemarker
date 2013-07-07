@@ -193,14 +193,14 @@ final class StaticModel implements TemplateHashModelEx
                     if (obj instanceof Method)
                     {
                         OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper);
-                        overloadedMethods.addMember((Method) obj);
-                        overloadedMethods.addMember(method);
+                        overloadedMethods.addMethod((Method) obj);
+                        overloadedMethods.addMethod(method);
                         map.put(name, overloadedMethods);
                     }
                     else if(obj instanceof OverloadedMethods)
                     {
                         OverloadedMethods overloadedMethods = (OverloadedMethods) obj;
-                        overloadedMethods.addMember(method);
+                        overloadedMethods.addMethod(method);
                     }
                     else
                     {

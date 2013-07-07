@@ -52,7 +52,6 @@
 package freemarker.ext.beans;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Member;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -128,8 +127,8 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         }
     }
 
-    Class[] preprocessParameterTypes(Member member, Class[] paramTypes) {
-        final Class[] preprocessedParamTypes = (Class[]) paramTypes.clone();
+    Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
+        final Class[] preprocessedParamTypes = (Class[]) memberDesc.paramTypes.clone();
         int ln = preprocessedParamTypes.length;
         final Class varArgsCompType = preprocessedParamTypes[ln - 1].getComponentType();
         preprocessedParamTypes[ln - 1] = varArgsCompType;
@@ -144,7 +143,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 argPacker = canonical;
             }
         }
-        argPackers.put(member, argPacker);
+        argPackers.put(memberDesc.member, argPacker);
         
         return preprocessedParamTypes;
     }
@@ -258,9 +257,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             break;
         }
         
-        MaybeEmptyOverloadedMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, true);
-        if(maybeEmtpyMemberDesc instanceof OverloadedMemberDescriptor) {
-            OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) maybeEmtpyMemberDesc;
+        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, true);
+        if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
+            CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             pojoArgs = ((ArgumentPacker)argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);
             if(pojoArgs == null) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
@@ -268,7 +267,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
             return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
-            return EmptyMemberAndArguments.from((EmptyOverloadedMemberDescriptor) maybeEmtpyMemberDesc); // either NOT_FOUND or AMBIGUOUS
+            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc); // either NOT_FOUND or AMBIGUOUS
         }
     }
 }

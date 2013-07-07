@@ -54,6 +54,7 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
@@ -79,14 +80,24 @@ final class OverloadedMethods
     BeansWrapper getWrapper() {
         return wrapper;
     }
+
+    void addMethod(Method member) {
+        final Class[] paramTypes = member.getParameterTypes();
+        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+    }
+
+    void addConstructor(Constructor member) {
+        final Class[] paramTypes = member.getParameterTypes();
+        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+    }
     
-    void addMember(Member member) {
-        fixArgMethods.addMember(member);
-        if(MethodUtilities.isVarArgs(member)) {
+    private void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+        fixArgMethods.addCallableMemberDescriptor(memberDesc);
+        if(MethodUtilities.isVarArgs(memberDesc.member)) {
             if(varargMethods == null) {
                 varargMethods = new OverloadedVarArgsMethods(wrapper);
             }
-            varargMethods.addMember(member);
+            varargMethods.addCallableMemberDescriptor(memberDesc);
         }
     }
     
@@ -125,12 +136,12 @@ final class OverloadedMethods
             while (fixArgMethodsIter.hasNext()) {
                 if (sb.length() != 0) sb.append(",\n");
                 sb.append("    ");
-                sb.append(methodOrConstructorToString(((OverloadedMemberDescriptor) fixArgMethodsIter.next()).member));
+                sb.append(methodOrConstructorToString(((CallableMemberDescriptor) fixArgMethodsIter.next()).member));
             }
             if (varargMethodsIter != null) {
                 while (varargMethodsIter.hasNext()) {
                     if (sb.length() != 0) sb.append(",\n");
-                    sb.append(methodOrConstructorToString(((OverloadedMemberDescriptor) varargMethodsIter.next()).member));
+                    sb.append(methodOrConstructorToString(((CallableMemberDescriptor) varargMethodsIter.next()).member));
                 }
             }
             return sb.toString();
@@ -146,11 +157,11 @@ final class OverloadedMethods
         final Member firstMember;
         Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         if (fixArgMethodsIter.hasNext()) {
-            firstMember = ((OverloadedMemberDescriptor) fixArgMethodsIter.next()).member;
+            firstMember = ((CallableMemberDescriptor) fixArgMethodsIter.next()).member;
         } else {
             Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
             if (varArgMethods != null && varArgMethods.hasNext()) {
-                firstMember = ((OverloadedMemberDescriptor) varArgMethods.next()).member;
+                firstMember = ((CallableMemberDescriptor) varArgMethods.next()).member;
             } else {
                 firstMember = null;
             }

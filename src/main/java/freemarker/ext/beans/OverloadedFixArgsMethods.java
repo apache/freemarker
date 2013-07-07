@@ -70,8 +70,8 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
         super(beansWrapper);
     }
 
-    Class[] preprocessParameterTypes(Member member, Class[] paramTypes) {
-        return paramTypes;
+    Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
+        return memberDesc.paramTypes;
     }
     
     void afterWideningUnwrappingHints(Class[] paramTypes) {
@@ -104,13 +104,14 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
             pojoArgs[i] = pojo;
         }
         
-        MaybeEmptyOverloadedMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, false);
-        if(maybeEmtpyMemberDesc instanceof OverloadedMemberDescriptor) {
-            OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) maybeEmtpyMemberDesc;
+        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberForArgs(pojoArgs, false);
+        if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
+            CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
             return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
-            return EmptyMemberAndArguments.from((EmptyOverloadedMemberDescriptor) maybeEmtpyMemberDesc);
+            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc);
         }
     }
+    
 }

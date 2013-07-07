@@ -1304,8 +1304,8 @@ public class BeansWrapper implements ObjectWrapper
                         {
                             // Overloaded method - replace method with a method map
                             OverloadedMethods overloadedMethods = new OverloadedMethods(this);
-                            overloadedMethods.addMember((Method)previous);
-                            overloadedMethods.addMember(publicMethod);
+                            overloadedMethods.addMethod((Method)previous);
+                            overloadedMethods.addMethod(publicMethod);
                             introspData.put(methodKey, overloadedMethods);
                             // remove parameter type information
                             getArgTypes(introspData).remove(previous);
@@ -1313,7 +1313,7 @@ public class BeansWrapper implements ObjectWrapper
                         else if(previous instanceof OverloadedMethods)
                         {
                             // Already overloaded method - add new overload
-                            ((OverloadedMethods)previous).addMember(publicMethod);
+                            ((OverloadedMethods)previous).addMethod(publicMethod);
                         }
                         else if (decision.getMethodShadowsProperty()
                                 || !(previous instanceof PropertyDescriptor))
@@ -1415,7 +1415,7 @@ public class BeansWrapper implements ObjectWrapper
                 OverloadedMethods ctorMap = new OverloadedMethods(this);
                 for (int i = 0; i < ctors.length; i++)
                 {
-                    ctorMap.addMember(ctors[i]);
+                    ctorMap.addConstructor(ctors[i]);
                 }
                 introspData.put(CONSTRUCTORS, ctorMap);
             }

@@ -69,8 +69,8 @@ abstract class OverloadedMethodsSubset {
 
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
     // Java 5: Use ConcurrentHashMap:
-    private final Map/*<ClassString, MaybeEmptyOverloadedMemberDescriptor>*/ selectorCache = new HashMap();
-    private final List/*<OverloadedMemberDescriptor>*/ memberDescs = new LinkedList();
+    private final Map/*<ClassString, MaybeEmptyCallableMemberDescriptor>*/ selectorCache = new HashMap();
+    private final List/*<CallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
     protected final int beansWrapperVersion;
     
@@ -78,13 +78,12 @@ abstract class OverloadedMethodsSubset {
         beansWrapperVersion = beansWrapper.getIncompatibleImprovements().intValue();
     }
     
-    void addMember(Member member) {
-        final Class[] paramTypes = MethodUtilities.getParameterTypes(member);
-        final int paramCount = paramTypes.length;
+    void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+        final int paramCount = memberDesc.paramTypes.length;
         
-        memberDescs.add(new OverloadedMemberDescriptor(member, paramTypes));
+        memberDescs.add(memberDesc);
         
-        final Class[] preprocessedParamTypes = preprocessParameterTypes(member, paramTypes);
+        final Class[] preprocessedParamTypes = preprocessParameterTypes(memberDesc);
         
         final Class[] unwrappingHints = (Class[]) preprocessedParamTypes.clone();
         // Merge these unwrapping hints with the existing table of hints:
@@ -124,11 +123,11 @@ abstract class OverloadedMethodsSubset {
         return unwrappingHintsByParamCount;
     }
     
-    MaybeEmptyOverloadedMemberDescriptor getMemberForArgs(Object[] args, boolean varArg) {
+    MaybeEmptyCallableMemberDescriptor getMemberForArgs(Object[] args, boolean varArg) {
         ClassString argTypes = new ClassString(args);
-        MaybeEmptyOverloadedMemberDescriptor memberDesc;
+        MaybeEmptyCallableMemberDescriptor memberDesc;
         synchronized(selectorCache) {
-            memberDesc = (MaybeEmptyOverloadedMemberDescriptor) selectorCache.get(argTypes);
+            memberDesc = (MaybeEmptyCallableMemberDescriptor) selectorCache.get(argTypes);
             if(memberDesc == null) {
                 memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
                 selectorCache.put(argTypes, memberDesc);
@@ -137,11 +136,11 @@ abstract class OverloadedMethodsSubset {
         return memberDesc;
     }
     
-    Iterator/*<OverloadedMemberDescriptor>*/ getMemberDescriptors() {
+    Iterator/*<CallableMemberDescriptor>*/ getMemberDescriptors() {
         return memberDescs.iterator();
     }
     
-    abstract Class[] preprocessParameterTypes(Member member, Class[] paramTypes);
+    abstract Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc);
     abstract void afterWideningUnwrappingHints(Class[] paramTypes);
     
     abstract MaybeEmptyMemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 

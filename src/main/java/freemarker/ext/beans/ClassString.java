@@ -110,27 +110,27 @@ final class ClassString
     private static final int INDETERMINATE = 2;
     
     /**
-     * @return Possibly {@link EmptyOverloadedMemberDescriptor#NO_SUCH_METHOD} or {@link EmptyOverloadedMemberDescriptor#AMBIGUOUS_METHOD}. 
+     * @return Possibly {@link EmptyCallableMemberDescriptor#NO_SUCH_METHOD} or {@link EmptyCallableMemberDescriptor#AMBIGUOUS_METHOD}. 
      */
-    MaybeEmptyOverloadedMemberDescriptor getMostSpecific(List/*<OverloadedMemberDescriptor>*/ memberDescs, boolean varArg)
+    MaybeEmptyCallableMemberDescriptor getMostSpecific(List/*<CallableMemberDescriptor>*/ memberDescs, boolean varArg)
     {
-        LinkedList/*<OverloadedMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
+        LinkedList/*<CallableMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
         if(applicables.isEmpty()) {
-            return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
+            return EmptyCallableMemberDescriptor.NO_SUCH_METHOD;
         }
         if(applicables.size() == 1) {
-            return (OverloadedMemberDescriptor) applicables.getFirst();
+            return (CallableMemberDescriptor) applicables.getFirst();
         }
-        LinkedList/*<OverloadedMemberDescriptor>*/ maximals = new LinkedList();
+        LinkedList/*<CallableMemberDescriptor>*/ maximals = new LinkedList();
         for (Iterator it = applicables.iterator(); it.hasNext();)
         {
-            OverloadedMemberDescriptor applicable = (OverloadedMemberDescriptor) it.next();
+            CallableMemberDescriptor applicable = (CallableMemberDescriptor) it.next();
             Class[] appParamTypes = applicable.paramTypes;
             boolean lessSpecific = false;
             for (Iterator maximal = maximals.iterator(); 
                 maximal.hasNext();)
             {
-                OverloadedMemberDescriptor max = (OverloadedMemberDescriptor) maximal.next();
+                CallableMemberDescriptor max = (CallableMemberDescriptor) maximal.next();
                 Class[] maxParamTypes = max.paramTypes;
                 switch(moreSpecific(appParamTypes, maxParamTypes, varArg)) {
                     case MORE_SPECIFIC: {
@@ -148,9 +148,9 @@ final class ClassString
             }
         }
         if(maximals.size() > 1) {
-            return EmptyOverloadedMemberDescriptor.AMBIGUOUS_METHOD;
+            return EmptyCallableMemberDescriptor.AMBIGUOUS_METHOD;
         }
-        return (OverloadedMemberDescriptor) maximals.getFirst();
+        return (CallableMemberDescriptor) maximals.getFirst();
     }
     
     private static int moreSpecific(Class[] c1, Class[] c2, boolean varArg) {
@@ -191,10 +191,10 @@ final class ClassString
      * Returns all methods that are applicable to actual
      * parameter classes represented by this ClassString object.
      */
-    LinkedList/*<OverloadedMemberDescriptor>*/ getApplicables(List/*<OverloadedMemberDescriptor>*/ memberDescs, boolean varArg) {
-        LinkedList/*<OverloadedMemberDescriptor>*/ list = new LinkedList();
+    LinkedList/*<CallableMemberDescriptor>*/ getApplicables(List/*<CallableMemberDescriptor>*/ memberDescs, boolean varArg) {
+        LinkedList/*<CallableMemberDescriptor>*/ list = new LinkedList();
         for (Iterator it = memberDescs.iterator(); it.hasNext();) {
-            OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) it.next();
+            CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) it.next();
             if(isApplicable(memberDesc, varArg)) {
                 list.add(memberDesc);
             }
@@ -206,7 +206,7 @@ final class ClassString
      * Returns true if the supplied method is applicable to actual
      * parameter classes represented by this ClassString object.
      */
-    private boolean isApplicable(OverloadedMemberDescriptor memberDesc, boolean varArg) {
+    private boolean isApplicable(CallableMemberDescriptor memberDesc, boolean varArg) {
         final Class[] formalTypes = memberDesc.paramTypes; 
         final int cl = classes.length;
         final int fl = formalTypes.length - (varArg ? 1 : 0);

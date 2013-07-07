@@ -7,9 +7,9 @@ final class EmptyMemberAndArguments extends MaybeEmptyMemberAndArguments {
     
     private EmptyMemberAndArguments() { }
 
-    public static EmptyMemberAndArguments from(EmptyOverloadedMemberDescriptor emtpyMemberDesc) {
-        if (emtpyMemberDesc == EmptyOverloadedMemberDescriptor.AMBIGUOUS_METHOD) return AMBIGUOUS_METHOD;
-        else if (emtpyMemberDesc == EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD) return NO_SUCH_METHOD;
+    public static EmptyMemberAndArguments from(EmptyCallableMemberDescriptor emtpyMemberDesc) {
+        if (emtpyMemberDesc == EmptyCallableMemberDescriptor.AMBIGUOUS_METHOD) return AMBIGUOUS_METHOD;
+        else if (emtpyMemberDesc == EmptyCallableMemberDescriptor.NO_SUCH_METHOD) return NO_SUCH_METHOD;
         else throw new IllegalArgumentException("Unrecognized constant: " + emtpyMemberDesc);
     }
 
