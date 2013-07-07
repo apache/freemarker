@@ -78,7 +78,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
         // Do nothing
     }
 
-    Object getMemberAndArguments(List tmArgs, BeansWrapper w) 
+    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper w) 
     throws TemplateModelException {
         if(tmArgs == null) {
             // null is treated as empty args
@@ -87,20 +87,19 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
         final int argCount = tmArgs.size();
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         if(unwrappingHintsByParamCount.length <= argCount) {
-            return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
+            return EmptyMemberAndArguments.NO_SUCH_METHOD;
         }
         Class[] unwarppingArgumentTypes = unwrappingHintsByParamCount[argCount];
         if(unwarppingArgumentTypes == null) {
-            return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
+            return EmptyMemberAndArguments.NO_SUCH_METHOD;
         }
-        //assert types.length == l;
-        // Unwrap the arguments
+        
         Object[] pojoArgs = new Object[argCount];
         Iterator it = tmArgs.iterator();
         for(int i = 0; i < argCount; ++i) {
             Object pojo = w.unwrapInternal((TemplateModel)it.next(), unwarppingArgumentTypes[i]);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
-                return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
+                return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
             pojoArgs[i] = pojo;
         }
@@ -111,7 +110,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset
             BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
             return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
-            return maybeEmtpyMemberDesc; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
+            return EmptyMemberAndArguments.from((EmptyOverloadedMemberDescriptor) maybeEmtpyMemberDesc);
         }
     }
 }

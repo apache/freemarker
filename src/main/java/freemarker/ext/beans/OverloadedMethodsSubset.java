@@ -144,7 +144,7 @@ abstract class OverloadedMethodsSubset {
     abstract Class[] preprocessParameterTypes(Member member, Class[] paramTypes);
     abstract void afterWideningUnwrappingHints(Class[] paramTypes);
     
-    abstract Object getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
+    abstract MaybeEmptyMemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
             BeansWrapper w) throws TemplateModelException;
     
 }

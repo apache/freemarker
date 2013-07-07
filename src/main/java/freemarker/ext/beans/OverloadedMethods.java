@@ -92,13 +92,13 @@ final class OverloadedMethods
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
     throws TemplateModelException {
-        Object memberAndArgumentsOrError = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
+        MaybeEmptyMemberAndArguments maybeEmptyMemberAndArgs = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
         
-        if(memberAndArgumentsOrError == EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD) {
+        if(maybeEmptyMemberAndArgs == EmptyMemberAndArguments.NO_SUCH_METHOD) {
             if(varargMethods != null) {
-                memberAndArgumentsOrError = varargMethods.getMemberAndArguments(tmArgs, wrapper);
+                maybeEmptyMemberAndArgs = varargMethods.getMemberAndArguments(tmArgs, wrapper);
             }
-            if(memberAndArgumentsOrError == EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD) {
+            if(maybeEmptyMemberAndArgs == EmptyMemberAndArguments.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
                         "parameter values:\n" + getDeducedCallSignature(tmArgs)
@@ -106,14 +106,14 @@ final class OverloadedMethods
             }
         }
         
-        if(memberAndArgumentsOrError == EmptyOverloadedMemberDescriptor.AMBIGUOUS_METHOD) {
+        if(maybeEmptyMemberAndArgs == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
             throw new TemplateModelException(
                     "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
                     "parameter values:\n" + getDeducedCallSignature(tmArgs)
                     + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
         }
         
-        return (MemberAndArguments) memberAndArgumentsOrError;
+        return (MemberAndArguments) maybeEmptyMemberAndArgs;
     }
     
     private String memberListToString() {

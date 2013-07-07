@@ -224,7 +224,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         }
     }
     
-    Object getMemberAndArguments(List tmArgs, BeansWrapper w) 
+    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper w) 
     throws TemplateModelException {
         if(tmArgs == null) {
             // null is treated as empty args
@@ -240,7 +240,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             Class[] unwarappingArgTypes = unwrappingHintsByParamCount[j];
             if(unwarappingArgTypes == null) {
                 if(j == 0) {
-                    return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
+                    return EmptyMemberAndArguments.NO_SUCH_METHOD;
                 }
                 continue;
             }
@@ -263,12 +263,12 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             OverloadedMemberDescriptor memberDesc = (OverloadedMemberDescriptor) maybeEmtpyMemberDesc;
             pojoArgs = ((ArgumentPacker)argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);
             if(pojoArgs == null) {
-                return EmptyOverloadedMemberDescriptor.NO_SUCH_METHOD;
+                return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
             BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
             return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
-            return maybeEmtpyMemberDesc; // either NOT_FOUND or AMBIGUOUS
+            return EmptyMemberAndArguments.from((EmptyOverloadedMemberDescriptor) maybeEmtpyMemberDesc); // either NOT_FOUND or AMBIGUOUS
         }
     }
 }
