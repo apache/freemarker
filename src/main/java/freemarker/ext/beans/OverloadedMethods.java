@@ -92,30 +92,29 @@ final class OverloadedMethods
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
     throws TemplateModelException {
-        MaybeEmptyMemberAndArguments maybeEmptyMemberAndArgs = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
-        
-        if(maybeEmptyMemberAndArgs == EmptyMemberAndArguments.NO_SUCH_METHOD) {
-            if(varargMethods != null) {
-                maybeEmptyMemberAndArgs = varargMethods.getMemberAndArguments(tmArgs, wrapper);
-            }
-            if(maybeEmptyMemberAndArgs == EmptyMemberAndArguments.NO_SUCH_METHOD) {
+        MaybeEmptyMemberAndArguments res;
+        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+            return (MemberAndArguments) res;
+        } else if (varargMethods != null
+                && (res = varargMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+            return (MemberAndArguments) res;
+        } else {
+            if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
                         "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are:\n" + memberListToString());
+            } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
+                throw new TemplateModelException(
+                        "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
+                        "parameter values:\n" + getDeducedCallSignature(tmArgs)
+                        + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
+            } else {
+                throw new RuntimeException("Unsupported EmptyMemberAndArguments: " + res); 
             }
         }
-        
-        if(maybeEmptyMemberAndArgs == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
-            throw new TemplateModelException(
-                    "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
-                    "parameter values:\n" + getDeducedCallSignature(tmArgs)
-                    + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
-        }
-        
-        return (MemberAndArguments) maybeEmptyMemberAndArgs;
     }
-    
+
     private String memberListToString() {
         Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
