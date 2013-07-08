@@ -65,18 +65,18 @@ final class ClassString
     private static final Class BIGDECIMAL_CLASS = BigDecimal.class;
     private static final Class NUMBER_CLASS = Number.class;
     private final Class[] classes;
-    private final int incompatibleImprovements;
+    private final boolean bugfixed;
     
-    ClassString(Object[] objects, int incompatibleImprovements) {
+    ClassString(Object[] objects, boolean bugfixed) {
         int l = objects.length;
         classes = new Class[l];
         for(int i = 0; i < l; ++i) {
             Object obj = objects[i];
             classes[i] = obj == null
-                    ? (incompatibleImprovements > 2003020 ? Null.class : Object.class)
+                    ? (bugfixed ? Null.class : Object.class)
                     : obj.getClass();
         }
-        this.incompatibleImprovements = incompatibleImprovements;
+        this.bugfixed = bugfixed;
     }
     
     Class[] getClasses() {
@@ -150,7 +150,7 @@ final class ClassString
         return (CallableMemberDescriptor) maximals.getFirst();
     }
     
-    private static int compareParameterTypesSpecificity(Class[] paramTypes1, Class[] paramTypes2, boolean varArg) {
+    private int compareParameterTypesSpecificity(Class[] paramTypes1, Class[] paramTypes2, boolean varArg) {
         boolean paramTypes1HasAMoreSpecific = false;
         boolean paramTypes2HasAMoreSpecific = false;
         final int paramTypes1Len = paramTypes1.length;
@@ -163,10 +163,10 @@ final class ClassString
             if(paramType1 != paramType2) {
                 paramTypes1HasAMoreSpecific = 
                     paramTypes1HasAMoreSpecific
-                    || MethodUtilities.isMoreSpecific(paramType1, paramType2);
+                    || MethodUtilities.isMoreSpecificOrTheSame(paramType1, paramType2, bugfixed);
                 paramTypes2HasAMoreSpecific = 
                     paramTypes2HasAMoreSpecific
-                    || MethodUtilities.isMoreSpecific(paramType2, paramType1);
+                    || MethodUtilities.isMoreSpecificOrTheSame(paramType2, paramType1, bugfixed);
             }
         }
         
@@ -256,7 +256,7 @@ final class ClassString
             return true;
         }
         
-        if (actual == Null.class && incompatibleImprovements > 2003020) {
+        if (actual == Null.class && bugfixed) {
             return !formal.isPrimitive();
         }
         

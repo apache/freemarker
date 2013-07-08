@@ -5,3 +5,5 @@
 <@assertEquals actual=obj.mNull2(null) expected="mNull2(Object a1 = null)" />
 <@assertFails message="no compatible overloaded">${obj.mVarargs('a', null)}</@>
 <@assertFails message="no compatible overloaded">${obj.mVarargs(null, 'a')}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mSpecificity('a', 'b')}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mBoolean(true)}</@>

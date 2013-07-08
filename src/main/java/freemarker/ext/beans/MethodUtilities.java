@@ -54,79 +54,17 @@ package freemarker.ext.beans;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import freemarker.template.utility.UndeclaredThrowableException;
 
 class MethodUtilities
 {
+    // Get rid of these on Java 5
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
     
-    // DD: This method is broken. It gives different result depending on the order of the argument values. Like
-    // getMostSpecificCommonType(int.class, Integer.class) gives Object.class, but
-    // getMostSpecificCommonType(Integer.class, int.class) gives Integer.class. And this actually influences the
-    // overloaded method mechanism, because the order of the values depends on the order in which the Java reflection
-    // API returns the methods, and that order "randomly" changes depending on factors like the J2SE version (5 VS 6).
-    // I don't dare to fix this, because I don't want a FreeMarker update to break any apps that even if out of sheer
-    // luck, but happen to work...
-    static Class getMostSpecificCommonType(Class c1, Class c2) {
-        if(c1 == c2) {
-            return c1;
-        }
-        if(c2.isPrimitive()) {
-            if(c2 == Byte.TYPE) c2 = Byte.class;
-            else if(c2 == Short.TYPE) c2 = Short.class;
-            else if(c2 == Character.TYPE) c2 = Character.class;
-            else if(c2 == Integer.TYPE) c2 = Integer.class;
-            else if(c2 == Float.TYPE) c2 = Float.class;
-            else if(c2 == Long.TYPE) c2 = Long.class;
-            else if(c2 == Double.TYPE) c2 = Double.class;
-        }
-        // DD: This appears to be wrong to me... What if c1.isPrimitive? A non-primitive is never assignable to a
-        //     primitive, or the other way around.
-        Set a1 = getAssignables(c1, c2);
-        Set a2 = getAssignables(c2, c1);
-        a1.retainAll(a2);
-        if(a1.isEmpty()) {
-            // Can happen when at least one of the arguments is an interface, as
-            // they don't have Object at the root of their hierarchy
-            return Object.class;
-        }
-        // Gather maximally specific elements. Yes, there can be more than one 
-        // thank to interfaces. I.e., if you call this method for String.class 
-        // and Number.class, you'll have Comparable, Serializable, and Object as 
-        // maximal elements. 
-        List max = new ArrayList();
-outer:  for (Iterator it = a1.iterator(); it.hasNext();) {
-            Class clazz = (Class)it.next();
-            for (Iterator maxiter = max.iterator(); maxiter.hasNext();) {
-                Class maxClazz = (Class)maxiter.next();
-                if(isMoreSpecific(maxClazz, clazz)) {
-                    // It can't be maximal, if there's already a more specific
-                    // maximal than it.
-                    continue outer;
-                }
-                if(isMoreSpecific(clazz, maxClazz)) {
-                    // If it's more specific than a currently maximal element,
-                    // that currently maximal is no longer a maximal.
-                    maxiter.remove();
-                }
-            }
-            // If we get here, no current maximal is more specific than the
-            // current class, so it's considered maximal as well
-            max.add(clazz);
-        }
-        if(max.size() > 1) {
-            return Object.class;
-        }
-        return (Class)max.get(0);
-    }
-
     /**
      * Determines whether a type represented by a class object is 
      * convertible to another type represented by a class object using a 
@@ -137,7 +75,7 @@ outer:  for (Iterator it = a1.iterator(); it.hasNext();) {
      * or formal and actual are both primitive types and actual can be
      * subject to widening conversion to formal.
      */
-    static boolean isMoreSpecific(Class specific, Class generic) {
+    static boolean isMoreSpecificOrTheSame(Class specific, Class generic, boolean primitiveIsConvertibleToClass) {
         // Check for identity or widening reference conversion
         if(generic.isAssignableFrom(specific)) {
             return true;
@@ -167,11 +105,15 @@ outer:  for (Iterator it = a1.iterator(); it.hasNext();) {
                 specific == Byte.TYPE)) {
                 return true; 
             }
+            // FIXME: What's with (boolean, Boolean) and (int, Long) and such?
         }
         return false;
     }
     
-    private static Set getAssignables(Class c1, Class c2) {
+    /**
+     * Attention, this doesn't handle primitive classes correctly, nor numerical conversions.
+     */
+    static Set getAssignables(Class c1, Class c2) {
         Set s = new HashSet();
         collectAssignables(c1, c2, s);
         return s;

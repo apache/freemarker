@@ -7,3 +7,8 @@
 <@assertEquals actual=obj.mNull2(null) expected="mNull2(String a1 = null)" />
 <@assertEquals actual=obj.mVarargs('a', null) expected="mVarargs(String... a1 = anull)" />
 <@assertFails message="multiple compatible overloaded">${obj.mVarargs(null, 'a')}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mSpecificity('a', 'b')}</@>
+<#-- TODO No yet fixed: 
+<@assertEquals actual=obj.mChar('a') expected='mChar(char a1 = a)' />
+<@assertEquals actual=obj.mBoolean(true) expected="mBoolean(boolean a1 = true)" />
+-->

@@ -173,7 +173,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         for(int i = paramCount - 1; i >= 0; i--) {
             Class[] previousHints = unwrappingHintsByParamCount[i];
             if(previousHints != null) {
-                widenToCommonSupertypes(hints, previousHints);
+                widenToCommonSupertypesForUnwrappingHint(hints, previousHints);
                 break;
             }
         }
@@ -184,7 +184,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         if(paramCount + 1 < unwrappingHintsByParamCount.length) {
             Class[] oneLongerHints = unwrappingHintsByParamCount[paramCount + 1];
             if(oneLongerHints != null) {
-                widenToCommonSupertypes(hints, oneLongerHints);
+                widenToCommonSupertypesForUnwrappingHint(hints, oneLongerHints);
             }
         }
         
@@ -194,7 +194,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         for(int i = paramCount + 1; i < unwrappingHintsByParamCount.length; ++i) {
             Class[] longerHints = unwrappingHintsByParamCount[i];
             if(longerHints != null) {
-                widenToCommonSupertypes(longerHints, paramTypes);
+                widenToCommonSupertypesForUnwrappingHint(longerHints, paramTypes);
             }
         }
         // The case of m(t1) where m is the currently added method.
@@ -202,23 +202,23 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         if(paramCount > 0) {  // (should be always true, or else it wasn't a varags method)
             Class[] oneShorterUnwrappingHints = unwrappingHintsByParamCount[paramCount - 1];
             if(oneShorterUnwrappingHints != null) {
-                widenToCommonSupertypes(oneShorterUnwrappingHints, paramTypes);
+                widenToCommonSupertypesForUnwrappingHint(oneShorterUnwrappingHints, paramTypes);
             }
         }
         
     }
     
-    private static void widenToCommonSupertypes(Class[] typesToWiden, Class[] wideningTypes) {
+    private void widenToCommonSupertypesForUnwrappingHint(Class[] typesToWiden, Class[] wideningTypes) {
         final int typesToWidenLen = typesToWiden.length;
         final int wideningTypesLen = wideningTypes.length;
         int min = Math.min(wideningTypesLen, typesToWidenLen);
         for(int i = 0; i < min; ++i) {
-            typesToWiden[i] = MethodUtilities.getMostSpecificCommonType(typesToWiden[i], wideningTypes[i]);
+            typesToWiden[i] = getCommonSupertypeForUnwrappingHint(typesToWiden[i], wideningTypes[i]);
         }
         if(typesToWidenLen > wideningTypesLen) {
             Class varargsComponentType = wideningTypes[wideningTypesLen - 1];
             for(int i = wideningTypesLen; i < typesToWidenLen; ++i) {
-                typesToWiden[i] = MethodUtilities.getMostSpecificCommonType(typesToWiden[i], varargsComponentType);
+                typesToWiden[i] = getCommonSupertypeForUnwrappingHint(typesToWiden[i], varargsComponentType);
             }
         }
     }
