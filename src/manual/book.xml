@@ -20434,13 +20434,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>Comparable</literal> (in that order), that will be
                   chosen. Only then it falls back to
                   <literal>Object</literal>. (b) The common most specific
-                  class of a primitive type and the corresponding wrapper
-                  class was sometimes <literal>Object</literal> instead of the
-                  wrapper class. This depended on Java's the internal ordering
+                  class of a primitive type and the corresponding boxing class
+                  was sometimes <literal>Object</literal> instead of the
+                  boxing class. This depended on Java's the internal ordering
                   of the methods, and so were quite unpredictable. (c) The
                   common superclass of a numerical primitive value and a
                   numerical non-primitive value was always
-                  <literal>Object</literal>, now if the are primitive-boxing
+                  <literal>Object</literal>, now if they are primitive-boxing
                   class pair, then it's the boxing class, otherwise it's
                   <literal>Number</literal>. (d) If the varags parameter
                   position was not the same in all the overloaded varargs

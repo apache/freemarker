@@ -168,6 +168,8 @@ abstract class OverloadedMethodsSubset {
      */
     protected Class getCommonSupertypeForUnwrappingHint(Class c1, Class c2) {
         if(c1 == c2) return c1;
+        // This also means that the hint for (Integer, Integer) will be Integer, not just Number. This is consistent
+        // with how non-overloaded method hints work.
         
         if (bugfixed) {
             // c1 primitive class to boxing class:
@@ -204,6 +206,7 @@ abstract class OverloadedMethodsSubset {
                 // - They don't have the same wrapper (boxing) class
                 return Object.class;
             }
+            // Falls through
         } else {  // old buggy behavior
             if(c2.isPrimitive()) {
                 if(c2 == Byte.TYPE) c2 = Byte.class;
@@ -215,6 +218,8 @@ abstract class OverloadedMethodsSubset {
                 else if(c2 == Double.TYPE) c2 = Double.class;
             }
         }
+        
+        // If buxfixed is true and any of the classes was a primitive type, we never reach this point.
         
         Set commonTypes = MethodUtilities.getAssignables(c1, c2);
         commonTypes.retainAll(MethodUtilities.getAssignables(c2, c1));

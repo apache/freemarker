@@ -262,6 +262,7 @@ final class ClassString
         
         // Check for boxing with widening primitive conversion. Note that 
         // actual parameters are never primitives.
+        // FIXME: Why we don't do the same with boxing types too?
         if(formal.isPrimitive()) {
             if(formal == Boolean.TYPE) {
                 return actual == Boolean.class;
