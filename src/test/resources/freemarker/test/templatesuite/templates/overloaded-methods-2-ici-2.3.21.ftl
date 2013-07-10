@@ -8,7 +8,17 @@
 <@assertEquals actual=obj.mVarargs('a', null) expected="mVarargs(String... a1 = anull)" />
 <@assertFails message="multiple compatible overloaded">${obj.mVarargs(null, 'a')}</@>
 <@assertFails message="multiple compatible overloaded">${obj.mSpecificity('a', 'b')}</@>
-<#-- TODO No yet fixed: 
+
 <@assertEquals actual=obj.mChar('a') expected='mChar(char a1 = a)' />
 <@assertEquals actual=obj.mBoolean(true) expected="mBoolean(boolean a1 = true)" />
--->
+<@assertEquals actual=obj.mBoolean(null) expected="mBoolean(Boolean a1 = null)" />
+
+<@assertEquals actual=obj.mIntNonOverloaded(123?long) expected=123 />
+<@assertEquals actual=obj.mIntNonOverloaded(123) expected=123 />
+<@assertEquals actual=obj.mIntNonOverloaded(123.5) expected=123 />
+<@assertEquals actual=obj.mIntNonOverloaded(2147483648) expected=-2147483648 /> <#-- overflow -->
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mNumBoxedVSBoxed(123.5) expected=123 /></@>
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mNumBoxedVSBoxed(123?int) expected=123 /></@>
+<@assertEquals actual=obj.mNumBoxedVSBoxed(123?long) expected="mNum(Long a1 = 123)" />
+<@assertEquals 
+    actual=obj.mNumUnambigous(2147483648) expected="mNumUnambigous(Integer a1 = -2147483648)" /> <#-- overflow -->

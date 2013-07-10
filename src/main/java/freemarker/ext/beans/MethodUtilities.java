@@ -57,6 +57,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 class MethodUtilities
@@ -66,50 +67,122 @@ class MethodUtilities
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
     
     /**
-     * Determines whether a type represented by a class object is 
-     * convertible to another type represented by a class object using a 
-     * method invocation conversion, without matching object and primitive
-     * types. This method is used to determine the more specific type when
-     * comparing signatures of methods.
-     * @return true if either formal type is assignable from actual type, 
-     * or formal and actual are both primitive types and actual can be
-     * subject to widening conversion to formal.
+     * Determines whether the type given as the 1st argument is convertible to the type given as the 2nd argument
+     * for method call argument conversion. This follows the rules of the Java reflection-based method call, except
+     * that since we don't have the value here, a boxed calls is never seens as convertable to a primtivie type. 
+     * 
+     * @return 0 means {@code false}, non-0 means {@code true}.
+     *         That is, 0 is returned less specificity or incomparable specificity, also when if
+     *         then method was aborted because of {@code ifHigherThan}.
+     *         The absolute value of the returned non-0 number symbolizes how more specific it is:
+     *         <ul>
+     *           <li>1: The two classes are identical</li>
+     *           <li>2: The 1st type is primitive, the 2nd type is the corresponding boxing class</li>
+     *           <li>3: Both classes are numerical, and one is convertible into the other with widening conversion.
+     *                  E.g., {@code int} is convertible to {@code long} and {#code double}, hence {@code int} is more
+     *                  specific.
+     *                  This ignores primitive VS boxed mismatches, except that a boxed class is never seen as
+     *                  convertible to a primitive class.</li>
+     *           <li>4: One class is {@code instanceof} of the other, but they aren't identical.
+     *               But unlike in Java, primitive numerical types are {@code instanceof} {@link Number} here.</li>
+     *         </ul> 
      */
-    static boolean isMoreSpecificOrTheSame(Class specific, Class generic, boolean primitiveIsConvertibleToClass) {
-        // Check for identity or widening reference conversion
+    static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
+            int ifHigherThan) {
+        if (ifHigherThan >= 4) return 0;
         if(generic.isAssignableFrom(specific)) {
-            return true;
-        }
-        // Check for widening primitive conversion.
-        if(generic.isPrimitive()) {
-            if(generic == Short.TYPE && (specific == Byte.TYPE)) {
-                return true;
+            // Identity or widening reference conversion:
+            return generic == specific ? 1 : 4;
+        } else {
+            final boolean specificIsPrim = specific.isPrimitive(); 
+            final boolean genericIsPrim = generic.isPrimitive();
+            if (specificIsPrim) {
+                if (genericIsPrim) {
+                    if (ifHigherThan >= 3) return 0;
+                    return isWideningPrimitiveNumberConversion(specific, generic) ? 3 : 0;
+                } else {  // => specificIsPrim && !genericIsPrim
+                    if (bugfixed) {
+                        final Class specificAsBoxed = ClassUtil.primitiveClassToBoxingClass(specific); 
+                        if (specificAsBoxed == generic) {
+                            // A primitive class is more specific than its boxing class, because it can't store null
+                            return 2;
+                        } else if (generic.isAssignableFrom(specificAsBoxed)) {
+                            // Note: This only occurs if `specific` is a primitive numerical, and `generic == Number`
+                            return 4;
+                        } else if (ifHigherThan >= 3) {
+                            return 0;
+                        } else if (Number.class.isAssignableFrom(specificAsBoxed)
+                                && Number.class.isAssignableFrom(generic)) {
+                            return isWideningBoxedNumberConversion(specificAsBoxed, generic) ? 3 : 0;
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
+                }
+            } else {  // => !specificIsPrim
+                if (ifHigherThan >= 3) return 0;
+                if (bugfixed && !genericIsPrim
+                        && Number.class.isAssignableFrom(specific) && Number.class.isAssignableFrom(generic)) {
+                    return isWideningBoxedNumberConversion(specific, generic) ? 3 : 0;
+                } else {
+                    return 0;
+                }
             }
-            if(generic == Integer.TYPE && 
-               (specific == Short.TYPE || specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Long.TYPE && 
-               (specific == Integer.TYPE || specific == Short.TYPE || 
-                specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Float.TYPE && 
-               (specific == Long.TYPE || specific == Integer.TYPE || 
-                specific == Short.TYPE || specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Double.TYPE && 
-               (specific == Float.TYPE || specific == Long.TYPE || 
-                specific == Integer.TYPE || specific == Short.TYPE || 
-                specific == Byte.TYPE)) {
-                return true; 
-            }
-            // FIXME: What's with (boolean, Boolean) and (int, Long) and such?
-        }
-        return false;
+        }  // of: !generic.isAssignableFrom(specific) 
     }
-    
+
+    private static boolean isWideningPrimitiveNumberConversion(final Class source, final Class target) {
+        // Check for widening primitive numerical conversion.
+        if(target == Short.TYPE && (source == Byte.TYPE)) {
+            return true;
+        } else if (target == Integer.TYPE && 
+           (source == Short.TYPE || source == Byte.TYPE)) {
+            return true;
+        } else if (target == Long.TYPE && 
+           (source == Integer.TYPE || source == Short.TYPE || 
+            source == Byte.TYPE)) {
+            return true;
+        } else if (target == Float.TYPE && 
+           (source == Long.TYPE || source == Integer.TYPE || 
+            source == Short.TYPE || source == Byte.TYPE)) {
+            return true;
+        } else if (target == Double.TYPE && 
+           (source == Float.TYPE || source == Long.TYPE || 
+            source == Integer.TYPE || source == Short.TYPE || 
+            source == Byte.TYPE)) {
+            return true; 
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isWideningBoxedNumberConversion(final Class source, final Class target) {
+        // Check for widening primitive numerical conversion.
+        if(target == Short.class && (source == Byte.class)) {
+            return true;
+        } else if (target == Integer.class && 
+           (source == Short.class || source == Byte.class)) {
+            return true;
+        } else if (target == Long.class && 
+           (source == Integer.class || source == Short.class || 
+            source == Byte.class)) {
+            return true;
+        } else if (target == Float.class && 
+           (source == Long.class || source == Integer.class || 
+            source == Short.class || source == Byte.class)) {
+            return true;
+        } else if (target == Double.class && 
+           (source == Float.class || source == Long.class || 
+            source == Integer.class || source == Short.class || 
+            source == Byte.class)) {
+            return true; 
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Attention, this doesn't handle primitive classes correctly, nor numerical conversions.
      */

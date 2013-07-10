@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.ClassUtil;
 
 /**
  * @author Attila Szegedi
@@ -175,7 +176,7 @@ abstract class OverloadedMethodsSubset {
             // c1 primitive class to boxing class:
             final boolean c1WasPrim; 
             if (c1.isPrimitive()) {
-                c1 = OverloadedMethodsSubset.primitiveClassToBoxingClass(c1);
+                c1 = ClassUtil.primitiveClassToBoxingClass(c1);
                 c1WasPrim = true;
             } else {
                 c1WasPrim = false;
@@ -184,7 +185,7 @@ abstract class OverloadedMethodsSubset {
             // c1 primitive class to boxing class:
             final boolean c2WasPrim; 
             if (c2.isPrimitive()) {
-                c2 = OverloadedMethodsSubset.primitiveClassToBoxingClass(c2);
+                c2 = ClassUtil.primitiveClassToBoxingClass(c2);
                 c2WasPrim = true;
             } else {
                 c2WasPrim = false;
@@ -238,11 +239,11 @@ abstract class OverloadedMethodsSubset {
             Class clazz = (Class)commonTypesIter.next();
             for (Iterator maxIter = max.iterator(); maxIter.hasNext();) {
                 Class maxClazz = (Class)maxIter.next();
-                if(MethodUtilities.isMoreSpecificOrTheSame(maxClazz, clazz, bugfixed)) {
+                if(MethodUtilities.isMoreOrSameSpecificParameterType(maxClazz, clazz, bugfixed, 0) != 0) {
                     // clazz can't be maximal, if there's already a more specific or equal maximal than it.
                     continue listCommonTypes;
                 }
-                if(MethodUtilities.isMoreSpecificOrTheSame(clazz, maxClazz, bugfixed)) {
+                if(MethodUtilities.isMoreOrSameSpecificParameterType(clazz, maxClazz, bugfixed, 0) != 0) {
                     // If it's more specific than a currently maximal element,
                     // that currently maximal is no longer a maximal.
                     maxIter.remove();
@@ -287,42 +288,6 @@ abstract class OverloadedMethodsSubset {
         }
         
         return (Class) max.get(0);
-    }
-
-    /**
-     * Gets the wrapper class for a primitive class, like {@link Integer} for {@code int}, also returns {@link Void}
-     * for {@code void}. 
-     * 
-     * @param primitiveClass A {@link Class} like {@code int.type}, {@code boolean.type}, etc. If it's not a primitive
-     *     class, or it's {@code null}, then the parameter value is returned as is. 
-     */
-    private static Class primitiveClassToBoxingClass(Class primitiveClass) {
-        // Tried to sort these with decreasing frequency in API-s:
-        if (primitiveClass == int.class) return Integer.class;
-        if (primitiveClass == boolean.class) return Boolean.class;
-        if (primitiveClass == long.class) return Long.class;
-        if (primitiveClass == double.class) return Double.class;
-        if (primitiveClass == char.class) return Character.class;
-        if (primitiveClass == float.class) return Float.class;
-        if (primitiveClass == byte.class) return Byte.class;
-        if (primitiveClass == short.class) return Short.class;
-        if (primitiveClass == void.class) return Void.class;  // not really a primitive, but we normalize it
-        return primitiveClass;
-    }
-    
-    /** The exact reverse of {@link #primitiveClassToBoxingClass(Class)}. */
-    private static Class boxingClassToPrimitiveClass(Class boxingClass) {
-        // Tried to sort these with decreasing frequency in API-s:
-        if (boxingClass == Integer.class) return int.class;
-        if (boxingClass == Boolean.class) return boolean.class;
-        if (boxingClass == Long.class) return long.class;
-        if (boxingClass == Double.class) return double.class;
-        if (boxingClass == Character.class) return char.class;
-        if (boxingClass == Float.class) return float.class;
-        if (boxingClass == Byte.class) return byte.class;
-        if (boxingClass == Short.class) return short.class;
-        if (boxingClass == Void.class) return void.class;  // not really a primitive, but we normalize to it
-        return boxingClass;
     }
     
 }

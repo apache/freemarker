@@ -20409,6 +20409,46 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Ambiguity is now resolved in some cases where earlier
+                  it was an error. Ambiguities was and are resolved by
+                  selecting the compatible methods then choosing the one with
+                  the most specific parameter types among them. How the
+                  specificity of the parameter types is calculated was
+                  extended: </para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>When comparing the specificity of two parameters
+                      types at the same parameter position: The algorithm now
+                      considers a primitive type as more specific that its
+                      corresponding boxing class. Also, the now it considers
+                      widening conversion from primitive numerical types to
+                      numerical classes, and from numerical class types to
+                      other numerical class types, and if the target is wider
+                      than the source, then the source is considered to be
+                      more specific. (Earlier this has only worked among two
+                      primitive types). Furthermore, it considers any
+                      primitive numerical type as more specific than
+                      <literal>Number</literal>.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>When comparing the overall specificity of two
+                      parameter lists: Earlier the more specific parameter
+                      list was the one that had some parameters that won in
+                      specificity, and if both had such parameters then it was
+                      an ambiguity. This rule changes in that now parameter
+                      specificity wins has a score, and the parameter list
+                      that contains the parameter with the highest score wins.
+                      The scores from lowest to highest: primitive wins over
+                      boxing type, narrower numerical type wins over wider
+                      numerical type, and subclass wins over
+                      super-class.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
                   <para>In many cases, less specific hint class was used for
                   unwrapping than that was theoretically possible within the
                   limitations of the applied hint generation algorithm. (The

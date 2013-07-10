@@ -348,5 +348,48 @@ public class ClassUtil
             return sb.toString();
         }
     }
+
+    /**
+     * Gets the wrapper class for a primitive class, like {@link Integer} for {@code int}, also returns {@link Void}
+     * for {@code void}. 
+     * 
+     * @param primitiveClass A {@link Class} like {@code int.type}, {@code boolean.type}, etc. If it's not a primitive
+     *     class, or it's {@code null}, then the parameter value is returned as is. Note that performance-wise the
+     *     method assumes that it's a primitive class.
+     *     
+     * @since 2.3.21
+     */
+    public static Class primitiveClassToBoxingClass(Class primitiveClass) {
+        // Tried to sort these with decreasing frequency in API-s:
+        if (primitiveClass == int.class) return Integer.class;
+        if (primitiveClass == boolean.class) return Boolean.class;
+        if (primitiveClass == long.class) return Long.class;
+        if (primitiveClass == double.class) return Double.class;
+        if (primitiveClass == char.class) return Character.class;
+        if (primitiveClass == float.class) return Float.class;
+        if (primitiveClass == byte.class) return Byte.class;
+        if (primitiveClass == short.class) return Short.class;
+        if (primitiveClass == void.class) return Void.class;  // not really a primitive, but we normalize it
+        return primitiveClass;
+    }
+
+    /**
+     * The exact reverse of {@link #primitiveClassToBoxingClass}.
+     *     
+     * @since 2.3.21
+     */
+    public static Class boxingClassToPrimitiveClass(Class boxingClass) {
+        // Tried to sort these with decreasing frequency in API-s:
+        if (boxingClass == Integer.class) return int.class;
+        if (boxingClass == Boolean.class) return boolean.class;
+        if (boxingClass == Long.class) return long.class;
+        if (boxingClass == Double.class) return double.class;
+        if (boxingClass == Character.class) return char.class;
+        if (boxingClass == Float.class) return float.class;
+        if (boxingClass == Byte.class) return byte.class;
+        if (boxingClass == Short.class) return short.class;
+        if (boxingClass == Void.class) return void.class;  // not really a primitive, but we normalize to it
+        return boxingClass;
+    }
     
 }

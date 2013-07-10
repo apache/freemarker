@@ -60,21 +60,40 @@ public class OverloadedMethods2 {
         return "mBoolean(Boolean a1 = " + a1 + ")";
     }
 
-    public String mInt(int a1) {
-        return "mInt(int a1 = " + a1 + ")";
+    public String mIntPrimVSBoxed(int a1) {
+        return "mIntPrimVSBoxed(int a1 = " + a1 + ")";
     }
     
-    public String mInt(Integer a1) {
-        return "mInt(Integer a1 = " + a1 + ")";
+    public String mIntPrimVSBoxed(Integer a1) {
+        return "mIntPrimVSBoxed(Integer a1 = " + a1 + ")";
     }
 
+    public int mIntNonOverloaded(int a1) {
+        return a1;
+    }
 
-    public String mNum(short a1) {
+    public String mNumPrimVSPrim(short a1) {
         return "mNum(short a1 = " + a1 + ")";
     }
     
-    public String mNum(long a1) {
+    public String mNumPrimVSPrim(long a1) {
         return "mNum(long a1 = " + a1 + ")";
+    }
+
+    public String mNumBoxedVSBoxed(Short a1) {
+        return "mNum(Short a1 = " + a1 + ")";
+    }
+    
+    public String mNumBoxedVSBoxed(Long a1) {
+        return "mNum(Long a1 = " + a1 + ")";
+    }
+
+    public String mNumUnambigous(Short a1, boolean otherOverload) {
+        return "mmNumUnambigous won't be called";
+    }
+    
+    public String mNumUnambigous(Integer a1) {
+        return "mNumUnambigous(Integer a1 = " + a1 + ")";
     }
     
 }

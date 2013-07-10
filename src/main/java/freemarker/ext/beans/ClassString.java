@@ -151,31 +151,64 @@ final class ClassString
     }
     
     private int compareParameterTypesSpecificity(Class[] paramTypes1, Class[] paramTypes2, boolean varArg) {
-        boolean paramTypes1HasAMoreSpecific = false;
-        boolean paramTypes2HasAMoreSpecific = false;
         final int paramTypes1Len = paramTypes1.length;
         final int paramTypes2Len = paramTypes2.length;
         //assert varArg || cl1 == cl2;
         
-        for(int i = 0; i < paramTypes1Len; ++i) {
-            Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
-            Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
-            if(paramType1 != paramType2) {
-                paramTypes1HasAMoreSpecific = 
-                    paramTypes1HasAMoreSpecific
-                    || MethodUtilities.isMoreSpecificOrTheSame(paramType1, paramType2, bugfixed);
-                paramTypes2HasAMoreSpecific = 
-                    paramTypes2HasAMoreSpecific
-                    || MethodUtilities.isMoreSpecificOrTheSame(paramType2, paramType1, bugfixed);
+        if (bugfixed) {
+            int currentWinner = 0;
+            int currentHighScore = 0;
+            for(int i = 0; i < paramTypes1Len; ++i) {
+                Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
+                Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+                if(paramType1 != paramType2) {
+                    int score;
+                    
+                    score = MethodUtilities.isMoreOrSameSpecificParameterType(
+                            paramType1, paramType2, true,
+                            currentWinner == -1 ? currentHighScore - 1 : currentHighScore);
+                    if (score > currentHighScore) {
+                        currentHighScore = score;
+                        currentWinner = 1;
+                    } else if (score == currentHighScore && currentWinner == -1) {
+                        currentWinner = 0;
+                    }
+
+                    score = MethodUtilities.isMoreOrSameSpecificParameterType(
+                            paramType2, paramType1, true,
+                            currentWinner == 1 ? currentHighScore - 1 : currentHighScore);
+                    if (score > currentHighScore) {
+                        currentHighScore = score;
+                        currentWinner = -1;
+                    } else if (score == currentHighScore && currentWinner == 1) {
+                        currentWinner = 0;
+                    }
+                }
             }
-        }
-        
-        if(paramTypes1HasAMoreSpecific) {
-            return paramTypes2HasAMoreSpecific ? 0 : 1;
-        } else if(paramTypes2HasAMoreSpecific) {
-            return -1;
+            return currentWinner;
         } else {
-            return 0;
+            boolean paramTypes1HasAMoreSpecific = false;
+            boolean paramTypes2HasAMoreSpecific = false;
+            for(int i = 0; i < paramTypes1Len; ++i) {
+                Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
+                Class paramType2 = getParamType(paramTypes2, paramTypes2Len, i, varArg);
+                if(paramType1 != paramType2) {
+                    paramTypes1HasAMoreSpecific = 
+                        paramTypes1HasAMoreSpecific
+                        || MethodUtilities.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
+                    paramTypes2HasAMoreSpecific = 
+                        paramTypes2HasAMoreSpecific
+                        || MethodUtilities.isMoreOrSameSpecificParameterType(paramType2, paramType1, false, 0) != 0;
+                }
+            }
+            
+            if(paramTypes1HasAMoreSpecific) {
+                return paramTypes2HasAMoreSpecific ? 0 : 1;
+            } else if(paramTypes2HasAMoreSpecific) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
     
@@ -250,7 +283,7 @@ final class ClassString
      * type or an object type of a primitive type that can be converted to
      * the formal type.
      */
-    boolean isMethodInvocationConvertible(Class formal, Class actual) {
+    private boolean isMethodInvocationConvertible(Class formal, Class actual) {
         // Check for identity or widening reference conversion
         if(formal.isAssignableFrom(actual)) {
             return true;
