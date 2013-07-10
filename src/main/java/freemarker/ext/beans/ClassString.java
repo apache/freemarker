@@ -62,8 +62,6 @@ import java.util.List;
  */
 final class ClassString
 {
-    private static final Class BIGDECIMAL_CLASS = BigDecimal.class;
-    private static final Class NUMBER_CLASS = Number.class;
     private final Class[] classes;
     private final boolean bugfixed;
     
@@ -77,10 +75,6 @@ final class ClassString
                     : obj.getClass();
         }
         this.bugfixed = bugfixed;
-    }
-    
-    Class[] getClasses() {
-        return classes;
     }
     
     public int hashCode() {
@@ -324,7 +318,7 @@ final class ClassString
             } else if(formal == Short.TYPE &&
                (actual == Short.class || actual == Byte.class)) {
                 return true;
-            } else if (BIGDECIMAL_CLASS.isAssignableFrom(actual) && isNumerical(formal)) {
+            } else if (BigDecimal.class.isAssignableFrom(actual) && isNumerical(formal)) {
                 // Special case for BigDecimals as we deem BigDecimal to be
                 // convertible to any numeric type - either object or primitive.
                 // This can actually cause us trouble as this is a narrowing 
@@ -338,8 +332,18 @@ final class ClassString
     }
     
     private static boolean isNumerical(Class type) {
-        return NUMBER_CLASS.isAssignableFrom(type)
+        return Number.class.isAssignableFrom(type)
                 || type.isPrimitive() && type != Boolean.TYPE && type != Character.TYPE;
+    }
+ 
+    /**
+     * Symbolizes the class of null (it's missing from Java).
+     */
+    private static class Null {
+        
+        // Can't be instantiated
+        private Null() { }
+        
     }
     
 }

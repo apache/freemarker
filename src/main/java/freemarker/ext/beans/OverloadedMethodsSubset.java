@@ -67,8 +67,6 @@ import freemarker.template.utility.ClassUtil;
  * @author Attila Szegedi
  */
 abstract class OverloadedMethodsSubset {
-    
-    static final Object[] EMPTY_ARGS = new Object[0];
 
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
     
