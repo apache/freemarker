@@ -20340,7 +20340,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para/>
+              <para>Error message quality improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Fixed glitch where if an <literal>#if</literal> had
+                  and <literal>#else</literal> or <literal>#elseif</literal>,
+                  the
+                  <literal>#if</literal>/<literal>#else</literal>/<literal>#elseif</literal>
+                  wasn't hidden in the FTL stack trace when the error was
+                  inside its nested block.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
@@ -20414,7 +20425,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   selecting the compatible methods then choosing the one with
                   the most specific parameter types among them. How the
                   specificity of the parameter types is calculated was
-                  extended: </para>
+                  extended:</para>
 
                   <itemizedlist>
                     <listitem>
