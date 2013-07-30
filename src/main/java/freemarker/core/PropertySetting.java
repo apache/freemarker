@@ -93,7 +93,7 @@ final class PropertySetting extends TemplateElement {
                     "Invalid setting name, or it's not allowed to change "
                     + "the value of the setting with FTL: "
                     + key,
-                    template, beginLine, beginColumn);
+                    template, beginLine, beginColumn, endLine, endColumn);
         }
     }
 

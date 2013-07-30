@@ -98,6 +98,7 @@ public class TokenMgrError extends Error
 
    private String detail;
    private Integer lineNumber, columnNumber;
+   private Integer endLineNumber, endColumnNumber;
 
    /**
     * Replaces unprintable characters by their espaced (or unicode escaped)
@@ -195,13 +196,17 @@ public class TokenMgrError extends Error
    /**
     * @since 2.3.20
     */
-   public TokenMgrError(String detail, int reason, int errorLine, int errorColumn) {
+   public TokenMgrError(String detail, int reason,
+           int errorLine, int errorColumn,
+           int endLineNumber, int endColumnNumber) {
        super(detail);  // the "detail" must not contain location information, the "message" might does
        this.detail = detail;
        errorCode = reason;
        
        this.lineNumber = new Integer(errorLine);  // In J2SE there was no Integer.valueOf(int)
        this.columnNumber = new Integer(errorColumn);
+       this.endLineNumber = new Integer(endLineNumber); 
+       this.endColumnNumber = new Integer(endColumnNumber); 
     }
 
    public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar, int reason) {
@@ -209,9 +214,14 @@ public class TokenMgrError extends Error
       
       this.lineNumber = new Integer(errorLine);  // In J2SE there was no Integer.valueOf(int)
       this.columnNumber = new Integer(errorColumn);
+      // We blame the single character that can't be the start of a legal token: 
+      this.endLineNumber = this.lineNumber; 
+      this.endColumnNumber = this.columnNumber; 
    }
 
    /**
+    * 1-based line number of the unexpected character(s).
+    * 
     * @since 2.3.20
     */
    public Integer getLineNumber() {
@@ -219,12 +229,36 @@ public class TokenMgrError extends Error
    }
     
    /**
+    * 1-based column number of the unexpected character(s).
+    * 
     * @since 2.3.20
     */
    public Integer getColumnNumber() {
       return columnNumber;
    }
    
+   /**
+    * Returns the 1-based line at which the last character of the wrong section is. This will be usually (but not
+    * always) the same as {@link #getLineNumber()} because the lexer can only point to the single character that
+    * doesn't match any patterns.
+    * 
+    * @since 2.3.21
+    */
+   public Integer getEndLineNumber() {
+      return endLineNumber;
+   }
+
+   /**
+    * Returns the 1-based column at which the last character of the wrong section is. This will be usually (but not
+    * always) the same as {@link #getColumnNumber()} because the lexer can only point to the single character that
+    * doesn't match any patterns.
+    * 
+    * @since 2.3.21
+    */
+   public Integer getEndColumnNumber() {
+      return endColumnNumber;
+   }
+
    public String getDetail() {
        return detail;
    }
@@ -233,7 +267,9 @@ public class TokenMgrError extends Error
        return new ParseException(getDetail(),
                template,
                getLineNumber() != null ? getLineNumber().intValue() : 0,
-               getColumnNumber() != null ? getColumnNumber().intValue() : 0);
+               getColumnNumber() != null ? getColumnNumber().intValue() : 0,
+               getEndLineNumber() != null ? getEndLineNumber().intValue() : 0,
+               getEndColumnNumber() != null ? getEndColumnNumber().intValue() : 0);
    }
    
 }

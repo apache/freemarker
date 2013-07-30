@@ -20501,6 +20501,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para><literal>ParseException</literal>-s now also store the
+              end-location of the error, not just its start-location. This is
+              useful if you want to underline the error in the source code,
+              not just point at it.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

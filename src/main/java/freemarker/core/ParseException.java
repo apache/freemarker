@@ -86,6 +86,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
     private String description; 
 
     public int columnNumber, lineNumber;
+    public int endColumnNumber, endLineNumber;
 
     /**
      * Each entry in this array is an array of integers.  Each array
@@ -137,6 +138,8 @@ public class ParseException extends java.io.IOException implements FMParserConst
         tokenImage = tokenImageVal;
         lineNumber = currentToken.next.beginLine;
         columnNumber = currentToken.next.beginColumn;
+        endLineNumber = currentToken.next.endLine;
+        endColumnNumber = currentToken.next.endColumn;
     }
 
     /**
@@ -147,6 +150,8 @@ public class ParseException extends java.io.IOException implements FMParserConst
      * "expectedTokenSequences", and "tokenImage" do not contain
      * relevant information.  The JavaCC generated code does not use
      * these constructors.
+     * 
+     * @deprecated
      */
     protected ParseException() {
         super();
@@ -154,13 +159,36 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
-     * @deprecated Use a constructor to which you can also pass the template.
+     * @deprecated Use a constructor to which you can also pass the template, and the end positions.
      */
     public ParseException(String description, int lineNumber, int columnNumber) {
         this(description, (Template) null, lineNumber, columnNumber, null);
     }
 
     /**
+     * @since 2.3.21
+     */
+    public ParseException(String description, Template template,
+            int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber) {
+        this(description, template, lineNumber, columnNumber, endLineNumber, endColumnNumber, null);      
+    }
+
+    /**
+     * @since 2.3.21
+     */
+    public ParseException(String description, Template template,
+            int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
+            Throwable cause) {
+        this(description,
+                template == null ? null : template.getName(),
+                        lineNumber, columnNumber,
+                        endLineNumber, endColumnNumber,
+                        cause);      
+    }
+    
+    /**
+     * @deprecated Use {@link #ParseException(String, Template, int, int, int, int)} instead, as IDE-s need the end
+     * position of the error too.
      * @since 2.3.20
      */
     public ParseException(String description, Template template, int lineNumber, int columnNumber) {
@@ -168,12 +196,15 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
+     * @deprecated Use {@link #ParseException(String, Template, int, int, int, int, Throwable)} instead, as IDE-s need
+     * the end position of the error too.
      * @since 2.3.20
      */
     public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
         this(description,
                 template == null ? null : template.getName(),
                         lineNumber, columnNumber,
+                        0, 0,
                         cause);      
     }
 
@@ -191,6 +222,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
         this(description,
                 template == null ? null : template.getName(),
                         tk.beginLine, tk.beginColumn,
+                        tk.endLine, tk.endColumn,
                         cause);
     }
 
@@ -208,16 +240,22 @@ public class ParseException extends java.io.IOException implements FMParserConst
         this(description,
                 tobj.getTemplate() == null ? null : tobj.getTemplate().getName(),
                         tobj.beginLine, tobj.beginColumn,
+                        tobj.endLine, tobj.endColumn,
                         cause);
     }
 
-    private ParseException(String description, String templateName, int lineNumber, int columnNumber, Throwable cause) {
+    private ParseException(String description, String templateName,
+            int lineNumber, int columnNumber,
+            int endLineNumber, int endColumnNumber,
+            Throwable cause) {
         super(description);  // but we override getMessage, so it will be different
         this.cause = cause;
         this.description = description; 
         this.templateName = templateName;
         this.lineNumber = lineNumber;
         this.columnNumber = columnNumber;
+        this.endLineNumber = endLineNumber;
+        this.endColumnNumber = endColumnNumber;
     }
 
     /**
@@ -285,17 +323,31 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
-     * 1-based line number of the failing token.
+     * 1-based line number of the failing section, or 0 is the information is not available.
      */
     public int getLineNumber() {
         return lineNumber;
     }
 
     /**
-     * 1-based column number of the failing token.
+     * 1-based column number of the failing section, or 0 is the information is not available.
      */
     public int getColumnNumber() {
         return columnNumber;
+    }
+
+    /**
+     * 1-based line number of the failing section, or 0 is the information is not available.
+     */
+    public int getEndLineNumber() {
+        return endLineNumber;
+    }
+
+    /**
+     * 1-based column number of the failing section, or 0 is the information is not available.
+     */
+    public int getEndColumnNumber() {
+        return endColumnNumber;
     }
 
     private void renderMessageAndDescription() {

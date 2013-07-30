@@ -651,7 +651,9 @@ TOKEN:
 			    }
 			    throw new TokenMgrError(
 			      		"Unknown directive: " + s + (tip != null ? ". " + tip : ""),
-			      		TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
+			      		TokenMgrError.LEXICAL_ERROR,
+			      		matchedToken.beginLine, matchedToken.beginColumn + 1,
+			      		matchedToken.endLine, matchedToken.endColumn);
 			}
         }
     }
@@ -814,7 +816,9 @@ TOKEN:
 	      + "of " + c + "{myExpression}, just write myExpression. "
 	      + "(" + c + "{...} is only needed where otherwise static text is expected, i.e, outside FreeMarker tags and "
 	      + "${...}-s.)",
-	      TokenMgrError.LEXICAL_ERROR, matchedToken.beginLine, matchedToken.beginColumn + 1);
+	      TokenMgrError.LEXICAL_ERROR,
+	      matchedToken.beginLine, matchedToken.beginColumn,
+	      matchedToken.endLine, matchedToken.endColumn);
     }
   }
   |
@@ -1393,6 +1397,8 @@ BuiltinVariable BuiltinVariable() :
       } catch (ParseException pe) {
           pe.lineNumber = dot.beginLine;
           pe.columnNumber = dot.beginColumn;
+          pe.endLineNumber = name.endLine;
+          pe.endColumnNumber = name.endColumn;
           throw pe;
       }
       result.setLocation(template, dot, name);
@@ -1484,6 +1490,8 @@ Expression BuiltIn(Expression exp) :
        } catch (ParseException pe) {
            pe.lineNumber = t.beginLine;
            pe.columnNumber = t.beginColumn;
+           pe.endLineNumber = t.endLine;
+           pe.endColumnNumber = t.endColumn;
            throw pe;
        }
        result.setLocation(template, exp, t);
@@ -1596,6 +1604,8 @@ StringLiteral StringLiteral(boolean interpolate) :
        } catch (ParseException pe) {
           pe.lineNumber = t.beginLine;
           pe.columnNumber = t.beginColumn;
+          pe.endLineNumber = t.endLine;
+          pe.endColumnNumber = t.endColumn;
           throw pe;
        }
        StringLiteral result = new StringLiteral(s);
