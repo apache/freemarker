@@ -84,15 +84,13 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
         assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(int.class, short.class));
         assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(short.class, int.class));
     }
-    
-    public void testMisc() {
-        testMiscSameResult(buggy);
-        testMiscSameResult(fixed);
-    }
 
-    /** These will be the same with fixed and buggy: */
-    private void testMiscSameResult(OverloadedMethodsSubset oms) {
-        assertEquals(Number.class, oms.getCommonSupertypeForUnwrappingHint(Long.class, Integer.class));
+    public void testFixedMisc() {
+        assertEquals(Number.class, fixed.getCommonSupertypeForUnwrappingHint(Long.class, Integer.class));
+    }
+    
+    public void testBuggyMisc() {
+        assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(Long.class, Integer.class));
     }
     
     static interface I1 { };
