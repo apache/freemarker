@@ -50,87 +50,36 @@
  * http://www.visigoths.org/
  */
 
-package freemarker.debug.impl;
+package freemarker.debug;
 
 import java.rmi.RemoteException;
-import java.util.Collections;
-import java.util.List;
 
 import freemarker.core.Environment;
 import freemarker.template.Template;
-import freemarker.template.utility.SecurityUtilities;
 
 /**
- * This class provides debugging hooks for the core FreeMarker engine. It is
- * not usable for anyone outside the FreeMarker core classes. It is public only
- * as an implementation detail.
+ * This class provides debugging hooks for the core FreeMarker engine. It is not
+ * usable for anyone outside the FreeMarker core classes. It is public only as
+ * an implementation detail.
+ * 
  * @author Attila Szegedi
+ * @version $Id: DebuggerService.java,v 1.2 2003/05/30 16:51:53 szegedia Exp $
  */
-public abstract class DebuggerService
-{
-    private static final DebuggerService instance = createInstance();
+public interface DebuggerService {
+
+    void addBreakpoint(Breakpoint breakpoint);
+
+    void removeBreakpoint(Breakpoint breakpoint);
+
+    boolean suspendEnvironment(Environment env, String templateName, int line) throws
+    RemoteException;
     
-    private static DebuggerService createInstance()
-    {
-        // Creates the appropriate service class. If the debugging is turned
-        // off, this is a fast no-op service, otherwise it's the real-thing
-        // RMI service.
-        return 
-            SecurityUtilities.getSystemProperty("freemarker.debug.password") == null
-            ? (DebuggerService)new NoOpDebuggerService()
-            : (DebuggerService)new RmiDebuggerService();
-    }
+    void registerTemplate(Template template);
 
-    public static List getBreakpoints(String templateName)
-    {
-        return instance.getBreakpointsSpi(templateName);
-    }
+    void removeDebuggerListener(Object id);
+
+    Object addDebuggerListener(DebuggerListener listener);
     
-    abstract List getBreakpointsSpi(String templateName);
+    void shutdown();
 
-    public static void registerTemplate(Template template)
-    {
-        instance.registerTemplateSpi(template);
-    }
-    
-    abstract void registerTemplateSpi(Template template);
-    
-    public static boolean suspendEnvironment(Environment env, String templateName, int line)
-    throws
-        RemoteException
-    {
-        return instance.suspendEnvironmentSpi(env, templateName, line);
-    }
-    
-    abstract boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
-    throws
-        RemoteException;
-
-    abstract void shutdownSpi();
-
-    public static void shutdown()
-    {
-        instance.shutdownSpi();
-    }
-
-    private static class NoOpDebuggerService extends DebuggerService
-    {
-        List getBreakpointsSpi(String templateName)
-        {
-            return Collections.EMPTY_LIST;
-        }
-        
-        boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
-        {
-            throw new UnsupportedOperationException();
-        }
-        
-        void registerTemplateSpi(Template template)
-        {
-        }
-
-        void shutdownSpi()
-        {
-        }
-    }
 }

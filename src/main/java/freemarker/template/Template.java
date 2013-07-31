@@ -78,7 +78,6 @@ import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core.TextBlock;
 import freemarker.core.TokenMgrError;
-import freemarker.debug.impl.DebuggerService;
 
 /**
  * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
@@ -207,9 +206,16 @@ public class Template extends Configurable {
         finally {
             reader.close();
         }
-        DebuggerService.registerTemplate(this);
+        registerTemplateToDebugger(this, cfg);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
+    }
+    
+    static void registerTemplateToDebugger(Template template, Configuration cfg) {
+        freemarker.debug.DebuggerService debuggerService = cfg.getDebuggerService();
+        if (debuggerService != null) {
+            debuggerService.registerTemplate(template);
+        }
     }
 
     /**
@@ -230,7 +236,7 @@ public class Template extends Configurable {
     Template(String name, TemplateElement root, Configuration config) {
         this(name, config);
         this.rootElement = root;
-        DebuggerService.registerTemplate(this);
+        registerTemplateToDebugger(this, config);
     }
 
     /**
@@ -246,7 +252,7 @@ public class Template extends Configurable {
         Template template = new Template(name, config);
         TextBlock block = new TextBlock(content);
         template.rootElement = block;
-        DebuggerService.registerTemplate(template);
+        registerTemplateToDebugger(template, config);
         return template;
     }
 

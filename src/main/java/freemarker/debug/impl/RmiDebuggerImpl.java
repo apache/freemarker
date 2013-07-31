@@ -39,12 +39,12 @@ implements
 
     public List getBreakpoints()
     {
-        return service.getBreakpointsSpi();
+        return service.getBreakpoints();
     }
 
     public List getBreakpoints(String templateName)
     {
-        return service.getBreakpointsSpi(templateName);
+        return service.getBreakpoints(templateName);
     }
 
     public Collection getSuspendedEnvironments()
