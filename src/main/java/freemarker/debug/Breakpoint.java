@@ -64,16 +64,28 @@ public class Breakpoint implements Serializable, Comparable
 
     private final String templateName;
     private final int line;
+    private final Serializable data;
+
+    public Breakpoint(String templateName, int line) {
+        this(templateName, line, null);
+    }
     
     /**
      * Creates a new breakpoint.
      * @param templateName the name of the template
      * @param line the line number in the template where to put the breakpoint
+     * @param data arbitrary data attached to this breakpoint, that the debugger client will get back with the
+     *        suspension event. As this data will travel back and forth between the client and server, <b>it has to be
+     *        de-serializable on the server</b>. Also, it shouldn't be very big serialized, as it will be possibly sent
+     *        through network. So if the data is big or might not be de-serializable on another JVM (missing classes), 
+     *        the client should just use an identifier as data (like a {@link Long}) with which later it can get
+     *        the actual data that's only stored on the client.
      */
-    public Breakpoint(String templateName, int line)
+    public Breakpoint(String templateName, int line, Serializable data)
     {
         this.templateName = templateName;
         this.line = line;
+        this.data = data;
     }
 
     /**
@@ -83,6 +95,7 @@ public class Breakpoint implements Serializable, Comparable
     {
         return line;
     }
+    
     /**
      * Returns the template name of the breakpoint
      */
@@ -91,6 +104,14 @@ public class Breakpoint implements Serializable, Comparable
         return templateName;
     }
 
+    /**
+     * Returns the arbitrary data attached to this breakpoint.
+     */
+    public Serializable getData()
+    {
+        return data;
+    }
+    
     public int hashCode()
     {
         return templateName.hashCode() + 31 * line;

@@ -52,6 +52,7 @@
 
 package freemarker.debug;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 
 import freemarker.core.Environment;
@@ -71,7 +72,7 @@ public interface DebuggerService {
 
     void removeBreakpoint(Breakpoint breakpoint);
 
-    boolean suspendEnvironment(Environment env, String templateName, int line) throws
+    boolean suspendEnvironment(Environment env, String templateName, int line, Serializable data) throws
     RemoteException;
     
     void registerTemplate(Template template);

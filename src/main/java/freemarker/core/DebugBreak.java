@@ -53,8 +53,8 @@
 package freemarker.core;
 
 import java.io.IOException;
+import java.io.Serializable;
 
-import freemarker.debug.Breakpoint;
 import freemarker.debug.DebuggerService;
 import freemarker.template.TemplateException;
 
@@ -64,21 +64,20 @@ import freemarker.template.TemplateException;
 public class DebugBreak extends TemplateElement
 {
     private final DebuggerService debuggerService;    
-    private final String templateName;
+    private final Serializable data;
     
-    public DebugBreak(TemplateElement nestedBlock, DebuggerService debuggerService, Breakpoint breakpoint)
+    public DebugBreak(TemplateElement nestedBlock, DebuggerService debuggerService, Serializable data)
     {
         this.nestedBlock = nestedBlock;
         nestedBlock.parent = this;
         copyLocationFrom(nestedBlock);
         this.debuggerService = debuggerService;
-
-        this.templateName = breakpoint.getTemplateName();
+        this.data = data;   
     }
     
     protected void accept(Environment env) throws TemplateException, IOException
     {
-        if(!debuggerService.suspendEnvironment(env, templateName, nestedBlock.getBeginLine()))
+        if(!debuggerService.suspendEnvironment(env, getTemplate().getName(), nestedBlock.getBeginLine(), data))
         {
             nestedBlock.accept(env);
         }

@@ -52,6 +52,7 @@
 
 package freemarker.debug.impl;
 
+import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.rmi.RemoteException;
@@ -110,7 +111,7 @@ implements
         return sumlist;
     }
 
-    public boolean suspendEnvironment(Environment env, String templateName, int line)
+    public boolean suspendEnvironment(Environment env, String templateName, int line, Serializable data)
     throws
         RemoteException
     {
@@ -125,7 +126,7 @@ implements
         try
         {
             EnvironmentSuspendedEvent breakpointEvent = 
-                new EnvironmentSuspendedEvent(this, templateName, line, denv);
+                new EnvironmentSuspendedEvent(this, templateName, line, data, denv);
     
             synchronized(listeners)
             {
@@ -235,7 +236,7 @@ implements
             return;
         }
         TemplateElement parent = (TemplateElement)te.getParent();
-        DebugBreak db = new DebugBreak(te, this, breakpoint);   
+        DebugBreak db = new DebugBreak(te, this, breakpoint.getData());   
         // TODO: Ensure there always is a parent by making sure
         // that the root element in the template is always a MixedContent
         // Also make sure it doesn't conflict with anyone's code.

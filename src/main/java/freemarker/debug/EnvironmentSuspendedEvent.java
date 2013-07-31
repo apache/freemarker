@@ -1,5 +1,6 @@
 package freemarker.debug;
 
+import java.io.Serializable;
 import java.util.EventObject;
 
 /**
@@ -13,13 +14,15 @@ public class EnvironmentSuspendedEvent extends EventObject
 
     private final String name;
     private final int line;
+    private final Serializable data;
     private final DebuggedEnvironment env;
 
-    public EnvironmentSuspendedEvent(Object source, String templateName, int line, DebuggedEnvironment env)
+    public EnvironmentSuspendedEvent(Object source, String templateName, int line, Serializable data, DebuggedEnvironment env)
     {
         super(source);
         this.name = templateName;
         this.line = line;
+        this.data = data;
         this.env = env;
     }
 
@@ -41,6 +44,14 @@ public class EnvironmentSuspendedEvent extends EventObject
     public int getLine()
     {
         return line;
+    }
+    
+    /**
+     * Returns the arbitrary data that the debugger clients has attached to the {@link Breakpoint};
+     * possibly {@code null}.
+     */
+    public Serializable getData() {
+        return data;
     }
 
     /**
