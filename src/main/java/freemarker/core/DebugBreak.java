@@ -64,7 +64,6 @@ import freemarker.template.TemplateException;
 public class DebugBreak extends TemplateElement
 {
     private final DebuggerService debuggerService;    
-    private final boolean suspendAfter;
     private final String templateName;
     
     public DebugBreak(TemplateElement nestedBlock, DebuggerService debuggerService, Breakpoint breakpoint)
@@ -74,36 +73,18 @@ public class DebugBreak extends TemplateElement
         copyLocationFrom(nestedBlock);
         this.debuggerService = debuggerService;
 
-        // Debug Break must be suspended before or after the TemplateElement te
-        // founded.
-        // After suspend, must be done when breakpoint line is not the same
-        // than the TemplateElement
-        // (ex : breakpoint added to </#if> must be executed before to execute
-        // the whole ConditionnalBlock and suspend to the </#if>)
-        boolean suspendAfter = (nestedBlock.getBeginLine() != breakpoint
-                .getLine());
-        this.suspendAfter = suspendAfter;
         this.templateName = breakpoint.getTemplateName();
     }
     
     protected void accept(Environment env) throws TemplateException, IOException
     {
-        int line = 0;
-        if (suspendAfter) {
-            // Suspend must be done after the execution of the nestedBlock
-            line = nestedBlock.getEndLine();
+        if(!debuggerService.suspendEnvironment(env, templateName, nestedBlock.getBeginLine()))
+        {
             nestedBlock.accept(env);
-        } else {
-            // Suspend must be done before the execution of the nestedBlock
-            line = nestedBlock.getBeginLine();
         }
-
-        if (debuggerService.suspendEnvironment(env, templateName, line)) {
-            if (!suspendAfter) {
-                nestedBlock.accept(env);
-            }
-        } else {
-            throw new StopException(env, "Stopped by debugger");
+        else
+        {
+            throw new StopException(env, "Stopped by debugger");        
         }
     }
 
