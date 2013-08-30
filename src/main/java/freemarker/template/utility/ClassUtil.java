@@ -391,5 +391,17 @@ public class ClassUtil
         if (boxingClass == Void.class) return void.class;  // not really a primitive, but we normalize to it
         return boxingClass;
     }
+
+    /**
+     * Tells if a type is numerical; works both for primitive types and classes.
+     * 
+     * @param type can't be {@code null}
+     * 
+     * @since. 2.3.21
+     */
+    public static boolean isNumerical(Class type) {
+        return Number.class.isAssignableFrom(type)
+                || type.isPrimitive() && type != Boolean.TYPE && type != Character.TYPE && type != Void.TYPE;
+    }
     
 }

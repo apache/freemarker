@@ -60,5 +60,37 @@ public class NumberUtilTest extends TestCase {
         assertEquals(0, NumberUtil.getSignum(BigInteger.valueOf(0)));
         assertEquals(-1, NumberUtil.getSignum(BigInteger.valueOf(-3)));
     }
+    
+    public void testIsBigDecimalInteger() {
+        BigDecimal n1 = new BigDecimal("1.125");
+        if (n1.precision() != 4 || n1.scale() != 3) {
+            throw new RuntimeException("Wrong: " +  n1);
+        }
+        BigDecimal n2 = new BigDecimal("1.125").subtract(new BigDecimal("0.005"));
+        if (n2.precision() != 4 || n2.scale() != 3) {
+            throw new RuntimeException("Wrong: " +  n2);
+        }
+        BigDecimal n3 = new BigDecimal("123");
+        BigDecimal n4 = new BigDecimal("6000");
+        BigDecimal n5 = new BigDecimal("1.12345").subtract(new BigDecimal("0.12345"));
+        if (n5.precision() != 6 || n5.scale() != 5) {
+            throw new RuntimeException("Wrong: " +  n5);
+        }
+        BigDecimal n6 = new BigDecimal("0"); 
+        BigDecimal n7 = new BigDecimal("0.001").subtract(new BigDecimal("0.001")); 
+        BigDecimal n8 = new BigDecimal("60000.5").subtract(new BigDecimal("0.5")); 
+        BigDecimal n9 = new BigDecimal("6").movePointRight(3).setScale(-3);
+        
+        BigDecimal[] ns = new BigDecimal[] {
+                n1, n2, n3, n4, n5, n6, n7, n8, n9,
+                n1.negate(), n2.negate(), n3.negate(), n4.negate(), n5.negate(), n6.negate(), n7.negate(), n8.negate(),
+                n9.negate(),
+        };
+        
+        for (BigDecimal n : ns) {
+            assertEquals(n.doubleValue() == n.longValue(), NumberUtil.isBigDecimalInteger(n));
+        }
+        
+    }
 
 }

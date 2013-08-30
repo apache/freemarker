@@ -69,7 +69,7 @@ class MethodUtilities
     /**
      * Determines whether the type given as the 1st argument is convertible to the type given as the 2nd argument
      * for method call argument conversion. This follows the rules of the Java reflection-based method call, except
-     * that since we don't have the value here, a boxed calls is never seens as convertable to a primtivie type. 
+     * that since we don't have the value here, a boxed class is never seen as convertible to a primitive type. 
      * 
      * @return 0 means {@code false}, non-0 means {@code true}.
      *         That is, 0 is returned less specificity or incomparable specificity, also when if

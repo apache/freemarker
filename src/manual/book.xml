@@ -20417,31 +20417,84 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>TODO: number conversions</para>
+                  <para>The behavior of numbers with overloaded method
+                  selection was heavily reworked:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>If possible, it now always choses the overload
+                      where overflow and truncation to integer (like 1.5 to 1)
+                      is avoided. Among the methods where no such critical
+                      loss occurs, it choses the overload with the least risk
+                      of precision loss (unless other conditions with higher
+                      priority suggest otherwise). Earlier, the method
+                      selection was prone to do choices that led to overflow
+                      or precision loss, especially when the parameter was a
+                      literal with decimals.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Overloaded method call can now convert to
+                      non-primitive numerical types, like a
+                      <literal>Byte</literal> or <literal>byte</literal> value
+                      is automatically converted to <literal>Integer</literal>
+                      if the parameter type is <literal>Integer</literal>.
+                      (This has always worked for non-overloaded methods.)
+                      Earlier where such conversion was needed, the method
+                      wasn't seen seen applicable.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Method selection is now not only based on the type
+                      of the wrapped number, but also on its value. For
+                      example, a wrapped <literal>Long</literal> with value
+                      <literal>1</literal> is now seen to be compatible with a
+                      method with parameter type <literal>int</literal> or
+                      <literal>short</literal> or <literal>byte</literal>, as
+                      <literal>1</literal> can be stored in those without
+                      loss. This is important as unlike in Java language, in
+                      FTL you doesn't have strict control over the numerical
+                      types (the type of the wrapped number, actually), as FTL
+                      has no type declarations. (If multiple compatible
+                      methods are available, it will still try to chose the
+                      one with the same or bigger type first.)</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Conversion from/to <literal>BigInteger</literal>
+                      is now supported.</para>
+                    </listitem>
+                  </itemizedlist>
                 </listitem>
 
                 <listitem>
                   <para>Ambiguity is now resolved in many cases where earlier
                   it was an error. Ambiguities was and are resolved by
                   selecting the compatible methods then choosing the one with
-                  the most specific parameter types among them. How the
-                  specificity of the parameter types is calculated was
-                  extended:</para>
+                  the most specific parameter types among them. Sever things
+                  were changes here:</para>
 
                   <itemizedlist>
                     <listitem>
                       <para>When comparing the specificity of two parameters
                       types at the same parameter position: The algorithm now
                       considers a primitive type as more specific that its
-                      corresponding boxing class. Also, the now it considers
-                      widening conversion from primitive numerical types to
-                      numerical classes, and from numerical class types to
-                      other numerical class types, and if the target is wider
-                      than the source, then the source is considered to be
-                      more specific. (Earlier this has only worked among two
-                      primitive types). Furthermore, it considers any
-                      primitive numerical type as more specific than
-                      <literal>Number</literal>.</para>
+                      corresponding boxing class.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>The type and certain aspects of the value of the
+                      argument (aka. actual parameter value) is now considered
+                      for numerical types when it's decided which method has
+                      the best matching numerical typed parameter. This let
+                      FreeMarker differentiate cases that looked equally good
+                      earlier. Furthermore, unlike the earlier algorithms,
+                      this matching logic also allows conversion between
+                      non-primitive numerical types (like
+                      <literal>Integer</literal> to <literal>Long</literal>),
+                      or from primitive types to non-primitive numerical types
+                      (even to <literal>Number</literal>), which makes even
+                      more cases decidable.</para>
                     </listitem>
 
                     <listitem>
@@ -20449,13 +20502,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       parameter lists: Earlier the more specific parameter
                       list was the one that had some parameters that won in
                       specificity, and if both had such parameters then it was
-                      an ambiguity. This rule changes in that now parameter
-                      specificity wins has a score, and the parameter list
-                      that contains the parameter with the highest score wins.
-                      The scores from lowest to highest: primitive wins over
-                      boxing type, narrower numerical type wins over wider
-                      numerical type, and subclass wins over
-                      super-class.</para>
+                      an ambiguity. Now it's enough if a method has more such
+                      parameters where it's a better match than the other has,
+                      or if the two methods are still equal, if it has the
+                      first better matching parameter. While this can lead to
+                      choices that seem arbitrary (but are still
+                      deterministic), as there is no automated way of
+                      discovering method selection ambiguities in templates
+                      (unlike in Java source code, where they will be detected
+                      during compilation), especially as overloaded selection
+                      has to rely on the <emphasis>runtime</emphasis> type of
+                      the values which makes proper testing hard, this was
+                      considered to be a better compromise than throwing an
+                      exception whenever the choice of the method is not
+                      obvious.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

@@ -1,8 +1,12 @@
 package freemarker.test.templatesuite.models;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import freemarker.ext.beans.RationalNumber;
+import freemarker.template.utility.StringUtil;
 
 public class OverloadedMethods2 {
 
@@ -16,6 +20,10 @@ public class OverloadedMethods2 {
     
     public BigInteger bigInteger(BigDecimal n) {
         return n.toBigInteger();
+    }
+
+    public RationalNumber rational(int a, int b) {
+        return new RationalNumber(a, b);
     }
     
     public String mVarargs(File a1, String... a2) {
@@ -221,6 +229,166 @@ public class OverloadedMethods2 {
         
     public String mDecimalLoss(double a1) {
         return "mDecimalLoss(double a1 = " + a1 + ")";
+    }
+    
+    public String mNumConversionLoses1(byte i, Object o1, Object o2) {
+        return "byte " + i;
+    }
+    
+    public String mNumConversionLoses1(double i, Object o1, Object o2) {
+        return "double " + i;
+    }
+
+    public String mNumConversionLoses1(Number i, String o1, String o2) {
+        return "Number " + i + " " + i.getClass().getName();
+    }
+
+    public String mNumConversionLoses2(int i, Object o1, Object o2) {
+        return "int " + i;
+    }
+
+    public String mNumConversionLoses2(long i, Object o1, Object o2) {
+        return "long " + i;
+    }
+
+    public String mNumConversionLoses2(Number i, String o1, String o2) {
+        return "Number " + i + " " + i.getClass().getName();
+    }
+
+    public String mNumConversionLoses3(int i, Object o1, Object o2) {
+        return "int " + i;
+    }
+
+    public String mNumConversionLoses3(Serializable i, String o1, String o2) {
+        return "Serializable " + i + " " + i.getClass().getName();
+    }
+    
+    public String nIntAndLong(int i) {
+        return "nIntAndLong(int " + i + ")";
+    }
+    
+    public String nIntAndLong(long i) {
+        return "nIntAndLong(long " + i + ")";
+    }
+
+    public String nIntAndShort(int i) {
+        return "nIntAndShort(int " + i + ")";
+    }
+    
+    public String nIntAndShort(short i) {
+        return "nIntAndShort(short " + i + ")";
+    }
+
+    public String nLongAndShort(long i) {
+        return "nLongAndShort(long " + i + ")";
+    }
+    
+    public String nLongAndShort(short i) {
+        return "nLongAndShort(short " + i + ")";
+    }
+
+    public String varargs1(String s, int... xs) {
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs1(String s, double... xs) {
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs1(String s, Object... xs) {
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs1(Object s, Object... xs) {
+        return "varargs1(Object s = " + s + ", Object... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs2(int... xs) {
+        return "varargs2(int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs2(double... xs) {
+        return "varargs2(double... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs3(String... xs) {
+        return "varargs3(String... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs3(Comparable... xs) {
+        return "varargs3(Comparable... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs3(Object... xs) {
+        return "varargs3(Object... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs4(Integer... xs) {
+        return "varargs4(Integer... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs4(int... xs) {
+        return "varargs4(int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs5(int... xs) {
+        return "varargs5(int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs5(int a1, int... xs) {
+        return "varargs5(int a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs5(int a1, int a2, int... xs) {
+        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs5(int a1, int a2, int a3, int... xs) {
+        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int a3 = " + a3
+                + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs6(String a1, int... xs) {
+        return "varargs6(String a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs6(Object a1, int a2, int... xs) {
+        return "varargs6(Object a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs7(int... xs) {
+        return "varargs7(int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs7(short a1, int... xs) {
+        return "varargs7(short a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    private String arrayToString(int[] xs) {
+        StringBuilder sb = new StringBuilder();
+        for (int x : xs) {
+            if (sb.length() != 0) sb.append(", ");
+            sb.append(x);
+        }
+        return sb.toString();
+    }
+
+    private String arrayToString(double[] xs) {
+        StringBuilder sb = new StringBuilder();
+        for (double x : xs) {
+            if (sb.length() != 0) sb.append(", ");
+            sb.append(x);
+        }
+        return sb.toString();
+    }
+
+    private String arrayToString(Object[] xs) {
+        StringBuilder sb = new StringBuilder();
+        for (Object x : xs) {
+            if (sb.length() != 0) sb.append(", ");
+            sb.append(x);
+        }
+        return sb.toString();
     }
     
 }

@@ -514,7 +514,11 @@ public class BeansWrapper implements ObjectWrapper
      */
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
-    }    
+    }
+    
+    boolean is2321Bugfixed() {
+        return getIncompatibleImprovements().intValue() >= 2003021;
+    }
     
     /**
      * Returns the default instance of the wrapper. This instance is used
@@ -652,21 +656,43 @@ public class BeansWrapper implements ObjectWrapper
     public Object unwrap(TemplateModel model, Class hint) 
     throws TemplateModelException
     {
-        final Object obj = unwrapInternal(model, hint);
+        final Object obj = tryUnwrap(model, hint);
         if(obj == CAN_NOT_UNWRAP) {
           throw new TemplateModelException("Can not unwrap model of type " + 
               model.getClass().getName() + " to type " + hint.getName());
         }
         return obj;
     }
+
+    /**
+     * Same as {@link #tryUnwrap(TemplateModel, Class, int)} with 0 last argument.
+     */
+    Object tryUnwrap(TemplateModel model, Class hint) throws TemplateModelException
+    {
+        return tryUnwrap(model, hint, 0);
+    }
     
-    Object unwrapInternal(TemplateModel model, Class hint) 
+    /**
+     * @param targetNumTypes Used when unwrapping for overloaded methods and so the hint is too generic; 0 otherwise.
+     *        This will be ignored if the hint is already a concrete numerical type. (With overloaded methods the hint
+     *        is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
+     *        concrete overloaded method.)
+     * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
+     */
+    Object tryUnwrap(TemplateModel model, Class hint, int targetNumTypes) 
     throws TemplateModelException
     {
-        return unwrap(model, hint, null);
+        Object res = tryUnwrap(model, hint, null);
+        if (targetNumTypes != 0
+                && (targetNumTypes & OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT) != 0
+                && res instanceof Number) {
+            return OverloadedNumberUtil.addFallbackType((Number) res, targetNumTypes);
+        } else {
+            return res;
+        }
     }
 
-    private Object unwrap(TemplateModel model, Class hint, Map recursionStops) 
+    private Object tryUnwrap(TemplateModel model, final Class hint, Map recursionStops) 
     throws TemplateModelException
     {
         if(model == null || model == nullModel) {
@@ -687,13 +713,9 @@ public class BeansWrapper implements ObjectWrapper
                 return adapted;
             }
             // Attempt numeric conversion 
-            if(adapted instanceof Number && ((hint.isPrimitive() && !isChar && 
-                    !isBoolean) || NUMBER_CLASS.isAssignableFrom(hint))) {
-                Number number = convertUnwrappedNumber(hint,
-                        (Number)adapted);
-                if(number != null) {
-                    return number;
-                }
+            if(adapted instanceof Number && ClassUtil.isNumerical(hint)) {
+                Number number = forceUnwrappedNumberToType((Number) adapted, hint, is2321Bugfixed());
+                if(number != null) return number;
             }
         }
         
@@ -703,10 +725,8 @@ public class BeansWrapper implements ObjectWrapper
                 return wrapped;
             }
             // Attempt numeric conversion 
-            if(wrapped instanceof Number && ((hint.isPrimitive() && !isChar && 
-                    !isBoolean) || NUMBER_CLASS.isAssignableFrom(hint))) {
-                Number number = convertUnwrappedNumber(hint,
-                        (Number)wrapped);
+            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
+                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed());
                 if(number != null) {
                     return number;
                 }
@@ -718,6 +738,7 @@ public class BeansWrapper implements ObjectWrapper
         // select the appropriate interface in multi-interface models when we
         // know what is expected as the return type.
 
+        // Java 5: Also should check for CharSequence at the end
         if(STRING_CLASS == hint) {
             if(model instanceof TemplateScalarModel) {
                 return ((TemplateScalarModel)model).getAsString();
@@ -727,11 +748,10 @@ public class BeansWrapper implements ObjectWrapper
         }
 
         // Primitive numeric types & Number.class and its subclasses
-        if((hint.isPrimitive() && !isChar && !isBoolean) 
-                || NUMBER_CLASS.isAssignableFrom(hint)) {
+        if(ClassUtil.isNumerical(hint)) {
             if(model instanceof TemplateNumberModel) {
-                Number number = convertUnwrappedNumber(hint, 
-                        ((TemplateNumberModel)model).getAsNumber());
+                Number number = forceUnwrappedNumberToType(
+                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed());
                 if(number != null) {
                     return number;
                 }
@@ -795,8 +815,7 @@ public class BeansWrapper implements ObjectWrapper
                 try {
                     int size = seq.size();
                     for (int i = 0; i < size; i++) {
-                        Object val = unwrap(seq.get(i), componentType, 
-                                recursionStops);
+                        Object val = tryUnwrap(seq.get(i), componentType, recursionStops);
                         if(val == CAN_NOT_UNWRAP) {
                             return CAN_NOT_UNWRAP;
                         }
@@ -879,57 +898,64 @@ public class BeansWrapper implements ObjectWrapper
         return CAN_NOT_UNWRAP;
     }
 
-    private static Number convertUnwrappedNumber(Class hint, Number number)
-    {
-        if(hint == Integer.TYPE || hint == Integer.class) {
-            return number instanceof Integer ? (Integer)number : 
-                new Integer(number.intValue());
-        }
-        if(hint == Long.TYPE || hint == Long.class) {
-            return number instanceof Long ? (Long)number : 
-                new Long(number.longValue());
-        }
-        if(hint == Float.TYPE || hint == Float.class) {
-            return number instanceof Float ? (Float)number : 
-                new Float(number.floatValue());
-        }
-        if(hint == Double.TYPE 
-                || hint == Double.class) {
-            return number instanceof Double ? (Double)number : 
-                new Double(number.doubleValue());
-        }
-        if(hint == Byte.TYPE || hint == Byte.class) {
-            return number instanceof Byte ? (Byte)number : 
-                new Byte(number.byteValue());
-        }
-        if(hint == Short.TYPE || hint == Short.class) {
-            return number instanceof Short ? (Short)number : 
-                new Short(number.shortValue());
-        }
-        if(hint == BigInteger.class) {
-            return number instanceof BigInteger ? number : 
-                new BigInteger(number.toString());
-        }
-        if(hint == BigDecimal.class) {
-            if(number instanceof BigDecimal) {
-                return number;
+    /**
+     * Converts a number to the target type aggressively (possibly with overflow or significant loss of precision).
+     * @param n Non-{@code null}
+     * @return {@code null} if the conversion has failed.
+     */
+    static Number forceUnwrappedNumberToType(final Number n, final Class targetType, boolean bugfixed) {
+        // We try to order the conditions by decreasing probability.
+        if (targetType == n.getClass()) {
+            return n;
+        } else if (targetType == Integer.TYPE || targetType == Integer.class) {
+            return n instanceof Integer ? (Integer) n : new Integer(n.intValue());
+        } else if (targetType == Long.TYPE || targetType == Long.class) {
+            return n instanceof Long ? (Long) n : new Long(n.longValue());
+        } else if (targetType == Double.TYPE || targetType == Double.class) {
+            return n instanceof Double ? (Double) n : new Double(n.doubleValue());
+        } else if(targetType == BigDecimal.class) {
+            if(n instanceof BigDecimal) {
+                return n;
+            } else if (n instanceof BigInteger) {
+                return new BigDecimal((BigInteger) n);
+            } else if (n instanceof Long) {
+                // Because we can't represent long accurately as double
+                return BigDecimal.valueOf(n.longValue());
+            } else {
+                return new BigDecimal(n.doubleValue());
             }
-            if(number instanceof BigInteger) {
-                return new BigDecimal((BigInteger)number);
+        } else if (targetType == Float.TYPE || targetType == Float.class) {
+            return n instanceof Float ? (Float) n : new Float(n.floatValue());
+        } else if (targetType == Byte.TYPE || targetType == Byte.class) {
+            return n instanceof Byte ? (Byte) n : new Byte(n.byteValue());
+        } else if (targetType == Short.TYPE || targetType == Short.class) {
+            return n instanceof Short ? (Short) n : new Short(n.shortValue());
+        } else if (targetType == BigInteger.class) {
+            if (n instanceof BigInteger) {
+                return n;
+            } else if (bugfixed) {
+                if (n instanceof OverloadedNumberUtil.IntegerBigDecimal) {
+                    return ((OverloadedNumberUtil.IntegerBigDecimal) n).bigIntegerValue();
+                } else if (n instanceof BigDecimal) {
+                    return ((BigDecimal) n).toBigInteger(); 
+                } else {
+                    return BigInteger.valueOf(n.longValue()); 
+                }
+            } else {
+                // This is wrong, because something like "123.4" will cause NumberFormatException instead of flooring.
+                return new BigInteger(n.toString());
             }
-            if(number instanceof Long) {
-                // Because we can't represent long accurately as a 
-                // double
-                return new BigDecimal(number.toString());
+        } else {
+            final Number oriN = n instanceof OverloadedNumberUtil.NumberWithFallbackType
+                    ? ((OverloadedNumberUtil.NumberWithFallbackType) n).getSourceNumber() : n; 
+            if (targetType.isInstance(oriN)) {
+                // Handle nonstandard Number subclasses as well as directly java.lang.Number.
+                return oriN;
+            } else {
+                // Fails
+                return null;
             }
-            return new BigDecimal(number.doubleValue());
         }
-        // Handle nonstandard Number subclasses as well as directly 
-        // java.lang.Number too
-        if(hint.isInstance(number)) {
-            return number;
-        }
-        return null;
     }
     
     /**
@@ -1726,6 +1752,7 @@ public class BeansWrapper implements ObjectWrapper
      * Converts any {@link BigDecimal}s in the passed array to the type of
      * the corresponding formal argument of the method.
      */
+    // Unused?
     public static void coerceBigDecimals(AccessibleObject callable, Object[] args)
     {
         Class[] formalTypes = null;
@@ -1775,7 +1802,7 @@ public class BeansWrapper implements ObjectWrapper
             }
         }
     }
-    
+
     public static Object coerceBigDecimal(BigDecimal bd, Class formalType) {
         // int is expected in most situations, so we check it first
         if(formalType == Integer.TYPE || formalType == Integer.class) {
@@ -1798,8 +1825,9 @@ public class BeansWrapper implements ObjectWrapper
         }
         else if(BIGINTEGER_CLASS.isAssignableFrom(formalType)) {
             return bd.toBigInteger();
+        } else {
+            return bd;
         }
-        return bd;
     }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
