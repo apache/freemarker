@@ -20385,30 +20385,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               (or higher). There's a very little chance that because of these
               fixes, a different overloaded method will chosen than before
               (which in theory could change the behavior of the application),
-              or ambiguity error will be reported where earlier it has only
-              seen one choice, hence the fixes aren't automatically active (at
-              least not unit FreeMarker 2.4). But the fix mostly only effect
-              calls that were failing earlier, so it's recommended to active
-              it for project that are still actively developed. The fixes
-              are:</para>
+              or even that ambiguity error will arise where earlier they
+              didn't (although the opposite is much more probable), hence the
+              fixes aren't automatically active, at least not unit FreeMarker
+              2.4. But the fix mostly only effect calls that were failing
+              earlier, so it's recommended to activate it for projects that
+              are still actively developed. This fix includes numerous
+              changes:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>null</literal> argument values has only
-                  matched overloaded methods where the corresponding parameter
-                  had <literal>Object</literal> type, not a subclass of it.
-                  This is the most risky fix regarding backward-compatibility,
-                  as when the argument is <literal>null</literal>, earlier it
-                  has chosen the overload that has <literal>Object</literal>
-                  at the given position, while after the fix it also considers
-                  the other overloads with a non-primitive type at the given
-                  position. In that case the overload with the
-                  <literal>Object</literal> parameter will fall out (so far so
-                  good), but if there are two other candidates, whose
-                  parameter types at that position aren't in
-                  <literal>instanceof</literal> relationship at some
-                  direction, their relative specificity is undecidable and so
-                  there will be ambiguity exception.</para>
+                  <para>Earlier, <literal>null</literal> argument values has
+                  only matched overloaded methods where the corresponding
+                  parameter had <literal>Object</literal> type, not a subclass
+                  of it. Now it considers all overloads where the parameter
+                  type is non-primitive, and just like the Java language, it
+                  choses the one with the most specific type among them. This
+                  is the most important and also the most risky fix regarding
+                  backward-compatibility. Like if you have <literal>m(Object
+                  o)</literal> and <literal>m(String s)</literal> in a Java
+                  class, earlier for a <literal>m(null)</literal> call in the
+                  template it has chosen <literal>m(Object o)</literal>, but
+                  now it will choose <literal>m(String s)</literal> instead
+                  (because <literal>String</literal> is also
+                  <literal>null</literal>-able and is more specific then
+                  <literal>Object</literal>). Furthermore, if you also had
+                  <literal>m(File f)</literal> in the same class, now it will
+                  be ambiguity exception, since the specificity of
+                  <literal>File</literal> and <literal>String</literal> can't
+                  be compared (same rule as under Java language).</para>
                 </listitem>
 
                 <listitem>
@@ -20416,11 +20421,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>TODO: method order dependence</para>
-                </listitem>
-
-                <listitem>
-                  <para>Ambiguity is now resolved in some cases where earlier
+                  <para>Ambiguity is now resolved in many cases where earlier
                   it was an error. Ambiguities was and are resolved by
                   selecting the compatible methods then choosing the one with
                   the most specific parameter types among them. How the
@@ -20478,9 +20479,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   interfaces), due to the ambiguity it has felt back to using
                   <literal>Object</literal> as the unwrapping hint. Now if
                   there's a non-<literal>Object</literal> class among them in
-                  such case, it will be chosen as the hint. Otherwise if only
-                  a single interface remains by removing
-                  <literal>Cloneable</literal>,
+                  such case, it will be chosen as the hint (i.e., we ignore
+                  the common interfaces). Otherwise if only a single interface
+                  remains by removing <literal>Cloneable</literal>,
                   <literal>Serializable</literal>, and
                   <literal>Comparable</literal> (in that order), that will be
                   chosen. Only then it falls back to
@@ -20497,7 +20498,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   position was not the same in all the overloaded varargs
                   methods, sometimes some varargs arguments where unwrapped
                   with too generic hints. When this happened was unpredictable
-                  as it depended on the internal method ordering.)</para>
+                  as it depended on the internal method ordering
+                  again.)</para>
                 </listitem>
               </itemizedlist>
             </listitem>
