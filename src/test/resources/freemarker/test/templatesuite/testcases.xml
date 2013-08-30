@@ -175,4 +175,16 @@
    <testcase name="string-builtins-ici-2.3.19" nooutput="true">
       <config incompatible_improvements="2.3.19"/>
    </testcase>
+   <testcase name="overloaded-methods-2-inc-ici-2.3.20" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapperInc2003020"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-desc-ici-2.3.20" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapperDesc2003020"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-inc-ici-2.3.21" template="overloaded-methods-2-ici-2.3.21.ftl" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapperInc2003021"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-desc-ici-2.3.21" template="overloaded-methods-2-ici-2.3.21.ftl" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.BeansWrapperDesc2003021"/>
+   </testcase>
 </testcases>

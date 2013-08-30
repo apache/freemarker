@@ -76,6 +76,18 @@ public class NumberUtil {
         }
     }
     
+    /**
+     * Tells if a {@link BigDecimal} stores a whole number. For example, it returns {@code true} for {@code 1.0000},
+     * but {@code false} for {@code 1.0001}.
+     * @since 2.3.21
+     */
+    static public boolean isBigDecimalInteger(BigDecimal bd) {
+            return bd.scale() <= 0  // A fast check that whole numbers usually (not always) match
+                   || bd.setScale(0, BigDecimal.ROUND_DOWN).compareTo(bd) == 0;  // This is rather slow
+            // Note that `bd.signum() == 0 || bd.stripTrailingZeros().scale() <= 0` was also tried for the last
+            // condition, but stripTrailingZeros was slower than setScale + compareTo.
+    }
+    
     private static boolean isNonFPNumberOfSupportedClass(Number num) {
         return num instanceof Integer || num instanceof BigDecimal || num instanceof Long
                 || num instanceof Short || num instanceof Byte || num instanceof BigInteger;

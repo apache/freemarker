@@ -54,125 +54,139 @@ package freemarker.ext.beans;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 class MethodUtilities
 {
-    static final Class OBJECT_CLASS = Object.class;
+    // Get rid of these on Java 5
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
     
-    // DD: This method is broken. It gives different result depending on the order of the argument values. Like
-    // getMostSpecificCommonType(int.class, Integer.class) gives Object.class, but
-    // getMostSpecificCommonType(Integer.class, int.class) gives Integer.class. And this actually influences the
-    // overloaded method mechanism, because the order of the values depends on the order in which the Java reflection
-    // API returns the methods, and that order "randomly" changes depending on factors like the J2SE version (5 VS 6).
-    // I don't dare to fix this, because I don't want a FreeMarker update to break any apps that even if out of sheer
-    // luck, but happen to work...
-    static Class getMostSpecificCommonType(Class c1, Class c2) {
-        if(c1 == c2) {
-            return c1;
-        }
-        if(c2.isPrimitive()) {
-            if(c2 == Byte.TYPE) c2 = Byte.class;
-            else if(c2 == Short.TYPE) c2 = Short.class;
-            else if(c2 == Character.TYPE) c2 = Character.class;
-            else if(c2 == Integer.TYPE) c2 = Integer.class;
-            else if(c2 == Float.TYPE) c2 = Float.class;
-            else if(c2 == Long.TYPE) c2 = Long.class;
-            else if(c2 == Double.TYPE) c2 = Double.class;
-        }
-        // DD: This appears to be wrong to me... What if c1.isPrimitive? A non-primitive is never assignable to a
-        //     primitive, or the other way around.
-        Set a1 = getAssignables(c1, c2);
-        Set a2 = getAssignables(c2, c1);
-        a1.retainAll(a2);
-        if(a1.isEmpty()) {
-            // Can happen when at least one of the arguments is an interface, as
-            // they don't have Object at the root of their hierarchy
-            return Object.class;
-        }
-        // Gather maximally specific elements. Yes, there can be more than one 
-        // thank to interfaces. I.e., if you call this method for String.class 
-        // and Number.class, you'll have Comparable, Serializable, and Object as 
-        // maximal elements. 
-        List max = new ArrayList();
-outer:  for (Iterator it = a1.iterator(); it.hasNext();) {
-            Class clazz = (Class)it.next();
-            for (Iterator maxiter = max.iterator(); maxiter.hasNext();) {
-                Class maxClazz = (Class)maxiter.next();
-                if(isMoreSpecific(maxClazz, clazz)) {
-                    // It can't be maximal, if there's already a more specific
-                    // maximal than it.
-                    continue outer;
+    /**
+     * Determines whether the type given as the 1st argument is convertible to the type given as the 2nd argument
+     * for method call argument conversion. This follows the rules of the Java reflection-based method call, except
+     * that since we don't have the value here, a boxed class is never seen as convertible to a primitive type. 
+     * 
+     * @return 0 means {@code false}, non-0 means {@code true}.
+     *         That is, 0 is returned less specificity or incomparable specificity, also when if
+     *         then method was aborted because of {@code ifHigherThan}.
+     *         The absolute value of the returned non-0 number symbolizes how more specific it is:
+     *         <ul>
+     *           <li>1: The two classes are identical</li>
+     *           <li>2: The 1st type is primitive, the 2nd type is the corresponding boxing class</li>
+     *           <li>3: Both classes are numerical, and one is convertible into the other with widening conversion.
+     *                  E.g., {@code int} is convertible to {@code long} and {#code double}, hence {@code int} is more
+     *                  specific.
+     *                  This ignores primitive VS boxed mismatches, except that a boxed class is never seen as
+     *                  convertible to a primitive class.</li>
+     *           <li>4: One class is {@code instanceof} of the other, but they aren't identical.
+     *               But unlike in Java, primitive numerical types are {@code instanceof} {@link Number} here.</li>
+     *         </ul> 
+     */
+    static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
+            int ifHigherThan) {
+        if (ifHigherThan >= 4) return 0;
+        if(generic.isAssignableFrom(specific)) {
+            // Identity or widening reference conversion:
+            return generic == specific ? 1 : 4;
+        } else {
+            final boolean specificIsPrim = specific.isPrimitive(); 
+            final boolean genericIsPrim = generic.isPrimitive();
+            if (specificIsPrim) {
+                if (genericIsPrim) {
+                    if (ifHigherThan >= 3) return 0;
+                    return isWideningPrimitiveNumberConversion(specific, generic) ? 3 : 0;
+                } else {  // => specificIsPrim && !genericIsPrim
+                    if (bugfixed) {
+                        final Class specificAsBoxed = ClassUtil.primitiveClassToBoxingClass(specific); 
+                        if (specificAsBoxed == generic) {
+                            // A primitive class is more specific than its boxing class, because it can't store null
+                            return 2;
+                        } else if (generic.isAssignableFrom(specificAsBoxed)) {
+                            // Note: This only occurs if `specific` is a primitive numerical, and `generic == Number`
+                            return 4;
+                        } else if (ifHigherThan >= 3) {
+                            return 0;
+                        } else if (Number.class.isAssignableFrom(specificAsBoxed)
+                                && Number.class.isAssignableFrom(generic)) {
+                            return isWideningBoxedNumberConversion(specificAsBoxed, generic) ? 3 : 0;
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
                 }
-                if(isMoreSpecific(clazz, maxClazz)) {
-                    // If it's more specific than a currently maximal element,
-                    // that currently maximal is no longer a maximal.
-                    maxiter.remove();
+            } else {  // => !specificIsPrim
+                if (ifHigherThan >= 3) return 0;
+                if (bugfixed && !genericIsPrim
+                        && Number.class.isAssignableFrom(specific) && Number.class.isAssignableFrom(generic)) {
+                    return isWideningBoxedNumberConversion(specific, generic) ? 3 : 0;
+                } else {
+                    return 0;
                 }
             }
-            // If we get here, no current maximal is more specific than the
-            // current class, so it's considered maximal as well
-            max.add(clazz);
+        }  // of: !generic.isAssignableFrom(specific) 
+    }
+
+    private static boolean isWideningPrimitiveNumberConversion(final Class source, final Class target) {
+        // Check for widening primitive numerical conversion.
+        if(target == Short.TYPE && (source == Byte.TYPE)) {
+            return true;
+        } else if (target == Integer.TYPE && 
+           (source == Short.TYPE || source == Byte.TYPE)) {
+            return true;
+        } else if (target == Long.TYPE && 
+           (source == Integer.TYPE || source == Short.TYPE || 
+            source == Byte.TYPE)) {
+            return true;
+        } else if (target == Float.TYPE && 
+           (source == Long.TYPE || source == Integer.TYPE || 
+            source == Short.TYPE || source == Byte.TYPE)) {
+            return true;
+        } else if (target == Double.TYPE && 
+           (source == Float.TYPE || source == Long.TYPE || 
+            source == Integer.TYPE || source == Short.TYPE || 
+            source == Byte.TYPE)) {
+            return true; 
+        } else {
+            return false;
         }
-        if(max.size() > 1) {
-            return OBJECT_CLASS;
+    }
+
+    private static boolean isWideningBoxedNumberConversion(final Class source, final Class target) {
+        // Check for widening primitive numerical conversion.
+        if(target == Short.class && (source == Byte.class)) {
+            return true;
+        } else if (target == Integer.class && 
+           (source == Short.class || source == Byte.class)) {
+            return true;
+        } else if (target == Long.class && 
+           (source == Integer.class || source == Short.class || 
+            source == Byte.class)) {
+            return true;
+        } else if (target == Float.class && 
+           (source == Long.class || source == Integer.class || 
+            source == Short.class || source == Byte.class)) {
+            return true;
+        } else if (target == Double.class && 
+           (source == Float.class || source == Long.class || 
+            source == Integer.class || source == Short.class || 
+            source == Byte.class)) {
+            return true; 
+        } else {
+            return false;
         }
-        return (Class)max.get(0);
     }
 
     /**
-     * Determines whether a type represented by a class object is 
-     * convertible to another type represented by a class object using a 
-     * method invocation conversion, without matching object and primitive
-     * types. This method is used to determine the more specific type when
-     * comparing signatures of methods.
-     * @return true if either formal type is assignable from actual type, 
-     * or formal and actual are both primitive types and actual can be
-     * subject to widening conversion to formal.
+     * Attention, this doesn't handle primitive classes correctly, nor numerical conversions.
      */
-    static boolean isMoreSpecific(Class specific, Class generic) {
-        // Check for identity or widening reference conversion
-        if(generic.isAssignableFrom(specific)) {
-            return true;
-        }
-        // Check for widening primitive conversion.
-        if(generic.isPrimitive()) {
-            if(generic == Short.TYPE && (specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Integer.TYPE && 
-               (specific == Short.TYPE || specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Long.TYPE && 
-               (specific == Integer.TYPE || specific == Short.TYPE || 
-                specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Float.TYPE && 
-               (specific == Long.TYPE || specific == Integer.TYPE || 
-                specific == Short.TYPE || specific == Byte.TYPE)) {
-                return true;
-            }
-            if(generic == Double.TYPE && 
-               (specific == Float.TYPE || specific == Long.TYPE || 
-                specific == Integer.TYPE || specific == Short.TYPE || 
-                specific == Byte.TYPE)) {
-                return true; 
-            }
-        }
-        return false;
-    }
-    
-    private static Set getAssignables(Class c1, Class c2) {
+    static Set getAssignables(Class c1, Class c2) {
         Set s = new HashSet();
         collectAssignables(c1, c2, s);
         return s;

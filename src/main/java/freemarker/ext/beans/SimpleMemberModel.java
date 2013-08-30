@@ -119,7 +119,7 @@ class SimpleMemberModel
         while (argIdx < normalArgCnt) {
             Class argType = argTypes[argIdx];
             TemplateModel argVal = (TemplateModel) it.next();
-            Object unwrappedArgVal = w.unwrapInternal(argVal, argType);
+            Object unwrappedArgVal = w.tryUnwrap(argVal, argType);
             if(unwrappedArgVal == BeansWrapper.CAN_NOT_UNWRAP) {
                 throw createArgumentTypeMismarchException(argIdx, argVal, argType);
             }
@@ -143,7 +143,7 @@ class SimpleMemberModel
                 // We first try to treat the last argument as a vararg *array*.
                 // This is consistent to what OverloadedVarArgMethod does.
                 if (argsLen - argIdx == 1
-                        && (unwrappedArgVal = w.unwrapInternal(argVal, varargType))
+                        && (unwrappedArgVal = w.tryUnwrap(argVal, varargType))
                             != BeansWrapper.CAN_NOT_UNWRAP) {
                     // It was a vararg array.
                     unwrappedArgs[argIdx++] = unwrappedArgVal;
@@ -154,7 +154,7 @@ class SimpleMemberModel
                     Object varargArray = Array.newInstance(varargItemType, varargArrayLen);
                     for (int varargIdx = 0; varargIdx < varargArrayLen; varargIdx++) {
                         TemplateModel varargVal = (TemplateModel) (varargIdx == 0 ? argVal : it.next());
-                        Object unwrappedVarargVal = w.unwrapInternal(varargVal, varargItemType);
+                        Object unwrappedVarargVal = w.tryUnwrap(varargVal, varargItemType);
                         if(unwrappedVarargVal == BeansWrapper.CAN_NOT_UNWRAP) {
                             throw createArgumentTypeMismarchException(
                                     argIdx + varargIdx, varargVal, varargItemType);

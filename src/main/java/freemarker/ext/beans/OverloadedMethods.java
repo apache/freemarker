@@ -54,6 +54,7 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
@@ -68,53 +69,66 @@ import freemarker.template.utility.ClassUtil;
 final class OverloadedMethods
 {
     private final BeansWrapper wrapper;
-    private final OverloadedMethodsSubset fixArgMethods = new OverloadedFixArgMethods();
+    private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
     
     OverloadedMethods(BeansWrapper wrapper) {
         this.wrapper = wrapper;
+        fixArgMethods = new OverloadedFixArgsMethods(wrapper);
     }
     
     BeansWrapper getWrapper() {
         return wrapper;
     }
+
+    void addMethod(Method member) {
+        final Class[] paramTypes = member.getParameterTypes();
+        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+    }
+
+    void addConstructor(Constructor member) {
+        final Class[] paramTypes = member.getParameterTypes();
+        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+    }
     
-    void addMember(Member member) {
-        fixArgMethods.addMember(member);
-        if(MethodUtilities.isVarArgs(member)) {
+    private void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+        fixArgMethods.addCallableMemberDescriptor(memberDesc);
+        if(MethodUtilities.isVarArgs(memberDesc.member)) {
             if(varargMethods == null) {
-                varargMethods = new OverloadedVarargMethods();
+                varargMethods = new OverloadedVarArgsMethods(wrapper);
             }
-            varargMethods.addMember(member);
+            varargMethods.addCallableMemberDescriptor(memberDesc);
         }
     }
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
     throws TemplateModelException {
-        Object memberAndArguments = fixArgMethods.getMemberAndArguments(tmArgs, wrapper);
-        if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
-            if(varargMethods != null) {
-                memberAndArguments = varargMethods.getMemberAndArguments(tmArgs, wrapper);
-            }
-            if(memberAndArguments == OverloadedMethodsSubset.NO_SUCH_METHOD) {
+        MaybeEmptyMemberAndArguments res;
+        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+            return (MemberAndArguments) res;
+        } else if (varargMethods != null
+                && (res = varargMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+            return (MemberAndArguments) res;
+        } else {
+            if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
                         "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are:\n" + memberListToString());
+            } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
+                throw new TemplateModelException(
+                        "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
+                        "parameter values:\n" + getDeducedCallSignature(tmArgs)
+                        + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
+            } else {
+                throw new RuntimeException("Unsupported EmptyMemberAndArguments: " + res); 
             }
         }
-        if(memberAndArguments == OverloadedMethodsSubset.AMBIGUOUS_METHOD) {
-            throw new TemplateModelException(
-                    "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
-                    "parameter values:\n" + getDeducedCallSignature(tmArgs)
-                    + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
-        }
-        return (MemberAndArguments)memberAndArguments;
     }
-    
+
     private String memberListToString() {
-        Iterator fixArgMethodsIter = fixArgMethods.getMembers();
-        Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMembers() : null;
+        Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
+        Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
         
         boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
         if (hasMethods) {
@@ -122,12 +136,12 @@ final class OverloadedMethods
             while (fixArgMethodsIter.hasNext()) {
                 if (sb.length() != 0) sb.append(",\n");
                 sb.append("    ");
-                sb.append(methodOrConstructorToString((Member) fixArgMethodsIter.next()));
+                sb.append(methodOrConstructorToString(((CallableMemberDescriptor) fixArgMethodsIter.next()).member));
             }
             if (varargMethodsIter != null) {
                 while (varargMethodsIter.hasNext()) {
                     if (sb.length() != 0) sb.append(",\n");
-                    sb.append(methodOrConstructorToString((Member) varargMethodsIter.next()));
+                    sb.append(methodOrConstructorToString(((CallableMemberDescriptor) varargMethodsIter.next()).member));
                 }
             }
             return sb.toString();
@@ -141,13 +155,13 @@ final class OverloadedMethods
      */
     private String getDeducedCallSignature(List arguments) {
         final Member firstMember;
-        Iterator fixArgMethodsIter = fixArgMethods.getMembers();
+        Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         if (fixArgMethodsIter.hasNext()) {
-            firstMember = (Member) fixArgMethodsIter.next();
+            firstMember = ((CallableMemberDescriptor) fixArgMethodsIter.next()).member;
         } else {
-            Iterator varArgMethods = varargMethods != null ? varargMethods.getMembers() : null;
+            Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
             if (varArgMethods != null && varArgMethods.hasNext()) {
-                firstMember = (Member) varArgMethods.next();
+                firstMember = ((CallableMemberDescriptor) varArgMethods.next()).member;
             } else {
                 firstMember = null;
             }

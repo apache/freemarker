@@ -231,9 +231,21 @@ public class ASTPrinter {
     }
 
     protected static void printNodeLineEnd(Object node, Writer out, Options opts) throws IOException {
+        boolean commentStared = false;
         if (opts.getShowJavaClass()) {
             out.write("  // ");
+            commentStared = true;
             out.write(ClassUtil.getShortClassNameOfObject(node, true));
+        }
+        if (opts.getShowLocation() && node instanceof TemplateObject) {
+            if (!commentStared) {
+                out.write("  // ");
+                commentStared = true;
+            } else {
+                out.write("; ");
+            }
+            TemplateObject tObj = (TemplateObject) node;
+            out.write("Location " + tObj.beginLine + ":" + tObj.beginColumn + "-" + tObj.endLine + ":" + tObj.endColumn);
         }
         out.write('\n');
     }
@@ -253,6 +265,7 @@ public class ASTPrinter {
         
         private boolean showJavaClass = true;
         private boolean showConstantValue = false;
+        private boolean showLocation = false;
         
         public boolean getShowJavaClass() {
             return showJavaClass;
@@ -268,6 +281,14 @@ public class ASTPrinter {
         
         public void setShowConstantValue(boolean showConstantValue) {
             this.showConstantValue = showConstantValue;
+        }
+
+        public boolean getShowLocation() {
+            return showLocation;
+        }
+
+        public void setShowLocation(boolean showLocation) {
+            this.showLocation = showLocation;
         }
         
     }

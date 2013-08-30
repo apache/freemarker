@@ -5,7 +5,8 @@ import java.lang.reflect.Member;
 /**
  * @author Attila Szegedi
  */
-class MemberAndArguments {
+class MemberAndArguments extends MaybeEmptyMemberAndArguments {
+    
     private final Member member;
     private final Object[] args;
     
@@ -21,4 +22,5 @@ class MemberAndArguments {
     public Member getMember() {
         return member;
     }
+    
 }

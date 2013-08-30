@@ -125,7 +125,7 @@
     <!-- test -->
     
     <!-- Note: Ant doesn't contain junit.jar anymore, so we add it to conf "test" too. -->
-    <dependency org="junit" name="junit" rev="3.7" conf="build.test->default; test->default" />
+    <dependency org="junit" name="junit" rev="4.11" conf="build.test->default; test->default" />
     
     <!-- docs -->
     

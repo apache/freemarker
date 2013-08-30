@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.dom.NodeModel;
 
 /**
@@ -72,6 +73,19 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                          JYTHON_OBJ_CLASS;
     
     static private ObjectWrapper JYTHON_WRAPPER;
+    
+    public DefaultObjectWrapper() {
+        super();
+    }
+    
+    /**
+     * @param incompatibleImprovements see in {@link BeansWrapper#BeansWrapper(Version)}.
+     * 
+     * @since 2.3.21
+     */
+    public DefaultObjectWrapper(Version incompatibleImprovements) {
+        super(incompatibleImprovements);
+    }
     
     static {
         try {

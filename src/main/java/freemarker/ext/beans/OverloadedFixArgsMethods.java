@@ -51,7 +51,6 @@
  */
 package freemarker.ext.beans;
 
-import java.lang.reflect.Member;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -60,53 +59,75 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
+ * Stores the non-varargs methods for a {@link OverloadedMethods} object.
  * @author Attila Szegedi
  */
-class OverloadedFixArgMethods extends OverloadedMethodsSubset
-{
-    void onAddSignature(Member member, Class[] argTypes) {
-    };
+class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     
-    void updateSignature(int l) {
-    };
-    
-    void afterSignatureAdded(int l) {
-    };
+    OverloadedFixArgsMethods(BeansWrapper beansWrapper) {
+        super(beansWrapper);
+    }
 
-    Object getMemberAndArguments(List tmArgs, BeansWrapper w) 
+    Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
+        return memberDesc.paramTypes;
+    }
+    
+    void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
+        // Do nothing
+    }
+
+    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper w) 
     throws TemplateModelException {
         if(tmArgs == null) {
             // null is treated as empty args
             tmArgs = Collections.EMPTY_LIST;
         }
         final int argCount = tmArgs.size();
-        final Class[][] unwrappingArgTypesByArgCount = getUnwrappingArgTypesByArgCount();
-        if(unwrappingArgTypesByArgCount.length <= argCount) {
-            return NO_SUCH_METHOD;
+        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
+        if(unwrappingHintsByParamCount.length <= argCount) {
+            return EmptyMemberAndArguments.NO_SUCH_METHOD;
         }
-        Class[] unwarppingArgumentTypes = unwrappingArgTypesByArgCount[argCount];
-        if(unwarppingArgumentTypes == null) {
-            return NO_SUCH_METHOD;
+        Class[] unwarppingHints = unwrappingHintsByParamCount[argCount];
+        if(unwarppingHints == null) {
+            return EmptyMemberAndArguments.NO_SUCH_METHOD;
         }
-        //assert types.length == l;
-        // Marshal the arguments
+        
         Object[] pojoArgs = new Object[argCount];
+        
+        int[] possibleNumericalTypes = getPossibleNumericalTypes(argCount);
+        if (possibleNumericalTypes == ALL_ZEROS_ARRAY) {
+            possibleNumericalTypes = null;
+        }
+
         Iterator it = tmArgs.iterator();
         for(int i = 0; i < argCount; ++i) {
-            Object pojo = w.unwrapInternal((TemplateModel)it.next(), unwarppingArgumentTypes[i]);
+            Object pojo = w.tryUnwrap(
+                    (TemplateModel) it.next(),
+                    unwarppingHints[i],
+                    possibleNumericalTypes != null ? possibleNumericalTypes[i] : 0);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
-                return NO_SUCH_METHOD;
+                return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
             pojoArgs[i] = pojo;
         }
         
-        Object objMember = getMemberForArgs(pojoArgs, false);
-        if(objMember instanceof Member) {
-            Member member = (Member) objMember;
-            BeansWrapper.coerceBigDecimals(getSignature(member), pojoArgs);
-            return new MemberAndArguments(member, pojoArgs);
+        MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, false);
+        if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
+            CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
+            if (bugfixed) {
+                if (possibleNumericalTypes != null) {
+                    // Note that overloaded method selection has already accounted for overflow errors when the method
+                    // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
+                    // BigDecimal is allowed to overflow for backward-compatibility.
+                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.paramTypes, possibleNumericalTypes);
+                }
+            } else {
+                BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+            }
+            return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
-            return objMember; // either NO_SUCH_METHOD or AMBIGUOUS_METHOD
+            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc);
         }
     }
+    
 }
