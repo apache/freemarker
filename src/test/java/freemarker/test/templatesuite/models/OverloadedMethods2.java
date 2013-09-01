@@ -391,4 +391,36 @@ public class OverloadedMethods2 {
         return sb.toString();
     }
     
+    public String mNullAmbiguous(String s) {
+        return "mNullAmbiguous(String s = " + s + ")";
+    }
+
+    public String mNullAmbiguous(int i) {
+        return "mNullAmbiguous(int i = " + i + ")";
+    }
+
+    public String mNullAmbiguous(File f) {
+        return "mNullAmbiguous(File f = " + f + ")";
+    }
+    
+    public String mNullAmbiguous2(String s) {
+        return "mNullNonAmbiguous(String s = " + s + ")";
+    }
+
+    public String mNullAmbiguous2(File f) {
+        return "mNullAmbiguous(File f = " + f + ")";
+    }
+
+    public String mNullAmbiguous2(Object o) {
+        return "mNullAmbiguous(Object o = " + o + ")";
+    }
+
+    public String mNullNonAmbiguous(String s) {
+        return "mNullNonAmbiguous(String s = " + s + ")";
+    }
+
+    public String mNullNonAmbiguous(int i) {
+        return "mNullNonAmbiguous(int i = " + i + ")";
+    }
+    
 }

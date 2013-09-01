@@ -169,3 +169,14 @@
 
 <@assertEquals actual=obj.varargs7(1?int, 2?int) expected='varargs7(int... xs = [1, 2])' />
 <@assertEquals actual=obj.varargs7(1?short, 2?int) expected='varargs7(short a1 = 1, int... xs = [2])' />
+
+<@assertEquals actual=obj.mNullAmbiguous('a') expected='mNullAmbiguous(String s = a)' />
+<@assertEquals actual=obj.mNullAmbiguous(123) expected='mNullAmbiguous(int i = 123)' />
+<@assertEquals actual=obj.mNullAmbiguous(1.9) expected='mNullAmbiguous(int i = 1)' />
+<@assertEquals actual=obj.mNullAmbiguous(1?double) expected='mNullAmbiguous(int i = 1)' />
+<@assertFails message="no compatible overloaded">${obj.mNullAmbiguous(1.9?double)}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mNullAmbiguous(null)}</@>
+
+<@assertFails message="multiple compatible overloaded">${obj.mNullAmbiguous2(null)}</@>
+
+<@assertEquals actual=obj.mNullNonAmbiguous(null) expected='mNullNonAmbiguous(String s = null)' />
