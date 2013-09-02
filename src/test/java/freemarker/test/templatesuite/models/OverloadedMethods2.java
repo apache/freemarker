@@ -423,4 +423,12 @@ public class OverloadedMethods2 {
         return "mNullNonAmbiguous(int i = " + i + ")";
     }
     
+    public String mLowRankWins(int x, int y, Object o) {
+        return "mLowRankWins(int x = " + x + ", int y = " + y + ", Object o = " + o + ")";
+    }
+
+    public String mLowRankWins(Integer x, Integer y, String s) {
+        return "mLowRankWins(Integer x = " + x + ", Integer y = " + y + ", String s = " + s + ")";
+    }
+    
 }

@@ -20515,7 +20515,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       the values which makes proper testing hard, this was
                       considered to be a better compromise than throwing an
                       exception whenever the choice of the method is not
-                      obvious.</para>
+                      obvious. Also note that in fact it's more complicated
+                      then counting the <quote>winner</quote> parameter
+                      positions for each methods, as certain kind of wins are
+                      stronger than any number of the others: wins there the
+                      other possibility is risking the loss of substantial
+                      mantissa precision are the strongest (like dropping
+                      decimals versus not to), wins where the primitive type
+                      wins over the boxed class is the weakest (like
+                      <literal>int</literal> versus
+                      <literal>Integer</literal>), subclassing wins (like
+                      <literal>String</literal> versus
+                      <literal>Object</literal>) are between these two.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

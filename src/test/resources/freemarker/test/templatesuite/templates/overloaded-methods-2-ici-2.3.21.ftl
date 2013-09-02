@@ -180,3 +180,6 @@
 <@assertFails message="multiple compatible overloaded">${obj.mNullAmbiguous2(null)}</@>
 
 <@assertEquals actual=obj.mNullNonAmbiguous(null) expected='mNullNonAmbiguous(String s = null)' />
+
+<#-- The primitive int-s will win twice, but then String wins over Object, which is stronger: -->
+<@assertEquals actual=obj.mLowRankWins(1, 2, 'a') expected='mLowRankWins(Integer x = 1, Integer y = 2, String s = a)' />

@@ -193,6 +193,8 @@ final class ArgumentTypes {
         //assert varArg || paramTypes1Len == paramTypes2Len;
         
         if (bugfixed) {
+            int paramList1WeakWinCnt = 0;
+            int paramList2WeakWinCnt = 0;
             int paramList1WinCnt = 0;
             int paramList2WinCnt = 0;
             int paramList1StrongWinCnt = 0;
@@ -232,42 +234,58 @@ final class ArgumentTypes {
                     
                     if (numConvPrice1 == Integer.MAX_VALUE) {
                         if (numConvPrice2 == Integer.MAX_VALUE) {  // No numerical conversions anywhere
-                            winerParam = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
+                            final int r = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
+                            if (r > 0) {
+                                winerParam = 1;
+                                if (r > 1) {
+                                    paramList1WinCnt++;
+                                } else {
+                                    paramList1WeakWinCnt++;
+                                }
+                            } else if (r < 0) {
+                                winerParam = -1;
+                                if (r < -1) {
+                                    paramList2WinCnt++;
+                                } else {
+                                    paramList2WeakWinCnt++;
+                                }
+                            } else {
+                                winerParam = 0;
+                            }
                         } else {     // No num. conv. of param1, num. conv. of param2
                             winerParam = -1;
+                            paramList2WinCnt++;
                         }
                     } else if (numConvPrice2 == Integer.MAX_VALUE) {  // Num. conv. of param1, not of param2
                         winerParam = 1;
+                        paramList1WinCnt++;
                     } else {  // Num. conv. of both param1 and param2
                         if (numConvPrice1 != numConvPrice2) {
                             if (numConvPrice1 < numConvPrice2) {
                                 winerParam = 1;
                                 if (numConvPrice1 < BIG_MANTISSA_LOSS_PRICE && numConvPrice2 > BIG_MANTISSA_LOSS_PRICE) {
                                     paramList1StrongWinCnt++;
+                                } else {
+                                    paramList1WinCnt++;
                                 }
                             } else {
                                 winerParam = -1;
                                 if (numConvPrice2 < BIG_MANTISSA_LOSS_PRICE && numConvPrice1 > BIG_MANTISSA_LOSS_PRICE) {
                                     paramList2StrongWinCnt++;
+                                } else {
+                                    paramList2WinCnt++;
                                 }
                             }
                         } else {
                             winerParam = (paramType1.isPrimitive() ? 1 : 0) - (paramType2.isPrimitive() ? 1 : 0);
+                            if (winerParam == 1) paramList1WeakWinCnt++;
+                            else if (winerParam == -1) paramList2WeakWinCnt++;
                         }
                     }
                 }  // when paramType1 != paramType2
                 
-                if (winerParam != 0) {
-                    if (firstWinerParamList == 0) {
-                        firstWinerParamList = winerParam; 
-                    }
-                    if (winerParam == 1) {
-                        paramList1WinCnt++;
-                    } else if (winerParam == -1) {
-                        paramList2WinCnt++;
-                    } else {
-                        throw new RuntimeException();
-                    }
+                if (firstWinerParamList == 0 && winerParam != 0) {
+                    firstWinerParamList = winerParam; 
                 }
             }  // for each parameter types
             
@@ -275,6 +293,8 @@ final class ArgumentTypes {
                 return paramList1StrongWinCnt - paramList2StrongWinCnt;
             } else if (paramList1WinCnt != paramList2WinCnt) {
                 return paramList1WinCnt - paramList2WinCnt;
+            } else if (paramList1WeakWinCnt != paramList2WeakWinCnt) {
+                return paramList1WeakWinCnt - paramList2WeakWinCnt;
             } else if (firstWinerParamList != 0) {  // paramList1WinCnt == paramList2WinCnt
                 return firstWinerParamList;
             } else { // still undecided
@@ -329,6 +349,12 @@ final class ArgumentTypes {
         }
     }
     
+    /**
+     * Trivial comparison type specificities; unaware of numerical conversions. 
+     * 
+     * @return Less-than-0, 0, or more-than-0 depending on which side is more specific. The absolute value is 1 if
+     *     the difference is only in primitive VS non-primitive, more otherwise.
+     */
     private int compareParameterListPreferability_cmpTypeSpecificty(final Class paramType1, final Class paramType2) {
         // The more specific (smaller) type wins.
         
@@ -350,9 +376,9 @@ final class ArgumentTypes {
                 return 0;  // identical non-prim. types
             }
         } else if (nonPrimParamType2.isAssignableFrom(nonPrimParamType1)) {
-            return 1;
+            return 2;
         } else if (nonPrimParamType1.isAssignableFrom(nonPrimParamType2)) {
-            return -1;
+            return -2;
         } else  {
             return 0;  // unrelated types
         }

@@ -4,5 +4,6 @@
 <@assertEquals actual=obj.mIntPrimVSBoxed(123?short) expected="mIntPrimVSBoxed(int a1 = 123)" />
 <@assertEquals actual=obj.mIntPrimVSBoxed(123) expected="mIntPrimVSBoxed(int a1 = 123)" />
 <@assertEquals actual=obj.varargs4(1, 2, 3) expected='varargs4(int... xs = [1, 2, 3])' />
+<@assertEquals actual=obj.mLowRankWins(1, 2, 'a') expected='mLowRankWins(int x = 1, int y = 2, Object o = a)' />
 
 <#include 'overloaded-methods-2-ici-2.3.20.ftl'>
