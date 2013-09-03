@@ -93,7 +93,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
                 Object varargs = Array.newInstance(varArgsCompType, totalArgCount - fixArgCount);
                 for(int i = fixArgCount; i < totalArgCount; ++i) {
-                    Object val = w.unwrapInternal((TemplateModel)modelArgs.get(i), varArgsCompType);
+                    Object val = w.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
                     if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                         return null;
                     }
@@ -103,7 +103,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 return packedArgs;
             }
             else {
-                Object val = w.unwrapInternal((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
+                Object val = w.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
                 if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                     return null;
                 }
@@ -142,73 +142,79 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             else {
                 argPacker = canonical;
             }
-        }
         argPackers.put(memberDesc.member, argPacker);
+        }
         
         return preprocessedParamTypes;
     }
 
-    void afterWideningUnwrappingHints(Class[] paramTypes) {
-        final int paramCount = paramTypes.length;
-        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
-        final Class[] hints = unwrappingHintsByParamCount[paramCount];
-
+    void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
         // Overview
         // --------
         //
         // So far, m(t1, t2...) was treated by the hint widening like m(t1, t2). So now we have to continue hint
         // widening like if we had further methods:
-        // - m(t1), because a vararg array can be 0 long
-        // - m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ...
+        // - m(t1, t2, t2), m(t1, t2, t2, t2), ...
+        // - m(t1), because a varargs array can be 0 long
         //
         // But we can't do that for real, because we had to add infinite number of methods. Also, for efficiency we
         // don't want to create unwrappingHintsByParamCount entries at the indices which are still unused.
         // So we only update the already existing hints. Remember that we already have m(t1, t2) there.
         
-        // The case of m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ..., where m is an *earlier* added method.
+        final int paramCount = paramTypes.length;
+        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
+        
+        // The case of e(t1, t2), e(t1, t2, t2), e(t1, t2, t2, t2), ..., where e is an *earlier* added method.
         // When that was added, this method wasn't added yet, so it had no chance updating the hints of this method,
         // so we do that now:
         // FIXME: Only needed if m(t1, t2) was filled an empty slot, otherwise whatever was there was already
         // widened by the preceding hints, so this will be a no-op.
         for(int i = paramCount - 1; i >= 0; i--) {
-            Class[] previousHints = unwrappingHintsByParamCount[i];
+            final Class[] previousHints = unwrappingHintsByParamCount[i];
             if(previousHints != null) {
-                widenToCommonSupertypesForUnwrappingHint(hints, previousHints);
-                break;
+                widenHintsToCommonSupertypes(
+                        paramCount,
+                        previousHints, getPossibleNumericalTypes(i));
+                break;  // we only do this for the first hit, as the methods before that has already widened it.
             }
         }
-        // The case of m(t1), where m is an *earlier* added method.
+        // The case of e(t1), where e is an *earlier* added method.
         // When that was added, this method wasn't added yet, so it had no chance updating the hints of this method,
         // so we do that now:
         // FIXME: Same as above; it's often unnecessary.
         if(paramCount + 1 < unwrappingHintsByParamCount.length) {
             Class[] oneLongerHints = unwrappingHintsByParamCount[paramCount + 1];
             if(oneLongerHints != null) {
-                widenToCommonSupertypesForUnwrappingHint(hints, oneLongerHints);
+                widenHintsToCommonSupertypes(
+                        paramCount,
+                        oneLongerHints, getPossibleNumericalTypes(paramCount + 1));
             }
         }
         
-        // The case of m(t1, t2), m(t1, t2, t2), , m(t1, t2, t2, t2), ..., where m is the currently added method.
+        // The case of m(t1, t2, t2), m(t1, t2, t2, t2), ..., where m is the currently added method.
         // Update the longer hints-arrays:  
-        // FIXME Shouldn't these use the original hint array instead of the widened one?
-        for(int i = paramCount + 1; i < unwrappingHintsByParamCount.length; ++i) {
-            Class[] longerHints = unwrappingHintsByParamCount[i];
-            if(longerHints != null) {
-                widenToCommonSupertypesForUnwrappingHint(longerHints, paramTypes);
-            }
+        for(int i = paramCount + 1; i < unwrappingHintsByParamCount.length; i++) {
+            widenHintsToCommonSupertypes(
+                    i,
+                    paramTypes, paramNumericalTypes);
         }
         // The case of m(t1) where m is the currently added method.
         // update the one-shorter hints-array:  
         if(paramCount > 0) {  // (should be always true, or else it wasn't a varags method)
-            Class[] oneShorterUnwrappingHints = unwrappingHintsByParamCount[paramCount - 1];
-            if(oneShorterUnwrappingHints != null) {
-                widenToCommonSupertypesForUnwrappingHint(oneShorterUnwrappingHints, paramTypes);
-            }
+            widenHintsToCommonSupertypes(
+                    paramCount - 1,
+                    paramTypes, paramNumericalTypes);
         }
         
     }
     
-    private void widenToCommonSupertypesForUnwrappingHint(Class[] typesToWiden, Class[] wideningTypes) {
+    private void widenHintsToCommonSupertypes(
+            int paramCountOfWidened, Class[] wideningTypes, int[] wideningNumTypes) {
+        final Class[] typesToWiden = getUnwrappingHintsByParamCount()[paramCountOfWidened];
+        if (typesToWiden == null) { 
+            return;  // no such overload exists; nothing to widen
+        }
+        
         final int typesToWidenLen = typesToWiden.length;
         final int wideningTypesLen = wideningTypes.length;
         int min = Math.min(wideningTypesLen, typesToWidenLen);
@@ -221,6 +227,10 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 typesToWiden[i] = getCommonSupertypeForUnwrappingHint(typesToWiden[i], varargsComponentType);
             }
         }
+        
+        if (bugfixed) {
+            mergeInNumericalTypes(paramCountOfWidened, wideningNumTypes);
+        }
     }
     
     MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper w) 
@@ -229,30 +239,39 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             // null is treated as empty args
             tmArgs = Collections.EMPTY_LIST;
         }
-        int l = tmArgs.size();
+        int argsLen = tmArgs.size();
         Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
-        Object[] pojoArgs = new Object[l];
+        Object[] pojoArgs = new Object[argsLen];
+        int[] possibleNumericalTypes = null;
         // Starting from args.length + 1 as we must try to match against a case
         // where all specified args are fixargs, and the vararg portion 
         // contains zero args
-        outer:  for(int j = Math.min(l + 1, unwrappingHintsByParamCount.length - 1); j >= 0; --j) {
-            Class[] unwarappingArgTypes = unwrappingHintsByParamCount[j];
-            if(unwarappingArgTypes == null) {
-                if(j == 0) {
+        outer: for(int paramCount = Math.min(argsLen + 1, unwrappingHintsByParamCount.length - 1); paramCount >= 0; --paramCount) {
+            Class[] unwarappingHints = unwrappingHintsByParamCount[paramCount];
+            if(unwarappingHints == null) {
+                if (paramCount == 0) {
                     return EmptyMemberAndArguments.NO_SUCH_METHOD;
                 }
                 continue;
             }
-            // Try to marshal the arguments
+            
+            possibleNumericalTypes = getPossibleNumericalTypes(paramCount);
+            if (possibleNumericalTypes == ALL_ZEROS_ARRAY) {
+                possibleNumericalTypes = null;
+            }
+            
+            // Try to unwrap the arguments
             Iterator it = tmArgs.iterator();
-            for(int i = 0; i < l; ++i) {
-                Object pojo = w.unwrapInternal((TemplateModel)it.next(), i < j ? unwarappingArgTypes[i] : unwarappingArgTypes[j - 1]);
+            for(int i = 0; i < argsLen; ++i) {
+                int paramIdx = i < paramCount ? i : paramCount - 1;
+                Object pojo = w.tryUnwrap(
+                        (TemplateModel)it.next(),
+                        unwarappingHints[paramIdx],
+                        possibleNumericalTypes != null ? possibleNumericalTypes[paramIdx] : 0);
                 if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                     continue outer;
                 }
-                if(pojo != pojoArgs[i]) {
-                    pojoArgs[i] = pojo;
-                }
+                pojoArgs[i] = pojo;
             }
             break;
         }
@@ -260,11 +279,20 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, true);
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
-            pojoArgs = ((ArgumentPacker)argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);
+            pojoArgs = ((ArgumentPacker) argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);
             if(pojoArgs == null) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
-            BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+            if (bugfixed) {
+                if (possibleNumericalTypes != null) {
+                    // Note that overloaded method selection has already accounted for overflow errors when the method
+                    // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
+                    // BigDecimal is allowed to overflow for backward-compatibility.
+                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.paramTypes, possibleNumericalTypes);
+                }
+            } else {
+                BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+            }
             return new MemberAndArguments(memberDesc.member, pojoArgs);
         } else {
             return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc); // either NOT_FOUND or AMBIGUOUS

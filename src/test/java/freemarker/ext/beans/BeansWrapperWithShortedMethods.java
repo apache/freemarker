@@ -27,13 +27,12 @@ public abstract class BeansWrapperWithShortedMethods extends BeansWrapper {
     @Override
     MethodDescriptor[] shortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
         ArrayList<MethodDescriptor> ls = new ArrayList<MethodDescriptor>(Arrays.asList(methodDescriptors));
-                Collections.sort(ls, new Comparator<MethodDescriptor>() {
-        
-                    public int compare(MethodDescriptor o1, MethodDescriptor o2) {
-                        int res = o1.getMethod().toString().compareTo(o2.getMethod().toString());
-                        return desc ? -res : res;
-                    }
-                });
+        Collections.sort(ls, new Comparator<MethodDescriptor>() {
+            public int compare(MethodDescriptor o1, MethodDescriptor o2) {
+                int res = o1.getMethod().toString().compareTo(o2.getMethod().toString());
+                return desc ? -res : res;
+            }
+        });
         return ls.toArray(new MethodDescriptor[ls.size()]);
     }
 

@@ -136,7 +136,7 @@ public class TemplateTestSuite extends TestSuite {
                     }
                 }
                 if (n.getNodeName().equals("testcase")) {
-                    TestCase tc = createTestCaseFromNode((Element) n, filter);
+                    TemplateTestCase tc = createTestCaseFromNode((Element) n, filter);
                     if (tc != null) addTest(tc);
                 }
             }
@@ -164,44 +164,32 @@ public class TemplateTestSuite extends TestSuite {
      * it must extend {@link TestCase} and have a constructor with the same parameters as of
      * {@link TemplateTestCase#TemplateTestCase(String, String, String, boolean)}.
      */
-    private TestCase createTestCaseFromNode(Element e, Pattern filter) throws Exception {
+    private TemplateTestCase createTestCaseFromNode(Element e, Pattern filter) throws Exception {
         String name = StringUtil.emptyToNull(e.getAttribute("name"));
         if (name == null) throw new Exception("Invalid XML: the \"name\" attribute is mandatory.");
         if (filter != null && !filter.matcher(name).matches()) return null;
         
         String templateName = StringUtil.emptyToNull(e.getAttribute("template"));
-        if (templateName == null) templateName = name + ".ftl";
 
         String expectedFileName = StringUtil.emptyToNull(e.getAttribute("expected"));
-        if (expectedFileName == null) expectedFileName = name + ".txt";
         
         String noOutputStr = StringUtil.emptyToNull(e.getAttribute("nooutput"));
         boolean noOutput = noOutputStr == null ? false : StringUtil.getYesNo(noOutputStr);
         
-        String classname = StringUtil.emptyToNull(e.getAttribute("class"));
-        
-        if (classname != null) {
-            Class cl = Class.forName(classname);
-            Constructor cons = cl.getConstructor(new Class[] {
-                    String.class, String.class, String.class, boolean.class});
-            return (TestCase) cons.newInstance(new Object [] {
-                    name, templateName, expectedFileName, Boolean.valueOf(noOutput)});
-        } else { 
-	        TemplateTestCase result = new TemplateTestCase(name, templateName, expectedFileName, noOutput);
-	        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
-	            Map.Entry entry = (Map.Entry) it.next();
-	            result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());
-	        }
-	        NodeList configs = e.getElementsByTagName("config");
-	        for (int i=0; i<configs.getLength(); i++)  {
-	            NamedNodeMap atts = configs.item(i).getAttributes();
-	            for (int j=0; j<atts.getLength(); j++) {
-	                Attr att = (Attr) atts.item(j);
-	                result.setConfigParam(att.getName(), att.getValue());
-	            }
-	        }
-	        return result;
+        TemplateTestCase result = new TemplateTestCase(name, templateName, expectedFileName, noOutput);
+        for (Iterator it=configParams.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            result.setConfigParam(entry.getKey().toString(), entry.getValue().toString());
         }
+        NodeList configs = e.getElementsByTagName("config");
+        for (int i=0; i<configs.getLength(); i++)  {
+            NamedNodeMap atts = configs.item(i).getAttributes();
+            for (int j=0; j<atts.getLength(); j++) {
+                Attr att = (Attr) atts.item(j);
+                result.setConfigParam(att.getName(), att.getValue());
+            }
+        }
+        return result;
     }
     
     public static void main (String[] args) throws Exception {

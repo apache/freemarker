@@ -118,7 +118,7 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
         }
 
         @Override
-        void afterWideningUnwrappingHints(Class[] paramTypes) {
+        void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
             // Do nothing
         }
 

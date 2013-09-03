@@ -91,6 +91,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.templatesuite.models.BooleanAndStringTemplateModel;
@@ -119,11 +120,17 @@ public class TemplateTestCase extends FileTestCase {
     private final boolean noOutput;
     
     private Configuration conf = new Configuration();
+
+    public TemplateTestCase(String name) {
+        this(name, null, null, false);
+    }
     
     public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
         super(name);
-        this.templateName = templateName;
-        this.expectedFileName = expectedFileName;
+        
+        NullArgumentException.check("name", name);
+        this.templateName = templateName != null ? templateName : name + ".ftl";
+        this.expectedFileName = expectedFileName != null ? expectedFileName : name + ".txt";
         this.noOutput = noOutput;
     }
     

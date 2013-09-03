@@ -1,0 +1,48 @@
+,Byte,Short,Integer,Long,BigInteger,Float,Double,BigDecimal,,Note
+Byte,0,1,1,1,1,2,2,2,,
+ShortOrByte,2.1,0,1,1,1,2,2,2,,
+Short,-,0,1,1,1,2,2,2,,
+IntegerOrByte,2.2,2.1,0,1,1,2.4,2,2,,
+IntegerOrShort,-,2.1,0,1,1,2.4,2,2,,
+Integer,-,-,0,1,1,3,2,2,,
+LongOrByte,2.3,2.2,2.1,0,1,2.4,2.1,2,,
+LongOrShort,-,2.2,2.1,0,1,2.4,2.1,2,,
+LongOrInteger,-,-,2.1,0,1,3,2.1,2,,
+Long,-,-,-,0,1,4,3,2,,
+BigIntegerOrByte,1.8,1.7,1.6,1.5,0,2.4,2,1,,
+BigIntegerOrShort,-,1.7,1.6,1.5,0,2.4,2,1,,
+BigIntegerOrInteger,-,-,1.6,1.5,0,3,2,1,,
+BigIntegerOrLong,-,-,-,1.5,0,4,3,1,,
+BigIntegerOrFloat,N/A,N/A,N/A,N/A,0,2.4,2,1,,"Condition: No whole-number target types exist, and abs(value) <= 2**24"
+BigIntegerOrDouble,N/A,N/A,N/A,N/A,0,4,2,1,,"Condition: No whole-number target types exist, and abs(value) <= 2**53"
+BigInteger,-,-,-,-,0,-,-,1,,
+FloatOrByte,2.3,2.2,2.1,2.1,2.5,0,1,2,,"Condition: fraction == 0, in [T.MIN_VALUE .. T.MAX_VALUE]"
+FloatOrShort,-,2.2,2.1,2.1,2.5,0,1,2,,"Condition: fraction == 0, in [T.MIN_VALUE .. T.MAX_VALUE]"
+FloatOrInteger,-,-,2.1,2.1,2.5,0,1,2,,"Condition: fraction == 0, in [-16777216 .. 16777216]"
+Float,-,-,-,-,-,0,1,2,,
+DoubleOrByte,2.5,2.4,2.2,2.1,2.1,2.3,0,2,,"Condition: fraction == 0, in [T.MIN_VALUE .. T.MAX_VALUE]"
+DoubleOrShort,-,2.4,2.2,2.1,2.1,2.3,0,2,,"Condition: fraction == 0, in [T.MIN_VALUE .. T.MAX_VALUE]"
+DoubleOrIntegerOrFloat,-,-,2.2,2.1,2.1,2.3,0,2,,"Condition: fraction == 0, in [-16777216 .. 16777216]"
+DoubleOrInteger,-,-,2.2,2.1,2.1,3,0,2,,"Condition: fraction == 0, in [T.MIN_VALUE .. T.MAX_VALUE]"
+DoubleOrLong,-,-,-,2.1,2.1,4,0,2,,"Condition: fraction == 0, in [-9007199254740992..9007199254740992]"
+DoubleOrFloat,-,-,-,-,-,3,0,2,,Condition: no magnitude loss
+Double,-,-,-,-,-,-,0,2,,
+IntegerBigDecimal,3.5,3.4,3.1,3.1,1,3.3,3.2,0,,Condition: fraction == 0; for BC we convert rather “bravely” here.
+BigDecimal,4.5,4.4,4.1,4.1,4,3.3,3.2,0,,Condition: fraction != 0; for BC we convert rather “bravely” here.
+,,,,,,,,,,
+,Legend:,,,,,,,,,
+,,"The numbers are the „price” of the conversion, and they tell how much we try to avoid it (when selecting among overloaded methods):",,,,,,,,
+,,,,,,,,,,
+,,0,No conversion,,,,,,,
+,,1,Lossless conversion,,,,,,,
+,,2,"Up to but excluding 3, lossless but certainly unintended conversion.",,,,,,,
+,,3,Smaller precision loss in mantissa.,,,,,,,
+,,4,Bigger precision loss in mantissa.,,,,,,,
+,,-,Magnitude loss or overflow => not allowed,,,,,,,
+,,N/A,Doesn't mater (Not Applicable),,,,,,,
+,,,,,,,,,,
+,Notes:,,,,,,,,,
+,-,"FooOrBar types mean that the argument's type was Foo, but the value also fits into the more specific Bar type.",,,,,,,,
+,,"This possibility should only be utilized as a last resort, to keep the method selection stable (always selects the same method) for Foo-s regardless of the actual value.",,,,,,,,
+,,"This is why the column of Bar-s tends to use higher costs than the less fitting columns that are, however, also selectable for higher values of type Foo.",,,,,,,,
+,-,"Between same-price conversions the one in the leftmost column (i.e., the smallest type) wins. This is realized in the Java code generator.",,,,,,,,

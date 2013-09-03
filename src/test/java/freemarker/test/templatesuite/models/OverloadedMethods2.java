@@ -1,8 +1,17 @@
 package freemarker.test.templatesuite.models;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import freemarker.ext.beans.RationalNumber;
+import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.AdapterTemplateModel;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.utility.StringUtil;
 
 public class OverloadedMethods2 {
 
@@ -16,6 +25,10 @@ public class OverloadedMethods2 {
     
     public BigInteger bigInteger(BigDecimal n) {
         return n.toBigInteger();
+    }
+
+    public RationalNumber rational(int a, int b) {
+        return new RationalNumber(a, b);
     }
     
     public String mVarargs(File a1, String... a2) {
@@ -221,6 +234,347 @@ public class OverloadedMethods2 {
         
     public String mDecimalLoss(double a1) {
         return "mDecimalLoss(double a1 = " + a1 + ")";
+    }
+    
+    public String mNumConversionLoses1(byte i, Object o1, Object o2) {
+        return "byte " + i;
+    }
+    
+    public String mNumConversionLoses1(double i, Object o1, Object o2) {
+        return "double " + i;
+    }
+
+    public String mNumConversionLoses1(Number i, String o1, String o2) {
+        return "Number " + i + " " + i.getClass().getName();
+    }
+
+    public String mNumConversionLoses2(int i, Object o1, Object o2) {
+        return "int " + i;
+    }
+
+    public String mNumConversionLoses2(long i, Object o1, Object o2) {
+        return "long " + i;
+    }
+
+    public String mNumConversionLoses2(Number i, String o1, String o2) {
+        return "Number " + i + " " + i.getClass().getName();
+    }
+
+    public String mNumConversionLoses3(int i, Object o1, Object o2) {
+        return "int " + i;
+    }
+
+    public String mNumConversionLoses3(Serializable i, String o1, String o2) {
+        return "Serializable " + i + " " + i.getClass().getName();
+    }
+    
+    public String nIntAndLong(int i) {
+        return "nIntAndLong(int " + i + ")";
+    }
+    
+    public String nIntAndLong(long i) {
+        return "nIntAndLong(long " + i + ")";
+    }
+
+    public String nIntAndShort(int i) {
+        return "nIntAndShort(int " + i + ")";
+    }
+    
+    public String nIntAndShort(short i) {
+        return "nIntAndShort(short " + i + ")";
+    }
+
+    public String nLongAndShort(long i) {
+        return "nLongAndShort(long " + i + ")";
+    }
+    
+    public String nLongAndShort(short i) {
+        return "nLongAndShort(short " + i + ")";
+    }
+
+    public String varargs1(String s, int... xs) {
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs1(String s, double... xs) {
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs1(String s, Object... xs) {
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs1(Object s, Object... xs) {
+        return "varargs1(Object s = " + s + ", Object... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs2(int... xs) {
+        return "varargs2(int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs2(double... xs) {
+        return "varargs2(double... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs3(String... xs) {
+        return "varargs3(String... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs3(Comparable... xs) {
+        return "varargs3(Comparable... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs3(Object... xs) {
+        return "varargs3(Object... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs4(Integer... xs) {
+        return "varargs4(Integer... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs4(int... xs) {
+        return "varargs4(int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs5(int... xs) {
+        return "varargs5(int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs5(int a1, int... xs) {
+        return "varargs5(int a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs5(int a1, int a2, int... xs) {
+        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs5(int a1, int a2, int a3, int... xs) {
+        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int a3 = " + a3
+                + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+
+    public String varargs6(String a1, int... xs) {
+        return "varargs6(String a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs6(Object a1, int a2, int... xs) {
+        return "varargs6(Object a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs7(int... xs) {
+        return "varargs7(int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    public String varargs7(short a1, int... xs) {
+        return "varargs7(short a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+    }
+    
+    private String arrayToString(int[] xs) {
+        StringBuilder sb = new StringBuilder();
+        for (int x : xs) {
+            if (sb.length() != 0) sb.append(", ");
+            sb.append(x);
+        }
+        return sb.toString();
+    }
+
+    private String arrayToString(double[] xs) {
+        StringBuilder sb = new StringBuilder();
+        for (double x : xs) {
+            if (sb.length() != 0) sb.append(", ");
+            sb.append(x);
+        }
+        return sb.toString();
+    }
+
+    private String arrayToString(Object[] xs) {
+        StringBuilder sb = new StringBuilder();
+        for (Object x : xs) {
+            if (sb.length() != 0) sb.append(", ");
+            sb.append(x);
+        }
+        return sb.toString();
+    }
+    
+    public String mNullAmbiguous(String s) {
+        return "mNullAmbiguous(String s = " + s + ")";
+    }
+
+    public String mNullAmbiguous(int i) {
+        return "mNullAmbiguous(int i = " + i + ")";
+    }
+
+    public String mNullAmbiguous(File f) {
+        return "mNullAmbiguous(File f = " + f + ")";
+    }
+    
+    public String mNullAmbiguous2(String s) {
+        return "mNullNonAmbiguous(String s = " + s + ")";
+    }
+
+    public String mNullAmbiguous2(File f) {
+        return "mNullAmbiguous(File f = " + f + ")";
+    }
+
+    public String mNullAmbiguous2(Object o) {
+        return "mNullAmbiguous(Object o = " + o + ")";
+    }
+
+    public String mNullNonAmbiguous(String s) {
+        return "mNullNonAmbiguous(String s = " + s + ")";
+    }
+
+    public String mNullNonAmbiguous(int i) {
+        return "mNullNonAmbiguous(int i = " + i + ")";
+    }
+    
+    public String mVarargsIgnoredTail(int i, double... ds) {
+        return "mVarargsIgnoredTail(int i = " + i + ", double... ds = [" + arrayToString(ds) + "])"; 
+    }
+    
+    public String mVarargsIgnoredTail(int... is) {
+        return "mVarargsIgnoredTail(int... is = [" + arrayToString(is) + "])"; 
+    }
+    
+    public String mLowRankWins(int x, int y, Object o) {
+        return "mLowRankWins(int x = " + x + ", int y = " + y + ", Object o = " + o + ")";
+    }
+
+    public String mLowRankWins(Integer x, Integer y, String s) {
+        return "mLowRankWins(Integer x = " + x + ", Integer y = " + y + ", String s = " + s + ")";
+    }
+    
+    public String mRareWrappings(File f, double d1, Double d2, double d3, boolean b) {
+        return "mRareWrappings(File f = " + f + ", double d1 = " + d1 + ", Double d2 = " + d2
+                + ", double d3 = " + d3 + ", b = " + b + ")";
+    }
+
+    public String mRareWrappings(Object o, double d1, Double d2, Double d3, boolean b) {
+        return "mRareWrappings(Object o = " + o + ", double d1 = " + d1 + ", Double d2 = " + d2
+                + ", double d3 = " + d3 + ", b = " + b + ")";
+    }
+
+    public String mRareWrappings(String s, double d1, Double d2, Double d3, boolean b) {
+        return "mRareWrappings(String s = " + s + ", double d1 = " + d1 + ", Double d2 = " + d2
+                + ", double d3 = " + d3 + ", b = " + b + ")";
+    }
+
+    public String mRareWrappings2(String s) {
+        return "mRareWrappings2(String s = " + s + ")";
+    }
+    
+    public String mRareWrappings2(byte b) {
+        return "mRareWrappings2(byte b = " + b + ")";
+    }
+    
+    public File getFile() {
+        return new File("file");
+    }
+
+    public TemplateNumberModel getAdaptedNumber() {
+        return new MyAdapterNumberModel();
+    }
+
+    public TemplateNumberModel getWrapperNumber() {
+        return new MyWrapperNumberModel();
+    }
+
+    public TemplateBooleanModel getStringAdaptedToBoolean() {
+        return new MyStringAdaptedToBooleanModel();
+    }
+    
+    public TemplateBooleanModel getStringAdaptedToBoolean2() {
+        return new MyStringAdaptedToBooleanModel2();
+    }
+    
+    public TemplateBooleanModel getStringWrappedAsBoolean() {
+        return new MyStringWrapperAsBooleanModel();
+    }
+    
+    public TemplateBooleanModel getBooleanWrappedAsAnotherBoolean() {
+        return new MyBooleanWrapperAsAnotherBooleanModel(); 
+    }
+    
+    private static class MyAdapterNumberModel implements TemplateNumberModel, AdapterTemplateModel {
+
+        public Object getAdaptedObject(Class hint) {
+            if (hint == double.class) {
+                return Double.valueOf(123.0001);
+            } else if (hint == Double.class) {
+                return Double.valueOf(123.0002);
+            } else {
+                return Long.valueOf(124L);
+            }
+        }
+
+        public Number getAsNumber() throws TemplateModelException {
+            return Integer.valueOf(122);
+        }
+        
+    }
+    
+    private static class MyWrapperNumberModel implements TemplateNumberModel, WrapperTemplateModel {
+
+        public Number getAsNumber() throws TemplateModelException {
+            return Integer.valueOf(122);
+        }
+
+        public Object getWrappedObject() {
+            return Double.valueOf(123.0001);
+        }
+        
+    }
+    
+    private static class MyStringWrapperAsBooleanModel implements TemplateBooleanModel, WrapperTemplateModel {
+
+        public Object getWrappedObject() {
+            return "yes";
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return true;
+        }
+        
+    }
+
+    private static class MyBooleanWrapperAsAnotherBooleanModel implements TemplateBooleanModel, WrapperTemplateModel {
+
+        public Object getWrappedObject() {
+            return Boolean.TRUE;
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return false;
+        }
+        
+    }
+    
+    private static class MyStringAdaptedToBooleanModel implements TemplateBooleanModel, AdapterTemplateModel {
+
+        public Object getAdaptedObject(Class hint) {
+            if (hint != Boolean.class && hint != boolean.class) {
+                return "yes";
+            } else {
+                return Boolean.TRUE;
+            }
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return false;
+        }
+        
+    }
+
+    private static class MyStringAdaptedToBooleanModel2 implements TemplateBooleanModel, AdapterTemplateModel {
+
+        public Object getAdaptedObject(Class hint) {
+            return "yes";
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return true;
+        }
+        
     }
     
 }

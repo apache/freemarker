@@ -1,0 +1,56 @@
+sources: generator.ftl
+outputFile: ../../../../build/overloadedNumberRules.java
+data: {
+  t: csv(prices.csv, { separator: ',' })
+  
+  # Conversion target types sorted by decreasing probablity of occurence
+  toCsFreqSorted: [ Integer, Long, Double, Float, Byte, Short, BigDecimal, BigInteger ]
+  
+  # Conversion target types associated to conversion price boost. The prices from the spreadsheet
+  # will be multipied by 10000 and the boost will be added to it. Thus, if the price of two possible
+  # targets are the same according the spreadsheet (and only then!), the choice will depend on
+  # this boost.
+  # The more specific the (the smaller) type is, the lower the boost should be. This is improtant,
+  # because this number is also used for comparing the specificity of numerical types where
+  # there's no argument type available.
+  # Note where the price from the spreadsheet is 0 or "-" or "N/A", the boost is not used.
+  toCsCostBoosts: {
+    'Byte': 1, 'Short': 2, 'Integer': 3, 'Long': 4, 'BigInteger': 5,
+    'Float': 6, 'Double': 7,
+    'BigDecimal': 8
+  }
+  
+  # Conversion source types sorted by decreasing probablity of occurence
+  fromCsFreqSorted: [
+    Integer, 
+    IntegerBigDecimal, 
+    BigDecimal, 
+    Long, 
+    Double, 
+    Float, 
+    Byte, 
+    BigInteger,
+    LongOrInteger
+    DoubleOrFloat, 
+    DoubleOrIntegerOrFloat, 
+    DoubleOrInteger, 
+    DoubleOrLong, 
+    IntegerOrByte,
+    DoubleOrByte, 
+    LongOrByte
+    Short, 
+    LongOrShort
+    ShortOrByte
+    FloatOrInteger, 
+    FloatOrByte, 
+    FloatOrShort, 
+    BigIntegerOrInteger, 
+    BigIntegerOrLong, 
+    BigIntegerOrDouble,   
+    BigIntegerOrFloat, 
+    BigIntegerOrByte, 
+    IntegerOrShort,
+    DoubleOrShort, 
+    BigIntegerOrShort, 
+  ]
+}
