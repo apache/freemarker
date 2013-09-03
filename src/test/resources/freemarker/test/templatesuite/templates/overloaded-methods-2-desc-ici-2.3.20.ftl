@@ -4,6 +4,10 @@
 <@assertEquals actual=obj.mIntPrimVSBoxed(123?short) expected="mIntPrimVSBoxed(int a1 = 123)" />
 <@assertEquals actual=obj.mIntPrimVSBoxed(123) expected="mIntPrimVSBoxed(int a1 = 123)" />
 <@assertEquals actual=obj.varargs4(1, 2, 3) expected='varargs4(int... xs = [1, 2, 3])' />
+
+<@assertFails message="multiple compatible overloaded">${obj.mVarargsIgnoredTail(1, 2, 3)}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mVarargsIgnoredTail(1, 2, 3.5)}</@>
+
 <@assertEquals actual=obj.mLowRankWins(1, 2, 'a') expected='mLowRankWins(int x = 1, int y = 2, Object o = a)' />
 
 <@assertEquals actual=obj.mRareWrappings(obj.file, obj.adaptedNumber, obj.adaptedNumber, obj.adaptedNumber, obj.stringWrappedAsBoolean)

@@ -20518,6 +20518,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       is considered to be more specific than
                       <literal>Integer</literal>).</para>
                     </listitem>
+
+                    <listitem>
+                      <para>The was a bug with overloaded varargs methods of
+                      different parameter counts, where sometimes the last
+                      parameters of the compared methods was ignored, which is
+                      taking away a potential deciding factor and thus can
+                      lead to ambiguity error. Whether this happened depends
+                      on the order in which the Java reflection API has
+                      returned the methods, which is undocumented and known to
+                      change at least after some Java updates, breaking the
+                      application.</para>
+                    </listitem>
                   </itemizedlist>
                 </listitem>
 

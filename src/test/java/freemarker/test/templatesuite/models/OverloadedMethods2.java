@@ -428,6 +428,14 @@ public class OverloadedMethods2 {
         return "mNullNonAmbiguous(int i = " + i + ")";
     }
     
+    public String mVarargsIgnoredTail(int i, double... ds) {
+        return "mVarargsIgnoredTail(int i = " + i + ", double... ds = [" + arrayToString(ds) + "])"; 
+    }
+    
+    public String mVarargsIgnoredTail(int... is) {
+        return "mVarargsIgnoredTail(int... is = [" + arrayToString(is) + "])"; 
+    }
+    
     public String mLowRankWins(int x, int y, Object o) {
         return "mLowRankWins(int x = " + x + ", int y = " + y + ", Object o = " + o + ")";
     }

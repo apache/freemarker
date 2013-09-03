@@ -170,6 +170,10 @@
 <@assertEquals actual=obj.varargs7(1?int, 2?int) expected='varargs7(int... xs = [1, 2])' />
 <@assertEquals actual=obj.varargs7(1?short, 2?int) expected='varargs7(short a1 = 1, int... xs = [2])' />
 
+<#-- Tests that a pre-2.3.21 bug is fixed now: -->
+<@assertEquals actual=obj.mVarargsIgnoredTail(1, 2, 3) expected='mVarargsIgnoredTail(int... is = [1, 2, 3])' />
+<@assertEquals actual=obj.mVarargsIgnoredTail(1, 2, 3.5) expected='mVarargsIgnoredTail(int i = 1, double... ds = [2.0, 3.5])' />
+
 <@assertEquals actual=obj.mNullAmbiguous('a') expected='mNullAmbiguous(String s = a)' />
 <@assertEquals actual=obj.mNullAmbiguous(123) expected='mNullAmbiguous(int i = 123)' />
 <@assertEquals actual=obj.mNullAmbiguous(1.9) expected='mNullAmbiguous(int i = 1)' />
