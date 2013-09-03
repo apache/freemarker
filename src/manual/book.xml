@@ -20378,22 +20378,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixes in the overloaded method selection rules when
-              <literal>BeansWrapper</literal> or
+              <para>Fixes and reworkings in the overloaded method selection
+              rules when <literal>BeansWrapper</literal> or
               <literal>DefaultObjectWrapper</literal> is used (almost all
-              applications use these), but only if you create
+              applications use these), but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>Version(2, 3, 21)</literal>
-              or higher. There's a very little chance that because of these
-              fixes, a different overloaded method will chosen than before
-              (which in theory could change the behavior of the application),
+              or higher. There's a little chance that because of these
+              changes, a different overloaded method will chosen than before,
               or even that ambiguity error will arise where earlier they
               didn't (although the opposite is much more probable), hence the
               fixes aren't automatically active, at least not unit FreeMarker
-              2.4. But the fix mostly only effect calls that were failing
-              earlier, so it's recommended to activate it for projects that
-              are still actively developed. This fix includes numerous
-              changes:</para>
+              2.4. But the fix mostly only effect calls that were failing or
+              has chosen then wrong method, so it's recommended to activate it
+              for projects that are still actively developed. This fix
+              includes numerous changes:</para>
 
               <itemizedlist>
                 <listitem>
@@ -20403,19 +20402,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   of it. Now it considers all overloads where the parameter
                   type is non-primitive, and just like the Java language, it
                   choses the one with the most specific type among them. This
-                  is the most important and also the most risky fix regarding
-                  backward-compatibility. Like if you have <literal>m(Object
-                  o)</literal> and <literal>m(String s)</literal> in a Java
-                  class, earlier for a <literal>m(null)</literal> call in the
-                  template it has chosen <literal>m(Object o)</literal>, but
-                  now it will choose <literal>m(String s)</literal> instead
-                  (because <literal>String</literal> is also
+                  is the most important fix, and also the most risky one
+                  regarding backward-compatibility. Like if you have
+                  <literal>m(Object o)</literal> and <literal>m(String
+                  s)</literal> in a Java class, earlier for a
+                  <literal>m(null)</literal> call in the template it has
+                  chosen <literal>m(Object o)</literal>, but now it will
+                  choose <literal>m(String s)</literal> instead (because
+                  <literal>String</literal> is also
                   <literal>null</literal>-able and is more specific then
                   <literal>Object</literal>). Furthermore, if you also had
                   <literal>m(File f)</literal> in the same class, now it will
-                  be ambiguity exception, since the specificity of
+                  cause an ambiguity exception, since the specificity of
                   <literal>File</literal> and <literal>String</literal> can't
-                  be compared (same rule as under Java language).</para>
+                  be compared (same rule as under Java language), while
+                  earlier that wasn't a problem as only <literal>m(Object
+                  o)</literal> was seen as applicable.</para>
                 </listitem>
 
                 <listitem>
@@ -20449,7 +20451,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     <listitem>
                       <para>Method selection is now not only based on the type
                       of the wrapped number, but also on its value. For
-                      example, a wrapped <literal>Long</literal> with value
+                      example, a <literal>Long</literal> with value
                       <literal>1</literal> is now seen to be compatible with a
                       method with parameter type <literal>int</literal> or
                       <literal>short</literal> or <literal>byte</literal>, as
@@ -20470,35 +20472,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Ambiguity is now resolved in many cases where earlier
-                  it was an error. Ambiguities was and are resolved by
-                  selecting the compatible methods then choosing the one with
-                  the most specific parameter types among them. Sever things
-                  were changes here:</para>
+                  <para>Method choice ambiguity errors now occur much less
+                  often. Ambiguities was and are resolved by selecting the
+                  compatible methods then choosing the one with the most
+                  specific parameter types among them. The changes are:</para>
 
                   <itemizedlist>
-                    <listitem>
-                      <para>When comparing the specificity of two parameters
-                      types at the same parameter position: The algorithm now
-                      considers a primitive type as more specific that its
-                      corresponding boxing class.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>The type and certain aspects of the value of the
-                      argument (aka. actual parameter value) is now considered
-                      for numerical types when it's decided which method has
-                      the best matching numerical typed parameter. This let
-                      FreeMarker differentiate cases that looked equally good
-                      earlier. Furthermore, unlike the earlier algorithms,
-                      this matching logic also allows conversion between
-                      non-primitive numerical types (like
-                      <literal>Integer</literal> to <literal>Long</literal>),
-                      or from primitive types to non-primitive numerical types
-                      (even to <literal>Number</literal>), which makes even
-                      more cases decidable.</para>
-                    </listitem>
-
                     <listitem>
                       <para>When comparing the overall specificity of two
                       parameter lists: Earlier the more specific parameter
@@ -20530,6 +20509,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>String</literal> versus
                       <literal>Object</literal>) are between these two.</para>
                     </listitem>
+
+                    <listitem>
+                      <para>When comparing the specificity of two parameters
+                      types at the same parameter position: The algorithm now
+                      considers a primitive type as more specific that its
+                      corresponding boxing class (like <literal>int</literal>
+                      is considered to be more specific than
+                      <literal>Integer</literal>).</para>
+                    </listitem>
                   </itemizedlist>
                 </listitem>
 
@@ -20540,21 +20528,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   unwrapping hint has influence when there's an ambiguity
                   regarding how to create a Java object form an FTL value. In
                   the vast majority of the cases, a too generic hint has no
-                  effect.) (This is a highly technical topic. The limitation
-                  of the applied algorithm is that, a single common unwrapping
-                  hint class is chosen for a given argument position shared by
-                  the overloads that has the same number of parameters. The
-                  issue with the too generic hints had several instances: (a)
-                  When the most specific common class/interface of two
-                  same-position parameter types were searched, if there was
-                  multiple common class/interfaces that had no relationship
-                  (this is always at most one class and one or more unrelated
-                  interfaces), due to the ambiguity it has felt back to using
-                  <literal>Object</literal> as the unwrapping hint. Now if
-                  there's a non-<literal>Object</literal> class among them in
-                  such case, it will be chosen as the hint (i.e., we ignore
-                  the common interfaces). Otherwise if only a single interface
-                  remains by removing <literal>Cloneable</literal>,
+                  effect.) (This is a highly technical topic. The way it works
+                  is that a single common unwrapping hint class is chosen for
+                  a given argument position shared by the overloads that has
+                  the same number of parameters, and that hint class has to be
+                  as specific as possible while it must fit all those
+                  parameter types. The issue with the too generic hints had
+                  several instances: (a) When the most specific common
+                  class/interface of two same-position parameter types were
+                  searched, if there was multiple common class/interfaces that
+                  had no relationship (this is always at most one class and
+                  one or more unrelated interfaces), due to the ambiguity it
+                  has felt back to using <literal>Object</literal> as the
+                  unwrapping hint. Now if there's a
+                  non-<literal>Object</literal> class among them in such case,
+                  it will be chosen as the hint (i.e., we ignore the common
+                  interfaces). Otherwise if only a single interface remains by
+                  removing <literal>Cloneable</literal>,
                   <literal>Serializable</literal>, and
                   <literal>Comparable</literal> (in that order), that will be
                   chosen. Only then it falls back to
@@ -20562,7 +20552,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   class of a primitive type and the corresponding boxing class
                   was sometimes <literal>Object</literal> instead of the
                   boxing class. This depended on Java's the internal ordering
-                  of the methods, and so were quite unpredictable. (c) The
+                  of the methods, and so were quite unpredictable, like could
+                  change after upgrading Java under the application. (c) The
                   common superclass of a numerical primitive value and a
                   numerical non-primitive value was always
                   <literal>Object</literal>, now if they are primitive-boxing
@@ -20578,7 +20569,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed, active only if you create the
+              <para>Bug fixed, fix is active only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>Version(2, 3, 21)</literal>
               or higher: When <literal>BeansWrapper</literal> (and so also
