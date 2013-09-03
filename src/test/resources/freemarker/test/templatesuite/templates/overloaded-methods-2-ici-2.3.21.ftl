@@ -169,3 +169,36 @@
 
 <@assertEquals actual=obj.varargs7(1?int, 2?int) expected='varargs7(int... xs = [1, 2])' />
 <@assertEquals actual=obj.varargs7(1?short, 2?int) expected='varargs7(short a1 = 1, int... xs = [2])' />
+
+<#-- Tests that a pre-2.3.21 bug is fixed now: -->
+<@assertEquals actual=obj.mVarargsIgnoredTail(1, 2, 3) expected='mVarargsIgnoredTail(int... is = [1, 2, 3])' />
+<@assertEquals actual=obj.mVarargsIgnoredTail(1, 2, 3.5) expected='mVarargsIgnoredTail(int i = 1, double... ds = [2.0, 3.5])' />
+
+<@assertEquals actual=obj.mNullAmbiguous('a') expected='mNullAmbiguous(String s = a)' />
+<@assertEquals actual=obj.mNullAmbiguous(123) expected='mNullAmbiguous(int i = 123)' />
+<@assertEquals actual=obj.mNullAmbiguous(1.9) expected='mNullAmbiguous(int i = 1)' />
+<@assertEquals actual=obj.mNullAmbiguous(1?double) expected='mNullAmbiguous(int i = 1)' />
+<@assertFails message="no compatible overloaded">${obj.mNullAmbiguous(1.9?double)}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mNullAmbiguous(null)}</@>
+
+<@assertFails message="multiple compatible overloaded">${obj.mNullAmbiguous2(null)}</@>
+
+<@assertEquals actual=obj.mNullNonAmbiguous(null) expected='mNullNonAmbiguous(String s = null)' />
+
+<#-- The primitive int-s will win twice, but then String wins over Object, which is stronger: -->
+<@assertEquals actual=obj.mLowRankWins(1, 2, 'a') expected='mLowRankWins(Integer x = 1, Integer y = 2, String s = a)' />
+
+<@assertEquals actual=obj.mRareWrappings(obj.file, obj.adaptedNumber, obj.adaptedNumber, obj.adaptedNumber, obj.stringWrappedAsBoolean)
+               expected='mRareWrappings(File f = file, double d1 = 123.0002, Double d2 = 123.0002, double d3 = 123.0002, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.stringWrappedAsBoolean, obj.adaptedNumber, obj.adaptedNumber, obj.adaptedNumber, obj.stringAdaptedToBoolean)
+               expected='mRareWrappings(String s = yes, double d1 = 123.0002, Double d2 = 123.0002, double d3 = 123.0002, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.stringAdaptedToBoolean2, obj.wrapperNumber, obj.wrapperNumber, obj.wrapperNumber, obj.stringAdaptedToBoolean2)
+               expected='mRareWrappings(String s = yes, double d1 = 123.0001, Double d2 = 123.0001, double d3 = 123.0001, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.booleanWrappedAsAnotherBoolean, 0, 0, 0, obj.booleanWrappedAsAnotherBoolean)
+               expected='mRareWrappings(Object o = true, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.adaptedNumber, 0, 0, 0, !obj.booleanWrappedAsAnotherBoolean)
+               expected='mRareWrappings(Object o = 124, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.booleanWrappedAsAnotherBoolean, 0, 0, 0, !obj.stringAdaptedToBoolean)
+               expected='mRareWrappings(Object o = true, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+               
+<@assertEquals actual=obj.mRareWrappings2(obj.adaptedNumber) expected='mRareWrappings2(byte b = 124)' />

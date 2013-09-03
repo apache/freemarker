@@ -135,3 +135,19 @@
 
 <@assertEquals actual=obj.varargs7(1?int, 2?int) expected='varargs7(int... xs = [1, 2])' />
 <@assertEquals actual=obj.varargs7(1?short, 2?int) expected='varargs7(short a1 = 1, int... xs = [2])' />
+
+<@assertEquals actual=obj.mNullAmbiguous('a') expected='mNullAmbiguous(String s = a)' />
+<@assertEquals actual=obj.mNullAmbiguous(123) expected='mNullAmbiguous(int i = 123)' />
+<@assertEquals actual=obj.mNullAmbiguous(1.9) expected='mNullAmbiguous(int i = 1)' />
+<@assertFails message="no compatible overloaded">${obj.mNullAmbiguous(1?double)}</@>
+<@assertFails message="no compatible overloaded">${obj.mNullAmbiguous(1.9?double)}</@>
+<@assertFails message="no compatible overloaded">${obj.mNullAmbiguous(null)}</@>
+
+<@assertEquals actual=obj.mNullAmbiguous2(null) expected='mNullAmbiguous(Object o = null)' />
+
+<@assertFails message="no compatible overloaded">${obj.mNullNonAmbiguous(null)}</@>
+
+<@assertEquals actual=obj.mRareWrappings(obj.stringAdaptedToBoolean2, obj.wrapperNumber, obj.wrapperNumber, obj.wrapperNumber, obj.stringAdaptedToBoolean2)
+               expected='mRareWrappings(String s = yes, double d1 = 123.0001, Double d2 = 123.0001, double d3 = 123.0001, b = true)' />
+               
+<@assertFails message="no compatible overloaded">${obj.mRareWrappings2(obj.adaptedNumber)}</@>

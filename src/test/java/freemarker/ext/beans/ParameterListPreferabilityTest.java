@@ -276,6 +276,44 @@ public class ParameterListPreferabilityTest extends TestCase {
                     new Class[] { Object.class, Object.class },
                 },
                 new Object[] { "a", "b" });
+        
+        /** Subclassing is more important than primitive-VS-boxed: */
+        testAllCmpPermutationsInc(
+                new Class[][] {
+                    new Class[] { boolean.class, boolean.class, boolean.class, String.class },
+                    new Class[] { Boolean.class, boolean.class, boolean.class, String.class },
+                    new Class[] { boolean.class, Boolean.class, Boolean.class, String.class },
+                    new Class[] { Boolean.class, boolean.class, Boolean.class, String.class },
+                    new Class[] { Boolean.class, Boolean.class, boolean.class, String.class },
+                    new Class[] { Boolean.class, Boolean.class, Boolean.class, String.class },
+                    new Class[] { Boolean.class, Boolean.class, Boolean.class, CharSequence.class },
+                    new Class[] { boolean.class, boolean.class, boolean.class, Object.class },
+                    new Class[] { Boolean.class, boolean.class, boolean.class, Object.class },
+                    new Class[] { boolean.class, Boolean.class, Boolean.class, Object.class },
+                    new Class[] { Boolean.class, boolean.class, Boolean.class, Object.class },
+                    new Class[] { Boolean.class, Boolean.class, boolean.class, Object.class },
+                    new Class[] { Boolean.class, Boolean.class, Boolean.class, Object.class },
+                },
+                new Object[] { true, false, true, "a" });
+        
+        /** Subclassing is more important than primitive-VS-boxed: */
+        testAllCmpPermutationsInc(
+                new Class[][] {
+                    new Class[] { int.class, int.class, int.class, String.class },
+                    new Class[] { Integer.class, int.class, int.class, String.class },
+                    new Class[] { int.class, Integer.class, Integer.class, String.class },
+                    new Class[] { Integer.class, int.class, Integer.class, String.class },
+                    new Class[] { Integer.class, Integer.class, int.class, String.class },
+                    new Class[] { Integer.class, Integer.class, Integer.class, String.class },
+                    new Class[] { Integer.class, Integer.class, Integer.class, CharSequence.class },
+                    new Class[] { int.class, int.class, int.class, Object.class },
+                    new Class[] { Integer.class, int.class, int.class, Object.class },
+                    new Class[] { int.class, Integer.class, Integer.class, Object.class },
+                    new Class[] { Integer.class, int.class, Integer.class, Object.class },
+                    new Class[] { Integer.class, Integer.class, int.class, Object.class },
+                    new Class[] { Integer.class, Integer.class, Integer.class, Object.class },
+                },
+                new Object[] { 1, 2, 3, "a" });
     }
 
     public void testVarargs() {
