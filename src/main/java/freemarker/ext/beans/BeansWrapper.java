@@ -1227,7 +1227,7 @@ public class BeansWrapper implements ObjectWrapper
         if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
         {
             MethodAppearanceDecision decision = new MethodAppearanceDecision();  
-            MethodDescriptor[] mda = beanInfo.getMethodDescriptors();
+            MethodDescriptor[] mda = shortMethodDescriptors(beanInfo.getMethodDescriptors());
             int mdaLength = mda != null ? mda.length : 0;  
             for(int i = mdaLength - 1; i >= 0; --i)
             {
@@ -1280,6 +1280,11 @@ public class BeansWrapper implements ObjectWrapper
                 }
             }
         } // end if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
+    }
+    
+    /** As of this writing, this is only used for testing if method order really doesn't mater. */
+    MethodDescriptor[] shortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
+        return methodDescriptors; // do nothing;
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(PropertyDescriptor pd,

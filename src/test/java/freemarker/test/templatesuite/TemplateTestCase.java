@@ -101,6 +101,7 @@ import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.BooleanVsStringMethods;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
+import freemarker.test.templatesuite.models.OverloadedMethods2;
 import freemarker.test.templatesuite.models.VarArgTestModel;
 import freemarker.test.utility.AssertDirective;
 import freemarker.test.utility.AssertEqualsDirective;
@@ -363,6 +364,10 @@ public class TemplateTestCase extends FileTestCase {
         else if (testName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
         }
+
+        else if (testName.startsWith("overloaded-methods-2-")) {
+            dataModel.put("obj", new OverloadedMethods2());
+        }
         
         else if (testName.startsWith("overloaded-methods-")) {
           dataModel.put("obj", new OverloadedMethods());
@@ -405,6 +410,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("beanTrue", new BeansWrapper().wrap(Boolean.TRUE));
             dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
         }
+        
     }
     
     public void runTest() {
