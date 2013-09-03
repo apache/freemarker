@@ -692,15 +692,16 @@ public class BeansWrapper implements ObjectWrapper
         }
     }
 
-    private Object tryUnwrap(TemplateModel model, final Class hint, Map recursionStops) 
+    private Object tryUnwrap(TemplateModel model, Class hint, Map recursionStops) 
     throws TemplateModelException
     {
         if(model == null || model == nullModel) {
             return null;
         }
         
-        boolean isBoolean = Boolean.TYPE == hint;
-        boolean isChar = Character.TYPE == hint;
+        if (is2321Bugfixed() && hint.isPrimitive()) {
+            hint = ClassUtil.primitiveClassToBoxingClass(hint);            
+        }
         
         // This is for transparent interop with other wrappers (and ourselves)
         // Passing the hint allows i.e. a Jython-aware method that declares a
@@ -758,7 +759,7 @@ public class BeansWrapper implements ObjectWrapper
             }
         }
         
-        if(isBoolean || BOOLEAN_CLASS == hint) {
+        if(Boolean.TYPE == hint || BOOLEAN_CLASS == hint) {
             if(model instanceof TemplateBooleanModel) {
                 return ((TemplateBooleanModel)model).getAsBoolean() 
                 ? Boolean.TRUE : Boolean.FALSE;
@@ -831,7 +832,7 @@ public class BeansWrapper implements ObjectWrapper
         }
         
         // Allow one-char strings to be coerced to characters
-        if(isChar || hint == CHARACTER_CLASS) {
+        if(Character.TYPE == hint || hint == CHARACTER_CLASS) {
             if(model instanceof TemplateScalarModel) {
                 String s = ((TemplateScalarModel)model).getAsString();
                 if(s.length() == 1) {

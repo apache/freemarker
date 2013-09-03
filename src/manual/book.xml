@@ -20372,7 +20372,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>ObjectWrapper</literal> instead. (As
               <literal>ObjectWrapper</literal> objects are often shared among
               multiple <literal>Configuration</literal>-s, they can't use that
-              setting of the <literal>Configuration</literal>.)</para>
+              setting of the <literal>Configuration</literal>.) In new or
+              actively developed projects it's recommended to use
+              <literal>Version(2, 3, 21)</literal> or higher.</para>
             </listitem>
 
             <listitem>
@@ -20382,7 +20384,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               applications use these), but only if you create
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>Version(2, 3, 21)</literal>
-              (or higher). There's a very little chance that because of these
+              or higher. There's a very little chance that because of these
               fixes, a different overloaded method will chosen than before
               (which in theory could change the behavior of the application),
               or even that ambiguity error will arise where earlier they
@@ -20573,6 +20575,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   again.)</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed, active only if you create the
+              <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
+              with constructor parameter <literal>Version(2, 3, 21)</literal>
+              or higher: When <literal>BeansWrapper</literal> (and so also
+              <literal>DefaultObjectWrapper</literal>) has unwrapped method
+              call arguments before calling a Java method, when the argument
+              was a <literal>AdapterTemplateModel</literal> and the target
+              parameter type was primitive,
+              <literal>AdapterTemplateModel.getAdaptedObject(Class
+              hint)</literal> has received the primitive type of the target
+              parameter (like <literal>int</literal> instead of
+              <literal>Integer</literal>) as the hint. This did not make sense
+              since <literal>getAdaptedObject</literal> can only return
+              <literal>Object</literal>-s, not primitive values. Furthermore,
+              <literal>BeansWrapper</literal> has expected the returned value
+              to be of the primitive type, otherwise it has discarded it.
+              Exactly the same problem occurs with
+              <literal>WrapperTemplateModel</literal>. Thus, ultimately, if
+              the target parameter type was primitive and some of these
+              interfaces were implemented, their return value was always
+              discarded, instead FreeMarker has felt back to other means of
+              unwrapping.</para>
             </listitem>
 
             <listitem>

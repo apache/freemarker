@@ -183,3 +183,18 @@
 
 <#-- The primitive int-s will win twice, but then String wins over Object, which is stronger: -->
 <@assertEquals actual=obj.mLowRankWins(1, 2, 'a') expected='mLowRankWins(Integer x = 1, Integer y = 2, String s = a)' />
+
+<@assertEquals actual=obj.mRareWrappings(obj.file, obj.adaptedNumber, obj.adaptedNumber, obj.adaptedNumber, obj.stringWrappedAsBoolean)
+               expected='mRareWrappings(File f = file, double d1 = 123.0002, Double d2 = 123.0002, double d3 = 123.0002, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.stringWrappedAsBoolean, obj.adaptedNumber, obj.adaptedNumber, obj.adaptedNumber, obj.stringAdaptedToBoolean)
+               expected='mRareWrappings(String s = yes, double d1 = 123.0002, Double d2 = 123.0002, double d3 = 123.0002, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.stringAdaptedToBoolean2, obj.wrapperNumber, obj.wrapperNumber, obj.wrapperNumber, obj.stringAdaptedToBoolean2)
+               expected='mRareWrappings(String s = yes, double d1 = 123.0001, Double d2 = 123.0001, double d3 = 123.0001, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.booleanWrappedAsAnotherBoolean, 0, 0, 0, obj.booleanWrappedAsAnotherBoolean)
+               expected='mRareWrappings(Object o = true, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.adaptedNumber, 0, 0, 0, !obj.booleanWrappedAsAnotherBoolean)
+               expected='mRareWrappings(Object o = 124, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+<@assertEquals actual=obj.mRareWrappings(obj.booleanWrappedAsAnotherBoolean, 0, 0, 0, !obj.stringAdaptedToBoolean)
+               expected='mRareWrappings(Object o = true, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+               
+<@assertEquals actual=obj.mRareWrappings2(obj.adaptedNumber) expected='mRareWrappings2(byte b = 124)' />

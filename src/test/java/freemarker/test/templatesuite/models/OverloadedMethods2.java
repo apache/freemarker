@@ -6,6 +6,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import freemarker.ext.beans.RationalNumber;
+import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.AdapterTemplateModel;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.StringUtil;
 
 public class OverloadedMethods2 {
@@ -429,6 +434,139 @@ public class OverloadedMethods2 {
 
     public String mLowRankWins(Integer x, Integer y, String s) {
         return "mLowRankWins(Integer x = " + x + ", Integer y = " + y + ", String s = " + s + ")";
+    }
+    
+    public String mRareWrappings(File f, double d1, Double d2, double d3, boolean b) {
+        return "mRareWrappings(File f = " + f + ", double d1 = " + d1 + ", Double d2 = " + d2
+                + ", double d3 = " + d3 + ", b = " + b + ")";
+    }
+
+    public String mRareWrappings(Object o, double d1, Double d2, Double d3, boolean b) {
+        return "mRareWrappings(Object o = " + o + ", double d1 = " + d1 + ", Double d2 = " + d2
+                + ", double d3 = " + d3 + ", b = " + b + ")";
+    }
+
+    public String mRareWrappings(String s, double d1, Double d2, Double d3, boolean b) {
+        return "mRareWrappings(String s = " + s + ", double d1 = " + d1 + ", Double d2 = " + d2
+                + ", double d3 = " + d3 + ", b = " + b + ")";
+    }
+
+    public String mRareWrappings2(String s) {
+        return "mRareWrappings2(String s = " + s + ")";
+    }
+    
+    public String mRareWrappings2(byte b) {
+        return "mRareWrappings2(byte b = " + b + ")";
+    }
+    
+    public File getFile() {
+        return new File("file");
+    }
+
+    public TemplateNumberModel getAdaptedNumber() {
+        return new MyAdapterNumberModel();
+    }
+
+    public TemplateNumberModel getWrapperNumber() {
+        return new MyWrapperNumberModel();
+    }
+
+    public TemplateBooleanModel getStringAdaptedToBoolean() {
+        return new MyStringAdaptedToBooleanModel();
+    }
+    
+    public TemplateBooleanModel getStringAdaptedToBoolean2() {
+        return new MyStringAdaptedToBooleanModel2();
+    }
+    
+    public TemplateBooleanModel getStringWrappedAsBoolean() {
+        return new MyStringWrapperAsBooleanModel();
+    }
+    
+    public TemplateBooleanModel getBooleanWrappedAsAnotherBoolean() {
+        return new MyBooleanWrapperAsAnotherBooleanModel(); 
+    }
+    
+    private static class MyAdapterNumberModel implements TemplateNumberModel, AdapterTemplateModel {
+
+        public Object getAdaptedObject(Class hint) {
+            if (hint == double.class) {
+                return Double.valueOf(123.0001);
+            } else if (hint == Double.class) {
+                return Double.valueOf(123.0002);
+            } else {
+                return Long.valueOf(124L);
+            }
+        }
+
+        public Number getAsNumber() throws TemplateModelException {
+            return Integer.valueOf(122);
+        }
+        
+    }
+    
+    private static class MyWrapperNumberModel implements TemplateNumberModel, WrapperTemplateModel {
+
+        public Number getAsNumber() throws TemplateModelException {
+            return Integer.valueOf(122);
+        }
+
+        public Object getWrappedObject() {
+            return Double.valueOf(123.0001);
+        }
+        
+    }
+    
+    private static class MyStringWrapperAsBooleanModel implements TemplateBooleanModel, WrapperTemplateModel {
+
+        public Object getWrappedObject() {
+            return "yes";
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return true;
+        }
+        
+    }
+
+    private static class MyBooleanWrapperAsAnotherBooleanModel implements TemplateBooleanModel, WrapperTemplateModel {
+
+        public Object getWrappedObject() {
+            return Boolean.TRUE;
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return false;
+        }
+        
+    }
+    
+    private static class MyStringAdaptedToBooleanModel implements TemplateBooleanModel, AdapterTemplateModel {
+
+        public Object getAdaptedObject(Class hint) {
+            if (hint != Boolean.class && hint != boolean.class) {
+                return "yes";
+            } else {
+                return Boolean.TRUE;
+            }
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return false;
+        }
+        
+    }
+
+    private static class MyStringAdaptedToBooleanModel2 implements TemplateBooleanModel, AdapterTemplateModel {
+
+        public Object getAdaptedObject(Class hint) {
+            return "yes";
+        }
+
+        public boolean getAsBoolean() throws TemplateModelException {
+            return true;
+        }
+        
     }
     
 }

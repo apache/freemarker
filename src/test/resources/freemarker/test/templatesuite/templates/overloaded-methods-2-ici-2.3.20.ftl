@@ -146,3 +146,8 @@
 <@assertEquals actual=obj.mNullAmbiguous2(null) expected='mNullAmbiguous(Object o = null)' />
 
 <@assertFails message="no compatible overloaded">${obj.mNullNonAmbiguous(null)}</@>
+
+<@assertEquals actual=obj.mRareWrappings(obj.stringAdaptedToBoolean2, obj.wrapperNumber, obj.wrapperNumber, obj.wrapperNumber, obj.stringAdaptedToBoolean2)
+               expected='mRareWrappings(String s = yes, double d1 = 123.0001, Double d2 = 123.0001, double d3 = 123.0001, b = true)' />
+               
+<@assertFails message="no compatible overloaded">${obj.mRareWrappings2(obj.adaptedNumber)}</@>
