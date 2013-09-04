@@ -53,13 +53,13 @@ package freemarker.ext.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
@@ -86,8 +86,10 @@ abstract class OverloadedMethodsSubset {
     
     // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
     // and such need to be fixed in this regard. 
-    // Java 5: Use ConcurrentHashMap:
-    private final Map/*<ArgumentTypes, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache = new HashMap();
+    private final Map/*<ArgumentTypes, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache
+            = _ConcurrentMapFactory.newMaybeConcurrentHashMap(6, 0.75f, 1);
+    private final boolean isArgTypesToMemberDescCacheConcurrentMap
+            = _ConcurrentMapFactory.isConcurrent(argTypesToMemberDescCache);
     
     private final List/*<CallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
@@ -162,12 +164,17 @@ abstract class OverloadedMethodsSubset {
     
     final MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
         ArgumentTypes argTypes = new ArgumentTypes(args, bugfixed);
-        MaybeEmptyCallableMemberDescriptor memberDesc;
-        synchronized(argTypesToMemberDescCache) {
-            memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
-            if(memberDesc == null) {
-                memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
-                argTypesToMemberDescCache.put(argTypes, memberDesc);
+        MaybeEmptyCallableMemberDescriptor memberDesc = 
+                isArgTypesToMemberDescCacheConcurrentMap
+                        ? (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes)
+                        : null;
+        if (memberDesc == null) {
+            synchronized(argTypesToMemberDescCache) {
+                memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
+                if (memberDesc == null) {
+                    memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
+                    argTypesToMemberDescCache.put(argTypes, memberDesc);
+                }
             }
         }
         return memberDesc;

@@ -20611,6 +20611,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               useful if you want to underline the error in the source code,
               not just point at it.</para>
             </listitem>
+
+            <listitem>
+              <para>The concurrent performance of overloaded method lookups
+              (from the cache) was improved under Java 5 and later.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
