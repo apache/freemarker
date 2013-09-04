@@ -40,7 +40,7 @@ public class _ConcurrentMapFactory {
         try {
             c = ClassUtil.forName("java.util.concurrent.ConcurrentHashMap");
             try {
-                constr = c.getConstructor(Integer.TYPE, Float.TYPE, Integer.TYPE);
+                constr = c.getConstructor(new Class[] { Integer.TYPE, Float.TYPE, Integer.TYPE });
                 constrParamCnt = 3;            
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get ConcurrentHashMap constructor: " + e);
@@ -48,7 +48,7 @@ public class _ConcurrentMapFactory {
         } catch(ClassNotFoundException e) {
             c = HashMap.class;
             try {
-                constr = c.getConstructor(Integer.TYPE, Float.TYPE);
+                constr = c.getConstructor(new Class[] { Integer.TYPE, Float.TYPE });
                 constrParamCnt = 2;            
             } catch (Exception e2) {
                 throw new RuntimeException("Failed to get HashMap constructor: " + e2);
