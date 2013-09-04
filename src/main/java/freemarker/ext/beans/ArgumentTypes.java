@@ -82,14 +82,17 @@ final class ArgumentTypes {
      *      created with {@link Version} 2.3.21 or higher.
      */
     ArgumentTypes(Object[] args, boolean bugfixed) {
-        int l = args.length;
-        types = new Class[l];
-        for(int i = 0; i < l; ++i) {
-            Object obj = args[i];
-            types[i] = obj == null
+        int ln = args.length;
+        Class[] typesTmp = new Class[ln];
+        for(int i = 0; i < ln; ++i) {
+            Object arg = args[i];
+            typesTmp[i] = arg == null
                     ? (bugfixed ? Null.class : Object.class)
-                    : obj.getClass();
+                    : arg.getClass();
         }
+        
+        // `typesTmp` is used so the array is only modified before it's stored in the final `types` field (see JSR-133)
+        types = typesTmp;  
         this.bugfixed = bugfixed;
     }
     
