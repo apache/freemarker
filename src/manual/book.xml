@@ -20385,14 +20385,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>Version(2, 3, 21)</literal>
               or higher. There's a little chance that because of these
-              changes, a different overloaded method will chosen than before,
-              or even that ambiguity error will arise where earlier they
-              didn't (although the opposite is much more probable), hence the
-              fixes aren't automatically active, at least not unit FreeMarker
-              2.4. But the fix mostly only effect calls that were failing or
-              has chosen then wrong method, so it's recommended to activate it
-              for projects that are still actively developed. This fix
-              includes numerous changes:</para>
+              changes, a different overloaded method will be chosen than
+              before, or even that ambiguity errors will arise where earlier
+              they didn't (although the opposite is much more probable), hence
+              the fixes aren't automatically active, at least not unit
+              FreeMarker 2.4. But the fix mostly only effect calls that were
+              failing or has chosen then wrong method, so it's recommended to
+              activate it for projects that are still actively developed. This
+              fix includes numerous changes:</para>
 
               <itemizedlist>
                 <listitem>

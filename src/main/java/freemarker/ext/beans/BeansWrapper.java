@@ -320,7 +320,7 @@ public class BeansWrapper implements ObjectWrapper
      * handle existing properties whose value is <tt>null</tt>, without the risk of
      * hiding typos in the property names. Typos will always cause error. But mind you, it
      * goes against the basic approach of FreeMarker, so use this feature only if you really
-     * know what are you doing.
+     * know what you are doing.
      */
     public void setStrict(boolean strict) {
     	this.strict = strict;
