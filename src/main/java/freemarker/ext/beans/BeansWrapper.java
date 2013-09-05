@@ -105,6 +105,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
+import freemarker.template.utility.Lockable;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.UndeclaredThrowableException;
@@ -114,7 +115,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * It handles all polymorphism issues in the {@link #wrap(Object)} and {@link #unwrap(TemplateModel)} methods.
  * @author Attila Szegedi
  */
-public class BeansWrapper implements ObjectWrapper
+public class BeansWrapper implements ObjectWrapper, Lockable
 {
     static final Object CAN_NOT_UNWRAP = new Object();
     private static final Class BIGINTEGER_CLASS = java.math.BigInteger.class;
@@ -233,6 +234,8 @@ public class BeansWrapper implements ObjectWrapper
      */
     public static final int EXPOSE_NOTHING = 3;
 
+    private volatile boolean readOnly;
+    
     private int exposureLevel = EXPOSE_SAFE;
     private TemplateModel nullModel = null;
     private boolean methodsShadowItems = true;
@@ -293,6 +296,34 @@ public class BeansWrapper implements ObjectWrapper
             JavaRebelIntegration.registerWrapper(this);
         }
     }
+    
+    /**
+     * Makes the JavaBean properties of this object read-only;
+     * this will also ban {@link #clearClassIntrospecitonCache()}; you can still clear the cache by specifying which 
+     * 
+     * @since 2.3.21
+     */
+    public void makeReadOnly() {
+        readOnly = true;
+    }
+
+    /**
+     * @since 2.3.21
+     */
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+    
+    /**
+     * If this object is already read-only according to {@link Lockable}, throws {@link IllegalStateException},
+     * otherwise does nothing.
+     * 
+     * @since 2.3.21
+     */
+    protected void checkModifiable() {
+        if (readOnly) throw new IllegalStateException(
+                "Can't modify the " + this.getClass().getName() + " object, as it was set to read-only.");
+    }
 
     /**
      * @see #setStrict(boolean)
@@ -323,6 +354,7 @@ public class BeansWrapper implements ObjectWrapper
      * know what you are doing.
      */
     public void setStrict(boolean strict) {
+        checkModifiable();
     	this.strict = strict;
     }
 
@@ -337,6 +369,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setOuterIdentity(ObjectWrapper outerIdentity)
     {
+        checkModifiable();
         this.outerIdentity = outerIdentity;
     }
 
@@ -361,6 +394,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setSimpleMapWrapper(boolean simpleMapWrapper)
     {
+        checkModifiable();
         this.simpleMapWrapper = simpleMapWrapper;
     }
 
@@ -407,6 +441,8 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setExposureLevel(int exposureLevel)
     {
+        checkModifiable();
+        
         if(exposureLevel < EXPOSE_ALL || exposureLevel > EXPOSE_NOTHING)
         {
             throw new IllegalArgumentException("Illegal exposure level " + exposureLevel);
@@ -431,6 +467,8 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setExposeFields(boolean exposeFields)
     {
+        checkModifiable();
+        
         this.exposeFields = exposeFields;
     }
     
@@ -456,6 +494,8 @@ public class BeansWrapper implements ObjectWrapper
      */
     public synchronized void setMethodsShadowItems(boolean methodsShadowItems)
     {
+        checkModifiable();
+        
         this.methodsShadowItems = methodsShadowItems;
     }
     
@@ -472,6 +512,8 @@ public class BeansWrapper implements ObjectWrapper
      * @param defaultDateType the new default date type.
      */
     public synchronized void setDefaultDateType(int defaultDateType) {
+        checkModifiable();
+        
         this.defaultDateType = defaultDateType;
     }
 
@@ -492,6 +534,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setUseCache(boolean useCache)
     {
+        checkModifiable();
         modelCache.setUseCache(useCache);
     }
     
@@ -505,6 +548,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setNullModel(TemplateModel nullModel)
     {
+        checkModifiable();
         this.nullModel = nullModel;
     }
     
@@ -1149,15 +1193,44 @@ public class BeansWrapper implements ObjectWrapper
             if (enumModels != null) enumModels.removeFromCache(clazz);
         }
     }
-
+    
     /**
-     * Removes all class introspection data from the cache.
-     * Use this if you want to free up memory on the expense of recreating
-     * the cache entries for the classes that will be used later in templates.
+     * Removes all classes from the introspection cache whose fully qualified name starts with the given prefix
+     * followed by {@code '.'} or {@code '$'} or the end of the string. For example, {@code "com.example.action"}
+     * will remove {@code com.example.action.Foo}, {@code com.example.action.shop.Foo}, but not
+     * {@code com.example.actions.Foo} (note the "s" as the end of "actions"). {@code "com.example.action.Foo"} will
+     * remove  {@code "com.example.action.Foo"} itself, and also nested classes like
+     * {@code "com.example.action.Foo$Bar"}.
+     * 
+     * @since 2.3.21
+     */
+    public void removeFromClassIntrospectionCache(String namePrefix) {
+        throw new RuntimeException("Not implemented");  // TODO
+    }
+    
+    /**
+     * Removes all class introspection data from the cache;
+     * consider using {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * 
+     * <p>Use this if you want to free up memory on the expense of recreating
+     * the cache entries for the classes that will be used later in templates. If you only need to purge certain
+     * classes/packages, then use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * 
+     * @throws IllegalStateException if {@link #isReadOnly()} is true; for
+     *     such singletons, you must use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
      * 
      * @since 2.3.20
      */
     public void clearClassIntrospecitonCache() {
+        if (isReadOnly()) {
+            throw new IllegalStateException(
+                    "It's not allowed to clear the whole cache in a read-only " + this.getClass().getName() +
+                    "instance. Use removeFromClassIntrospectionCache(String prefix) instead.");
+        }
+        forcedClearClassIntrospecitonCache();
+    }
+    
+    private void forcedClearClassIntrospecitonCache() {
         synchronized (sharedClassIntrospectionCacheLock) {
             clearGenericClassIntrospectionCache();
             staticModels.clearCache();
@@ -1176,7 +1249,7 @@ public class BeansWrapper implements ObjectWrapper
                     "\". Assuming it was a class-reloading. Clearing BeansWrapper " +
                     "caches to release old data.");
         }
-        clearClassIntrospecitonCache();
+        forcedClearClassIntrospecitonCache();
     }
     
     Object getSharedClassIntrospectionCacheLock() {
