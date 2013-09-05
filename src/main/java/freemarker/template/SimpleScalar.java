@@ -71,7 +71,7 @@ implements TemplateScalarModel, Serializable {
      * @serial the value of this <tt>SimpleScalar</tt> if it wraps a
      * <tt>String</tt>.
      */
-    private String value;
+    private final String value;
 
     /**
      * Constructs a <tt>SimpleScalar</tt> containing a string value.

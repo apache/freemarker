@@ -69,10 +69,9 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
-    static private Class W3C_DOM_NODE_CLASS, 
-                         JYTHON_OBJ_CLASS;
+    static final private Class W3C_DOM_NODE_CLASS, JYTHON_OBJ_CLASS;
     
-    static private ObjectWrapper JYTHON_WRAPPER;
+    static final private ObjectWrapper JYTHON_WRAPPER;
     
     public DefaultObjectWrapper() {
         super();
@@ -88,17 +87,26 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     static {
+        Class cl;
         try {
-            W3C_DOM_NODE_CLASS = Class.forName("org.w3c.dom.Node");
-        } catch (Exception e) {}
+            cl = Class.forName("org.w3c.dom.Node");
+        } catch (Exception e) {
+            cl = null;
+        }
+        W3C_DOM_NODE_CLASS = cl;
+        
+        ObjectWrapper ow;
         try {
-            JYTHON_OBJ_CLASS = Class.forName("org.python.core.PyObject");
-            JYTHON_WRAPPER = (ObjectWrapper) Class.forName(
+            cl = Class.forName("org.python.core.PyObject");
+            ow = (ObjectWrapper) Class.forName(
                     "freemarker.ext.jython.JythonWrapper")
                     .getField("INSTANCE").get(null);
         } catch (Exception e) {
-            // ignore
+            cl = null;
+            ow = null;
         }
+        JYTHON_OBJ_CLASS = cl;
+        JYTHON_WRAPPER = ow;
     }
 
     public TemplateModel wrap(Object obj) throws TemplateModelException {
