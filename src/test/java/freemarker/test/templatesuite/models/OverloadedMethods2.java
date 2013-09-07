@@ -12,6 +12,7 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.StringUtil;
+import freemarker.test.utility.Helpers;
 
 public class OverloadedMethods2 {
 
@@ -293,107 +294,80 @@ public class OverloadedMethods2 {
     }
 
     public String varargs1(String s, int... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = [" + arrayToString(xs) + "])";
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs1(String s, double... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = [" + arrayToString(xs) + "])";
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", double... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs1(String s, Object... xs) {
-        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = [" + arrayToString(xs) + "])";
+        return "varargs1(String s = " + StringUtil.jQuote(s) + ", Object... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs1(Object s, Object... xs) {
-        return "varargs1(Object s = " + s + ", Object... xs = [" + arrayToString(xs) + "])";
+        return "varargs1(Object s = " + s + ", Object... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs2(int... xs) {
-        return "varargs2(int... xs = [" + arrayToString(xs) + "])";
+        return "varargs2(int... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs2(double... xs) {
-        return "varargs2(double... xs = [" + arrayToString(xs) + "])";
+        return "varargs2(double... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs3(String... xs) {
-        return "varargs3(String... xs = [" + arrayToString(xs) + "])";
+        return "varargs3(String... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs3(Comparable... xs) {
-        return "varargs3(Comparable... xs = [" + arrayToString(xs) + "])";
+        return "varargs3(Comparable... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs3(Object... xs) {
-        return "varargs3(Object... xs = [" + arrayToString(xs) + "])";
+        return "varargs3(Object... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs4(Integer... xs) {
-        return "varargs4(Integer... xs = [" + arrayToString(xs) + "])";
+        return "varargs4(Integer... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs4(int... xs) {
-        return "varargs4(int... xs = [" + arrayToString(xs) + "])";
+        return "varargs4(int... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs5(int... xs) {
-        return "varargs5(int... xs = [" + arrayToString(xs) + "])";
+        return "varargs5(int... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs5(int a1, int... xs) {
-        return "varargs5(int a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+        return "varargs5(int a1 = " + a1 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs5(int a1, int a2, int... xs) {
-        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = [" + arrayToString(xs) + "])";
+        return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs5(int a1, int a2, int a3, int... xs) {
         return "varargs5(int a1 = " + a1 + ", int a2 = " + a2 + ", int a3 = " + a3
-                + ", int... xs = [" + arrayToString(xs) + "])";
+                + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
 
     public String varargs6(String a1, int... xs) {
-        return "varargs6(String a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
+        return "varargs6(String a1 = " + a1 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs6(Object a1, int a2, int... xs) {
-        return "varargs6(Object a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = [" + arrayToString(xs) + "])";
+        return "varargs6(Object a1 = " + a1 + ", int a2 = " + a2 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs7(int... xs) {
-        return "varargs7(int... xs = [" + arrayToString(xs) + "])";
+        return "varargs7(int... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String varargs7(short a1, int... xs) {
-        return "varargs7(short a1 = " + a1 + ", int... xs = [" + arrayToString(xs) + "])";
-    }
-    
-    private String arrayToString(int[] xs) {
-        StringBuilder sb = new StringBuilder();
-        for (int x : xs) {
-            if (sb.length() != 0) sb.append(", ");
-            sb.append(x);
-        }
-        return sb.toString();
-    }
-
-    private String arrayToString(double[] xs) {
-        StringBuilder sb = new StringBuilder();
-        for (double x : xs) {
-            if (sb.length() != 0) sb.append(", ");
-            sb.append(x);
-        }
-        return sb.toString();
-    }
-
-    private String arrayToString(Object[] xs) {
-        StringBuilder sb = new StringBuilder();
-        for (Object x : xs) {
-            if (sb.length() != 0) sb.append(", ");
-            sb.append(x);
-        }
-        return sb.toString();
+        return "varargs7(short a1 = " + a1 + ", int... xs = " + Helpers.arrayToString(xs) + ")";
     }
     
     public String mNullAmbiguous(String s) {
@@ -429,11 +403,11 @@ public class OverloadedMethods2 {
     }
     
     public String mVarargsIgnoredTail(int i, double... ds) {
-        return "mVarargsIgnoredTail(int i = " + i + ", double... ds = [" + arrayToString(ds) + "])"; 
+        return "mVarargsIgnoredTail(int i = " + i + ", double... ds = " + Helpers.arrayToString(ds) + ")"; 
     }
     
     public String mVarargsIgnoredTail(int... is) {
-        return "mVarargsIgnoredTail(int... is = [" + arrayToString(is) + "])"; 
+        return "mVarargsIgnoredTail(int... is = " + Helpers.arrayToString(is) + ")"; 
     }
     
     public String mLowRankWins(int x, int y, Object o) {
