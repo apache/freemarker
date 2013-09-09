@@ -20,12 +20,13 @@ public final class Version implements Serializable {
     private final int minor;
     private final int micro;
     private final String extraInfo;
+    private final String originalStringValue;
     
     private final Boolean gaeCompliant;
     private final Date buildDate;
     
-    private int intValue;
-    private String stringValue;  // not final because it's calculated on demand
+    private final int intValue;
+    private String calculatedStringValue;  // not final because it's calculated on demand
     private Integer hashCode;  // not final because it's calculated on demand
 
     public Version(String stringValue) {
@@ -34,6 +35,7 @@ public final class Version implements Serializable {
     
     public Version(String stringValue, Boolean gaeCompliant, Date buildDate) {
         stringValue = stringValue.trim();
+        originalStringValue = stringValue; 
         
         int[] parts = new int[3];
         String extraInfoTmp = null;
@@ -75,9 +77,8 @@ public final class Version implements Serializable {
         major = parts[0];
         minor = parts[1];
         micro = parts[2];
-        calculateIntValue();
+        intValue = calculateIntValue();
         
-        this.stringValue = stringValue;
         this.gaeCompliant = gaeCompliant;
         this.buildDate = buildDate;
         
@@ -94,26 +95,35 @@ public final class Version implements Serializable {
         this.extraInfo = extraInfo;
         this.gaeCompliant = gaeCompatible;
         this.buildDate = buildDate;
-        calculateIntValue();
+        intValue = calculateIntValue();
+        originalStringValue = null;
     }
 
-    private void calculateIntValue() {
-        intValue = intValueFor(major, minor, micro);
+    private int calculateIntValue() {
+        return intValueFor(major, minor, micro);
     }
     
     static public int intValueFor(int major, int minor, int micro) {
         return major * 1000000 + minor * 1000 + micro;
     }
     
+    private String getStringValue() {
+        if (originalStringValue != null) return originalStringValue;
+        // Switch to double-check + volatile with Java 5
+        synchronized (this) {
+            if (calculatedStringValue == null) {
+                calculatedStringValue = major + "." + minor + "." + micro;
+                if (extraInfo != null) calculatedStringValue += "-" + extraInfo; 
+            }
+            return calculatedStringValue;
+        }
+    }
+    
     /**
      * Contains the major.minor.micor numbers and the extraInfo part, not the other information.
      */
-    public synchronized String toString() {  // Switch to double-check + volatile with Java 5
-        if (stringValue == null) {
-            stringValue = major + "." + minor + "." + micro;
-            if (extraInfo != null) stringValue += "-" + extraInfo; 
-        }
-        return stringValue;
+    public String toString() {
+        return getStringValue();
     }
 
     /**
@@ -169,18 +179,22 @@ public final class Version implements Serializable {
     }
 
     public int hashCode() {
-        if (hashCode == null) {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((buildDate == null) ? 0 : buildDate.hashCode());
-            result = prime * result + ((extraInfo == null) ? 0 : extraInfo.hashCode());
-            result = prime * result + ((gaeCompliant == null) ? 0 : gaeCompliant.hashCode());
-            result = prime * result + ((hashCode == null) ? 0 : hashCode.hashCode());
-            result = prime * result + intValue;
-            result = prime * result + ((stringValue == null) ? 0 : stringValue.hashCode());
-            hashCode = new Integer(result);  // J2SE 1.2 had no Integer.valueOf(int)
+        // Switch to double-check + volatile with Java 5:
+        synchronized (this) {
+            if (hashCode == null) {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + (buildDate == null ? 0 : buildDate.hashCode());
+                result = prime * result + (extraInfo == null ? 0 : extraInfo.hashCode());
+                result = prime * result + (gaeCompliant == null ? 0 : gaeCompliant.hashCode());
+                result = prime * result + (hashCode == null ? 0 : hashCode.hashCode());
+                result = prime * result + intValue;
+                String stringValue = getStringValue();
+                result = prime * result + (stringValue == null ? 0 : stringValue.hashCode());
+                hashCode = new Integer(result);  // J2SE 1.2 had no Integer.valueOf(int)
+            }
+            return hashCode.intValue();
         }
-        return hashCode.intValue();
     }
 
     public boolean equals(Object obj) {

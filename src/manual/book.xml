@@ -20631,6 +20631,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>The concurrent performance of overloaded method lookups
               (from the cache) was improved under Java 5 and later.</para>
             </listitem>
+
+            <listitem>
+              <para>Fixed concurrency issues in <literal>Version</literal>
+              class <literal>hashCode</literal>, <literal>equals</literal>,
+              <literal>toString</literal> that could, in theory, result in
+              wrong return values.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
