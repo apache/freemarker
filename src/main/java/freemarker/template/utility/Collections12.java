@@ -68,6 +68,12 @@ import java.util.Set;
 public class Collections12
 {
     public static final Map EMPTY_MAP = new EmptyMap();
+    
+    /** @since 2.3.21 */
+    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
+
+    /** @since 2.3.21 */
+    public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };;
 
     private Collections12()
     {
@@ -127,7 +133,7 @@ public class Collections12
             return 0;
         }
     }
-
+    
     public static Map singletonMap(Object key, Object value)
     {
         return new SingletonMap(key, value);
