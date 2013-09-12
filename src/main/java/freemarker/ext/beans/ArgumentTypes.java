@@ -58,6 +58,7 @@ import java.util.List;
 
 import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility._MethodUtil;
 
 
 /**
@@ -335,10 +336,10 @@ final class ArgumentTypes {
                 if(paramType1 != paramType2) {
                     paramTypes1HasAMoreSpecific = 
                         paramTypes1HasAMoreSpecific
-                        || MethodUtilities.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
+                        || _MethodUtil.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
                     paramTypes2HasAMoreSpecific = 
                         paramTypes2HasAMoreSpecific
-                        || MethodUtilities.isMoreOrSameSpecificParameterType(paramType2, paramType1, false, 0) != 0;
+                        || _MethodUtil.isMoreOrSameSpecificParameterType(paramType2, paramType1, false, 0) != 0;
                 }
             }
             

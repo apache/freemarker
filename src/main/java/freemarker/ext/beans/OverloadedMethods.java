@@ -61,6 +61,7 @@ import java.util.List;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility._MethodUtil;
 
 /**
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
@@ -93,7 +94,7 @@ final class OverloadedMethods
     
     private void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
-        if(MethodUtilities.isVarArgs(memberDesc.member)) {
+        if(_MethodUtil.isVarArgs(memberDesc.member)) {
             if(varargMethods == null) {
                 varargMethods = new OverloadedVarArgsMethods(wrapper);
             }
@@ -204,7 +205,7 @@ final class OverloadedMethods
         sb.append(member.getName());
 
         sb.append('(');
-        Class[] paramTypes = MethodUtilities.getParameterTypes(member);
+        Class[] paramTypes = _MethodUtil.getParameterTypes(member);
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) sb.append(", ");
             sb.append(ClassUtil.getShortClassName(paramTypes[i]));

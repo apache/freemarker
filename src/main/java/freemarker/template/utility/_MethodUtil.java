@@ -49,7 +49,7 @@
  * information on the Visigoth Software Society, please see
  * http://www.visigoths.org/
  */
-package freemarker.ext.beans;
+package freemarker.template.utility;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
@@ -57,11 +57,13 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.UndeclaredThrowableException;
-
-class MethodUtilities
-{
+/**
+ * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+ * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
+ * access things inside this package that users shouldn't.
+ */
+public class _MethodUtil {
+    
     // Get rid of these on Java 5
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
@@ -87,7 +89,7 @@ class MethodUtilities
      *               But unlike in Java, primitive numerical types are {@code instanceof} {@link Number} here.</li>
      *         </ul> 
      */
-    static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
+    public static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
             int ifHigherThan) {
         if (ifHigherThan >= 4) return 0;
         if(generic.isAssignableFrom(specific)) {
@@ -134,7 +136,6 @@ class MethodUtilities
     }
 
     private static boolean isWideningPrimitiveNumberConversion(final Class source, final Class target) {
-        // Check for widening primitive numerical conversion.
         if(target == Short.TYPE && (source == Byte.TYPE)) {
             return true;
         } else if (target == Integer.TYPE && 
@@ -159,8 +160,7 @@ class MethodUtilities
     }
 
     private static boolean isWideningBoxedNumberConversion(final Class source, final Class target) {
-        // Check for widening primitive numerical conversion.
-        if(target == Short.class && (source == Byte.class)) {
+        if(target == Short.class && source == Byte.class) {
             return true;
         } else if (target == Integer.class && 
            (source == Short.class || source == Byte.class)) {
@@ -186,7 +186,7 @@ class MethodUtilities
     /**
      * Attention, this doesn't handle primitive classes correctly, nor numerical conversions.
      */
-    static Set getAssignables(Class c1, Class c2) {
+    public static Set getAssignables(Class c1, Class c2) {
         Set s = new HashSet();
         collectAssignables(c1, c2, s);
         return s;
@@ -206,17 +206,17 @@ class MethodUtilities
         }
     }
 
-    static Class[] getParameterTypes(Member member) {
+    public static Class[] getParameterTypes(Member member) {
         if(member instanceof Method) {
             return ((Method)member).getParameterTypes();
         }
         if(member instanceof Constructor) {
             return ((Constructor)member).getParameterTypes();
         }
-        throw new RuntimeException();
+        throw new IllegalArgumentException("\"member\" must be Method or Constructor");
     }
 
-    static boolean isVarArgs(Member member) {
+    public static boolean isVarArgs(Member member) {
         if(member instanceof Method) { 
             return isVarArgs(member, METHOD_IS_VARARGS);
         }
