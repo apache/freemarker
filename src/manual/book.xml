@@ -20621,6 +20621,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new method, <literal>static Object
+              Configuration.getSingleton(Class singletonClass, Object[]
+              constrArgs, Map properties)</literal>. This gets or creates a
+              VM-wide shared object (a singleton) with the given class,
+              constructor parameters and JavaBean properties. If based on the
+              class, constructor arguments and properties set, a matching
+              instance already exists, it returns that, otherwise it creates a
+              new one (that it will store so that next time it can return it).
+              This is mostly used for creating/getting the standard
+              <literal>ObjectWrapper</literal>-s, but can also manage
+              singletons of user-defined classes.</para>
+            </listitem>
+
+            <listitem>
               <para><literal>ParseException</literal>-s now also store the
               end-location of the error, not just its start-location. This is
               useful if you want to underline the error in the source code,
