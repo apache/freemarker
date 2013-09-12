@@ -52,10 +52,14 @@
 
 package freemarker.template;
 
+import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -170,7 +174,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
     private static Configuration defaultConfig = new Configuration();
-    
+
     private static boolean versionPropertiesLoaded;
     /** @deprecated Use {@link #version} instead. */
     private static String versionNumber;
@@ -1186,8 +1190,8 @@ public class Configuration extends Configurable implements Cloneable {
         return version;
     }
     
-	private static void loadVersionProperties() {
-		try {
+    private static void loadVersionProperties() {
+        try {
             Properties vp = new Properties();
             InputStream ins = Configuration.class.getClassLoader()
                     .getResourceAsStream("freemarker/version.properties");
@@ -1207,13 +1211,13 @@ public class Configuration extends Configurable implements Cloneable {
                 {
                     String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
                     if (buildDateStr.endsWith("Z")) {
-                    	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                        buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
                     }
                     try {
-    					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-    				} catch (java.text.ParseException e) {
-    					buildDate = null;
-    				}
+                        buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
+                    } catch (java.text.ParseException e) {
+                        buildDate = null;
+                    }
                 }
                 
                 final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
@@ -1226,8 +1230,8 @@ public class Configuration extends Configurable implements Cloneable {
         } catch (IOException e) {
             throw new RuntimeException("Failed to load version file: " + e);
         }
-	}
-	
+    }
+    
     /**
      * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
@@ -1235,16 +1239,17 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @return {@link Set} of {@link String}-s. 
      */
-	public Set getSupportedBuiltInNames() {
-	    return _CoreAPI.getSupportedBuiltInNames();
-	}
+    public Set getSupportedBuiltInNames() {
+        return _CoreAPI.getSupportedBuiltInNames();
+    }
 
-	private static String getRequiredVersionProperty(Properties vp, String properyName) {
-		String s = vp.getProperty(properyName);
-		if (s == null) {
-		    throw new RuntimeException(
-		    		"Version file is corrupt: \"" + properyName + "\" property is missing.");
-		}
-		return s;
-	}
+    private static String getRequiredVersionProperty(Properties vp, String properyName) {
+        String s = vp.getProperty(properyName);
+        if (s == null) {
+            throw new RuntimeException(
+                    "Version file is corrupt: \"" + properyName + "\" property is missing.");
+        }
+        return s;
+    }
+
 }

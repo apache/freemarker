@@ -391,7 +391,7 @@ public class ClassUtil
         if (boxingClass == Void.class) return void.class;  // not really a primitive, but we normalize to it
         return boxingClass;
     }
-
+    
     /**
      * Tells if a type is numerical; works both for primitive types and classes.
      * 
