@@ -1314,15 +1314,17 @@ public class Configuration extends Configurable implements Cloneable {
      *     requirements earlier.
      *     Note that the class will be hard-referenced by the {@link Configuration} class, and thus possibly can't be
      *     ever garbage collected.
-     * @param constrArgs The constructor arguments. All argument values should have proper
-     *     {@link Object#equals(Object)} and {@link Object#hashCode()} support.
+     * @param constrArgs The constructor arguments, possibly {@code null} for 0 arguments. All argument values should
+     *     have proper {@link Object#equals(Object)} and {@link Object#hashCode()} support.
      *     If there's a {@link Version} argument, the first one will be normalized to the lowest
      *     equivalent value; see details earlier.
      *     Note that this object will be hard-referenced by {@link Configuration} class (or, possibly, the normalized
      *     version of this object), and thus possibly can't be ever garbage collected.
-     * @param properties The JavaBean propertiesKey to set. All property values must have proper
-     *     {@link Object#equals(Object)} and {@link Object#hashCode()} support. Only the properties that are returned
-     *     by the {@code getPropertyDefaults} method can be set; see details earlier.
+     * @param properties The JavaBean properties to set, possibly {@code null} for an empty {@link Map}. The keys in the
+     *     {@link Map} are the {@link String} property names, the values are the vales to which the properties should
+     *     be set. All property values must have proper {@link Object#equals(Object)} and {@link Object#hashCode()}
+     *     support. Only the properties that are returned by the {@code getPropertyDefaults} method can be set; see
+     *     details earlier.
      *     Note that this object will be hard-referenced by {@link Configuration} class, and thus possibly can't be ever
      *     garbage collected.
      * @param strongRef If the singleton instance will have to be created now, tells if there will be

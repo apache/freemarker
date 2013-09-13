@@ -55,7 +55,8 @@ package freemarker.template;
 import freemarker.ext.beans.BeansWrapper;
 
 /**
- * The default implementation of the ObjectWrapper interface.
+ * A restricted object wrapper that will not expose arbitrary object, just those that directly correspond to the
+ * {@link TemplateModel} sub-interfaces ({@code String}, {@code Map} and such).
  */
 public class SimpleObjectWrapper extends DefaultObjectWrapper {
     

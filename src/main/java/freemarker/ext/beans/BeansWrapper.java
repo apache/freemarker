@@ -259,21 +259,30 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     
     /**
      * @param incompatibleImprovements
-     *   Sets which of the non-backward-compatible bugfixes/improvements should be enabled. This is like
-     *   {@link Configuration#setIncompatibleEnhancements(String)}, except that it applies to the object wrapper only,
-     *   and the actual effects are as listed below. (As {@link ObjectWrapper} objects are often shared among multiple
-     *   {@link Configuration}-s, they can't use {@link Configuration#getIncompatibleEnhancements()} to decide
-     *   their own incompatible improvements setting.)
+     *   Sets which of the non-backward-compatible improvements should be enabled. This version number is the
+     *   same as the FreeMarker version number with which the improvements were implemented. 
+     *   For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
+     *   For released products that are still actively developed it's a low risk change to increase the 3rd
+     *   version number further as FreeMarker is updated, but of course you should always check the list of effects
+     *   below. Increasing the 2nd or 1st version number can mean substantial changes with higher risk of breaking
+     *   the application.
+     *   
+     *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
+     *   {@link ObjectWrapper} objects are sometimes shared among multiple {@link Configuration}-s, so the two version
+     *   numbers are technically independent.
      * 
+     *   <p>The changes enabled by {@code incompatibleImprovements} are:
      *   <ul>
      *     <li>
-     *       2.3.21 (or higher):
-     *       <ul>
-     *         <li>Overloaded varargs methods use more specific type hinting when unwrapping varargs in some
-     *             rare cases. (For example, for m(File, String...) and m(String...), sometimes (unpredictably) it has
-     *             unwrapped arguments with the hints [Object, Object, Object, etc.] instead of with 
-     *             [Object, String, String, ...].)</li>
-     *       </ul> 
+     *       2.3.21 (or higher): Several glitches were fixed in overloaded method selection. This usually just gets rid
+     *       of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method choices),
+     *       still, as in some cases the method chosen can be a different one now (that was the point of the reworking
+     *       after all), it can mean a change in the behavior of the application. The most important change is that the
+     *       treatment of {@code null} arguments were fixed, as earlier they were only seen applicable to parameters of
+     *       type {@code Object}. Now {@code null}-s are seen to be applicable to any non-primitive parameters, and
+     *       among those the one with the most specific type will be preferred (just like in Java), which is hence never
+     *       the one with the {@code Object} parameter type. For more details about overloaded method selection changes
+     *       see the version History in the FreeMarker Manual.</li>
      *     </li>
      *   </ul>
      *

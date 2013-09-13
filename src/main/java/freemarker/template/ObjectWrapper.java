@@ -103,7 +103,7 @@ public interface ObjectWrapper {
      * Makes a {@link TemplateModel} out of a non-{@link TemplateModel} object, usually by "wrapping" it into a
      * {@link TemplateModel} implementation that delegates to the original object.
      * 
-     * @param obj The object to wrap into a {@link TemplateModel}. If the it already implements {@link TemplateModel},
+     * @param obj The object to wrap into a {@link TemplateModel}. If it already implements {@link TemplateModel},
      *      it should just return the object as is.
      * 
      * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the
