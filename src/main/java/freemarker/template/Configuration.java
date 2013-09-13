@@ -1310,18 +1310,19 @@ public class Configuration extends Configurable implements Cloneable {
      *       normalizations. This parameter is provided in case the property defaults depend on constructor parameters. 
      * </ul>
      *  
-     * @param singletonClass The exact class of the singleton object. 
+     * @param singletonClass The exact class of the singleton object; must implement {@link Lockable}. See other
+     *     requirements earlier.
      *     Note that the class will be hard-referenced by the {@link Configuration} class, and thus possibly can't be
      *     ever garbage collected.
-     * @param constrArgs The constructor arguments. All argument values must have proper
+     * @param constrArgs The constructor arguments. All argument values should have proper
      *     {@link Object#equals(Object)} and {@link Object#hashCode()} support.
-     *     If there's a {@link Version} argument, there can be only one, and it will be normalized to the lowest
-     *     equivalent value with the {@code public static Version normalizeVersion(Version)} method of the
-     *     {@code owClass} class, which must be defined (possibly inherited) or else an exception will be thrown.
-     *     Note that this object will be hard-referenced by {@link Configuration} class, and thus possibly can't be ever
-     *     garbage collected.
+     *     If there's a {@link Version} argument, the first one will be normalized to the lowest
+     *     equivalent value; see details earlier.
+     *     Note that this object will be hard-referenced by {@link Configuration} class (or, possibly, the normalized
+     *     version of this object), and thus possibly can't be ever garbage collected.
      * @param properties The JavaBean propertiesKey to set. All property values must have proper
-     *     {@link Object#equals(Object)} and {@link Object#hashCode()} support.
+     *     {@link Object#equals(Object)} and {@link Object#hashCode()} support. Only the properties that are returned
+     *     by the {@code getPropertyDefaults} method can be set; see details earlier.
      *     Note that this object will be hard-referenced by {@link Configuration} class, and thus possibly can't be ever
      *     garbage collected.
      * @param strongRef If the singleton instance will have to be created now, tells if there will be
