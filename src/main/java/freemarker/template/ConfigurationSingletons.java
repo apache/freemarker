@@ -537,7 +537,10 @@ class ConfigurationSingletons {
                 return false;
             }
             
-            SingletonObjectKey thatKey = (SingletonObjectKey) that; 
+            SingletonObjectKey thatKey = (SingletonObjectKey) that;
+            if (hashCode() != thatKey.hashCode) {
+                return false;
+            }
             return nullSafeEquals(this.singletonClass, thatKey.singletonClass)
                     && (this.constructorArgumentsKey == thatKey.constructorArgumentsKey
                         || (this.constructorArgumentsKey != null && this.constructorArgumentsKey != null
