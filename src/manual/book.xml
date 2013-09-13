@@ -20378,21 +20378,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>BeansWrapper</literal>,
-              <literal>DefaultObjectWrapper</literal> and
-              <literal>SimpleObjectWrapper</literal> now implements the
-              <literal>freemarker.template.utility.Lockable</literal>
-              interface with which the configuration properties of the object
-              wrapper can be set permanently to read-only by calling
-              <literal>makeReadOnly()</literal>. An attempt to call a setter
-              on a read-only <literal>ObjectWrapper</literal> will immediately
-              cause <literal>IllegalStateException</literal>. This is useful
-              to ensure that subsystems that share a singleton
-              <literal>ObjectWrapper</literal> can't re-configure it, causing
-              problems that are possibly hard to reproduce.</para>
-            </listitem>
-
-            <listitem>
               <para>Fixes and reworkings in the overloaded method selection
               rules when <literal>BeansWrapper</literal> or
               <literal>DefaultObjectWrapper</literal> is used (almost all
@@ -20621,17 +20606,58 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added new method, <literal>static Object
-              Configuration.getSingleton(Class singletonClass, Object[]
-              constrArgs, Map properties)</literal>. This gets or creates a
-              VM-wide shared object (a singleton) with the given class,
-              constructor parameters and JavaBean properties. If based on the
-              class, constructor arguments and properties set, a matching
-              instance already exists, it returns that, otherwise it creates a
-              new one (that it will store so that next time it can return it).
-              This is mostly used for creating/getting the standard
-              <literal>ObjectWrapper</literal>-s, but can also manage
-              singletons of user-defined classes.</para>
+              <para>Better/safer ways of managing singleton
+              <literal>ObjectWrapper</literal>-s that are shared by
+              independently developed subsystems:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>BeansWrapper</literal>,
+                  <literal>DefaultObjectWrapper</literal> and
+                  <literal>SimpleObjectWrapper</literal> now implements the
+                  <literal>freemarker.template.utility.Lockable</literal>
+                  interface with which the configuration properties of the
+                  object wrapper can be set permanently to read-only by
+                  calling <literal>makeReadOnly()</literal>. An attempt to
+                  call a setter on a read-only
+                  <literal>ObjectWrapper</literal> will immediately cause
+                  <literal>IllegalStateException</literal>. This is useful to
+                  ensure that subsystems that share a singleton
+                  <literal>ObjectWrapper</literal> can't re-configure it,
+                  causing problems that are possibly hard to reproduce.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new method, <literal>static Object
+                  Configuration.getSingleton(Class singletonClass, Object[]
+                  constrArgs, Map properties)</literal>. This gets or creates
+                  a VM-wide shared object (a singleton) with the given class,
+                  constructor parameters and JavaBean properties. If based on
+                  the class, constructor arguments and properties set, a
+                  matching instance already exists, it returns that, otherwise
+                  it creates a new one (that it will store so that next time
+                  it can return it). This is mostly used for creating/getting
+                  the standard <literal>ObjectWrapper</literal>-s, but can
+                  also manage singletons of user-defined classes.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Deprecated the static fields
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,
+                  <literal>BEANS_WRAPPER</literal> and
+                  <literal>SIMPLE_WRAPPER</literal>, because the returned
+                  <literal>ObjectWrapper</literal>-s are configurable (not
+                  read-only), and thus dangerous to use. Instead, use the new
+                  static methods of <literal>Configuration</literal>,
+                  <literal>getSingletonDefaultObjectWrapper(Version)</literal>
+                  and <literal>getSingletonBeansWrapper(Version[,
+                  simpleMapWrapper])</literal>. These are convenience methods
+                  for calling <literal>getSingleton</literal>, and thus are
+                  returning safe read-only instances. Also, unlike the
+                  deprecated fields, with these you can ask for singletons
+                  instances configured in a specific way.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>

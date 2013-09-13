@@ -92,11 +92,14 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.Collections12;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.Lockable;
 import freemarker.template.utility.NormalizeNewlines;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StandardCompress;
 import freemarker.template.utility.StringUtil;
@@ -1347,6 +1350,19 @@ public class Configuration extends Configurable implements Cloneable {
                     InvocationTargetException, IntrospectionException {
         return ConfigurationSingletons.getSingleton(singletonClass, constrArgs, properties, strongRef); 
     }
+
+    /**
+     * Same as {@link #getSingleton(Class, Object[], Map, boolean)} with {@code false} last ({@code strongRef})
+     * parameter. 
+     *  
+     * @since 2.3.21
+     */
+    public static Object getSingleton(
+            Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties)
+            throws IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException,
+                    InvocationTargetException, IntrospectionException {
+        return getSingleton(singletonClass, constrArgs, properties, false); 
+    }
     
     /**
      * Changes the reference type of the singleton to {@link WeakReference}, or does nothing if no matching singleton
@@ -1355,12 +1371,67 @@ public class Configuration extends Configurable implements Cloneable {
      * the {@link #getSingleton(Class, Object[], Map, boolean)} will return it.
      * 
      * @see #getSingleton(Class, Object[], Map, boolean)
+     * 
      * @since 2.3.21
      */
     public static void weakenSingletonReference(
             Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties)
             throws IllegalArgumentException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         ConfigurationSingletons.weakenSingletonReference(singletonClass, constrArgs, properties);
+    }
+
+    /**
+     * Gets (possibly first creates) the singleton {@link DefaultObjectWrapper} instance with the given parameters.
+     * This is a convenience method that internally calls {@link #getSingleton(Class, Object[], Map)}.
+     * 
+     * @param incompatibleImprovements Not {@code null}. See {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}
+     *     for details.
+     * 
+     * @since 2.3.21
+     */
+    public static DefaultObjectWrapper getSingletonDefaultObjectWrapper(Version incompatibleImprovements) {
+        return (DefaultObjectWrapper) getSingletonBeansWrapper(
+                DefaultObjectWrapper.class, incompatibleImprovements, null);
+    }
+    
+    /**
+     * Gets (possibly first creates) the singleton {@link BeansWrapper} instance with the given parameters.
+     * This is a convenience method that internally calls {@link #getSingleton(Class, Object[], Map)}.
+     * 
+     * @param incompatibleImprovements Not {@code null}. See {@link BeansWrapper#BeansWrapper(Version)}
+     *     for details.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getSingletonBeansWrapper(Version incompatibleImprovements) {
+        return getSingletonBeansWrapper(BeansWrapper.class, incompatibleImprovements, null);
+    }
+    
+    /**
+     * Gets (possibly first creates) the singleton {@link BeansWrapper} instance with the given parameters.
+     * This is a convenience method that internally calls {@link #getSingleton(Class, Object[], Map)}.
+     * 
+     * @param incompatibleImprovements Not {@code null}. See {@link BeansWrapper#BeansWrapper(Version)}
+     *     for details.
+     * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getSingletonBeansWrapper(Version incompatibleImprovements, boolean simpleMapsWrapper) {
+        return getSingletonBeansWrapper(
+                BeansWrapper.class,
+                incompatibleImprovements,
+                Collections12.singletonMap("simpleMapWrapper", simpleMapsWrapper ? Boolean.TRUE : Boolean.FALSE));
+    }
+    
+    private static BeansWrapper getSingletonBeansWrapper(Class pClass, Version incompatibleImprovements, Map properties) {
+        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        try {
+            return (BeansWrapper) getSingleton(pClass, new Object[]{ incompatibleImprovements }, properties, false);
+        } catch (Throwable e) {
+            // Java 5: Use cause exception
+            throw new RuntimeException("Failed to get or create " + pClass.getName() + " singleton:\n" + e);
+        }
     }
     
 }

@@ -184,4 +184,15 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         }
         return list;
     }
+    
+    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    public static Object[] normalizeConstructorArguments(Object[] args) {
+        return BeansWrapper.normalizeConstructorArguments(args);
+    }
+
+    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    public static Version normalizeIncompatibleImprovementsVersion(Version version) {
+        return BeansWrapper.normalizeIncompatibleImprovementsVersion(version);
+    }
+    
 }

@@ -92,6 +92,7 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -245,7 +246,12 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper;
     private boolean strict = false;
+    
     private final Version incompatibleImprovements;
+    private static Version getDefaultIncompatbileImprovements() {
+        // Using a method instead of a static field avoids circular class-init-dependency. 
+        return Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
+    }
     
     /**
      * Creates a new instance of BeansWrapper. The newly created instance
@@ -254,7 +260,12 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * model instances.
      */
     public BeansWrapper() {
-        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        this(getDefaultIncompatbileImprovements());
+    }
+    
+    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    public static Object[] normalizeConstructorArguments(Object[] args) {
+        return new Object[] { args.length > 0 ? args[0] : getDefaultIncompatbileImprovements() };
     }
     
     /**
@@ -459,7 +470,10 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         this.exposureLevel = exposureLevel;
     }
     
-    int getExposureLevel()
+    /**
+     * @since 2.3.21
+     */
+    public int getExposureLevel()
     {
         return exposureLevel;
     }
@@ -570,7 +584,16 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     boolean is2321Bugfixed() {
-        return getIncompatibleImprovements().intValue() >= 2003021;
+        return is2321Bugfixed(getIncompatibleImprovements());
+    }
+
+    static boolean is2321Bugfixed(Version version) {
+        return version.intValue() >= 2003021;
+    }
+    
+    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    public static Version normalizeIncompatibleImprovementsVersion(Version version) {
+        return is2321Bugfixed(version) ? new Version(2, 3, 21) : new Version(2, 3, 0);
     }
     
     /**
@@ -1912,6 +1935,29 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             return bd;
         }
     }
+    
+    /**
+     * Returns the exact class name and the value of the most often used {@link BeansWrapper} settings. 
+     * @since 2.3.21
+     */
+    public String toString() {
+        return ClassUtil.getShortClassNameOfObject(this) + "(" + incompatibleImprovements + ") { "
+                + "simpleMapWrapper = " + simpleMapWrapper + ", "
+                + "exposureLevel = " + exposureLevel + ", "
+                + "exposeFields = " + exposeFields + ", "
+                + "strict = " + strict
+                + " }";
+    }
+
+    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    public static Map getPropertyDefaults(Object[] args) {
+        Map props = new HashMap();
+        props.put("simpleMapWrapper", Boolean.FALSE);
+        props.put("exposureLevel", new Integer(EXPOSE_SAFE));  // Java 5: valueOf...
+        props.put("exposeFields", Boolean.FALSE);
+        props.put("strict", Boolean.FALSE);
+        return props;
+    }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
         if(ENUMS_MODEL_CTOR != null) {
@@ -1941,7 +1987,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         }
     }
 
-    
     private static boolean isJavaRebelAvailable() {
         try {
             JavaRebelIntegration.testAvailability();

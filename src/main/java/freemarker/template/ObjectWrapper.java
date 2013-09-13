@@ -77,6 +77,9 @@ public interface ObjectWrapper {
      * An {@link ObjectWrapper} that exposes the object methods and JavaBeans properties as hash elements, and has
      * custom handling for Java {@link Map}-s, {@link ResourceBundle}-s, etc. It doesn't treat
      * {@link org.w3c.dom.Node}-s and Jython objects specially, however.
+     * 
+     * @deprecated Use {@link Configuration#getSingletonBeansWrapper(Version)} instead; this instance isn't read-only
+     *    and thus can't be trusted.
      */
     ObjectWrapper BEANS_WRAPPER = BeansWrapper.getDefaultInstance();
 
@@ -87,6 +90,9 @@ public interface ObjectWrapper {
      * {@link SimpleHash} for {@link Map}-s, {@link SimpleSequence} for {@link List}-s and collections/arrays.
      * Furthermore it uses {@link SimpleScalar}, {@link SimpleNumber} to wrap {@link String}-s and {@link Number}-s,
      * although this is not considered to be harmful.    
+     * 
+     * @deprecated Use {@link Configuration#getSingletonDefaultObjectWrapper(Version)} instead; this instance isn't
+     *    read-only and thus can't be trusted.
      */
     ObjectWrapper DEFAULT_WRAPPER = DefaultObjectWrapper.instance;
 
@@ -95,7 +101,10 @@ public interface ObjectWrapper {
      * It behaves like the {@link #DEFAULT_WRAPPER}, but for objects
      * that it does not know how to wrap as a {@code SimpleXXX} it 
      * throws an exception. It makes no use of reflection-based 
-     * exposure of anything, which may makes it a good candidate for security-restricted applications. 
+     * exposure of anything, which may makes it a good candidate for security-restricted applications.
+     * 
+     * @deprecated No replacement as it was seldom if ever used by anyone; this instance isn't
+     *    read-only and thus can't be trusted.
      */
     ObjectWrapper SIMPLE_WRAPPER = SimpleObjectWrapper.instance;
     
