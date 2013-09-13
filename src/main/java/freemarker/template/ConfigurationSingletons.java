@@ -384,6 +384,12 @@ class ConfigurationSingletons {
                 normalizedArgs = constructorArguments.length == 0
                         ? constructorArguments
                         : widenNumbersToParameterTypes(constructors[0], constructorArguments);
+            } else {
+                if (normalizedArgs.length < constructorArguments.length) {
+                    throw new RuntimeException(
+                            singletonClass.getName() + "." + NORMALIZE_CONSTRUCTOR_ARGUMENTS_METHOD_NAME
+                            + " is not allowed to normalize an argument list to a shorter list.");
+                }
             }
             this.constructorArgumentsKey = normalizedArgs; 
             

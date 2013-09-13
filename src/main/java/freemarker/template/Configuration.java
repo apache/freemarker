@@ -1290,7 +1290,10 @@ public class Configuration extends Configurable implements Cloneable {
      *       then for a 0-length {@code Object[]} the method has to return {@code [10, null]}. Also, for the array
      *       {@code [(short) 1, "foo"]} it must return {@code [1, "foo"]}, that is, {@code short} was changed to
      *       {@code int}. (When you don't define {@code normalizeConstructorArguments} and
-     *       there's only one public constructor, FreeMarker will take care of such numerical conversions.)
+     *       there's only one public constructor, FreeMarker will take care of such numerical conversions.) The
+     *       {@code constrArgs} parameter array shound't be modified during the normalization, instead a new array must
+     *       be returned if the normalized array differs from the original. The new array can't be shorter than the
+     *       parameter array. 
      *       
      *    <li><p>If you wish to set some JavaBean properties, {@code singletonClass} or a super-class of it must have
      *       a {@code public static Map getPropertyDefaults(Object constrArgs[])} method. For all properties that are
