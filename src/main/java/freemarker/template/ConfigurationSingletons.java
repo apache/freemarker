@@ -390,6 +390,10 @@ class ConfigurationSingletons {
                             singletonClass.getName() + "." + NORMALIZE_CONSTRUCTOR_ARGUMENTS_METHOD_NAME
                             + " is not allowed to normalize an argument list to a shorter list.");
                 }
+                // To protect from misuse we ensure it's a copy:
+                if (normalizedArgs == constructorArguments && normalizedArgs.length != 0) {
+                    normalizedArgs = (Object[]) normalizedArgs.clone(); 
+                }
             }
             this.constructorArgumentsKey = normalizedArgs; 
             
@@ -445,6 +449,13 @@ class ConfigurationSingletons {
                         normalizedProps.put(defaultPropName, ent.getValue());
                     }
                 }
+            }
+            
+            // To protect from misuse and poor Map implementations, we ensure it's a copy and a HashMap: 
+            if ((normalizedProps == properties && normalizedProps != Collections12.EMPTY_MAP)
+                    || !(normalizedProps instanceof HashMap)) {
+                // For consistent hashCode, we better ensure it's a HashMap.
+                normalizedProps = new HashMap(normalizedProps);
             }
             this.propertiesKey = normalizedProps;
             
