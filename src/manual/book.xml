@@ -20612,6 +20612,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
+                  <para>Instead of <literal>new
+                  DefaultObjectWrapper(<replaceable>...</replaceable>)</literal>
+                  and <literal>new
+                  BeansWrapper(<replaceable>...</replaceable>)</literal>, you
+                  should use
+                  <literal>DefaultObjectWrapper.getInstance(Version)</literal>
+                  and <literal>BeansWrapper.getInstance(Version)</literal> or
+                  <literal>BeansWrapper.getInstance(Version, boolean
+                  SimpleMapWrapper)</literal>. These will return a VM-wide
+                  singleton instance, which is read-only (means,
+                  non-configurable, hence safe to share), created on-demand
+                  and is only soft-referenced inside FreeMarker. The benefit
+                  of using singletons instead of new instances is that this
+                  way the class introspection cache is shared among the
+                  subsystem that use FreeMarker but doesn't share the
+                  <literal>Configuration</literal>. </para>
+                </listitem>
+
+                <listitem>
+                  <para>Deprecated the static fields
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,
+                  <literal>BEANS_WRAPPER</literal> and
+                  <literal>SIMPLE_WRAPPER</literal>, because the returned
+                  <literal>ObjectWrapper</literal>-s are configurable (not
+                  read-only), and thus dangerous to use. Use the
+                  <literal>getInstance</literal> methods above instead.</para>
+                </listitem>
+
+                <listitem>
                   <para><literal>BeansWrapper</literal>,
                   <literal>DefaultObjectWrapper</literal> and
                   <literal>SimpleObjectWrapper</literal> now implements the
@@ -20636,26 +20665,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   the class, constructor arguments and properties set, a
                   matching instance already exists, it returns that, otherwise
                   it creates a new one (that it will store so that next time
-                  it can return it). This is mostly used for creating/getting
-                  the standard <literal>ObjectWrapper</literal>-s, but can
-                  also manage singletons of user-defined classes.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Deprecated the static fields
-                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,
-                  <literal>BEANS_WRAPPER</literal> and
-                  <literal>SIMPLE_WRAPPER</literal>, because the returned
-                  <literal>ObjectWrapper</literal>-s are configurable (not
-                  read-only), and thus dangerous to use. Instead, use the new
-                  static methods of <literal>Configuration</literal>,
-                  <literal>getSingletonDefaultObjectWrapper(Version)</literal>
-                  and <literal>getSingletonBeansWrapper(Version[,
-                  simpleMapWrapper])</literal>. These are convenience methods
-                  for calling <literal>getSingleton</literal>, and thus are
-                  returning safe read-only instances. Also, unlike the
-                  deprecated fields, with these you can ask for singletons
-                  instances configured in a specific way.</para>
+                  it can return it). This is what
+                  <literal>DefaultObjectWrapper.getInstance</literal> and
+                  <literal>BeansWrapper.getInstance</literal> uses, but since
+                  it's a public API, it can also be used to manage singletons
+                  of user-defined classes.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

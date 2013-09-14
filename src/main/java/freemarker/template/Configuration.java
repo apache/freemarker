@@ -183,7 +183,7 @@ public class Configuration extends Configurable implements Cloneable {
     /** @deprecated Use {@link #version} instead. */
     private static String versionNumber;
     private static Version version;
-    
+
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
@@ -1259,19 +1259,23 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Gets or creates a VM-wide shared object (a singleton) with the given class, constructor parameters and JavaBean
      * properties. If based on the class, constructor arguments and properties set, a matching instance already exists,
-     * it returns that, otherwise it creates a new one (that it will store so that next time it can return it). This
-     * is mostly used for creating/getting the standard {@code ObjectWrapper}-s, but can also manage
-     * singletons of user-defined classes.
+     * it returns that, otherwise it creates a new one that it will store so that next time it can return it.
      * 
-     * <p>This method isn't meant to be called often (it's not very lightweight). This is usually only used when
-     * setting up a {@link Configuration} instance, to acquire some of the setting values. Like {@link ObjectWrapper}-s
-     * are often singletons instead of being re-created again and again, so that their introspection cache need not be
-     * re-built.
+     * <p>The major application of this is within {@link DefaultObjectWrapper#getInstance(Version)},
+     * {@link BeansWrapper#getInstance(Version)} and such, but you can use this facility to manage your own singletons,
+     * possibly of custom classes. The advantage of using this over a static final field is that these objects are
+     * created on-demand and are optionally only soft-referenced. 
      * 
-     * <p>For this method to be usable with a class, it has to meet some conditions as listed below. To understand it
-     * easier, know that FreeMarker will find already existing singletons based on if their constructor arguments and
-     * property assignments are equivalent with those specified in the parameters to this method. Thus, the constructor
-     * argument list and the set of property assignments will have to be normalized. So the conditions are:   
+     * <p>This method isn't meant to be called often, as it's quite slow. This is only meant to be used directly during
+     * seldom executed tasks like getting some setting values when setting up a long-lived {@link Configuration}
+     * instance. {@link DefaultObjectWrapper#getInstance(Version)} and such use an internal cache to avoid frequent
+     * calls to this method. 
+     * 
+     * <p>For this method to be usable with a class, the class has to meet some conditions as listed below. To
+     * understand it easier, know that FreeMarker will find already existing singletons based on if their constructor
+     * arguments and property assignments are equivalent with those specified in the parameters to this method. Thus,
+     * the constructor argument list and the set of property assignments will have to be normalized. So the conditions
+     * are:   
      * 
      * <ul>
      *   <li><p>The {@code singletonClass} must implement {@link Lockable}. Since singletons are automatically shared
@@ -1378,60 +1382,6 @@ public class Configuration extends Configurable implements Cloneable {
             Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties)
             throws IllegalArgumentException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         ConfigurationSingletons.weakenSingletonReference(singletonClass, constrArgs, properties);
-    }
-
-    /**
-     * Gets (possibly first creates) the singleton {@link DefaultObjectWrapper} instance with the given parameters.
-     * This is a convenience method that internally calls {@link #getSingleton(Class, Object[], Map)}.
-     * 
-     * @param incompatibleImprovements Not {@code null}. See {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}
-     *     for details.
-     * 
-     * @since 2.3.21
-     */
-    public static DefaultObjectWrapper getSingletonDefaultObjectWrapper(Version incompatibleImprovements) {
-        return (DefaultObjectWrapper) getSingletonBeansWrapper(
-                DefaultObjectWrapper.class, incompatibleImprovements, null);
-    }
-    
-    /**
-     * Gets (possibly first creates) the singleton {@link BeansWrapper} instance with the given parameters.
-     * This is a convenience method that internally calls {@link #getSingleton(Class, Object[], Map)}.
-     * 
-     * @param incompatibleImprovements Not {@code null}. See {@link BeansWrapper#BeansWrapper(Version)}
-     *     for details.
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getSingletonBeansWrapper(Version incompatibleImprovements) {
-        return getSingletonBeansWrapper(BeansWrapper.class, incompatibleImprovements, null);
-    }
-    
-    /**
-     * Gets (possibly first creates) the singleton {@link BeansWrapper} instance with the given parameters.
-     * This is a convenience method that internally calls {@link #getSingleton(Class, Object[], Map)}.
-     * 
-     * @param incompatibleImprovements Not {@code null}. See {@link BeansWrapper#BeansWrapper(Version)}
-     *     for details.
-     * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getSingletonBeansWrapper(Version incompatibleImprovements, boolean simpleMapsWrapper) {
-        return getSingletonBeansWrapper(
-                BeansWrapper.class,
-                incompatibleImprovements,
-                Collections12.singletonMap("simpleMapWrapper", simpleMapsWrapper ? Boolean.TRUE : Boolean.FALSE));
-    }
-    
-    private static BeansWrapper getSingletonBeansWrapper(Class pClass, Version incompatibleImprovements, Map properties) {
-        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
-        try {
-            return (BeansWrapper) getSingleton(pClass, new Object[]{ incompatibleImprovements }, properties, false);
-        } catch (Throwable e) {
-            // Java 5: Use cause exception
-            throw new RuntimeException("Failed to get or create " + pClass.getName() + " singleton:\n" + e);
-        }
     }
     
 }

@@ -59,6 +59,7 @@ import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -92,7 +93,6 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -161,13 +161,21 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private static final Object CONSTRUCTORS = new Object();
     private static final Object ARGTYPES = new Object();
 
+    private static final boolean SIMPLE_MAP_WRAPPER_DEFAULT = false;
+    
     private static final boolean javaRebelAvailable = isJavaRebelAvailable();
     
     /**
      * The default instance of BeansWrapper
+     * @deprecated Static instances were deprecated by {@link #getInstance(Version)}.
      */
     private static final BeansWrapper INSTANCE = new BeansWrapper();
 
+    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003000;
+    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003021;
+    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003000DifSimpleMaps;
+    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003021DifSimpleMaps;
+    
     /**
      * Used for synchronization by {@link #genericClassIntrospectionCache},
      * {@link #staticModels} and {@link #enumModels} (and by any similar future
@@ -244,7 +252,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private int defaultDateType = TemplateDateModel.UNKNOWN;
 
     private ObjectWrapper outerIdentity = this;
-    private boolean simpleMapWrapper;
+    private boolean simpleMapWrapper = SIMPLE_MAP_WRAPPER_DEFAULT;
     private boolean strict = false;
     
     private final Version incompatibleImprovements;
@@ -258,17 +266,19 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * will use the null reference as its null object, it will use
      * {@link #EXPOSE_SAFE} method exposure level, and will not cache
      * model instances.
+     * 
+     * @deprecated Use {@link #getInstance(Version)}, {@link #getInstance(Version, boolean)} or
+     *     {@link #BeansWrapper(Version)}.
      */
     public BeansWrapper() {
         this(getDefaultIncompatbileImprovements());
     }
     
-    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
-    public static Object[] normalizeConstructorArguments(Object[] args) {
-        return new Object[] { args.length > 0 ? args[0] : getDefaultIncompatbileImprovements() };
-    }
-    
     /**
+     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} instead,
+     * unless you need a separate class introspection cache or some configuration tweak that can't be achieved with
+     * them.
+     * 
      * @param incompatibleImprovements
      *   Sets which of the non-backward-compatible improvements should be enabled. This version number is the
      *   same as the FreeMarker version number with which the improvements were implemented. 
@@ -296,6 +306,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      *       see the version History in the FreeMarker Manual.</li>
      *     </li>
      *   </ul>
+     *   
+     *   <p>Not {@code null}. 
      *
      * @since 2.3.21
      */
@@ -314,6 +326,100 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         
         if(javaRebelAvailable) {
             JavaRebelIntegration.registerWrapper(this);
+        }
+    }
+
+    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    public static Object[] normalizeConstructorArguments(Object[] args) {
+        return new Object[] { args.length > 0 ? args[0] : getDefaultIncompatbileImprovements() };
+    }
+    
+    /**
+     * Gets (possibly first creates) the read-only singleton {@link BeansWrapper} instance with the given parameters.
+     * (Read-only means that you can configure it.)
+     * This is a convenience method that internally calls {@link Configuration#getSingleton(Class, Object[], Map)},
+     * although it's also much faster as it caches the result.
+     * 
+     * @param incompatibleImprovements See in {@link BeansWrapper#BeansWrapper(Version)}.
+     *     Note that the version will be normalized to the lowest equivalent version, so for the returned
+     *     instance {@link #getIncompatibleImprovements()} might returns a lower version that what you have specified.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements) {
+        return getInstanceInner(incompatibleImprovements, true);
+    }
+    
+    /**
+     * Same as {@link #getInstance(Version)}, but also specifies the simple-map-wrapper setting of the desired
+     * instance.
+     *     
+     * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapsWrapper) {
+        return getInstanceInner(incompatibleImprovements, simpleMapsWrapper == SIMPLE_MAP_WRAPPER_DEFAULT);
+    }
+
+    private static BeansWrapper getInstanceInner(Version incompatibleImprovements, boolean defaultSimpleMaps) {
+        BeansWrapper res;
+        
+        final int v = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements).intValue();
+        if (v == 2003000) {
+            WeakReference rw = defaultSimpleMaps ? singleton2003000 : singleton2003000DifSimpleMaps;
+            if (rw != null) {
+                res = (BeansWrapper) rw.get();
+                if (res != null) return res;
+            }
+        } else if (v == 2003021) {
+            WeakReference rw = defaultSimpleMaps ? singleton2003021 : singleton2003021DifSimpleMaps;
+            if (rw != null) {
+                res = (BeansWrapper) rw.get();
+                if (res != null) return res;
+            }
+        } else {
+            throw new RuntimeException();
+        }
+        
+        res = getInstance(
+                BeansWrapper.class,
+                incompatibleImprovements,
+                defaultSimpleMaps
+                    ? null
+                    : Collections12.singletonMap(
+                            "simpleMapWrapper",
+                            !SIMPLE_MAP_WRAPPER_DEFAULT ? Boolean.TRUE : Boolean.FALSE));
+        
+        if (v == 2003000) {
+            WeakReference wr = new WeakReference(res);
+            if (defaultSimpleMaps) {
+                singleton2003000 = wr;
+            } else {
+                singleton2003000DifSimpleMaps = wr;
+            }
+        } else if (v == 2003021) {
+            WeakReference wr = new WeakReference(res);
+            if (defaultSimpleMaps) {
+                singleton2003021 = wr;
+            } else {
+                singleton2003021DifSimpleMaps = wr;
+            }
+        } else {
+            throw new RuntimeException();
+        }
+        
+        return res;
+    }
+    
+    protected static BeansWrapper getInstance(Class pClass, Version incompatibleImprovements, Map properties) {
+        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        try {
+            return (BeansWrapper) Configuration.getSingleton(
+                    pClass, new Object[] { incompatibleImprovements }, properties, false);
+        } catch (Throwable e) {
+            // Java 5: Use cause exception
+            throw new RuntimeException("Failed to get or create " + pClass.getName() + " singleton:\n" + e);
         }
     }
     
@@ -403,14 +509,27 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
 
     /**
-     * By default the BeansWrapper wraps classes implementing
-     * java.util.Map using {@link MapModel}. Setting this flag will
-     * cause it to use a {@link SimpleMapModel} instead. The biggest
-     * difference is that when using a {@link SimpleMapModel}, the
-     * map will be visible as <code>TemplateHashModelEx</code>,
-     * and the subvariables will be the content of the map,
-     * without the other methods and properties of the map object.
-     * @param simpleMapWrapper enable simple map wrapping
+     * When set to {@code true}, the keys in {@link Map}-s won't mix with the method names when looking at them
+     * from templates. The default is {@code false} for backward-compatibility, but is not recommended.
+     * 
+     * <p>When this is {@code false}, {@code myMap.foo} or {@code myMap['foo']} either returns the method {@code foo},
+     * or calls {@code Map.get("foo")}. If both exists (the method and the {link Map} key), one will hide the other,
+     * depending on the {@link #setMethodsShadowItems(boolean)} setting, which default to {@code true} (the method
+     * wins). Some frameworks use this so that you can call {@code myMap.get(nonStringKey)} from templates [*], but it
+     * comes on the cost of polluting the key-set with the method names, and risking methods accidentally hiding
+     * {@link Map} entries (or the other way around). Thus, this setting is not recommended.
+     * (Technical note: {@link Map}-s will be wrapped into {@link MapModel} in this case.)  
+     *
+     * <p>When this is {@code true}, {@code myMap.foo} or {@code myMap['foo']} always calls {@code Map.get("foo")}.
+     * The methods of the {@link Map} object aren't visible from templates in this case. This, however, spoils the
+     * {@code myMap.get(nonStringKey)} workaround. But now you can use {@code myMap(nonStringKey)} instead, that is, you
+     * can use the map itself as the {@code get} method. 
+     * (Technical note: {@link Map}-s will be wrapped into {@link SimpleMapModel} in this case.)
+     * 
+     * <p>*: For historical reasons, FreeMarker 2.3.X doesn't support non-string keys with the {@code []} operator,
+     *       hence the workarounds. This will be likely fixed in FreeMarker 2.4.0. Also note that the method- and
+     *       the "field"-namespaces aren't separate in FreeMarker, hence {@code myMap.get} can return the {@code get}
+     *       method.
      */
     public void setSimpleMapWrapper(boolean simpleMapWrapper)
     {
@@ -591,9 +710,13 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         return version.intValue() >= 2003021;
     }
     
+    private final static Version VERSION_2_3_21 = new Version(2, 3, 21);  
+    private final static Version VERSION_2_3_0 = new Version(2, 3, 0);  
+    
     /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
     public static Version normalizeIncompatibleImprovementsVersion(Version version) {
-        return is2321Bugfixed(version) ? new Version(2, 3, 21) : new Version(2, 3, 0);
+        NullArgumentException.check("version", version);
+        return is2321Bugfixed(version) ? VERSION_2_3_21 : VERSION_2_3_0;
     }
     
     /**
@@ -606,6 +729,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * exposure level, null model) to affect its operation. By default, the
      * default instance is not caching, uses the <code>EXPOSE_SAFE</code>
      * exposure level, and uses null reference as the null model.
+     * 
+     * @deprecated Use {@link #getInstance(Version)}; as the instance returned is not read-only, it's dangerous to use.
      */
     public static final BeansWrapper getDefaultInstance()
     {

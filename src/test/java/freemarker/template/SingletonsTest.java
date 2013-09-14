@@ -351,51 +351,64 @@ public class SingletonsTest extends TestCase {
         String bw1Str = "soft freemarker.ext.beans.BeansWrapper(2.3.0) { "
                 + "simpleMapWrapper = true, exposureLevel = 1, exposeFields = false, strict = false }";
         
-        final BeansWrapper bw1 = Configuration.getSingletonBeansWrapper(new Version(2, 3, 19), true);
+        final BeansWrapper bw1 = BeansWrapper.getInstance(new Version(2, 3, 19), true);
         assertSingletonSet(bw1Str);
         assertTrue(bw1.wrap(newMap("x", 1)) instanceof SimpleMapModel);
         assertSame(bw1.getClass(), BeansWrapper.class);
         
-        final BeansWrapper bw2 = Configuration.getSingletonBeansWrapper(new Version(2, 3, 20), true);
+        final BeansWrapper bw2 = BeansWrapper.getInstance(new Version(2, 3, 20), true);
         assertSingletonSet(bw1Str);
         assertSame(bw1, bw2);
         
         final String bwBf1Str = "soft freemarker.ext.beans.BeansWrapper(2.3.21) { "
                 + "simpleMapWrapper = true, exposureLevel = 1, exposeFields = false, strict = false }";
-        final ObjectWrapper bwBf1 = Configuration.getSingletonBeansWrapper(new Version(2, 3, 21), true);
+        final ObjectWrapper bwBf1 = BeansWrapper.getInstance(new Version(2, 3, 21), true);
+        assertTrue(bw1.wrap(newMap("x", 1)) instanceof SimpleMapModel);
         assertSingletonSet(bw1Str, bwBf1Str);
         assertNotSame(bwBf1, bw2);
         
-        final ObjectWrapper bwBf2 = Configuration.getSingletonBeansWrapper(new Version(2, 3, 22), true);
+        final ObjectWrapper bwBf2 = BeansWrapper.getInstance(new Version(2, 3, 22), true);
         assertSingletonSet(bw1Str, bwBf1Str);
         assertNotSame(bwBf1, bw2);
         assertSame(bwBf1, bwBf2);
         
         String bwDefStr = "soft freemarker.ext.beans.BeansWrapper(2.3.0) { "
                 + "simpleMapWrapper = false, exposureLevel = 1, exposeFields = false, strict = false }";
-        final ObjectWrapper bwDef1 = Configuration.getSingletonBeansWrapper(new Version(2, 3, 10), false);
+        final ObjectWrapper bwDef1 = BeansWrapper.getInstance(new Version(2, 3, 10), false);
         assertTrue(bwDef1.wrap(newMap("x", 1)) instanceof MapModel);
         assertSingletonSet(bw1Str, bwBf1Str, bwDefStr);
         final ObjectWrapper bwDef2 = (BeansWrapper) Configuration.getSingleton(BeansWrapper.class, null, null, false);
         assertSingletonSet(bw1Str, bwBf1Str, bwDefStr);
         
         assertSame(bwDef1, bwDef2);
-        assertSame(bwDef1, Configuration.getSingletonBeansWrapper(new Version(2, 3, 12)));
+        assertSame(bwDef1, BeansWrapper.getInstance(new Version(2, 3, 12)));
         assertSame(bwDef1.getClass(), BeansWrapper.class);
         
-        assertSame(bw1, Configuration.getSingletonBeansWrapper(new Version(2, 3, 12), true));
-        assertSame(bwBf1, Configuration.getSingletonBeansWrapper(new Version(2, 3, 21), true));
+        assertSame(bw1, BeansWrapper.getInstance(new Version(2, 3, 12), true));
+        assertSame(bwBf1, BeansWrapper.getInstance(new Version(2, 3, 21), true));
+        
+        BeansWrapper bw;
+        
+        bw = BeansWrapper.getInstance(new Version(2, 3, 20));
+        assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 20), false));
+        assertTrue(bwDef1.wrap(newMap("x", 1)) instanceof MapModel);
+        assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
+        
+        bw = BeansWrapper.getInstance(new Version(2, 3, 21));
+        assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 21), false));
+        assertTrue(bwDef1.wrap(newMap("x", 1)) instanceof MapModel);
+        assertEquals(new Version(2, 3, 21), bw.getIncompatibleImprovements());
     }
 
     public void testDefaultObjectWrapperSingletons() throws Exception {
-        DefaultObjectWrapper dw1 = Configuration.getSingletonDefaultObjectWrapper(new Version(2, 3, 20));
+        BeansWrapper dw1 = DefaultObjectWrapper.getInstance(new Version(2, 3, 20));
         assertSame(dw1.getClass(), DefaultObjectWrapper.class);
-        DefaultObjectWrapper dw2 = (DefaultObjectWrapper) Configuration.getSingleton(DefaultObjectWrapper.class, null, null, false);
+        BeansWrapper dw2 = (DefaultObjectWrapper) Configuration.getSingleton(DefaultObjectWrapper.class, null, null, false);
         assertSame(dw1, dw2);
         
-        DefaultObjectWrapper dwBf1 = Configuration.getSingletonDefaultObjectWrapper(new Version(2, 3, 22));
+        BeansWrapper dwBf1 = DefaultObjectWrapper.getInstance(new Version(2, 3, 22));
         assertEquals(dwBf1.getIncompatibleImprovements(), new Version(2, 3, 21));
-        DefaultObjectWrapper dwBf2 = Configuration.getSingletonDefaultObjectWrapper(new Version(2, 3, 21));
+        BeansWrapper dwBf2 = DefaultObjectWrapper.getInstance(new Version(2, 3, 21));
         assertSame(dwBf1, dwBf2);
     }
     

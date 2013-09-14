@@ -52,6 +52,7 @@
 
 package freemarker.template;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,17 +74,76 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     static final private ObjectWrapper JYTHON_WRAPPER;
     
+    private static volatile WeakReference/*<DefaultObjectWrapper>*/ singleton2003000;
+    private static volatile WeakReference/*<DefaultObjectWrapper>*/ singleton2003021;
+    
+    /**
+     * @deprecated Use {@link #getInstance(Version)} instead.
+     */
     public DefaultObjectWrapper() {
         super();
     }
     
     /**
-     * @param incompatibleImprovements see in {@link BeansWrapper#BeansWrapper(Version)}.
+     * Use {@link #getInstance(Version)} instead, unless you need a separate class introspection cache or some
+     * configuration tweak that can't be achieved with it.
+     * 
+     * @param incompatibleImprovements As of yet, same as in {@link BeansWrapper#BeansWrapper(Version)}.
      * 
      * @since 2.3.21
      */
     public DefaultObjectWrapper(Version incompatibleImprovements) {
         super(incompatibleImprovements);
+    }
+
+    /**
+     * Gets (possibly first creates) the read-only singleton {@link DefaultObjectWrapper} instance with the given
+     * parameters. (Read-only means that you can configure it.)
+     * This is a convenience method that internally calls {@link Configuration#getSingleton(Class, Object[], Map)}.
+     * 
+     * @param incompatibleImprovements See in {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
+     *     Note that the version will be normalized to the lowest equivalent version, so for the returned
+     *     instance {@link #getIncompatibleImprovements()} might returns a lower version that what you have specified.
+     * 
+     * @return A {@link DefaultObjectWrapper}, only Java languages doesn't allow declaring that return type.   
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements) {
+        incompatibleImprovements = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(
+                incompatibleImprovements);
+        DefaultObjectWrapper res; 
+        
+        final int v = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements)
+                .intValue();
+        if (v == 2003000) {
+            WeakReference rw = singleton2003000;
+            if (rw != null) {
+                res = (DefaultObjectWrapper) rw.get();
+                if (res != null) return res;
+            }
+        } else if (v == 2003021) {
+            WeakReference rw = singleton2003021;
+            if (rw != null) {
+                res = (DefaultObjectWrapper) rw.get();
+                if (res != null) return res;
+            }
+        } else {
+            throw new RuntimeException();
+        }
+        
+        res = (DefaultObjectWrapper) getInstance(
+                DefaultObjectWrapper.class, incompatibleImprovements, null);
+
+        if (v == 2003000) {
+            singleton2003000 = new WeakReference(res);
+        } else if (v == 2003021) {
+            singleton2003021 = new WeakReference(res);
+        } else {
+            throw new RuntimeException();
+        }
+        
+        return res;
     }
     
     static {
