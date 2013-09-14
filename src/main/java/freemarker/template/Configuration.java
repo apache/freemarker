@@ -95,11 +95,9 @@ import freemarker.core._MiscTemplateException;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Collections12;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.Lockable;
 import freemarker.template.utility.NormalizeNewlines;
-import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StandardCompress;
 import freemarker.template.utility.StringUtil;
@@ -1261,82 +1259,85 @@ public class Configuration extends Configurable implements Cloneable {
      * properties. If based on the class, constructor arguments and properties set, a matching instance already exists,
      * it returns that, otherwise it creates a new one that it will store so that next time it can return it.
      * 
-     * <p>The major application of this is within {@link DefaultObjectWrapper#getInstance(Version)},
-     * {@link BeansWrapper#getInstance(Version)} and such, but you can use this facility to manage your own singletons,
-     * possibly of custom classes. The advantage of using this over a static final field is that these objects are
-     * created on-demand and are optionally only soft-referenced. 
+     * <p>The main application of this method is within {@link DefaultObjectWrapper#getInstance(Version)},
+     * {@link BeansWrapper#getInstance(Version)} and such, but you can use this facility to manage your own singleton
+     * objects, possibly of custom classes. The advantage of using this over a static final field is that these objects
+     * are created lazily (when first needed) and are optionally only soft-referenced from inside FreeMarker's singleton
+     * registry, so they can be garbage collected when they aren't used anymore.
      * 
      * <p>This method isn't meant to be called often, as it's quite slow. This is only meant to be used directly during
-     * seldom executed tasks like getting some setting values when setting up a long-lived {@link Configuration}
-     * instance. {@link DefaultObjectWrapper#getInstance(Version)} and such use an internal cache to avoid frequent
-     * calls to this method. 
+     * seldom executed tasks like creating some configuration setting values when setting up a long-lived
+     * {@link Configuration} object. {@link DefaultObjectWrapper#getInstance(Version)} and such use an internal cache to
+     * avoid frequent calls to this method. 
      * 
      * <p>For this method to be usable with a class, the class has to meet some conditions as listed below. To
-     * understand it easier, know that FreeMarker will find already existing singletons based on if their constructor
-     * arguments and property assignments are equivalent with those specified in the parameters to this method. Thus,
-     * the constructor argument list and the set of property assignments will have to be normalized. So the conditions
-     * are:   
+     * understand them easier, you should know that FreeMarker will find already existing singletons based on if their
+     * constructor arguments and property assignments are equivalent but not necessarily strictly equal with those
+     * specified in the parameters to this method. Thus, the constructor argument list and the set of property
+     * assignments will have to be normalized (see later). So the conditions are:   
      * 
      * <ul>
-     *   <li><p>The {@code singletonClass} must implement {@link Lockable}. Since singletons are automatically shared
-     *       among subsystems that are possibly made by 3rd parties, it's important to protect the singletons from
-     *       accidental modification.
+     *   <li><p>The class must implement {@link Lockable}. Since singletons are automatically shared
+     *       among subsystems that are possibly made by 3rd parties, it's important to protect them from accidental
+     *       modifications that can interfere with normal operation of those who share the singleton. Consider this,
+     *       when you decide what operations will be blocked after {@link Lockable#makeReadOnly()}, which will be
+     *       called before the singleton is returned.
      *       
-     *   <li><p>If the constructor argument list contains a {@link Version}, the {@code singletonClass} must have a
+     *   <li><p>If the constructor argument list contains a {@link Version}, the class must have a
      *       non-inherited {@code public static Version normalizeIncompatibleImprovementsVersion(Version)} method. This
      *       has to return the lowest version that is equivalent with the argument version. Thus, if singletons are
      *       requested with different but equivalent versions, FreeMarker will know that it on needs one singleton for
      *       all that. The constructor and all the other further static methods described below will only see the
      *       normalized version.
      *   
-     *   <li><p>If {@code singletonClass} has multiple public constructors, and you wish to instantiate singletons with
-     *       other than the 0-argument constructor, the class must have a non-inherited
+     *   <li><p>If the class has multiple public constructors, and you wish to instantiate singletons with
+     *       other than its 0-argument constructor, the class must have a non-inherited
      *       {@code public static Object[] normalizeConstructorArguments(Object[] constrArgs)} method. This must return
-     *       the same argument lists for all argument lists that ultimately mean the same. Like, if you have two
+     *       an array with the same content for all argument lists that ultimately mean the same. Like, if you have two
      *       constructors, {@code C()} and {@code C(int x, String s)}, and {@code C()} internally calls
      *       {@code this(10, null)}, then for a 0-length {@code Object[]} the method has to return {@code [10, null]}.
      *       Also, for the array {@code [(short) 1, "foo"]} it must return {@code [1, "foo"]}, that is, {@code short}
-     *       was changed to {@code int}. (When you don't define {@code normalizeConstructorArguments} and
+     *       must be converted to {@code int}. (When you don't define {@code normalizeConstructorArguments} and
      *       there's only one public constructor, FreeMarker will take care of such numerical conversions.) The
      *       {@code constrArgs} parameter array shound't be modified during the normalization, instead a new array must
-     *       be returned if the normalized array differs from the original. The new array can't be shorter than the
-     *       parameter array. 
+     *       be returned if the normalized array differs from the original. The returned array can't be shorter than the
+     *       argument array.
      *       
-     *    <li><p>If you wish to set some JavaBean properties, {@code singletonClass} or a super-class of it must have
+     *    <li><p>If you wish to set some JavaBean properties, the class or a super-class of it must have
      *       a {@code public static Map getPropertyDefaults(Object constrArgs[])} method. For all properties that are
      *       allowed to be set via the {@code properties} parameter, it must contain a {@code String}-{@code Object}
      *       entry that maps the name of the property to its default value. For example, if {@code getPropertyDefaults}
-     *       return a {@code Map} containing <tt>{x=1, y=2, z=3}</tt>, then when the {@code properties} parameter to
-     *       {@link #getSingleton} is only <tt>{y=22}</tt>, FreeMarker will
+     *       return the {@code Map} <tt>{x=1, y=2, z=3}</tt>, then when the {@code properties} parameter to
+     *       {@link #getInstanceOf getInstanceOf} is only <tt>{y=22}</tt>, FreeMarker will
      *       extend it to <tt>{x=1, y=22, z=3}</tt>, and that's what it will use to find out if such a singleton
-     *       already exists. Note that {@code getPropertyDefaults} need not return all the JavaBean properties
-     *       of the class, but those that it doesn't return will not be writable with {@link #getSingleton}.
+     *       already exists. Note that {@code getPropertyDefaults} need not return all the JavaBean properties of the
+     *       class, but those that it doesn't return will not be writable with {@link #getInstanceOf getInstanceOf}.
      *       The {@code constrArgs[]} parameter of {@code getPropertyDefaults} stores the constructor arguments as it
      *       was returned by {@code normalizeConstructorArguments}, or if there was no
      *       {@code normalizeConstructorArguments}, the original constructor arguments after number type
      *       normalizations. This parameter is provided in case the property defaults depend on constructor parameters. 
      * </ul>
      *  
-     * @param singletonClass The exact class of the singleton object; must implement {@link Lockable}. See other
+     * @param cls The exact class of the requested object; it must implement {@link Lockable}. See other
      *     requirements earlier.
-     *     Note that the class will be hard-referenced by the {@link Configuration} class, and thus possibly can't be
-     *     ever garbage collected.
+     *     Note that the class will be hard-referenced by the singleton registry of FreeMarker, and thus possibly can't
+     *     be ever garbage collected.
      * @param constrArgs The constructor arguments, possibly {@code null} for 0 arguments. All argument values should
      *     have proper {@link Object#equals(Object)} and {@link Object#hashCode()} support.
      *     If there's a {@link Version} argument, the first one will be normalized to the lowest
      *     equivalent value; see details earlier.
-     *     Note that this object will be hard-referenced by {@link Configuration} class (or, possibly, the normalized
-     *     version of this object), and thus possibly can't be ever garbage collected.
+     *     Note that this object (or the normalized version of this object) will be hard-referenced by the
+     *     singleton registry of FreeMarker, and thus possibly can't be ever garbage collected.
      * @param properties The JavaBean properties to set, possibly {@code null} for an empty {@link Map}. The keys in the
      *     {@link Map} are the {@link String} property names, the values are the vales to which the properties should
      *     be set. All property values must have proper {@link Object#equals(Object)} and {@link Object#hashCode()}
      *     support. Only the properties that are returned by the {@code getPropertyDefaults} method can be set; see
      *     details earlier.
-     *     Note that this object will be hard-referenced by {@link Configuration} class, and thus possibly can't be ever
-     *     garbage collected.
+     *     Note that this object will be hard-referenced by the singleton registry of FreeMarker, and thus possibly
+     *     can't be ever garbage collected.
      * @param strongRef If the singleton instance will have to be created now, tells if there will be
-     *     strong-reference or a {@link SoftReference} to it from the {@link Configuration} class. If the matching
-     *     singleton has already existed, it can change the reference from soft to hard, but not the other way around
+     *     strong-reference or a {@link SoftReference} to it from the singleton registry of FreeMarker. If the matching
+     *     singleton was already these, it can change the reference from soft to hard, but not the other way around
      *     (it just silently leaves the reference hard then). When the singleton is soft-referenced, it's maybe
      *     garbage collected when the memory is low, unless there's a hard-reference to it from somewhere else
      *     (typically from a setting in a {@link Configuration} instance). The key of the singleton (the singleton's
@@ -1347,41 +1348,42 @@ public class Configuration extends Configurable implements Cloneable {
      *     
      * @since 2.3.21
      */
-    public static Object getSingleton(
-            Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties,
+    public static Object getInstanceOf(
+            Class cls, Object[] constrArgs, Map/*<String, Object>*/ properties,
             boolean strongRef)
             throws IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException,
                     InvocationTargetException, IntrospectionException {
-        return ConfigurationSingletons.getSingleton(singletonClass, constrArgs, properties, strongRef); 
+        return SingletonRegistry.getSingleton(cls, constrArgs, properties, strongRef); 
     }
 
     /**
-     * Same as {@link #getSingleton(Class, Object[], Map, boolean)} with {@code false} last ({@code strongRef})
+     * Same as {@link #getInstanceOf(Class, Object[], Map, boolean)} with {@code false} last ({@code strongRef})
      * parameter. 
      *  
      * @since 2.3.21
      */
-    public static Object getSingleton(
-            Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties)
+    public static Object getInstanceOf(
+            Class cls, Object[] constrArgs, Map/*<String, Object>*/ properties)
             throws IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException,
                     InvocationTargetException, IntrospectionException {
-        return getSingleton(singletonClass, constrArgs, properties, false); 
+        return getInstanceOf(cls, constrArgs, properties, false); 
     }
     
     /**
-     * Changes the reference type of the singleton to {@link WeakReference}, or does nothing if no matching singleton
-     * exists. This is similar in purpose to removing the singleton (that you can't do), but as far as there's a
-     * hard reference to this singleton somewhere, or else until the garbage collector has collected the singleton,
-     * the {@link #getSingleton(Class, Object[], Map, boolean)} will return it.
+     * Changes the reference type of the singleton in the singleton registry of FreeMarker to {@link WeakReference},
+     * or does nothing if no matching singleton exists.
+     * This is similar in purpose to removing the singleton from the registry (that you can't do), but as far as there's
+     * a hard reference to this singleton somewhere, or else until the garbage collector has collected the singleton,
+     * {@link #getInstanceOf(Class, Object[], Map, boolean)} will return it.
      * 
-     * @see #getSingleton(Class, Object[], Map, boolean)
+     * @see #getInstanceOf(Class, Object[], Map, boolean)
      * 
      * @since 2.3.21
      */
     public static void weakenSingletonReference(
             Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties)
             throws IllegalArgumentException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        ConfigurationSingletons.weakenSingletonReference(singletonClass, constrArgs, properties);
+        SingletonRegistry.weakenSingletonReference(singletonClass, constrArgs, properties);
     }
     
 }

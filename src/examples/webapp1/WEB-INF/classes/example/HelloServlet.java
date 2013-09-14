@@ -23,9 +23,9 @@ public class HelloServlet extends HttpServlet {
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");
         cfg.setTemplateExceptionHandler(
-				TemplateExceptionHandler.RETHROW_HANDLER);
+        TemplateExceptionHandler.RETHROW_HANDLER);
         // You *really* should set various other settings in a real app.
-		// See the "webapp2" example for them.
+        // See the "webapp2" example for them.
     }
     
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

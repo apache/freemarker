@@ -88,7 +88,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * Use {@link #getInstance(Version)} instead, unless you need a separate class introspection cache or some
      * configuration tweak that can't be achieved with it.
      * 
-     * @param incompatibleImprovements As of yet, same as in {@link BeansWrapper#BeansWrapper(Version)}.
+     * @param incompatibleImprovements As of yet, the same as in {@link BeansWrapper#BeansWrapper(Version)}.
      * 
      * @since 2.3.21
      */
@@ -97,11 +97,13 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Gets (possibly first creates) the read-only singleton {@link DefaultObjectWrapper} instance with the given
-     * parameters. (Read-only means that you can configure it.)
-     * This is a convenience method that internally calls {@link Configuration#getSingleton(Class, Object[], Map)}.
+     * Gets (possibly first creates) the unconfigurable {@link DefaultObjectWrapper} instance that's conforming to
+     * the specified incompatible improvements version.
+     * This does exactly the same as {@link Configuration#getInstanceOf(Class, Object[], Map)} called with the
+     * appropriate arguments, but it runs much faster.
      * 
-     * @param incompatibleImprovements See in {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
+     * @param incompatibleImprovements See the corresponding parameter of
+     *     {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
      *     Note that the version will be normalized to the lowest equivalent version, so for the returned
      *     instance {@link #getIncompatibleImprovements()} might returns a lower version that what you have specified.
      * 
@@ -245,12 +247,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         return list;
     }
     
-    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
     public static Object[] normalizeConstructorArguments(Object[] args) {
         return BeansWrapper.normalizeConstructorArguments(args);
     }
 
-    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
     public static Version normalizeIncompatibleImprovementsVersion(Version version) {
         return BeansWrapper.normalizeIncompatibleImprovementsVersion(version);
     }

@@ -5137,10 +5137,6 @@ That's all.</programlisting>
 // plain directory for it, but non-file-system are possible too:
 cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
 
-// Specify how templates will see the data-model. This is an advanced topic...
-// for now just use this:
-cfg.setObjectWrapper(new DefaultObjectWrapper());
-
 // Set your preferred charset template files are stored in. UTF-8 is
 // a good choice in most applications:
 cfg.setDefaultEncoding("UTF-8");
@@ -5152,7 +5148,12 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 // At least in new projects, specify that you want the fixes that aren't
 // 100% backward compatible too (these are very low-risk changes as far as the
 // 1st and 2nd version number remains):
-cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20</programlisting>
+cfg.setIncompatibleImprovements(new Version(2, 3, 21));  // FreeMarker 2.3.21
+
+// Specify how templates will see the data-model. This is an advanced topic...
+// Here we will just use the default value, except that we require the
+// "incompatible improvements" here too:
+cfg.setObjectWrapper(DefaultObjectWrapper.getInstance(new Version(2, 3, 21)));</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -5336,20 +5337,20 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
         
-        /* ----------------------------------------------------------------------- */    
-        /* You should do this ONLY ONCE in the whole application life-cycle:       */    
+        /* ------------------------------------------------------------------------ */    
+        /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration */
         Configuration cfg = new Configuration();
 
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
-        cfg.setObjectWrapper(new DefaultObjectWrapper());
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
+        cfg.setIncompatibleImprovements(new Version(2, 3, 21));
+        cfg.setObjectWrapper(DefaultObjectWrapper.getInstance(new Version(2, 3, 21)));
 
-        /* ----------------------------------------------------------------------- */    
-        /* You usually do these for many times in the application life-cycle:      */    
+        /* ------------------------------------------------------------------------ */    
+        /* You usually do these for many times in the application life-cycle:       */    
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -20330,7 +20331,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
-      <section>
+      <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
 
         <para>Date of release: [FIXME]</para>
@@ -20370,11 +20371,87 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>incompatible_improvements</literal> setting of the
               <literal>Configuration</literal>, but it applies to the
               <literal>ObjectWrapper</literal> instead. (As
-              <literal>ObjectWrapper</literal> objects are often shared among
+              <literal>ObjectWrapper</literal>-s are often shared among
               multiple <literal>Configuration</literal>-s, they can't use that
               setting of the <literal>Configuration</literal>.) In new or
-              actively developed projects it's recommended to use
-              <literal>Version(2, 3, 21)</literal> or higher.</para>
+              actively developed projects it's recommended to use <literal>new
+              Version(2, 3, 21)</literal> now. The constructor without the
+              <literal>Version</literal> parameter are now deprecated.</para>
+            </listitem>
+
+            <listitem>
+              <para>Safer and more memory-efficient way of managing singleton
+              <literal>ObjectWrapper</literal>-s that are possibly shared by
+              independently developed subsystems:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Instead of <literal>new
+                  DefaultObjectWrapper(<replaceable>...</replaceable>)</literal>
+                  and <literal>new
+                  BeansWrapper(<replaceable>...</replaceable>)</literal>, from
+                  now on you should use
+                  <literal>DefaultObjectWrapper.getInstance(Version
+                  incompatibleImprovements)</literal> and
+                  <literal>BeansWrapper.getInstance(Version)</literal> or
+                  <literal>BeansWrapper.getInstance(Version, boolean
+                  SimpleMapWrapper)</literal>, except when you need more
+                  configurability. These will return a shared VM-wide instance
+                  (a singleton), which is read-only (means, non-configurable,
+                  hence safe to share), created lazily (when first needed),
+                  and is only soft-referenced from inside FreeMarker's
+                  singleton registry, so they can be garbage collected when
+                  they aren't used anymore. The benefit of using singletons
+                  instead of new instances is that this way the class
+                  introspection cache is shared among the subsystems that use
+                  FreeMarker but doesn't share the
+                  <literal>Configuration</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Deprecated the static fields
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,
+                  <literal>BEANS_WRAPPER</literal> and
+                  <literal>SIMPLE_WRAPPER</literal>, because the returned
+                  <literal>ObjectWrapper</literal>-s are configurable (not
+                  read-only), and thus dangerous to use. Use the
+                  <literal>getInstance</literal> methods above instead. They
+                  are also more flexible, as you can specify the desired
+                  version among others.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>BeansWrapper</literal>,
+                  <literal>DefaultObjectWrapper</literal> and
+                  <literal>SimpleObjectWrapper</literal> now implements the
+                  <literal>freemarker.template.utility.Lockable</literal>
+                  interface with which the configuration properties of the
+                  object wrapper can be set permanently to read-only by
+                  calling <literal>makeReadOnly()</literal>. An attempt to
+                  call a setter on a read-only
+                  <literal>ObjectWrapper</literal> will immediately cause
+                  <literal>IllegalStateException</literal>. This is what's
+                  used for the singletons returned by the
+                  <literal>getInstance()</literal> method too (see
+                  earlier).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new method, <literal>static Object
+                  Configuration.getInstanceOf(Class cls, Object[] constrArgs,
+                  Map properties)</literal>. This gets or creates a VM-wide
+                  shared object (a singleton) with the given class,
+                  constructor parameters and JavaBean properties. If based on
+                  the class, constructor arguments and properties set, a
+                  matching instance already exists, it returns that, otherwise
+                  it creates a new one (that it will store so that next time
+                  it can return it). This is what
+                  <literal>DefaultObjectWrapper.getInstance</literal> and
+                  <literal>BeansWrapper.getInstance</literal> uses internally,
+                  but since it's a public API, it can also be used to manage
+                  singletons of user-defined classes.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -20603,75 +20680,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               interfaces were implemented, their return value was always
               discarded, instead FreeMarker has felt back to other means of
               unwrapping.</para>
-            </listitem>
-
-            <listitem>
-              <para>Better/safer ways of managing singleton
-              <literal>ObjectWrapper</literal>-s that are shared by
-              independently developed subsystems:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Instead of <literal>new
-                  DefaultObjectWrapper(<replaceable>...</replaceable>)</literal>
-                  and <literal>new
-                  BeansWrapper(<replaceable>...</replaceable>)</literal>, you
-                  should use
-                  <literal>DefaultObjectWrapper.getInstance(Version)</literal>
-                  and <literal>BeansWrapper.getInstance(Version)</literal> or
-                  <literal>BeansWrapper.getInstance(Version, boolean
-                  SimpleMapWrapper)</literal>. These will return a VM-wide
-                  singleton instance, which is read-only (means,
-                  non-configurable, hence safe to share), created on-demand
-                  and is only soft-referenced inside FreeMarker. The benefit
-                  of using singletons instead of new instances is that this
-                  way the class introspection cache is shared among the
-                  subsystem that use FreeMarker but doesn't share the
-                  <literal>Configuration</literal>. </para>
-                </listitem>
-
-                <listitem>
-                  <para>Deprecated the static fields
-                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,
-                  <literal>BEANS_WRAPPER</literal> and
-                  <literal>SIMPLE_WRAPPER</literal>, because the returned
-                  <literal>ObjectWrapper</literal>-s are configurable (not
-                  read-only), and thus dangerous to use. Use the
-                  <literal>getInstance</literal> methods above instead.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>BeansWrapper</literal>,
-                  <literal>DefaultObjectWrapper</literal> and
-                  <literal>SimpleObjectWrapper</literal> now implements the
-                  <literal>freemarker.template.utility.Lockable</literal>
-                  interface with which the configuration properties of the
-                  object wrapper can be set permanently to read-only by
-                  calling <literal>makeReadOnly()</literal>. An attempt to
-                  call a setter on a read-only
-                  <literal>ObjectWrapper</literal> will immediately cause
-                  <literal>IllegalStateException</literal>. This is useful to
-                  ensure that subsystems that share a singleton
-                  <literal>ObjectWrapper</literal> can't re-configure it,
-                  causing problems that are possibly hard to reproduce.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Added new method, <literal>static Object
-                  Configuration.getSingleton(Class singletonClass, Object[]
-                  constrArgs, Map properties)</literal>. This gets or creates
-                  a VM-wide shared object (a singleton) with the given class,
-                  constructor parameters and JavaBean properties. If based on
-                  the class, constructor arguments and properties set, a
-                  matching instance already exists, it returns that, otherwise
-                  it creates a new one (that it will store so that next time
-                  it can return it). This is what
-                  <literal>DefaultObjectWrapper.getInstance</literal> and
-                  <literal>BeansWrapper.getInstance</literal> uses, but since
-                  it's a public API, it can also be used to manage singletons
-                  of user-defined classes.</para>
-                </listitem>
-              </itemizedlist>
             </listitem>
 
             <listitem>

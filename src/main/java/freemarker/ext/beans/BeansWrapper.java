@@ -289,13 +289,16 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      *   the application.
      *   
      *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
-     *   {@link ObjectWrapper} objects are sometimes shared among multiple {@link Configuration}-s, so the two version
+     *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
      *   numbers are technically independent.
      * 
      *   <p>The changes enabled by {@code incompatibleImprovements} are:
      *   <ul>
      *     <li>
-     *       2.3.21 (or higher): Several glitches were fixed in overloaded method selection. This usually just gets rid
+     *       <p>2.3.0: No changes; this is the starting point, the version used in older projects.
+     *     </li>
+     *     <li>
+     *       <p>2.3.21 (or higher): Several glitches were fixed in overloaded method selection. This usually just gets rid
      *       of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method choices),
      *       still, as in some cases the method chosen can be a different one now (that was the point of the reworking
      *       after all), it can mean a change in the behavior of the application. The most important change is that the
@@ -329,18 +332,18 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         }
     }
 
-    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
     public static Object[] normalizeConstructorArguments(Object[] args) {
         return new Object[] { args.length > 0 ? args[0] : getDefaultIncompatbileImprovements() };
     }
     
     /**
-     * Gets (possibly first creates) the read-only singleton {@link BeansWrapper} instance with the given parameters.
-     * (Read-only means that you can configure it.)
-     * This is a convenience method that internally calls {@link Configuration#getSingleton(Class, Object[], Map)},
-     * although it's also much faster as it caches the result.
+     * Gets (possibly first creates) the unconfigurable singleton {@link BeansWrapper} instance that's already
+     * configured as specified in the arguments.
+     * This does exactly the same as {@link Configuration#getInstanceOf(Class, Object[], Map)} called with the
+     * appropriate arguments, but it runs much faster.
      * 
-     * @param incompatibleImprovements See in {@link BeansWrapper#BeansWrapper(Version)}.
+     * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
      *     Note that the version will be normalized to the lowest equivalent version, so for the returned
      *     instance {@link #getIncompatibleImprovements()} might returns a lower version that what you have specified.
      * 
@@ -352,7 +355,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     
     /**
      * Same as {@link #getInstance(Version)}, but also specifies the simple-map-wrapper setting of the desired
-     * instance.
+     * instance. Without this, that will be set to its default.
      *     
      * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
      * 
@@ -415,7 +418,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     protected static BeansWrapper getInstance(Class pClass, Version incompatibleImprovements, Map properties) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         try {
-            return (BeansWrapper) Configuration.getSingleton(
+            return (BeansWrapper) Configuration.getInstanceOf(
                     pClass, new Object[] { incompatibleImprovements }, properties, false);
         } catch (Throwable e) {
             // Java 5: Use cause exception
@@ -513,7 +516,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * from templates. The default is {@code false} for backward-compatibility, but is not recommended.
      * 
      * <p>When this is {@code false}, {@code myMap.foo} or {@code myMap['foo']} either returns the method {@code foo},
-     * or calls {@code Map.get("foo")}. If both exists (the method and the {link Map} key), one will hide the other,
+     * or calls {@code Map.get("foo")}. If both exists (the method and the {@link Map} key), one will hide the other,
      * depending on the {@link #setMethodsShadowItems(boolean)} setting, which default to {@code true} (the method
      * wins). Some frameworks use this so that you can call {@code myMap.get(nonStringKey)} from templates [*], but it
      * comes on the cost of polluting the key-set with the method names, and risking methods accidentally hiding
@@ -713,7 +716,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private final static Version VERSION_2_3_21 = new Version(2, 3, 21);  
     private final static Version VERSION_2_3_0 = new Version(2, 3, 0);  
     
-    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
     public static Version normalizeIncompatibleImprovementsVersion(Version version) {
         NullArgumentException.check("version", version);
         return is2321Bugfixed(version) ? VERSION_2_3_21 : VERSION_2_3_0;
@@ -2074,7 +2077,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                 + " }";
     }
 
-    /** Needed for {@link Configuration#getSingleton(Class, Object[], Map, boolean)}. @since 2.3.21 */
+    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
     public static Map getPropertyDefaults(Object[] args) {
         Map props = new HashMap();
         props.put("simpleMapWrapper", Boolean.FALSE);

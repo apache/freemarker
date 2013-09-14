@@ -5,7 +5,6 @@ import java.util.*;
 import java.lang.reflect.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import freemarker.core.Version;
 import freemarker.template.*;
 import freemarker.ext.beans.BeansWrapper;
 
@@ -24,7 +23,7 @@ public class ControllerServlet extends HttpServlet {
         cfg = new Configuration();
         // - At least in new projects, specify that you want the fixes that aren't
         //   100% backward compatible too (these are always very low-risk changes):
-        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
+        cfg.setIncompatibleImprovements(new Version(2, 3, 21));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");
@@ -32,16 +31,15 @@ public class ControllerServlet extends HttpServlet {
         //   Higher value should be used in production environment.
         cfg.setTemplateUpdateDelay(0);
         // - When developing, set an error handler that prints errors so they are
-		//   readable with a HTML browser, otherwise we just let the HTTP 500
-		//   handler to deal with it.
+        //   readable with a HTML browser, otherwise we just let the HTTP 500
+        //   handler to deal with it.
         cfg.setTemplateExceptionHandler(
-				isInDevelopmentMode()
-						? TemplateExceptionHandler.HTML_DEBUG_HANDLER
-						: TemplateExceptionHandler.RETHROW_HANDLER);
-        // - Use beans wrapper (recommmended for most applications)
-		BeansWrapper bw = new BeansWrapper();
-		bw.setSimpleMapWrapper(true);
-        cfg.setObjectWrapper(bw);
+                isInDevelopmentMode()
+                        ? TemplateExceptionHandler.HTML_DEBUG_HANDLER
+                        : TemplateExceptionHandler.RETHROW_HANDLER);
+        // - Use BeansWrapper instead of the default ObjectWrapper.
+        //   This is recommmended for most applications until FreeMarker 2.4.0.
+        cfg.setObjectWrapper(BeansWrapper.getInstance(new Version(2, 3, 21), true));
         // - Set the default charset of the template files
         cfg.setDefaultEncoding("ISO-8859-1");
         // - Set the charset of the output. This is actually just a hint, that
@@ -51,7 +49,7 @@ public class ControllerServlet extends HttpServlet {
         // - Set the default locale
         cfg.setLocale(Locale.US);
     }
-	
+    
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         doGet(req, resp);
@@ -121,10 +119,10 @@ public class ControllerServlet extends HttpServlet {
             throw new ServletException("The action didn't specified a command.");
         }
     }
-	
-	private boolean isInDevelopmentMode() {
-		// This should detect this with a system property for example.
-		return true;
-	}
-	
+    
+    private boolean isInDevelopmentMode() {
+        // This should detect this with a system property for example.
+        return true;
+    }
+    
 }

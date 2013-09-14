@@ -30,16 +30,16 @@ import freemarker.template.utility._MethodUtil;
 /**
  * Singleton-related functionality of {@link Configuration} separated to keep the code more organized. 
  */
-class ConfigurationSingletons {
+class SingletonRegistry {
 
     private static final String NORMALIZE_ICI_VERSION_METHOD_NAME = "normalizeIncompatibleImprovementsVersion";
     private static final String NORMALIZE_CONSTRUCTOR_ARGUMENTS_METHOD_NAME = "normalizeConstructorArguments";
-    private static final String GET_PROPERTY_DEFAULTS = "getPropertyDefaults";
+    private static final String GET_PROPERTY_DEFAULTS_METHOD_NAME = "getPropertyDefaults";
     
     private static final Map/*<SingletonObjectKey, Object|SingletonObectSoftReference>*/ singletons = new HashMap();
     private static final ReferenceQueue singletonReferenceQueue = new ReferenceQueue();
     
-    /** See documentation at {@link Configuration#getSingleton(Class, Object[], Map, boolean)} */
+    /** See documentation at {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)} */
     static Object getSingleton(
             Class singletonClass, Object[] constrArgs, Map/*<String, Object>*/ properties,
             boolean strongRef)
@@ -153,31 +153,31 @@ class ConfigurationSingletons {
                             if (propDesc == null) {
                                 throw new RuntimeException(
                                         "The JavaBean property " + StringUtil.jQuote(propName) + " returned by "
-                                        + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS
+                                        + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS_METHOD_NAME
                                         + " doesn't exists in the class. "
-                                        + GET_PROPERTY_DEFAULTS + " needs to be fixed to match reality.");
+                                        + GET_PROPERTY_DEFAULTS_METHOD_NAME + " needs to be fixed to match reality.");
                             }
                             Method readMethod = propDesc.getReadMethod();
                             if (readMethod == null) {
                                 throw new RuntimeException(
                                         "The JavaBean property " + StringUtil.jQuote(propName) + " returned by "
-                                        + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS
+                                        + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS_METHOD_NAME
                                         + " exists but isn't readable. "
                                         + "Write-only properties can't be part of a singleton's key, and so shouldn't "
-                                        + "be exposed by " + GET_PROPERTY_DEFAULTS + ".");
+                                        + "be exposed by " + GET_PROPERTY_DEFAULTS_METHOD_NAME + ".");
                             }
                             Object actual = readMethod.invoke(newSingleton, Collections12.EMPTY_OBJECT_ARRAY);
                             Object expected = ent.getValue();
                             if (actual != expected && (expected == null || !expected.equals(actual))) {
                                 throw new RuntimeException(
                                         "The JavaBean property default value promissed by "
-                                        + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS + " doesn't seem to "
+                                        + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS_METHOD_NAME + " doesn't seem to "
                                         + "match the actual default value. "
                                         + "Expected: " + (expected != null ? expected.getClass().getName() + " " : "")
                                         + StringUtil.jQuote(expected)
                                         + "; actual: " + (actual != null ? actual.getClass().getName() + " " : "")
                                         + StringUtil.jQuote(actual) + ". "
-                                        + GET_PROPERTY_DEFAULTS + " needs to be fixed to match reality.");
+                                        + GET_PROPERTY_DEFAULTS_METHOD_NAME + " needs to be fixed to match reality.");
                             }
                         }
                     }
@@ -400,7 +400,7 @@ class ConfigurationSingletons {
             // Normalize properties:
             // - Get the property defaults
             Map propDefaults = (Map) invokeStaticSingletonMethod(
-                    Map.class, GET_PROPERTY_DEFAULTS, Object[].class,
+                    Map.class, GET_PROPERTY_DEFAULTS_METHOD_NAME, Object[].class,
                     this.constructorArgumentsKey,
                     properties.isEmpty(),  true,
                     new _DelayedConversionToString(null) {
@@ -424,7 +424,7 @@ class ConfigurationSingletons {
                         throw new IllegalArgumentException(
                                 "You can't set the \"" + propName + "\" JavaBean property of a singleton "
                                 + singletonClass.getName() + ", because it's not in the Map returned by "
-                                + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS + ".");
+                                + singletonClass.getName() + "." + GET_PROPERTY_DEFAULTS_METHOD_NAME + ".");
                     }
                     Object propVal = ent.getValue();
                     if (propDefault instanceof Number && propVal instanceof Number) {
@@ -442,7 +442,7 @@ class ConfigurationSingletons {
                     Object defaultPropName = ent.getKey();
                     if (!(defaultPropName instanceof String)) {
                         throw new ClassCastException("The Map returned by " + singletonClass.getName()
-                                + "." + GET_PROPERTY_DEFAULTS + " must only contain String keys.");
+                                + "." + GET_PROPERTY_DEFAULTS_METHOD_NAME + " must only contain String keys.");
                     }
                     if (!properties.containsKey(defaultPropName)) {
                         if (normalizedProps == properties) normalizedProps = new HashMap(properties);
