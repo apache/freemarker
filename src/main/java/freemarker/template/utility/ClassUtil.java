@@ -397,7 +397,7 @@ public class ClassUtil
      * 
      * @param type can't be {@code null}
      * 
-     * @since. 2.3.21
+     * @since 2.3.21
      */
     public static boolean isNumerical(Class type) {
         return Number.class.isAssignableFrom(type)

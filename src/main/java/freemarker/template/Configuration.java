@@ -1293,10 +1293,10 @@ public class Configuration extends Configurable implements Cloneable {
      *       other than the 0-argument constructor, the class must have a non-inherited
      *       {@code public static Object[] normalizeConstructorArguments(Object[] constrArgs)} method. This must return
      *       the same argument lists for all argument lists that ultimately mean the same. Like, if you have two
-     *       constructors, {@code C()} and C(int x, String s)}, and {@code C()} internally calls {@code this(10, null)},
-     *       then for a 0-length {@code Object[]} the method has to return {@code [10, null]}. Also, for the array
-     *       {@code [(short) 1, "foo"]} it must return {@code [1, "foo"]}, that is, {@code short} was changed to
-     *       {@code int}. (When you don't define {@code normalizeConstructorArguments} and
+     *       constructors, {@code C()} and {@code C(int x, String s)}, and {@code C()} internally calls
+     *       {@code this(10, null)}, then for a 0-length {@code Object[]} the method has to return {@code [10, null]}.
+     *       Also, for the array {@code [(short) 1, "foo"]} it must return {@code [1, "foo"]}, that is, {@code short}
+     *       was changed to {@code int}. (When you don't define {@code normalizeConstructorArguments} and
      *       there's only one public constructor, FreeMarker will take care of such numerical conversions.) The
      *       {@code constrArgs} parameter array shound't be modified during the normalization, instead a new array must
      *       be returned if the normalized array differs from the original. The new array can't be shorter than the
@@ -1307,10 +1307,10 @@ public class Configuration extends Configurable implements Cloneable {
      *       allowed to be set via the {@code properties} parameter, it must contain a {@code String}-{@code Object}
      *       entry that maps the name of the property to its default value. For example, if {@code getPropertyDefaults}
      *       return a {@code Map} containing <tt>{x=1, y=2, z=3}</tt>, then when the {@code properties} parameter to
-     *       {@link #getSingleton} is only <tt>{y=22}</tt>, then FreeMarker will
+     *       {@link #getSingleton} is only <tt>{y=22}</tt>, FreeMarker will
      *       extend it to <tt>{x=1, y=22, z=3}</tt>, and that's what it will use to find out if such a singleton
      *       already exists. Note that {@code getPropertyDefaults} need not return all the JavaBean properties
-     *       of the class, only those that it doesn't return will not be writable with {@link #getSingleton}.
+     *       of the class, but those that it doesn't return will not be writable with {@link #getSingleton}.
      *       The {@code constrArgs[]} parameter of {@code getPropertyDefaults} stores the constructor arguments as it
      *       was returned by {@code normalizeConstructorArguments}, or if there was no
      *       {@code normalizeConstructorArguments}, the original constructor arguments after number type
