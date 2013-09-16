@@ -59,6 +59,8 @@ import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
@@ -93,6 +95,7 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -128,7 +131,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private static final Class ITERABLE_CLASS;
     private static final Class LIST_CLASS = List.class;
     private static final Class MAP_CLASS = Map.class;
-    private static final Class NUMBER_CLASS = Number.class;
     private static final Class OBJECT_CLASS = Object.class;
     private static final Class SEQUENCEADAPTER_CLASS = SequenceAdapter.class;
     private static final Class SET_CLASS = Set.class;
@@ -160,52 +162,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     static final Object GENERIC_GET_KEY = new Object();
     private static final Object CONSTRUCTORS = new Object();
     private static final Object ARGTYPES = new Object();
-
-    private static final boolean SIMPLE_MAP_WRAPPER_DEFAULT = false;
-    
-    private static final boolean javaRebelAvailable = isJavaRebelAvailable();
-    
-    /**
-     * The default instance of BeansWrapper
-     * @deprecated Static instances were deprecated by {@link #getInstance(Version)}.
-     */
-    private static final BeansWrapper INSTANCE = new BeansWrapper();
-
-    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003000;
-    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003021;
-    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003000DifSimpleMaps;
-    private static volatile WeakReference/*<BeansWrapper>*/ singleton2003021DifSimpleMaps;
-    
-    /**
-     * Used for synchronization by {@link #genericClassIntrospectionCache},
-     * {@link #staticModels} and {@link #enumModels} (and by any similar future
-     * fields). The primary goal of using a common monitor is to prevent
-     * deadlocks when these objects call each other.
-     */
-    private final Object sharedClassIntrospectionCacheLock = new Object();
-    
-    /**
-     * This is called the "generic" class introspection cache because when the
-     * public API simply says "introspection cache" it refers to the sum of all
-     * caches. The other less generic caches are in {@link #staticModels}
-     * and {@link #enumModels}.
-     */
-    private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache
-            = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
-    private final boolean isGenericClassIntrospectionCacheConcurrentMap
-            = _ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
-    private final Set/*<String>*/ genericClassIntrospectionCacheClassNames
-            = new HashSet();
-    private final Set/*<Class>*/ genericClassIntrospectionsInProgress
-            = new HashSet();
-
-    private final StaticModels staticModels;
-    private final ClassBasedModelFactory enumModels;
-
-    private final ModelCache modelCache;
-    
-    private final BooleanModel FALSE;
-    private final BooleanModel TRUE;
 
     /**
      * At this level of exposure, all methods and properties of the
@@ -242,17 +198,99 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * speed up map item retrieval.
      */
     public static final int EXPOSE_NOTHING = 3;
+    
+    private static final boolean javaRebelAvailable = isJavaRebelAvailable();
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Instance cache:
+    
+    /**
+     * The default instance of BeansWrapper
+     * @deprecated Use {@link #getInstance(Version)} instead, but mind its performance
+     */
+    private static final BeansWrapper INSTANCE = new BeansWrapper();
+
+    private static volatile WeakReference/*<BeansWrapper>*/ instance2003000SimpleMapsFalse;
+    private static volatile WeakReference/*<BeansWrapper>*/ instance2003021SimpleMapsFalse;
+    private static volatile WeakReference/*<BeansWrapper>*/ instance2003000SimpleMapsTrue;
+    private static volatile WeakReference/*<BeansWrapper>*/ instance2003021SimpleMapsTrue;
+    
+    // -----------------------------------------------------------------------------------------------------------------
+    // Introspection cache:
+    
+    /**
+     * Used for synchronization by {@link #genericClassIntrospectionCache},
+     * {@link #staticModels} and {@link #enumModels} (and by any similar future
+     * fields). The primary goal of using a common monitor is to prevent
+     * deadlocks when these objects call each other.
+     */
+    private final Object sharedClassIntrospectionCacheLock;
+    
+    /**
+     * This is called the "generic" class introspection cache because when the
+     * public API simply says "introspection cache" it refers to the sum of all
+     * caches. The other less generic caches are in {@link #staticModels}
+     * and {@link #enumModels}.
+     */
+    private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache;
+    private final boolean isGenericClassIntrospectionCacheConcurrentMap;
+    private final Set/*<String>*/ genericClassIntrospectionCacheClassNames;
+    private final Set/*<Class>*/ genericClassIntrospectionsInProgress;
+    
+    private final StaticModels staticModels;
+    private final ClassBasedModelFactory enumModels;
+    
+    /**
+     * This is used for sharing the introspection cache among {@link BeansWrapper} instances.
+     * When a new read-only {@link BeansWrapper} is created with {@link #BeansWrapper(Version, SettingAssignments)},
+     * an instance of this is get from the {@link #introspectionCacheCache} and its content is copied into the new
+     * instance's fields. Otherwise a new instance of this is created, and again, its content is copied into the new
+     * instance's fields, then the {@link IntrospectionCacheSource} instance is discarded. This last is only useful for
+     * code-reuse.
+     */
+    private class IntrospectionCacheSource {
+        private final Object sharedClassIntrospectionCacheLock = new Object();
+        private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache
+                = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
+        private final boolean isGenericClassIntrospectionCacheConcurrentMap
+                = _ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
+        private final Set/*<String>*/ genericClassIntrospectionCacheClassNames
+                = new HashSet();
+        private final Set/*<Class>*/ genericClassIntrospectionsInProgress
+                = new HashSet();
+        private final StaticModels staticModels = new StaticModels(BeansWrapper.this);
+        private final ClassBasedModelFactory enumModels = createEnumModels(BeansWrapper.this);
+    }
+    
+    /**
+     * Caches class-introspection-caches so that {@link BeansWrapper} instances can share them.
+     * There's a separate class-introspection-cache for each setting permutation that affects introspection results,
+     * hence this is an array. The array index is coming from {@link SettingAssignments#getIntrospectionCacheIndex()}.
+     * Note that all this is only used when creating {@link BeansWrapper} instances with
+     * {@link BeansWrapper#BeansWrapper(Version, SettingAssignments)} or with {@link #getInstance(Version)} or some
+     * of its overloads. It's not used for instances created by the regular constructors; each such instance has
+     * its own class-introspection-cache that it has to build up from nothing.
+     */
+    static Reference/*<IntrospectionCacheSource>*/[] introspectionCacheCache;
+    static final Object introspectionCacheCacheLock = new Object();
+
+    // -----------------------------------------------------------------------------------------------------------------
+    
+    private final ModelCache modelCache;
+    
+    private final BooleanModel FALSE;
+    private final BooleanModel TRUE;
 
     private volatile boolean readOnly;
     
-    private int exposureLevel = EXPOSE_SAFE;
+    private int exposureLevel = SettingAssignments.EXPLOSURE_LEVEL_DEFAULT;
     private TemplateModel nullModel = null;
     private boolean methodsShadowItems = true;
-    private boolean exposeFields = false;
+    private boolean exposeFields = SettingAssignments.EXPOSE_FIELDS_DEFAULT;
     private int defaultDateType = TemplateDateModel.UNKNOWN;
 
     private ObjectWrapper outerIdentity = this;
-    private boolean simpleMapWrapper = SIMPLE_MAP_WRAPPER_DEFAULT;
+    private boolean simpleMapWrapper = SettingAssignments.SIMPLE_MAP_WRAPPER_DEFAULT;
     private boolean strict = false;
     
     private final Version incompatibleImprovements;
@@ -262,27 +300,26 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     /**
-     * Creates a new instance of BeansWrapper. The newly created instance
-     * will use the null reference as its null object, it will use
-     * {@link #EXPOSE_SAFE} method exposure level, and will not cache
-     * model instances.
+     * Creates a new instance with the incompatible-improvements-version specified in
+     * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
      * 
      * @deprecated Use {@link #getInstance(Version)}, {@link #getInstance(Version, boolean)} or
-     *     {@link #BeansWrapper(Version)}.
+     *     {@link #getInstance(Version, SettingAssignments)}, or in rare cases {@link #BeansWrapper(Version)} instead.
      */
     public BeansWrapper() {
         this(getDefaultIncompatbileImprovements());
     }
     
     /**
-     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} instead,
-     * unless you need a separate class introspection cache or some configuration tweak that can't be achieved with
-     * them.
+     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} or
+     * {@link #getInstance(Version, SettingAssignments)} instead if possible.
+     * Instances created with this constructor won't share the class introspection caches with other instances.
      * 
      * @param incompatibleImprovements
-     *   Sets which of the non-backward-compatible improvements should be enabled. This version number is the
-     *   same as the FreeMarker version number with which the improvements were implemented. 
-     *   For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
+     *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
+     *   is the same as the FreeMarker version number with which the improvements were implemented.
+     *    
+     *   <p>For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
      *   For released products that are still actively developed it's a low risk change to increase the 3rd
      *   version number further as FreeMarker is updated, but of course you should always check the list of effects
      *   below. Increasing the 2nd or 1st version number can mean substantial changes with higher risk of breaking
@@ -298,59 +335,154 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      *       <p>2.3.0: No changes; this is the starting point, the version used in older projects.
      *     </li>
      *     <li>
-     *       <p>2.3.21 (or higher): Several glitches were fixed in overloaded method selection. This usually just gets rid
-     *       of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method choices),
-     *       still, as in some cases the method chosen can be a different one now (that was the point of the reworking
-     *       after all), it can mean a change in the behavior of the application. The most important change is that the
-     *       treatment of {@code null} arguments were fixed, as earlier they were only seen applicable to parameters of
-     *       type {@code Object}. Now {@code null}-s are seen to be applicable to any non-primitive parameters, and
-     *       among those the one with the most specific type will be preferred (just like in Java), which is hence never
-     *       the one with the {@code Object} parameter type. For more details about overloaded method selection changes
-     *       see the version History in the FreeMarker Manual.</li>
+     *       <p>2.3.21 (or higher): Several glitches were fixed in overloaded method selection. This usually just gets
+     *       rid of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method
+     *       choices), still, as in some cases the method chosen can be a different one now (that was the point of the
+     *       reworking after all), it can mean a change in the behavior of the application. The most important change is
+     *       that the treatment of {@code null} arguments were fixed, as earlier they were only seen applicable to
+     *       parameters of type {@code Object}. Now {@code null}-s are seen to be applicable to any non-primitive
+     *       parameters, and among those the one with the most specific type will be preferred (just like in Java),
+     *       which is hence never the one with the {@code Object} parameter type. For more details about overloaded
+     *       method selection changes see the version History in the FreeMarker Manual.</li>
      *     </li>
      *   </ul>
-     *   
-     *   <p>Not {@code null}. 
      *
      * @since 2.3.21
      */
     public BeansWrapper(Version incompatibleImprovements) {
+        this(incompatibleImprovements, null, false);
+    }
+    
+    /**
+     * Creates an instance that's already made read-only via {@link #makeReadOnly()}; this way it can share the class
+     * introspection cache of similarly created instances with compatible settings. This is what
+     * {@link #getInstance(Version, SettingAssignments)} and its overloads use internally.
+     * 
+     * @param settings The configuration settings to set before the instance is made read-only.
+     * 
+     * @since 2.3.21
+     */
+    protected BeansWrapper(Version incompatibleImprovements, SettingAssignments settings) {
+        this(incompatibleImprovements, settings, true);
+    }
+
+    private BeansWrapper(Version incompatibleImprovements, SettingAssignments settings, boolean makeReadOnly) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
-        
         this.incompatibleImprovements = incompatibleImprovements;
         
-        staticModels = new StaticModels(this);
-        enumModels = createEnumModels(this);
+        if (settings != null) {
+            settings.apply(this);
+        }
+        
+        final IntrospectionCacheSource introspCacheSrc; 
+        if (makeReadOnly) {
+            makeReadOnly();
+            if (isTrustedImplementation(this)) {
+                final int cacheIdx = settings.getIntrospectionCacheIndex();
+                final boolean isSoft = cacheIdx <= SettingAssignments.MAX_SOFT_INTROSPECTION_CACHE_INDEX;
+                synchronized (introspectionCacheCacheLock) {
+                    // Ensure we have an array of the required size:
+                    if (introspectionCacheCache == null) {
+                        introspectionCacheCache = new Reference[cacheIdx + 1];
+                    } else if (introspectionCacheCache.length <= cacheIdx) {
+                        Reference[] newIntrospectionCacheCache = new Reference[cacheIdx + 1];
+                        for (int i = 0; i < introspectionCacheCache.length; i++) {
+                            newIntrospectionCacheCache[i] = introspectionCacheCache[i];
+                        }
+                        introspectionCacheCache = newIntrospectionCacheCache;
+                    }
+                    
+                    // Get and dereference the cache from the cache-cache:
+                    Reference entryRef = introspectionCacheCache[cacheIdx];
+                    IntrospectionCacheSource entry
+                            = entryRef != null ? (IntrospectionCacheSource) entryRef.get() : null;
+
+                    if (entry != null) {  // Cache-cache hit
+                        introspCacheSrc = entry;
+                    } else {  // Cache-cache miss
+                        introspCacheSrc = new IntrospectionCacheSource();
+                        introspectionCacheCache[cacheIdx] = isSoft
+                                ? (Reference) new SoftReference(introspCacheSrc)
+                                : (Reference) new WeakReference(introspCacheSrc);
+                    }
+                }
+            } else {
+                introspCacheSrc = new IntrospectionCacheSource();
+            }
+        } else {
+            introspCacheSrc = new IntrospectionCacheSource();
+        }
+        sharedClassIntrospectionCacheLock = introspCacheSrc.sharedClassIntrospectionCacheLock;
+        genericClassIntrospectionCache = introspCacheSrc.genericClassIntrospectionCache;
+        isGenericClassIntrospectionCacheConcurrentMap = introspCacheSrc.isGenericClassIntrospectionCacheConcurrentMap;
+        genericClassIntrospectionCacheClassNames = introspCacheSrc.genericClassIntrospectionCacheClassNames;
+        genericClassIntrospectionsInProgress = introspCacheSrc.genericClassIntrospectionsInProgress;
+        staticModels = introspCacheSrc.staticModels;
+        enumModels = introspCacheSrc.enumModels;        
 
         modelCache = new BeansModelCache(this);
         
         FALSE = new BooleanModel(Boolean.FALSE, this);
         TRUE = new BooleanModel(Boolean.TRUE, this);
-        
         if(javaRebelAvailable) {
             JavaRebelIntegration.registerWrapper(this);
         }
     }
-
-    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
-    public static Object[] normalizeConstructorArguments(Object[] args) {
-        return new Object[] { args.length > 0 ? args[0] : getDefaultIncompatbileImprovements() };
+    
+    private boolean isTrustedImplementation(BeansWrapper beansWrapper) {
+        Class cls = beansWrapper.getClass();
+        return cls == BeansWrapper.class || cls == DefaultObjectWrapper.class;
     }
     
+    /** Used for unit testing only. */
+    static Reference[] getIntrospectionCacheCacheSnapshotForUnitTesting() {
+        synchronized (introspectionCacheCacheLock) {
+            return introspectionCacheCache == null ? (Reference[]) null : (Reference[]) introspectionCacheCache.clone();
+        }
+    }
+
+    /** Used for unit testing only. */
+    static void clearSharedStateForUnitTesting() {
+        instance2003000SimpleMapsFalse = null;
+        instance2003000SimpleMapsTrue = null;
+        instance2003021SimpleMapsFalse = null;
+        instance2003021SimpleMapsTrue = null;
+        synchronized (introspectionCacheCacheLock) {
+            introspectionCacheCache = null;
+        }
+    }
+    
+    /** Used for unit testing only. */
+    boolean checkIfUsesSharedIntrospectionCacheForUnitTesting(int cacheIdx) {
+        synchronized (introspectionCacheCacheLock) {
+            if (introspectionCacheCache == null) return false;
+            if (introspectionCacheCache.length - 1 < cacheIdx) return false;
+            Reference ref = introspectionCacheCache[cacheIdx];
+            if (ref == null) return false;
+            IntrospectionCacheSource ics = (IntrospectionCacheSource) ref.get();
+            if (ics == null) return false;
+            return ics.genericClassIntrospectionCache == genericClassIntrospectionCache; 
+        }
+    }
+
     /**
-     * Gets (possibly first creates) the unconfigurable singleton {@link BeansWrapper} instance that's already
-     * configured as specified in the arguments.
-     * This does exactly the same as {@link Configuration#getInstanceOf(Class, Object[], Map)} called with the
-     * appropriate arguments, but it runs much faster.
+     * Returns an unconfigurable (read-only) {@link BeansWrapper} instance that's already configured as specified in the
+     * arguments; this is preferred over using the constructors. The returned instance is often, but not always a
+     * VM-wide singleton.
+     * 
+     * <p>The main benefit of this over the constructors is that the instances made with this method
+     * share their internal class introspection caches, which is something that's expensive to build. (To be precise,
+     * the introspection cache is only shared among those instances that use compatible introspection settings, like the
+     * same exposure level.)
      * 
      * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
      *     Note that the version will be normalized to the lowest equivalent version, so for the returned
-     *     instance {@link #getIncompatibleImprovements()} might returns a lower version that what you have specified.
+     *     instance {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
      * 
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        return getInstanceInner(incompatibleImprovements, true);
+        return getInstance(incompatibleImprovements, SettingAssignments.DEFAULT);
     }
     
     /**
@@ -362,21 +494,46 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapsWrapper) {
-        return getInstanceInner(incompatibleImprovements, simpleMapsWrapper == SIMPLE_MAP_WRAPPER_DEFAULT);
+        return getInstance(
+                incompatibleImprovements,
+                simpleMapsWrapper
+                        ? SettingAssignments.SIMPLE_MAP_WRAPPER_TRUE
+                        : SettingAssignments.SIMPLE_MAP_WRAPPER_FALSE);
     }
-
-    private static BeansWrapper getInstanceInner(Version incompatibleImprovements, boolean defaultSimpleMaps) {
+    
+    /**
+     * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
+     *     
+     * @param settings The settings that you want to be set in the returned instance.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements, SettingAssignments settings) {
         BeansWrapper res;
         
-        final int v = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements).intValue();
-        if (v == 2003000) {
-            WeakReference rw = defaultSimpleMaps ? singleton2003000 : singleton2003000DifSimpleMaps;
+        final boolean simpleMapWrapper;
+        if (settings.equals(SettingAssignments.SIMPLE_MAP_WRAPPER_FALSE)) {
+            simpleMapWrapper = false;
+        } else if (settings.equals(SettingAssignments.SIMPLE_MAP_WRAPPER_TRUE)) {
+            simpleMapWrapper = true;
+        } else {
+            // We don't cache an instance for this setting permutation.
+            // This is usually not a big loss; caching the internal introspection cache is what really matters.
+            // So we just address the most common cases.
+            return new BeansWrapper(incompatibleImprovements, settings);
+        }
+        
+        incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        
+        final int iciInt = incompatibleImprovements.intValue();
+        if (iciInt == 2003000) {
+            WeakReference rw = simpleMapWrapper ? instance2003000SimpleMapsTrue : instance2003000SimpleMapsFalse;
             if (rw != null) {
                 res = (BeansWrapper) rw.get();
                 if (res != null) return res;
             }
-        } else if (v == 2003021) {
-            WeakReference rw = defaultSimpleMaps ? singleton2003021 : singleton2003021DifSimpleMaps;
+        } else if (iciInt == 2003021) {
+            WeakReference rw = simpleMapWrapper ? instance2003021SimpleMapsTrue : instance2003021SimpleMapsFalse;
             if (rw != null) {
                 res = (BeansWrapper) rw.get();
                 if (res != null) return res;
@@ -385,45 +542,27 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             throw new RuntimeException();
         }
         
-        res = getInstance(
-                BeansWrapper.class,
-                incompatibleImprovements,
-                defaultSimpleMaps
-                    ? null
-                    : Collections12.singletonMap(
-                            "simpleMapWrapper",
-                            !SIMPLE_MAP_WRAPPER_DEFAULT ? Boolean.TRUE : Boolean.FALSE));
+        res = new BeansWrapper(incompatibleImprovements, settings);
         
-        if (v == 2003000) {
+        if (iciInt == 2003000) {
             WeakReference wr = new WeakReference(res);
-            if (defaultSimpleMaps) {
-                singleton2003000 = wr;
+            if (simpleMapWrapper) {
+                instance2003000SimpleMapsTrue = wr;
             } else {
-                singleton2003000DifSimpleMaps = wr;
+                instance2003000SimpleMapsFalse = wr;
             }
-        } else if (v == 2003021) {
+        } else if (iciInt == 2003021) {
             WeakReference wr = new WeakReference(res);
-            if (defaultSimpleMaps) {
-                singleton2003021 = wr;
+            if (simpleMapWrapper) {
+                instance2003021SimpleMapsTrue = wr;
             } else {
-                singleton2003021DifSimpleMaps = wr;
+                instance2003021SimpleMapsFalse = wr;
             }
         } else {
             throw new RuntimeException();
         }
         
         return res;
-    }
-    
-    protected static BeansWrapper getInstance(Class pClass, Version incompatibleImprovements, Map properties) {
-        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
-        try {
-            return (BeansWrapper) Configuration.getInstanceOf(
-                    pClass, new Object[] { incompatibleImprovements }, properties, false);
-        } catch (Throwable e) {
-            // Java 5: Use cause exception
-            throw new RuntimeException("Failed to get or create " + pClass.getName() + " singleton:\n" + e);
-        }
     }
     
     /**
@@ -716,10 +855,15 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private final static Version VERSION_2_3_21 = new Version(2, 3, 21);  
     private final static Version VERSION_2_3_0 = new Version(2, 3, 0);  
     
-    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
-    public static Version normalizeIncompatibleImprovementsVersion(Version version) {
-        NullArgumentException.check("version", version);
-        return is2321Bugfixed(version) ? VERSION_2_3_21 : VERSION_2_3_0;
+    /** 
+     * Returns the lowest version number that is equivalent with the parameter version.
+     * @since 2.3.21
+     */
+    protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
+        NullArgumentException.check("version", incompatibleImprovements);
+        // Warning! If you add new results here, you must update getInstance in ObjectWrapper and DefaultObjectWrapper,
+        // as they will throw exception on unsupported version!
+        return is2321Bugfixed(incompatibleImprovements) ? VERSION_2_3_21 : VERSION_2_3_0;
     }
     
     /**
@@ -2073,18 +2217,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                 + "simpleMapWrapper = " + simpleMapWrapper + ", "
                 + "exposureLevel = " + exposureLevel + ", "
                 + "exposeFields = " + exposeFields + ", "
-                + "strict = " + strict
+                + "... "
                 + " }";
-    }
-
-    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
-    public static Map getPropertyDefaults(Object[] args) {
-        Map props = new HashMap();
-        props.put("simpleMapWrapper", Boolean.FALSE);
-        props.put("exposureLevel", new Integer(EXPOSE_SAFE));  // Java 5: valueOf...
-        props.put("exposeFields", Boolean.FALSE);
-        props.put("strict", Boolean.FALSE);
-        return props;
     }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
@@ -2164,6 +2298,103 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             this.methodShadowsProperty = shadowEarlierProperty;
         }
 
+    }
+    
+    /**
+     * Parameter to {@link #getInstance(Version, SettingAssignments)}; only contains that, in some permutations, has
+     * shared introspection cache.
+     */
+    static public class SettingAssignments implements freemarker.core.SettingAssignments {
+        
+        private static final boolean SIMPLE_MAP_WRAPPER_DEFAULT = false;  // W! Keep in sync with the static instances! 
+        private static final int EXPLOSURE_LEVEL_DEFAULT = EXPOSE_SAFE;   // W! Keep in sync with the static instances!
+        private static final boolean EXPOSE_FIELDS_DEFAULT = false;       // W! Keep in sync with the static instances!
+
+        public static final SettingAssignments DEFAULT = new SettingAssignments();  
+        public static final SettingAssignments SIMPLE_MAP_WRAPPER_FALSE = DEFAULT;
+        public static final SettingAssignments SIMPLE_MAP_WRAPPER_TRUE = new SettingAssignments();
+        static {
+            SIMPLE_MAP_WRAPPER_TRUE.setSimpleMapWrapper(true);
+        }
+
+        private int exposureLevel = EXPLOSURE_LEVEL_DEFAULT;
+        private boolean exposeFields = EXPOSE_FIELDS_DEFAULT;
+        private boolean simpleMapWrapper = SIMPLE_MAP_WRAPPER_DEFAULT;
+        // Warning! If you add a new filed, and it affects class introspection, review getIntrospectionCacheId! 
+
+        public void apply(BeansWrapper bw) {
+            bw.setExposureLevel(exposureLevel);
+            bw.setExposeFields(exposeFields);
+            bw.setSimpleMapWrapper(simpleMapWrapper);
+        }
+        
+        /**
+         * Returns a different int for each permutation of the settings that need a separate introspection cache. 
+         * This meant to be used as an array index, so it must be at least 0 and the maximum should be kept low.
+         */
+        private int getIntrospectionCacheIndex() {
+            if (exposureLevel > 3 || exposureLevel < 0) {
+                throw new RuntimeException("Unsupported exposureLevel: " + exposureLevel);
+            }
+            int expLev = exposureLevel;
+            if (expLev == EXPOSE_SAFE) {
+                expLev = EXPOSE_ALL;  // to keep the most important case on index 0
+            } else if (expLev == EXPOSE_ALL) {
+                expLev = EXPOSE_SAFE;
+            }
+            return (exposeFields ? 1 : 0) + (expLev << 1);
+        }
+        
+        /**
+         * The highest index returned by {@link #getIntrospectionCacheIndex()} for which a {@link SoftReference}
+         * should be created, rather than a {@link WeakReference}.
+         */
+        private static final int MAX_SOFT_INTROSPECTION_CACHE_INDEX = 0; 
+
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (exposeFields ? 1231 : 1237);
+            result = prime * result + exposureLevel;
+            result = prime * result + (simpleMapWrapper ? 1231 : 1237);
+            return result;
+        }
+
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            SettingAssignments other = (SettingAssignments) obj;
+            if (exposeFields != other.exposeFields) return false;
+            if (exposureLevel != other.exposureLevel) return false;
+            if (simpleMapWrapper != other.simpleMapWrapper) return false;
+            return true;
+        }
+
+        public int getExposureLevel() {
+            return exposureLevel;
+        }
+
+        public void setExposureLevel(int exposureLevel) {
+            this.exposureLevel = exposureLevel;
+        }
+
+        public boolean getExposeFields() {
+            return exposeFields;
+        }
+
+        public void setExposeFields(boolean exposeFields) {
+            this.exposeFields = exposeFields;
+        }
+
+        public boolean isSimpleMapWrapper() {
+            return simpleMapWrapper;
+        }
+
+        public void setSimpleMapWrapper(boolean simpleMapWrapper) {
+            this.simpleMapWrapper = simpleMapWrapper;
+        }
+        
     }
 
 }

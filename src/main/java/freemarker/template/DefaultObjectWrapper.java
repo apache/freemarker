@@ -60,14 +60,15 @@ import java.util.Iterator;
 import java.util.Map;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapper.SettingAssignments;
 import freemarker.ext.dom.NodeModel;
 
 /**
- * <p>The default implementation of the ObjectWrapper
- * interface.
+ * The default implementation of the {@link ObjectWrapper} interface.
  */
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
+    /** @deprecated Use {@link #getInstance(Version)} instead, but mind its performance */
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
     static final private Class W3C_DOM_NODE_CLASS, JYTHON_OBJ_CLASS;
@@ -78,15 +79,19 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     private static volatile WeakReference/*<DefaultObjectWrapper>*/ singleton2003021;
     
     /**
-     * @deprecated Use {@link #getInstance(Version)} instead.
+     * Creates a new instance with the incompatible-improvements-version specified in
+     * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
+     * 
+     * @deprecated Use {@link #getInstance(Version)} or {@link #getInstance(Version, SettingAssignments)}, or
+     *     in rare cases {@link #DefaultObjectWrapper(Version)} instead.
      */
     public DefaultObjectWrapper() {
         super();
     }
     
     /**
-     * Use {@link #getInstance(Version)} instead, unless you need a separate class introspection cache or some
-     * configuration tweak that can't be achieved with it.
+     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, SettingAssignments)} instead if possible.
+     * Instances created with this constructor won't share the class introspection caches with other instances.
      * 
      * @param incompatibleImprovements As of yet, the same as in {@link BeansWrapper#BeansWrapper(Version)}.
      * 
@@ -97,34 +102,76 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Gets (possibly first creates) the unconfigurable {@link DefaultObjectWrapper} instance that's conforming to
-     * the specified incompatible improvements version.
-     * This does exactly the same as {@link Configuration#getInstanceOf(Class, Object[], Map)} called with the
-     * appropriate arguments, but it runs much faster.
+     * Calls {@link BeansWrapper#BeansWrapper(Version, BeansWrapper.SettingAssignments)}.
+     * 
+     * @since 2.3.21
+     */
+    protected DefaultObjectWrapper(Version incompatibleImprovements, BeansWrapper.SettingAssignments settings) {
+        super(incompatibleImprovements, settings);
+    }
+    
+    /**
+     * 
+     * Returns an unconfigurable (read-only) {@link DefaultObjectWrapper} instance that's already configured as
+     * specified in the arguments; this is preferred over using the constructors. The returned instance is often, but
+     * not always a VM-wide singleton.
+     * 
+     * <p>The main benefit of this over the constructors is that the instances made with this method
+     * share their internal class introspection caches, which is something that's expensive to build. (To be precise,
+     * the introspection cache is only shared among those instances that use compatible introspection settings, like the
+     * same exposure level.)
      * 
      * @param incompatibleImprovements See the corresponding parameter of
-     *     {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
-     *     Note that the version will be normalized to the lowest equivalent version, so for the returned
-     *     instance {@link #getIncompatibleImprovements()} might returns a lower version that what you have specified.
+     *     {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. Note that the version will be normalized to the
+     *     lowest equivalent version, so for the returned instance {@link #getIncompatibleImprovements()} might returns
+     *     a lower version than what you have specified.
      * 
-     * @return A {@link DefaultObjectWrapper}, only Java languages doesn't allow declaring that return type.   
+     * @return A {@link DefaultObjectWrapper} (Java doesn't allow declaring that as return type here, that's only
+     *      why it's declared as {@link BeansWrapper}).
      * 
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        incompatibleImprovements = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(
-                incompatibleImprovements);
+        return getInstance(incompatibleImprovements, SettingAssignments.DEFAULT);
+    }
+
+    /**
+     * Don't call this; always fails because {@link DefaultObjectWrapper} is not affected by the
+     * <tt>simpleMapWrapper</tt> setting. This method exists only so that it hides the one "inherited" from
+     * {@link BeansWrapper}, which wouldn't return a {@link DefaultObjectWrapper}.
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapWrapper) {
+        throw new IllegalArgumentException(
+                "DefaultObjectWrapper is not affected by the simpleMapWrapper setting; "
+                + "use getInstance(Version).");
+    }
+    
+    /**
+     * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
+     *     
+     * @param settings The settings that you want to be set in the returned instance.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements, SettingAssignments settings) {
         DefaultObjectWrapper res; 
         
-        final int v = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements)
-                .intValue();
-        if (v == 2003000) {
+        if (!settings.equals(SettingAssignments.DEFAULT)) {
+            // We only cache an instance for the DEFAULT setting permutation.
+            // This is usually not a big loss; caching the internal introspection cache is what really matters.
+            return new DefaultObjectWrapper(incompatibleImprovements, settings);
+        }
+        
+        incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        
+        int iciInt = incompatibleImprovements.intValue();
+        if (iciInt == 2003000) {
             WeakReference rw = singleton2003000;
             if (rw != null) {
                 res = (DefaultObjectWrapper) rw.get();
                 if (res != null) return res;
             }
-        } else if (v == 2003021) {
+        } else if (iciInt == 2003021) {
             WeakReference rw = singleton2003021;
             if (rw != null) {
                 res = (DefaultObjectWrapper) rw.get();
@@ -134,12 +181,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             throw new RuntimeException();
         }
         
-        res = (DefaultObjectWrapper) getInstance(
-                DefaultObjectWrapper.class, incompatibleImprovements, null);
+        res = new DefaultObjectWrapper(incompatibleImprovements, settings);
 
-        if (v == 2003000) {
+        if (iciInt == 2003000) {
             singleton2003000 = new WeakReference(res);
-        } else if (v == 2003021) {
+        } else if (iciInt == 2003021) {
             singleton2003021 = new WeakReference(res);
         } else {
             throw new RuntimeException();
@@ -245,16 +291,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             list.add(Array.get(arr, i));
         }
         return list;
-    }
-    
-    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
-    public static Object[] normalizeConstructorArguments(Object[] args) {
-        return BeansWrapper.normalizeConstructorArguments(args);
-    }
-
-    /** Needed for {@link Configuration#getInstanceOf(Class, Object[], Map, boolean)}. @since 2.3.21 */
-    public static Version normalizeIncompatibleImprovementsVersion(Version version) {
-        return BeansWrapper.normalizeIncompatibleImprovementsVersion(version);
     }
     
 }
