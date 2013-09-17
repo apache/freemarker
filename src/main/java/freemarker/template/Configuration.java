@@ -52,14 +52,10 @@
 
 package freemarker.template;
 
-import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,11 +89,9 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
-import freemarker.template.utility.Lockable;
 import freemarker.template.utility.NormalizeNewlines;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StandardCompress;
@@ -384,8 +378,11 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
      */
-    public synchronized void setTemplateLoader(TemplateLoader loader) {
-        createTemplateCache(loader, cache.getCacheStorage());
+    public void setTemplateLoader(TemplateLoader loader) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            createTemplateCache(loader, cache.getCacheStorage());
+        }
     }
 
     private void createTemplateCache(TemplateLoader loader, CacheStorage storage)
@@ -415,8 +412,11 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the cache storage will re-create the template cache, so
      * all its content will be lost.
      */
-    public synchronized void setCacheStorage(CacheStorage storage) {
-        createTemplateCache(cache.getTemplateLoader(), storage);
+    public void setCacheStorage(CacheStorage storage) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            createTemplateCache(cache.getTemplateLoader(), storage);
+        }
     }
     
     /**
@@ -424,8 +424,11 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @since 2.3.20
      */
-    public synchronized CacheStorage getCacheStorage() {
-        return cache.getCacheStorage();
+    public CacheStorage getCacheStorage() {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            return cache.getCacheStorage();
+        }
     }
 
     /**
@@ -1069,19 +1072,25 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
      * templates. The order of the imports will be the same as the order in which they were added with this method.
      */
-    public synchronized void addAutoImport(String namespaceVarName, String templateName) {
-        autoImports.remove(namespaceVarName);
-        autoImports.add(namespaceVarName);
-        autoImportNsToTmpMap.put(namespaceVarName, templateName);
+    public void addAutoImport(String namespaceVarName, String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoImports.remove(namespaceVarName);
+            autoImports.add(namespaceVarName);
+            autoImportNsToTmpMap.put(namespaceVarName, templateName);
+        }
     }
     
     /**
      * Removes an auto-import; see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't
      * exist.
      */
-    public synchronized void removeAutoImport(String namespaceVarName) {
-        autoImports.remove(namespaceVarName);
-        autoImportNsToTmpMap.remove(namespaceVarName);
+    public void removeAutoImport(String namespaceVarName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoImports.remove(namespaceVarName);
+            autoImportNsToTmpMap.remove(namespaceVarName);
+        }
     }
     
     /**
@@ -1090,16 +1099,19 @@ public class Configuration extends Configurable implements Cloneable {
      * returns the keys, thus, it's not the best idea to use a {@link HashMap} (although the order of imports doesn't
      * mater for properly designed libraries).
      */
-    public synchronized void setAutoImports(Map map) {
-        autoImports = new ArrayList(map.keySet());
-        if (map instanceof HashMap) {
-            autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
-        } 
-        else if (map instanceof SortedMap) {
-            autoImportNsToTmpMap = new TreeMap(map);             
-        }
-        else {
-            autoImportNsToTmpMap = new HashMap(map);
+    public void setAutoImports(Map map) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoImports = new ArrayList(map.keySet());
+            if (map instanceof HashMap) {
+                autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
+            } 
+            else if (map instanceof SortedMap) {
+                autoImportNsToTmpMap = new TreeMap(map);             
+            }
+            else {
+                autoImportNsToTmpMap = new HashMap(map);
+            }
         }
     }
     
@@ -1122,23 +1134,29 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds an invisible <code>#include <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
      * templates. The order of the inclusions will be the same as the order in which they were added with this method.
      */
-    public synchronized void addAutoInclude(String templateName) {
-        autoIncludes.remove(templateName);
-        autoIncludes.add(templateName);
+    public void addAutoInclude(String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoIncludes.remove(templateName);
+            autoIncludes.add(templateName);
+        }
     }
 
     /**
      * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
      */
-    public synchronized void setAutoIncludes(List templateNames) {
-        autoIncludes.clear();
-        Iterator it = templateNames.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
-            if (!(o instanceof String)) {
-                throw new IllegalArgumentException("List items must be String-s.");
+    public void setAutoIncludes(List templateNames) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoIncludes.clear();
+            Iterator it = templateNames.iterator();
+            while (it.hasNext()) {
+                Object o = it.next();
+                if (!(o instanceof String)) {
+                    throw new IllegalArgumentException("List items must be String-s.");
+                }
+                autoIncludes.add(o);
             }
-            autoIncludes.add(o);
         }
     }
     
@@ -1146,8 +1164,11 @@ public class Configuration extends Configurable implements Cloneable {
      * Removes a template from the auto-include list; see {@link #addAutoInclude(String)}. Does nothing if the template
      * is not there.
      */
-    public synchronized void removeAutoInclude(String templateName) {
-        autoIncludes.remove(templateName);
+    public void removeAutoInclude(String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoIncludes.remove(templateName);
+        }
     }
 
     /**
