@@ -57,6 +57,8 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import freemarker.core.BugException;
+
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
@@ -223,7 +225,7 @@ public class _MethodUtil {
         if(member instanceof Constructor) {
             return isVarArgs(member, CONSTRUCTOR_IS_VARARGS);
         }
-        throw new RuntimeException();
+        throw new BugException();
     }
     
     private static boolean isVarArgs(Member member, Method isVarArgsMethod) {

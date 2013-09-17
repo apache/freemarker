@@ -87,6 +87,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import freemarker.core.BugException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
@@ -570,7 +571,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                 }
             }
         } else {
-            throw new RuntimeException();
+            throw new BugException(iciInt);
         }
         
         res = new BeansWrapper(incompatibleImprovements, settings);
@@ -593,7 +594,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                 instance2003021SimpleMapsFalse = wr;
             }
         } else {
-            throw new RuntimeException();
+            throw new BugException(iciInt);
         }
         
         return res;
@@ -2372,7 +2373,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
          */
         private int getIntrospectionCacheIndex() {
             if (exposureLevel > 3 || exposureLevel < 0) {
-                throw new RuntimeException("Unsupported exposureLevel: " + exposureLevel);
+                throw new BugException("Unsupported exposureLevel: " + exposureLevel);
             }
             int expLev = exposureLevel;
             if (expLev == EXPOSE_SAFE) {

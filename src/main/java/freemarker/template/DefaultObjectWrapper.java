@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import freemarker.core.BugException;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapper.SettingAssignments;
 import freemarker.ext.dom.NodeModel;
@@ -188,7 +189,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 }
             }
         } else {
-            throw new RuntimeException();
+            throw new BugException();
         }
         
         res = new DefaultObjectWrapper(incompatibleImprovements, settings);
@@ -201,7 +202,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         } else if (iciInt == 2003021) {
             singleton2003021 = new WeakReference(res);
         } else {
-            throw new RuntimeException();
+            throw new BugException();
         }
         
         return res;

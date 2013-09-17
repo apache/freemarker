@@ -81,7 +81,7 @@ public class DateUtil {
                     throw new RuntimeException(
                             "Failed to create TimeZoneOffsetCalculator. " +
                             "Note that this feature requires at least " +
-                            "Java 1.4.\nCause exception: " + e);
+                            "Java 1.4.\nCause exception: " + e);  // Java 5: use cause exc.  
                 }
                 
             };

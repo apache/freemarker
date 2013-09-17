@@ -346,7 +346,7 @@ class EvalUtil
             case CMP_OP_GREATER_THAN: return cmpResult > 0;
             case CMP_OP_LESS_THAN_EQUALS: return cmpResult <= 0;
             case CMP_OP_GREATER_THAN_EQUALS: return cmpResult >= 0;
-            default: throw new RuntimeException("Unsupported comparator operator code: " + operator);
+            default: throw new BugException("Unsupported comparator operator code: " + operator);
         }
     }
 
@@ -405,7 +405,7 @@ class EvalUtil
                         return booleanValue ? MiscUtil.C_TRUE : "";
                     }
                 } else {
-                    throw new RuntimeException("Unsupported classic_compatible variation: " + compatMode);
+                    throw new BugException("Unsupported classic_compatible variation: " + compatMode);
                 }
             }
         } else {

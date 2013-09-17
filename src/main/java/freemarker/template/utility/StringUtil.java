@@ -58,6 +58,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
@@ -247,7 +248,7 @@ public class StringUtil {
                     case '<': b.append("&lt;"); break;
                     case '>': b.append("&gt;"); break;
                     case '&': b.append("&amp;"); break;
-                    default: throw new RuntimeException("Bug: unexpected char");
+                    default: throw new BugException();
                 }
                 i++;
                 int next = i;
@@ -263,7 +264,7 @@ public class StringUtil {
                             case '<': b.append("&lt;"); break;
                             case '>': b.append("&gt;"); break;
                             case '&': b.append("&amp;"); break;
-                            default: throw new RuntimeException("Bug: unexpected char");
+                            default: throw new BugException();
                         }
                         next = i + 1;
                     }

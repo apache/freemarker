@@ -91,7 +91,7 @@ final class ComparisonExpression extends BooleanExpression {
             operation = EvalUtil.CMP_OP_LESS_THAN_EQUALS;
         }
         else {
-            throw new RuntimeException("Unknown comparison operator " + opString);
+            throw new BugException("Unknown comparison operator " + opString);
         }
     }
 

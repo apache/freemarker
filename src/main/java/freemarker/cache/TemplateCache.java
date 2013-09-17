@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
@@ -248,7 +249,7 @@ public class TemplateCache
                         rethrown = true;
                         throwLoadFailedException((IOException)t);
                     }
-                    throw new RuntimeException("t is " + t.getClass().getName());
+                    throw new BugException("t is " + t.getClass().getName());
                 }
                 // Clone as the instance bound to the map should be treated as
                 // immutable to ensure proper concurrent semantics

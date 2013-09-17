@@ -58,6 +58,7 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core.BugException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
@@ -122,7 +123,7 @@ final class OverloadedMethods
                         "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
             } else {
-                throw new RuntimeException("Unsupported EmptyMemberAndArguments: " + res); 
+                throw new BugException("Unsupported EmptyMemberAndArguments: " + res); 
             }
         }
     }

@@ -116,7 +116,7 @@ final class ConditionalBlock extends TemplateElement {
         } else if (type == TYPE_ELSE_IF) {
             return "#elseif";
         } else {
-            throw new RuntimeException("Unknown type");
+            throw new BugException("Unknown type");
         }
     }
     

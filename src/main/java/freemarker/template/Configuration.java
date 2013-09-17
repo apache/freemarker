@@ -85,6 +85,7 @@ import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
+import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
@@ -216,7 +217,7 @@ public class Configuration extends Configurable implements Cloneable {
             copy.createTemplateCache(cache.getTemplateLoader(), cache.getCacheStorage());
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Clone is not supported, but it should be: " + e.getMessage());
+            throw new BugException(e.getMessage());  // Java 5: use cause exc.
         }
     }
     
@@ -481,7 +482,7 @@ public class Configuration extends Configurable implements Cloneable {
                             .getConstructor(constructorParamTypes)
                                     .newInstance(constructorParams));
         } catch (Exception exc) {
-            throw new RuntimeException("Internal FreeMarker error: " + exc);
+            throw new BugException(exc.toString());  // Java 5: use cause exc.
         }
     }
 

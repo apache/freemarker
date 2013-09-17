@@ -332,7 +332,7 @@ class SequenceBuiltins {
                         break;
                         
                     default:
-                        throw new RuntimeException("FreeMarker bug: Unexpected key type");
+                        throw new BugException("Unexpected key type");
                 }
             }
 
