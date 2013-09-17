@@ -214,6 +214,21 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private static volatile WeakReference/*<BeansWrapper>*/ instance2003021SimpleMapsFalse;
     private static volatile WeakReference/*<BeansWrapper>*/ instance2003000SimpleMapsTrue;
     private static volatile WeakReference/*<BeansWrapper>*/ instance2003021SimpleMapsTrue;
+
+    /**
+     * @deprecated Don't use this outside FreeMarker; will be soon removed.
+     */
+    protected final Object _preJava5Sync = _BeansAPI.JVM_USES_JSR133 ? null : new Object(); 
+    
+    /**
+     * Write any non-0 (!) value into this after some fields were modified, then read it back before those fields are
+     * used in another thread. On Java 5 and later, this will ensure that the reading thread doesn't see stale
+     * values. This variable is used by {@link #getInstance(Version, SettingAssignments)} (and its overloads) to ensure
+     * that cached {@link BeansWrapper} instances are seen consistently.
+     * 
+     * @since 2.3.21
+     */
+    protected volatile int instanceMemorySync;
     
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection cache:
@@ -476,6 +491,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * same exposure level.)
      * 
      * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
+     *     Not {@code null}
      *     Note that the version will be normalized to the lowest equivalent version, so for the returned
      *     instance {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
      * 
@@ -504,11 +520,16 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     /**
      * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
      *     
-     * @param settings The settings that you want to be set in the returned instance.
+     * @param settings The settings that you want to be set in the returned instance. Not {@code null}.
      * 
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements, SettingAssignments settings) {
+        // Note: Don't forget when creating instances here and then later give them out from the cache, that it's this
+        // method's responsibility to ensure that the receiver thread doesn't see a partially initialized object. As of
+        // this writing, the happens-before semantic is ensured by writing and later reading the *volatile* field that
+        // holds the cached instance. (See JSR-133 why it works, since Java 5.)
+        
         BeansWrapper res;
         
         final boolean simpleMapWrapper;
@@ -530,19 +551,32 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             WeakReference rw = simpleMapWrapper ? instance2003000SimpleMapsTrue : instance2003000SimpleMapsFalse;
             if (rw != null) {
                 res = (BeansWrapper) rw.get();
-                if (res != null) return res;
+                if (res != null) {
+                    if (res._preJava5Sync != null) {
+                        synchronized (res._preJava5Sync) { }  // force cache invalidation
+                    }
+                    return res;
+                }
             }
         } else if (iciInt == 2003021) {
             WeakReference rw = simpleMapWrapper ? instance2003021SimpleMapsTrue : instance2003021SimpleMapsFalse;
             if (rw != null) {
                 res = (BeansWrapper) rw.get();
-                if (res != null) return res;
+                if (res != null) {
+                    if (res._preJava5Sync != null) {
+                        synchronized (res._preJava5Sync) { }  // force cache invalidation
+                    }
+                    return res;
+                }
             }
         } else {
             throw new RuntimeException();
         }
         
         res = new BeansWrapper(incompatibleImprovements, settings);
+        if (res._preJava5Sync != null) {
+            synchronized (res._preJava5Sync) { }  // force cache flushing
+        }
         
         if (iciInt == 2003000) {
             WeakReference wr = new WeakReference(res);
@@ -1615,6 +1649,10 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * class. If any property or method descriptors specifies a read method
      * that is not accessible, replaces it with appropriate accessible method
      * from a superclass or interface.
+     * 
+     * <p>WARNING! This must be called after (or inside) synchronized(sharedClassIntrospectionCacheLock), or else
+     * there's a risk that we do the introspection with stale settings, which can pollute the introspection cache
+     * with wrong data.
      */
     private Map createClassIntrospectionData(Class clazz)
     {

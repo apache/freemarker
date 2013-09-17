@@ -169,19 +169,32 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             WeakReference rw = singleton2003000;
             if (rw != null) {
                 res = (DefaultObjectWrapper) rw.get();
-                if (res != null) return res;
+                if (res != null) {
+                    if (res._preJava5Sync != null) {
+                        synchronized (res._preJava5Sync) { }  // force cache invalidation
+                    }
+                    return res;
+                }
             }
         } else if (iciInt == 2003021) {
             WeakReference rw = singleton2003021;
             if (rw != null) {
                 res = (DefaultObjectWrapper) rw.get();
-                if (res != null) return res;
+                if (res != null) {
+                    if (res._preJava5Sync != null) {
+                        synchronized (res._preJava5Sync) { }  // force cache invalidation
+                    }
+                    return res;
+                }
             }
         } else {
             throw new RuntimeException();
         }
         
         res = new DefaultObjectWrapper(incompatibleImprovements, settings);
+        if (res._preJava5Sync != null) {
+            synchronized (res._preJava5Sync) { }  // force cache flushing
+        }
 
         if (iciInt == 2003000) {
             singleton2003000 = new WeakReference(res);
