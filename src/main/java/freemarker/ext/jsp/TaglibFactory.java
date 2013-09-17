@@ -78,6 +78,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
@@ -192,7 +193,7 @@ public class TaglibFactory implements TemplateHashModel {
                         return loadTaglib(new TldPath(uri), uri);
                     }
                     default: {
-                        throw new RuntimeException("Cannot happen");
+                        throw new BugException();
                     }
                 }
             }
