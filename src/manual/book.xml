@@ -5125,35 +5125,29 @@ That's all.</programlisting>
         <literal>freemarker.template.Configuration</literal> instance and
         adjust its settings. A <literal>Configuration</literal> instance is a
         central place to store the application level settings of FreeMarker.
-        Also, it deals with the creation and caching of pre-parsed
-        templates.</para>
+        Also, it deals with the creation and caching of pre-parsed templates
+        (i.e., <literal>Template</literal> objects).</para>
 
         <para>Probably you will <emphasis>do it only once</emphasis> at the
         beginning of the application (possibly servlet) life-cycle:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration();
+        <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
+// version (here 2.3.21) do you want to apply the fixes that are not 100%
+// backward-compatible. The fixes activated this way are very low-risk
+// changes as far as the 1st and 2nd version number remains the same.
+Configuration cfg = new Configuration(new Version(2, 3, 21));
 
-// Specify the data source where the template files come from. Here I set a
-// plain directory for it, but non-file-system are possible too:
+// Specify the source where the template files come from. Here I set a
+// plain directory for it, but non-file-system sources are possible too:
 cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
 
-// Set your preferred charset template files are stored in. UTF-8 is
+// Set the preferred charset template files are stored in. UTF-8 is
 // a good choice in most applications:
 cfg.setDefaultEncoding("UTF-8");
 
 // Sets how errors will appear. Here we assume we are developing HTML pages.
 // For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
-cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-
-// At least in new projects, specify that you want the fixes that aren't
-// 100% backward compatible too (these are very low-risk changes as far as the
-// 1st and 2nd version number remains):
-cfg.setIncompatibleImprovements(new Version(2, 3, 21));  // FreeMarker 2.3.21
-
-// Specify how templates will see the data-model. This is an advanced topic...
-// Here we will just use the default value, except that we require the
-// "incompatible improvements" here too:
-cfg.setObjectWrapper(DefaultObjectWrapper.getInstance(new Version(2, 3, 21)));</programlisting>
+cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -5341,13 +5335,10 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration */
-        Configuration cfg = new Configuration();
-
+        Configuration cfg = new Configuration(new Version(2, 3, 21));
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        cfg.setIncompatibleImprovements(new Version(2, 3, 21));
-        cfg.setObjectWrapper(DefaultObjectWrapper.getInstance(new Version(2, 3, 21)));
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for many times in the application life-cycle:       */    
@@ -20361,6 +20352,51 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added new <literal>Configuration</literal> constructor,
+              <literal>Configuration(Version
+              incompatibleImprovements)</literal>. This deprecates the vague
+              <literal>Configuration()</literal> constructor, and makes using
+              <literal>setIncompatibleImprovements(Version)</literal> needless
+              in most cases. See an example <link
+              linkend="pgui_quickstart_createconfiguration">here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>When setting the
+              <literal>incompatible_improvements</literal> setting (like with
+              the constructor above) to 2.3.21, two things change:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>The default of the <literal>object_wrapper</literal>
+                  setting changes to another
+                  <literal>DefaultObjectWrapper</literal> singleton, which
+                  however has the overloaded bug fixes activated (see them
+                  later), and doesn't allow changing its settings (setter
+                  methods throw <literal>IllegalStateException</literal>). If
+                  anything ever tried to call setters on the old default,
+                  which was also a singleton, that was a serious bug in the
+                  application, as the singletons are shared among
+                  independently developed components, which expect it to
+                  always behave the same (not to mention the concurrency
+                  issues).</para>
+                </listitem>
+
+                <listitem>
+                  <para>The default of the <literal>template_loader</literal>
+                  setting changes to a dummy template loader that that never
+                  finds any templates (<literal>NullTemplateLoader</literal>).
+                  Earlier the default was a
+                  <literal>FileTemplateLoader</literal> that uses the current
+                  directory as the root. This was dangerous and fragile (as
+                  you usually don't have a good control over what the current
+                  directory is according the OS), while almost never looked
+                  for the template at the good place anyway.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
             <listitem>
               <para>New <literal>BeansWrapper</literal>,
               <literal>DefaultObjectWrapper</literal> and

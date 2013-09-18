@@ -72,6 +72,7 @@ import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -99,6 +100,9 @@ import freemarker.template.utility.StringUtil;
 public class Configurable
 {
     static final String C_TRUE_FALSE = "true,false";
+    
+    /** The incompatible improvements version where the default of tempateLoader and objectWrapper was changed. */
+    static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = 2003021;
     
     public static final String LOCALE_KEY = "locale";
     public static final String NUMBER_FORMAT_KEY = "number_format";
@@ -144,10 +148,21 @@ public class Configurable
     private TemplateClassResolver newBuiltinClassResolver;
     
     /**
-     * Creates a top-level configurable, one that doesn't ingerit from a parent, and thus stores the default values.
+     * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
      * The only class that should use this is {@link Configuration}.
+     * 
+     * @deprecated This shouldn't even be public; don't use it.
      */
     public Configurable() {
+        this((Version) null);
+    }
+
+    /**
+     * Intended to be called from inside FreeMarker only.
+     * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
+     * Called by the {@link Configuration} constructor.
+     */
+    protected Configurable(Version incompatibleImprovements) {
         parent = null;
         locale = Locale.getDefault();
         timeZone = TimeZone.getDefault();
@@ -158,7 +173,7 @@ public class Configurable
         classicCompatible = new Integer(0);
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
-        objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
+        objectWrapper = getDefaultObjectWrapper(incompatibleImprovements);
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         // outputEncoding and urlEscapingCharset defaults to null,
@@ -210,7 +225,7 @@ public class Configurable
      * The parent stores the default values for this configurable. For example,
      * the parent of the {@link freemarker.template.Template} object is the
      * {@link freemarker.template.Configuration} object, so setting values not
-     * specfied on template level are specified by the confuration object.
+     * specified on template level are specified by the confuration object.
      *
      * @return the parent <tt>Configurable</tt> object, or null, if this is
      *    the root <tt>Configurable</tt> object.
@@ -229,7 +244,7 @@ public class Configurable
     }
     
     /**
-     * Toggles the "Classic Compatibile" mode. For a comprehensive description
+     * Toggles the "Classic Compatible" mode. For a comprehensive description
      * of this mode, see {@link #isClassicCompatible()}.
      */
     public void setClassicCompatible(boolean classicCompatibility) {
@@ -618,6 +633,15 @@ public class Configurable
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper != null
                 ? objectWrapper : parent.getObjectWrapper();
+    }
+    
+    static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
+        if (incompatibleImprovements == null
+                || incompatibleImprovements.intValue() < DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+            return ObjectWrapper.DEFAULT_WRAPPER;
+        } else {
+            return DefaultObjectWrapper.getInstance(incompatibleImprovements);
+        }
     }
     
     /**

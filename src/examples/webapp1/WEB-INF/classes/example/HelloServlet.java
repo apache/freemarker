@@ -17,8 +17,8 @@ public class HelloServlet extends HttpServlet {
     
     public void init() {
         // Initialize the FreeMarker configuration;
-        // - Create a configuration instance
-        cfg = new Configuration();
+        // - Create a configuration instance with the defaults of FreeMarker 2.3.21
+        cfg = new Configuration(new Version(2, 3, 21));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");

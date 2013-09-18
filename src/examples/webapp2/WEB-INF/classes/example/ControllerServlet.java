@@ -19,11 +19,10 @@ public class ControllerServlet extends HttpServlet {
     
     public void init() {
         // Initialize the FreeMarker configuration;
-        // - Create a configuration instance
-        cfg = new Configuration();
-        // - At least in new projects, specify that you want the fixes that aren't
-        //   100% backward compatible too (these are always very low-risk changes):
-        cfg.setIncompatibleImprovements(new Version(2, 3, 21));
+        // - Create a configuration instance, with the not-100%-backward-compatible
+        //   fixes up until FreeMarker 2.3.21 applied (as far as it starts
+        //   with 2.3, these are only minor changes that doesn't affect most apps):
+        cfg = new Configuration(new Version(2, 3, 21));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");
@@ -37,9 +36,6 @@ public class ControllerServlet extends HttpServlet {
                 isInDevelopmentMode()
                         ? TemplateExceptionHandler.HTML_DEBUG_HANDLER
                         : TemplateExceptionHandler.RETHROW_HANDLER);
-        // - Use BeansWrapper instead of the default ObjectWrapper.
-        //   This is recommmended for most applications until FreeMarker 2.4.0.
-        cfg.setObjectWrapper(BeansWrapper.getInstance(new Version(2, 3, 21), true));
         // - Set the default charset of the template files
         cfg.setDefaultEncoding("ISO-8859-1");
         // - Set the charset of the output. This is actually just a hint, that

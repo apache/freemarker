@@ -4,6 +4,9 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Set;
 
+import freemarker.template.ObjectWrapper;
+import freemarker.template.Version;
+
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -16,6 +19,8 @@ public class _CoreAPI {
     private _CoreAPI() { }
 
     public static final String STACK_SECTION_SEPARATOR = Environment.STACK_SECTION_SEPARATOR;
+    
+    public static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = Configurable.DEFAULT_TL_AND_OW_CHANGE_VERSION;
     
     /**
      * Returns the names of the currently supported "built-ins" ({@code expr?builtin_name}-like things).
@@ -36,6 +41,10 @@ public class _CoreAPI {
     public static void outputInstructionStack(
             TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
         Environment.outputInstructionStack(instructionStackSnapshot, pw);
+    }
+    
+    public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
+        return Configurable.getDefaultObjectWrapper(incompatibleImprovements);
     }
     
 }

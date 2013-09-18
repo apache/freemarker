@@ -117,10 +117,13 @@ public class TemplateCache
      */
     public TemplateCache()
     {
-        this(createDefaultTemplateLoader());
+        this(createLegacyDefaultTemplateLoader());
     }
 
-    private static TemplateLoader createDefaultTemplateLoader() {
+    /**
+     * Creates the default {@link TemplateLoader} used in 2.3.0-compatible mode.
+     */
+    protected static TemplateLoader createLegacyDefaultTemplateLoader() {
         try {
             return new FileTemplateLoader();
         } catch(Exception e) {

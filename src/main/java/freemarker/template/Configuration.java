@@ -77,10 +77,12 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MruCacheStorage;
 import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.NullTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache._CacheAPI;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
@@ -93,6 +95,7 @@ import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.NormalizeNewlines;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StandardCompress;
 import freemarker.template.utility.StringUtil;
@@ -180,10 +183,13 @@ public class Configuration extends Configurable implements Cloneable {
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
-    private Version incompatibleImprovements = DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
+    private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
+    private boolean templateLoaderWasSet;
+
+    private boolean objectWrapperWasSet;
     
     private HashMap sharedVariables = new HashMap();
     
@@ -193,13 +199,81 @@ public class Configuration extends Configurable implements Cloneable {
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
+    /**
+     * @deprecated Use {@link Configuration} instead.
+     */
     public Configuration() {
-        cache = new TemplateCache();
-        cache.setConfiguration(this);
-        cache.setDelay(5000);
+        this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+    }
+
+    /**
+     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
+     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
+     * active by default, as that would break backward-compatibility).
+     * 
+     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
+     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
+     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
+     * low-risk changes, so usually they don't break anything in older applications either.
+     * 
+     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
+     * enabled, regardless of what you set here.
+     * 
+     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
+     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
+     * set this setting to a low value, it might wont bring back the old behavior anymore.
+     * 
+     * <p>Currently the effects of this setting are:
+     * <ul>
+     *   <li><p>
+     *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
+     *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
+     *     same template.
+     *   </li>
+     *   <li><p>
+     *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
+     *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
+     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
+     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
+     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
+     *     concern anymore.
+     *   </li>
+     * </ul>
+     * 
+     * @since 2.3.21
+     */
+    public Configuration(Version incompatibleImprovements) {
+        super(incompatibleImprovements);
+        
+        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        this.incompatibleImprovements = incompatibleImprovements;
+        
+        createTemplateCache();
         loadBuiltInSharedVariables();
     }
 
+    private void createTemplateCache() {
+        cache = new TemplateCache(getDefaultTemplateLoader());
+        cache.setConfiguration(this);
+        cache.setDelay(5000);
+    }
+
+    private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
+        TemplateCache oldCache = cache;
+        cache = new TemplateCache(
+                loader != null ? loader : cache.getTemplateLoader(),
+                storage != null ? storage : cache.getCacheStorage());
+        cache.setDelay(oldCache.getDelay());
+        cache.setConfiguration(this);
+        cache.setLocalizedLookup(localizedLookup);
+    }
+    
+    private TemplateLoader getDefaultTemplateLoader() {
+        return incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION
+                ? _CacheAPI.createLegacyDefaultTemplateLoader()
+                : NullTemplateLoader.INSTANCE;
+    }
+    
     public Object clone() {
         try {
             Configuration copy = (Configuration)super.clone();
@@ -208,7 +282,7 @@ public class Configuration extends Configurable implements Cloneable {
             copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();
-            copy.createTemplateCache(cache.getTemplateLoader(), cache.getCacheStorage());
+            copy.recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException(e.getMessage());  // Java 5: use cause exc.
@@ -381,19 +455,11 @@ public class Configuration extends Configurable implements Cloneable {
     public void setTemplateLoader(TemplateLoader loader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            createTemplateCache(loader, cache.getCacheStorage());
+            recreateTemplateCacheWith(loader, null);
+            templateLoaderWasSet = true;
         }
     }
 
-    private void createTemplateCache(TemplateLoader loader, CacheStorage storage)
-    {
-        TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage);
-        cache.setDelay(oldCache.getDelay());
-        cache.setConfiguration(this);
-        cache.setLocalizedLookup(localizedLookup);
-    }
-    
     /**
      * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
@@ -415,7 +481,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setCacheStorage(CacheStorage storage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            createTemplateCache(cache.getTemplateLoader(), storage);
+            recreateTemplateCacheWith(null, storage);
         }
     }
     
@@ -525,6 +591,11 @@ public class Configuration extends Configurable implements Cloneable {
         strictSyntax = b;
     }
 
+    public void setObjectWrapper(ObjectWrapper objectWrapper) {
+        super.setObjectWrapper(objectWrapper);
+        objectWrapperWasSet = true;
+    }
+
     /**
      * The getter pair of {@link #setStrictSyntaxMode}.
      */
@@ -533,43 +604,23 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
-     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
-     * active by default, as that would break backward-compatibility).
+     * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there. 
      * 
-     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
-     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
-     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
-     * low-risk changes, so usually they don't break anything in older applications either.
-     * 
-     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
-     * enabled, regardless of what you set here.
-     * 
-     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
-     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
-     * set this setting to a low value, it might wont bring back the old behavior anymore.
-     * 
-     * <p>Currently the effects of this setting are:
-     * <ul>
-     *   <li><p>
-     *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
-     *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
-     *     same template.
-     *   </li>
-     *   <li><p>
-     *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
-     *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
-     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
-     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
-     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
-     *     concern anymore.
-     *   </li>
-     * </ul>
-     *
      * @since 2.3.20
      */
-    public void setIncompatibleImprovements(Version version) {
-        incompatibleImprovements = version;
+    public void setIncompatibleImprovements(Version incompatibleImprovements) {
+        boolean hadLegacyTLOWDefaults
+                = this.incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION; 
+        this.incompatibleImprovements = incompatibleImprovements;
+        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+            if (!templateLoaderWasSet) {
+                recreateTemplateCacheWith(getDefaultTemplateLoader(), null);
+            }
+            if (!objectWrapperWasSet) {
+                // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
+                super.setObjectWrapper(_CoreAPI.getDefaultObjectWrapper(incompatibleImprovements));
+            }
+        }
     }
 
     /**
@@ -581,7 +632,8 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * @deprecated Use {@link #setIncompatibleImprovements(Version)} instead.
+     * @deprecated Use {@link #Configuration(Version)}, or
+     *    as last chance, {@link #setIncompatibleImprovements(Version)} instead.
      */
     public void setIncompatibleEnhancements(String version) {
         setIncompatibleImprovements(new Version(version));
