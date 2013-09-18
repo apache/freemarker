@@ -20370,29 +20370,47 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <itemizedlist>
                 <listitem>
                   <para>The default of the <literal>object_wrapper</literal>
-                  setting changes to another
-                  <literal>DefaultObjectWrapper</literal> singleton, which
-                  however has the overloaded bug fixes activated (see them
-                  later), and doesn't allow changing its settings (setter
-                  methods throw <literal>IllegalStateException</literal>). If
-                  anything ever tried to call setters on the old default,
-                  which was also a singleton, that was a serious bug in the
-                  application, as the singletons are shared among
-                  independently developed components, which expect it to
-                  always behave the same (not to mention the concurrency
-                  issues).</para>
+                  setting
+                  (<literal>Configuration.getObjectWrapper()</literal>)
+                  changes from
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
+                  almost identical <literal>DefaultObjectWrapper</literal>
+                  singleton, returned by
+                  <literal>DefaultObjectWrapper.getInstance(Version)</literal>.
+                  The new default object wrapper's <quote>incompatible
+                  improvements</quote> version is set to the same as of the
+                  <literal>Configuration</literal>. (See later regarding the
+                  2.3.21 <quote>incompatible improvements</quote> of
+                  <literal>BeansWrapper</literal> and
+                  <literal>DefaultObjectWrapper</literal>). Furthermore, the
+                  new default object wrapper doesn't allow changing its
+                  settings; setter methods throw
+                  <literal>IllegalStateException</literal>. (If anything tries
+                  to call setters on the old default in your application,
+                  that's a dangerous bug that won't remain hidden now. As the
+                  old default is a singleton too, potentially shared by
+                  independently developed components, most of them expects the
+                  out-of-the-box behavior from it (and the others are
+                  necessarily buggy). Also, then concurrency glitches can
+                  occur (and even pollute the class introspection cache)
+                  because the singleton is modified after publishing.)</para>
                 </listitem>
 
                 <listitem>
                   <para>The default of the <literal>template_loader</literal>
-                  setting changes to a dummy template loader that that never
-                  finds any templates (<literal>NullTemplateLoader</literal>).
-                  Earlier the default was a
-                  <literal>FileTemplateLoader</literal> that uses the current
-                  directory as the root. This was dangerous and fragile (as
-                  you usually don't have a good control over what the current
-                  directory is according the OS), while almost never looked
-                  for the template at the good place anyway.</para>
+                  setting
+                  (<literal>Configuration.getTemplateLoader()</literal>)
+                  changes to a dummy template loader
+                  (<literal>NullTemplateLoader.INSTANCE</literal>) that never
+                  finds any templates. Earlier the default was a
+                  <literal>FileTemplateLoader</literal> that used the current
+                  directory as the root. This was dangerous and fragile as you
+                  usually don't have good control over what the current
+                  directory is according the OS. Luckily, the old default
+                  almost never looked for the templates at the right place
+                  anyway, so pretty much all applications had to set a
+                  <literal>template_loader</literal> setting, so it's unlikely
+                  that changing the default breaks your application.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20721,6 +20739,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>The concurrent performance of overloaded method lookups
               (from the cache) was improved under Java 5 and later.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>template.cache.NullTemplateLoader</literal>, which is a
+              dummy <literal>TemplateLoader</literal> that doesn't find any
+              templates.</para>
             </listitem>
 
             <listitem>

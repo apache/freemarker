@@ -91,6 +91,7 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
@@ -225,6 +226,9 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>Currently the effects of this setting are:
      * <ul>
+   *     <li><p>
+   *       2.3.0: This is just the starting point, the version used in older projects.
+   *     </li>
      *   <li><p>
      *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
      *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
@@ -237,6 +241,33 @@ public class Configuration extends Configurable implements Cloneable {
      *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
      *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
      *     concern anymore.
+     *   </li>
+     *   <li><p>
+     *     2.3.21 (or higher):
+     *     <ul>
+     *       <li><p>
+     *         The default of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
+     *         {@link ObjectWrapper#DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
+     *         returned by {@link DefaultObjectWrapper#getInstance(Version)}. The new default object wrapper's
+     *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
+     *         See {@link BeansWrapper#BeansWrapper(Version)} for further details. Furthermore, the new default
+     *         object wrapper doesn't allow changing its settings; setter methods throw {@link IllegalStateException}).
+     *         (If anything tries to call setters on the old default in your application, that's a dangerous bug that
+     *         won't remain hidden now. As the old default is a singleton too, potentially shared by independently
+     *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
+     *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
+     *         cache) because the singleton is modified after publishing.)
+     *       </li>
+     *       <li><p>
+     *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
+     *         to a dummy template loader ({@link NullTemplateLoader#INSTANCE}) that never finds any templates. Earlier
+     *         the default was a {@link FileTemplateLoader} that used the current directory as the root. This was
+     *         dangerous and fragile as you usually don't have good control over what the current directory is
+     *         according the OS. Luckily, the old default almost never looked for the templates at the right place
+     *         anyway, so pretty much all applications had to set a {@code template_loader} setting, so it's unlikely
+     *         that changing the default breaks your application.
+     *       </li>
+     *     </ul>
      *   </li>
      * </ul>
      * 
