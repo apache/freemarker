@@ -108,17 +108,19 @@ import freemarker.template.utility.XmlEscape;
  *
  * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at the beginning of
  * the application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
- * setter methods or by loading a {@code .properties} file), and then use that single instance everywhere in your
- * application. Frequently re-creating {@link Configuration} is a typical and grave mistake from performance standpoint,
- * as the {@link Configuration} holds the template cache, and often also the class introspection cache, which then will
- * be lost. (Note that, naturally, having multiple long-lived instances, like one per component that internally uses
- * FreeMarker is fine.)  
+ * setter methods like {@link #setTemplateLoader(TemplateLoader)} or by loading a {@code .properties} file), and then
+ * use that single instance everywhere in your application. Frequently re-creating {@link Configuration} is a typical
+ * and grave mistake from performance standpoint, as the {@link Configuration} holds the template cache, and often also
+ * the class introspection cache, which then will be lost. (Note that, naturally, having multiple long-lived instances,
+ * like one per component that internally uses FreeMarker is fine.)  
  * 
  * <p>The basic usage pattern is like:
  * 
  * <pre>
  *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
- *  Configuration cfg = new Configuration();
+ *  Configuration cfg = new Configuration(new Version(X, Y, Z));
+ *  // Where X, Y, Z enables the not-100%-backward-compatible fixes introduced in
+ *  // FreeMarker version X.Y.Z  and earlier (see {@link #Configuration(Version)}).
  *  cfg.set<i>SomeSetting</i>(...);
  *  cfg.set<i>OtherSetting</i>(...);
  *  ...
@@ -134,18 +136,17 @@ import freemarker.template.utility.XmlEscape;
  *       {@link #setClassForTemplateLoading(Class, String)} too.)
  *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
- *   <li>{@link #setIncompatibleImprovements(Version) incompatible_improvements}: As far the 1st and 2nd version number
- *       remains, it's quite safe to set it as high as possible, so for new or actively developed products it's
- *       recommended to do.
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
  *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
  *       {@link TemplateExceptionHandler#RETHROW_HANDLER} is safer to use.
  *   <!-- 2.4: recommend the new object wrapper here -->
  * </ul>
  * 
- * <p>A {@link Configuration} object is thread-safe only after you have stopped modify the configuration settings.
- * Generally, you set everything directly after you have instantiated the {@link Configuration} object, then you don't
- * change the settings anymore, so then it's safe to make it accessible from multiple threads.
+ * <p>A {@link Configuration} object is thread-safe only after you have stopped modifying the configuration settings,
+ * and you have <b>safely published</b> it (see JSR 133 and related literature) to other threads. Generally, you set
+ * everything directly after you have instantiated the {@link Configuration} object, then you don't change the settings
+ * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
+ * The methods that aren't about modifying setting, like {@link #getTemplate(String)}, are thread-safe.
  *
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @author Attila Szegedi
@@ -464,7 +465,8 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Sets a {@link TemplateLoader} that is used to look up and load templates.
+     * Sets a {@link TemplateLoader} that is used to look up and load templates;
+     * as a side effect the template cache will be emptied.
      * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
      * storages, like from relational databases, NoSQL-storages, etc.
      * 
@@ -476,9 +478,9 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>You can chain several {@link TemplateLoader}-s together with {@link MultiTemplateLoader}.
      * 
      * <p>Default value: You should always set the template loader instead of relying on the default value.
-     * The a default value is there only for backward compatibility, and it will be probably
-     * removed in the future. It's a multi-loader that first tries to load a
-     * template from the file in the current directory, then from a resource on the classpath.
+     * (But if you still care what it is, before "incompatible improvements" 2.3.21 it's a {@link FileTemplateLoader}
+     * that uses the current directory as its root; as it's hard tell what that directory will be, it's not very useful
+     * and dangerous. Starting with "incompatible improvements" 2.3.21 it's {@link NullTemplateLoader#INSTANCE}.)   
      * 
      * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
@@ -500,8 +502,10 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the {@link CacheStorage} used for caching {@link Template}-s. The
-     * default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
+     * Sets the {@link CacheStorage} used for caching {@link Template}-s;
+     * the earlier content of the template cache will be dropt.
+     * 
+     * The default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
      * objects is significant but most templates are used rarely, using a
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
      * all, use {@link freemarker.cache.NullCacheStorage} (you can't use {@code null}).
@@ -635,7 +639,13 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there. 
+     * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there.
+     * If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
+     * was never set in this {@link Configuration} object through the public API, its value will be set to the default
+     * value appropriate for the new {@code incompatibleImprovements}. (This adjustment of a setting value doesn't
+     * count as setting that setting, so setting {@code incompatibleImprovements} for multiple times also works as
+     * expected.) Note that if the {@code template_loader} have to be changed because of this, the template cache will
+     * be emptied.
      * 
      * @since 2.3.20
      */
@@ -786,6 +796,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Retrieves the template with the given name (and according the specified further parameters) from the template
      * cache, loading it into the cache first if it's missing/staled.
      * 
+     * <p>This method is thread-safe. 
+     * 
      * <p>See {@link Configuration} for an example of basic usage.
      *
      * @param name The name of the template. Can't be {@code null}. The exact syntax of the name
@@ -912,6 +924,8 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
+     * 
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
      *
      * @param name the name used to access the data object from your template.
      *     If a shared variable with this name already exists, it will replace
@@ -937,6 +951,9 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds shared variable to the configuration.
      * It uses {@link Configurable#getObjectWrapper()} to wrap the 
      * <code>obj</code>.
+     * 
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
+     * 
      * @see #setSharedVariable(String,TemplateModel)
      * @see #setAllSharedVariables
      */
@@ -949,6 +966,8 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
+     *
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
      *
      * @param hash a hash model whose objects will be copied to the
      * configuration with same names as they are given in the hash.
@@ -994,7 +1013,8 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Removes all entries from the template cache, thus forcing reloading of templates
      * on subsequent <code>getTemplate</code> calls.
-     * This method is thread-safe and can be called while the engine works.
+     * 
+     * <p>This method is thread-safe and can be called while the engine processes templates.
      */
     public void clearTemplateCache() {
         cache.clear();
@@ -1039,8 +1059,10 @@ public class Configuration extends Configurable implements Cloneable {
      * finer control over cache updating than {@link #setTemplateUpdateDelay(int)}
      * alone does.
      * 
-     * For the meaning of the parameters, see
+     * <p>For the meaning of the parameters, see
      * {@link #getTemplate(String, Locale, String, boolean)}.
+     * 
+     * <p>This method is thread-safe and can be called while the engine processes templates.
      * 
      * @since 2.3.19
      */

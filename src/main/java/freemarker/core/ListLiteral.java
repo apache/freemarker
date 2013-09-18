@@ -69,7 +69,7 @@ import freemarker.template.utility.Collections12;
 
 final class ListLiteral extends Expression {
 
-    final ArrayList items;
+    final ArrayList/*<Expression>*/ items;
 
     ListLiteral(ArrayList items) {
         this.items = items;

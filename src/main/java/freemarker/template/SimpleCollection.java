@@ -78,11 +78,17 @@ implements TemplateCollectionModel, Serializable {
     private final Iterator iterator;
     private final Collection collection;
 
+    /**
+     * @deprecated Use {@link #SimpleCollection(Iterator, ObjectWrapper)}
+     */
     public SimpleCollection(Iterator iterator) {
         this.iterator = iterator;
         collection = null;
     }
 
+    /**
+     * @deprecated Use {@link #SimpleCollection(Collection, ObjectWrapper)}
+     */
     public SimpleCollection(Collection collection) {
         this.collection = collection;
         iterator = null;

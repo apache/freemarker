@@ -71,7 +71,8 @@ import freemarker.ext.beans.BeansWrapper;
  * copies all the elements and discards the <tt>TemplateCollectionModel</tt>.</p>
  *
  * <p>This class is thread-safe if you don't call the <tt>add</tt> method after you
- * have made the object available for multiple threads.
+ * have made the object available for multiple threads, and you have published it
+ * safely.
  *
  * <p><b>Note:</b><br />
  * As of 2.0, this class is unsynchronized by default.
@@ -93,6 +94,8 @@ implements TemplateSequenceModel, Serializable {
      * Constructs an empty simple sequence that will use the the default object 
      * wrapper set in 
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
+     * 
+     * @deprecated Use {@link #SimpleSequence(ObjectWrapper)} instead.
      */
     public SimpleSequence() {
         this((ObjectWrapper) null);
@@ -102,11 +105,14 @@ implements TemplateSequenceModel, Serializable {
      * Constructs an empty simple sequence with preallocated capacity and using
      * the default object wrapper set in 
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
+     * 
+     * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
      */
     public SimpleSequence(int capacity) {
         list = new ArrayList(capacity);
     }
 
+    
     /**
      * Constructs a simple sequence that will contain the elements
      * from the specified {@link Collection} and will use the the default 
@@ -114,6 +120,8 @@ implements TemplateSequenceModel, Serializable {
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
      * @param collection the collection containing initial values. Note that a
      * copy of the collection is made for internal use.
+     * 
+     * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
      */
     public SimpleSequence(Collection collection) {
         this(collection, null);
@@ -144,6 +152,16 @@ implements TemplateSequenceModel, Serializable {
         super(wrapper);
         list = new ArrayList();
     }
+    
+    /**
+     * Constructs an empty simple sequence with preallocated capacity.
+     * 
+     * @since 2.3.21
+     */
+    public SimpleSequence(int capacity, ObjectWrapper wrapper) {
+        super(wrapper);
+        list = new ArrayList(capacity);
+    }    
     
     /**
      * Constructs a simple sequence that will contain the elements

@@ -86,6 +86,8 @@ implements TemplateHashModelEx, Serializable {
     /**
      * Constructs an empty hash that uses the default wrapper set in
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
+     * 
+     * @deprecated Use {@link #SimpleHash(ObjectWrapper)}
      */
     public SimpleHash() {
         this((ObjectWrapper)null);
@@ -99,6 +101,8 @@ implements TemplateHashModelEx, Serializable {
      * internal use. If the map implements the {@link SortedMap} interface, the
      * internal copy will be a {@link TreeMap}, otherwise it will be a 
      * {@link HashMap}.
+     * 
+     * @deprecated Use {@link #SimpleHash(Map, ObjectWrapper)}
      */
     public SimpleHash(Map map) {
         this(map, null);
