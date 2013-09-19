@@ -20530,6 +20530,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>From now on, if you try to set the <quote>incompatible
+              improvements</quote> to greater than the current FreeMarker
+              version, or less than 2.3.0, an
+              <literal>IllegalArgumentException</literal> will be thrown.
+              Thus, new <literal>Configuration(new Version(2, 3,
+              21))</literal> will not only active the fixes up to 2.3.21, but
+              will ensure that the application is not deployed in an
+              environment where an older FreeMarker version is installed.
+              After all, on an older FreeMarker version the fixes that you
+              have requested aren't implemented yet.</para>
+            </listitem>
+
+            <listitem>
               <para>Fixes and reworkings in the overloaded method selection
               rules when <literal>BeansWrapper</literal> or
               <literal>DefaultObjectWrapper</literal> is used (almost all

@@ -108,6 +108,7 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility.Lockable;
@@ -384,6 +385,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
 
     private BeansWrapper(Version incompatibleImprovements, SettingAssignments settings, boolean makeReadOnly) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         if (settings != null) {

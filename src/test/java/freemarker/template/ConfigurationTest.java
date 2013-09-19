@@ -18,6 +18,7 @@ public class ConfigurationTest extends TestCase{
         Configuration cfg = new Configuration();
         assertUsesLegacyObjectWrapper(cfg);
         assertUsesLegacyTemplateLoader(cfg);
+        assertEquals(cfg.getIncompatibleImprovements(), new Version(2, 3, 0));
         
         cfg.setIncompatibleImprovements(newVersion);
         assertUsesNewObjectWrapper(cfg);
@@ -90,6 +91,18 @@ public class ConfigurationTest extends TestCase{
         assertTrue(v.intValue() > 2003020);
         assertNotNull(v.getExtraInfo());
         assertSame(v.toString(), Configuration.getVersionNumber());
+        
+        try {
+            new Configuration(new Version(999, 1, 2));
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("upgrade"));
+        }
+        
+        try {
+            new Configuration(new Version(2, 2, 2));
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("2.3.0"));
+        }
     }    
     
 }

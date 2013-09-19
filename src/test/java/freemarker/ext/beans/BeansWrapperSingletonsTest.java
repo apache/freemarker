@@ -12,6 +12,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapper.SettingAssignments;
 import freemarker.ext.beans.MapModel;
 import freemarker.ext.beans.SimpleMapModel;
+import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.TemplateHashModel;
@@ -90,7 +91,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
             
-            assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 22), true));
+            assertSame(bw, BeansWrapper.getInstance(Configuration.getVersion(), true));
             
             SettingAssignments sa = new SettingAssignments();
             sa.setSimpleMapWrapper(true);
@@ -123,7 +124,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             
-            assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 22), false));
+            assertSame(bw, BeansWrapper.getInstance(Configuration.getVersion(), false));
             assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 21), new SettingAssignments()));
         }
 
@@ -179,10 +180,10 @@ public class BeansWrapperSingletonsTest extends TestCase {
         {
             SettingAssignments sa = new SettingAssignments();
             sa.setSimpleMapWrapper(true);
-            BeansWrapper bw = DefaultObjectWrapper.getInstance(new Version(2, 3, 22), sa);
-            assertNotSame(bw, DefaultObjectWrapper.getInstance(new Version(2, 3, 22), sa));
+            BeansWrapper bw = DefaultObjectWrapper.getInstance(Configuration.getVersion(), sa);
+            assertNotSame(bw, DefaultObjectWrapper.getInstance(Configuration.getVersion(), sa));
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(new Version(2, 3, 22), bw.getIncompatibleImprovements());
+            assertEquals(Configuration.getVersion(), bw.getIncompatibleImprovements());
             assertTrue(bw.isReadOnly());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
@@ -209,7 +210,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             
-            assertSame(bw, DefaultObjectWrapper.getInstance(new Version(2, 3, 22), new SettingAssignments()));
+            assertSame(bw, DefaultObjectWrapper.getInstance(Configuration.getVersion(), new SettingAssignments()));
             assertSame(bw, DefaultObjectWrapper.getInstance(new Version(2, 3, 21), new SettingAssignments()));
         }
 

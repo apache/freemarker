@@ -79,6 +79,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -163,6 +164,8 @@ public class Configurable
      * Called by the {@link Configuration} constructor.
      */
     protected Configurable(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        
         parent = null;
         locale = Locale.getDefault();
         timeZone = TimeZone.getDefault();
@@ -198,7 +201,7 @@ public class Configurable
         
         customAttributes = new HashMap();
     }
-    
+
     /**
      * Creates a new instance. Normally you do not need to use this constructor,
      * as you don't use <code>Configurable</code> directly, but its subclasses.

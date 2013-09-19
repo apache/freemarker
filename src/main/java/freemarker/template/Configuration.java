@@ -176,8 +176,6 @@ public class Configuration extends Configurable implements Cloneable {
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
-    private static Configuration defaultConfig = new Configuration();
-
     private static final Version version;
     static {
         try {
@@ -217,6 +215,8 @@ public class Configuration extends Configurable implements Cloneable {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH + ": " + e);
         }
     }
+    
+    private static Configuration defaultConfig = new Configuration();
 
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
@@ -307,6 +307,9 @@ public class Configuration extends Configurable implements Cloneable {
      *     </ul>
      *   </li>
      * </ul>
+     * 
+     * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
+     *     version, or less than 2.3.0.
      * 
      * @since 2.3.21
      */
@@ -683,9 +686,13 @@ public class Configuration extends Configurable implements Cloneable {
      * expected.) Note that if the {@code template_loader} have to be changed because of this, the template cache will
      * be emptied.
      * 
+     * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
+     *     version, or less than 2.3.0.
+     * 
      * @since 2.3.20
      */
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
         boolean hadLegacyTLOWDefaults
                 = this.incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION; 
         this.incompatibleImprovements = incompatibleImprovements;
