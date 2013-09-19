@@ -304,11 +304,11 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private TemplateModel nullModel = null;
     private boolean methodsShadowItems = true;
     private boolean exposeFields = SettingAssignments.EXPOSE_FIELDS_DEFAULT;
-    private int defaultDateType = TemplateDateModel.UNKNOWN;
+    private int defaultDateType = SettingAssignments.DEFAULT_DATE_TYPE_DEFAULT;
 
     private ObjectWrapper outerIdentity = this;
     private boolean simpleMapWrapper = SettingAssignments.SIMPLE_MAP_WRAPPER_DEFAULT;
-    private boolean strict = false;
+    private boolean strict = SettingAssignments.STRICT_DEFAULT;
     
     private final Version incompatibleImprovements;
     private static Version getDefaultIncompatbileImprovements() {
@@ -2342,14 +2342,15 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     /**
-     * Parameter to {@link #getInstance(Version, SettingAssignments)}; only contains that, in some permutations, has
-     * shared introspection cache.
+     * Used as the 2nd parameter to {@link #getInstance(Version, SettingAssignments)}; see there.
      */
     static public class SettingAssignments implements freemarker.core.SettingAssignments {
         
         private static final boolean SIMPLE_MAP_WRAPPER_DEFAULT = false;  // W! Keep in sync with the static instances! 
-        private static final int EXPLOSURE_LEVEL_DEFAULT = EXPOSE_SAFE;   // W! Keep in sync with the static instances!
-        private static final boolean EXPOSE_FIELDS_DEFAULT = false;       // W! Keep in sync with the static instances!
+        private static final int EXPLOSURE_LEVEL_DEFAULT = EXPOSE_SAFE;
+        private static final boolean EXPOSE_FIELDS_DEFAULT = false;
+        private static final boolean STRICT_DEFAULT = false;
+        private static final int DEFAULT_DATE_TYPE_DEFAULT = TemplateDateModel.UNKNOWN;
 
         public static final SettingAssignments DEFAULT = new SettingAssignments();  
         public static final SettingAssignments SIMPLE_MAP_WRAPPER_FALSE = DEFAULT;
@@ -2361,12 +2362,19 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         private int exposureLevel = EXPLOSURE_LEVEL_DEFAULT;
         private boolean exposeFields = EXPOSE_FIELDS_DEFAULT;
         private boolean simpleMapWrapper = SIMPLE_MAP_WRAPPER_DEFAULT;
+        private int defaultDateType = DEFAULT_DATE_TYPE_DEFAULT;
+        private ObjectWrapper outerIdentity;
+        private boolean strict = STRICT_DEFAULT;
+        
         // Warning! If you add a new filed, and it affects class introspection, review getIntrospectionCacheId! 
 
         public void apply(BeansWrapper bw) {
             bw.setExposureLevel(exposureLevel);
             bw.setExposeFields(exposeFields);
             bw.setSimpleMapWrapper(simpleMapWrapper);
+            bw.setDefaultDateType(defaultDateType);
+            bw.setOuterIdentity(outerIdentity != null ? outerIdentity : bw);
+            bw.setStrict(strict);
         }
         
         /**
@@ -2416,6 +2424,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             return exposureLevel;
         }
 
+        /** See {@link BeansWrapper#setExposureLevel(int)}. */
         public void setExposureLevel(int exposureLevel) {
             this.exposureLevel = exposureLevel;
         }
@@ -2424,6 +2433,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             return exposeFields;
         }
 
+        /** See {@link BeansWrapper#setExposeFields(boolean)}. */
         public void setExposeFields(boolean exposeFields) {
             this.exposeFields = exposeFields;
         }
@@ -2432,8 +2442,39 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             return simpleMapWrapper;
         }
 
+        /** See {@link BeansWrapper#setSimpleMapWrapper(boolean)}. */
         public void setSimpleMapWrapper(boolean simpleMapWrapper) {
             this.simpleMapWrapper = simpleMapWrapper;
+        }
+
+        public int getDefaultDateType() {
+            return defaultDateType;
+        }
+
+        /** See {@link BeansWrapper#setDefaultDateType(int)}. */
+        public void setDefaultDateType(int defaultDateType) {
+            this.defaultDateType = defaultDateType;
+        }
+
+        public ObjectWrapper getOuterIdentity() {
+            return outerIdentity;
+        }
+
+        /**
+         * See {@link BeansWrapper#setOuterIdentity(ObjectWrapper)}, except here the default is {@code null} that means
+         * the {@link ObjectWrapper} that you will set up with this {@link SettingAssignments} object.
+         */
+        public void setOuterIdentity(ObjectWrapper outerIdentity) {
+            this.outerIdentity = outerIdentity;
+        }
+
+        public boolean isStrict() {
+            return strict;
+        }
+
+        /** See {@link BeansWrapper#setStrict(boolean)}. */
+        public void setStrict(boolean strict) {
+            this.strict = strict;
         }
         
     }

@@ -15,6 +15,8 @@ import freemarker.ext.beans.SimpleMapModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleHash;
+import freemarker.template.SimpleObjectWrapper;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -74,6 +76,9 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.isReadOnly());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
+            assertFalse(bw.isStrict());
+            assertEquals(TemplateDateModel.UNKNOWN, bw.getDefaultDateType());
+            assertSame(bw, bw.getOuterIdentity());
             
             assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 20), true));
             assertSame(bw, BeansWrapper.getInstance(new Version(2, 3, 0), true));
@@ -146,6 +151,9 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             assertEquals(BeansWrapper.EXPOSE_PROPERTIES_ONLY, bw.getExposureLevel());
+            assertFalse(bw.isStrict());
+            assertEquals(TemplateDateModel.UNKNOWN, bw.getDefaultDateType());
+            assertSame(bw, bw.getOuterIdentity());
         }
         
         {
@@ -162,6 +170,18 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             assertEquals(true, bw.isExposeFields());
         }
+        
+        {
+            SettingAssignments sa = new SettingAssignments();
+            sa.setStrict(true);
+            sa.setDefaultDateType(TemplateDateModel.DATETIME);
+            sa.setOuterIdentity(new SimpleObjectWrapper());
+            BeansWrapper bw = BeansWrapper.getInstance(new Version(2, 3, 19), sa);
+            assertTrue(bw.isStrict());
+            assertEquals(TemplateDateModel.DATETIME, bw.getDefaultDateType());
+            assertSame(SimpleObjectWrapper.class, bw.getOuterIdentity().getClass());
+        }
+        
     }
 
     public void testDefaultObjectWrapperSingletons() throws Exception {
