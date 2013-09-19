@@ -5,9 +5,9 @@ import freemarker.cache.NullTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import junit.framework.TestCase;
 
-public class TestConfiguration extends TestCase{
+public class ConfigurationTest extends TestCase{
 
-    public TestConfiguration(String name) {
+    public ConfigurationTest(String name) {
         super(name);
     }
     

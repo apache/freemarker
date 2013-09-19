@@ -7,9 +7,9 @@ import java.io.StringWriter;
 import junit.framework.TestCase;
 import freemarker.cache.StringTemplateLoader;
 
-public class TestIncudeFromNameless extends TestCase {
+public class IncudeFromNamelessTest extends TestCase {
 
-    public TestIncudeFromNameless(String name) {
+    public IncudeFromNamelessTest(String name) {
         super(name);
     }
     
