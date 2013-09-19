@@ -77,7 +77,6 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.MruCacheStorage;
 import freemarker.cache.MultiTemplateLoader;
-import freemarker.cache.NullTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
@@ -297,10 +296,10 @@ public class Configuration extends Configurable implements Cloneable {
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
-     *         to a dummy template loader ({@link NullTemplateLoader#INSTANCE}) that never finds any templates. Earlier
+     *         to {@code null}, which means that FreeMarker will not find any templates. Earlier
      *         the default was a {@link FileTemplateLoader} that used the current directory as the root. This was
-     *         dangerous and fragile as you usually don't have good control over what the current directory is
-     *         according the OS. Luckily, the old default almost never looked for the templates at the right place
+     *         dangerous and fragile as you usually don't have good control over what the current directory will be.
+     *         Luckily, the old default almost never looked for the templates at the right place
      *         anyway, so pretty much all applications had to set a {@code template_loader} setting, so it's unlikely
      *         that changing the default breaks your application.
      *       </li>
@@ -328,12 +327,10 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setConfiguration(this);
         cache.setDelay(5000);
     }
-
+    
     private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(
-                loader != null ? loader : cache.getTemplateLoader(),
-                storage != null ? storage : cache.getCacheStorage());
+        cache = new TemplateCache(loader, storage);
         cache.setDelay(oldCache.getDelay());
         cache.setConfiguration(this);
         cache.setLocalizedLookup(localizedLookup);
@@ -342,7 +339,7 @@ public class Configuration extends Configurable implements Cloneable {
     private TemplateLoader getDefaultTemplateLoader() {
         return incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION
                 ? _CacheAPI.createLegacyDefaultTemplateLoader()
-                : NullTemplateLoader.INSTANCE;
+                : null;
     }
     
     public Object clone() {
@@ -519,7 +516,7 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Default value: You should always set the template loader instead of relying on the default value.
      * (But if you still care what it is, before "incompatible improvements" 2.3.21 it's a {@link FileTemplateLoader}
      * that uses the current directory as its root; as it's hard tell what that directory will be, it's not very useful
-     * and dangerous. Starting with "incompatible improvements" 2.3.21 it's {@link NullTemplateLoader#INSTANCE}.)   
+     * and dangerous. Starting with "incompatible improvements" 2.3.21 the default is {@code null}.)   
      * 
      * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
@@ -527,7 +524,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setTemplateLoader(TemplateLoader loader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(loader, null);
+            recreateTemplateCacheWith(loader, cache.getCacheStorage());
             templateLoaderWasSet = true;
         }
     }
@@ -555,7 +552,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setCacheStorage(CacheStorage storage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(null, storage);
+            recreateTemplateCacheWith(cache.getTemplateLoader(), storage);
         }
     }
     
@@ -698,7 +695,7 @@ public class Configuration extends Configurable implements Cloneable {
         this.incompatibleImprovements = incompatibleImprovements;
         if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION) {
             if (!templateLoaderWasSet) {
-                recreateTemplateCacheWith(getDefaultTemplateLoader(), null);
+                recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
             }
             if (!objectWrapperWasSet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 

@@ -1,9 +1,8 @@
 package freemarker.template;
 
-import freemarker.cache.FileTemplateLoader;
-import freemarker.cache.NullTemplateLoader;
-import freemarker.cache.StringTemplateLoader;
 import junit.framework.TestCase;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.StringTemplateLoader;
 
 public class ConfigurationTest extends TestCase{
 
@@ -79,7 +78,7 @@ public class ConfigurationTest extends TestCase{
     }
     
     private void assertUsesNewTemplateLoader(Configuration cfg) {
-        assertSame(NullTemplateLoader.INSTANCE, cfg.getTemplateLoader());
+        assertNull(cfg.getTemplateLoader());
     }
     
     private void assertUsesLegacyTemplateLoader(Configuration cfg) {

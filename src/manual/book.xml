@@ -20421,16 +20421,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>The default of the <literal>template_loader</literal>
                   setting
-                  (<literal>Configuration.getTemplateLoader()</literal>)
-                  changes to a dummy template loader
-                  (<literal>NullTemplateLoader.INSTANCE</literal>) that never
-                  finds any templates. Earlier the default was a
-                  <literal>FileTemplateLoader</literal> that used the current
-                  directory as the root. This was dangerous and fragile as you
-                  usually don't have good control over what the current
-                  directory is according the OS. Luckily, the old default
-                  almost never looked for the templates at the right place
-                  anyway, so pretty much all applications had to set a
+                  (<literal>Configuration.getTemplateLoader()</literal>})
+                  changes to <literal>null</literal>, which means that
+                  FreeMarker will not find any templates. Earlier the default
+                  was a <literal>FileTemplateLoader</literal> that used the
+                  current directory as the root. This was dangerous and
+                  fragile as you usually don't have good control over what the
+                  current directory will be. Luckily, the old default almost
+                  never looked for the templates at the right place anyway, so
+                  pretty much all applications had to set a
                   <literal>template_loader</literal> setting, so it's unlikely
                   that changing the default breaks your application.</para>
                 </listitem>
