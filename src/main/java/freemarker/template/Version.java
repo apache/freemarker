@@ -27,7 +27,7 @@ public final class Version implements Serializable {
     
     private final int intValue;
     private String calculatedStringValue;  // not final because it's calculated on demand
-    private Integer hashCode;  // not final because it's calculated on demand
+    private int hashCode;  // not final because it's calculated on demand
 
     public Version(String stringValue) {
         this(stringValue, null, null);
@@ -179,21 +179,22 @@ public final class Version implements Serializable {
     }
 
     public int hashCode() {
-        // Switch to double-check + volatile with Java 5:
+        int r = hashCode;
+        if (r != 0) return r;
         synchronized (this) {
-            if (hashCode == null) {
+            if (hashCode == 0) {
                 final int prime = 31;
                 int result = 1;
                 result = prime * result + (buildDate == null ? 0 : buildDate.hashCode());
                 result = prime * result + (extraInfo == null ? 0 : extraInfo.hashCode());
                 result = prime * result + (gaeCompliant == null ? 0 : gaeCompliant.hashCode());
-                result = prime * result + (hashCode == null ? 0 : hashCode.hashCode());
                 result = prime * result + intValue;
                 String stringValue = getStringValue();
                 result = prime * result + (stringValue == null ? 0 : stringValue.hashCode());
-                hashCode = new Integer(result);  // J2SE 1.2 had no Integer.valueOf(int)
+                if (result == 0) result = -1;  // 0 is reserved for "not set"
+                hashCode = result;
             }
-            return hashCode.intValue();
+            return hashCode;
         }
     }
 

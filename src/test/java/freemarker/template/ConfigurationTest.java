@@ -85,4 +85,11 @@ public class ConfigurationTest extends TestCase{
         assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
     }
     
+    public void testVersion() {
+        Version v = Configuration.getVersion();
+        assertTrue(v.intValue() > 2003020);
+        assertNotNull(v.getExtraInfo());
+        assertSame(v.toString(), Configuration.getVersionNumber());
+    }    
+    
 }

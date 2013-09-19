@@ -152,6 +152,7 @@ import freemarker.template.utility.XmlEscape;
  * @author Attila Szegedi
  */
 public class Configuration extends Configurable implements Cloneable {
+    private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
     public static final String STRICT_SYNTAX_KEY = "strict_syntax";
@@ -177,10 +178,45 @@ public class Configuration extends Configurable implements Cloneable {
     
     private static Configuration defaultConfig = new Configuration();
 
-    private static boolean versionPropertiesLoaded;
-    /** @deprecated Use {@link #version} instead. */
-    private static String versionNumber;
-    private static Version version;
+    private static final Version version;
+    static {
+        try {
+            Properties vp = new Properties();
+            InputStream ins = Configuration.class.getClassLoader()
+                    .getResourceAsStream(VERSION_PROPERTIES_PATH);
+            if (ins == null) {
+                throw new RuntimeException("Version file is missing.");
+            } else {
+                try {
+                    vp.load(ins);
+                } finally {
+                    ins.close();
+                }
+                
+                String versionString  = getRequiredVersionProperty(vp, "version");
+                
+                Date buildDate;
+                {
+                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                    if (buildDateStr.endsWith("Z")) {
+                        buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                    }
+                    try {
+                        buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
+                    } catch (java.text.ParseException e) {
+                        buildDate = null;
+                    }
+                }
+                
+                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                
+                version = new Version(versionString, gaeCompliant, buildDate);
+            }
+        } catch (IOException e) {
+            // Java 5: use cause
+            throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH + ": " + e);
+        }
+    }
 
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
@@ -1282,8 +1318,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @deprecated Use {@link #getVersion()} instead.
      */
     public static String getVersionNumber() {
-        if (!versionPropertiesLoaded) loadVersionProperties();
-        return versionNumber;
+        return version.toString();
     }
     
     /**
@@ -1315,50 +1350,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @since 2.3.20
      */ 
     public static Version getVersion() {
-        if (!versionPropertiesLoaded) loadVersionProperties();
         return version;
-    }
-    
-    private static void loadVersionProperties() {
-        try {
-            Properties vp = new Properties();
-            InputStream ins = Configuration.class.getClassLoader()
-                    .getResourceAsStream("freemarker/version.properties");
-            if (ins == null) {
-                throw new RuntimeException("Version file is missing.");
-            } else {
-                try {
-                    vp.load(ins);
-                } finally {
-                    ins.close();
-                }
-                
-                String versionString  = getRequiredVersionProperty(vp, "version");
-                versionNumber = versionString;
-                
-                Date buildDate;
-                {
-                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
-                    if (buildDateStr.endsWith("Z")) {
-                        buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
-                    }
-                    try {
-                        buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-                    } catch (java.text.ParseException e) {
-                        buildDate = null;
-                    }
-                }
-                
-                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
-                
-                version = new Version(versionString, gaeCompliant, buildDate);
-                
-                versionPropertiesLoaded = true;
-            }
-            
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load version file: " + e);
-        }
     }
     
     /**
