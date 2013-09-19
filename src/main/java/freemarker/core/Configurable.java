@@ -804,9 +804,11 @@ public class Configurable
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
-     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}),
+     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
+     *       or {@link DefaultObjectWrapper#getInstance(Version)}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
-     *       {@code "beans"} (means {@link BeansWrapper#DEFAULT_WRAPPER}),
+     *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
+     *       or {@link BeansWrapper#getInstance(Version)}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
