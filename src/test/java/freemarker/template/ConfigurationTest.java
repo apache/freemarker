@@ -1,5 +1,8 @@
 package freemarker.template;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import junit.framework.TestCase;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
@@ -65,6 +68,32 @@ public class ConfigurationTest extends TestCase{
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
         assertUsesLegacyTemplateLoader(cfg);
+    }
+    
+    public void testTemplateLoadingErrors() throws Exception {
+        Configuration cfg = new Configuration();
+        try {
+            cfg.getTemplate("missing.ftl");
+            fail();
+        } catch (FileNotFoundException e) {
+            assertTrue(e.getMessage().contains("wasn't set") && e.getMessage().contains("default"));
+        }
+        
+        cfg = new Configuration(new Version(2, 3, 21));
+        try {
+            cfg.getTemplate("missing.ftl");
+            fail();
+        } catch (FileNotFoundException e) {
+            assertTrue(e.getMessage().contains("wasn't set") && !e.getMessage().contains("default"));
+        }
+        
+        cfg.setClassForTemplateLoading(this.getClass(), "nosuchpackage");
+        try {
+            cfg.getTemplate("missing.ftl");
+            fail();
+        } catch (IOException e) {
+            assertTrue(!e.getMessage().contains("wasn't set"));
+        }
     }
     
     private void assertUsesLegacyObjectWrapper(Configuration cfg) {

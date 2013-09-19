@@ -231,4 +231,15 @@ public class FileTemplateLoader implements TemplateLoader
     {
         // Do nothing.
     }
+    
+    /**
+     * Returns the base directory in which the templates are searched. This comes from the constructor argument, but
+     * it's possibly a canonicalized version of that. 
+     *  
+     * @since 2.3.21
+     */
+    public File getBaseDirectory() {
+        return baseDir;
+    }
+    
 }

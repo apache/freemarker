@@ -884,7 +884,22 @@ public class Configuration extends Configurable implements Cloneable {
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
         Template result = cache.getTemplate(name, locale, encoding, parseAsFTL);
         if (result == null) {
-            throw new FileNotFoundException("Template " + StringUtil.jQuote(name) + " not found.");
+            TemplateLoader tl = getTemplateLoader();  
+            String msg; 
+            if (tl == null) {
+                msg = "Don't know from where to load template " + StringUtil.jQuote(name)
+                      + " because the \"template_loader\" FreeMarker setting wasn't set.";
+            } else {
+                msg = "Template " + StringUtil.jQuote(name) + " not found.";
+                if (!templateLoaderWasSet) {
+                    msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
+                            + "default value, which is most certainly not intended and the cause of this problem."; 
+                }
+                if (tl instanceof FileTemplateLoader) {            
+                    msg += " The template directory used was: " + ((FileTemplateLoader) tl).getBaseDirectory();
+                }
+            }
+            throw new FileNotFoundException(msg);
         }
         return result;
     }
