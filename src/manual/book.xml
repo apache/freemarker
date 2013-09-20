@@ -20796,6 +20796,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>toString</literal> that could, in theory, result in
               wrong return values.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>ClassUtil.forName</literal>, used inside
+              FreeMarker everywhere to resolve class names to classes, if the
+              thread context class loader is <literal>null</literal>, no
+              longer tries to load with the bootstrap class loader before
+              loading with the defining class loader of FreeMarker.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

@@ -107,7 +107,10 @@ public class ClassUtil
     {
         try
         {
-            return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+            ClassLoader ctcl = Thread.currentThread().getContextClassLoader();
+            if (ctcl != null) {  // not null: we don't want to fall back to the bootstrap class loader
+                return Class.forName(className, true, ctcl);
+            }
         }
         catch(ClassNotFoundException e)
         {
@@ -117,7 +120,7 @@ public class ClassUtil
         {
             ;// Intentionally ignored
         }
-        // Fall back to default class loader 
+        // Fall back to the defining class loader of the FreeMarker classes 
         return Class.forName(className);
     }
     
