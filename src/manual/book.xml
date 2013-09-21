@@ -20804,6 +20804,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               longer tries to load with the bootstrap class loader before
               loading with the defining class loader of FreeMarker.</para>
             </listitem>
+
+            <listitem>
+              <para>Added new configuration setting,
+              <literal>show_error_tips</literal>, defaults to
+              <literal>true</literal>. Sets if tips should be shown in error
+              messages of errors arising during template processing.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

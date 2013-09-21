@@ -123,6 +123,8 @@ public class Configurable
     public static final String AUTO_FLUSH_KEY = "auto_flush";
     /** @since 2.3.17 */
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
+    /** @since 2.3.21 */
+    public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
 
     private Configurable parent;
     private Properties properties;
@@ -147,6 +149,7 @@ public class Configurable
     private boolean urlEscapingCharsetSet;
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
+    private Boolean showErrorTips;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -179,6 +182,7 @@ public class Configurable
         objectWrapper = getDefaultObjectWrapper(incompatibleImprovements);
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
+        showErrorTips = Boolean.TRUE;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         
@@ -194,6 +198,7 @@ public class Configurable
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
+        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
         // as outputEncoding and urlEscapingCharset defaults to null, 
         // they are not set
 
@@ -758,6 +763,28 @@ public class Configurable
             : (parent != null ? parent.getAutoFlush() : true);
     }
     
+    /**
+     * Sets if tips should be shown in error messages of errors arising during template processing.
+     * The default is {@code true}. 
+     * 
+     * @since 2.3.21
+     */
+    public void setShowErrorTips(boolean showTips) {
+        this.showErrorTips = showTips ? Boolean.TRUE : Boolean.FALSE;
+        properties.setProperty(SHOW_ERROR_TIPS_KEY, String.valueOf(showTips));
+    }
+    
+    /**
+     * See {@link #setShowErrorTips(boolean)}
+     * 
+     * @since 2.3.21
+     */
+    public boolean getShowErrorTips() {
+        return showErrorTips != null 
+            ? showErrorTips.booleanValue()
+            : (parent != null ? parent.getShowErrorTips() : true);
+    }
+    
     private static final String ALLOWED_CLASSES = "allowed_classes";
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
@@ -888,6 +915,12 @@ public class Configurable
      *             a full-qualified class name, and the object will be created
      *             with its parameterless constructor.
      *       </ol>
+     *       
+     *   <li><p>{@code "show_error_tips"}:
+     *       See {@link #setShowErrorTips(boolean)}.
+     *       Since 2.3.21.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       
      * </ul>
      * 
      * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
@@ -1060,6 +1093,8 @@ public class Configurable
                 setStrictBeanModels(StringUtil.getYesNo(value));
             } else if (AUTO_FLUSH_KEY.equals(name)) {
                 setAutoFlush(StringUtil.getYesNo(value));
+            } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
+                setShowErrorTips(StringUtil.getYesNo(value));
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);

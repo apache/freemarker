@@ -303,7 +303,9 @@ public class TemplateException extends Exception {
     private String getDescription() {
         synchronized (lock) {
             if (description == null && descriptionBuilder != null) {
-                description = descriptionBuilder.toString(getFailingInstruction());
+                description = descriptionBuilder.toString(
+                        getFailingInstruction(),
+                        env != null ? env.getShowErrorTips() : true);
                 descriptionBuilder = null;
             }
             return description;

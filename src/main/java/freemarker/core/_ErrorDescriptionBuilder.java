@@ -37,10 +37,10 @@ public class _ErrorDescriptionBuilder {
     }
 
     public String toString() {
-        return toString(null);
+        return toString(null, true);
     }
     
-    public String toString(TemplateElement parentElement) {
+    public String toString(TemplateElement parentElement, boolean showTips) {
         if (blamed == null && tips == null && tip == null && descriptionParts == null) return description;
 
         StringBuffer sb = new StringBuffer(200);
@@ -103,31 +103,33 @@ public class _ErrorDescriptionBuilder {
             }
         }
         
-        int allTipsLen = (tips != null ? tips.length : 0) + (tip != null ? 1 : 0) + (extraTip != null ? 1 : 0);
-        Object[] allTips;
-        if (tips != null && allTipsLen == tips.length) {
-            allTips = tips;
-        } else {
-            allTips = new Object[allTipsLen];
-            int dst = 0;
-            if (tip != null) allTips[dst++] = tip; 
-            if (tips != null) {
-                for (int i = 0; i < tips.length; i++) {
-                    allTips[dst++] = tips[i]; 
+        if (showTips) {
+            int allTipsLen = (tips != null ? tips.length : 0) + (tip != null ? 1 : 0) + (extraTip != null ? 1 : 0);
+            Object[] allTips;
+            if (tips != null && allTipsLen == tips.length) {
+                allTips = tips;
+            } else {
+                allTips = new Object[allTipsLen];
+                int dst = 0;
+                if (tip != null) allTips[dst++] = tip; 
+                if (tips != null) {
+                    for (int i = 0; i < tips.length; i++) {
+                        allTips[dst++] = tips[i]; 
+                    }
                 }
+                if (extraTip != null) allTips[dst++] = extraTip; 
             }
-            if (extraTip != null) allTips[dst++] = extraTip; 
-        }
-        if (allTips != null && allTips.length > 0) {
-            sb.append("\n\n");
-            for (int i = 0; i < allTips.length; i++) {
-                if (i != 0) sb.append('\n');
-                sb.append("Tip: ");
-                Object tip = allTips[i];
-                if (!(tip instanceof Object[])) {
-                    sb.append(allTips[i]);
-                } else {
-                    appendParts(sb, (Object[]) tip);
+            if (allTips != null && allTips.length > 0) {
+                sb.append("\n\n");
+                for (int i = 0; i < allTips.length; i++) {
+                    if (i != 0) sb.append('\n');
+                    sb.append("Tip: ");
+                    Object tip = allTips[i];
+                    if (!(tip instanceof Object[])) {
+                        sb.append(allTips[i]);
+                    } else {
+                        appendParts(sb, (Object[]) tip);
+                    }
                 }
             }
         }

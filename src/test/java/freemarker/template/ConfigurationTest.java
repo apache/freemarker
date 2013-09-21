@@ -6,6 +6,7 @@ import java.io.IOException;
 import junit.framework.TestCase;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
+import freemarker.template.utility.NullWriter;
 
 public class ConfigurationTest extends TestCase{
 
@@ -131,6 +132,24 @@ public class ConfigurationTest extends TestCase{
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("2.3.0"));
         }
-    }    
+    }
+    
+    public void testShowErrorTips() throws Exception {
+        Configuration cfg = new Configuration();
+        try {
+            new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
+            fail();
+        } catch (TemplateException e) {
+            assertTrue(e.getMessage().contains("Tip:"));
+        }
+        
+        cfg.setShowErrorTips(false);
+        try {
+            new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
+            fail();
+        } catch (TemplateException e) {
+            assertFalse(e.getMessage().contains("Tip:"));
+        }
+    }
     
 }
