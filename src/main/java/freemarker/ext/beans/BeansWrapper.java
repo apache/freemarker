@@ -2374,8 +2374,9 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         private int defaultDateType = DEFAULT_DATE_TYPE_DEFAULT;
         private ObjectWrapper outerIdentity;
         private boolean strict = STRICT_DEFAULT;
-        
-        // Warning! If you add a new filed, and it affects class introspection, review getIntrospectionCacheId! 
+        // Warning! If you add a new field:
+        // - update equals and hashCode
+        // - if the new field affects class introspection, review getIntrospectionCacheId
 
         public void apply(BeansWrapper bw) {
             bw.setExposureLevel(exposureLevel);
@@ -2415,6 +2416,9 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             result = prime * result + (exposeFields ? 1231 : 1237);
             result = prime * result + exposureLevel;
             result = prime * result + (simpleMapWrapper ? 1231 : 1237);
+            result = prime * result + defaultDateType;
+            result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 1237);
+            result = prime * result + (strict ? 1231 : 1237);
             return result;
         }
 
@@ -2426,6 +2430,10 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             if (exposeFields != other.exposeFields) return false;
             if (exposureLevel != other.exposureLevel) return false;
             if (simpleMapWrapper != other.simpleMapWrapper) return false;
+            if (defaultDateType != other.defaultDateType) return false;
+            if (outerIdentity != other.outerIdentity) return false;
+            if (strict != other.strict) return false;
+            
             return true;
         }
 
