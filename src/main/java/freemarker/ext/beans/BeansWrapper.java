@@ -298,12 +298,21 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private final BooleanModel FALSE;
     private final BooleanModel TRUE;
 
+    // Why volatile: In principle it need not be volatile, but we want to catch modification attempts even if the
+    // object was published improperly to other threads. After all, the main goal of Locakable is protecting things from
+    // buggy user code.
     private volatile boolean readOnly;
     
+    // -----------------------------------------------------------------------------------------------------------------
+    // Properties that influence class introspection results:
+    
     private int exposureLevel = SettingAssignments.EXPLOSURE_LEVEL_DEFAULT;
-    private TemplateModel nullModel = null;
     private boolean methodsShadowItems = true;
     private boolean exposeFields = SettingAssignments.EXPOSE_FIELDS_DEFAULT;
+    
+    // -----------------------------------------------------------------------------------------------------------------
+    
+    private TemplateModel nullModel = null;
     private int defaultDateType = SettingAssignments.DEFAULT_DATE_TYPE_DEFAULT;
 
     private ObjectWrapper outerIdentity = this;
