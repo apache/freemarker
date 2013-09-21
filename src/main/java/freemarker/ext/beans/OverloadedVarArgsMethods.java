@@ -70,8 +70,8 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
     private static final Map canoncialArgPackers = new HashMap();
     private final Map argPackers = new HashMap();
 
-    OverloadedVarArgsMethods(BeansWrapper beansWrapper) {
-        super(beansWrapper);
+    OverloadedVarArgsMethods(boolean bugfixed) {
+        super(bugfixed);
     }
     
     // TODO: Do we really need this class?
@@ -84,7 +84,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             this.varArgsCompType = varArgsCompType; 
         }
         
-        Object[] packArgs(Object[] args, List modelArgs, BeansWrapper w) 
+        Object[] packArgs(Object[] args, List modelArgs, BeansWrapper unwrapper) 
         throws TemplateModelException {
             final int totalArgCount = args.length;
             final int fixArgCount = paramCount - 1;
@@ -93,7 +93,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
                 Object varargs = Array.newInstance(varArgsCompType, totalArgCount - fixArgCount);
                 for(int i = fixArgCount; i < totalArgCount; ++i) {
-                    Object val = w.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
+                    Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
                     if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                         return null;
                     }
@@ -103,7 +103,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 return packedArgs;
             }
             else {
-                Object val = w.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
+                Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
                 if(val == BeansWrapper.CAN_NOT_UNWRAP) {
                     return null;
                 }
@@ -233,7 +233,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         }
     }
     
-    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper w) 
+    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         if(tmArgs == null) {
             // null is treated as empty args
@@ -264,7 +264,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             Iterator it = tmArgs.iterator();
             for(int i = 0; i < argsLen; ++i) {
                 int paramIdx = i < paramCount ? i : paramCount - 1;
-                Object pojo = w.tryUnwrap(
+                Object pojo = unwrapper.tryUnwrap(
                         (TemplateModel)it.next(),
                         unwarappingHints[paramIdx],
                         possibleNumericalTypes != null ? possibleNumericalTypes[paramIdx] : 0);
@@ -279,7 +279,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, true);
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
-            pojoArgs = ((ArgumentPacker) argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, w);
+            pojoArgs = ((ArgumentPacker) argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, unwrapper);
             if(pojoArgs == null) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }

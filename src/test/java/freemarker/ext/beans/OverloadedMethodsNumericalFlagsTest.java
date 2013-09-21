@@ -308,7 +308,7 @@ public class OverloadedMethodsNumericalFlagsTest extends TestCase {
         });
         
         final OverloadedMethodsSubset oms = cl.getName().indexOf("VarArgs") == -1
-                ? new OverloadedFixArgsMethods(bw) : new OverloadedVarArgsMethods(bw);
+                ? new OverloadedFixArgsMethods(bw.is2321Bugfixed()) : new OverloadedVarArgsMethods(bw.is2321Bugfixed());
         for (Method m : filteredMethods) {
             oms.addCallableMemberDescriptor(new CallableMemberDescriptor(m, m.getParameterTypes()));
         }

@@ -1450,7 +1450,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             {
                 OverloadedMethods overloadedConstructors = (OverloadedMethods) ctors; 
                 MemberAndArguments maa = 
-                    overloadedConstructors.getMemberAndArguments(arguments);
+                    overloadedConstructors.getMemberAndArguments(arguments, this);
                 objargs = maa.getArgs();
                 ctor = (Constructor)maa.getMember();
             }
@@ -1757,7 +1757,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                         if(previous instanceof Method)
                         {
                             // Overloaded method - replace method with a method map
-                            OverloadedMethods overloadedMethods = new OverloadedMethods(this);
+                            OverloadedMethods overloadedMethods = new OverloadedMethods(is2321Bugfixed());
                             overloadedMethods.addMethod((Method)previous);
                             overloadedMethods.addMethod(publicMethod);
                             introspData.put(methodKey, overloadedMethods);
@@ -1866,7 +1866,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             }
             else if(ctors.length > 1)
             {
-                OverloadedMethods ctorMap = new OverloadedMethods(this);
+                OverloadedMethods ctorMap = new OverloadedMethods(is2321Bugfixed());
                 for (int i = 0; i < ctors.length; i++)
                 {
                     ctorMap.addConstructor(ctors[i]);

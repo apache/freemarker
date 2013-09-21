@@ -192,7 +192,7 @@ final class StaticModel implements TemplateHashModelEx
                     Object obj = map.get(name);
                     if (obj instanceof Method)
                     {
-                        OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper);
+                        OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper.is2321Bugfixed());
                         overloadedMethods.addMethod((Method) obj);
                         overloadedMethods.addMethod(method);
                         map.put(name, overloadedMethods);
@@ -228,8 +228,7 @@ final class StaticModel implements TemplateHashModelEx
                 }
                 else if (value instanceof OverloadedMethods)
                 {
-                    entry.setValue(new OverloadedMethodsModel(null, 
-                            (OverloadedMethods)value));
+                    entry.setValue(new OverloadedMethodsModel(null, (OverloadedMethods) value, wrapper));
                 }
             }
         }

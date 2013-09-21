@@ -289,7 +289,7 @@ implements
         else if(desc instanceof OverloadedMethods)
         {
             retval = member = 
-                new OverloadedMethodsModel(object, (OverloadedMethods)desc);
+                new OverloadedMethodsModel(object, (OverloadedMethods) desc, wrapper);
         }
         
         // If new cacheable member was created, cache it

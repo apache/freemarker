@@ -64,8 +64,8 @@ import freemarker.template.TemplateModelException;
  */
 class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     
-    OverloadedFixArgsMethods(BeansWrapper beansWrapper) {
-        super(beansWrapper);
+    OverloadedFixArgsMethods(boolean bugfixed) {
+        super(bugfixed);
     }
 
     Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
@@ -76,7 +76,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         // Do nothing
     }
 
-    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper w) 
+    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         if(tmArgs == null) {
             // null is treated as empty args
@@ -101,7 +101,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
 
         Iterator it = tmArgs.iterator();
         for(int i = 0; i < argCount; ++i) {
-            Object pojo = w.tryUnwrap(
+            Object pojo = unwrapper.tryUnwrap(
                     (TemplateModel) it.next(),
                     unwarppingHints[i],
                     possibleNumericalTypes != null ? possibleNumericalTypes[i] : 0);

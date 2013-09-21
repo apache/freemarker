@@ -9,8 +9,10 @@ import freemarker.template.Version;
 
 public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     
-    final OverloadedMethodsSubset buggy = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 20)));
-    final OverloadedMethodsSubset fixed = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 21)));
+    final OverloadedMethodsSubset buggy
+            = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 20)).is2321Bugfixed());
+    final OverloadedMethodsSubset fixed
+            = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 21)).is2321Bugfixed());
 
     public CommonSupertypeForUnwrappingHintTest(String name) {
         super(name);
@@ -108,8 +110,8 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     
     private static class DummyOverloadedMethodsSubset extends OverloadedMethodsSubset {
 
-        DummyOverloadedMethodsSubset(BeansWrapper beansWrapper) {
-            super(beansWrapper);
+        DummyOverloadedMethodsSubset(boolean bugfixed) {
+            super(bugfixed);
         }
 
         @Override

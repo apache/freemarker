@@ -97,8 +97,8 @@ abstract class OverloadedMethodsSubset {
     /** Enables 2.3.21 {@link BeansWrapper} incompatibleImprovements */
     protected final boolean bugfixed;
     
-    OverloadedMethodsSubset(BeansWrapper beansWrapper) {
-        bugfixed = beansWrapper.is2321Bugfixed();
+    OverloadedMethodsSubset(boolean bugfixed) {
+        this.bugfixed = bugfixed;
     }
     
     void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
@@ -189,7 +189,7 @@ abstract class OverloadedMethodsSubset {
     abstract void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes);
     
     abstract MaybeEmptyMemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
-            BeansWrapper w) throws TemplateModelException;
+            BeansWrapper unwrapper) throws TemplateModelException;
 
     /**
      * Returns the most specific common class (or interface) of two parameter types for the purpose of unwrapping.

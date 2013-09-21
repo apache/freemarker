@@ -67,7 +67,8 @@ public class MiscNumericalOperationsTest extends TestCase {
     
     @SuppressWarnings("boxing")
     public void testForceNumberArgumentsToParameterTypes() {
-        OverloadedMethodsSubset oms = new OverloadedFixArgsMethods(new BeansWrapper(new Version(2, 3, 21)));
+        OverloadedMethodsSubset oms
+                = new OverloadedFixArgsMethods(new BeansWrapper(new Version(2, 3, 21)).is2321Bugfixed());
         Class[] paramTypes = new Class[] { Short.TYPE, Short.class, Double.TYPE, BigDecimal.class, BigInteger.class };
         Object[] args;
         

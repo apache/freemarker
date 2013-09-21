@@ -70,19 +70,15 @@ import freemarker.template.utility._MethodUtil;
  */
 final class OverloadedMethods
 {
-    private final BeansWrapper wrapper;
     private final OverloadedMethodsSubset fixArgMethods;
+    private final boolean bugfixed;
     private OverloadedMethodsSubset varargMethods;
     
-    OverloadedMethods(BeansWrapper wrapper) {
-        this.wrapper = wrapper;
-        fixArgMethods = new OverloadedFixArgsMethods(wrapper);
+    OverloadedMethods(boolean bugfixed) {
+        this.bugfixed = bugfixed;
+        fixArgMethods = new OverloadedFixArgsMethods(bugfixed);
     }
     
-    BeansWrapper getWrapper() {
-        return wrapper;
-    }
-
     void addMethod(Method member) {
         final Class[] paramTypes = member.getParameterTypes();
         addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
@@ -97,19 +93,19 @@ final class OverloadedMethods
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
         if(_MethodUtil.isVarArgs(memberDesc.member)) {
             if(varargMethods == null) {
-                varargMethods = new OverloadedVarArgsMethods(wrapper);
+                varargMethods = new OverloadedVarArgsMethods(bugfixed);
             }
             varargMethods.addCallableMemberDescriptor(memberDesc);
         }
     }
     
-    MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
+    MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         MaybeEmptyMemberAndArguments res;
-        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
             return (MemberAndArguments) res;
         } else if (varargMethods != null
-                && (res = varargMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+                && (res = varargMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
             return (MemberAndArguments) res;
         } else {
             if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {

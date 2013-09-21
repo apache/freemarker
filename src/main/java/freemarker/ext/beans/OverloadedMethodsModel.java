@@ -79,11 +79,13 @@ implements
 {
     private final Object object;
     private final OverloadedMethods overloadedMethods;
+    private final BeansWrapper wrapper;
     
-    OverloadedMethodsModel(Object object, OverloadedMethods overloadedMethods)
+    OverloadedMethodsModel(Object object, OverloadedMethods overloadedMethods, BeansWrapper wrapper)
     {
         this.object = object;
         this.overloadedMethods = overloadedMethods;
+        this.wrapper = wrapper;
     }
 
     /**
@@ -97,10 +99,10 @@ implements
     throws
         TemplateModelException
     {
-        MemberAndArguments maa = overloadedMethods.getMemberAndArguments(arguments);
+        MemberAndArguments maa = overloadedMethods.getMemberAndArguments(arguments, wrapper);
         Method method = (Method)maa.getMember();
         try {
-            return overloadedMethods.getWrapper().invokeMethod(object, method, maa.getArgs());
+            return wrapper.invokeMethod(object, method, maa.getArgs());
         }
         catch(Exception e)
         {
