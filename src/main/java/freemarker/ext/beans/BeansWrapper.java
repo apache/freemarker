@@ -927,7 +927,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      */
     public static final BeansWrapper getDefaultInstance()
     {
-        return INSTANCE;
+        return BeansWrapperSingletonHolder.INSTANCE;
     }
 
     /**
