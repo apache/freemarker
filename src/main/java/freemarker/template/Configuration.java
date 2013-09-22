@@ -215,7 +215,8 @@ public class Configuration extends Configurable implements Cloneable {
         }
     }
     
-    private static Configuration defaultConfig = new Configuration();
+    private final static Object defaultConfigLock = new Object();
+    private static Configuration defaultConfig;
 
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
@@ -485,7 +486,13 @@ public class Configuration extends Configurable implements Cloneable {
      * is initialized.
      */
     static public Configuration getDefaultConfiguration() {
-        return defaultConfig;
+        // Java 5: use volatile + double check
+        synchronized (defaultConfigLock) {
+            if (defaultConfig == null) {
+                defaultConfig = new Configuration();
+            }
+            return defaultConfig;
+        }
     }
 
     /**
@@ -497,7 +504,9 @@ public class Configuration extends Configurable implements Cloneable {
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
     static public void setDefaultConfiguration(Configuration config) {
-        defaultConfig = config;
+        synchronized (defaultConfigLock) {
+            defaultConfig = config;
+        }
     }
     
     /**
