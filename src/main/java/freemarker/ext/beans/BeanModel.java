@@ -134,7 +134,7 @@ implements
         this.object = object;
         this.wrapper = wrapper;
         if (object != null) {
-            wrapper.getClassIntrospectionData(object.getClass());
+            wrapper.getClassIntrospector().get(object.getClass());
         }
     }
 
@@ -169,7 +169,7 @@ implements
         TemplateModelException
     {
         Class clazz = object.getClass();
-        Map classInfo = wrapper.getClassIntrospectionData(clazz);
+        Map classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
         
         try
@@ -236,7 +236,7 @@ implements
      */
     
     protected boolean hasPlainGetMethod() {
-    	return wrapper.getClassIntrospectionData(object.getClass()).get(BeansWrapper.GENERIC_GET_KEY) != null;
+    	return wrapper.getClassIntrospector().get(object.getClass()).get(ClassIntrospector.GENERIC_GET_KEY) != null;
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map classInfo)
@@ -267,7 +267,7 @@ implements
                 ((IndexedPropertyDescriptor)desc).getIndexedReadMethod(); 
             retval = member = 
                 new SimpleMethodModel(object, readMethod, 
-                        BeansWrapper.getArgTypes(classInfo, readMethod), wrapper);
+                        ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
         }
         else if(desc instanceof PropertyDescriptor)
         {
@@ -284,7 +284,7 @@ implements
         {
             Method method = (Method)desc;
             retval = member = new SimpleMethodModel(object, method, 
-                    BeansWrapper.getArgTypes(classInfo, method), wrapper);
+                    ClassIntrospector.getArgTypes(classInfo, method), wrapper);
         }
         else if(desc instanceof OverloadedMethods)
         {
@@ -310,7 +310,7 @@ implements
         InvocationTargetException,
         TemplateModelException
     {
-        Method genericGet = (Method)keyMap.get(BeansWrapper.GENERIC_GET_KEY);
+        Method genericGet = (Method)keyMap.get(ClassIntrospector.GENERIC_GET_KEY);
         if(genericGet == null)
             return UNKNOWN;
 
@@ -362,7 +362,7 @@ implements
     
     public int size()
     {
-        return wrapper.keyCount(object.getClass());
+        return wrapper.getClassIntrospector().keyCount(object.getClass());
     }
 
     public TemplateCollectionModel keys()
@@ -403,6 +403,6 @@ implements
      */
     protected Set keySet()
     {
-        return wrapper.keySet(object.getClass());
+        return wrapper.getClassIntrospector().keySet(object.getClass());
     }    
 }

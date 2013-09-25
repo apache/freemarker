@@ -294,6 +294,9 @@ public class Configuration extends Configurable implements Cloneable {
      *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
      *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
      *         cache) because the singleton is modified after publishing.)
+     *         Furthermore the new default object wrapper shares class introspection cache with other
+     *         {@link BeansWrapper}-s get with {@code getInstance} calls, which has an impact as
+     *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be banned; see more about it there.
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes

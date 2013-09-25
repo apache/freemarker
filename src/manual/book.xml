@@ -20811,6 +20811,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>true</literal>. Sets if tips should be shown in error
               messages of errors arising during template processing.</para>
             </listitem>
+
+            <listitem>
+              <para>Instead of overriding
+              <literal>BeansWrapper.finetuneMethodAppearance</literal> (now
+              deprecated), now you can use
+              <literal>BeansWrapper.setMethodAppearanceFineTuner(MethodAppearanceFineTuner)</literal>,
+              so you don't need to extend the class to customize this
+              aspect.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When changing the properties of
+              <literal>DefaultObjectWrapper</literal> or
+              <literal>BeansWrapper</literal> that influenced class
+              introspection results (like <literal>exposureLevel</literal> or
+              <literal>exposeFields</literal>), the introspection cache wasn't
+              cleared, and thus returned stale information for the classes
+              that were introspected before those properties were changed. Now
+              changing such properties always clear the introspection
+              caches.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

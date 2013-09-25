@@ -186,7 +186,8 @@ final class StaticModel implements TemplateHashModelEx
             {
                 Method method = methods[i];
                 int mod = method.getModifiers();
-                if (Modifier.isPublic(mod) && Modifier.isStatic(mod) && wrapper.isSafeMethod(method))
+                if (Modifier.isPublic(mod) && Modifier.isStatic(mod)
+                        && wrapper.getClassIntrospector().isAllowedToExpose(method))
                 {
                     String name = method.getName();
                     Object obj = map.get(name);

@@ -52,20 +52,22 @@
 
 package freemarker.template;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import freemarker.core.BugException;
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapper.SettingAssignments;
 import freemarker.ext.dom.NodeModel;
 
 /**
- * The default implementation of the {@link ObjectWrapper} interface.
+ * The default implementation of the {@link ObjectWrapper} interface. Note that instances of this class generally should
+ * be made by {@link #getInstance(Version)} and its overloads, not with its constructor.
+ * 
+ * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
+ * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
+ * was safely published and then left unmodified. 
  */
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
@@ -76,14 +78,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     static final private ObjectWrapper JYTHON_WRAPPER;
     
-    private static volatile WeakReference/*<DefaultObjectWrapper>*/ singleton2003000;
-    private static volatile WeakReference/*<DefaultObjectWrapper>*/ singleton2003021;
-    
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
      * 
-     * @deprecated Use {@link #getInstance(Version)} or {@link #getInstance(Version, SettingAssignments)}, or
+     * @deprecated Use {@link #getInstance(Version)} or {@link #getInstance(SettingAssignments)}, or
      *     in rare cases {@link #DefaultObjectWrapper(Version)} instead.
      */
     public DefaultObjectWrapper() {
@@ -91,7 +90,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     /**
-     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, SettingAssignments)} instead if possible.
+     * Use {@link #getInstance(Version)} or {@link #getInstance(SettingAssignments)} instead if possible.
      * Instances created with this constructor won't share the class introspection caches with other instances.
      * 
      * @param incompatibleImprovements As of yet, the same as in {@link BeansWrapper#BeansWrapper(Version)}.
@@ -103,12 +102,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Calls {@link BeansWrapper#BeansWrapper(Version, BeansWrapper.SettingAssignments)}.
+     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapper.SettingAssignments, boolean)}.
      * 
      * @since 2.3.21
      */
-    protected DefaultObjectWrapper(Version incompatibleImprovements, BeansWrapper.SettingAssignments settings) {
-        super(incompatibleImprovements, settings);
+    protected DefaultObjectWrapper(BeansWrapper.SettingAssignments settings, boolean readOnly) {
+        super(settings, readOnly);
     }
     
     /**
@@ -133,7 +132,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        return getInstance(incompatibleImprovements, SettingAssignments.DEFAULT);
+        return getInstance(new SettingAssignments(incompatibleImprovements));
     }
 
     /**
@@ -154,58 +153,14 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * 
      * @since 2.3.21
      */
-    public static BeansWrapper getInstance(Version incompatibleImprovements, SettingAssignments settings) {
-        DefaultObjectWrapper res; 
+    public static BeansWrapper getInstance(SettingAssignments settings) {
+        // Note: Don't forget when creating instances here and then later give them out from the cache, that it's this
+        // method's responsibility to ensure that the receiver thread doesn't see a partially initialized object.
+        // Also don't forget, that BeansWrapper can't be cached across different Thread Context Class Loaders.
         
-        if (!settings.equals(SettingAssignments.DEFAULT)) {
-            // We only cache an instance for the DEFAULT setting permutation.
-            // This is usually not a big loss; caching the internal introspection cache is what really matters.
-            return new DefaultObjectWrapper(incompatibleImprovements, settings);
-        }
-        
-        incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
-        
-        int iciInt = incompatibleImprovements.intValue();
-        if (iciInt == 2003000) {
-            WeakReference rw = singleton2003000;
-            if (rw != null) {
-                res = (DefaultObjectWrapper) rw.get();
-                if (res != null) {
-                    if (res._preJava5Sync != null) {
-                        synchronized (res._preJava5Sync) { }  // force cache invalidation
-                    }
-                    return res;
-                }
-            }
-        } else if (iciInt == 2003021) {
-            WeakReference rw = singleton2003021;
-            if (rw != null) {
-                res = (DefaultObjectWrapper) rw.get();
-                if (res != null) {
-                    if (res._preJava5Sync != null) {
-                        synchronized (res._preJava5Sync) { }  // force cache invalidation
-                    }
-                    return res;
-                }
-            }
-        } else {
-            throw new BugException();
-        }
-        
-        res = new DefaultObjectWrapper(incompatibleImprovements, settings);
-        if (res._preJava5Sync != null) {
-            synchronized (res._preJava5Sync) { }  // force cache flushing
-        }
-
-        if (iciInt == 2003000) {
-            singleton2003000 = new WeakReference(res);
-        } else if (iciInt == 2003021) {
-            singleton2003021 = new WeakReference(res);
-        } else {
-            throw new BugException();
-        }
-        
-        return res;
+        // TODO add caching
+        BeansWrapper bw = new DefaultObjectWrapper(settings, true);
+        return bw;
     }
     
     static {
