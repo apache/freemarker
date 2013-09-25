@@ -64,10 +64,10 @@ class ClassIntrospector {
     
     /**
      * Caches {@link ClassIntrospector}-s so that {@link BeansWrapper} instances can share them.
-     * Used by {@link #getInstanceAndSharedLock(SettingAssignments)}.
+     * Used by {@link #getInstance(SettingAssignments)}.
      */
-    //private static final WeakHashMap/*<SettingAssignments, Reference<ClassIntrospector>>*/ instanceCache;
-    //private static final Object instanceCacheLock = new Object();
+    private static final Map/*<SettingAssignments, Reference<ClassIntrospector>>*/ instanceCache = new HashMap();
+    private static final ReferenceQueue instanceCacheRefQue = new ReferenceQueue(); 
 
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection setting fields:
@@ -111,7 +111,7 @@ class ClassIntrospector {
 
     /**
      * @param shared {@code true} exactly if we are creating a new instance with
-     *     {@link #getInstanceAndSharedLock(SettingAssignments)}.
+     *     {@link #getInstance(SettingAssignments)}.
      */
     private ClassIntrospector(SettingAssignments sa, Object sharedLock, boolean shared) {
         NullArgumentException.check("sharedLock", sharedLock);
@@ -136,25 +136,52 @@ class ClassIntrospector {
     }
     
     /**
-     * Returns an instance that is possibly singleton (singleton). Note that this comes with its own "singleton lock",
+     * Returns an instance that is possibly shared (singleton). Note that this comes with its own "shared lock",
      * since everyone who uses this object will have to lock with that common object.
      * 
      * <p>We don't use a plain {@code getInstance} to prevent the handy but dangerous idea where {@link BeansWrapper}
      * gets the shared lock from the {@link ClassIntrospector} instance. It can't be get from it, so it's prevented...
      */
-    static InstanceAndSharedLock getInstanceAndSharedLock(SettingAssignments sa) {
-        // If methodAppearanceFineTuner or methodShorter is specified, it can't be cached as
-        // those objects could contain a back-reference to the BeansWrapper.
-        Object sharedLock = new Object();
+    static ClassIntrospector getInstance(SettingAssignments sa) {
+        sa = (SettingAssignments) sa.clone();  // prevent any aliasing issues
         if (sa.methodAppearanceFineTuner == null && sa.methodShorter == null) {
-            // TODO: add caching
-            return new InstanceAndSharedLock(new ClassIntrospector(sa, new Object(), true), sharedLock);
+            // Instance can be cached.
+            ClassIntrospector instance;
+            synchronized (instanceCache) {
+                Reference instanceRef = (Reference) instanceCache.get(sa);
+                instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
+                if (instance == null) {
+                    instance = new ClassIntrospector(sa, new Object(), true);
+                    instanceCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
+                }
+            }
+            
+            removeClearedReferencesFromCache();
+            
+            return instance;
         } else {
-            return new InstanceAndSharedLock(new ClassIntrospector(sa, new Object(), true), sharedLock);
+            // If methodAppearanceFineTuner or methodShorter is specified, the ClassIntrospector can't be shared/cached
+            // as those objects could contain a back-reference to the BeansWrapper.
+            //TODO Add a marked interface, like Cacheable or Singleton, and then allow them in shared instances.
+            return new ClassIntrospector(sa, new Object(), true);
+        }
+    }
+
+    private static void removeClearedReferencesFromCache() {
+        Reference ref;
+        while ((ref = instanceCacheRefQue.poll()) != null) {
+            synchronized (instanceCache) {
+                findRef: for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
+                    if (it.next() == ref) {
+                        it.remove();
+                        break findRef;
+                    }
+                }
+            }
         }
     }
     
-    final static class SettingAssignments {
+    final static class SettingAssignments implements Cloneable {
         private final boolean bugfixed;
         
         // Properties and their *defaults*:
@@ -181,6 +208,14 @@ class ClassIntrospector {
             // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
             // to some version changes that affects BeansWrapper, but not the other way around. 
             bugfixed = BeansWrapper.is2321Bugfixed(incompatibleImprovements);
+        }
+        
+        protected Object clone() {
+            try {
+                return super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException();  // Java 5: use cause
+            }
         }
     
         public int hashCode() {
@@ -245,27 +280,6 @@ class ClassIntrospector {
     
         public void setMethodShorter(MethodShorter methodShorter) {
             this.methodShorter = methodShorter;
-        }
-        
-    }
-
-    static class InstanceAndSharedLock {
-        
-        private final ClassIntrospector classIntrospector;
-        private final Object sharedLock;
-        
-        public InstanceAndSharedLock(ClassIntrospector classIntrospector, Object sharedLock) {
-            super();
-            this.classIntrospector = classIntrospector;
-            this.sharedLock = sharedLock;
-        }
-    
-        public ClassIntrospector getClassIntrospector() {
-            return classIntrospector;
-        }
-    
-        public Object getSharedLock() {
-            return sharedLock;
         }
         
     }
@@ -852,13 +866,20 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns {@code true} if this instance was created for {@link #getInstanceAndSharedLock(SettingAssignments)}, even
+     * Returns {@code true} if this instance was created for {@link #getInstance(SettingAssignments)}, even
      * if it wasn't actually put into the cache (as we reserve the right to do so in later versions). 
      */
     boolean isShared() {
         return shared;
     }
-
+    
+    /**
+     * Almost always, you want to use {@link BeansWrapper#getSharedInrospectionLock()}, not this! The only exception is
+     * when you get this to set the filed returned by {@link BeansWrapper#getSharedInrospectionLock()}.
+     */
+    Object getSharedLock() {
+        return sharedLock;
+    }
     
     // -----------------------------------------------------------------------------------------------------------------
     // Monitoring:
@@ -869,5 +890,18 @@ class ClassIntrospector {
             return modelFactories.toArray();
         }
     }
+
+    /** For unit testing only */
+    static void clearInstanceCache() {
+        synchronized (instanceCache) {
+            instanceCache.clear();
+        }
+    }
+    
+    /** For unit testing only */
+    static Map getInstanceCache() {
+        return instanceCache;
+    }
+
     
 }

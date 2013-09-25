@@ -377,10 +377,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         } else {
             // As in this read-only BeansWrapper the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            ClassIntrospector.InstanceAndSharedLock res
-                    = ClassIntrospector.getInstanceAndSharedLock(settings.classIntrospectorSettings);
-            classIntrospector = res.getClassIntrospector();
-            sharedInrospectionLock = res.getSharedLock(); 
+            classIntrospector = ClassIntrospector.getInstance(settings.classIntrospectorSettings);
+            sharedInrospectionLock = classIntrospector.getSharedLock(); 
         }
         
         // TODO: Get rid of these somehow...        
@@ -457,6 +455,11 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         // TODO add caching here
         BeansWrapper bw = new BeansWrapper(settings, true);
         return bw;
+    }
+
+    /** For unit testing only */
+    static void clearInstanceCache() {
+        // TODO there's nothing to clear yet...
     }
     
     /**

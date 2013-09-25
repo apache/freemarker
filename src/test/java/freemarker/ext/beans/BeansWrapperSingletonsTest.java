@@ -1,9 +1,12 @@
 package freemarker.ext.beans;
 
+import java.lang.ref.Reference;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
@@ -332,219 +335,249 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
     }
     
-    public void testInrospectionCacheCache() throws TemplateModelException {
-        SettingAssignments sa;
-
+    public void testClassInrospectorCache() throws TemplateModelException {
         assertFalse(new BeansWrapper().isClassIntrospectionCacheShared());
         assertFalse(new BeansWrapper(new Version(2, 3, 21)).isClassIntrospectionCacheShared());
         assertTrue(BeansWrapper.getInstance(new Version(2, 3, 20)).isClassIntrospectionCacheShared());
         
-        //TODO BeansWrapper.clearSharedStateForUnitTesting();
-        //TODO checkIntrospectionCacheCachePattern(null);
+        ClassIntrospector.clearInstanceCache();
+        BeansWrapper.clearInstanceCache();
+        checkClassIntrospectorCacheSize(0);
         
-        BeansWrapper bw;
         List<BeansWrapper> hardReferences = new LinkedList<BeansWrapper>();
+        SettingAssignments sa;
         
-        sa = new SettingAssignments(V_2_3_19);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(0);
-        //sa.setExposureLevel(BeansWrapper.EXPOSE_SAFE);  // this was already set to this
-        //sa.setSimpleMapWrapper(true);  // this shouldn't matter for the introspection cache
-        //TODO BeansWrapper.getInstance(sa).checkIfUsesSharedIntrospectionCacheForUnitTesting(0);
-        //TODO checkIntrospectionCacheCachePattern("S");
-        // Wrapping tests:
-        assertFalse(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertTrue(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        assertTrue(bw.isClassIntrospectionCacheShared());
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-
-        sa = new SettingAssignments(V_2_3_19);
-        sa.setExposeFields(true);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(1);
-        //TODO checkIntrospectionCacheCachePattern("SW");
-        // Wrapping tests:
-        assertTrue(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertTrue(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-
-        sa.setExposureLevel(BeansWrapper.EXPOSE_ALL);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(3);
-        //TODO checkIntrospectionCacheCachePattern("SWnW");
-        // Wrapping tests:
-        assertTrue(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertTrue(hasGetBar(bw));
-        assertTrue(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-        
-        sa.setExposeFields(false);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(2);
-        //TODO checkIntrospectionCacheCachePattern("SWWW");
-        // Wrapping tests:
-        assertFalse(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertTrue(hasGetBar(bw));
-        assertTrue(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-        
-        sa.setExposureLevel(BeansWrapper.EXPOSE_NOTHING);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(6);
-        //TODO checkIntrospectionCacheCachePattern("SWWWnnW");
-        // Wrapping tests:
-        assertFalse(hasFoo(bw));
-        assertFalse(hasBar(bw));
-        assertFalse(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-
-        sa.setExposeFields(true);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(7);
-        //TODO checkIntrospectionCacheCachePattern("SWWWnnWW");
-        // Wrapping tests:
-        assertTrue(hasFoo(bw));
-        assertFalse(hasBar(bw));
-        assertFalse(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-        
-        sa.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(5);
-        //TODO checkIntrospectionCacheCachePattern("SWWWnWWW");
-        // Wrapping tests:
-        assertTrue(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertFalse(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
-        
-        sa = new SettingAssignments(V_2_3_21);
-        sa.setExposeFields(false);
-        sa.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
-        BeansWrapper bw1 = BeansWrapper.getInstance(sa);
-        /*
-        checkIntrospectionCacheCachePattern("SWWWWWWW");
-        bw1.checkIfUsesSharedIntrospectionCacheForUnitTesting(4);
-        Reference isc1 = BeansWrapper.getIntrospectionCacheCacheSnapshotForUnitTesting()[4];
-        sa.setSimpleMapWrapper(true);  // Shouldn't mater
-        BeansWrapper bw2 = BeansWrapper.getInstance(new Version(2, 3, 21), sa);
-        bw2.checkIfUsesSharedIntrospectionCacheForUnitTesting(4);
-        Reference isc2 = BeansWrapper.getIntrospectionCacheCacheSnapshotForUnitTesting()[4];
-        assertSame(isc1, isc2);
-        */
-        // Wrapping tests:
-        assertFalse(hasFoo(bw1));
-        assertTrue(hasBar(bw1));
-        assertFalse(hasGetBar(bw1));
-        assertFalse(hasWait(bw1));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw1);
-        /*
-        hardReferences.add(bw2);
-                
-        Reference[] cc = BeansWrapper.getIntrospectionCacheCacheSnapshotForUnitTesting();
-        for (Reference ref : cc) {
-            ref.clear();
+        {
+            sa = new SettingAssignments(V_2_3_19);
+            
+            BeansWrapper bw1 = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(1);
+            
+            sa.setExposureLevel(BeansWrapper.EXPOSE_SAFE);  // this was already set to this
+            sa.setSimpleMapWrapper(true);  // this shouldn't matter for the introspection cache
+            BeansWrapper bw2 = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(1);
+            
+            assertSame(bw2.getClassIntrospector(), bw1.getClassIntrospector());
+            assertNotSame(bw1, bw2);
+            
+            // Wrapping tests:
+            assertFalse(exposesFields(bw1));
+            assertTrue(exposesProperties(bw1));
+            assertTrue(exposesMethods(bw1));
+            assertFalse(exposesUnsafe(bw1));
+            assertFalse(isSimpleMapWrapper(bw1));
+            assertTrue(bw1.isClassIntrospectionCacheShared());
+            // Prevent introspection cache GC:
+            hardReferences.add(bw1);
         }
-        */
 
-        sa.setSimpleMapWrapper(false);
-        sa.setExposeFields(false);
-        bw1 = BeansWrapper.getInstance(sa);
-        /*
-        checkIntrospectionCacheCachePattern("SWWWWWWW");
-        bw1.checkIfUsesSharedIntrospectionCacheForUnitTesting(4);
-        Reference isc1r2 = BeansWrapper.getIntrospectionCacheCacheSnapshotForUnitTesting()[4];
-        sa.setSimpleMapWrapper(true);  // Shouldn't mater
-        bw2 = BeansWrapper.getInstance(new Version(2, 3, 21), sa);
-        bw2.checkIfUsesSharedIntrospectionCacheForUnitTesting(4);
-        Reference isc2r2 = BeansWrapper.getIntrospectionCacheCacheSnapshotForUnitTesting()[4];
-        assertSame(isc1r2, isc2r2);
-        assertNotSame(isc1, isc2r2);  // the Reference was re-created as it was cleared 
-        // Wrapping tests:
-        */
-        assertFalse(hasFoo(bw1));
-        assertTrue(hasBar(bw1));
-        assertFalse(hasGetBar(bw1));
-        assertFalse(hasWait(bw1));
-        assertFalse(isSimpleMapWrapper(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw1);
-        /*
-        hardReferences.add(bw2);
-        */
+        {
+            sa = new SettingAssignments(V_2_3_19);
+            sa.setExposeFields(true);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(2);
+            // Wrapping tests:
+            assertTrue(exposesFields(bw));
+            assertTrue(exposesProperties(bw));
+            assertTrue(exposesMethods(bw));
+            assertFalse(exposesUnsafe(bw));
+            assertFalse(isSimpleMapWrapper(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
+
+        {
+            sa.setExposureLevel(BeansWrapper.EXPOSE_ALL);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(3);
+            // Wrapping tests:
+            assertTrue(exposesFields(bw));
+            assertTrue(exposesProperties(bw));
+            assertTrue(exposesMethods(bw));
+            assertTrue(exposesUnsafe(bw));
+            assertFalse(isSimpleMapWrapper(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
         
-        sa = new SettingAssignments(V_2_3_19);
-        bw = BeansWrapper.getInstance(sa);
-        //TODO bw.checkIfUsesSharedIntrospectionCacheForUnitTesting(0);
-        //TODO checkIntrospectionCacheCachePattern("SWWWWWWW");
-        // Wrapping tests:
-        assertFalse(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertTrue(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
+        {
+            sa.setExposeFields(false);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(4);
+            // Wrapping tests:
+            assertFalse(exposesFields(bw));
+            assertTrue(exposesProperties(bw));
+            assertTrue(exposesMethods(bw));
+            assertTrue(exposesUnsafe(bw));
+            assertFalse(isSimpleMapWrapper(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
         
-        sa = new SettingAssignments(V_2_3_21);
-        sa.setExposeFields(true);
-        bw = BeansWrapper.getInstance(sa);
-        // Wrapping tests:
-        assertTrue(hasFoo(bw));
-        assertTrue(hasBar(bw));
-        assertTrue(hasGetBar(bw));
-        assertFalse(hasWait(bw));
-        // Prevent introspection cache GC:
-        hardReferences.add(bw);
+        {
+            sa.setExposureLevel(BeansWrapper.EXPOSE_NOTHING);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(5);
+            // Wrapping tests:
+            assertFalse(exposesFields(bw));
+            assertFalse(exposesProperties(bw));
+            assertFalse(exposesMethods(bw));
+            assertFalse(exposesUnsafe(bw));
+            assertFalse(isSimpleMapWrapper(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
+
+        {
+            sa.setExposeFields(true);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(6);
+            // Wrapping tests:
+            assertTrue(exposesFields(bw));
+            assertFalse(exposesProperties(bw));
+            assertFalse(exposesMethods(bw));
+            assertFalse(exposesUnsafe(bw));
+            assertFalse(isSimpleMapWrapper(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
+
+        {
+            sa.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(7);
+            // Wrapping tests:
+            assertTrue(exposesFields(bw));
+            assertTrue(exposesProperties(bw));
+            assertFalse(exposesMethods(bw));
+            assertFalse(exposesUnsafe(bw));
+            assertFalse(isSimpleMapWrapper(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
+        
+        {
+            sa = new SettingAssignments(V_2_3_21);
+            sa.setExposeFields(false);
+            sa.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
+            
+            BeansWrapper bw1 = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(8);
+            ClassIntrospector ci1 = bw1.getClassIntrospector();
+            
+            sa.setSimpleMapWrapper(true);  // Shouldn't mater
+            BeansWrapper bw2 = BeansWrapper.getInstance(sa);
+            ClassIntrospector ci2 = bw2.getClassIntrospector();
+            checkClassIntrospectorCacheSize(8);
+            
+            assertSame(ci1, ci2);
+            assertNotSame(bw1, bw2);
+            
+            // Wrapping tests:
+            assertFalse(exposesFields(bw1));
+            assertTrue(exposesProperties(bw1));
+            assertFalse(exposesMethods(bw1));
+            assertFalse(exposesUnsafe(bw1));
+            assertFalse(isSimpleMapWrapper(bw1));
+            
+            // Prevent introspection cache GC:
+            hardReferences.add(bw1);
+            hardReferences.add(bw2);
+        }
+        
+        clearInstanceCacheReferences(false);
+        checkClassIntrospectorCacheSize(8);
+        assertEquals(0, getNonClearedInstanceCacheSize());
+
+        {
+            sa.setSimpleMapWrapper(false);
+            sa.setExposeFields(false);
+            
+            BeansWrapper bw1 = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(8);
+            assertEquals(1, getNonClearedInstanceCacheSize());
+            ClassIntrospector ci1 = bw1.getClassIntrospector();
+            
+            sa.setSimpleMapWrapper(true);  // Shouldn't mater
+            BeansWrapper bw2 = BeansWrapper.getInstance(sa);
+            ClassIntrospector ci2 = bw2.getClassIntrospector();
+            
+            assertSame(ci1, ci2);
+            assertNotSame(bw1, bw2);
+            
+            // Wrapping tests:
+            assertFalse(exposesFields(bw1));
+            assertTrue(exposesProperties(bw1));
+            assertFalse(exposesMethods(bw1));
+            assertFalse(exposesUnsafe(bw1));
+            assertFalse(isSimpleMapWrapper(bw1));
+            
+            // Prevent introspection cache GC:
+            hardReferences.add(bw1);
+            hardReferences.add(bw2);
+        }
+        
+        {
+            sa = new SettingAssignments(V_2_3_19);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(8);
+            assertEquals(2, getNonClearedInstanceCacheSize());
+            // Wrapping tests:
+            assertFalse(exposesFields(bw));
+            assertTrue(exposesProperties(bw));
+            assertTrue(exposesMethods(bw));
+            assertFalse(exposesUnsafe(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
+
+        clearInstanceCacheReferences(true);
+        checkClassIntrospectorCacheSize(8);
+        assertEquals(0, getNonClearedInstanceCacheSize());
+        
+        {
+            sa = new SettingAssignments(V_2_3_21);
+            sa.setExposeFields(true);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(1);
+            // Wrapping tests:
+            assertTrue(exposesFields(bw));
+            assertTrue(exposesProperties(bw));
+            assertTrue(exposesMethods(bw));
+            assertFalse(exposesUnsafe(bw));
+            // Prevent introspection cache GC:
+            hardReferences.add(bw);
+        }
+        
+        {
+            sa = new SettingAssignments(V_2_3_19);
+            sa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
+                public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
+                }
+            });  // spoils caching
+            
+            BeansWrapper bw1 = BeansWrapper.getInstance(sa);
+            BeansWrapper bw2 = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(1);
+            
+            assertNotSame(bw2.getClassIntrospector(), bw1.getClassIntrospector());
+            //TODO assertSame(bw1, bw2);
+            
+            assertTrue(bw1.isClassIntrospectionCacheShared());
+            
+            // Wrapping tests:
+            assertFalse(exposesFields(bw1));
+            assertTrue(exposesProperties(bw1));
+            assertTrue(exposesMethods(bw1));
+            assertFalse(exposesUnsafe(bw1));
+        }
+        
     }
     
-    /*
-    private void checkIntrospectionCacheCachePattern(String pattern) {
-        Reference[] cc = BeansWrapper.getIntrospectionCacheCacheSnapshotForUnitTesting();
-        if (pattern == null) {
-            assertNull(cc);
-        } else {
-            assertNotNull(cc);
-            
-            StringBuilder sb = new StringBuilder(cc.length);
-            sb.setLength(cc.length);
-            for (int i = 0; i < cc.length; i++) {
-                Reference ref = cc[i];
-                sb.setCharAt(i,
-                        ref == null
-                            ? 'n'
-                            : (ref instanceof WeakReference
-                                    ? 'W'
-                                    : (ref instanceof SoftReference ? 'S' : '?')));
-            }
-            assertEquals(pattern, sb.toString());
-        }
+    private void checkClassIntrospectorCacheSize(int expectedSize) {
+        assertEquals(expectedSize, getInstanceCacheSize());
     }
-    */
 
     private void assertNotEquals(Object o1, Object o2) {
         assertFalse(o1.equals(o2));
@@ -564,7 +597,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         return bw.wrap(new HashMap()) instanceof SimpleMapModel;
     }
     
-    private boolean hasFoo(BeansWrapper bw) throws TemplateModelException {
+    private boolean exposesFields(BeansWrapper bw) throws TemplateModelException {
         TemplateHashModel thm = (TemplateHashModel) bw.wrap(new C());
         TemplateScalarModel r = (TemplateScalarModel) thm.get("foo");
         if (r == null) return false;
@@ -572,7 +605,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         return true;
     }
 
-    private boolean hasBar(BeansWrapper bw) throws TemplateModelException {
+    private boolean exposesProperties(BeansWrapper bw) throws TemplateModelException {
         TemplateHashModel thm = (TemplateHashModel) bw.wrap(new C());
         TemplateScalarModel r = (TemplateScalarModel) thm.get("bar");
         if (r == null) return false;
@@ -580,14 +613,45 @@ public class BeansWrapperSingletonsTest extends TestCase {
         return true;
     }
 
-    private boolean hasGetBar(BeansWrapper bw) throws TemplateModelException {
+    private boolean exposesMethods(BeansWrapper bw) throws TemplateModelException {
         TemplateHashModel thm = (TemplateHashModel) bw.wrap(new C());
         return thm.get("getBar") != null;
     }
 
-    private boolean hasWait(BeansWrapper bw) throws TemplateModelException {
+    private boolean exposesUnsafe(BeansWrapper bw) throws TemplateModelException {
         TemplateHashModel thm = (TemplateHashModel) bw.wrap(new C());
         return thm.get("wait") != null;
+    }
+    
+    static int getInstanceCacheSize() {
+        Map instanceCache = ClassIntrospector.getInstanceCache();
+        synchronized (instanceCache) {
+            return instanceCache.size();
+        }
+    }
+
+    static int getNonClearedInstanceCacheSize() {
+        Map instanceCache = ClassIntrospector.getInstanceCache();
+        synchronized (instanceCache) {
+            int cnt = 0;
+            for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
+                if (((Reference) it.next()).get() != null) cnt++;
+            }
+            return cnt;
+        }
+    }
+    
+    static void clearInstanceCacheReferences(boolean enqueue) {
+        Map instanceCache = ClassIntrospector.getInstanceCache();
+        synchronized (instanceCache) {
+            for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
+                Reference ref = ((Reference) it.next());
+                ref.clear();
+                if (enqueue) {
+                    ref.enqueue();
+                }
+            }
+        }
     }
     
 }
