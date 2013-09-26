@@ -37,6 +37,9 @@ import freemarker.template.utility.SecurityUtilities;
  * Returns information about a {@link Class} that's useful for FreeMarker. Encapsulates a cache for this.
  * Thread-safe, doesn't require "proper publishing" starting from Java 5. Immutable, with the exception of the internal
  * caches.
+ * 
+ * <p>Note that instances of this are cached on the level of FreeMarker's defining class loader. Hence, it must not do
+ * operations that depend on the Thread Context Class Loader, such as resolving class names.
  */
 class ClassIntrospector {
     // Attention: This class must be thread-safe (not just after proper publishing). This is important as some of
@@ -143,7 +146,6 @@ class ClassIntrospector {
      * gets the shared lock from the {@link ClassIntrospector} instance. It can't be get from it, so it's prevented...
      */
     static ClassIntrospector getInstance(SettingAssignments sa) {
-        sa = (SettingAssignments) sa.clone();  // prevent any aliasing issues
         if (sa.methodAppearanceFineTuner == null && sa.methodShorter == null) {
             // Instance can be cached.
             ClassIntrospector instance;
@@ -151,12 +153,13 @@ class ClassIntrospector {
                 Reference instanceRef = (Reference) instanceCache.get(sa);
                 instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
                 if (instance == null) {
+                    sa = (SettingAssignments) sa.clone();  // prevent any aliasing issues
                     instance = new ClassIntrospector(sa, new Object(), true);
                     instanceCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
                 }
             }
             
-            removeClearedReferencesFromCache();
+            removeClearedReferencesFromInstanceCache();
             
             return instance;
         } else {
@@ -167,14 +170,14 @@ class ClassIntrospector {
         }
     }
 
-    private static void removeClearedReferencesFromCache() {
-        Reference ref;
-        while ((ref = instanceCacheRefQue.poll()) != null) {
+    private static void removeClearedReferencesFromInstanceCache() {
+        Reference clearedRef;
+        while ((clearedRef = instanceCacheRefQue.poll()) != null) {
             synchronized (instanceCache) {
-                findRef: for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
-                    if (it.next() == ref) {
+                findClearedRef: for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
+                    if (it.next() == clearedRef) {
                         it.remove();
-                        break findRef;
+                        break findClearedRef;
                     }
                 }
             }
@@ -804,9 +807,10 @@ class ClassIntrospector {
         Reference cleardRef;
         while ((cleardRef = modelFactoriesRefQueue.poll()) != null) {
             synchronized (sharedLock) {
-                for (Iterator it = modelFactories.iterator(); it.hasNext();) {
+                findCleardRef: for (Iterator it = modelFactories.iterator(); it.hasNext();) {
                     if (it.next() == cleardRef) {
                         it.remove();
+                        break findCleardRef;
                     }
                 }
             }
