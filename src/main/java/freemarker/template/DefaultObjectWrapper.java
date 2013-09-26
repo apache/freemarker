@@ -52,13 +52,16 @@
 
 package freemarker.template;
 
+import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans._BeansAPI;
 import freemarker.ext.dom.NodeModel;
 
 /**
@@ -73,6 +76,10 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     /** @deprecated Use {@link #getInstance(Version)} instead, but mind its performance */
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
+    
+    private final static WeakHashMap/*<ClassLoader, Map<SettingAssignments, WeakReference<DefaultObjectWrapper>>*/
+            instanceCache = new WeakHashMap();
+    private final static ReferenceQueue instanceCacheRefQue = new ReferenceQueue();
     
     static final private Class W3C_DOM_NODE_CLASS, JYTHON_OBJ_CLASS;
     
@@ -92,6 +99,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /**
      * Use {@link #getInstance(Version)} or {@link #getInstance(SettingAssignments)} instead if possible.
      * Instances created with this constructor won't share the class introspection caches with other instances.
+     * See {@link BeansWrapper#BeansWrapper(Version)} (the superclass constructor) for more details.
      * 
      * @param incompatibleImprovements As of yet, the same as in {@link BeansWrapper#BeansWrapper(Version)}.
      * 
@@ -111,20 +119,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     /**
-     * 
      * Returns an unconfigurable (read-only) {@link DefaultObjectWrapper} instance that's already configured as
-     * specified in the arguments; this is preferred over using the constructors. The returned instance is often, but
-     * not always a VM-wide singleton.
+     * specified in the argument; this is preferred over using the constructors.
+     * If you need to configure more than the {@code incompatibleImprovements version}, use
+     * {@link #getInstance(SettingAssignments)}.
      * 
-     * <p>The main benefit of this over the constructors is that the instances made with this method
-     * share their internal class introspection caches, which is something that's expensive to build. (To be precise,
-     * the introspection cache is only shared among those instances that use compatible introspection settings, like the
-     * same exposure level.)
-     * 
-     * @param incompatibleImprovements See the corresponding parameter of
-     *     {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. Note that the version will be normalized to the
-     *     lowest equivalent version, so for the returned instance {@link #getIncompatibleImprovements()} might returns
-     *     a lower version than what you have specified.
+     * <p>See {@link BeansWrapper#getInstance(Version)} for more info (that's what this delegates to). 
      * 
      * @return A {@link DefaultObjectWrapper} (Java doesn't allow declaring that as return type here, that's only
      *      why it's declared as {@link BeansWrapper}).
@@ -149,20 +149,25 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /**
      * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
      *     
-     * @param settings The settings that you want to be set in the returned instance.
+     * @param sa The settings that you want to be set in the returned instance.
      * 
      * @since 2.3.21
      */
-    public static BeansWrapper getInstance(SettingAssignments settings) {
-        // Note: Don't forget when creating instances here and then later give them out from the cache, that it's this
-        // method's responsibility to ensure that the receiver thread doesn't see a partially initialized object.
-        // Also don't forget, that BeansWrapper can't be cached across different Thread Context Class Loaders.
-        
-        // TODO add caching
-        BeansWrapper bw = new DefaultObjectWrapper(settings, true);
-        return bw;
+    public static BeansWrapper getInstance(SettingAssignments sa) {
+        return _BeansAPI.getBeansWrapperSubclassInstance(
+                sa, instanceCache, instanceCacheRefQue, DefaultObjectWrapperFactory.INSTANCE);
     }
-    
+
+    private static class DefaultObjectWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
+        
+        private static final DefaultObjectWrapperFactory INSTANCE = new DefaultObjectWrapperFactory(); 
+
+        public BeansWrapper create(SettingAssignments sa) {
+            return new DefaultObjectWrapper(sa, true);
+        }
+        
+    }
+
     static {
         Class cl;
         try {
@@ -260,6 +265,13 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             list.add(Array.get(arr, i));
         }
         return list;
+    }
+    
+    /** For unit testing only */
+    static void clearInstanceCache() {
+        synchronized (instanceCache) {
+            instanceCache.clear();
+        }
     }
     
 }

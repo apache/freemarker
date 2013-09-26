@@ -21,4 +21,9 @@ public class _TemplateAPI {
         }
     }
     
+    /** For unit testing only */
+    public static void DefaultObjectWrapper_clearInstanceCache() {
+        DefaultObjectWrapper.clearInstanceCache();
+    }
+    
 }

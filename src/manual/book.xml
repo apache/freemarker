@@ -20468,15 +20468,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   BeansWrapper(<replaceable>...</replaceable>)</literal>, from
                   now on you should use
                   <literal>DefaultObjectWrapper.getInstance</literal> and
-                  <literal>BeansWrapper.getInstance</literal> methods wherever
-                  possible (these allow specifying some of the settings of the
-                  desired instance too). These will return an instance (often
-                  a VM-wide singleton), which is read-only (means,
-                  non-configurable, hence safe to share), created lazily
-                  (i.e., only when first needed), and is only weak-referenced
-                  from inside FreeMarker, so they can be garbage collected
-                  when all the <literal>Configuration</literal>-s where they
-                  were used can be. The main benefit of using
+                  <literal>BeansWrapper.getInstance</literal> methods (these
+                  allow specifying some of the settings of the desired
+                  instance too). These will return an instance (usually a
+                  VM-wide, or rather Web-Application-wide singleton), which is
+                  read-only (means, non-configurable, hence safe to share),
+                  created lazily (i.e., only when first needed), and is only
+                  weak-referenced from inside FreeMarker, so it can be garbage
+                  collected when all the <literal>Configuration</literal>-s
+                  where they were used can be. The main benefit of using
                   <literal>getInstance</literal> instead of creating new
                   instances is that this allows FreeMarker to share the class
                   introspection caches (an internal part of
@@ -20496,18 +20496,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper</literal>-s are configurable (not
                   read-only), and thus dangerous to use (a badly behaving 3rd
                   party component can mess them up). Use the
-                  <literal>getInstance</literal> methods above instead. They
-                  are also more flexible, as you can specify the desired
-                  incompatible-improvements version for them an various other
-                  <literal>BeansWrapper</literal> settings. (Also deprecated
-                  all <literal>SimpleHash</literal>,
+                  <literal>getInstance</literal> methods above instead.
+                  <literal>getInstance</literal> is also more flexible, as you
+                  can specify the desired incompatible-improvements version
+                  for them and various other <literal>BeansWrapper</literal>
+                  settings. (Also deprecated all
+                  <literal>SimpleHash</literal>,
                   <literal>SimpleCollection</literal> and
                   <literal>SimpleSequence</literal> constructors that didn't
                   take an <literal>ObjectWrapper</literal> argument, as they
                   have usually used
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> as the
-                  default, or a user-specified static field value, which is
-                  even worse.)</para>
+                  default.)</para>
                 </listitem>
 
                 <listitem>
@@ -20522,7 +20522,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper</literal> will immediately cause
                   <literal>IllegalStateException</literal>. This is what's
                   used for the singletons returned by the
-                  <literal>getInstance()</literal> method too (see
+                  <literal>getInstance</literal> method too (see
                   earlier).</para>
                 </listitem>
               </itemizedlist>

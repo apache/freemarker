@@ -53,6 +53,7 @@
 package freemarker.ext.beans;
 
 import java.beans.PropertyDescriptor;
+import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
@@ -183,15 +185,9 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      */
     protected final Object _preJava5Sync = _BeansAPI.JVM_USES_JSR133 ? null : new Object(); 
     
-    /**
-     * Write any non-0 (!) value into this after some fields were modified, then read it back before those fields are
-     * used in another thread. On Java 5 and later, this will ensure that the reading thread doesn't see stale
-     * values. This variable is used by {@link #getInstance(SettingAssignments)} (and its overloads) to ensure
-     * that cached {@link BeansWrapper} instances are seen consistently.
-     * 
-     * @since 2.3.21
-     */
-    protected volatile int instanceMemorySync; // TODO: remove if not needed
+    private final static WeakHashMap/*<ClassLoader, Map<SettingAssignments, WeakReference<BeansWrapper>>*/ instanceCache
+            = new WeakHashMap();
+    private final static ReferenceQueue instanceCacheRefQue = new ReferenceQueue();
     
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection cache:
@@ -266,7 +262,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} or
      * {@link #getInstance(SettingAssignments)} instead if possible.
      * Instances created with this constructor won't share the class introspection caches with other instances. That's
-     * also why you may want to use it instead of {@code getInstance}.
+     * also why you may want to use it instead of {@code getInstance} (you don't want to use common caches).
      * 
      * @param incompatibleImprovements
      *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
@@ -280,7 +276,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      *   
      *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
      *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
-     *   numbers are technically independent.
+     *   numbers are technically independent. But it's recommended to keep those two version numbers the same.
      * 
      *   <p>The changes enabled by {@code incompatibleImprovements} are:
      *   <ul>
@@ -350,7 +346,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                             + "future. Use BeansWrapper.setMethodAppearanceFineTuner instead.");
                     ftmaDeprecationWarnLogged = true;
                 }
-                settings = (SettingAssignments) settings.clone();
+                settings = (SettingAssignments) settings.clone(false);
                 settings.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
                     public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
@@ -407,18 +403,63 @@ public class BeansWrapper implements ObjectWrapper, Lockable
 
     /**
      * Returns an unconfigurable (read-only) {@link BeansWrapper} instance that's already configured as specified in the
-     * arguments; this is preferred over using the constructors. The returned instance is often, but not always a
-     * VM-wide singleton.
+     * argument; this is preferred over using the constructors. The returned instance is often, but not always a
+     * VM-wide (or rather, Web-Application-wide) singleton. Note that other overloads of this method allows you to
+     * specify more configuration settings.
      * 
-     * <p>The main benefit of this over the constructors is that the instances made with this method
-     * share their internal class introspection caches, which is something that's expensive to build. (To be precise,
-     * the introspection cache is only shared among those instances that use compatible introspection settings, like the
-     * same exposure level.)
+     * <p>Note that what this method documentation says about {@link BeansWrapper} also applies to
+     * {@link DefaultObjectWrapper}.
+     * 
+     * <p>The main benefit of using this method instead of the constructors is that this way the internal
+     * object wrapping-related caches will be reused/shared when appropriate. As the caches are expensive to build and
+     * take memory, if multiple independent components use FreeMarker in an application, this can mean some resource
+     * savings.
+     * 
+     * <p>The object wrapping-related caches are:
+     * <ul>
+     *   <li><p>Class introspection cache: Stores information about classes that once had to be wrapped. The cache is
+     *     stored in the static fields of certain FreeMarker classes. Thus, if you have two {@link BeansWrapper}
+     *     instances, they might share the same class introspection cache. But if you have two
+     *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
+     *     share their caches (as they don't share the same FreeMarker classes).
+     *     Also, currently there's a separate cache for each permutation of the setting values that influence class
+     *     introspection: {@link SettingAssignments#setExposeFields(boolean) expose_fields} and
+     *     {@link SettingAssignments#setExposureLevel(int) exposure_level}. So only {@link BeansWrapper} where those
+     *     settings are the same may share class introspection caches among each other.
+     *   </li>
+     *   <li><p>Model caches: These are local to a {@link BeansWrapper}. {@code getInstance} returns the same
+     *     {@link BeansWrapper} instance for the equivalent settings (unless the existing instance was garbage collected
+     *     and thus a new one had to be created), hence these caches will be re-used too. {@link BeansWrapper} instances
+     *     are cached in the static fields of FreeMarker here too, but there's a separate cache for each
+     *     Thread Context Class Loader, which in a servlet container practically means a separate cache for each Web
+     *     Application (each servlet context). (This is like so because when resolving class names to classes FreeMarker
+     *     will turn to the Thread Context Class Loader first, and only then to the defining class loader of FreeMarker,
+     *     so the result of the resolution can be different for different Thread Context Class Loaders.) The caches
+     *     local to a {@link BeansWrapper} are:
+     *     <ul>
+     *       <li><p>
+     *         Static model caches: These are used by the hash returned by {@link #getEnumModels()} and
+     *         {@link #getStaticModels()}, for caching {@link TemplateModel}-s for the static methods/fields
+     *         and Java 5 enums that were accessed through them. To use said hashes, you have to put them
+     *         explicitly into the data-model or expose them to template explicitly otherwise, so in most applications
+     *         these cache are unused. 
+     *       </li>
+     *       <li><p>
+     *         Instance model cache: By default off (see {@link #setUseCache(boolean)}). Caches the
+     *         {@link TemplateModel}-s for all Java objects that were accessed from templates.
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     * 
+     * <p>Note that if you set {@link SettingAssignments#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)} to
+     * non-{@code null}, you will always get a new instance, and the class introspection cache won't be shared.
      * 
      * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
-     *     Not {@code null}
-     *     Note that the version will be normalized to the lowest equivalent version, so for the returned
-     *     instance {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
+     *     Not {@code null}.
+     *     Note that the version will be normalized to the lowest version where the same incompatible
+     *     {@link BeansWrapper} improvements were already present, so for the returned instance
+     *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
      * 
      * @since 2.3.21
      */
@@ -443,23 +484,35 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     /**
      * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
      *     
-     * @param settings The settings that you want to be set in the returned instance. Not {@code null}.
+     * @param sa The settings that you want to be set in the returned instance. Not {@code null}.
      * 
      * @since 2.3.21
      */
-    public static BeansWrapper getInstance(SettingAssignments settings) {
-        // Note: Don't forget when creating instances here and then later give them out from the cache, that it's this
-        // method's responsibility to ensure that the receiver thread doesn't see a partially initialized object.
-        // Also don't forget, that BeansWrapper can't be cached across different Thread Context Class Loaders. 
+    public static BeansWrapper getInstance(SettingAssignments sa) {
+        return _BeansAPI.getBeansWrapperSubclassInstance(
+                sa, instanceCache, instanceCacheRefQue, BeansWrapperFactory.INSTANCE);
+    }
+    
+    private static class BeansWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
+        
+        private static final BeansWrapperFactory INSTANCE = new BeansWrapperFactory(); 
 
-        // TODO add caching here
-        BeansWrapper bw = new BeansWrapper(settings, true);
-        return bw;
+        public BeansWrapper create(SettingAssignments sa) {
+            return new BeansWrapper(sa, true);
+        }
+        
     }
 
     /** For unit testing only */
     static void clearInstanceCache() {
-        // TODO there's nothing to clear yet...
+        synchronized (instanceCache) {
+            instanceCache.clear();
+        }
+    }
+
+    /** For unit testing only */
+    static Map getInstanceCache() {
+        return instanceCache;
     }
     
     /**
@@ -675,7 +728,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
 
     /**
-     * Used for customizing how the methods are visible from templates; see {@link MethodAppearanceFineTuner}.
+     * Used to tweak certain aspects of how methods appear in the data-model;
+     * see {@link MethodAppearanceFineTuner} for more.
      */
     public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
         checkModifiable();
@@ -1575,15 +1629,20 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     /**
-     * Returns the exact class name and the value of the most often used {@link BeansWrapper} settings. 
+     * Returns the exact class name and the identity hash, also the values of the most often used {@link BeansWrapper}
+     * settings, also if which (if any) shared class introspection cache it uses.
+     *  
      * @since 2.3.21
      */
     public String toString() {
-        return ClassUtil.getShortClassNameOfObject(this) + "(" + incompatibleImprovements + ") { "
+        return ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
+                + "(" + incompatibleImprovements + ") { "
                 + "simpleMapWrapper = " + simpleMapWrapper + ", "
                 + "exposureLevel = " + classIntrospector.getExposureLevel() + ", "
                 + "exposeFields = " + classIntrospector.getExposeFields() + ", "
-                + "... "
+                + "sharedClassIntrospCache = "
+                + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none")
+                + ", ... "
                 + " }";
     }
 
@@ -1667,11 +1726,12 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     /**
-     * Used as the 2nd parameter to {@link #getInstance(SettingAssignments)}; see there.
+     * Used as the parameter to {@link #getInstance(SettingAssignments)}; see there.
      */
     static public final class SettingAssignments implements Cloneable {
         private final Version incompatibleImprovements;
-        private final ClassIntrospector.SettingAssignments classIntrospectorSettings;
+        
+        private ClassIntrospector.SettingAssignments classIntrospectorSettings;
         
         // Properties and their *defaults*:
         private boolean simpleMapWrapper = false;
@@ -1722,14 +1782,19 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             return true;
         }
         
-        protected Object clone() {
+        protected Object clone(boolean deepCloneKey) {
             try {
-                return super.clone();
+                SettingAssignments newSA = (SettingAssignments) super.clone();
+                if (deepCloneKey) {
+                    newSA.classIntrospectorSettings
+                            = (ClassIntrospector.SettingAssignments) classIntrospectorSettings.clone();
+                }
+                return newSA;
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e.getMessage());  // Java 5: use cause
             }
         }
-
+        
         public boolean isSimpleMapWrapper() {
             return simpleMapWrapper;
         }
@@ -1795,6 +1860,11 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             return classIntrospectorSettings.getMethodAppearanceFineTuner();
         }
 
+        /**
+         * See {@link BeansWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}; additionally,
+         * note that currently setting this to non-{@code null} will disable instance and introspection cache sharing.
+         * See {@link BeansWrapper#getInstance(Version)} for more about these.
+         */
         public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
             classIntrospectorSettings.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
         }
