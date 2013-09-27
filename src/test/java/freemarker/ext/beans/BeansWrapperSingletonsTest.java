@@ -85,6 +85,11 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertNotEquals(sa1, sa2);
         sa2.setStrict(true);
         assertEquals(sa1, sa2);
+
+        sa1.setUseModelCache(true);
+        assertNotEquals(sa1, sa2);
+        sa2.setUseModelCache(true);
+        assertEquals(sa1, sa2);
         
         AlphabeticalMethodShorter ms = new AlphabeticalMethodShorter(true);
         sa1.setMethodShorter(ms);
@@ -115,6 +120,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
             assertFalse(bw.isStrict());
+            assertFalse(bw.getUseCache());
             assertEquals(TemplateDateModel.UNKNOWN, bw.getDefaultDateType());
             assertSame(bw, bw.getOuterIdentity());
             assertTrue(bw.isClassIntrospectionCacheShared());
@@ -283,6 +289,16 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertNotSame(bw2, bw3);
             assertEquals(1, getBeansWrapperInstanceCacheSize());
             assertEquals(1, getBeansWrapperNonClearedInstanceCacheSize());
+        }
+
+        {
+            SettingAssignments sa = new SettingAssignments(V_2_3_19);
+            sa.setUseModelCache(true);
+            BeansWrapper bw = BeansWrapper.getInstance(sa);
+            assertTrue(bw.getUseCache());
+            assertEquals(2, getBeansWrapperInstanceCacheSize());
+            
+            hardReferences.add(bw);            
         }
         
         assertTrue(hardReferences.size() != 0);  // just to save it from GC until this line        

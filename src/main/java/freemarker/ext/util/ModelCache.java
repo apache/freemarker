@@ -93,6 +93,13 @@ public abstract class ModelCache
             refQueue = null;
         }
     }
+
+    /**
+     * @since 2.3.21
+     */
+    public synchronized boolean getUseCache() {
+        return useCache;
+    }
     
     public TemplateModel getInstance(Object object)
     {

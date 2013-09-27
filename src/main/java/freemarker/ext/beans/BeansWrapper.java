@@ -388,6 +388,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         staticModels = new StaticModels(BeansWrapper.this);
         enumModels = createEnumModels(BeansWrapper.this);
         modelCache = new BeansModelCache(BeansWrapper.this);
+        setUseCache(settings.useModelCache);
 
         if (readOnly) {
             makeReadOnly();
@@ -864,15 +865,24 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     /**
-     * Sets whether this wrapper caches model instances. Default is false.
-     * When set to true, calling {@link #wrap(Object)} multiple times for
+     * Sets whether this wrapper caches the {@link TemplateModel}-s created for the Java objects that has wrapped with
+     * this object wrapper. Default is {@code false}.
+     * When set to {@code true}, calling {@link #wrap(Object)} multiple times for
      * the same object will likely return the same model (although there is
-     * no guarantee as the cache items can be cleared anytime).
+     * no guarantee as the cache items can be cleared any time).
      */
     public void setUseCache(boolean useCache)
     {
         checkModifiable();
         modelCache.setUseCache(useCache);
+    }
+
+    /**
+     * @since 2.3.21
+     */
+    public boolean getUseCache()
+    {
+        return modelCache.getUseCache();
     }
     
     /**
@@ -1738,6 +1748,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         private int defaultDateType = TemplateDateModel.UNKNOWN;
         private ObjectWrapper outerIdentity = null;
         private boolean strict = false;
+        private boolean useModelCache;
         // Attention!
         // - This is also used as a cache key, so non-normalized field values should be avoided.
         // - If some field has a default value, it must be set until the end of the constructor. No field that has a
@@ -1762,6 +1773,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             result = prime * result + defaultDateType;
             result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
             result = prime * result + (strict ? 1231 : 1237);
+            result = prime * result + (useModelCache ? 1231 : 1237);
             result = prime * result + classIntrospectorSettings.hashCode();
             return result;
         }
@@ -1777,6 +1789,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             if (defaultDateType != other.defaultDateType) return false;
             if (outerIdentity != other.outerIdentity) return false;
             if (strict != other.strict) return false;
+            if (useModelCache != other.useModelCache) return false;
             if (!classIntrospectorSettings.equals(other.classIntrospectorSettings)) return false;
             
             return true;
@@ -1832,6 +1845,15 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         /** See {@link BeansWrapper#setStrict(boolean)}. */
         public void setStrict(boolean strict) {
             this.strict = strict;
+        }
+
+        public boolean getUseModelCache() {
+            return useModelCache;
+        }
+
+        /** See {@link BeansWrapper#setUseCache(boolean)} (it means the same). */
+        public void setUseModelCache(boolean useModelCache) {
+            this.useModelCache = useModelCache;
         }
 
         public Version getIncompatibleImprovements() {
