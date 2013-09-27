@@ -53,7 +53,7 @@ class ClassIntrospector {
      * catch suspicious things in development that can otherwise be valid situations.
      */
     static final boolean DEVELOPMENT_MODE
-            = "true".equals(SecurityUtilities.getSystemProperty("freemarker.development"));
+            = "true".equals(SecurityUtilities.getSystemProperty("freemarker.development", "false"));
 
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection info Map keys:
