@@ -13,19 +13,25 @@ import freemarker.template.*;
  * 2nd Web application example.
  */
 public class HelloServlet extends HttpServlet {
-    private Configuration cfg; 
+
+    // Volatile so that it's properly published according to JSR 133 (JMM).
+    // Although, the servlet container most certainly makes this unnecessarry.
+    private volatile Configuration cfg; 
     
     public void init() {
         // Initialize the FreeMarker configuration;
         // - Create a configuration instance with the defaults of FreeMarker 2.3.21
-        cfg = new Configuration(new Version(2, 3, 21));
+        Configuration cfg = new Configuration(new Version(2, 3, 21));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
-                getServletContext(), "WEB-INF/templates");
-        cfg.setTemplateExceptionHandler(
-        TemplateExceptionHandler.RETHROW_HANDLER);
-        // You *really* should set various other settings in a real app.
+            getServletContext(), "WEB-INF/templates");
+        // - Give the standard error page on template errors (HTTP 500, usually):
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        // You should set various other settings in a real app.
         // See the "webapp2" example for them.
+        
+        // Finished modifying cfg, so let's publish it to other threads:
+        this.cfg = cfg;
     }
     
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

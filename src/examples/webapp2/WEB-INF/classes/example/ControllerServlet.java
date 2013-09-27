@@ -15,23 +15,25 @@ import freemarker.ext.beans.BeansWrapper;
  * this class.
  */
 public class ControllerServlet extends HttpServlet {
-    private Configuration cfg; 
+
+    // Volatile so that it's properly published according to JSR 133 (JMM).
+    // Although, the servlet container most certainly makes this unnecessarry.
+    private volatile Configuration cfg; 
     
     public void init() {
         // Initialize the FreeMarker configuration;
         // - Create a configuration instance, with the not-100%-backward-compatible
         //   fixes up until FreeMarker 2.3.21 applied (as far as it starts
         //   with 2.3, these are only minor changes that doesn't affect most apps):
-        cfg = new Configuration(new Version(2, 3, 21));
+        Configuration cfg = new Configuration(new Version(2, 3, 21));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");
-        // - Set update dealy to 0 for now, to ease debugging and testing.
-        //   Higher value should be used in production environment.
-        cfg.setTemplateUpdateDelay(0);
+        // - At most how often should FreeMarker check if a template was updated:
+        cfg.setTemplateUpdateDelay(isInDevelopmentMode() ? 0 : 60);
         // - When developing, set an error handler that prints errors so they are
-        //   readable with a HTML browser, otherwise we just let the HTTP 500
-        //   handler to deal with it.
+        //   readable with a Web browser, otherwise we just let the HTTP 500
+        //   handler deal with it.
         cfg.setTemplateExceptionHandler(
                 isInDevelopmentMode()
                         ? TemplateExceptionHandler.HTML_DEBUG_HANDLER
@@ -39,11 +41,14 @@ public class ControllerServlet extends HttpServlet {
         // - Set the default charset of the template files
         cfg.setDefaultEncoding("ISO-8859-1");
         // - Set the charset of the output. This is actually just a hint, that
-        //   templates may require for URL encoding and for generating META element
-        //   that uses http-equiv="Content-type".
+        //   templates may require for URL encoding and for generating META
+        //   element that uses http-equiv="Content-type".
         cfg.setOutputEncoding("UTF-8");
         // - Set the default locale
         cfg.setLocale(Locale.US);
+        
+        // Finished modifying cfg, so let's publish it to other threads:
+        this.cfg = cfg;
     }
     
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -117,7 +122,7 @@ public class ControllerServlet extends HttpServlet {
     }
     
     private boolean isInDevelopmentMode() {
-        // This should detect this with a system property for example.
+        // FIXME: Should detect this with a system property for example.
         return true;
     }
     
