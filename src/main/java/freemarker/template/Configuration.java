@@ -169,7 +169,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
-    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = new Version(2, 3, 0);
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = _TemplateAPI.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */

@@ -924,9 +924,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         return version.intValue() >= 2003021;
     }
     
-    private final static Version VERSION_2_3_21 = new Version(2, 3, 21);  
-    private final static Version VERSION_2_3_0 = new Version(2, 3, 0);  
-    
     /** 
      * Returns the lowest version number that is equivalent with the parameter version.
      * @since 2.3.21
@@ -935,7 +932,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         NullArgumentException.check("version", incompatibleImprovements);
         // Warning! If you add new results here, you must update getInstance in ObjectWrapper and DefaultObjectWrapper,
         // as they will throw exception on unsupported version!
-        return is2321Bugfixed(incompatibleImprovements) ? VERSION_2_3_21 : VERSION_2_3_0;
+        return is2321Bugfixed(incompatibleImprovements) ? _TemplateAPI.VERSION_2_3_21 : _TemplateAPI.VERSION_2_3_0;
     }
     
     /**

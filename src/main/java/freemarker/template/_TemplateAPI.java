@@ -7,6 +7,9 @@ package freemarker.template;
  */ 
 public class _TemplateAPI {
 
+    public final static Version VERSION_2_3_21 = new Version(2, 3, 21);  
+    public final static Version VERSION_2_3_0 = new Version(2, 3, 0);  
+    
     public static void checkVersionSupported(Version incompatibleImprovements) {
         if (incompatibleImprovements != null) {
             int iciV = incompatibleImprovements.intValue();
