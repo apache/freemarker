@@ -212,7 +212,7 @@ public class _BeansAPI {
     
     public interface BeansWrapperSubclassFactory {
         
-        /** Creates a new read-only wrapper; used for {@link #getInstance} */
+        /** Creates a new read-only wrapper; used for {@link BeansWrapper#getInstance} and in its subclasses. */
         BeansWrapper create(SettingAssignments sa);
     }
     
