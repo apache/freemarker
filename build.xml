@@ -603,15 +603,15 @@
     </sequential>
   </macrodef>
   
-  <target name="example-webapp1" depends="init">
+  <target name="example-webapp1" depends="jar">
     <u:buildExampleWebapp examplename="webapp1" />
   </target>
 
-  <target name="example-webapp2" depends="init">
+  <target name="example-webapp2" depends="jar">
     <u:buildExampleWebapp examplename="webapp2" />
   </target>
 
-  <target name="example-struts-webapp" depends="init">
+  <target name="example-struts-webapp" depends="jar">
     <fail unless="struts.available"><!--
       -->You have to copy the Struts 1.1 jar-s to <!--
       -->lib/struts to build this example!<!--
@@ -622,7 +622,7 @@
     <u:buildExampleWebapp examplename="struts-webapp" />
   </target>
   
-  <target name="example-ant" depends="init">
+  <target name="example-ant" depends="jar">
     <mkdir dir="build/examples/ant" />
     <copy toDir="build/examples/ant">
       <fileset dir="src/examples/ant" />
