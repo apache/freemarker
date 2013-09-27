@@ -830,11 +830,14 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * When set to false, the lookup order is reversed and generic get method
      * is called first, and only if it returns null is method lookup attempted.
      */
-    public synchronized void setMethodsShadowItems(boolean methodsShadowItems)
+    public void setMethodsShadowItems(boolean methodsShadowItems)
     {
-        checkModifiable();
-        
-        this.methodsShadowItems = methodsShadowItems;
+        // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
+        // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
+        synchronized (this) {
+            checkModifiable();
+            this.methodsShadowItems = methodsShadowItems;
+        }
     }
     
     boolean isMethodsShadowItems()
@@ -849,10 +852,14 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * {@link TemplateDateModel#UNKNOWN}.
      * @param defaultDateType the new default date type.
      */
-    public synchronized void setDefaultDateType(int defaultDateType) {
-        checkModifiable();
-        
-        this.defaultDateType = defaultDateType;
+    public void setDefaultDateType(int defaultDateType) {
+        // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
+        // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
+        synchronized (this) {
+            checkModifiable();
+            
+            this.defaultDateType = defaultDateType;
+        }
     }
 
     /**
