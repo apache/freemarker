@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.python.modules.synchronize;
-
 import freemarker.core.BugException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
@@ -97,6 +95,9 @@ class ClassIntrospector {
     final private MethodShorter methodShorter;
     final private boolean bugfixed;
     
+    /** See {@link #getHasSharedInstanceRestrictons()} */
+    final private boolean hasSharedInstanceRestrictons;
+    
     /** See {@link #isShared()} */
     final private boolean shared;
     
@@ -124,14 +125,16 @@ class ClassIntrospector {
      * @param sa the settings of the new instance
      */
     ClassIntrospector(SettingAssignments sa, Object sharedLock) {
-        this(sa, sharedLock, false);
+        this(sa, sharedLock, false, false);
     }
 
     /**
-     * @param shared {@code true} exactly if we are creating a new instance with
-     *     {@link #getInstance(SettingAssignments)}.
+     * @param hasSharedInstanceRestrictons {@code true} exactly if we are creating a new instance with
+     *     {@link #getInstance(SettingAssignments)}. Then it's {@code true} even if
+     *     {@link #getInstance(SettingAssignments)} won't put the instance into the cache. 
      */
-    private ClassIntrospector(SettingAssignments sa, Object sharedLock, boolean shared) {
+    private ClassIntrospector(SettingAssignments sa, Object sharedLock,
+            boolean hasSharedInstanceRestrictons, boolean shared) {
         NullArgumentException.check("sharedLock", sharedLock);
         
         this.exposureLevel = sa.exposureLevel;
@@ -142,6 +145,7 @@ class ClassIntrospector {
         
         this.sharedLock = sharedLock;
         
+        this.hasSharedInstanceRestrictons = hasSharedInstanceRestrictons;
         this.shared = shared;
         
         if (javaRebelAvailable) {
@@ -174,7 +178,7 @@ class ClassIntrospector {
                 instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
                 if (instance == null) {
                     sa = (SettingAssignments) sa.clone();  // prevent any aliasing issues
-                    instance = new ClassIntrospector(sa, new Object(), true);
+                    instance = new ClassIntrospector(sa, new Object(), true, true);
                     instanceCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
                 }
             }
@@ -186,7 +190,7 @@ class ClassIntrospector {
             // If methodAppearanceFineTuner or methodShorter is specified and isn't marked as a singleton, the
             // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
             // BeansWrapper.
-            return new ClassIntrospector(sa, new Object(), true);
+            return new ClassIntrospector(sa, new Object(), true, false);
         }
     }
 
@@ -688,7 +692,7 @@ class ClassIntrospector {
      * @since 2.3.20
      */
     void clearCache() {
-        if (isShared()) {
+        if (getHasSharedInstanceRestrictons()) {
             throw new IllegalStateException(
                     "It's not allowed to clear the whole cache in a read-only " + this.getClass().getName() +
                     "instance. Use removeFromClassIntrospectionCache(String prefix) instead.");
@@ -891,6 +895,14 @@ class ClassIntrospector {
     /**
      * Returns {@code true} if this instance was created for {@link #getInstance(SettingAssignments)}, even
      * if it wasn't actually put into the cache (as we reserve the right to do so in later versions). 
+     */
+    boolean getHasSharedInstanceRestrictons() {
+        return hasSharedInstanceRestrictons;
+    }
+
+    /**
+     * Tells if this instance is (potentially) shared among {@link BeansWrapper} instances.
+     * @see #getHasSharedInstanceRestrictons()
      */
     boolean isShared() {
         return shared;

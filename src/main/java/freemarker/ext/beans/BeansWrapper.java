@@ -750,15 +750,17 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * Tells if this instance uses a class introspection cache that is potentially shared with other
-     * {@link BeansWrapper}-s, or it uses its own private class introspection cache. This depends on how the instance
+     * Tells if this instance acts like if its class introspection cache is sharable with other {@link BeansWrapper}-s.
+     * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospecitonCache()}.
+     * The value depends on how the instance
      * was created; with a public constructor (then this is {@code false}), or with {@link #getInstance(Version)} or
-     * its overloads (then it's {@code true}).
+     * its overloads (then it's {@code true}). Note that in the last case it's possible that the introspection cache
+     * will not be actually shared, but this will {@code true} even then. 
      * 
      * @since 2.3.21
      */
-    public boolean isClassIntrospectionCacheShared() {
-        return classIntrospector.isShared();
+    public boolean isClassIntrospectionCacheRestricted() {
+        return classIntrospector.getHasSharedInstanceRestrictons();
     }
     
     /** 
@@ -1533,7 +1535,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * the cache entries for the classes that will be used later in templates. If you only need to purge certain
      * classes/packages, then use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
      * 
-     * @throws IllegalStateException if {@link #isClassIntrospectionCacheShared()} is {@code true}; for
+     * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}; for
      *     such singletons, you must use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
      * 
      * @since 2.3.20

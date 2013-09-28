@@ -123,7 +123,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertFalse(bw.getUseCache());
             assertEquals(TemplateDateModel.UNKNOWN, bw.getDefaultDateType());
             assertSame(bw, bw.getOuterIdentity());
-            assertTrue(bw.isClassIntrospectionCacheShared());
+            assertTrue(bw.isClassIntrospectionCacheRestricted());
             assertNull(bw.getMethodAppearanceFineTuner());
             assertNull(bw.getMethodShorter());
             
@@ -154,7 +154,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
-            assertTrue(bw.isClassIntrospectionCacheShared());
+            assertTrue(bw.isClassIntrospectionCacheRestricted());
             assertNull(bw.getMethodAppearanceFineTuner());
             assertNull(bw.getMethodShorter());
             
@@ -365,7 +365,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            assertTrue(bw.isClassIntrospectionCacheShared());
+            assertTrue(bw.isClassIntrospectionCacheRestricted());
         }
         
         {
@@ -402,7 +402,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            assertTrue(bw.isClassIntrospectionCacheShared());
+            assertTrue(bw.isClassIntrospectionCacheRestricted());
             
             assertSame(bw, DefaultObjectWrapper.getInstance(new SettingAssignments(new Version(2, 3, 21))));
         }
@@ -457,9 +457,9 @@ public class BeansWrapperSingletonsTest extends TestCase {
     }
     
     public void testClassInrospectorCache() throws TemplateModelException {
-        assertFalse(new BeansWrapper().isClassIntrospectionCacheShared());
-        assertFalse(new BeansWrapper(new Version(2, 3, 21)).isClassIntrospectionCacheShared());
-        assertTrue(BeansWrapper.getInstance(new Version(2, 3, 20)).isClassIntrospectionCacheShared());
+        assertFalse(new BeansWrapper().isClassIntrospectionCacheRestricted());
+        assertFalse(new BeansWrapper(new Version(2, 3, 21)).isClassIntrospectionCacheRestricted());
+        assertTrue(BeansWrapper.getInstance(new Version(2, 3, 20)).isClassIntrospectionCacheRestricted());
         
         ClassIntrospector.clearInstanceCache();
         BeansWrapper.clearInstanceCache();
@@ -488,7 +488,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(exposesMethods(bw1));
             assertFalse(exposesUnsafe(bw1));
             assertFalse(isSimpleMapWrapper(bw1));
-            assertTrue(bw1.isClassIntrospectionCacheShared());
+            assertTrue(bw1.isClassIntrospectionCacheRestricted());
             // Prevent introspection cache GC:
             hardReferences.add(bw1);
             hardReferences.add(bw2);
@@ -689,8 +689,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
             checkClassIntrospectorCacheSize(1);
             assertNotSame(bw1, bw2);
             assertNotSame(bw1.getClassIntrospector(), bw2.getClassIntrospector());
-            assertTrue(bw1.isClassIntrospectionCacheShared());
-            assertTrue(bw2.isClassIntrospectionCacheShared());
+            assertTrue(bw1.isClassIntrospectionCacheRestricted());
+            assertTrue(bw2.isClassIntrospectionCacheRestricted());
             
             // Wrapping tests:
             assertFalse(exposesFields(bw1));
@@ -719,8 +719,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
             
             assertNotSame(bw1, bw2);
             assertSame(bw1.getClassIntrospector(), bw2.getClassIntrospector());  // !
-            assertTrue(bw1.isClassIntrospectionCacheShared());
-            assertTrue(bw2.isClassIntrospectionCacheShared());
+            assertTrue(bw1.isClassIntrospectionCacheRestricted());
+            assertTrue(bw2.isClassIntrospectionCacheRestricted());
             
             // Wrapping tests:
             assertFalse(exposesFields(bw1));
