@@ -683,15 +683,7 @@ class ClassIntrospector {
     // Cache management:
 
     /**
-     * Removes all class introspection data from the cache;
-     * consider using {@link #removeFromClassIntrospectionCache(String prefix)} instead.
-     * 
-     * <p>Use this if you want to free up memory on the expense of recreating
-     * the cache entries for the classes that will be used later in templates. If you only need to purge certain
-     * classes/packages, then use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
-     * 
-     * @throws IllegalStateException if {@link #isShared()} is true; for
-     *     such singletons, you must use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * Corresponds to {@link BeansWrapper#clearClassIntrospecitonCache()}.
      * 
      * @since 2.3.20
      */
@@ -728,10 +720,7 @@ class ClassIntrospector {
     }
 
     /**
-     * Removes the introspection data for a class from the cache.
-     * Use this if you know that a class is not used anymore in templates.
-     * If the class will be still used, the cache entry will be silently
-     * re-created, so this isn't a dangerous operation.
+     * Corresponds to {@link BeansWrapper#removeFromClassIntrospectionCache(Class)}.
      * 
      * @since 2.3.20
      */
@@ -759,12 +748,7 @@ class ClassIntrospector {
     }
 
     /**
-     * Removes all classes from the introspection cache whose fully qualified name starts with the given prefix
-     * followed by {@code '.'} or {@code '$'} or the end of the string. For example, {@code "com.example.action"}
-     * will remove {@code com.example.action.Foo}, {@code com.example.action.shop.Foo}, but not
-     * {@code com.example.actions.Foo} (note the "s" as the end of "actions"). {@code "com.example.action.Foo"} will
-     * remove  {@code "com.example.action.Foo"} itself, and also nested classes like
-     * {@code "com.example.action.Foo$Bar"}.
+     * Corresponds to {@link BeansWrapper#removeFromClassIntrospectionCache(String)}.
      * 
      * @since 2.3.21
      */
