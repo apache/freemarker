@@ -58,13 +58,13 @@ package freemarker.template.utility;
  * 
  * @since 2.3.21
  */
-public interface Lockable {
+public interface WriteProtectable {
 
     /**
      * Makes this object permanently read-only.
      */
-    void makeReadOnly();
+    void writeProtect();
     
-    boolean isReadOnly();
+    boolean isWriteProtected();
     
 }

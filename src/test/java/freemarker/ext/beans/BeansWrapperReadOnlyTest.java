@@ -10,11 +10,11 @@ import junit.framework.TestCase;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Lockable;
+import freemarker.template.utility.WriteProtectable;
 
 /**
  * Tests if all JavaBean properties of the standard {@link ObjectWrapper} classes are locked by
- * {@link Lockable#makeReadOnly()}. 
+ * {@link WriteProtectable#writeProtect()}. 
  */
 public class BeansWrapperReadOnlyTest extends TestCase {
 
@@ -26,13 +26,13 @@ public class BeansWrapperReadOnlyTest extends TestCase {
     
     public void testBeansWrapper() throws Exception {
         BeansWrapper bw = new BeansWrapper();
-        bw.makeReadOnly();
+        bw.writeProtect();
         checkAllPropertiesReadOnly(bw);
     }
 
     public void testDefaultObjectWrapper() throws Exception {
         BeansWrapper bw = new DefaultObjectWrapper();
-        bw.makeReadOnly();
+        bw.writeProtect();
         checkAllPropertiesReadOnly(bw);        
     }
     

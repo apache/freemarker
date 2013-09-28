@@ -20514,12 +20514,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>BeansWrapper</literal>,
                   <literal>DefaultObjectWrapper</literal> and
                   <literal>SimpleObjectWrapper</literal> now implements the
-                  <literal>freemarker.template.utility.Lockable</literal>
+                  <literal>freemarker.template.utility.WriteProtectable</literal>
                   interface with which the configuration properties of the
                   object wrapper can be set permanently to read-only by
-                  calling <literal>makeReadOnly()</literal>. An attempt to
-                  call a setter on a read-only
-                  <literal>ObjectWrapper</literal> will immediately cause
+                  calling <literal>writeProtect()</literal>. An attempt to
+                  call a setter on a such <literal>ObjectWrapper</literal>
+                  will immediately cause
                   <literal>IllegalStateException</literal>. This is what's
                   used for the singletons returned by the
                   <literal>getInstance</literal> method too (see

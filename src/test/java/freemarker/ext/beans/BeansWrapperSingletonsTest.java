@@ -116,7 +116,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertEquals(1, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
             assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
             assertFalse(bw.isStrict());
@@ -151,7 +151,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertEquals(2, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
             assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
             assertTrue(bw.isClassIntrospectionCacheShared());
@@ -178,7 +178,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertEquals(3, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
             assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             
@@ -195,7 +195,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertEquals(4, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
             assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             
@@ -223,7 +223,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             
             assertSame(bw.getClass(), BeansWrapper.class);
             assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             assertEquals(BeansWrapper.EXPOSE_PROPERTIES_ONLY, bw.getExposureLevel());
@@ -244,7 +244,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             
             assertSame(bw.getClass(), BeansWrapper.class);
             assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             assertTrue(bw.isExposeFields());
@@ -362,7 +362,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertSame(bw, DefaultObjectWrapper.getInstance(sa));
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
             assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertTrue(bw.isClassIntrospectionCacheShared());
@@ -377,7 +377,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertEquals(
                     BeansWrapper.normalizeIncompatibleImprovementsVersion(Configuration.getVersion()),
                     bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
         }
@@ -386,7 +386,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             BeansWrapper bw = DefaultObjectWrapper.getInstance(new SettingAssignments(V_2_3_19));
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
             assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             
@@ -399,7 +399,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             BeansWrapper bw = DefaultObjectWrapper.getInstance(new SettingAssignments(V_2_3_21));
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
             assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertTrue(bw.isClassIntrospectionCacheShared());
@@ -421,7 +421,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
             assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertEquals(BeansWrapper.EXPOSE_PROPERTIES_ONLY, bw.getExposureLevel());
@@ -436,7 +436,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
             assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isReadOnly());
+            assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertEquals(true, bw.isExposeFields());

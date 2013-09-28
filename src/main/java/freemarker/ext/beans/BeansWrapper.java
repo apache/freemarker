@@ -93,7 +93,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Lockable;
+import freemarker.template.utility.WriteProtectable;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -106,7 +106,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
  * was safely published and then left unmodified. 
  */
-public class BeansWrapper implements ObjectWrapper, Lockable
+public class BeansWrapper implements ObjectWrapper, WriteProtectable
 {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 
@@ -305,7 +305,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     private static volatile boolean ftmaDeprecationWarnLogged;
     
     /**
-     * @param readOnly makes the instance read-only via {@link Lockable#makeReadOnly()}; this way it can use the shared
+     * @param readOnly makes the instance read-only via {@link WriteProtectable#writeProtect()}; this way it can use the shared
      *     introspection cache.
      * 
      * @since 2.3.21
@@ -384,7 +384,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         setUseCache(settings.useModelCache);
 
         if (readOnly) {
-            makeReadOnly();
+            writeProtect();
         }
         
         // Attention! At this point, the BeansWrapper must be fully initialized, as when the model factories are
@@ -514,14 +514,14 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * 
      * @since 2.3.21
      */
-    public void makeReadOnly() {
+    public void writeProtect() {
         readOnly = true;
     }
 
     /**
      * @since 2.3.21
      */
-    public boolean isReadOnly() {
+    public boolean isWriteProtected() {
         return readOnly;
     }
     
@@ -530,7 +530,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
     }
     
     /**
-     * If this object is already read-only according to {@link Lockable}, throws {@link IllegalStateException},
+     * If this object is already read-only according to {@link WriteProtectable}, throws {@link IllegalStateException},
      * otherwise does nothing.
      * 
      * @since 2.3.21
