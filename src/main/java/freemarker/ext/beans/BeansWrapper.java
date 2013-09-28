@@ -1514,7 +1514,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * @since 2.3.20
      */
     public void removeFromClassIntrospectionCache(Class clazz) {
-        classIntrospector.removeFromClassIntrospectionCache(clazz);
+        classIntrospector.remove(clazz);
     }
     
     /**
@@ -1545,7 +1545,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * @since 2.3.20
      */
     public void clearClassIntrospecitonCache() {
-        classIntrospector.clearClassIntrospecitonCache();
+        classIntrospector.clearCache();
     }
     
     /** For unit tests only */

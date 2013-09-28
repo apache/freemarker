@@ -675,16 +675,16 @@ class ClassIntrospector {
      * 
      * @since 2.3.20
      */
-    void clearClassIntrospecitonCache() {
+    void clearCache() {
         if (isShared()) {
             throw new IllegalStateException(
                     "It's not allowed to clear the whole cache in a read-only " + this.getClass().getName() +
                     "instance. Use removeFromClassIntrospectionCache(String prefix) instead.");
         }
-        forcedClearClassIntrospecitonCache();
+        forcedClearCache();
     }
 
-    private void forcedClearClassIntrospecitonCache() {
+    private void forcedClearCache() {
         synchronized (sharedLock) {
             cache.clear();
             cacheClassNames.clear();
@@ -714,7 +714,7 @@ class ClassIntrospector {
      * 
      * @since 2.3.20
      */
-    void removeFromClassIntrospectionCache(Class clazz) {
+    void remove(Class clazz) {
         synchronized (sharedLock) {
             cache.remove(clazz);
             cacheClassNames.remove(clazz.getName());
@@ -761,7 +761,7 @@ class ClassIntrospector {
                     "\". Assuming it was a class-reloading. Clearing class introspection " +
                     "caches to release old data.");
         }
-        forcedClearClassIntrospecitonCache();
+        forcedClearCache();
     }
     
     // -----------------------------------------------------------------------------------------------------------------
