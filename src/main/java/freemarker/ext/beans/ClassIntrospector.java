@@ -79,13 +79,13 @@ class ClassIntrospector {
     
     /**
      * Caches {@link ClassIntrospector}-s so that {@link BeansWrapper} instances can share them.
-     * Used by {@link #getInstance(SettingAssignments)}.
+     * Used by {@link #getInstance(PropertyAssignments)}.
      */
-    private static final Map/*<SettingAssignments, Reference<ClassIntrospector>>*/ instanceCache = new HashMap();
+    private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ instanceCache = new HashMap();
     private static final ReferenceQueue instanceCacheRefQue = new ReferenceQueue(); 
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Introspection setting fields:
+    // Introspection configuration properties:
     
     // Note: These all must be *declared* final (or else synchronization is needed everywhere where they are accessed). 
     
@@ -122,26 +122,26 @@ class ClassIntrospector {
     /**
      * Creates a new instance, that is hence surely not shared (singleton) instance.
      * 
-     * @param sa the settings of the new instance
+     * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
      */
-    ClassIntrospector(SettingAssignments sa, Object sharedLock) {
-        this(sa, sharedLock, false, false);
+    ClassIntrospector(PropertyAssignments pa, Object sharedLock) {
+        this(pa, sharedLock, false, false);
     }
 
     /**
      * @param hasSharedInstanceRestrictons {@code true} exactly if we are creating a new instance with
-     *     {@link #getInstance(SettingAssignments)}. Then it's {@code true} even if
-     *     {@link #getInstance(SettingAssignments)} won't put the instance into the cache. 
+     *     {@link #getInstance(PropertyAssignments)}. Then it's {@code true} even if
+     *     {@link #getInstance(PropertyAssignments)} won't put the instance into the cache. 
      */
-    private ClassIntrospector(SettingAssignments sa, Object sharedLock,
+    private ClassIntrospector(PropertyAssignments pa, Object sharedLock,
             boolean hasSharedInstanceRestrictons, boolean shared) {
         NullArgumentException.check("sharedLock", sharedLock);
         
-        this.exposureLevel = sa.exposureLevel;
-        this.exposeFields = sa.exposeFields;
-        this.methodAppearanceFineTuner = sa.methodAppearanceFineTuner;
-        this.methodShorter = sa.methodShorter; 
-        this.bugfixed = sa.bugfixed;
+        this.exposureLevel = pa.exposureLevel;
+        this.exposeFields = pa.exposeFields;
+        this.methodAppearanceFineTuner = pa.methodAppearanceFineTuner;
+        this.methodShorter = pa.methodShorter; 
+        this.bugfixed = pa.bugfixed;
         
         this.sharedLock = sharedLock;
         
@@ -154,11 +154,11 @@ class ClassIntrospector {
     }
     
     /**
-     * Returns a {@link SettingAssignments}-s that could be used to create an identical {@link #ClassIntrospector}.
-     * The returned {@link SettingAssignments} can be modified without interfering with anything.
+     * Returns a {@link PropertyAssignments}-s that could be used to create an identical {@link #ClassIntrospector}.
+     * The returned {@link PropertyAssignments} can be modified without interfering with anything.
      */
-    SettingAssignments getSettingAssignments() {
-        return new SettingAssignments(this);
+    PropertyAssignments getPropertyAssignments() {
+        return new PropertyAssignments(this);
     }
     
     /**
@@ -168,18 +168,18 @@ class ClassIntrospector {
      * <p>We don't use a plain {@code getInstance} to prevent the handy but dangerous idea where {@link BeansWrapper}
      * gets the shared lock from the {@link ClassIntrospector} instance. It can't be get from it, so it's prevented...
      */
-    static ClassIntrospector getInstance(SettingAssignments sa) {
-        if ((sa.methodAppearanceFineTuner == null || sa.methodAppearanceFineTuner instanceof SingletonCustomizer)
-                && (sa.methodShorter == null || sa.methodShorter instanceof SingletonCustomizer)) {
+    static ClassIntrospector getInstance(PropertyAssignments pa) {
+        if ((pa.methodAppearanceFineTuner == null || pa.methodAppearanceFineTuner instanceof SingletonCustomizer)
+                && (pa.methodShorter == null || pa.methodShorter instanceof SingletonCustomizer)) {
             // Instance can be cached.
             ClassIntrospector instance;
             synchronized (instanceCache) {
-                Reference instanceRef = (Reference) instanceCache.get(sa);
+                Reference instanceRef = (Reference) instanceCache.get(pa);
                 instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
                 if (instance == null) {
-                    sa = (SettingAssignments) sa.clone();  // prevent any aliasing issues
-                    instance = new ClassIntrospector(sa, new Object(), true, true);
-                    instanceCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
+                    pa = (PropertyAssignments) pa.clone();  // prevent any aliasing issues
+                    instance = new ClassIntrospector(pa, new Object(), true, true);
+                    instanceCache.put(pa, new WeakReference(instance, instanceCacheRefQue));
                 }
             }
             
@@ -190,7 +190,7 @@ class ClassIntrospector {
             // If methodAppearanceFineTuner or methodShorter is specified and isn't marked as a singleton, the
             // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
             // BeansWrapper.
-            return new ClassIntrospector(sa, new Object(), true, false);
+            return new ClassIntrospector(pa, new Object(), true, false);
         }
     }
 
@@ -208,7 +208,7 @@ class ClassIntrospector {
         }
     }
     
-    final static class SettingAssignments implements Cloneable {
+    final static class PropertyAssignments implements freemarker.template.utility.PropertyAssignments, Cloneable {
         private final boolean bugfixed;
         
         // Properties and their *defaults*:
@@ -222,7 +222,7 @@ class ClassIntrospector {
         //   default can be left unset (like null).
         // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
         
-        private SettingAssignments(ClassIntrospector ci) {
+        private PropertyAssignments(ClassIntrospector ci) {
             bugfixed = ci.bugfixed;
             exposureLevel = ci.exposureLevel;
             exposeFields = ci.exposeFields;
@@ -230,7 +230,7 @@ class ClassIntrospector {
             methodShorter = ci.methodShorter; 
         }
         
-        SettingAssignments(Version incompatibleImprovements) {
+        PropertyAssignments(Version incompatibleImprovements) {
             // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
             // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
             // to some version changes that affects BeansWrapper, but not the other way around. 
@@ -260,7 +260,7 @@ class ClassIntrospector {
             if (this == obj) return true;
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
-            SettingAssignments other = (SettingAssignments) obj;
+            PropertyAssignments other = (PropertyAssignments) obj;
             
             if (bugfixed != other.bugfixed) return false;
             if (exposeFields != other.exposeFields) return false;
@@ -874,7 +874,7 @@ class ClassIntrospector {
     
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Setting values and other properties
+    // Properties
     
     int getExposureLevel() {
         return exposureLevel;
@@ -893,7 +893,7 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns {@code true} if this instance was created for {@link #getInstance(SettingAssignments)}, even
+     * Returns {@code true} if this instance was created for {@link #getInstance(PropertyAssignments)}, even
      * if it wasn't actually put into the cache (as we reserve the right to do so in later versions). 
      */
     boolean getHasSharedInstanceRestrictons() {

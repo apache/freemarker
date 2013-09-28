@@ -4,7 +4,7 @@ import java.beans.MethodDescriptor;
 
 /**
  * Used for JUnit testing method-order dependence bugs via
- * {@link BeansWrapper.SettingAssignments#setMethodShorter(MethodShorter)}.
+ * {@link BeansWrapper.PropertyAssignments#setMethodShorter(MethodShorter)}.
  */
 interface MethodShorter {
 

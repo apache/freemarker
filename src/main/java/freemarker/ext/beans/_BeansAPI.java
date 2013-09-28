@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import freemarker.ext.beans.BeansWrapper.SettingAssignments;
+import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility._MethodUtil;
@@ -136,7 +136,7 @@ public class _BeansAPI {
      *     {@link BeansWrapper} subclass. 
      */
     public static BeansWrapper getBeansWrapperSubclassInstance(
-            SettingAssignments sa,
+            PropertyAssignments pa,
             Map instanceCache,
             ReferenceQueue instanceCacheRefQue,
             BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
@@ -147,7 +147,7 @@ public class _BeansAPI {
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         
         Reference instanceRef;
-        Map/*<SettingAssignments, WeakReference<BeansWrapper>>*/ tcclScopedCache;
+        Map/*<PropertyAssignments, WeakReference<BeansWrapper>>*/ tcclScopedCache;
         synchronized (instanceCache) {
             tcclScopedCache = (Map) instanceCache.get(tccl);
             if (tcclScopedCache == null) {
@@ -155,7 +155,7 @@ public class _BeansAPI {
                 instanceCache.put(tccl, tcclScopedCache);
                 instanceRef = null;
             } else {
-                instanceRef = (Reference) tcclScopedCache.get(sa);
+                instanceRef = (Reference) tcclScopedCache.get(pa);
             }
         }
 
@@ -165,14 +165,14 @@ public class _BeansAPI {
         }
         // cache miss
         
-        sa = (SettingAssignments) sa.clone(true);  // prevent any aliasing issues 
-        instance = beansWrapperSubclassFactory.create(sa);
+        pa = (PropertyAssignments) pa.clone(true);  // prevent any aliasing issues 
+        instance = beansWrapperSubclassFactory.create(pa);
         
         synchronized (instanceCache) {
-            instanceRef = (Reference) tcclScopedCache.get(sa);
+            instanceRef = (Reference) tcclScopedCache.get(pa);
             BeansWrapper concurrentInstance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
             if (concurrentInstance == null) {
-                tcclScopedCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
+                tcclScopedCache.put(pa, new WeakReference(instance, instanceCacheRefQue));
             } else {
                 instance = concurrentInstance;
             }
@@ -203,7 +203,7 @@ public class _BeansAPI {
     public interface BeansWrapperSubclassFactory {
         
         /** Creates a new read-only wrapper; used for {@link BeansWrapper#getInstance} and in its subclasses. */
-        BeansWrapper create(SettingAssignments sa);
+        BeansWrapper create(PropertyAssignments sa);
     }
     
 }

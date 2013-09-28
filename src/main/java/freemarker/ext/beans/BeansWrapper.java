@@ -183,7 +183,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     protected final Object _preJava5Sync = _BeansAPI.JVM_USES_JSR133 ? null : new Object(); 
     
-    private final static WeakHashMap/*<ClassLoader, Map<SettingAssignments, WeakReference<BeansWrapper>>*/ instanceCache
+    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<BeansWrapper>>*/ instanceCache
             = new WeakHashMap();
     private final static ReferenceQueue instanceCacheRefQue = new ReferenceQueue();
     
@@ -196,7 +196,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * {@link Class} to class info cache.
      * This object is possibly shared with other {@link BeansWrapper}-s!
      * 
-     * <p>To write this, always use {@link #setClassIntrospector(ClassIntrospector.SettingAssignments)}.
+     * <p>To write this, always use {@link #setClassIntrospector(ClassIntrospector.PropertyAssignments)}.
      * 
      * <p>When reading this, it's good idea to synchronize on sharedInrospectionLock when it doesn't hurt overall
      * performance. In theory that's not needed, but apps might fail to keep the rules.
@@ -236,11 +236,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     private volatile boolean readOnly;
     
     private TemplateModel nullModel = null;
-    private int defaultDateType; // initialized by SettingAssignments.apply
+    private int defaultDateType; // initialized by PropertyAssignments.apply
     private ObjectWrapper outerIdentity = this;
     private boolean methodsShadowItems = true;
-    private boolean simpleMapWrapper;  // initialized by SettingAssignments.apply
-    private boolean strict;  // initialized by SettingAssignments.apply
+    private boolean simpleMapWrapper;  // initialized by PropertyAssignments.apply
+    private boolean strict;  // initialized by PropertyAssignments.apply
     
     private final Version incompatibleImprovements;
     
@@ -249,7 +249,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
      * 
      * @deprecated Use {@link #getInstance(Version)}, {@link #getInstance(Version, boolean)} or
-     *     {@link #getInstance(SettingAssignments)}, or in rare cases {@link #BeansWrapper(Version)} instead.
+     *     {@link #getInstance(PropertyAssignments)}, or in rare cases {@link #BeansWrapper(Version)} instead.
      */
     public BeansWrapper() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
@@ -258,7 +258,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     
     /**
      * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} or
-     * {@link #getInstance(SettingAssignments)} instead if possible.
+     * {@link #getInstance(PropertyAssignments)} instead if possible.
      * Instances created with this constructor won't share the class introspection caches with other instances. That's
      * also why you may want to use it instead of {@code getInstance} (you don't want to use common caches).
      * 
@@ -298,7 +298,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     public BeansWrapper(Version incompatibleImprovements) {
-        this(new SettingAssignments(incompatibleImprovements), false);
+        this(new PropertyAssignments(incompatibleImprovements), false);
         // Attention! Don't don anything here, as the instance is possibly already visible to other threads.  
     }
     
@@ -310,9 +310,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * 
      * @since 2.3.21
      */
-    protected BeansWrapper(SettingAssignments settings, boolean readOnly) {
+    protected BeansWrapper(PropertyAssignments pa, boolean readOnly) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
-        if (settings.getMethodAppearanceFineTuner() == null) {
+        if (pa.getMethodAppearanceFineTuner() == null) {
             Class thisClass = this.getClass();
             boolean overridden = false;
             boolean testFailed = false;
@@ -344,8 +344,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                             + "future. Use BeansWrapper.setMethodAppearanceFineTuner instead.");
                     ftmaDeprecationWarnLogged = true;
                 }
-                settings = (SettingAssignments) settings.clone(false);
-                settings.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
+                pa = (PropertyAssignments) pa.clone(false);
+                pa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
                     public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
                         BeansWrapper.this.finetuneMethodAppearance(clazz, m, decision);
@@ -355,23 +355,23 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
         }
         
-        this.incompatibleImprovements = settings.getIncompatibleImprovements();  // normalized
+        this.incompatibleImprovements = pa.getIncompatibleImprovements();  // normalized
         
-        simpleMapWrapper = settings.isSimpleMapWrapper();
-        defaultDateType = settings.getDefaultDateType();
-        outerIdentity = settings.getOuterIdentity() != null ? settings.getOuterIdentity() : this;
-        strict = settings.isStrict();
+        simpleMapWrapper = pa.isSimpleMapWrapper();
+        defaultDateType = pa.getDefaultDateType();
+        outerIdentity = pa.getOuterIdentity() != null ? pa.getOuterIdentity() : this;
+        strict = pa.isStrict();
         
         if (!readOnly) {
             // As this is not a read-only BeansWrapper, the classIntrospector will be possibly replaced for a few times,
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
             sharedInrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(settings.classIntrospectorSettings, sharedInrospectionLock);
+            classIntrospector = new ClassIntrospector(pa.classIntrospectorPropertyAssignments, sharedInrospectionLock);
         } else {
             // As in this read-only BeansWrapper the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = ClassIntrospector.getInstance(settings.classIntrospectorSettings);
+            classIntrospector = ClassIntrospector.getInstance(pa.classIntrospectorPropertyAssignments);
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
         }
         
@@ -381,7 +381,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         staticModels = new StaticModels(BeansWrapper.this);
         enumModels = createEnumModels(BeansWrapper.this);
         modelCache = new BeansModelCache(BeansWrapper.this);
-        setUseCache(settings.useModelCache);
+        setUseCache(pa.useModelCache);
 
         if (readOnly) {
             writeProtect();
@@ -399,7 +399,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * Returns an unconfigurable (read-only) {@link BeansWrapper} instance that's already configured as specified in the
      * argument; this is preferred over using the constructors. The returned instance is often, but not always a
      * VM-wide (or rather, Web-Application-wide) singleton. Note that other overloads of this method allows you to
-     * specify more configuration settings.
+     * configure more properties.
      * 
      * <p>Note that what this method documentation says about {@link BeansWrapper} also applies to
      * {@link DefaultObjectWrapper}.
@@ -416,13 +416,13 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *     instances, they might share the same class introspection cache. But if you have two
      *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
      *     share their caches (as they don't share the same FreeMarker classes).
-     *     Also, currently there's a separate cache for each permutation of the setting values that influence class
-     *     introspection: {@link SettingAssignments#setExposeFields(boolean) expose_fields} and
-     *     {@link SettingAssignments#setExposureLevel(int) exposure_level}. So only {@link BeansWrapper} where those
-     *     settings are the same may share class introspection caches among each other.
+     *     Also, currently there's a separate cache for each permutation of the property values that influence class
+     *     introspection: {@link PropertyAssignments#setExposeFields(boolean) expose_fields} and
+     *     {@link PropertyAssignments#setExposureLevel(int) exposure_level}. So only {@link BeansWrapper} where those
+     *     properties are the same may share class introspection caches among each other.
      *   </li>
      *   <li><p>Model caches: These are local to a {@link BeansWrapper}. {@code getInstance} returns the same
-     *     {@link BeansWrapper} instance for the equivalent settings (unless the existing instance was garbage collected
+     *     {@link BeansWrapper} instance for equivalent properties (unless the existing instance was garbage collected
      *     and thus a new one had to be created), hence these caches will be re-used too. {@link BeansWrapper} instances
      *     are cached in the static fields of FreeMarker here too, but there's a separate cache for each
      *     Thread Context Class Loader, which in a servlet container practically means a separate cache for each Web
@@ -446,7 +446,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *   </li>
      * </ul>
      * 
-     * <p>Note that if you set {@link SettingAssignments#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)} to
+     * <p>Note that if you set {@link PropertyAssignments#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)} to
      * non-{@code null}, you will always get a new instance, and the class introspection cache won't be shared.
      * 
      * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
@@ -458,11 +458,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        return getInstance(new SettingAssignments(incompatibleImprovements));
+        return getInstance(new PropertyAssignments(incompatibleImprovements));
     }
     
     /**
-     * Same as {@link #getInstance(Version)}, but also specifies the simple-map-wrapper setting of the desired
+     * Same as {@link #getInstance(Version)}, but also specifies the {@code simpleMapWrapper} property of the desired
      * instance. Without this, that will be set to its default.
      *     
      * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
@@ -470,29 +470,29 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapsWrapper) {
-        SettingAssignments sa = new SettingAssignments(incompatibleImprovements);
-        sa.setSimpleMapWrapper(simpleMapsWrapper);
-        return getInstance(sa);
+        PropertyAssignments pa = new PropertyAssignments(incompatibleImprovements);
+        pa.setSimpleMapWrapper(simpleMapsWrapper);
+        return getInstance(pa);
     }
     
     /**
-     * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
+     * Same as {@link #getInstance(Version)}, but you can specify more properties of the desired instance.
      *     
-     * @param sa The settings that you want to be set in the returned instance. Not {@code null}.
+     * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
      * 
      * @since 2.3.21
      */
-    public static BeansWrapper getInstance(SettingAssignments sa) {
+    public static BeansWrapper getInstance(PropertyAssignments pa) {
         return _BeansAPI.getBeansWrapperSubclassInstance(
-                sa, instanceCache, instanceCacheRefQue, BeansWrapperFactory.INSTANCE);
+                pa, instanceCache, instanceCacheRefQue, BeansWrapperFactory.INSTANCE);
     }
     
     private static class BeansWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
         
         private static final BeansWrapperFactory INSTANCE = new BeansWrapperFactory(); 
 
-        public BeansWrapper create(SettingAssignments sa) {
-            return new BeansWrapper(sa, true);
+        public BeansWrapper create(PropertyAssignments pa) {
+            return new BeansWrapper(pa, true);
         }
         
     }
@@ -603,10 +603,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * 
      * <p>When this is {@code false}, {@code myMap.foo} or {@code myMap['foo']} either returns the method {@code foo},
      * or calls {@code Map.get("foo")}. If both exists (the method and the {@link Map} key), one will hide the other,
-     * depending on the {@link #setMethodsShadowItems(boolean)} setting, which default to {@code true} (the method
+     * depending on the {@link #isMethodsShadowItems()}, which default to {@code true} (the method
      * wins). Some frameworks use this so that you can call {@code myMap.get(nonStringKey)} from templates [*], but it
      * comes on the cost of polluting the key-set with the method names, and risking methods accidentally hiding
-     * {@link Map} entries (or the other way around). Thus, this setting is not recommended.
+     * {@link Map} entries (or the other way around). Thus, this setup is not recommended.
      * (Technical note: {@link Map}-s will be wrapped into {@link MapModel} in this case.)  
      *
      * <p>When this is {@code true}, {@code myMap.foo} or {@code myMap['foo']} always calls {@code Map.get("foo")}.
@@ -672,9 +672,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
      
         if (classIntrospector.getExposureLevel() != exposureLevel) {
-            ClassIntrospector.SettingAssignments sa = classIntrospector.getSettingAssignments();
-            sa.setExposureLevel(exposureLevel);
-            setClassIntrospector(sa);
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setExposureLevel(exposureLevel);
+            setClassIntrospector(pa);
         }
     }
     
@@ -701,9 +701,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getExposeFields() != exposeFields) {
-            ClassIntrospector.SettingAssignments sa = classIntrospector.getSettingAssignments();
-            sa.setExposeFields(exposeFields);
-            setClassIntrospector(sa);
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setExposeFields(exposeFields);
+            setClassIntrospector(pa);
         }
     }
     
@@ -729,9 +729,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
-            ClassIntrospector.SettingAssignments sa = classIntrospector.getSettingAssignments();
-            sa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
-            setClassIntrospector(sa);
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+            setClassIntrospector(pa);
         }
     }
 
@@ -743,9 +743,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getMethodShorter() != methodShorter) {
-            ClassIntrospector.SettingAssignments sa = classIntrospector.getSettingAssignments();
-            sa.setMethodShorter(methodShorter);
-            setClassIntrospector(sa);
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setMethodShorter(methodShorter);
+            setClassIntrospector(pa);
         }
     }
     
@@ -767,10 +767,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * Replaces the value of {@link #classIntrospector}, but first it unregisters
      * the model factories in the old {@link #classIntrospector}.
      */
-    private void setClassIntrospector(ClassIntrospector.SettingAssignments sa) {
+    private void setClassIntrospector(ClassIntrospector.PropertyAssignments pa) {
         checkModifiable();
         
-        final ClassIntrospector newCI = new ClassIntrospector(sa, sharedInrospectionLock);
+        final ClassIntrospector newCI = new ClassIntrospector(pa, sharedInrospectionLock);
         final ClassIntrospector oldCI;
         
         // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
@@ -1645,7 +1645,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     
     /**
      * Returns the exact class name and the identity hash, also the values of the most often used {@link BeansWrapper}
-     * settings, also if which (if any) shared class introspection cache it uses.
+     * configuration properties, also if which (if any) shared class introspection cache it uses.
      *  
      * @since 2.3.21
      */
@@ -1731,12 +1731,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * Used as the parameter to {@link #getInstance(SettingAssignments)}; see there.
+     * Used as the parameter to {@link #getInstance(PropertyAssignments)}; see there.
      */
-    static public final class SettingAssignments implements Cloneable {
+    static public final class PropertyAssignments implements freemarker.template.utility.PropertyAssignments, Cloneable {
         private final Version incompatibleImprovements;
         
-        private ClassIntrospector.SettingAssignments classIntrospectorSettings;
+        private ClassIntrospector.PropertyAssignments classIntrospectorPropertyAssignments;
         
         // Properties and their *defaults*:
         private boolean simpleMapWrapper = false;
@@ -1750,14 +1750,14 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         //   default can be left unset (like null).
         // - If you add a new field, review all methods in this class
         
-        public SettingAssignments(Version incompatibleImprovements) {
+        public PropertyAssignments(Version incompatibleImprovements) {
             NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
             _TemplateAPI.checkVersionSupported(incompatibleImprovements);
             
             incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
             this.incompatibleImprovements = incompatibleImprovements;
             
-            classIntrospectorSettings = new ClassIntrospector.SettingAssignments(incompatibleImprovements);
+            classIntrospectorPropertyAssignments = new ClassIntrospector.PropertyAssignments(incompatibleImprovements);
         }
 
         public int hashCode() {
@@ -1769,7 +1769,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
             result = prime * result + (strict ? 1231 : 1237);
             result = prime * result + (useModelCache ? 1231 : 1237);
-            result = prime * result + classIntrospectorSettings.hashCode();
+            result = prime * result + classIntrospectorPropertyAssignments.hashCode();
             return result;
         }
 
@@ -1777,7 +1777,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             if (this == obj) return true;
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
-            SettingAssignments other = (SettingAssignments) obj;
+            PropertyAssignments other = (PropertyAssignments) obj;
             
             if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
             if (simpleMapWrapper != other.simpleMapWrapper) return false;
@@ -1785,19 +1785,19 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             if (outerIdentity != other.outerIdentity) return false;
             if (strict != other.strict) return false;
             if (useModelCache != other.useModelCache) return false;
-            if (!classIntrospectorSettings.equals(other.classIntrospectorSettings)) return false;
+            if (!classIntrospectorPropertyAssignments.equals(other.classIntrospectorPropertyAssignments)) return false;
             
             return true;
         }
         
         protected Object clone(boolean deepCloneKey) {
             try {
-                SettingAssignments newSA = (SettingAssignments) super.clone();
+                PropertyAssignments newPA = (PropertyAssignments) super.clone();
                 if (deepCloneKey) {
-                    newSA.classIntrospectorSettings
-                            = (ClassIntrospector.SettingAssignments) classIntrospectorSettings.clone();
+                    newPA.classIntrospectorPropertyAssignments
+                            = (ClassIntrospector.PropertyAssignments) classIntrospectorPropertyAssignments.clone();
                 }
-                return newSA;
+                return newPA;
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e.getMessage());  // Java 5: use cause
             }
@@ -1827,7 +1827,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
 
         /**
          * See {@link BeansWrapper#setOuterIdentity(ObjectWrapper)}, except here the default is {@code null} that means
-         * the {@link ObjectWrapper} that you will set up with this {@link SettingAssignments} object.
+         * the {@link ObjectWrapper} that you will set up with this {@link PropertyAssignments} object.
          */
         public void setOuterIdentity(ObjectWrapper outerIdentity) {
             this.outerIdentity = outerIdentity;
@@ -1856,43 +1856,43 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         
         public int getExposureLevel() {
-            return classIntrospectorSettings.getExposureLevel();
+            return classIntrospectorPropertyAssignments.getExposureLevel();
         }
 
         /** See {@link BeansWrapper#setExposureLevel(int)}. */
         public void setExposureLevel(int exposureLevel) {
-            classIntrospectorSettings.setExposureLevel(exposureLevel);
+            classIntrospectorPropertyAssignments.setExposureLevel(exposureLevel);
         }
 
         public boolean getExposeFields() {
-            return classIntrospectorSettings.getExposeFields();
+            return classIntrospectorPropertyAssignments.getExposeFields();
         }
 
         /** See {@link BeansWrapper#setExposeFields(boolean)}. */
         public void setExposeFields(boolean exposeFields) {
-            classIntrospectorSettings.setExposeFields(exposeFields);
+            classIntrospectorPropertyAssignments.setExposeFields(exposeFields);
         }
 
         public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
-            return classIntrospectorSettings.getMethodAppearanceFineTuner();
+            return classIntrospectorPropertyAssignments.getMethodAppearanceFineTuner();
         }
 
         /**
          * See {@link BeansWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}; additionally,
          * note that currently setting this to non-{@code null} will disable class introspection cache sharing, unless
-         * the value also implements {@link SingletonCustomizer}.
+         * the value implements {@link SingletonCustomizer}.
          * See {@link BeansWrapper#getInstance(Version)} for more about these.
          */
         public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
-            classIntrospectorSettings.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+            classIntrospectorPropertyAssignments.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
         }
 
         MethodShorter getMethodShorter() {
-            return classIntrospectorSettings.getMethodShorter();
+            return classIntrospectorPropertyAssignments.getMethodShorter();
         }
 
         void setMethodShorter(MethodShorter methodShorter) {
-            classIntrospectorSettings.setMethodShorter(methodShorter);
+            classIntrospectorPropertyAssignments.setMethodShorter(methodShorter);
         }
         
     }

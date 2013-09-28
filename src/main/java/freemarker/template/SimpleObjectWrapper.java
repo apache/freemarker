@@ -88,7 +88,7 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
      * {@link DefaultObjectWrapper}, which wouldn't return a {@link SimpleObjectWrapper}.
      * @since 2.3.21
      */
-    public static BeansWrapper getInstance(SettingAssignments sa) {
+    public static BeansWrapper getInstance(PropertyAssignments pa) {
         throw new RuntimeException("SimpleObjectWrapper doesn't support getInstance; use the constructor.");
     }
     

@@ -77,7 +77,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /** @deprecated Use {@link #getInstance(Version)} instead, but mind its performance */
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
-    private final static WeakHashMap/*<ClassLoader, Map<SettingAssignments, WeakReference<DefaultObjectWrapper>>*/
+    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<DefaultObjectWrapper>>*/
             instanceCache = new WeakHashMap();
     private final static ReferenceQueue instanceCacheRefQue = new ReferenceQueue();
     
@@ -89,7 +89,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
      * 
-     * @deprecated Use {@link #getInstance(Version)} or {@link #getInstance(SettingAssignments)}, or
+     * @deprecated Use {@link #getInstance(Version)} or {@link #getInstance(PropertyAssignments)}, or
      *     in rare cases {@link #DefaultObjectWrapper(Version)} instead.
      */
     public DefaultObjectWrapper() {
@@ -97,7 +97,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     /**
-     * Use {@link #getInstance(Version)} or {@link #getInstance(SettingAssignments)} instead if possible.
+     * Use {@link #getInstance(Version)} or {@link #getInstance(PropertyAssignments)} instead if possible.
      * Instances created with this constructor won't share the class introspection caches with other instances.
      * See {@link BeansWrapper#BeansWrapper(Version)} (the superclass constructor) for more details.
      * 
@@ -110,19 +110,19 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapper.SettingAssignments, boolean)}.
+     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapper.PropertyAssignments, boolean)}.
      * 
      * @since 2.3.21
      */
-    protected DefaultObjectWrapper(BeansWrapper.SettingAssignments settings, boolean readOnly) {
-        super(settings, readOnly);
+    protected DefaultObjectWrapper(BeansWrapper.PropertyAssignments pa, boolean readOnly) {
+        super(pa, readOnly);
     }
     
     /**
      * Returns an unconfigurable (read-only) {@link DefaultObjectWrapper} instance that's already configured as
      * specified in the argument; this is preferred over using the constructors.
      * If you need to configure more than the {@code incompatibleImprovements version}, use
-     * {@link #getInstance(SettingAssignments)}.
+     * {@link #getInstance(PropertyAssignments)}.
      * 
      * <p>See {@link BeansWrapper#getInstance(Version)} for more info (that's what this delegates to). 
      * 
@@ -132,38 +132,38 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * @since 2.3.21
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        return getInstance(new SettingAssignments(incompatibleImprovements));
+        return getInstance(new PropertyAssignments(incompatibleImprovements));
     }
 
     /**
      * Don't call this; always fails because {@link DefaultObjectWrapper} is not affected by the
-     * <tt>simpleMapWrapper</tt> setting. This method exists only so that it hides the one "inherited" from
+     * <tt>simpleMapWrapper</tt> property. This method exists only so that it hides the one "inherited" from
      * {@link BeansWrapper}, which wouldn't return a {@link DefaultObjectWrapper}.
      */
     public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapWrapper) {
         throw new IllegalArgumentException(
-                "DefaultObjectWrapper is not affected by the simpleMapWrapper setting; "
+                "DefaultObjectWrapper is not affected by the simpleMapWrapper property; "
                 + "use getInstance(Version).");
     }
     
     /**
-     * Same as {@link #getInstance(Version)}, but you can specify more settings of the desired instance.
+     * Same as {@link #getInstance(Version)}, but you can specify more properties of the desired instance.
      *     
-     * @param sa The settings that you want to be set in the returned instance.
+     * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
      * 
      * @since 2.3.21
      */
-    public static BeansWrapper getInstance(SettingAssignments sa) {
+    public static BeansWrapper getInstance(PropertyAssignments pa) {
         return _BeansAPI.getBeansWrapperSubclassInstance(
-                sa, instanceCache, instanceCacheRefQue, DefaultObjectWrapperFactory.INSTANCE);
+                pa, instanceCache, instanceCacheRefQue, DefaultObjectWrapperFactory.INSTANCE);
     }
 
     private static class DefaultObjectWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
         
         private static final DefaultObjectWrapperFactory INSTANCE = new DefaultObjectWrapperFactory(); 
 
-        public BeansWrapper create(SettingAssignments sa) {
-            return new DefaultObjectWrapper(sa, true);
+        public BeansWrapper create(PropertyAssignments pa) {
+            return new DefaultObjectWrapper(pa, true);
         }
         
     }

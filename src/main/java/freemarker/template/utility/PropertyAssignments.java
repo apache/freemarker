@@ -1,4 +1,4 @@
-package freemarker.core;
+package freemarker.template.utility;
 
 import java.util.Properties;
 
@@ -11,6 +11,6 @@ import java.util.Properties;
  * 
  * @since 2.3.21
  */
-public interface SettingAssignments {
+public interface PropertyAssignments {
 
 }
