@@ -174,8 +174,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      * speed up map item retrieval.
      */
     public static final int EXPOSE_NOTHING = 3;
-    
-    private static final boolean javaRebelAvailable = isJavaRebelAvailable();
 
     // -----------------------------------------------------------------------------------------------------------------
     // Instance cache:
@@ -380,10 +378,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         falseModel = new BooleanModel(Boolean.FALSE, this);
         trueModel = new BooleanModel(Boolean.TRUE, this);
         
-        if(javaRebelAvailable) {
-            JavaRebelIntegration.registerWrapper(this);
-        }
-        
         staticModels = new StaticModels(BeansWrapper.this);
         enumModels = createEnumModels(BeansWrapper.this);
         modelCache = new BeansModelCache(BeansWrapper.this);
@@ -400,7 +394,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         
         registerModelFactories();
     }
-
+    
     /**
      * Returns an unconfigurable (read-only) {@link BeansWrapper} instance that's already configured as specified in the
      * argument; this is preferred over using the constructors. The returned instance is often, but not always a
@@ -1693,16 +1687,6 @@ public class BeansWrapper implements ObjectWrapper, Lockable
         }
     }
 
-    private static boolean isJavaRebelAvailable() {
-        try {
-            JavaRebelIntegration.testAvailability();
-            return true;
-        }
-        catch(NoClassDefFoundError e) {
-            return false;
-        }
-    }
-    
     /**
      * <b>Experimental class; subject to change!</b>
      * Used for {@link #finetuneMethodAppearance} as output parameter; see there.

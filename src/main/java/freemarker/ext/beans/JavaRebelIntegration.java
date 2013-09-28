@@ -21,27 +21,27 @@ class JavaRebelIntegration
      * listener is unregistered if the wrapper is garbage collected.
      * @param w the beans wrapper to register.
      */
-    static void registerWrapper(BeansWrapper w) {
+    static void register(ClassIntrospector w) {
         ReloaderFactory.getInstance().addClassReloadListener(
-                new BeansWrapperCacheInvalidator(w));
+                new ClassIntrospectorCacheInvalidator(w));
     }
     
-    private static class BeansWrapperCacheInvalidator 
+    private static class ClassIntrospectorCacheInvalidator 
     implements ClassEventListener
     {
         private final WeakReference ref;
         
-        BeansWrapperCacheInvalidator(BeansWrapper w) {
+        ClassIntrospectorCacheInvalidator(ClassIntrospector w) {
             ref = new WeakReference(w);
         }
         
         public void onClassEvent(int eventType, Class klass) {
-            BeansWrapper wrapper = (BeansWrapper)ref.get();
-            if(wrapper == null) {
+            ClassIntrospector ci = (ClassIntrospector)ref.get();
+            if(ci == null) {
                 ReloaderFactory.getInstance().removeClassReloadListener(this);
             }
             else if(eventType == ClassEventListener.EVENT_RELOADED) {
-                wrapper.removeFromClassIntrospectionCache(klass);
+                ci.remove(klass);
             }
         }
     }

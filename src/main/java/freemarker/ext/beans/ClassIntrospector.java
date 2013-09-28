@@ -55,6 +55,19 @@ class ClassIntrospector {
     static final boolean DEVELOPMENT_MODE
             = "true".equals(SecurityUtilities.getSystemProperty("freemarker.development", "false"));
 
+    private static final boolean javaRebelAvailable;
+    static {
+        boolean res;
+        try {
+            JavaRebelIntegration.testAvailability();
+            res = true;
+        } catch(NoClassDefFoundError e) {
+            res = false;
+        }
+        javaRebelAvailable = res;
+    }
+    
+    
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection info Map keys:
     
@@ -128,6 +141,10 @@ class ClassIntrospector {
         this.sharedLock = sharedLock;
         
         this.shared = shared;
+        
+        if (javaRebelAvailable) {
+            JavaRebelIntegration.register(this);
+        }
     }
     
     /**
