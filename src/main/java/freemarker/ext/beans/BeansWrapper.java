@@ -1469,11 +1469,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
             Constructor ctor = null;
             Object[] objargs;
-            if(ctors instanceof SimpleMemberModel)
+            if(ctors instanceof SimpleMethod)
             {
-                SimpleMemberModel smm = (SimpleMemberModel)ctors;
-                ctor = (Constructor)smm.getMember();
-                objargs = smm.unwrapArguments(arguments, this);
+                SimpleMethod sm = (SimpleMethod)ctors;
+                ctor = (Constructor)sm.getMember();
+                objargs = sm.unwrapArguments(arguments, this);
             }
             else if(ctors instanceof OverloadedMethods)
             {

@@ -536,7 +536,7 @@ class ClassIntrospector {
             Constructor[] ctors = clazz.getConstructors();
             if (ctors.length == 1) {
                 Constructor ctor = ctors[0];
-                introspData.put(CONSTRUCTORS_KEY, new SimpleMemberModel(ctor, ctor.getParameterTypes()));
+                introspData.put(CONSTRUCTORS_KEY, new SimpleMethod(ctor, ctor.getParameterTypes()));
             } else if (ctors.length > 1) {
                 OverloadedMethods ctorMap = new OverloadedMethods(bugfixed);
                 for (int i = 0; i < ctors.length; i++) {
