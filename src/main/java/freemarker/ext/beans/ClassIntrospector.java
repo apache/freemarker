@@ -165,7 +165,8 @@ class ClassIntrospector {
      * gets the shared lock from the {@link ClassIntrospector} instance. It can't be get from it, so it's prevented...
      */
     static ClassIntrospector getInstance(SettingAssignments sa) {
-        if (sa.methodAppearanceFineTuner == null && sa.methodShorter == null) {
+        if ((sa.methodAppearanceFineTuner == null || sa.methodAppearanceFineTuner instanceof SingletonCustomizer)
+                && (sa.methodShorter == null || sa.methodShorter instanceof SingletonCustomizer)) {
             // Instance can be cached.
             ClassIntrospector instance;
             synchronized (instanceCache) {
@@ -182,9 +183,9 @@ class ClassIntrospector {
             
             return instance;
         } else {
-            // If methodAppearanceFineTuner or methodShorter is specified, the ClassIntrospector can't be shared/cached
-            // as those objects could contain a back-reference to the BeansWrapper.
-            //TODO Add a marked interface, like Cacheable or Singleton, and then allow them in shared instances.
+            // If methodAppearanceFineTuner or methodShorter is specified and isn't marked as a singleton, the
+            // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
+            // BeansWrapper.
             return new ClassIntrospector(sa, new Object(), true);
         }
     }

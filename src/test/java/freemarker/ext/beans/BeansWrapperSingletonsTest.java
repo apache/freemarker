@@ -679,22 +679,60 @@ public class BeansWrapperSingletonsTest extends TestCase {
             sa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
                 public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
                 }
-            });  // spoils caching
+            });  // spoils ClassIntrospector() sharing
             
             BeansWrapper bw1 = BeansWrapper.getInstance(sa);
+            assertSame(bw1, BeansWrapper.getInstance(sa));
+            
+            sa.setSimpleMapWrapper(true);
             BeansWrapper bw2 = BeansWrapper.getInstance(sa);
             checkClassIntrospectorCacheSize(1);
-            
-            assertNotSame(bw2.getClassIntrospector(), bw1.getClassIntrospector());
             assertNotSame(bw1, bw2);
-            
+            assertNotSame(bw1.getClassIntrospector(), bw2.getClassIntrospector());
             assertTrue(bw1.isClassIntrospectionCacheShared());
+            assertTrue(bw2.isClassIntrospectionCacheShared());
             
             // Wrapping tests:
             assertFalse(exposesFields(bw1));
+            assertFalse(exposesFields(bw2));
             assertTrue(exposesProperties(bw1));
+            assertTrue(exposesProperties(bw2));
             assertTrue(exposesMethods(bw1));
+            assertTrue(exposesMethods(bw2));
             assertFalse(exposesUnsafe(bw1));
+            assertFalse(exposesUnsafe(bw2));
+            assertFalse(isSimpleMapWrapper(bw1));
+            assertTrue(isSimpleMapWrapper(bw2));
+        }
+
+        {
+            sa = new SettingAssignments(V_2_3_19);
+            sa.setMethodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE);  // doesn't spoils sharing
+            
+            BeansWrapper bw1 = BeansWrapper.getInstance(sa);
+            assertSame(bw1, BeansWrapper.getInstance(sa));
+            checkClassIntrospectorCacheSize(2);
+            
+            sa.setSimpleMapWrapper(true);
+            BeansWrapper bw2 = BeansWrapper.getInstance(sa);
+            checkClassIntrospectorCacheSize(2);
+            
+            assertNotSame(bw1, bw2);
+            assertSame(bw1.getClassIntrospector(), bw2.getClassIntrospector());  // !
+            assertTrue(bw1.isClassIntrospectionCacheShared());
+            assertTrue(bw2.isClassIntrospectionCacheShared());
+            
+            // Wrapping tests:
+            assertFalse(exposesFields(bw1));
+            assertFalse(exposesFields(bw2));
+            assertTrue(exposesProperties(bw1));
+            assertTrue(exposesProperties(bw2));
+            assertTrue(exposesMethods(bw1));
+            assertTrue(exposesMethods(bw2));
+            assertFalse(exposesUnsafe(bw1));
+            assertFalse(exposesUnsafe(bw2));
+            assertFalse(isSimpleMapWrapper(bw1));
+            assertTrue(isSimpleMapWrapper(bw2));
         }
         
         assertTrue(hardReferences.size() != 0);  // just to save it from GC until this line        

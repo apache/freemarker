@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
@@ -84,30 +82,4 @@ public class FineTuneMethodAppearanceTest {
     }
     
     static class DefaultObjectWrapperOverrideExt extends DefaultObjectWrapperOverride { }
-    
-    static class GetlessMethodsAsPropertyGettersRule implements MethodAppearanceFineTuner {
-        
-        static final GetlessMethodsAsPropertyGettersRule INSTANCE = new GetlessMethodsAsPropertyGettersRule();  
-
-        public void fineTuneMethodAppearance(
-                Class clazz, Method m, MethodAppearanceDecision decision) {
-            if (m.getDeclaringClass() != Object.class
-                    && m.getReturnType() != void.class
-                    && m.getParameterTypes().length == 0) {
-                String mName = m.getName();
-                if (!(mName.startsWith("get")
-                        && (mName.length() == 3
-                           || Character.isUpperCase(mName.charAt(3))))) {
-                    decision.setExposeMethodAs(null);
-                    try {
-                        decision.setExposeAsProperty(new PropertyDescriptor(
-                                mName, clazz, mName, null));
-                    } catch (IntrospectionException e) {  // Won't happen...
-                        throw new RuntimeException(e); 
-                    }
-                }
-            }
-        }
-    
-    }
 }

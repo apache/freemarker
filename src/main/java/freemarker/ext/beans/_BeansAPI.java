@@ -140,57 +140,47 @@ public class _BeansAPI {
             Map instanceCache,
             ReferenceQueue instanceCacheRefQue,
             BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
-
-        if (sa.getMethodAppearanceFineTuner() == null && sa.getMethodShorter() == null) {
-            // Instance can be cached.
-            
-            // BeansWrapper can't be cached across different Thread Context Class Loaders (TCCL), because the result of
-            // a class name (String) to Class mappings depends on it, and the staticModels and enumModels need that.
-            // (The ClassIntrospector doesn't have to consider the TCCL, as it only works with Class-es, not class
-            // names.)
-            ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-            
-            Reference instanceRef;
-            Map/*<SettingAssignments, WeakReference<BeansWrapper>>*/ tcclScopedCache;
-            synchronized (instanceCache) {
-                tcclScopedCache = (Map) instanceCache.get(tccl);
-                if (tcclScopedCache == null) {
-                    tcclScopedCache = new HashMap();
-                    instanceCache.put(tccl, tcclScopedCache);
-                    instanceRef = null;
-                } else {
-                    instanceRef = (Reference) tcclScopedCache.get(sa);
-                }
-            }
-
-            BeansWrapper instance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
-            if (instance != null) {  // cache hit
-                return instance;
-            }
-            // cache miss
-            
-            sa = (SettingAssignments) sa.clone(true);  // prevent any aliasing issues 
-            instance = beansWrapperSubclassFactory.create(sa);
-            
-            synchronized (instanceCache) {
+        // BeansWrapper can't be cached across different Thread Context Class Loaders (TCCL), because the result of
+        // a class name (String) to Class mappings depends on it, and the staticModels and enumModels need that.
+        // (The ClassIntrospector doesn't have to consider the TCCL, as it only works with Class-es, not class
+        // names.)
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        
+        Reference instanceRef;
+        Map/*<SettingAssignments, WeakReference<BeansWrapper>>*/ tcclScopedCache;
+        synchronized (instanceCache) {
+            tcclScopedCache = (Map) instanceCache.get(tccl);
+            if (tcclScopedCache == null) {
+                tcclScopedCache = new HashMap();
+                instanceCache.put(tccl, tcclScopedCache);
+                instanceRef = null;
+            } else {
                 instanceRef = (Reference) tcclScopedCache.get(sa);
-                BeansWrapper concurrentInstance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
-                if (concurrentInstance == null) {
-                    tcclScopedCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
-                } else {
-                    instance = concurrentInstance;
-                }
             }
-            
-            removeClearedReferencesFromCache(instanceCache, instanceCacheRefQue);
-            
-            return instance;
-        } else {
-            // If methodAppearanceFineTuner or methodShorter is specified, the ClassIntrospector can't be shared/cached
-            // as those objects could contain a back-reference to the BeansWrapper, causing memory leaks.
-            //TODO Add a marked interface, like Cacheable or Singleton, and then allow them in shared instances.
-            return new BeansWrapper(sa, true);
         }
+
+        BeansWrapper instance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
+        if (instance != null) {  // cache hit
+            return instance;
+        }
+        // cache miss
+        
+        sa = (SettingAssignments) sa.clone(true);  // prevent any aliasing issues 
+        instance = beansWrapperSubclassFactory.create(sa);
+        
+        synchronized (instanceCache) {
+            instanceRef = (Reference) tcclScopedCache.get(sa);
+            BeansWrapper concurrentInstance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
+            if (concurrentInstance == null) {
+                tcclScopedCache.put(sa, new WeakReference(instance, instanceCacheRefQue));
+            } else {
+                instance = concurrentInstance;
+            }
+        }
+        
+        removeClearedReferencesFromCache(instanceCache, instanceCacheRefQue);
+        
+        return instance;
     }
     
     private static void removeClearedReferencesFromCache(Map instanceCache, ReferenceQueue instanceCacheRefQue) {
