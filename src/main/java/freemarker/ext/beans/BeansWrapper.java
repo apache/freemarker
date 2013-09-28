@@ -1877,7 +1877,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
 
         /**
          * See {@link BeansWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}; additionally,
-         * note that currently setting this to non-{@code null} will disable instance and introspection cache sharing.
+         * note that currently setting this to non-{@code null} will disable class introspection cache sharing, unless
+         * the value also implements {@link SingletonCustomizer}.
          * See {@link BeansWrapper#getInstance(Version)} for more about these.
          */
         public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
