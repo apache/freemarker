@@ -227,8 +227,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
      */
     private final ModelCache modelCache;
 
-    private final BooleanModel FALSE;
-    private final BooleanModel TRUE;
+    private final BooleanModel falseModel;
+    private final BooleanModel trueModel;
     
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -377,9 +377,8 @@ public class BeansWrapper implements ObjectWrapper, Lockable
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
         }
         
-        // TODO: Get rid of these somehow...        
-        FALSE = new BooleanModel(Boolean.FALSE, this);
-        TRUE = new BooleanModel(Boolean.TRUE, this);
+        falseModel = new BooleanModel(Boolean.FALSE, this);
+        trueModel = new BooleanModel(Boolean.TRUE, this);
         
         if(javaRebelAvailable) {
             JavaRebelIntegration.registerWrapper(this);
@@ -800,6 +799,12 @@ public class BeansWrapper implements ObjectWrapper, Lockable
                     oldCI.unregisterModelFactory(modelCache);
                     modelCache.clearCache();
                 }
+                if (trueModel != null) {
+                    trueModel.clearMemberCache();
+                }
+                if (falseModel != null) {
+                    falseModel.clearMemberCache();
+                }
             }
             
             classIntrospector = newCI;
@@ -994,7 +999,7 @@ public class BeansWrapper implements ObjectWrapper, Lockable
 
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return ((Boolean)object).booleanValue() ? TRUE : FALSE; 
+            return ((Boolean)object).booleanValue() ? trueModel : falseModel; 
         }
     };
 

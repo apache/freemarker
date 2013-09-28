@@ -65,7 +65,7 @@ public class BooleanModel extends BeanModel implements TemplateBooleanModel
     
     public BooleanModel(Boolean bool, BeansWrapper wrapper)
     {
-        super(bool, wrapper);
+        super(bool, wrapper, false);
         value = bool.booleanValue();
     }
 

@@ -131,13 +131,23 @@ implements
      */
     public BeanModel(Object object, BeansWrapper wrapper)
     {
+        // TODO 2.4: All models were introspected here, then the results was discareded, and get() will just do the
+        // introspection again. So is this necessary? (The inrospectNow parameter was added in 2.3.21 to allow
+        // lazy-introspecting BeansWrapper.trueModel|falseModel.)
+        this(object, wrapper, true);
+    }
+
+    /** @since 2.3.21 */
+    BeanModel(Object object, BeansWrapper wrapper, boolean inrospectNow)
+    {
         this.object = object;
         this.wrapper = wrapper;
-        if (object != null) {
+        if (inrospectNow && object != null) {
+            // TODO: Could this be removed? [FM 2.4]
             wrapper.getClassIntrospector().get(object.getClass());
         }
     }
-
+    
     /**
      * Uses Beans introspection to locate a property or method with name
      * matching the key name. If a method or property is found, it's wrapped
@@ -302,6 +312,12 @@ implements
             }
         }
         return retval;
+    }
+    
+    void clearMemberCache() {
+        synchronized(this) {
+            memberMap = null;
+        }
     }
 
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
