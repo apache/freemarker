@@ -98,6 +98,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
         }
 
         final ClassIntrospector classIntrospector;
+        int classIntrospectorClearingCounter;
         final Object sharedLock = wrapper.getSharedInrospectionLock();
         synchronized (sharedLock) {
             TemplateModel model = (TemplateModel) cache.get(key);
@@ -123,6 +124,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             // While the classIntrospector should not be changed from another thread, badly written apps can do that,
             // and it's cheap to get the classIntrospector from inside the lock here:   
             classIntrospector = wrapper.getClassIntrospector();
+            classIntrospectorClearingCounter = classIntrospector.getClearingCounter();
         }
         try {
             final Class clazz = ClassUtil.forName(key);
@@ -139,8 +141,11 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             
             if (model != null) {
                 synchronized (sharedLock) {
-                    // FIXME: What's if we have made the model based on a now cleared class info?  
-                    cache.put(key, model);
+                    // Save it into the cache, but only if nothing relevant has changed while we were outside the lock: 
+                    if (classIntrospector == wrapper.getClassIntrospector()
+                            && classIntrospectorClearingCounter == classIntrospector.getClearingCounter()) {  
+                        cache.put(key, model);
+                    }
                 }
             }
             return model;

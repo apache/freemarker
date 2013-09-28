@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.python.modules.synchronize;
+
 import freemarker.core.BugException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
@@ -67,7 +69,6 @@ class ClassIntrospector {
         javaRebelAvailable = res;
     }
     
-    
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection info Map keys:
     
@@ -111,7 +112,8 @@ class ClassIntrospector {
     
     private final List/*<WeakReference<ClassBasedModelFactory|ModelCache>>*/ modelFactories = new LinkedList();
     private final ReferenceQueue modelFactoriesRefQueue = new ReferenceQueue();
-
+    
+    private int clearingCounter;
     
     // -----------------------------------------------------------------------------------------------------------------
     // Instantiation:
@@ -705,6 +707,7 @@ class ClassIntrospector {
         synchronized (sharedLock) {
             cache.clear();
             cacheClassNames.clear();
+            clearingCounter++;
             
             for (Iterator it = modelFactories.iterator(); it.hasNext();) {
                 Object regedMf = ((WeakReference) it.next()).get();
@@ -735,6 +738,7 @@ class ClassIntrospector {
         synchronized (sharedLock) {
             cache.remove(clazz);
             cacheClassNames.remove(clazz.getName());
+            clearingCounter++;
             
             for (Iterator it = modelFactories.iterator(); it.hasNext();) {
                 Object regedMf = ((WeakReference) it.next()).get();
@@ -764,9 +768,22 @@ class ClassIntrospector {
      * @since 2.3.21
      */
     void removeFromClassIntrospectionCache(String namePrefix) {
-        throw new RuntimeException("Not implemented");  // TODO
+        synchronized (sharedLock) {
+            clearingCounter++;
+            
+            throw new RuntimeException("Not implemented");  // TODO
+        }
     }
     
+    /**
+     * Returns the number of events so far that could make class introspection data returned earlier outdated. 
+     */
+    int getClearingCounter() {
+        synchronized (sharedLock) {
+            return clearingCounter;
+        }
+    }
+
     private void onSameNameClassesDetected(String className) {
         // TODO: This behavior should be pluggable, as in environments where
         // some classes are often reloaded or multiple versions of the
