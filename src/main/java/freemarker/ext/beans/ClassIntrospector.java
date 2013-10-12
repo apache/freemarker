@@ -26,6 +26,7 @@ import java.util.Set;
 import freemarker.core.BugException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
 import freemarker.log.Logger;
 import freemarker.template.Version;
@@ -429,15 +430,22 @@ class ClassIntrospector {
         
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
             final MethodAppearanceDecision decision = new MethodAppearanceDecision();  
+            MethodAppearanceDecisionInput decisionInput = null;  
             final MethodDescriptor[] mda = sortMethodDescriptors(beanInfo.getMethodDescriptors());
             int mdaLength = mda != null ? mda.length : 0;  
             for (int i = mdaLength - 1; i >= 0; --i) {
-                MethodDescriptor md = mda[i];
-                Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
+                final MethodDescriptor md = mda[i];
+                final Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
                 if (method != null && isAllowedToExpose(method)) {
                     decision.setDefaults(method);
                     if (methodAppearanceFineTuner != null) {
-                        methodAppearanceFineTuner.fineTuneMethodAppearance(clazz, method, decision);
+                        if (decisionInput == null) {
+                            decisionInput = new MethodAppearanceDecisionInput();                            
+                        }
+                        decisionInput.setContainingClass(clazz);
+                        decisionInput.setMethod(method);
+                        
+                        methodAppearanceFineTuner.process(decisionInput, decision);
                     }
                     
                     PropertyDescriptor propDesc = decision.getExposeAsProperty();

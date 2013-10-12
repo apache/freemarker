@@ -75,8 +75,8 @@ public class FineTuneMethodAppearanceTest {
     static class DefaultObjectWrapperOverride extends DefaultObjectWrapper {
 
         @Override
-        protected void finetuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
-            GetlessMethodsAsPropertyGettersRule.INSTANCE.fineTuneMethodAppearance(clazz, m, decision);
+        protected void finetuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision out) {
+            GetlessMethodsAsPropertyGettersRule.INSTANCE.legacyProcess(clazz, m, out);
         }
         
     }

@@ -5,6 +5,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 
 /**
  * Used for customizing how the methods are visible from templates, via
@@ -20,15 +21,15 @@ public interface MethodAppearanceFineTuner {
      * Implement this to tweak certain aspects of how methods appear in the
      * data-model. {@link BeansWrapper} will pass in all Java methods here that
      * it intends to expose in the data-model as methods (so you can do
-     * <tt>obj.foo()</tt> in the template). By default this method does nothing.
-     * By overriding it you can do the following tweaks:
+     * <tt>obj.foo()</tt> in the template).
+     * With this method it you can do the following tweaks:
      * <ul>
      *   <li>Hide a method that would be otherwise shown by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
      *     with <tt>null</tt> parameter. Note that you can't un-hide methods
      *     that are not public or are considered to by unsafe
      *     (like {@link Object#wait()}) because
-     *     {@link #fineTuneMethodAppearance} is not called for those.</li>
+     *     {@link #process} is not called for those.</li>
      *   <li>Show the method with a different name in the data-model than its
      *     real name by calling
      *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
@@ -63,11 +64,14 @@ public interface MethodAppearanceFineTuner {
      * JavaBean property on the same time, however you have to chose different
      * names for them to prevent shadowing. 
      * 
-     * @param decision Stores how the parameter method will be exposed in the
-     *   data-model after {@link #fineTuneMethodAppearance} returns.
+     * @param in Describes the method about which the decision will have to be made.
+     *  
+     * @param out Stores how the method will be exposed in the
+     *   data-model after {@link #process} returns.
      *   This is initialized so that it reflects the default
-     *   behavior of {@link BeansWrapper}.
+     *   behavior of {@link BeansWrapper}, so you don't have to do anything with this
+     *   when you don't want to change the default behavior.
      */
-    void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision);    
+    void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out);    
     
 }

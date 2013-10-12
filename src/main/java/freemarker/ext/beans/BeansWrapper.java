@@ -347,8 +347,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 pa = (PropertyAssignments) pa.clone(false);
                 pa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
-                    public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
-                        BeansWrapper.this.finetuneMethodAppearance(clazz, m, decision);
+                    public void process(
+                            MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
+                        BeansWrapper.this.finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
                     }
                     
                 });
@@ -1691,7 +1692,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
 
     /**
      * <b>Experimental class; subject to change!</b>
-     * Used for {@link #finetuneMethodAppearance} as output parameter; see there.
+     * Used for
+     * {@link MethodAppearanceFineTuner#process(MethodAppearanceDecisionInput, MethodAppearanceDecision)}
+     * to store the results; see there.
      */
     static public final class MethodAppearanceDecision {
         private PropertyDescriptor exposeAsProperty;
@@ -1728,6 +1731,34 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             this.methodShadowsProperty = shadowEarlierProperty;
         }
 
+    }
+    
+    /**
+     * <b>Experimental class; subject to change!</b>
+     * Used for
+     * {@link MethodAppearanceFineTuner#process(MethodAppearanceDecisionInput, MethodAppearanceDecision)}
+     * as input parameter; see there.
+     */
+    static public final class MethodAppearanceDecisionInput {
+        private Method method;
+        private Class containingClass;
+        
+        void setMethod(Method method) {
+            this.method = method;
+        }
+        
+        void setContainingClass(Class containingClass) {
+            this.containingClass = containingClass;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public Class getContainingClass() {
+            return containingClass;
+        }
+        
     }
     
     /**

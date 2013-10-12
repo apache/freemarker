@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 
 @RunWith(JUnit4.class)
 public class BeansWrapperCachesTest {
@@ -33,7 +34,7 @@ public class BeansWrapperCachesTest {
         checkRegisteredModelFactories(ci3, bw.getStaticModels(), bw.getEnumModels(), bw.getModelCache());
         
         MethodAppearanceFineTuner maf = new MethodAppearanceFineTuner() {
-            public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
+            public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
                 // nop
             }
         };

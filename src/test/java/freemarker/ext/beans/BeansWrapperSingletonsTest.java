@@ -10,6 +10,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -98,7 +99,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(pa1, pa2);
         
         MethodAppearanceFineTuner maft = new MethodAppearanceFineTuner() {
-            public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) { }
+            public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) { }
         };
         pa1.setMethodAppearanceFineTuner(maft);
         assertNotEquals(pa1, pa2);
@@ -677,7 +678,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         {
             pa = new PropertyAssignments(V_2_3_19);
             pa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
-                public void fineTuneMethodAppearance(Class clazz, Method m, MethodAppearanceDecision decision) {
+                public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
                 }
             });  // spoils ClassIntrospector() sharing
             

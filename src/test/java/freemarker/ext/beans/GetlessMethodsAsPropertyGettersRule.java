@@ -5,6 +5,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 
 class GetlessMethodsAsPropertyGettersRule implements MethodAppearanceFineTuner, SingletonCustomizer {
     
@@ -13,7 +14,13 @@ class GetlessMethodsAsPropertyGettersRule implements MethodAppearanceFineTuner, 
     // Can't be constructed from outside
     private GetlessMethodsAsPropertyGettersRule() { }
 
-    public void fineTuneMethodAppearance(
+    public void process(
+            MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
+        legacyProcess(in.getContainingClass(), in.getMethod(), out);
+    }
+
+    /** This only exists as the tests need to call this through the deprecated method too. */
+    public void legacyProcess(
             Class clazz, Method m, MethodAppearanceDecision decision) {
         if (m.getDeclaringClass() != Object.class
                 && m.getReturnType() != void.class
