@@ -735,16 +735,16 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
     }
 
-    MethodShorter getMethodShorter() {
-        return classIntrospector.getMethodShorter();
+    MethodSorter getMethodSorter() {
+        return classIntrospector.getMethodSorter();
     }
 
-    void setMethodShorter(MethodShorter methodShorter) {
+    void setMethodSorter(MethodSorter methodSorter) {
         checkModifiable();
         
-        if (classIntrospector.getMethodShorter() != methodShorter) {
+        if (classIntrospector.getMethodSorter() != methodSorter) {
             ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
-            pa.setMethodShorter(methodShorter);
+            pa.setMethodSorter(methodSorter);
             setClassIntrospector(pa);
         }
     }
@@ -1887,12 +1887,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             classIntrospectorPropertyAssignments.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
         }
 
-        MethodShorter getMethodShorter() {
-            return classIntrospectorPropertyAssignments.getMethodShorter();
+        MethodSorter getMethodSorter() {
+            return classIntrospectorPropertyAssignments.getMethodSorter();
         }
 
-        void setMethodShorter(MethodShorter methodShorter) {
-            classIntrospectorPropertyAssignments.setMethodShorter(methodShorter);
+        void setMethodSorter(MethodSorter methodSorter) {
+            classIntrospectorPropertyAssignments.setMethodSorter(methodSorter);
         }
         
     }

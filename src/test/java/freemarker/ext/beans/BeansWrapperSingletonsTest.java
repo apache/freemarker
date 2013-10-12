@@ -91,10 +91,10 @@ public class BeansWrapperSingletonsTest extends TestCase {
         pa2.setUseModelCache(true);
         assertEquals(pa1, pa2);
         
-        AlphabeticalMethodShorter ms = new AlphabeticalMethodShorter(true);
-        pa1.setMethodShorter(ms);
+        AlphabeticalMethodSorter ms = new AlphabeticalMethodSorter(true);
+        pa1.setMethodSorter(ms);
         assertNotEquals(pa1, pa2);
-        pa2.setMethodShorter(ms);
+        pa2.setMethodSorter(ms);
         assertEquals(pa1, pa2);
         
         MethodAppearanceFineTuner maft = new MethodAppearanceFineTuner() {
@@ -125,7 +125,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertSame(bw, bw.getOuterIdentity());
             assertTrue(bw.isClassIntrospectionCacheRestricted());
             assertNull(bw.getMethodAppearanceFineTuner());
-            assertNull(bw.getMethodShorter());
+            assertNull(bw.getMethodSorter());
             
             try {
                 bw.setExposeFields(true);  // can't modify the settings of a (potential) singleton
@@ -156,7 +156,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
             assertTrue(bw.isClassIntrospectionCacheRestricted());
             assertNull(bw.getMethodAppearanceFineTuner());
-            assertNull(bw.getMethodShorter());
+            assertNull(bw.getMethodSorter());
             
             PropertyAssignments pa = new PropertyAssignments(V_2_3_21);
             pa.setSimpleMapWrapper(true);

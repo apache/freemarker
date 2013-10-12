@@ -9,12 +9,12 @@ import freemarker.template.Version;
 public abstract class BeansWrapperWithShortedMethods extends BeansWrapper {
     
     public BeansWrapperWithShortedMethods(boolean desc) {
-        this.setMethodShorter(new AlphabeticalMethodShorter(desc));
+        this.setMethodSorter(new AlphabeticalMethodSorter(desc));
     }
 
     public BeansWrapperWithShortedMethods(Version incompatibleImprovements, boolean desc) {
         super(incompatibleImprovements);
-        this.setMethodShorter(new AlphabeticalMethodShorter(desc));
+        this.setMethodSorter(new AlphabeticalMethodSorter(desc));
     }
 
 }

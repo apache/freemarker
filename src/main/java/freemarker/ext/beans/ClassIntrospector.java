@@ -92,7 +92,7 @@ class ClassIntrospector {
     final private int exposureLevel;
     final private boolean exposeFields;
     final private MethodAppearanceFineTuner methodAppearanceFineTuner;
-    final private MethodShorter methodShorter;
+    final private MethodSorter methodSorter;
     final private boolean bugfixed;
     
     /** See {@link #getHasSharedInstanceRestrictons()} */
@@ -140,7 +140,7 @@ class ClassIntrospector {
         this.exposureLevel = pa.exposureLevel;
         this.exposeFields = pa.exposeFields;
         this.methodAppearanceFineTuner = pa.methodAppearanceFineTuner;
-        this.methodShorter = pa.methodShorter; 
+        this.methodSorter = pa.methodSorter; 
         this.bugfixed = pa.bugfixed;
         
         this.sharedLock = sharedLock;
@@ -170,7 +170,7 @@ class ClassIntrospector {
      */
     static ClassIntrospector getInstance(PropertyAssignments pa) {
         if ((pa.methodAppearanceFineTuner == null || pa.methodAppearanceFineTuner instanceof SingletonCustomizer)
-                && (pa.methodShorter == null || pa.methodShorter instanceof SingletonCustomizer)) {
+                && (pa.methodSorter == null || pa.methodSorter instanceof SingletonCustomizer)) {
             // Instance can be cached.
             ClassIntrospector instance;
             synchronized (instanceCache) {
@@ -187,7 +187,7 @@ class ClassIntrospector {
             
             return instance;
         } else {
-            // If methodAppearanceFineTuner or methodShorter is specified and isn't marked as a singleton, the
+            // If methodAppearanceFineTuner or methodSorter is specified and isn't marked as a singleton, the
             // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
             // BeansWrapper.
             return new ClassIntrospector(pa, new Object(), true, false);
@@ -215,7 +215,7 @@ class ClassIntrospector {
         private int exposureLevel = BeansWrapper.EXPOSE_SAFE;
         private boolean exposeFields;
         private MethodAppearanceFineTuner methodAppearanceFineTuner;
-        private MethodShorter methodShorter;
+        private MethodSorter methodSorter;
         // Attention:
         // - This is also used as a cache key, so non-normalized field values should be avoided.
         // - If some field has a default value, it must be set until the end of the constructor. No field that has a
@@ -227,7 +227,7 @@ class ClassIntrospector {
             exposureLevel = ci.exposureLevel;
             exposeFields = ci.exposeFields;
             methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
-            methodShorter = ci.methodShorter; 
+            methodSorter = ci.methodSorter; 
         }
         
         PropertyAssignments(Version incompatibleImprovements) {
@@ -252,7 +252,7 @@ class ClassIntrospector {
             result = prime * result + (exposeFields ? 1231 : 1237);
             result = prime * result + exposureLevel;
             result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
-            result = prime * result + System.identityHashCode(methodShorter);
+            result = prime * result + System.identityHashCode(methodSorter);
             return result;
         }
     
@@ -266,7 +266,7 @@ class ClassIntrospector {
             if (exposeFields != other.exposeFields) return false;
             if (exposureLevel != other.exposureLevel) return false;
             if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
-            if (methodShorter != other.methodShorter) return false;
+            if (methodSorter != other.methodSorter) return false;
             
             return true;
         }
@@ -301,12 +301,12 @@ class ClassIntrospector {
             this.methodAppearanceFineTuner = methodAppearanceFineTuner;
         }
     
-        public MethodShorter getMethodShorter() {
-            return methodShorter;
+        public MethodSorter getMethodSorter() {
+            return methodSorter;
         }
     
-        public void setMethodShorter(MethodShorter methodShorter) {
-            this.methodShorter = methodShorter;
+        public void setMethodSorter(MethodSorter methodSorter) {
+            this.methodSorter = methodSorter;
         }
         
     }
@@ -429,7 +429,7 @@ class ClassIntrospector {
         
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
             final MethodAppearanceDecision decision = new MethodAppearanceDecision();  
-            final MethodDescriptor[] mda = shortMethodDescriptors(beanInfo.getMethodDescriptors());
+            final MethodDescriptor[] mda = sortMethodDescriptors(beanInfo.getMethodDescriptors());
             int mdaLength = mda != null ? mda.length : 0;  
             for (int i = mdaLength - 1; i >= 0; --i) {
                 MethodDescriptor md = mda[i];
@@ -634,8 +634,8 @@ class ClassIntrospector {
     /**
      * As of this writing, this is only used for testing if method order really doesn't mater.
      */
-    private MethodDescriptor[] shortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
-        return methodShorter != null ? methodShorter.shortMethodDescriptors(methodDescriptors) : methodDescriptors;
+    private MethodDescriptor[] sortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
+        return methodSorter != null ? methodSorter.sortMethodDescriptors(methodDescriptors) : methodDescriptors;
     }
 
     boolean isAllowedToExpose(Method method) {
@@ -888,8 +888,8 @@ class ClassIntrospector {
         return methodAppearanceFineTuner;
     }
 
-    MethodShorter getMethodShorter() {
-        return methodShorter;
+    MethodSorter getMethodSorter() {
+        return methodSorter;
     }
 
     /**
