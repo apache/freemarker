@@ -526,7 +526,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         return readOnly;
     }
     
-    public Object getSharedInrospectionLock() {
+    Object getSharedInrospectionLock() {
         return sharedInrospectionLock;
     }
     
