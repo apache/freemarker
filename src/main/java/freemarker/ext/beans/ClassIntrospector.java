@@ -386,7 +386,7 @@ class ClassIntrospector {
         
         if (exposureLevel != BeansWrapper.EXPOSE_NOTHING) {
             try {
-                addBeanInfoToClassInrospectionData(introspData, clazz, accessibleMethods);
+                addBeanInfoToClassIntrospectionData(introspData, clazz, accessibleMethods);
             } catch (IntrospectionException e) {
                 LOG.warn("Couldn't properly perform introspection for class " + clazz, e);
                 introspData.clear();  // FIXME NBC: Don't drop everything here. 
@@ -416,7 +416,7 @@ class ClassIntrospector {
         }
     }
 
-    private void addBeanInfoToClassInrospectionData(Map introspData, Class clazz, Map accessibleMethods)
+    private void addBeanInfoToClassIntrospectionData(Map introspData, Class clazz, Map accessibleMethods)
             throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
         
@@ -424,8 +424,8 @@ class ClassIntrospector {
         int pdaLength = pda != null ? pda.length : 0;
         for (int i = pdaLength - 1; i >= 0; --i) {
             addPropertyDescriptorToClassIntrospectionData(
-                    pda[i], clazz, accessibleMethods,
-                    introspData);
+                    introspData, pda[i], clazz,
+                    accessibleMethods);
         }
         
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
@@ -450,7 +450,7 @@ class ClassIntrospector {
                     
                     PropertyDescriptor propDesc = decision.getExposeAsProperty();
                     if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof PropertyDescriptor)) {
-                        addPropertyDescriptorToClassIntrospectionData(propDesc, clazz, accessibleMethods, introspData);
+                        addPropertyDescriptorToClassIntrospectionData(introspData, propDesc, clazz, accessibleMethods);
                     }
                     
                     String methodKey = decision.getExposeMethodAs();
@@ -480,8 +480,8 @@ class ClassIntrospector {
         } // end if (exposureLevel < EXPOSE_PROPERTIES_ONLY)
     }
 
-    private void addPropertyDescriptorToClassIntrospectionData(PropertyDescriptor pd,
-            Class clazz, Map accessibleMethods, Map classMap) {
+    private void addPropertyDescriptorToClassIntrospectionData(Map introspData,
+            PropertyDescriptor pd, Class clazz, Map accessibleMethods) {
         if (pd instanceof IndexedPropertyDescriptor) {
             IndexedPropertyDescriptor ipd = 
                 (IndexedPropertyDescriptor) pd;
@@ -495,8 +495,8 @@ class ClassIntrospector {
                                 null, publicReadMethod, 
                                 null);
                     }
-                    classMap.put(ipd.getName(), ipd);
-                    getArgTypes(classMap).put(publicReadMethod, publicReadMethod.getParameterTypes());
+                    introspData.put(ipd.getName(), ipd);
+                    getArgTypes(introspData).put(publicReadMethod, publicReadMethod.getParameterTypes());
                 } catch (IntrospectionException e) {
                     LOG.warn("Failed creating a publicly-accessible " +
                             "property descriptor for " + clazz.getName() + 
@@ -514,7 +514,7 @@ class ClassIntrospector {
                         pd = new PropertyDescriptor(pd.getName(), publicReadMethod, null);
                         pd.setReadMethod(publicReadMethod);
                     }
-                    classMap.put(pd.getName(), pd);
+                    introspData.put(pd.getName(), pd);
                 } catch (IntrospectionException e) {
                     LOG.warn("Failed creating a publicly-accessible " +
                             "property descriptor for " + clazz.getName() + 

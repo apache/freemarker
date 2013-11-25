@@ -71,8 +71,8 @@ import freemarker.template.utility._MethodUtil;
 final class OverloadedMethods
 {
     private final OverloadedMethodsSubset fixArgMethods;
-    private final boolean bugfixed;
     private OverloadedMethodsSubset varargMethods;
+    private final boolean bugfixed;
     
     OverloadedMethods(boolean bugfixed) {
         this.bugfixed = bugfixed;
