@@ -263,9 +263,9 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>Currently the effects of this setting are:
      * <ul>
-   *     <li><p>
-   *       2.3.0: This is just the starting point, the version used in older projects.
-   *     </li>
+     *   <li><p>
+     *     2.3.0: This is just the starting point, the version used in older projects.
+     *   </li>
      *   <li><p>
      *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
      *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
@@ -283,7 +283,7 @@ public class Configuration extends Configurable implements Cloneable {
      *     2.3.21 (or higher):
      *     <ul>
      *       <li><p>
-     *         The default of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
+     *         The <em>default</em> of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
      *         {@link ObjectWrapper#DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
      *         returned by {@link DefaultObjectWrapper#getInstance(Version)}. The new default object wrapper's
      *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
@@ -296,7 +296,7 @@ public class Configuration extends Configurable implements Cloneable {
      *         cache) because the singleton is modified after publishing.)
      *         Furthermore the new default object wrapper shares class introspection cache with other
      *         {@link BeansWrapper}-s get with {@code getInstance} calls, which has an impact as
-     *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be banned; see more about it there.
+     *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes

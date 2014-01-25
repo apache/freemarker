@@ -13,7 +13,7 @@ import freemarker.template.Version;
 public class ModelCacheTest {
     
     @Test
-    public void moldeCacheOff() throws Exception {
+    public void modelCacheOff() throws Exception {
         BeansWrapper bw = BeansWrapper.getInstance(new Version(2, 3, 21));
         assertFalse(bw.getUseCache());  // default is off
         
@@ -25,7 +25,7 @@ public class ModelCacheTest {
     }
     
     @Test
-    public void moldeCacheOn() throws Exception {
+    public void modelCacheOn() throws Exception {
         BeansWrapper bw = new BeansWrapper(new Version(2, 3, 21));
         bw.setUseCache(true);
         assertTrue(bw.getUseCache());

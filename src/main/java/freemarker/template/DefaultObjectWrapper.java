@@ -78,8 +78,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
     private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<DefaultObjectWrapper>>*/
-            instanceCache = new WeakHashMap();
-    private final static ReferenceQueue instanceCacheRefQue = new ReferenceQueue();
+            INSTANCE_CACHE = new WeakHashMap();
+    private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
     
     static final private Class W3C_DOM_NODE_CLASS, JYTHON_OBJ_CLASS;
     
@@ -155,7 +155,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      */
     public static BeansWrapper getInstance(PropertyAssignments pa) {
         return _BeansAPI.getBeansWrapperSubclassInstance(
-                pa, instanceCache, instanceCacheRefQue, DefaultObjectWrapperFactory.INSTANCE);
+                pa, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, DefaultObjectWrapperFactory.INSTANCE);
     }
 
     private static class DefaultObjectWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
@@ -269,8 +269,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     /** For unit testing only */
     static void clearInstanceCache() {
-        synchronized (instanceCache) {
-            instanceCache.clear();
+        synchronized (INSTANCE_CACHE) {
+            INSTANCE_CACHE.clear();
         }
     }
     

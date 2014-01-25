@@ -53,6 +53,7 @@
 package freemarker.ext.beans;
 
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
@@ -183,9 +184,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     protected final Object _preJava5Sync = _BeansAPI.JVM_USES_JSR133 ? null : new Object(); 
     
-    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<BeansWrapper>>*/ instanceCache
-            = new WeakHashMap();
-    private final static ReferenceQueue instanceCacheRefQue = new ReferenceQueue();
+    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<BeansWrapper>>*/
+            INSTANCE_CACHE = new WeakHashMap();
+    private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
     
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection cache:
@@ -231,8 +232,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     // -----------------------------------------------------------------------------------------------------------------
 
     // Why volatile: In principle it need not be volatile, but we want to catch modification attempts even if the
-    // object was published improperly to other threads. After all, the main goal of Locakable is protecting things from
-    // buggy user code.
+    // object was published improperly to other threads. After all, the main goal of WriteProtectable is protecting
+    // things from buggy user code.
     private volatile boolean readOnly;
     
     private TemplateModel nullModel = null;
@@ -370,7 +371,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             sharedInrospectionLock = new Object();
             classIntrospector = new ClassIntrospector(pa.classIntrospectorPropertyAssignments, sharedInrospectionLock);
         } else {
-            // As in this read-only BeansWrapper the classIntrospector is never replaced, and since it's shared by
+            // As in this read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
             classIntrospector = ClassIntrospector.getInstance(pa.classIntrospectorPropertyAssignments);
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
@@ -485,7 +486,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     public static BeansWrapper getInstance(PropertyAssignments pa) {
         return _BeansAPI.getBeansWrapperSubclassInstance(
-                pa, instanceCache, instanceCacheRefQue, BeansWrapperFactory.INSTANCE);
+                pa, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, BeansWrapperFactory.INSTANCE);
     }
     
     private static class BeansWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
@@ -500,14 +501,14 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
 
     /** For unit testing only */
     static void clearInstanceCache() {
-        synchronized (instanceCache) {
-            instanceCache.clear();
+        synchronized (INSTANCE_CACHE) {
+            INSTANCE_CACHE.clear();
         }
     }
 
     /** For unit testing only */
     static Map getInstanceCache() {
-        return instanceCache;
+        return INSTANCE_CACHE;
     }
     
     /**
@@ -977,8 +978,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     public TemplateModel wrap(Object object) throws TemplateModelException
     {
-        if(object == null)
-            return nullModel;
+        if(object == null) return nullModel;
         return modelCache.getInstance(object);
     }
 
@@ -1114,6 +1114,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     private Object tryUnwrap(TemplateModel model, Class hint, Map recursionStops) 
     throws TemplateModelException
     {
+        
         if(model == null || model == nullModel) {
             return null;
         }
@@ -1545,7 +1546,6 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         classIntrospector.clearCache();
     }
     
-    /** For unit tests only */
     ClassIntrospector getClassIntrospector() {
         return classIntrospector;
     }

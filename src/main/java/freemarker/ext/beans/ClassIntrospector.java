@@ -56,7 +56,7 @@ class ClassIntrospector {
     static final boolean DEVELOPMENT_MODE
             = "true".equals(SecurityUtilities.getSystemProperty("freemarker.development", "false"));
 
-    private static final boolean javaRebelAvailable;
+    private static final boolean JAVA_REBEL_AVAILABLE;
     static {
         boolean res;
         try {
@@ -65,7 +65,7 @@ class ClassIntrospector {
         } catch(NoClassDefFoundError e) {
             res = false;
         }
-        javaRebelAvailable = res;
+        JAVA_REBEL_AVAILABLE = res;
     }
     
     // -----------------------------------------------------------------------------------------------------------------
@@ -82,8 +82,8 @@ class ClassIntrospector {
      * Caches {@link ClassIntrospector}-s so that {@link BeansWrapper} instances can share them.
      * Used by {@link #getInstance(PropertyAssignments)}.
      */
-    private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ instanceCache = new HashMap();
-    private static final ReferenceQueue instanceCacheRefQue = new ReferenceQueue(); 
+    private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
+    private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue(); 
 
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection configuration properties:
@@ -149,7 +149,7 @@ class ClassIntrospector {
         this.hasSharedInstanceRestrictons = hasSharedInstanceRestrictons;
         this.shared = shared;
         
-        if (javaRebelAvailable) {
+        if (JAVA_REBEL_AVAILABLE) {
             JavaRebelIntegration.register(this);
         }
     }
@@ -165,22 +165,19 @@ class ClassIntrospector {
     /**
      * Returns an instance that is possibly shared (singleton). Note that this comes with its own "shared lock",
      * since everyone who uses this object will have to lock with that common object.
-     * 
-     * <p>We don't use a plain {@code getInstance} to prevent the handy but dangerous idea where {@link BeansWrapper}
-     * gets the shared lock from the {@link ClassIntrospector} instance. It can't be get from it, so it's prevented...
      */
     static ClassIntrospector getInstance(PropertyAssignments pa) {
         if ((pa.methodAppearanceFineTuner == null || pa.methodAppearanceFineTuner instanceof SingletonCustomizer)
                 && (pa.methodSorter == null || pa.methodSorter instanceof SingletonCustomizer)) {
             // Instance can be cached.
             ClassIntrospector instance;
-            synchronized (instanceCache) {
-                Reference instanceRef = (Reference) instanceCache.get(pa);
+            synchronized (INSTANCE_CACHE) {
+                Reference instanceRef = (Reference) INSTANCE_CACHE.get(pa);
                 instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
                 if (instance == null) {
                     pa = (PropertyAssignments) pa.clone();  // prevent any aliasing issues
                     instance = new ClassIntrospector(pa, new Object(), true, true);
-                    instanceCache.put(pa, new WeakReference(instance, instanceCacheRefQue));
+                    INSTANCE_CACHE.put(pa, new WeakReference(instance, INSTANCE_CACHE_REF_QUEUE));
                 }
             }
             
@@ -197,9 +194,9 @@ class ClassIntrospector {
 
     private static void removeClearedReferencesFromInstanceCache() {
         Reference clearedRef;
-        while ((clearedRef = instanceCacheRefQue.poll()) != null) {
-            synchronized (instanceCache) {
-                findClearedRef: for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
+        while ((clearedRef = INSTANCE_CACHE_REF_QUEUE.poll()) != null) {
+            synchronized (INSTANCE_CACHE) {
+                findClearedRef: for (Iterator it = INSTANCE_CACHE.values().iterator(); it.hasNext(); ) {
                     if (it.next() == clearedRef) {
                         it.remove();
                         break findClearedRef;
@@ -918,7 +915,7 @@ class ClassIntrospector {
     
     /**
      * Almost always, you want to use {@link BeansWrapper#getSharedInrospectionLock()}, not this! The only exception is
-     * when you get this to set the filed returned by {@link BeansWrapper#getSharedInrospectionLock()}.
+     * when you get this to set the field returned by {@link BeansWrapper#getSharedInrospectionLock()}.
      */
     Object getSharedLock() {
         return sharedLock;
@@ -936,14 +933,14 @@ class ClassIntrospector {
 
     /** For unit testing only */
     static void clearInstanceCache() {
-        synchronized (instanceCache) {
-            instanceCache.clear();
+        synchronized (INSTANCE_CACHE) {
+            INSTANCE_CACHE.clear();
         }
     }
     
     /** For unit testing only */
     static Map getInstanceCache() {
-        return instanceCache;
+        return INSTANCE_CACHE;
     }
 
     

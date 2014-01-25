@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import freemarker.core.BugException;
 import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.utility.Collections12;
@@ -167,6 +168,9 @@ public class _BeansAPI {
         
         pa = (PropertyAssignments) pa.clone(true);  // prevent any aliasing issues 
         instance = beansWrapperSubclassFactory.create(pa);
+        if (!instance.isWriteProtected()) {
+            throw new BugException();
+        }
         
         synchronized (instanceCache) {
             instanceRef = (Reference) tcclScopedCache.get(pa);
