@@ -81,17 +81,17 @@ final class OverloadedMethods
     
     void addMethod(Method member) {
         final Class[] paramTypes = member.getParameterTypes();
-        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(member, paramTypes));
     }
 
     void addConstructor(Constructor member) {
         final Class[] paramTypes = member.getParameterTypes();
-        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(member, paramTypes));
     }
     
-    private void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+    private void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
-        if(_MethodUtil.isVarArgs(memberDesc.member)) {
+        if (memberDesc.isVarargs()) {
             if(varargMethods == null) {
                 varargMethods = new OverloadedVarArgsMethods(bugfixed);
             }
@@ -134,12 +134,12 @@ final class OverloadedMethods
             while (fixArgMethodsIter.hasNext()) {
                 if (sb.length() != 0) sb.append(",\n");
                 sb.append("    ");
-                sb.append(methodOrConstructorToString(((CallableMemberDescriptor) fixArgMethodsIter.next()).member));
+                sb.append(((CallableMemberDescriptor) fixArgMethodsIter.next()).getDeclaration());
             }
             if (varargMethodsIter != null) {
                 while (varargMethodsIter.hasNext()) {
                     if (sb.length() != 0) sb.append(",\n");
-                    sb.append(methodOrConstructorToString(((CallableMemberDescriptor) varargMethodsIter.next()).member));
+                    sb.append(((CallableMemberDescriptor) varargMethodsIter.next()).getDeclaration());
                 }
             }
             return sb.toString();
@@ -152,27 +152,27 @@ final class OverloadedMethods
      * The description of the signature deduced from the method/constructor call, used in error messages.
      */
     private String getDeducedCallSignature(List arguments) {
-        final Member firstMember;
+        final CallableMemberDescriptor firstMemberDesc;
         Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         if (fixArgMethodsIter.hasNext()) {
-            firstMember = ((CallableMemberDescriptor) fixArgMethodsIter.next()).member;
+            firstMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
         } else {
             Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
             if (varArgMethods != null && varArgMethods.hasNext()) {
-                firstMember = ((CallableMemberDescriptor) varArgMethods.next()).member;
+                firstMemberDesc = (CallableMemberDescriptor) varArgMethods.next();
             } else {
-                firstMember = null;
+                firstMemberDesc = null;
             }
         }
         
         StringBuffer sb = new StringBuffer();
-        if (firstMember != null) {
-            if (firstMember instanceof Constructor) {
+        if (firstMemberDesc != null) {
+            if (firstMemberDesc.isConstructor()) {
                 sb.append("constructor ");
             } else {
                 sb.append("method ");
             }
-            sb.append(firstMember.getName());
+            sb.append(firstMemberDesc.getName());
         } else {
             sb.append("???");
         }
@@ -188,28 +188,4 @@ final class OverloadedMethods
         
     }
 
-    /**
-     * Detailed method/constructor description for parameter list error messages.
-     */
-    private String methodOrConstructorToString(Member member) {
-        StringBuffer sb = new StringBuffer();
-        
-        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
-        if (className != null) {
-            sb.append(className);
-            sb.append('.');
-        }
-        sb.append(member.getName());
-
-        sb.append('(');
-        Class[] paramTypes = _MethodUtil.getParameterTypes(member);
-        for (int i = 0; i < paramTypes.length; i++) {
-            if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getShortClassName(paramTypes[i]));
-        }
-        sb.append(')');
-        
-        return sb.toString();
-    }
-    
 }

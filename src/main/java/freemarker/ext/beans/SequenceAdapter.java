@@ -41,4 +41,9 @@ class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
             throw new UndeclaredThrowableException(e);
         }
     }
+    
+    public TemplateSequenceModel getTemplateSequenceModel() {
+        return model;
+    }
+    
 }

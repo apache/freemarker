@@ -53,7 +53,6 @@
 package freemarker.ext.beans;
 
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
@@ -72,6 +71,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import freemarker.core.BugException;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -94,9 +94,9 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.WriteProtectable;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.UndeclaredThrowableException;
+import freemarker.template.utility.WriteProtectable;
 
 /**
  * {@link ObjectWrapper} that is able to expose the Java API of arbitrary Java objects. This is also the superclass of
@@ -1084,11 +1084,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
 
     /**
-     * Same as {@link #tryUnwrap(TemplateModel, Class, int)} with 0 last argument.
+     * Same as {@link #tryUnwrap(TemplateModel, Class, int, boolean)} with 0 and <tt>false</tt> last arguments.
      */
     Object tryUnwrap(TemplateModel model, Class hint) throws TemplateModelException
     {
-        return tryUnwrap(model, hint, 0);
+        return tryUnwrap(model, hint, 0, false);
     }
     
     /**
@@ -1096,12 +1096,13 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *        This will be ignored if the hint is already a concrete numerical type. (With overloaded methods the hint
      *        is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
      *        concrete overloaded method.)
+     * @param overloadedMode Set true {@code true} when unwrapping for an overloaded method parameter
      * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
      */
-    Object tryUnwrap(TemplateModel model, Class hint, int targetNumTypes) 
+    Object tryUnwrap(TemplateModel model, Class hint, int targetNumTypes, boolean overloadedMode) 
     throws TemplateModelException
     {
-        Object res = tryUnwrap(model, hint, null);
+        Object res = tryUnwrap(model, hint, overloadedMode, null);
         if (targetNumTypes != 0
                 && (targetNumTypes & OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
@@ -1111,7 +1112,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
     }
 
-    private Object tryUnwrap(TemplateModel model, Class hint, Map recursionStops) 
+    /**
+     * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
+     */
+    private Object tryUnwrap(TemplateModel model, Class hint, boolean overloadedMode,  Map recursionStops) 
     throws TemplateModelException
     {
         
@@ -1220,32 +1224,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // TemplateSequenceModels can be converted to arrays
         if(hint.isArray()) {
             if(model instanceof TemplateSequenceModel) {
-                if(recursionStops != null) {
-                    Object retval = recursionStops.get(model);
-                    if(retval != null) {
-                        return retval;
-                    }
-                } else {
-                    recursionStops = 
-                        new IdentityHashMap();
-                }
-                TemplateSequenceModel seq = (TemplateSequenceModel)model;
-                Class componentType = hint.getComponentType();
-                Object array = Array.newInstance(componentType, seq.size());
-                recursionStops.put(model, array);
-                try {
-                    int size = seq.size();
-                    for (int i = 0; i < size; i++) {
-                        Object val = tryUnwrap(seq.get(i), componentType, recursionStops);
-                        if(val == CAN_NOT_UNWRAP) {
-                            return CAN_NOT_UNWRAP;
-                        }
-                        Array.set(array, i, val);
-                    }
-                } finally {
-                    recursionStops.remove(model);
-                }
-                return array;
+                return unwrapSequenceToArray((TemplateSequenceModel) model, hint, true, recursionStops);
             }
             // array classes are final, no other conversion will work
             return CAN_NOT_UNWRAP;
@@ -1309,6 +1288,13 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 hint.isAssignableFrom(SETADAPTER_CLASS)) {
             return new SetAdapter((TemplateCollectionModel)model, this);
         }
+        if (overloadedMode && is2321Bugfixed()) {
+            /** Because List-s are convertible to arrays later */
+            if(model instanceof TemplateSequenceModel 
+                    && hint.isAssignableFrom(Object[].class)) {
+                return new SequenceAdapter((TemplateSequenceModel)model, this);
+            }
+        }
 
         // Last ditch effort - is maybe the model itself instance of the 
         // required type?
@@ -1317,6 +1303,86 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         
         return CAN_NOT_UNWRAP;
+    }
+
+    /**
+     * @param tryOnly if <tt>true</true>, if the conversion of an item fails, the method returns {@link #CAN_NOT_UNWRAP}
+     *     instead of throwing a {@link TemplateModelException}.
+     */
+    Object unwrapSequenceToArray(TemplateSequenceModel seq, Class arrayClass, boolean tryOnly, Map recursionStops)
+            throws TemplateModelException {
+        if(recursionStops != null) {
+            Object retval = recursionStops.get(seq);
+            if(retval != null) {
+                return retval;
+            }
+        } else {
+            recursionStops = new IdentityHashMap();
+        }
+        Class componentType = arrayClass.getComponentType();
+        Object array = Array.newInstance(componentType, seq.size());
+        recursionStops.put(seq, array);
+        try {
+            int size = seq.size();
+            for (int i = 0; i < size; i++) {
+                final TemplateModel seqItem = seq.get(i);
+                Object val = tryUnwrap(seqItem, componentType, false, recursionStops);
+                if(val == CAN_NOT_UNWRAP) {
+                    if (tryOnly) {
+                        return CAN_NOT_UNWRAP;
+                    } else {
+                        throw new TemplateModelException(
+                                "Failed to convert " + ClassUtil.getFTLTypeDescription(seq)
+                                + " object to " + ClassUtil.getShortClassNameOfObject(array) + " at index " + i
+                                + ". The type of the failing item was: " + ClassUtil.getFTLTypeDescription(seqItem));
+                    }
+                }
+                Array.set(array, i, val);
+            }
+        } finally {
+            recursionStops.remove(seq);
+        }
+        return array;
+    }
+    
+    Object listToArray(List list, Class arrayClass, Map recursionStops)
+            throws TemplateModelException {
+        if (list instanceof SequenceAdapter) {
+            return unwrapSequenceToArray(
+                    ((SequenceAdapter) list).getTemplateSequenceModel(),
+                    arrayClass, false,
+                    recursionStops);
+        }
+        
+        if(recursionStops != null) {
+            Object retval = recursionStops.get(list);
+            if(retval != null) {
+                return retval;
+            }
+        } else {
+            recursionStops = new IdentityHashMap();
+        }
+        Class componentType = arrayClass.getComponentType();
+        Object array = Array.newInstance(componentType, list.size());
+        recursionStops.put(list, array);
+        try {
+            int i = 0;
+            for (Iterator it = list.iterator(); it.hasNext();) {
+                Object listItem = it.next();
+                // TODO: Component type conversion: numerical types, char -> String, Java 5 CharSequence -> String
+                try {
+                    Array.set(array, i++, listItem);
+                } catch (IllegalArgumentException e) {
+                    throw new TemplateModelException(
+                            "Failed to convert " + ClassUtil.getShortClassNameOfObject(list)
+                            + " object to " + ClassUtil.getShortClassNameOfObject(array) + " at index " + i
+                            + ". The type of the failing item was: " + ClassUtil.getShortClassNameOfObject(listItem), e);
+                }
+            }
+        } finally {
+            recursionStops.remove(list);
+        }
+        return array;
     }
 
     /**
@@ -1476,21 +1542,18 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 SimpleMethod sm = (SimpleMethod)ctors;
                 ctor = (Constructor)sm.getMember();
                 objargs = sm.unwrapArguments(arguments, this);
+                return ctor.newInstance(objargs);
             }
             else if(ctors instanceof OverloadedMethods)
             {
                 OverloadedMethods overloadedConstructors = (OverloadedMethods) ctors; 
-                MemberAndArguments maa = 
-                    overloadedConstructors.getMemberAndArguments(arguments, this);
-                objargs = maa.getArgs();
-                ctor = (Constructor)maa.getMember();
+                return overloadedConstructors.getMemberAndArguments(arguments, this).invokeConstructor(this);
             }
             else
             {
                 // Cannot happen
-                throw new Error();
+                throw new BugException();
             }
-            return ctor.newInstance(objargs);
         }
         catch (TemplateModelException e)
         {

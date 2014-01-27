@@ -20703,7 +20703,38 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       change at least after some Java updates, breaking the
                       application.</para>
                     </listitem>
+
+                    <listitem>
+                      <para>When comparing the specificity of two array types,
+                      until now they were seen as equal. Now the component
+                      types are compared, and then that with the less specific
+                      component type is preferred. For example, among
+                      <literal>f(String[])</literal> and
+                      <literal>f(Object[])</literal>, the last will always
+                      win. This might sounds controversial, but as we can't
+                      efficiently tell the common type of all the items in a
+                      sequence or <literal>List</literal>, an so we don't know
+                      if both arrays are indeed valid targets, we go for the
+                      safest choice.</para>
+                    </listitem>
                   </itemizedlist>
+                </listitem>
+
+                <listitem>
+                  <para>FTL sequence (or wrapped Java
+                  <literal>List</literal>-s) values were not seen as
+                  applicable to a parameter with array type if there were
+                  multiple overloaded methods with the same number of
+                  parameters but with different types on the position of the
+                  array parameter. That is, if you had
+                  <literal>f(String[])</literal> and
+                  <literal>f(String)</literal> in Java, then
+                  <literal>f(['foo', 'bar'])</literal> in the template
+                  reported no compatible overloads. Now it will choose
+                  <literal>f(String[])</literal>. Note that if there's also an
+                  <literal>f(List)</literal> or even an
+                  <literal>f(Collection)</literal>, it will prefer those over
+                  arrays.</para>
                 </listitem>
 
                 <listitem>

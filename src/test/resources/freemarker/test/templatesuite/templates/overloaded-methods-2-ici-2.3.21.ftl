@@ -202,3 +202,22 @@
                expected='mRareWrappings(Object o = true, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
                
 <@assertEquals actual=obj.mRareWrappings2(obj.adaptedNumber) expected='mRareWrappings2(byte b = 124)' />
+
+<#-- Test for List VS array problems due to too vague hinting: -->
+
+<@assertEquals actual=obj.mSeqToArrayNonOverloaded(['a', 'b'], 'c') expected='mSeqToArrayNonOverloaded(String[] [a, b], String c)' />
+
+<@assertEquals actual=obj.mSeqToArrayGoodHint(['a', 'b'], 'c') expected='mSeqToArrayGoodHint(String[] [a, b], String c)' />
+<@assertEquals actual=obj.mSeqToArrayGoodHint(['a', 'b'], 3) expected='mSeqToArrayGoodHint(String[] [a, b], int 3)' />
+
+<@assertEquals actual=obj.mSeqToArrayGoodHint2(['a', 'b'], 'c') expected='mSeqToArrayGoodHint2(String[] [a, b], String c)' />
+<@assertEquals actual=obj.mSeqToArrayGoodHint2('a') expected='mSeqToArrayGoodHint2(String a)' />
+
+<@assertEquals actual=obj.mSeqToArrayPoorHint(['a', 'b'], 'c') expected='mSeqToArrayPoorHint(String[] [a, b], String c)' />
+<@assertEquals actual=obj.mSeqToArrayPoorHint('a', 2) expected='mSeqToArrayPoorHint(String a, int 2)' />
+
+<@assertEquals actual=obj.mSeqToArrayPoorHint2(['a', 'b']) expected='mSeqToArrayPoorHint2(String[] [a, b])' />
+<@assertEquals actual=obj.mSeqToArrayPoorHint2('a') expected='mSeqToArrayPoorHint2(String a)' />
+
+<@assertFails message="multiple compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint3(['a', 'b']) expected='mSeqToArrayPoorHint3(String[] [a, b])' /></@>
+<@assertFails message="multiple compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint3([1, 2]) expected='mSeqToArrayPoorHint3(int[] [a, b])' /></@>

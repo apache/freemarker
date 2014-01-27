@@ -15,6 +15,7 @@ import java.util.Map;
 import freemarker.core.BugException;
 import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.TemplateModelException;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility._MethodUtil;
 
@@ -43,14 +44,10 @@ public class _BeansAPI {
         return bm.getAsClassicCompatibleString();
     }
     
-    /**
-     * Convenience method that combines {@link #getConstructor(Class, Object[])} and
-     * {@link #newInstance(Constructor, Object[])}.
-     */
-    public static Object newInstance(Class pClass, Object[] args)
+    public static Object newInstance(Class pClass, Object[] args, BeansWrapper bw)
             throws NoSuchMethodException, IllegalArgumentException, InstantiationException,
-            IllegalAccessException, InvocationTargetException {
-        return newInstance(getConstructor(pClass, args), args);
+            IllegalAccessException, InvocationTargetException, TemplateModelException {
+        return newInstance(getConstructorDescriptor(pClass, args), args, bw);
     }
     
     /**
@@ -58,7 +55,7 @@ public class _BeansAPI {
      * than what the Java reflection API provides in that it can handle overloaded constructors. This re-uses the
      * overloaded method selection logic of {@link BeansWrapper}.
      */
-    public static Constructor getConstructor(Class pClass, Object[] args) throws NoSuchMethodException {
+    private static CallableMemberDescriptor getConstructorDescriptor(Class pClass, Object[] args) throws NoSuchMethodException {
         if (args == null) args = Collections12.EMPTY_OBJECT_ARRAY;
         
         final ArgumentTypes argTypes = new ArgumentTypes(args, true);
@@ -67,7 +64,7 @@ public class _BeansAPI {
         final Constructor[] constrs = pClass.getConstructors();
         for (int i = 0; i < constrs.length; i++) {
             Constructor constr = constrs[i];
-            CallableMemberDescriptor memberDesc = new CallableMemberDescriptor(constr, constr.getParameterTypes());
+            ReflectionCallableMemberDescriptor memberDesc = new ReflectionCallableMemberDescriptor(constr, constr.getParameterTypes());
             if (!_MethodUtil.isVarArgs(constr)) {
                 fixedArgMemberDescs.add(memberDesc);
             } else {
@@ -93,22 +90,20 @@ public class _BeansAPI {
                 throw new NoSuchMethodException();
             }
         } else {
-            return (Constructor) ((CallableMemberDescriptor) contrDesc).member;
+            return (CallableMemberDescriptor) contrDesc;
         }
     }
     
-    /**
-     * Creates a new instance using a flat argument list (no varargs array parameter). 
-     */
-    public static Object newInstance(Constructor constr, Object[] args)
-            throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    private static Object newInstance(CallableMemberDescriptor constrDesc, Object[] args, BeansWrapper bw)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException, IllegalArgumentException,
+            TemplateModelException {
         if (args == null) args = Collections12.EMPTY_OBJECT_ARRAY;
         
         final Object[] packedArgs;
-        if (_MethodUtil.isVarArgs(constr)) {
+        if (constrDesc.isVarargs()) {
             // We have to put all the varargs arguments into a single array argument.
 
-            final Class[] paramTypes = constr.getParameterTypes();
+            final Class[] paramTypes = constrDesc.getParamTypes();
             final int fixedArgCnt = paramTypes.length - 1;
             
             packedArgs = new Object[fixedArgCnt + 1]; 
@@ -127,7 +122,7 @@ public class _BeansAPI {
             packedArgs = args;
         }
         
-        return constr.newInstance(packedArgs);
+        return constrDesc.invokeConstructor(bw, packedArgs);
     }
     
     /**

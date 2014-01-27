@@ -56,6 +56,33 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
         assertEquals(CharSequence.class, fixed.getCommonSupertypeForUnwrappingHint(String.class, StringBuilder.class));
         assertEquals(C6.class, fixed.getCommonSupertypeForUnwrappingHint(C7ExtC6I1.class, C8ExtC6I1.class));
     }
+
+    public void testArrayAndOther() {
+        testArrayAndOther(buggy);
+        testArrayAndOther(fixed);
+    }
+    
+    /** These will be the same with fixed and buggy: */
+    private void testArrayAndOther(OverloadedMethodsSubset oms) {
+        assertEquals(Serializable.class, oms.getCommonSupertypeForUnwrappingHint(int[].class, String.class));
+        assertEquals(Serializable.class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, String.class));
+        
+        assertEquals(Object.class, oms.getCommonSupertypeForUnwrappingHint(int[].class, List.class));
+        assertEquals(Object.class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, List.class));
+        
+        assertEquals(int[].class, oms.getCommonSupertypeForUnwrappingHint(int[].class, int[].class));
+        assertEquals(Object[].class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, Object[].class));
+    }
+    
+    public void testArrayAndDifferentArrayBuggy() {
+        assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(int[].class, Object[].class));
+        assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(int[].class, long[].class));
+    }
+    
+    public void testArrayAndDifferentArrayFixed() {
+        assertEquals(Serializable.class, fixed.getCommonSupertypeForUnwrappingHint(int[].class, Object[].class));
+        assertEquals(Serializable.class, fixed.getCommonSupertypeForUnwrappingHint(int[].class, long[].class));
+    }
     
     public void testFixedPrimitive() {
         assertEquals(Integer.class, fixed.getCommonSupertypeForUnwrappingHint(int.class, Integer.class));
@@ -116,7 +143,7 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
 
         @Override
         Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
-            return memberDesc.paramTypes;
+            return memberDesc.getParamTypes();
         }
 
         @Override

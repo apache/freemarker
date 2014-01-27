@@ -92,7 +92,7 @@ abstract class OverloadedMethodsSubset {
     private final boolean isArgTypesToMemberDescCacheConcurrentMap
             = _ConcurrentMapFactory.isConcurrent(argTypesToMemberDescCache);
     
-    private final List/*<CallableMemberDescriptor>*/ memberDescs = new LinkedList();
+    private final List/*<ReflectionCallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
     /** Enables 2.3.21 {@link BeansWrapper} incompatibleImprovements */
     protected final boolean bugfixed;
@@ -101,7 +101,7 @@ abstract class OverloadedMethodsSubset {
         this.bugfixed = bugfixed;
     }
     
-    void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+    void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
         memberDescs.add(memberDesc);
         
         // Warning: Do not modify this array, or put it into unwrappingHintsByParamCount by reference, as the arrays
@@ -181,7 +181,7 @@ abstract class OverloadedMethodsSubset {
         return memberDesc;
     }
     
-    Iterator/*<CallableMemberDescriptor>*/ getMemberDescriptors() {
+    Iterator/*<ReflectionCallableMemberDescriptor>*/ getMemberDescriptors() {
         return memberDescs.iterator();
     }
     

@@ -1,29 +1,36 @@
 package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import freemarker.template.TemplateModelException;
+import freemarker.template.utility._MethodUtil;
 
 /**
  * Packs a {@link Method} or {@link Constructor} together with its parameter types.
  */
-final class CallableMemberDescriptor extends MaybeEmptyCallableMemberDescriptor {
+abstract class CallableMemberDescriptor extends MaybeEmptyCallableMemberDescriptor {
 
-    final Member/*Method|Constructor*/ member;
-    
-    /**
-     * Don't modify this array!
-     */
-    final Class[] paramTypes;
-    
-    CallableMemberDescriptor(Method member, Class[] paramTypes) {
-        this.member = member;
-        this.paramTypes = paramTypes;
-    }
+    abstract Object invokeMethod(BeansWrapper bw, Object obj, Object[] args)
+            throws TemplateModelException, InvocationTargetException, IllegalAccessException;
 
-    CallableMemberDescriptor(Constructor member, Class[] paramTypes) {
-        this.member = member;
-        this.paramTypes = paramTypes;
-    }
+    abstract Object invokeConstructor(BeansWrapper bw, Object[] args)
+            throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException,
+            TemplateModelException;
+    
+    abstract String getDeclaration();
+    
+    abstract boolean isConstructor();
+    
+    abstract boolean isStatic();
+
+    abstract boolean isVarargs();
+
+    abstract Class[] getParamTypes();
+
+    abstract String getName();
     
 }

@@ -1,3 +1,5 @@
+<#-- Note that the point of 2.3.20 tests is to check if bugs fixed in 2.3.21 are still emulated in pre-2.3.21 mode -->
+
 <@assertFails message="no compatible overloaded">${obj.mVarargs('a', obj.getNnS('b'), obj.getNnS('c'))}</@>
 <@assertFails message="no compatible overloaded">${obj.mChar('a')}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntPrimVSBoxed(123?long)}</@>

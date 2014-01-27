@@ -1,9 +1,12 @@
 package freemarker.ext.beans;
 
 import junit.framework.TestCase;
+import freemarker.template.Version;
 import freemarker.test.utility.Helpers;
 
 public class BeansAPINewInstanceTest extends TestCase {
+
+    private BeansWrapper beansWrapper = BeansWrapper.getInstance(new Version(2, 3, 21));
 
     public BeansAPINewInstanceTest(String name) {
         super(name);
@@ -72,7 +75,7 @@ public class BeansAPINewInstanceTest extends TestCase {
     }
     
     private void testCall(String expected, Class cl, Object... args) throws Exception {
-        Object obj = _BeansAPI.newInstance(cl, args); 
+        Object obj = _BeansAPI.newInstance(cl, args, beansWrapper); 
         assertEquals(expected, obj.toString());        
     }
     

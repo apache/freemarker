@@ -1,3 +1,5 @@
+<#-- Note that the point of 2.3.20 tests is to check if bugs fixed in 2.3.21 are still emulated in pre-2.3.21 mode -->
+
 <@assertEquals actual=obj.mVarargs('a', obj.getNnS('b'), obj.getNnS('c')) expected='mVarargs(String... a1 = abc)' />
 <@assertFails message="multiple compatible overload">${obj.mChar('a')}</@>
 <@assertFails message="multiple compatible overload">${obj.mIntPrimVSBoxed(123?long)}</@>

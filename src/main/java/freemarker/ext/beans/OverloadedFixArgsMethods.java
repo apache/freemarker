@@ -69,7 +69,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     }
 
     Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
-        return memberDesc.paramTypes;
+        return memberDesc.getParamTypes();
     }
     
     void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
@@ -104,7 +104,8 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
             Object pojo = unwrapper.tryUnwrap(
                     (TemplateModel) it.next(),
                     unwarppingHints[i],
-                    possibleNumericalTypes != null ? possibleNumericalTypes[i] : 0);
+                    possibleNumericalTypes != null ? possibleNumericalTypes[i] : 0,
+                    true);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
@@ -119,12 +120,12 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
                     // Note that overloaded method selection has already accounted for overflow errors when the method
                     // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
                     // BigDecimal is allowed to overflow for backward-compatibility.
-                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.paramTypes, possibleNumericalTypes);
+                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.getParamTypes(), possibleNumericalTypes);
                 }
             } else {
-                BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+                BeansWrapper.coerceBigDecimals(memberDesc.getParamTypes(), pojoArgs);
             }
-            return new MemberAndArguments(memberDesc.member, pojoArgs);
+            return new MemberAndArguments(memberDesc, pojoArgs);
         } else {
             return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc);
         }

@@ -53,10 +53,8 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Array;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -67,84 +65,16 @@ import freemarker.template.TemplateModelException;
  */
 class OverloadedVarArgsMethods extends OverloadedMethodsSubset
 {
-    private static final Map canoncialArgPackers = new HashMap();
-    private final Map argPackers = new HashMap();
 
     OverloadedVarArgsMethods(boolean bugfixed) {
         super(bugfixed);
     }
     
-    // TODO: Do we really need this class?
-    private static class ArgumentPacker {
-        private final int paramCount;
-        private final Class varArgsCompType;
-        
-        ArgumentPacker(int paramCount, Class varArgsCompType) {
-            this.paramCount = paramCount;
-            this.varArgsCompType = varArgsCompType; 
-        }
-        
-        Object[] packArgs(Object[] args, List modelArgs, BeansWrapper unwrapper) 
-        throws TemplateModelException {
-            final int totalArgCount = args.length;
-            final int fixArgCount = paramCount - 1;
-            if(args.length != paramCount) {
-                Object[] packedArgs = new Object[paramCount];
-                System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
-                Object varargs = Array.newInstance(varArgsCompType, totalArgCount - fixArgCount);
-                for(int i = fixArgCount; i < totalArgCount; ++i) {
-                    Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
-                    if(val == BeansWrapper.CAN_NOT_UNWRAP) {
-                        return null;
-                    }
-                    Array.set(varargs, i - fixArgCount, val);
-                }
-                packedArgs[fixArgCount] = varargs;
-                return packedArgs;
-            }
-            else {
-                Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
-                if(val == BeansWrapper.CAN_NOT_UNWRAP) {
-                    return null;
-                }
-                Object array = Array.newInstance(varArgsCompType, 1);
-                Array.set(array, 0, val);
-                args[fixArgCount] = array;
-                return args;
-            }
-        }
-        
-        public boolean equals(Object obj) {
-            if(obj instanceof ArgumentPacker) {
-                ArgumentPacker p = (ArgumentPacker)obj;
-                return paramCount == p.paramCount && varArgsCompType == p.varArgsCompType;
-            }
-            return false;
-        }
-        
-        public int hashCode() {
-            return paramCount ^ varArgsCompType.hashCode();
-        }
-    }
-
     Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
-        final Class[] preprocessedParamTypes = (Class[]) memberDesc.paramTypes.clone();
+        final Class[] preprocessedParamTypes = (Class[]) memberDesc.getParamTypes().clone();
         int ln = preprocessedParamTypes.length;
         final Class varArgsCompType = preprocessedParamTypes[ln - 1].getComponentType();
         preprocessedParamTypes[ln - 1] = varArgsCompType;
-        
-        ArgumentPacker argPacker = new ArgumentPacker(ln, varArgsCompType);
-        synchronized(canoncialArgPackers) {
-            ArgumentPacker canonical = (ArgumentPacker) canoncialArgPackers.get(argPacker);
-            if(canonical == null) {
-                canoncialArgPackers.put(argPacker, argPacker);
-            }
-            else {
-                argPacker = canonical;
-            }
-        argPackers.put(memberDesc.member, argPacker);
-        }
-        
         return preprocessedParamTypes;
     }
 
@@ -239,13 +169,12 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             // null is treated as empty args
             tmArgs = Collections.EMPTY_LIST;
         }
-        int argsLen = tmArgs.size();
-        Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
-        Object[] pojoArgs = new Object[argsLen];
+        final int argsLen = tmArgs.size();
+        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
+        final Object[] pojoArgs = new Object[argsLen];
         int[] possibleNumericalTypes = null;
-        // Starting from args.length + 1 as we must try to match against a case
-        // where all specified args are fixargs, and the vararg portion 
-        // contains zero args
+        // Going down starting from methods with args.length + 1 parameters, because we must try to match against a case
+        // where all specified args are fixargs, and we have 0 varargs.
         outer: for(int paramCount = Math.min(argsLen + 1, unwrappingHintsByParamCount.length - 1); paramCount >= 0; --paramCount) {
             Class[] unwarappingHints = unwrappingHintsByParamCount[paramCount];
             if(unwarappingHints == null) {
@@ -267,20 +196,21 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 Object pojo = unwrapper.tryUnwrap(
                         (TemplateModel)it.next(),
                         unwarappingHints[paramIdx],
-                        possibleNumericalTypes != null ? possibleNumericalTypes[paramIdx] : 0);
+                        possibleNumericalTypes != null ? possibleNumericalTypes[paramIdx] : 0,
+                        true);
                 if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                     continue outer;
                 }
                 pojoArgs[i] = pojo;
             }
-            break;
+            break outer;
         }
         
         MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, true);
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
-            pojoArgs = ((ArgumentPacker) argPackers.get(memberDesc.member)).packArgs(pojoArgs, tmArgs, unwrapper);
-            if(pojoArgs == null) {
+            Object[] pojoArgsWithArray = replaceVarargsSectionWithArray(pojoArgs, tmArgs, memberDesc, unwrapper);
+            if(pojoArgsWithArray == null) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
             if (bugfixed) {
@@ -288,14 +218,53 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                     // Note that overloaded method selection has already accounted for overflow errors when the method
                     // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
                     // BigDecimal is allowed to overflow for backward-compatibility.
-                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.paramTypes, possibleNumericalTypes);
+                    forceNumberArgumentsToParameterTypes(pojoArgsWithArray, memberDesc.getParamTypes(), possibleNumericalTypes);
                 }
             } else {
-                BeansWrapper.coerceBigDecimals(memberDesc.paramTypes, pojoArgs);
+                BeansWrapper.coerceBigDecimals(memberDesc.getParamTypes(), pojoArgsWithArray);
             }
-            return new MemberAndArguments(memberDesc.member, pojoArgs);
+            return new MemberAndArguments(memberDesc, pojoArgsWithArray);
         } else {
             return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc); // either NOT_FOUND or AMBIGUOUS
         }
     }
+    
+    /**
+     * Converts a flat argument list to one where the last argument is an array that collects the varargs, also
+     * re-unwraps the varargs to the component type. Note that this couldn't be done until we had the concrete
+     * member selected.
+     */
+    private Object[] replaceVarargsSectionWithArray(
+            Object[] args, List modelArgs, CallableMemberDescriptor memberDesc, BeansWrapper unwrapper) 
+    throws TemplateModelException {
+        final Class[] paramTypes = memberDesc.getParamTypes();
+        final int paramCount = paramTypes.length;
+        final Class varArgsCompType = paramTypes[paramCount - 1].getComponentType(); 
+        final int totalArgCount = args.length;
+        final int fixArgCount = paramCount - 1;
+        if (args.length != paramCount) {
+            Object[] packedArgs = new Object[paramCount];
+            System.arraycopy(args, 0, packedArgs, 0, fixArgCount);
+            Object varargs = Array.newInstance(varArgsCompType, totalArgCount - fixArgCount);
+            for (int i = fixArgCount; i < totalArgCount; ++i) {
+                Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
+                if (val == BeansWrapper.CAN_NOT_UNWRAP) {
+                    return null;
+                }
+                Array.set(varargs, i - fixArgCount, val);
+            }
+            packedArgs[fixArgCount] = varargs;
+            return packedArgs;
+        } else {
+            Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
+            if (val == BeansWrapper.CAN_NOT_UNWRAP) {
+                return null;
+            }
+            Object array = Array.newInstance(varArgsCompType, 1);
+            Array.set(array, 0, val);
+            args[fixArgCount] = array;
+            return args;
+        }
+    }
+    
 }

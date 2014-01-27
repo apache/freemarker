@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
 
 import freemarker.ext.beans.RationalNumber;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -445,6 +447,71 @@ public class OverloadedMethods2 {
         return new File("file");
     }
 
+    public String mSeqToArrayNonOverloaded(String[] items, String s) {
+        return "mSeqToArrayNonOverloaded(String[] " + arrayToString(items) + ", String " + s + ")";
+    }
+    
+    public String mSeqToArrayGoodHint(String[] items, String s) {
+        return "mSeqToArrayGoodHint(String[] " + arrayToString(items) + ", String " + s + ")";
+    }
+
+    public String mSeqToArrayGoodHint(String[] items, int i) {
+        return "mSeqToArrayGoodHint(String[] " + arrayToString(items) + ", int " + i + ")";
+    }
+
+    public String mSeqToArrayGoodHint2(String[] items, String s) {
+        return "mSeqToArrayGoodHint2(String[] " + arrayToString(items) + ", String " + s + ")";
+    }
+
+    public String mSeqToArrayGoodHint2(String item) {
+        return "mSeqToArrayGoodHint2(String " + item + ")";
+    }
+    
+    public String mSeqToArrayPoorHint(String[] items, String s) {
+        return "mSeqToArrayPoorHint(String[] " + arrayToString(items) + ", String " + s + ")";
+    }
+
+    public String mSeqToArrayPoorHint(String item, int i) {
+        return "mSeqToArrayPoorHint(String " + item + ", int " + i + ")";
+    }
+
+    public String mSeqToArrayPoorHint2(String[] items) {
+        return "mSeqToArrayPoorHint2(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mSeqToArrayPoorHint2(String item) {
+        return "mSeqToArrayPoorHint2(String " + item + ")";
+    }
+    
+    public String mSeqToArrayPoorHint3(String[] items) {
+        return "mSeqToArrayPoorHint3(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mSeqToArrayPoorHint3(int[] items) {
+        return "mSeqToArrayPoorHint3(int[] " + arrayToString(items) + ")";
+    }
+    
+    private String arrayToString(Object[] array) {
+        return listToString(Arrays.asList(array));
+    }
+
+    private String arrayToString(int[] array) {
+        return listToString(Arrays.asList(array));
+    }
+    
+    private String listToString(List<?> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < list.size(); i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append(list.get(i));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    
     public TemplateNumberModel getAdaptedNumber() {
         return new MyAdapterNumberModel();
     }
