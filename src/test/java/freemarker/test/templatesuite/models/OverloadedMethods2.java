@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import freemarker.template.AdapterTemplateModel;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.utility.Helpers;
 
@@ -489,6 +491,45 @@ public class OverloadedMethods2 {
 
     public String mSeqToArrayPoorHint3(int[] items) {
         return "mSeqToArrayPoorHint3(int[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVsListPreference(String[] items) {
+        return "mStringArrayVsListPreference(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVsListPreference(List items) {
+        return "mStringArrayVsListPreference(List " + listToString(items) + ")";
+    }
+
+    public String mStringArrayVsObjectArrayPreference(String[] items) {
+        return "mStringArrayVsObjectArrayPreference(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVsObjectArrayPreference(Object[] items) {
+        return "mStringArrayVsObjectArrayPreference(Object[] " + arrayToString(items) + ")";
+    }
+
+    public String mIntArrayVsIntegerArrayPreference(int[] items) {
+        return "mIntArrayVsIntegerArrayPreference(int[] " + arrayToString(items) + ")";
+    }
+
+    public String mIntArrayVsIntegerArrayPreference(Integer[] items) {
+        return "mIntArrayVsIntegerArrayPreference(Integer[] " + arrayToString(items) + ")";
+    }
+    
+    public List getJavaList() {
+        List list = new ArrayList();
+        list.add("a");
+        list.add("b");
+        return list;
+    }
+    
+    public String[] getJavaStringArray() {
+        return new String[] { "a", "b" };
+    }
+
+    public Object[] getJavaObjectArray() {
+        return new Object[] { "a", "b" };
     }
     
     private String arrayToString(Object[] array) {
