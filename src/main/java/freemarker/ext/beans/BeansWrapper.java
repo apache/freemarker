@@ -1123,7 +1123,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             return null;
         }
         
-        if (is2321Bugfixed() && hint.isPrimitive()) {
+        final boolean is2321Bugfixed = is2321Bugfixed();
+        
+        if (is2321Bugfixed && hint.isPrimitive()) {
             hint = ClassUtil.primitiveClassToBoxingClass(hint);            
         }
         
@@ -1132,14 +1134,15 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // PyObject as its argument to receive a PyObject from a JythonModel
         // passed as an argument to TemplateMethodModelEx etc.
         if(model instanceof AdapterTemplateModel) {
-            Object adapted = ((AdapterTemplateModel)model).getAdaptedObject(
+            Object wrapped = ((AdapterTemplateModel)model).getAdaptedObject(
                     hint);
-            if(hint.isInstance(adapted)) {
-                return adapted;
+            if(hint.isInstance(wrapped)) {
+                return wrapped;
             }
-            // Attempt numeric conversion 
-            if(adapted instanceof Number && ClassUtil.isNumerical(hint)) {
-                Number number = forceUnwrappedNumberToType((Number) adapted, hint, is2321Bugfixed());
+            
+            // Attempt numeric conversion: 
+            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
+                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
                 if(number != null) return number;
             }
         }
@@ -1149,9 +1152,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             if(hint.isInstance(wrapped)) {
                 return wrapped;
             }
-            // Attempt numeric conversion 
+            
+            // Attempt numeric conversion: 
             if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
-                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed());
+                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
                 if(number != null) {
                     return number;
                 }
@@ -1176,7 +1180,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         if(ClassUtil.isNumerical(hint)) {
             if(model instanceof TemplateNumberModel) {
                 Number number = forceUnwrappedNumberToType(
-                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed());
+                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed);
                 if(number != null) {
                     return number;
                 }
@@ -1288,8 +1292,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 hint.isAssignableFrom(SETADAPTER_CLASS)) {
             return new SetAdapter((TemplateCollectionModel)model, this);
         }
-        if (overloadedMode && is2321Bugfixed()) {
-            /** Because List-s are convertible to arrays later */
+        if (overloadedMode && is2321Bugfixed) {
+            /** Because List-s are convertible to arrays later (but only overloaded method calls do that) */
             if(model instanceof TemplateSequenceModel 
                     && hint.isAssignableFrom(Object[].class)) {
                 return new SequenceAdapter((TemplateSequenceModel)model, this);
