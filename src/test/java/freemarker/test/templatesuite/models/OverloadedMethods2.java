@@ -517,6 +517,34 @@ public class OverloadedMethods2 {
         return "mIntArrayVsIntegerArrayPreference(Integer[] " + arrayToString(items) + ")";
     }
     
+    public String mIntArrayNonOverloaded(int[] items) {
+        return "mIntArrayNonOverloaded(int[] " + arrayToString(items) + ")";
+    }
+
+    public String mIntegerArrayNonOverloaded(Integer[] items) {
+        return "mIntegerArrayNonOverloaded(Integer[] " + arrayToString(items) + ")";
+    }
+
+    public String mIntegerListNonOverloaded(List<Integer> items) {
+        return "mIntegerListNonOverloaded(List<Integer> " + items + ")";
+    }
+
+    public String mStringListNonOverloaded(List<String> items) {
+        return "mStringListNonOverloaded(List<String> " + items + ")";
+    }
+
+    public String mStringArrayNonOverloaded(String[] items) {
+        return "mStringArrayNonOverloaded(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mObjectListNonOverloaded(List<Object> items) {
+        return "mObjectListNonOverloaded(List<Object> " + items + ")";
+    }
+
+    public String mObjectArrayNonOverloaded(Object[] items) {
+        return "mObjectArrayNonOverloaded(Object[] " + arrayToString(items) + ")";
+    }
+    
     public List getJavaList() {
         List list = new ArrayList();
         list.add("a");
@@ -537,7 +565,16 @@ public class OverloadedMethods2 {
     }
 
     private String arrayToString(int[] array) {
-        return listToString(Arrays.asList(array));
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < array.length; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append(array[i]);
+        }
+        sb.append("]");
+        return sb.toString();
     }
     
     private String listToString(List<?> list) {
