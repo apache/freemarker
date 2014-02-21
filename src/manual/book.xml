@@ -20837,6 +20837,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/409/">409</link>]:
+              <literal>SimpleHash</literal>'s internal <literal>Map</literal>
+              is concurrently modified on a non-safe way when getting length-1
+              <literal>String</literal> key that exists but maps to
+              <literal>null</literal>. This operation will accidentally add a
+              <literal>Character</literal> key to the internal map, which is
+              not a thread-safe operation.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: <literal>ClassUtil.forName</literal>, used
               inside FreeMarker everywhere to resolve class names to classes,
               if the thread context class loader is <literal>null</literal>,

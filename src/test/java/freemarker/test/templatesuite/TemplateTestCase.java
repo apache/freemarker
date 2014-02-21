@@ -271,6 +271,24 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bigDecimal", new SimpleNumber(java.math.BigDecimal.valueOf(1)));
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
         }
+        
+        else if (testName.equals("simplehash-char-key")) {
+            HashMap mStringC = new HashMap();
+            mStringC.put("c", "string");
+            dataModel.put("mStringC", mStringC);
+            
+            HashMap mStringCNull = new HashMap();
+            mStringCNull.put("c", null);
+            dataModel.put("mStringCNull", mStringCNull);
+            
+            HashMap mCharC = new HashMap();
+            mCharC.put(Character.valueOf('c'), "char");
+            dataModel.put("mCharC", mCharC);
+            
+            HashMap mCharCNull = new HashMap();
+            mCharCNull.put("c", null);
+            dataModel.put("mCharCNull", mCharCNull);
+        }
     
         else if (testName.equals("default-xmlns")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
