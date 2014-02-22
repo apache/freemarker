@@ -81,6 +81,8 @@ import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
+import freemarker.cache._CacheAPI;
+import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
@@ -88,10 +90,12 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.NormalizeNewlines;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StandardCompress;
 import freemarker.template.utility.StringUtil;
@@ -103,17 +107,19 @@ import freemarker.template.utility.XmlEscape;
  *
  * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at the beginning of
  * the application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
- * setter methods or by loading a {@code .properties} file), and then use that single instance everywhere in your
- * application. Frequently re-creating {@link Configuration} is a typical and grave mistake from performance standpoint,
- * as the {@link Configuration} holds the template cache, and often also the class introspection cache, which then will
- * be lost. (Note that, naturally, having multiple long-lived instances, like one per component that internally uses
- * FreeMarker is fine.)  
+ * setter methods like {@link #setTemplateLoader(TemplateLoader)} or by loading a {@code .properties} file), and then
+ * use that single instance everywhere in your application. Frequently re-creating {@link Configuration} is a typical
+ * and grave mistake from performance standpoint, as the {@link Configuration} holds the template cache, and often also
+ * the class introspection cache, which then will be lost. (Note that, naturally, having multiple long-lived instances,
+ * like one per component that internally uses FreeMarker is fine.)  
  * 
  * <p>The basic usage pattern is like:
  * 
  * <pre>
  *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
- *  Configuration cfg = new Configuration();
+ *  Configuration cfg = new Configuration(new Version(X, Y, Z));
+ *  // Where X, Y, Z enables the not-100%-backward-compatible fixes introduced in
+ *  // FreeMarker version X.Y.Z  and earlier (see {@link #Configuration(Version)}).
  *  cfg.set<i>SomeSetting</i>(...);
  *  cfg.set<i>OtherSetting</i>(...);
  *  ...
@@ -129,23 +135,23 @@ import freemarker.template.utility.XmlEscape;
  *       {@link #setClassForTemplateLoading(Class, String)} too.)
  *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
- *   <li>{@link #setIncompatibleImprovements(Version) incompatible_improvements}: As far the 1st and 2nd version number
- *       remains, it's quite safe to set it as high as possible, so for new or actively developed products it's
- *       recommended to do.
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
  *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
  *       {@link TemplateExceptionHandler#RETHROW_HANDLER} is safer to use.
  *   <!-- 2.4: recommend the new object wrapper here -->
  * </ul>
  * 
- * <p>A {@link Configuration} object is thread-safe only after you have stopped modify the configuration settings.
- * Generally, you set everything directly after you have instantiated the {@link Configuration} object, then you don't
- * change the settings anymore, so then it's safe to make it accessible from multiple threads.
+ * <p>A {@link Configuration} object is thread-safe only after you have stopped modifying the configuration settings,
+ * and you have <b>safely published</b> it (see JSR 133 and related literature) to other threads. Generally, you set
+ * everything directly after you have instantiated the {@link Configuration} object, then you don't change the settings
+ * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
+ * The methods that aren't about modifying setting, like {@link #getTemplate(String)}, are thread-safe.
  *
  * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @author Attila Szegedi
  */
 public class Configuration extends Configurable implements Cloneable {
+    private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
     public static final String STRICT_SYNTAX_KEY = "strict_syntax";
@@ -163,26 +169,65 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
-    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = new Version(2, 3, 0);
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = _TemplateAPI.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
-    private static Configuration defaultConfig = new Configuration();
+    private static final Version version;
+    static {
+        try {
+            Properties vp = new Properties();
+            InputStream ins = Configuration.class.getClassLoader()
+                    .getResourceAsStream(VERSION_PROPERTIES_PATH);
+            if (ins == null) {
+                throw new RuntimeException("Version file is missing.");
+            } else {
+                try {
+                    vp.load(ins);
+                } finally {
+                    ins.close();
+                }
+                
+                String versionString  = getRequiredVersionProperty(vp, "version");
+                
+                Date buildDate;
+                {
+                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                    if (buildDateStr.endsWith("Z")) {
+                        buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                    }
+                    try {
+                        buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
+                    } catch (java.text.ParseException e) {
+                        buildDate = null;
+                    }
+                }
+                
+                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+                
+                version = new Version(versionString, gaeCompliant, buildDate);
+            }
+        } catch (IOException e) {
+            // Java 5: use cause
+            throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH + ": " + e);
+        }
+    }
     
-    private static boolean versionPropertiesLoaded;
-    /** @deprecated Use {@link #version} instead. */
-    private static String versionNumber;
-    private static Version version;
-    
+    private final static Object defaultConfigLock = new Object();
+    private static Configuration defaultConfig;
+
     private boolean strictSyntax = true;
     private volatile boolean localizedLookup = true;
     private boolean whitespaceStripping = true;
-    private Version incompatibleImprovements = DEFAULT_INCOMPATIBLE_IMPROVEMENTS;
+    private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
+    private boolean templateLoaderWasSet;
+
+    private boolean objectWrapperWasSet;
     
     private HashMap sharedVariables = new HashMap();
     
@@ -192,13 +237,115 @@ public class Configuration extends Configurable implements Cloneable {
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
+    /**
+     * @deprecated Use {@link Configuration} instead.
+     */
     public Configuration() {
-        cache = new TemplateCache();
-        cache.setConfiguration(this);
-        cache.setDelay(5000);
+        this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+    }
+
+    /**
+     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
+     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
+     * active by default, as that would break backward-compatibility).
+     * 
+     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
+     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
+     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
+     * low-risk changes, so usually they don't break anything in older applications either.
+     * 
+     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
+     * enabled, regardless of what you set here.
+     * 
+     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
+     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
+     * set this setting to a low value, it might wont bring back the old behavior anymore.
+     * 
+     * <p>Currently the effects of this setting are:
+     * <ul>
+     *   <li><p>
+     *     2.3.0: This is just the starting point, the version used in older projects.
+     *   </li>
+     *   <li><p>
+     *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
+     *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
+     *     same template.
+     *   </li>
+     *   <li><p>
+     *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
+     *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
+     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
+     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
+     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
+     *     concern anymore.
+     *   </li>
+     *   <li><p>
+     *     2.3.21 (or higher):
+     *     <ul>
+     *       <li><p>
+     *         The <em>default</em> of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
+     *         {@link ObjectWrapper#DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
+     *         returned by {@link DefaultObjectWrapper#getInstance(Version)}. The new default object wrapper's
+     *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
+     *         See {@link BeansWrapper#BeansWrapper(Version)} for further details. Furthermore, the new default
+     *         object wrapper doesn't allow changing its settings; setter methods throw {@link IllegalStateException}).
+     *         (If anything tries to call setters on the old default in your application, that's a dangerous bug that
+     *         won't remain hidden now. As the old default is a singleton too, potentially shared by independently
+     *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
+     *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
+     *         cache) because the singleton is modified after publishing.)
+     *         Furthermore the new default object wrapper shares class introspection cache with other
+     *         {@link BeansWrapper}-s get with {@code getInstance} calls, which has an impact as
+     *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
+     *       </li>
+     *       <li><p>
+     *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
+     *         to {@code null}, which means that FreeMarker will not find any templates. Earlier
+     *         the default was a {@link FileTemplateLoader} that used the current directory as the root. This was
+     *         dangerous and fragile as you usually don't have good control over what the current directory will be.
+     *         Luckily, the old default almost never looked for the templates at the right place
+     *         anyway, so pretty much all applications had to set a {@code template_loader} setting, so it's unlikely
+     *         that changing the default breaks your application.
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     * 
+     * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
+     *     version, or less than 2.3.0.
+     * 
+     * @since 2.3.21
+     */
+    public Configuration(Version incompatibleImprovements) {
+        super(incompatibleImprovements);
+        
+        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        this.incompatibleImprovements = incompatibleImprovements;
+        
+        createTemplateCache();
         loadBuiltInSharedVariables();
     }
 
+    private void createTemplateCache() {
+        cache = new TemplateCache(getDefaultTemplateLoader());
+        cache.setConfiguration(this);
+        cache.setDelay(5000);
+    }
+    
+    private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
+        TemplateCache oldCache = cache;
+        cache = new TemplateCache(loader, storage);
+        cache.setDelay(oldCache.getDelay());
+        cache.setConfiguration(this);
+        cache.setLocalizedLookup(localizedLookup);
+    }
+    
+    private TemplateLoader getDefaultTemplateLoader() {
+        return incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION
+                ? _CacheAPI.createLegacyDefaultTemplateLoader()
+                : null;
+    }
+    
     public Object clone() {
         try {
             Configuration copy = (Configuration)super.clone();
@@ -207,10 +354,10 @@ public class Configuration extends Configurable implements Cloneable {
             copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();
-            copy.createTemplateCache(cache.getTemplateLoader(), cache.getCacheStorage());
+            copy.recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage());
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException("Clone is not supported, but it should be: " + e.getMessage());
+            throw new BugException(e.getMessage());  // Java 5: use cause exc.
         }
     }
     
@@ -342,7 +489,13 @@ public class Configuration extends Configurable implements Cloneable {
      * is initialized.
      */
     static public Configuration getDefaultConfiguration() {
-        return defaultConfig;
+        // Java 5: use volatile + double check
+        synchronized (defaultConfigLock) {
+            if (defaultConfig == null) {
+                defaultConfig = new Configuration();
+            }
+            return defaultConfig;
+        }
     }
 
     /**
@@ -354,11 +507,14 @@ public class Configuration extends Configurable implements Cloneable {
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
     static public void setDefaultConfiguration(Configuration config) {
-        defaultConfig = config;
+        synchronized (defaultConfigLock) {
+            defaultConfig = config;
+        }
     }
     
     /**
-     * Sets a {@link TemplateLoader} that is used to look up and load templates.
+     * Sets a {@link TemplateLoader} that is used to look up and load templates;
+     * as a side effect the template cache will be emptied.
      * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
      * storages, like from relational databases, NoSQL-storages, etc.
      * 
@@ -370,26 +526,21 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>You can chain several {@link TemplateLoader}-s together with {@link MultiTemplateLoader}.
      * 
      * <p>Default value: You should always set the template loader instead of relying on the default value.
-     * The a default value is there only for backward compatibility, and it will be probably
-     * removed in the future. It's a multi-loader that first tries to load a
-     * template from the file in the current directory, then from a resource on the classpath.
+     * (But if you still care what it is, before "incompatible improvements" 2.3.21 it's a {@link FileTemplateLoader}
+     * that uses the current directory as its root; as it's hard tell what that directory will be, it's not very useful
+     * and dangerous. Starting with "incompatible improvements" 2.3.21 the default is {@code null}.)   
      * 
      * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
      */
-    public synchronized void setTemplateLoader(TemplateLoader loader) {
-        createTemplateCache(loader, cache.getCacheStorage());
+    public void setTemplateLoader(TemplateLoader loader) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            recreateTemplateCacheWith(loader, cache.getCacheStorage());
+            templateLoaderWasSet = true;
+        }
     }
 
-    private void createTemplateCache(TemplateLoader loader, CacheStorage storage)
-    {
-        TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage);
-        cache.setDelay(oldCache.getDelay());
-        cache.setConfiguration(this);
-        cache.setLocalizedLookup(localizedLookup);
-    }
-    
     /**
      * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
@@ -399,8 +550,10 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the {@link CacheStorage} used for caching {@link Template}-s. The
-     * default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
+     * Sets the {@link CacheStorage} used for caching {@link Template}-s;
+     * the earlier content of the template cache will be dropt.
+     * 
+     * The default is a {@link SoftCacheStorage}. If the total size of the {@link Template}
      * objects is significant but most templates are used rarely, using a
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
      * all, use {@link freemarker.cache.NullCacheStorage} (you can't use {@code null}).
@@ -408,8 +561,11 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the cache storage will re-create the template cache, so
      * all its content will be lost.
      */
-    public synchronized void setCacheStorage(CacheStorage storage) {
-        createTemplateCache(cache.getTemplateLoader(), storage);
+    public void setCacheStorage(CacheStorage storage) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            recreateTemplateCacheWith(cache.getTemplateLoader(), storage);
+        }
     }
     
     /**
@@ -417,8 +573,11 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @since 2.3.20
      */
-    public synchronized CacheStorage getCacheStorage() {
-        return cache.getCacheStorage();
+    public CacheStorage getCacheStorage() {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            return cache.getCacheStorage();
+        }
     }
 
     /**
@@ -475,7 +634,7 @@ public class Configuration extends Configurable implements Cloneable {
                             .getConstructor(constructorParamTypes)
                                     .newInstance(constructorParams));
         } catch (Exception exc) {
-            throw new RuntimeException("Internal FreeMarker error: " + exc);
+            throw new BugException(exc.toString());  // Java 5: use cause exc.
         }
     }
 
@@ -515,6 +674,11 @@ public class Configuration extends Configurable implements Cloneable {
         strictSyntax = b;
     }
 
+    public void setObjectWrapper(ObjectWrapper objectWrapper) {
+        super.setObjectWrapper(objectWrapper);
+        objectWrapperWasSet = true;
+    }
+
     /**
      * The getter pair of {@link #setStrictSyntaxMode}.
      */
@@ -523,43 +687,33 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
-     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
-     * active by default, as that would break backward-compatibility).
+     * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there.
+     * If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
+     * was never set in this {@link Configuration} object through the public API, its value will be set to the default
+     * value appropriate for the new {@code incompatibleImprovements}. (This adjustment of a setting value doesn't
+     * count as setting that setting, so setting {@code incompatibleImprovements} for multiple times also works as
+     * expected.) Note that if the {@code template_loader} have to be changed because of this, the template cache will
+     * be emptied.
      * 
-     * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
-     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
-     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
-     * low-risk changes, so usually they don't break anything in older applications either.
+     * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
+     *     version, or less than 2.3.0.
      * 
-     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
-     * enabled, regardless of what you set here.
-     * 
-     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
-     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
-     * set this setting to a low value, it might wont bring back the old behavior anymore.
-     * 
-     * <p>Currently the effects of this setting are:
-     * <ul>
-     *   <li><p>
-     *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
-     *     causing parsing error when there was no correct {@code #} or {@code @} tag earlier in the
-     *     same template.
-     *   </li>
-     *   <li><p>
-     *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
-     *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
-     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
-     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
-     *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
-     *     concern anymore.
-     *   </li>
-     * </ul>
-     *
      * @since 2.3.20
      */
-    public void setIncompatibleImprovements(Version version) {
-        incompatibleImprovements = version;
+    public void setIncompatibleImprovements(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        boolean hadLegacyTLOWDefaults
+                = this.incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION; 
+        this.incompatibleImprovements = incompatibleImprovements;
+        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+            if (!templateLoaderWasSet) {
+                recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
+            }
+            if (!objectWrapperWasSet) {
+                // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
+                super.setObjectWrapper(_CoreAPI.getDefaultObjectWrapper(incompatibleImprovements));
+            }
+        }
     }
 
     /**
@@ -571,7 +725,8 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * @deprecated Use {@link #setIncompatibleImprovements(Version)} instead.
+     * @deprecated Use {@link #Configuration(Version)}, or
+     *    as last chance, {@link #setIncompatibleImprovements(Version)} instead.
      */
     public void setIncompatibleEnhancements(String version) {
         setIncompatibleImprovements(new Version(version));
@@ -693,6 +848,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Retrieves the template with the given name (and according the specified further parameters) from the template
      * cache, loading it into the cache first if it's missing/staled.
      * 
+     * <p>This method is thread-safe. 
+     * 
      * <p>See {@link Configuration} for an example of basic usage.
      *
      * @param name The name of the template. Can't be {@code null}. The exact syntax of the name
@@ -739,7 +896,22 @@ public class Configuration extends Configurable implements Cloneable {
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
         Template result = cache.getTemplate(name, locale, encoding, parseAsFTL);
         if (result == null) {
-            throw new FileNotFoundException("Template " + StringUtil.jQuote(name) + " not found.");
+            TemplateLoader tl = getTemplateLoader();  
+            String msg; 
+            if (tl == null) {
+                msg = "Don't know from where to load template " + StringUtil.jQuote(name)
+                      + " because the \"template_loader\" FreeMarker setting wasn't set.";
+            } else {
+                msg = "Template " + StringUtil.jQuote(name) + " not found.";
+                if (!templateLoaderWasSet) {
+                    msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
+                            + "default value, which is most certainly not intended and the cause of this problem."; 
+                }
+                if (tl instanceof FileTemplateLoader) {            
+                    msg += " The template directory used was: " + ((FileTemplateLoader) tl).getBaseDirectory();
+                }
+            }
+            throw new FileNotFoundException(msg);
         }
         return result;
     }
@@ -819,6 +991,8 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
+     * 
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
      *
      * @param name the name used to access the data object from your template.
      *     If a shared variable with this name already exists, it will replace
@@ -844,6 +1018,9 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds shared variable to the configuration.
      * It uses {@link Configurable#getObjectWrapper()} to wrap the 
      * <code>obj</code>.
+     * 
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
+     * 
      * @see #setSharedVariable(String,TemplateModel)
      * @see #setAllSharedVariables
      */
@@ -856,6 +1033,8 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
+     *
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
      *
      * @param hash a hash model whose objects will be copied to the
      * configuration with same names as they are given in the hash.
@@ -901,7 +1080,8 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Removes all entries from the template cache, thus forcing reloading of templates
      * on subsequent <code>getTemplate</code> calls.
-     * This method is thread-safe and can be called while the engine works.
+     * 
+     * <p>This method is thread-safe and can be called while the engine processes templates.
      */
     public void clearTemplateCache() {
         cache.clear();
@@ -946,8 +1126,10 @@ public class Configuration extends Configurable implements Cloneable {
      * finer control over cache updating than {@link #setTemplateUpdateDelay(int)}
      * alone does.
      * 
-     * For the meaning of the parameters, see
+     * <p>For the meaning of the parameters, see
      * {@link #getTemplate(String, Locale, String, boolean)}.
+     * 
+     * <p>This method is thread-safe and can be called while the engine processes templates.
      * 
      * @since 2.3.19
      */
@@ -1062,19 +1244,25 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
      * templates. The order of the imports will be the same as the order in which they were added with this method.
      */
-    public synchronized void addAutoImport(String namespaceVarName, String templateName) {
-        autoImports.remove(namespaceVarName);
-        autoImports.add(namespaceVarName);
-        autoImportNsToTmpMap.put(namespaceVarName, templateName);
+    public void addAutoImport(String namespaceVarName, String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoImports.remove(namespaceVarName);
+            autoImports.add(namespaceVarName);
+            autoImportNsToTmpMap.put(namespaceVarName, templateName);
+        }
     }
     
     /**
      * Removes an auto-import; see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't
      * exist.
      */
-    public synchronized void removeAutoImport(String namespaceVarName) {
-        autoImports.remove(namespaceVarName);
-        autoImportNsToTmpMap.remove(namespaceVarName);
+    public void removeAutoImport(String namespaceVarName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoImports.remove(namespaceVarName);
+            autoImportNsToTmpMap.remove(namespaceVarName);
+        }
     }
     
     /**
@@ -1083,16 +1271,19 @@ public class Configuration extends Configurable implements Cloneable {
      * returns the keys, thus, it's not the best idea to use a {@link HashMap} (although the order of imports doesn't
      * mater for properly designed libraries).
      */
-    public synchronized void setAutoImports(Map map) {
-        autoImports = new ArrayList(map.keySet());
-        if (map instanceof HashMap) {
-            autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
-        } 
-        else if (map instanceof SortedMap) {
-            autoImportNsToTmpMap = new TreeMap(map);             
-        }
-        else {
-            autoImportNsToTmpMap = new HashMap(map);
+    public void setAutoImports(Map map) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoImports = new ArrayList(map.keySet());
+            if (map instanceof HashMap) {
+                autoImportNsToTmpMap = (Map) ((HashMap) map).clone();
+            } 
+            else if (map instanceof SortedMap) {
+                autoImportNsToTmpMap = new TreeMap(map);             
+            }
+            else {
+                autoImportNsToTmpMap = new HashMap(map);
+            }
         }
     }
     
@@ -1115,23 +1306,29 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds an invisible <code>#include <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of all
      * templates. The order of the inclusions will be the same as the order in which they were added with this method.
      */
-    public synchronized void addAutoInclude(String templateName) {
-        autoIncludes.remove(templateName);
-        autoIncludes.add(templateName);
+    public void addAutoInclude(String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoIncludes.remove(templateName);
+            autoIncludes.add(templateName);
+        }
     }
 
     /**
      * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
      */
-    public synchronized void setAutoIncludes(List templateNames) {
-        autoIncludes.clear();
-        Iterator it = templateNames.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
-            if (!(o instanceof String)) {
-                throw new IllegalArgumentException("List items must be String-s.");
+    public void setAutoIncludes(List templateNames) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoIncludes.clear();
+            Iterator it = templateNames.iterator();
+            while (it.hasNext()) {
+                Object o = it.next();
+                if (!(o instanceof String)) {
+                    throw new IllegalArgumentException("List items must be String-s.");
+                }
+                autoIncludes.add(o);
             }
-            autoIncludes.add(o);
         }
     }
     
@@ -1139,8 +1336,11 @@ public class Configuration extends Configurable implements Cloneable {
      * Removes a template from the auto-include list; see {@link #addAutoInclude(String)}. Does nothing if the template
      * is not there.
      */
-    public synchronized void removeAutoInclude(String templateName) {
-        autoIncludes.remove(templateName);
+    public void removeAutoInclude(String templateName) {
+        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
+        synchronized (this) {
+            autoIncludes.remove(templateName);
+        }
     }
 
     /**
@@ -1149,8 +1349,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @deprecated Use {@link #getVersion()} instead.
      */
     public static String getVersionNumber() {
-        if (!versionPropertiesLoaded) loadVersionProperties();
-        return versionNumber;
+        return version.toString();
     }
     
     /**
@@ -1182,52 +1381,9 @@ public class Configuration extends Configurable implements Cloneable {
      * @since 2.3.20
      */ 
     public static Version getVersion() {
-        if (!versionPropertiesLoaded) loadVersionProperties();
         return version;
     }
     
-	private static void loadVersionProperties() {
-		try {
-            Properties vp = new Properties();
-            InputStream ins = Configuration.class.getClassLoader()
-                    .getResourceAsStream("freemarker/version.properties");
-            if (ins == null) {
-                throw new RuntimeException("Version file is missing.");
-            } else {
-                try {
-                    vp.load(ins);
-                } finally {
-                    ins.close();
-                }
-                
-                String versionString  = getRequiredVersionProperty(vp, "version");
-                versionNumber = versionString;
-                
-                Date buildDate;
-                {
-                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
-                    if (buildDateStr.endsWith("Z")) {
-                    	buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
-                    }
-                    try {
-    					buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-    				} catch (java.text.ParseException e) {
-    					buildDate = null;
-    				}
-                }
-                
-                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
-                
-                version = new Version(versionString, gaeCompliant, buildDate);
-                
-                versionPropertiesLoaded = true;
-            }
-            
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load version file: " + e);
-        }
-	}
-	
     /**
      * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
@@ -1235,16 +1391,17 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @return {@link Set} of {@link String}-s. 
      */
-	public Set getSupportedBuiltInNames() {
-	    return _CoreAPI.getSupportedBuiltInNames();
-	}
+    public Set getSupportedBuiltInNames() {
+        return _CoreAPI.getSupportedBuiltInNames();
+    }
 
-	private static String getRequiredVersionProperty(Properties vp, String properyName) {
-		String s = vp.getProperty(properyName);
-		if (s == null) {
-		    throw new RuntimeException(
-		    		"Version file is corrupt: \"" + properyName + "\" property is missing.");
-		}
-		return s;
-	}
+    private static String getRequiredVersionProperty(Properties vp, String properyName) {
+        String s = vp.getProperty(properyName);
+        if (s == null) {
+            throw new RuntimeException(
+                    "Version file is corrupt: \"" + properyName + "\" property is missing.");
+        }
+        return s;
+    }
+
 }

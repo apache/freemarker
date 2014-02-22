@@ -62,10 +62,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
@@ -94,6 +96,7 @@ public class TemplateCache
     private static final char SLASH = '/';
     private static final Logger logger = Logger.getLogger("freemarker.cache");
 
+    /** Maybe {@code null}. */
     private final TemplateLoader templateLoader;
     
     /** Here we keep our cached templates */
@@ -116,10 +119,13 @@ public class TemplateCache
      */
     public TemplateCache()
     {
-        this(createDefaultTemplateLoader());
+        this(createLegacyDefaultTemplateLoader());
     }
 
-    private static TemplateLoader createDefaultTemplateLoader() {
+    /**
+     * Creates the default {@link TemplateLoader} used in 2.3.0-compatible mode.
+     */
+    protected static TemplateLoader createLegacyDefaultTemplateLoader() {
         try {
             return new FileTemplateLoader();
         } catch(Exception e) {
@@ -187,24 +193,13 @@ public class TemplateCache
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
     throws IOException
     {
-        if (name == null) {
-            throw new IllegalArgumentException("Argument \"name\" can't be null");
-        }
-        if (locale == null) {
-            throw new IllegalArgumentException("Argument \"locale\" can't be null");
-        }
-        if (encoding == null) {
-            throw new IllegalArgumentException("Argument \"encoding\" can't be null");
-        }
+        if (name == null) throw new NullArgumentException("name");
+        if (locale == null) throw new NullArgumentException("locale");
+        if (encoding == null) throw new NullArgumentException("encoding");
         name = normalizeName(name);
-        if(name == null) {
-            return null;
-        }
-        Template result = null;
-        if (templateLoader != null) {
-            result = getTemplate(templateLoader, name, locale, encoding, parseAsFTL);
-        }
-        return result;
+        if(name == null) return null;
+        
+        return templateLoader != null ? getTemplate(templateLoader, name, locale, encoding, parseAsFTL) : null;
     }    
     
     private Template getTemplate(TemplateLoader loader, String name, Locale locale, String encoding, boolean parse)
@@ -248,7 +243,7 @@ public class TemplateCache
                         rethrown = true;
                         throwLoadFailedException((IOException)t);
                     }
-                    throw new RuntimeException("t is " + t.getClass().getName());
+                    throw new BugException("t is " + t.getClass().getName());
                 }
                 // Clone as the instance bound to the map should be treated as
                 // immutable to ensure proper concurrent semantics

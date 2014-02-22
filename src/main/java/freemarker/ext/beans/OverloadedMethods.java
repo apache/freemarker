@@ -58,9 +58,11 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core.BugException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility._MethodUtil;
 
 /**
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
@@ -68,46 +70,42 @@ import freemarker.template.utility.ClassUtil;
  */
 final class OverloadedMethods
 {
-    private final BeansWrapper wrapper;
     private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
+    private final boolean bugfixed;
     
-    OverloadedMethods(BeansWrapper wrapper) {
-        this.wrapper = wrapper;
-        fixArgMethods = new OverloadedFixArgsMethods(wrapper);
+    OverloadedMethods(boolean bugfixed) {
+        this.bugfixed = bugfixed;
+        fixArgMethods = new OverloadedFixArgsMethods(bugfixed);
     }
     
-    BeansWrapper getWrapper() {
-        return wrapper;
-    }
-
     void addMethod(Method member) {
         final Class[] paramTypes = member.getParameterTypes();
-        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(member, paramTypes));
     }
 
     void addConstructor(Constructor member) {
         final Class[] paramTypes = member.getParameterTypes();
-        addCallableMemberDescriptor(new CallableMemberDescriptor(member, paramTypes));
+        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(member, paramTypes));
     }
     
-    private void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+    private void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
-        if(MethodUtilities.isVarArgs(memberDesc.member)) {
+        if (memberDesc.isVarargs()) {
             if(varargMethods == null) {
-                varargMethods = new OverloadedVarArgsMethods(wrapper);
+                varargMethods = new OverloadedVarArgsMethods(bugfixed);
             }
             varargMethods.addCallableMemberDescriptor(memberDesc);
         }
     }
     
-    MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs) 
+    MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         MaybeEmptyMemberAndArguments res;
-        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
             return (MemberAndArguments) res;
         } else if (varargMethods != null
-                && (res = varargMethods.getMemberAndArguments(tmArgs, wrapper)) instanceof MemberAndArguments) {
+                && (res = varargMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
             return (MemberAndArguments) res;
         } else {
             if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
@@ -121,7 +119,7 @@ final class OverloadedMethods
                         "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
             } else {
-                throw new RuntimeException("Unsupported EmptyMemberAndArguments: " + res); 
+                throw new BugException("Unsupported EmptyMemberAndArguments: " + res); 
             }
         }
     }
@@ -136,12 +134,12 @@ final class OverloadedMethods
             while (fixArgMethodsIter.hasNext()) {
                 if (sb.length() != 0) sb.append(",\n");
                 sb.append("    ");
-                sb.append(methodOrConstructorToString(((CallableMemberDescriptor) fixArgMethodsIter.next()).member));
+                sb.append(((CallableMemberDescriptor) fixArgMethodsIter.next()).getDeclaration());
             }
             if (varargMethodsIter != null) {
                 while (varargMethodsIter.hasNext()) {
                     if (sb.length() != 0) sb.append(",\n");
-                    sb.append(methodOrConstructorToString(((CallableMemberDescriptor) varargMethodsIter.next()).member));
+                    sb.append(((CallableMemberDescriptor) varargMethodsIter.next()).getDeclaration());
                 }
             }
             return sb.toString();
@@ -154,27 +152,27 @@ final class OverloadedMethods
      * The description of the signature deduced from the method/constructor call, used in error messages.
      */
     private String getDeducedCallSignature(List arguments) {
-        final Member firstMember;
+        final CallableMemberDescriptor firstMemberDesc;
         Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         if (fixArgMethodsIter.hasNext()) {
-            firstMember = ((CallableMemberDescriptor) fixArgMethodsIter.next()).member;
+            firstMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
         } else {
             Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
             if (varArgMethods != null && varArgMethods.hasNext()) {
-                firstMember = ((CallableMemberDescriptor) varArgMethods.next()).member;
+                firstMemberDesc = (CallableMemberDescriptor) varArgMethods.next();
             } else {
-                firstMember = null;
+                firstMemberDesc = null;
             }
         }
         
         StringBuffer sb = new StringBuffer();
-        if (firstMember != null) {
-            if (firstMember instanceof Constructor) {
+        if (firstMemberDesc != null) {
+            if (firstMemberDesc.isConstructor()) {
                 sb.append("constructor ");
             } else {
                 sb.append("method ");
             }
-            sb.append(firstMember.getName());
+            sb.append(firstMemberDesc.getName());
         } else {
             sb.append("???");
         }
@@ -190,28 +188,4 @@ final class OverloadedMethods
         
     }
 
-    /**
-     * Detailed method/constructor description for parameter list error messages.
-     */
-    private String methodOrConstructorToString(Member member) {
-        StringBuffer sb = new StringBuffer();
-        
-        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
-        if (className != null) {
-            sb.append(className);
-            sb.append('.');
-        }
-        sb.append(member.getName());
-
-        sb.append('(');
-        Class[] paramTypes = MethodUtilities.getParameterTypes(member);
-        for (int i = 0; i < paramTypes.length; i++) {
-            if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getShortClassName(paramTypes[i]));
-        }
-        sb.append(')');
-        
-        return sb.toString();
-    }
-    
 }

@@ -62,17 +62,19 @@ import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility._MethodUtil;
 
 /**
- * This class is used for constructors and as a base for non-overloaded methods
+ * This class is used for as a base for non-overloaded method models and for constructors.
+ * (For overloaded methods and constructors see {@link OverloadedMethods}.)
  * @author Attila Szegedi
  */
-class SimpleMemberModel
+class SimpleMethod
 {
     private final Member member;
     private final Class[] argTypes;
     
-    protected SimpleMemberModel(Member member, Class[] argTypes)
+    protected SimpleMethod(Member member, Class[] argTypes)
     {
         this.member = member;
         this.argTypes = argTypes;
@@ -83,7 +85,7 @@ class SimpleMemberModel
         if(arguments == null) {
             arguments = Collections.EMPTY_LIST;
         }
-        boolean isVarArg = MethodUtilities.isVarArgs(member);
+        boolean isVarArg = _MethodUtil.isVarArgs(member);
         int typesLen = argTypes.length;
         if(isVarArg) {
             if(typesLen - 1 > arguments.size()) {

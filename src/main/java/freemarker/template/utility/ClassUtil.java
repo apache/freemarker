@@ -107,7 +107,10 @@ public class ClassUtil
     {
         try
         {
-            return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+            ClassLoader ctcl = Thread.currentThread().getContextClassLoader();
+            if (ctcl != null) {  // not null: we don't want to fall back to the bootstrap class loader
+                return Class.forName(className, true, ctcl);
+            }
         }
         catch(ClassNotFoundException e)
         {
@@ -117,29 +120,29 @@ public class ClassUtil
         {
             ;// Intentionally ignored
         }
-        // Fall back to default class loader 
+        // Fall back to the defining class loader of the FreeMarker classes 
         return Class.forName(className);
     }
     
     /**
      * Same as {@link #getShortClassName(Class, boolean) getShortClassName(pClass, false)}.
      * 
-     * @since 2.4
+     * @since 2.3.20
      */
     public static String getShortClassName(Class pClass) {
         return getShortClassName(pClass, false);
     }
     
     /**
-     * Returns a class name without "java.lang." and "java.util." prefix; useful for printing class names in error
-     * messages.
+     * Returns a class name without "java.lang." and "java.util." prefix, also shows array types in a format like
+     * {@code int[]}; useful for printing class names in error messages.
      * 
      * @param pClass can be {@code null}, in which case the method returns {@code null}.
      * @param shortenFreeMarkerClasses if {@code true}, it will also shorten FreeMarker class names. The exact rules
      *     aren't specified and might change over time, but right now, {@code freemarker.ext.beans.NumberModel} for
      *     example becomes to {@code f.e.b.NumberModel}. 
      * 
-     * @since 2.4
+     * @since 2.3.20
      */
     public static String getShortClassName(Class pClass, boolean shortenFreeMarkerClasses) {
         if (pClass == null) {
@@ -173,7 +176,7 @@ public class ClassUtil
     /**
      * Same as {@link #getShortClassNameOfObject(Object, boolean) getShortClassNameOfObject(pClass, false)}.
      * 
-     * @since 2.4
+     * @since 2.3.20
      */
     public static String getShortClassNameOfObject(Object obj) {
         return getShortClassNameOfObject(obj, false);
@@ -183,7 +186,7 @@ public class ClassUtil
      * {@link #getShortClassName(Class, boolean)} called with {@code object.getClass()}, but returns the fictional
      * class name {@code Null} for a {@code null} value.
      * 
-     * @since 2.4
+     * @since 2.3.20
      */
     public static String getShortClassNameOfObject(Object obj, boolean shortenFreeMarkerClasses) {
         if (obj == null) {
@@ -304,7 +307,7 @@ public class ClassUtil
      * time, but currently it's something like {@code "string (wrapper: f.t.SimpleScalar)"} or
      * {@code "sequence+hash+string (ArrayList wrapped into f.e.b.CollectionModel)"}.
      * 
-     * @since 2.4
+     * @since 2.3.20
      */
     public static String getFTLTypeDescription(TemplateModel tm) {
         if (tm == null) {
@@ -391,13 +394,13 @@ public class ClassUtil
         if (boxingClass == Void.class) return void.class;  // not really a primitive, but we normalize to it
         return boxingClass;
     }
-
+    
     /**
      * Tells if a type is numerical; works both for primitive types and classes.
      * 
      * @param type can't be {@code null}
      * 
-     * @since. 2.3.21
+     * @since 2.3.21
      */
     public static boolean isNumerical(Class type) {
         return Number.class.isAssignableFrom(type)

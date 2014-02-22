@@ -65,6 +65,7 @@ import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core._CoreAPI;
 import freemarker.core._ErrorDescriptionBuilder;
+import freemarker.template.utility.Collections12;
 
 /**
  * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
@@ -78,16 +79,12 @@ public class TemplateException extends Exception {
     private static boolean before14() {
         Class ec = Exception.class;
         try {
-            ec.getMethod("getCause", new Class[]{});
+            ec.getMethod("getCause", Collections12.EMPTY_CLASS_ARRAY);
         } catch (Throwable e) {
             return true;
         }
         return false;
     }
-
-    private static final Class[] EMPTY_CLASS_ARRAY = new Class[]{};
-
-    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
 
     // Set in constructor:
     private transient _ErrorDescriptionBuilder descriptionBuilder;
@@ -306,7 +303,9 @@ public class TemplateException extends Exception {
     private String getDescription() {
         synchronized (lock) {
             if (description == null && descriptionBuilder != null) {
-                description = descriptionBuilder.toString(getFailingInstruction());
+                description = descriptionBuilder.toString(
+                        getFailingInstruction(),
+                        env != null ? env.getShowErrorTips() : true);
                 descriptionBuilder = null;
             }
             return description;
@@ -420,13 +419,13 @@ public class TemplateException extends Exception {
                 // users.
                 try {
                     // Reflection is used to prevent dependency on Servlet classes.
-                    Method m = causeException.getClass().getMethod("getRootCause", EMPTY_CLASS_ARRAY);
-                    Throwable rootCause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
+                    Method m = causeException.getClass().getMethod("getRootCause", Collections12.EMPTY_CLASS_ARRAY);
+                    Throwable rootCause = (Throwable) m.invoke(causeException, Collections12.EMPTY_OBJECT_ARRAY);
                     if (rootCause != null) {
                         Throwable j14Cause = null;
                         if (!BEFORE_1_4) {
-                            m = causeException.getClass().getMethod("getCause", EMPTY_CLASS_ARRAY);
-                            j14Cause = (Throwable) m.invoke(causeException, EMPTY_OBJECT_ARRAY);
+                            m = causeException.getClass().getMethod("getCause", Collections12.EMPTY_CLASS_ARRAY);
+                            j14Cause = (Throwable) m.invoke(causeException, Collections12.EMPTY_OBJECT_ARRAY);
                         }
                         if (j14Cause == null) {
                             out.println("ServletException root cause: ");

@@ -55,12 +55,46 @@ package freemarker.template;
 import freemarker.ext.beans.BeansWrapper;
 
 /**
- * The default implementation of the ObjectWrapper interface.
+ * A restricted object wrapper that will not expose arbitrary object, just those that directly correspond to the
+ * {@link TemplateModel} sub-interfaces ({@code String}, {@code Map} and such).
  */
 public class SimpleObjectWrapper extends DefaultObjectWrapper {
     
     static final SimpleObjectWrapper instance = new SimpleObjectWrapper();
     
+    /**
+     * Don't call this; always fails because {@link SimpleObjectWrapper} doesn't support {@code getInstance}.
+     * This method exists only so that it hides the one "inherited" from
+     * {@link DefaultObjectWrapper}, which wouldn't return a {@link SimpleObjectWrapper}.
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements) {
+        throw new RuntimeException("SimpleObjectWrapper doesn't support getInstance; use the constructor.");
+    }
+
+    /**
+     * Don't call this; always fails because {@link SimpleObjectWrapper} doesn't support {@code getInstance}.
+     * This method exists only so that it hides the one "inherited" from
+     * {@link DefaultObjectWrapper}, which wouldn't return a {@link SimpleObjectWrapper}.
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapWrapper) {
+        throw new RuntimeException("SimpleObjectWrapper doesn't support getInstance; use the constructor.");
+    }
+    
+    /**
+     * Don't call this; always fails because {@link SimpleObjectWrapper} doesn't support {@code getInstance}.
+     * This method exists only so that it hides the one "inherited" from
+     * {@link DefaultObjectWrapper}, which wouldn't return a {@link SimpleObjectWrapper}.
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(PropertyAssignments pa) {
+        throw new RuntimeException("SimpleObjectWrapper doesn't support getInstance; use the constructor.");
+    }
+    
+    /**
+     * @deprecated Use {@link #SimpleObjectWrapper(Version)} instead.
+     */
     public SimpleObjectWrapper() {
         super();
     }

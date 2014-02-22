@@ -680,7 +680,7 @@ public class FreemarkerServlet extends HttpServlet
                 try {
                     config.setSetting(Configurable.OBJECT_WRAPPER_KEY, wrapper);
                 } catch (TemplateException e) {
-                    throw new RuntimeException(e.toString());
+                    throw new RuntimeException(e.toString());  // Java 5: use cause exception
                 }
                 return config.getObjectWrapper();
             }

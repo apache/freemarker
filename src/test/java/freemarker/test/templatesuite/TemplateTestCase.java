@@ -77,9 +77,11 @@ import org.xml.sax.InputSource;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BooleanModel;
+import freemarker.ext.beans.Java7MembersOnlyBeansWrapper;
 import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
@@ -184,13 +186,13 @@ public class TemplateTestCase extends FileTestCase {
         
         final String testName = getName();
         if (testName.equals("bean-maps")) {
-            BeansWrapper w1 = new BeansWrapper();
-            BeansWrapper w2 = new BeansWrapper();
-            BeansWrapper w3 = new BeansWrapper();
-            BeansWrapper w4 = new BeansWrapper();
-            BeansWrapper w5 = new BeansWrapper();
-            BeansWrapper w6 = new BeansWrapper();
-            BeansWrapper w7 = new BeansWrapper();
+            BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w3 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w4 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w5 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w6 = new Java7MembersOnlyBeansWrapper();
+            BeansWrapper w7 = new Java7MembersOnlyBeansWrapper();
     
             w1.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
             w2.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
@@ -269,6 +271,31 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("double4", new SimpleNumber(new Double(-1e-16)));
             dataModel.put("bigDecimal", new SimpleNumber(java.math.BigDecimal.valueOf(1)));
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
+        }
+        
+        else if (testName.equals("simplehash-char-key")) {
+            HashMap mStringC = new HashMap();
+            mStringC.put("c", "string");
+            dataModel.put("mStringC", mStringC);
+            
+            HashMap mStringCNull = new HashMap();
+            mStringCNull.put("c", null);
+            dataModel.put("mStringCNull", mStringCNull);
+            
+            HashMap mCharC = new HashMap();
+            mCharC.put(Character.valueOf('c'), "char");
+            dataModel.put("mCharC", mCharC);
+            
+            HashMap mCharCNull = new HashMap();
+            mCharCNull.put("c", null);
+            dataModel.put("mCharCNull", mCharCNull);
+            
+            HashMap mMixed = new HashMap();
+            mMixed.put(Character.valueOf('c'), "char");
+            mMixed.put("s", "string");
+            mMixed.put("s2", "string2");
+            mMixed.put("s2n", null);
+            dataModel.put("mMixed", mMixed);
         }
     
         else if (testName.equals("default-xmlns")) {
@@ -416,6 +443,7 @@ public class TemplateTestCase extends FileTestCase {
         
       else if (testName.startsWith("overloaded-methods-2-")) {
           dataModel.put("obj", new OverloadedMethods2());
+          dataModel.put("dow", Boolean.valueOf(conf.getObjectWrapper() instanceof DefaultObjectWrapper));
       }
     }
     

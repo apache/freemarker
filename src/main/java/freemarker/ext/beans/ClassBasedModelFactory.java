@@ -96,8 +96,10 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             TemplateModel model = (TemplateModel) cache.get(key);
             if (model != null) return model;
         }
-        
-        final Object sharedLock = wrapper.getSharedClassIntrospectionCacheLock();
+
+        final ClassIntrospector classIntrospector;
+        int classIntrospectorClearingCounter;
+        final Object sharedLock = wrapper.getSharedInrospectionLock();
         synchronized (sharedLock) {
             TemplateModel model = (TemplateModel) cache.get(key);
             if (model != null) return model;
@@ -118,6 +120,11 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             
             // This will be the thread that introspects this class.
             classIntrospectionsInProgress.add(key);
+
+            // While the classIntrospector should not be changed from another thread, badly written apps can do that,
+            // and it's cheap to get the classIntrospector from inside the lock here:   
+            classIntrospector = wrapper.getClassIntrospector();
+            classIntrospectorClearingCounter = classIntrospector.getClearingCounter();
         }
         try {
             final Class clazz = ClassUtil.forName(key);
@@ -126,7 +133,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             // class-reloading detector. If clazz is a reloaded class,
             // the wrapper will in turn call our clearCache method.
             // TODO: Why do we check it now and only now?
-            wrapper.getClassIntrospectionData(clazz);
+            classIntrospector.get(clazz);
             
             TemplateModel model = createModel(clazz);
             // Warning: model will be null if the class is not good for the subclass.
@@ -134,7 +141,11 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             
             if (model != null) {
                 synchronized (sharedLock) {
-                    cache.put(key, model);
+                    // Save it into the cache, but only if nothing relevant has changed while we were outside the lock: 
+                    if (classIntrospector == wrapper.getClassIntrospector()
+                            && classIntrospectorClearingCounter == classIntrospector.getClearingCounter()) {  
+                        cache.put(key, model);
+                    }
                 }
             }
             return model;
@@ -147,13 +158,13 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     }
     
     void clearCache() {
-        synchronized(wrapper.getSharedClassIntrospectionCacheLock()) {
+        synchronized(wrapper.getSharedInrospectionLock()) {
             cache.clear();
         }
     }
     
     void removeFromCache(Class clazz) {
-        synchronized(wrapper.getSharedClassIntrospectionCacheLock()) {
+        synchronized(wrapper.getSharedInrospectionLock()) {
             cache.remove(clazz.getName());
         }
     }

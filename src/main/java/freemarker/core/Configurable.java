@@ -72,12 +72,14 @@ import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -100,6 +102,9 @@ public class Configurable
 {
     static final String C_TRUE_FALSE = "true,false";
     
+    /** The incompatible improvements version where the default of tempateLoader and objectWrapper was changed. */
+    static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = 2003021;
+    
     public static final String LOCALE_KEY = "locale";
     public static final String NUMBER_FORMAT_KEY = "number_format";
     public static final String TIME_FORMAT_KEY = "time_format";
@@ -118,6 +123,8 @@ public class Configurable
     public static final String AUTO_FLUSH_KEY = "auto_flush";
     /** @since 2.3.17 */
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
+    /** @since 2.3.21 */
+    public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
 
     private Configurable parent;
     private Properties properties;
@@ -142,12 +149,26 @@ public class Configurable
     private boolean urlEscapingCharsetSet;
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
+    private Boolean showErrorTips;
     
     /**
-     * Creates a top-level configurable, one that doesn't ingerit from a parent, and thus stores the default values.
+     * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
      * The only class that should use this is {@link Configuration}.
+     * 
+     * @deprecated This shouldn't even be public; don't use it.
      */
     public Configurable() {
+        this((Version) null);
+    }
+
+    /**
+     * Intended to be called from inside FreeMarker only.
+     * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
+     * Called by the {@link Configuration} constructor.
+     */
+    protected Configurable(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        
         parent = null;
         locale = Locale.getDefault();
         timeZone = TimeZone.getDefault();
@@ -158,9 +179,10 @@ public class Configurable
         classicCompatible = new Integer(0);
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
-        objectWrapper = ObjectWrapper.DEFAULT_WRAPPER;
+        objectWrapper = getDefaultObjectWrapper(incompatibleImprovements);
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
+        showErrorTips = Boolean.TRUE;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         
@@ -176,6 +198,7 @@ public class Configurable
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
         properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
         properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
+        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
         // as outputEncoding and urlEscapingCharset defaults to null, 
         // they are not set
 
@@ -183,7 +206,7 @@ public class Configurable
         
         customAttributes = new HashMap();
     }
-    
+
     /**
      * Creates a new instance. Normally you do not need to use this constructor,
      * as you don't use <code>Configurable</code> directly, but its subclasses.
@@ -210,7 +233,7 @@ public class Configurable
      * The parent stores the default values for this configurable. For example,
      * the parent of the {@link freemarker.template.Template} object is the
      * {@link freemarker.template.Configuration} object, so setting values not
-     * specfied on template level are specified by the confuration object.
+     * specified on template level are specified by the confuration object.
      *
      * @return the parent <tt>Configurable</tt> object, or null, if this is
      *    the root <tt>Configurable</tt> object.
@@ -229,7 +252,7 @@ public class Configurable
     }
     
     /**
-     * Toggles the "Classic Compatibile" mode. For a comprehensive description
+     * Toggles the "Classic Compatible" mode. For a comprehensive description
      * of this mode, see {@link #isClassicCompatible()}.
      */
     public void setClassicCompatible(boolean classicCompatibility) {
@@ -620,6 +643,15 @@ public class Configurable
                 ? objectWrapper : parent.getObjectWrapper();
     }
     
+    static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
+        if (incompatibleImprovements == null
+                || incompatibleImprovements.intValue() < DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+            return ObjectWrapper.DEFAULT_WRAPPER;
+        } else {
+            return DefaultObjectWrapper.getInstance(incompatibleImprovements);
+        }
+    }
+    
     /**
      * Informs FreeMarker about the charset used for the output. As FreeMarker outputs character stream (not
      * byte stream), it's not aware of the output charset unless the software that encloses it tells it
@@ -731,6 +763,28 @@ public class Configurable
             : (parent != null ? parent.getAutoFlush() : true);
     }
     
+    /**
+     * Sets if tips should be shown in error messages of errors arising during template processing.
+     * The default is {@code true}. 
+     * 
+     * @since 2.3.21
+     */
+    public void setShowErrorTips(boolean showTips) {
+        this.showErrorTips = showTips ? Boolean.TRUE : Boolean.FALSE;
+        properties.setProperty(SHOW_ERROR_TIPS_KEY, String.valueOf(showTips));
+    }
+    
+    /**
+     * See {@link #setShowErrorTips(boolean)}
+     * 
+     * @since 2.3.21
+     */
+    public boolean getShowErrorTips() {
+        return showErrorTips != null 
+            ? showErrorTips.booleanValue()
+            : (parent != null ? parent.getShowErrorTips() : true);
+    }
+    
     private static final String ALLOWED_CLASSES = "allowed_classes";
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
@@ -777,9 +831,11 @@ public class Configurable
      *       interpreted as class name, and the object will be created with
      *       its parameterless constructor. If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
-     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}),
+     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
+     *       or {@link DefaultObjectWrapper#getInstance(Version)}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
-     *       {@code "beans"} (means {@link BeansWrapper#DEFAULT_WRAPPER}),
+     *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
+     *       or {@link BeansWrapper#getInstance(Version)}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
@@ -859,6 +915,12 @@ public class Configurable
      *             a full-qualified class name, and the object will be created
      *             with its parameterless constructor.
      *       </ol>
+     *       
+     *   <li><p>{@code "show_error_tips"}:
+     *       See {@link #setShowErrorTips(boolean)}.
+     *       Since 2.3.21.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       
      * </ul>
      * 
      * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
@@ -1031,6 +1093,8 @@ public class Configurable
                 setStrictBeanModels(StringUtil.getYesNo(value));
             } else if (AUTO_FLUSH_KEY.equals(name)) {
                 setAutoFlush(StringUtil.getYesNo(value));
+            } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
+                setShowErrorTips(StringUtil.getYesNo(value));
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);

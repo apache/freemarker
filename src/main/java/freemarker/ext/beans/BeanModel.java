@@ -131,13 +131,23 @@ implements
      */
     public BeanModel(Object object, BeansWrapper wrapper)
     {
-        this.object = object;
-        this.wrapper = wrapper;
-        if (object != null) {
-            wrapper.getClassIntrospectionData(object.getClass());
-        }
+        // TODO 2.4: All models were introspected here, then the results was discareded, and get() will just do the
+        // introspection again. So is this necessary? (The inrospectNow parameter was added in 2.3.21 to allow
+        // lazy-introspecting BeansWrapper.trueModel|falseModel.)
+        this(object, wrapper, true);
     }
 
+    /** @since 2.3.21 */
+    BeanModel(Object object, BeansWrapper wrapper, boolean inrospectNow)
+    {
+        this.object = object;
+        this.wrapper = wrapper;
+        if (inrospectNow && object != null) {
+            // TODO: Could this be removed? [FM 2.4]
+            wrapper.getClassIntrospector().get(object.getClass());
+        }
+    }
+    
     /**
      * Uses Beans introspection to locate a property or method with name
      * matching the key name. If a method or property is found, it's wrapped
@@ -169,7 +179,7 @@ implements
         TemplateModelException
     {
         Class clazz = object.getClass();
-        Map classInfo = wrapper.getClassIntrospectionData(clazz);
+        Map classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
         
         try
@@ -236,7 +246,7 @@ implements
      */
     
     protected boolean hasPlainGetMethod() {
-    	return wrapper.getClassIntrospectionData(object.getClass()).get(BeansWrapper.GENERIC_GET_KEY) != null;
+    	return wrapper.getClassIntrospector().get(object.getClass()).get(ClassIntrospector.GENERIC_GET_KEY) != null;
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map classInfo)
@@ -267,7 +277,7 @@ implements
                 ((IndexedPropertyDescriptor)desc).getIndexedReadMethod(); 
             retval = member = 
                 new SimpleMethodModel(object, readMethod, 
-                        BeansWrapper.getArgTypes(classInfo, readMethod), wrapper);
+                        ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
         }
         else if(desc instanceof PropertyDescriptor)
         {
@@ -284,12 +294,12 @@ implements
         {
             Method method = (Method)desc;
             retval = member = new SimpleMethodModel(object, method, 
-                    BeansWrapper.getArgTypes(classInfo, method), wrapper);
+                    ClassIntrospector.getArgTypes(classInfo, method), wrapper);
         }
         else if(desc instanceof OverloadedMethods)
         {
             retval = member = 
-                new OverloadedMethodsModel(object, (OverloadedMethods)desc);
+                new OverloadedMethodsModel(object, (OverloadedMethods) desc, wrapper);
         }
         
         // If new cacheable member was created, cache it
@@ -303,6 +313,12 @@ implements
         }
         return retval;
     }
+    
+    void clearMemberCache() {
+        synchronized(this) {
+            memberMap = null;
+        }
+    }
 
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
     throws
@@ -310,7 +326,7 @@ implements
         InvocationTargetException,
         TemplateModelException
     {
-        Method genericGet = (Method)keyMap.get(BeansWrapper.GENERIC_GET_KEY);
+        Method genericGet = (Method)keyMap.get(ClassIntrospector.GENERIC_GET_KEY);
         if(genericGet == null)
             return UNKNOWN;
 
@@ -362,7 +378,7 @@ implements
     
     public int size()
     {
-        return wrapper.keyCount(object.getClass());
+        return wrapper.getClassIntrospector().keyCount(object.getClass());
     }
 
     public TemplateCollectionModel keys()
@@ -403,6 +419,6 @@ implements
      */
     protected Set keySet()
     {
-        return wrapper.keySet(object.getClass());
+        return wrapper.getClassIntrospector().keySet(object.getClass());
     }    
 }

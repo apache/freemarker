@@ -1,4 +1,7 @@
-<#-- The parts of the IcI 2.3.20 tests that give the same result regardless of method introspection order -->
+<#-- The parts of the IcI 2.3.20 tests that give the same result regardless of method introspection order -->00000000000
+<#-- Note that the point of 2.3.20 tests is to check if bugs fixed in 2.3.21 are still emulated in pre-2.3.21 mode -->
+
+<#include "overloaded-methods-2-common.ftl">
 
 <@assertFails message="no compatible overloaded">${obj.mNull1(null)}</@>
 <@assertEquals actual=obj.mNull1(123) expected="mNull1(int a1 = 123)" />
@@ -151,3 +154,31 @@
                expected='mRareWrappings(String s = yes, double d1 = 123.0001, Double d2 = 123.0001, double d3 = 123.0001, b = true)' />
                
 <@assertFails message="no compatible overloaded">${obj.mRareWrappings2(obj.adaptedNumber)}</@>
+
+<#-- Test for List VS array problems due to too vague hinting: -->
+
+<@assertEquals actual=obj.mSeqToArrayNonOverloaded(['a', 'b'], 'c') expected='mSeqToArrayNonOverloaded(String[] [a, b], String c)' />
+
+<@assertEquals actual=obj.mSeqToArrayGoodHint(['a', 'b'], 'c') expected='mSeqToArrayGoodHint(String[] [a, b], String c)' />
+<@assertEquals actual=obj.mSeqToArrayGoodHint(['a', 'b'], 3) expected='mSeqToArrayGoodHint(String[] [a, b], int 3)' />
+
+<@assertEquals actual=obj.mSeqToArrayGoodHint2(['a', 'b'], 'c') expected='mSeqToArrayGoodHint2(String[] [a, b], String c)' />
+<@assertEquals actual=obj.mSeqToArrayGoodHint2('a') expected='mSeqToArrayGoodHint2(String a)' />
+
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint(['a', 'b'], 'c') expected='mSeqToArrayPoorHint(String[] [a, b], String c)' /></@>
+<@assertEquals actual=obj.mSeqToArrayPoorHint('a', 2) expected='mSeqToArrayPoorHint(String a, int 2)' />
+
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint2(['a', 'b']) expected='mSeqToArrayPoorHint2(String[] [a, b])' /></@>
+<@assertEquals actual=obj.mSeqToArrayPoorHint2('a') expected='mSeqToArrayPoorHint2(String a)' />
+
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint3(['a', 'b']) expected='mSeqToArrayPoorHint3(String[] [a, b])' /></@>
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint3([1, 2]) expected='mSeqToArrayPoorHint3(int[] [a, b])' /></@>
+
+<@assertEquals actual=obj.mStringArrayVsListPreference(['a', 'b']) expected="mStringArrayVsListPreference(List [a, b])" />
+<@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(['a', 'b'])}</@>
+<@assertFails message="no compatible overloaded">${obj.mIntArrayVsIntegerArrayPreference([1, 2])}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1, 2], 3)}</@>
+<@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3)}</@>
+<@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaIntegerList, 3)}</@>
+<@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaByteList, 3)}</@>

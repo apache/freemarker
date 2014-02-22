@@ -75,25 +75,35 @@ public class SimpleCollection extends WrappingTemplateModel
 implements TemplateCollectionModel, Serializable {
     
     private boolean iteratorDirty;
-    private Iterator iterator;
-    private Collection collection;
+    private final Iterator iterator;
+    private final Collection collection;
 
+    /**
+     * @deprecated Use {@link #SimpleCollection(Iterator, ObjectWrapper)}
+     */
     public SimpleCollection(Iterator iterator) {
         this.iterator = iterator;
+        collection = null;
     }
 
+    /**
+     * @deprecated Use {@link #SimpleCollection(Collection, ObjectWrapper)}
+     */
     public SimpleCollection(Collection collection) {
         this.collection = collection;
+        iterator = null;
     }
 
     public SimpleCollection(Iterator iterator, ObjectWrapper wrapper) {
         super(wrapper);
         this.iterator = iterator;
+        collection = null;
     }
 
     public SimpleCollection(Collection collection, ObjectWrapper wrapper) {
         super(wrapper);
         this.collection = collection;
+        iterator = null;
     }
 
     /**

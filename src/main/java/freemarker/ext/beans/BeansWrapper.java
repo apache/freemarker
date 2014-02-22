@@ -52,39 +52,26 @@
 
 package freemarker.ext.beans;
 
-import java.beans.BeanInfo;
-import java.beans.IndexedPropertyDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
-import java.io.InputStream;
+import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.WeakHashMap;
 
-import freemarker.core._ConcurrentMapFactory;
+import freemarker.core.BugException;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -92,7 +79,9 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
@@ -103,19 +92,25 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Collections12;
 import freemarker.template.utility.NullArgumentException;
-import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.UndeclaredThrowableException;
+import freemarker.template.utility.WriteProtectable;
 
 /**
- * Utility class that provides generic services to reflection classes.
- * It handles all polymorphism issues in the {@link #wrap(Object)} and {@link #unwrap(TemplateModel)} methods.
- * @author Attila Szegedi
+ * {@link ObjectWrapper} that is able to expose the Java API of arbitrary Java objects. This is also the superclass of
+ * {@link DefaultObjectWrapper}. Note that instances of this class generally should be made by
+ * {@link #getInstance(Version)} and its overloads, not with its constructor.
+ * 
+ * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
+ * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
+ * was safely published and then left unmodified. 
  */
-public class BeansWrapper implements ObjectWrapper
+public class BeansWrapper implements ObjectWrapper, WriteProtectable
 {
+    private static final Logger LOG = Logger.getLogger("freemarker.beans");
+
     static final Object CAN_NOT_UNWRAP = new Object();
     private static final Class BIGINTEGER_CLASS = java.math.BigInteger.class;
     private static final Class BOOLEAN_CLASS = Boolean.class;
@@ -126,7 +121,6 @@ public class BeansWrapper implements ObjectWrapper
     private static final Class ITERABLE_CLASS;
     private static final Class LIST_CLASS = List.class;
     private static final Class MAP_CLASS = Map.class;
-    private static final Class NUMBER_CLASS = Number.class;
     private static final Class OBJECT_CLASS = Object.class;
     private static final Class SEQUENCEADAPTER_CLASS = SequenceAdapter.class;
     private static final Class SET_CLASS = Set.class;
@@ -144,59 +138,8 @@ public class BeansWrapper implements ObjectWrapper
         ITERABLE_CLASS = iterable;
     }
     
-    // When this property is true, some things are stricter. This is mostly to
-    // catch anomalous things in development that can otherwise be valid situations
-    // for our users.
-    private static final boolean DEVELOPMENT = "true".equals(SecurityUtilities.getSystemProperty("freemarker.development"));
-    
     private static final Constructor ENUMS_MODEL_CTOR = enumsModelCtor();
-
-    private static final Logger logger = Logger.getLogger("freemarker.beans");
     
-    private static final Set UNSAFE_METHODS = createUnsafeMethodsSet();
-    
-    static final Object GENERIC_GET_KEY = new Object();
-    private static final Object CONSTRUCTORS = new Object();
-    private static final Object ARGTYPES = new Object();
-
-    private static final boolean javaRebelAvailable = isJavaRebelAvailable();
-    
-    /**
-     * The default instance of BeansWrapper
-     */
-    private static final BeansWrapper INSTANCE = new BeansWrapper();
-
-    /**
-     * Used for synchronization by {@link #genericClassIntrospectionCache},
-     * {@link #staticModels} and {@link #enumModels} (and by any similar future
-     * fields). The primary goal of using a common monitor is to prevent
-     * deadlocks when these objects call each other.
-     */
-    private final Object sharedClassIntrospectionCacheLock = new Object();
-    
-    /**
-     * This is called the "generic" class introspection cache because when the
-     * public API simply says "introspection cache" it refers to the sum of all
-     * caches. The other less generic caches are in {@link #staticModels}
-     * and {@link #enumModels}.
-     */
-    private final Map/*<Class, Map<String, Object>>*/ genericClassIntrospectionCache
-            = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
-    private final boolean isGenericClassIntrospectionCacheConcurrentMap
-            = _ConcurrentMapFactory.isConcurrent(genericClassIntrospectionCache);
-    private final Set/*<String>*/ genericClassIntrospectionCacheClassNames
-            = new HashSet();
-    private final Set/*<Class>*/ genericClassIntrospectionsInProgress
-            = new HashSet();
-
-    private final StaticModels staticModels;
-    private final ClassBasedModelFactory enumModels;
-
-    private final ModelCache modelCache;
-    
-    private final BooleanModel FALSE;
-    private final BooleanModel TRUE;
-
     /**
      * At this level of exposure, all methods and properties of the
      * wrapped objects are exposed to the template.
@@ -233,65 +176,370 @@ public class BeansWrapper implements ObjectWrapper
      */
     public static final int EXPOSE_NOTHING = 3;
 
-    private int exposureLevel = EXPOSE_SAFE;
-    private TemplateModel nullModel = null;
-    private boolean methodsShadowItems = true;
-    private boolean exposeFields = false;
-    private int defaultDateType = TemplateDateModel.UNKNOWN;
+    // -----------------------------------------------------------------------------------------------------------------
+    // Instance cache:
+    
+    /**
+     * @deprecated Don't use this outside FreeMarker; will be soon removed.
+     */
+    protected final Object _preJava5Sync = _BeansAPI.JVM_USES_JSR133 ? null : new Object(); 
+    
+    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<BeansWrapper>>*/
+            INSTANCE_CACHE = new WeakHashMap();
+    private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
+    
+    // -----------------------------------------------------------------------------------------------------------------
+    // Introspection cache:
+    
+    private final Object sharedInrospectionLock;
+    
+    /** 
+     * {@link Class} to class info cache.
+     * This object is possibly shared with other {@link BeansWrapper}-s!
+     * 
+     * <p>To write this, always use {@link #setClassIntrospector(ClassIntrospector.PropertyAssignments)}.
+     * 
+     * <p>When reading this, it's good idea to synchronize on sharedInrospectionLock when it doesn't hurt overall
+     * performance. In theory that's not needed, but apps might fail to keep the rules.
+     */
+    private ClassIntrospector classIntrospector;
+    
+    /**
+     * {@link String} class name to {@link StaticModel} cache.
+     * This object only belongs to a single {@link BeansWrapper}.
+     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * reference.
+     */
+    private final StaticModels staticModels;
+    
+    /**
+     * {@link String} class name to {@link EnumerationModel} cache.
+     * This object only belongs to a single {@link BeansWrapper}.
+     * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
+     * reference.
+     */
+    private final ClassBasedModelFactory enumModels;
+    
+    /**
+     * Object to wrapped object cache; not used by default.
+     * This object only belongs to a single {@link BeansWrapper}.
+     */
+    private final ModelCache modelCache;
 
+    private final BooleanModel falseModel;
+    private final BooleanModel trueModel;
+    
+    // -----------------------------------------------------------------------------------------------------------------
+
+    // Why volatile: In principle it need not be volatile, but we want to catch modification attempts even if the
+    // object was published improperly to other threads. After all, the main goal of WriteProtectable is protecting
+    // things from buggy user code.
+    private volatile boolean readOnly;
+    
+    private TemplateModel nullModel = null;
+    private int defaultDateType; // initialized by PropertyAssignments.apply
     private ObjectWrapper outerIdentity = this;
-    private boolean simpleMapWrapper;
-    private boolean strict = false;
+    private boolean methodsShadowItems = true;
+    private boolean simpleMapWrapper;  // initialized by PropertyAssignments.apply
+    private boolean strict;  // initialized by PropertyAssignments.apply
+    
     private final Version incompatibleImprovements;
     
     /**
-     * Creates a new instance of BeansWrapper. The newly created instance
-     * will use the null reference as its null object, it will use
-     * {@link #EXPOSE_SAFE} method exposure level, and will not cache
-     * model instances.
+     * Creates a new instance with the incompatible-improvements-version specified in
+     * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
+     * 
+     * @deprecated Use {@link #getInstance(Version)}, {@link #getInstance(Version, boolean)} or
+     *     {@link #getInstance(PropertyAssignments)}, or in rare cases {@link #BeansWrapper(Version)} instead.
      */
     public BeansWrapper() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        // Attention! Don't don anything here, as the instance is possibly already visible to other threads.  
     }
     
     /**
-     * @param incompatibleImprovements
-     *   Sets which of the non-backward-compatible bugfixes/improvements should be enabled. This is like
-     *   {@link Configuration#setIncompatibleEnhancements(String)}, except that it applies to the object wrapper only,
-     *   and the actual effects are as listed below. (As {@link ObjectWrapper} objects are often shared among multiple
-     *   {@link Configuration}-s, they can't use {@link Configuration#getIncompatibleEnhancements()} to decide
-     *   their own incompatible improvements setting.)
+     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} or
+     * {@link #getInstance(PropertyAssignments)} instead if possible.
+     * Instances created with this constructor won't share the class introspection caches with other instances. That's
+     * also why you may want to use it instead of {@code getInstance} (you don't want to use common caches).
      * 
+     * @param incompatibleImprovements
+     *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
+     *   is the same as the FreeMarker version number with which the improvements were implemented.
+     *    
+     *   <p>For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
+     *   For released products that are still actively developed it's a low risk change to increase the 3rd
+     *   version number further as FreeMarker is updated, but of course you should always check the list of effects
+     *   below. Increasing the 2nd or 1st version number can mean substantial changes with higher risk of breaking
+     *   the application.
+     *   
+     *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
+     *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
+     *   numbers are technically independent. But it's recommended to keep those two version numbers the same.
+     * 
+     *   <p>The changes enabled by {@code incompatibleImprovements} are:
      *   <ul>
      *     <li>
-     *       2.3.21 (or higher):
-     *       <ul>
-     *         <li>Overloaded varargs methods use more specific type hinting when unwrapping varargs in some
-     *             rare cases. (For example, for m(File, String...) and m(String...), sometimes (unpredictably) it has
-     *             unwrapped arguments with the hints [Object, Object, Object, etc.] instead of with 
-     *             [Object, String, String, ...].)</li>
-     *       </ul> 
+     *       <p>2.3.0: No changes; this is the starting point, the version used in older projects.
+     *     </li>
+     *     <li>
+     *       <p>2.3.21 (or higher):
+     *       Several glitches were fixed in overloaded method selection. This usually just gets
+     *       rid of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method
+     *       choices), still, as in some cases the method chosen can be a different one now (that was the point of
+     *       the reworking after all), it can mean a change in the behavior of the application. The most important
+     *       change is that the treatment of {@code null} arguments were fixed, as earlier they were only seen
+     *       applicable to parameters of type {@code Object}. Now {@code null}-s are seen to be applicable to any
+     *       non-primitive parameters, and among those the one with the most specific type will be preferred (just
+     *       like in Java), which is hence never the one with the {@code Object} parameter type. For more details
+     *       about overloaded method selection changes see the version History in the FreeMarker Manual.
      *     </li>
      *   </ul>
      *
      * @since 2.3.21
      */
     public BeansWrapper(Version incompatibleImprovements) {
-        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
-        
-        this.incompatibleImprovements = incompatibleImprovements;
-        
-        staticModels = new StaticModels(this);
-        enumModels = createEnumModels(this);
+        this(new PropertyAssignments(incompatibleImprovements), false);
+        // Attention! Don't don anything here, as the instance is possibly already visible to other threads.  
+    }
+    
+    private static volatile boolean ftmaDeprecationWarnLogged;
+    
+    /**
+     * @param readOnly makes the instance read-only via {@link WriteProtectable#writeProtect()}; this way it can use the shared
+     *     introspection cache.
+     * 
+     * @since 2.3.21
+     */
+    protected BeansWrapper(PropertyAssignments pa, boolean readOnly) {
+        // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
+        if (pa.getMethodAppearanceFineTuner() == null) {
+            Class thisClass = this.getClass();
+            boolean overridden = false;
+            boolean testFailed = false;
+            try {
+                while (!overridden
+                        && thisClass != DefaultObjectWrapper.class
+                        && thisClass != BeansWrapper.class
+                        && thisClass != SimpleObjectWrapper.class) {
+                    try {
+                        thisClass.getDeclaredMethod("finetuneMethodAppearance",
+                                new Class[] { Class.class, Method.class, MethodAppearanceDecision.class });
+                        overridden = true;
+                    } catch (NoSuchMethodException e) {
+                        thisClass = thisClass.getSuperclass();
+                    }
+                }
+            } catch (Throwable e) {
+                // The security manager sometimes doesn't allow this
+                LOG.info("Failed to check if finetuneMethodAppearance is overidden in " + thisClass.getName()
+                        + "; acting like if it was, but this way it won't utilize the shared class introspection "
+                        + "cache.",
+                        e);
+                overridden = true;
+                testFailed = true;
+            }
+            if (overridden) {
+                if (!testFailed && !ftmaDeprecationWarnLogged) {
+                    LOG.warn("Overriding BeansWrapper.finetuneMethodAppearance is deprecated and will be banned in the "
+                            + "future. Use BeansWrapper.setMethodAppearanceFineTuner instead.");
+                    ftmaDeprecationWarnLogged = true;
+                }
+                pa = (PropertyAssignments) pa.clone(false);
+                pa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
-        modelCache = new BeansModelCache(this);
-        
-        FALSE = new BooleanModel(Boolean.FALSE, this);
-        TRUE = new BooleanModel(Boolean.TRUE, this);
-        
-        if(javaRebelAvailable) {
-            JavaRebelIntegration.registerWrapper(this);
+                    public void process(
+                            MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
+                        BeansWrapper.this.finetuneMethodAppearance(in.getContainingClass(), in.getMethod(), out);
+                    }
+                    
+                });
+            }
         }
+        
+        this.incompatibleImprovements = pa.getIncompatibleImprovements();  // normalized
+        
+        simpleMapWrapper = pa.isSimpleMapWrapper();
+        defaultDateType = pa.getDefaultDateType();
+        outerIdentity = pa.getOuterIdentity() != null ? pa.getOuterIdentity() : this;
+        strict = pa.isStrict();
+        
+        if (!readOnly) {
+            // As this is not a read-only BeansWrapper, the classIntrospector will be possibly replaced for a few times,
+            // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
+            // synchronize on, even during the classIntrospector is being replaced.
+            sharedInrospectionLock = new Object();
+            classIntrospector = new ClassIntrospector(pa.classIntrospectorPropertyAssignments, sharedInrospectionLock);
+        } else {
+            // As in this read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
+            // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
+            classIntrospector = ClassIntrospector.getInstance(pa.classIntrospectorPropertyAssignments);
+            sharedInrospectionLock = classIntrospector.getSharedLock(); 
+        }
+        
+        falseModel = new BooleanModel(Boolean.FALSE, this);
+        trueModel = new BooleanModel(Boolean.TRUE, this);
+        
+        staticModels = new StaticModels(BeansWrapper.this);
+        enumModels = createEnumModels(BeansWrapper.this);
+        modelCache = new BeansModelCache(BeansWrapper.this);
+        setUseCache(pa.useModelCache);
+
+        if (readOnly) {
+            writeProtect();
+        }
+        
+        // Attention! At this point, the BeansWrapper must be fully initialized, as when the model factories are
+        // registered below, the BeansWrapper can immediately get concurrent callbacks. That those other threads will
+        // see consistent image of the BeansWrapper is ensured that callback are always sync-ed on
+        // classIntrospector.sharedLock, and so is classIntrospector.registerModelFactory(...).
+        
+        registerModelFactories();
+    }
+    
+    /**
+     * Returns an unconfigurable (read-only) {@link BeansWrapper} instance that's already configured as specified in the
+     * argument; this is preferred over using the constructors. The returned instance is often, but not always a
+     * VM-wide (or rather, Web-Application-wide) singleton. Note that other overloads of this method allows you to
+     * configure more properties.
+     * 
+     * <p>Note that what this method documentation says about {@link BeansWrapper} also applies to
+     * {@link DefaultObjectWrapper}.
+     * 
+     * <p>The main benefit of using this method instead of the constructors is that this way the internal
+     * object wrapping-related caches will be reused/shared when appropriate. As the caches are expensive to build and
+     * take memory, if multiple independent components use FreeMarker in an application, this can mean some resource
+     * savings.
+     * 
+     * <p>The object wrapping-related caches are:
+     * <ul>
+     *   <li><p>Class introspection cache: Stores information about classes that once had to be wrapped. The cache is
+     *     stored in the static fields of certain FreeMarker classes. Thus, if you have two {@link BeansWrapper}
+     *     instances, they might share the same class introspection cache. But if you have two
+     *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
+     *     share their caches (as they don't share the same FreeMarker classes).
+     *     Also, currently there's a separate cache for each permutation of the property values that influence class
+     *     introspection: {@link PropertyAssignments#setExposeFields(boolean) expose_fields} and
+     *     {@link PropertyAssignments#setExposureLevel(int) exposure_level}. So only {@link BeansWrapper} where those
+     *     properties are the same may share class introspection caches among each other.
+     *   </li>
+     *   <li><p>Model caches: These are local to a {@link BeansWrapper}. {@code getInstance} returns the same
+     *     {@link BeansWrapper} instance for equivalent properties (unless the existing instance was garbage collected
+     *     and thus a new one had to be created), hence these caches will be re-used too. {@link BeansWrapper} instances
+     *     are cached in the static fields of FreeMarker here too, but there's a separate cache for each
+     *     Thread Context Class Loader, which in a servlet container practically means a separate cache for each Web
+     *     Application (each servlet context). (This is like so because when resolving class names to classes FreeMarker
+     *     will turn to the Thread Context Class Loader first, and only then to the defining class loader of FreeMarker,
+     *     so the result of the resolution can be different for different Thread Context Class Loaders.) The caches
+     *     local to a {@link BeansWrapper} are:
+     *     <ul>
+     *       <li><p>
+     *         Static model caches: These are used by the hash returned by {@link #getEnumModels()} and
+     *         {@link #getStaticModels()}, for caching {@link TemplateModel}-s for the static methods/fields
+     *         and Java 5 enums that were accessed through them. To use said hashes, you have to put them
+     *         explicitly into the data-model or expose them to template explicitly otherwise, so in most applications
+     *         these cache are unused. 
+     *       </li>
+     *       <li><p>
+     *         Instance model cache: By default off (see {@link #setUseCache(boolean)}). Caches the
+     *         {@link TemplateModel}-s for all Java objects that were accessed from templates.
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     * 
+     * <p>Note that if you set {@link PropertyAssignments#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)} to
+     * non-{@code null}, you will always get a new instance, and the class introspection cache won't be shared.
+     * 
+     * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
+     *     Not {@code null}.
+     *     Note that the version will be normalized to the lowest version where the same incompatible
+     *     {@link BeansWrapper} improvements were already present, so for the returned instance
+     *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements) {
+        return getInstance(new PropertyAssignments(incompatibleImprovements));
+    }
+    
+    /**
+     * Same as {@link #getInstance(Version)}, but also specifies the {@code simpleMapWrapper} property of the desired
+     * instance. Without this, that will be set to its default.
+     *     
+     * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapsWrapper) {
+        PropertyAssignments pa = new PropertyAssignments(incompatibleImprovements);
+        pa.setSimpleMapWrapper(simpleMapsWrapper);
+        return getInstance(pa);
+    }
+    
+    /**
+     * Same as {@link #getInstance(Version)}, but you can specify more properties of the desired instance.
+     *     
+     * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
+     * 
+     * @since 2.3.21
+     */
+    public static BeansWrapper getInstance(PropertyAssignments pa) {
+        return _BeansAPI.getBeansWrapperSubclassInstance(
+                pa, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, BeansWrapperFactory.INSTANCE);
+    }
+    
+    private static class BeansWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
+        
+        private static final BeansWrapperFactory INSTANCE = new BeansWrapperFactory(); 
+
+        public BeansWrapper create(PropertyAssignments pa) {
+            return new BeansWrapper(pa, true);
+        }
+        
+    }
+
+    /** For unit testing only */
+    static void clearInstanceCache() {
+        synchronized (INSTANCE_CACHE) {
+            INSTANCE_CACHE.clear();
+        }
+    }
+
+    /** For unit testing only */
+    static Map getInstanceCache() {
+        return INSTANCE_CACHE;
+    }
+    
+    /**
+     * Makes the JavaBean properties of this object read-only.
+     * 
+     * @since 2.3.21
+     */
+    public void writeProtect() {
+        readOnly = true;
+    }
+
+    /**
+     * @since 2.3.21
+     */
+    public boolean isWriteProtected() {
+        return readOnly;
+    }
+    
+    Object getSharedInrospectionLock() {
+        return sharedInrospectionLock;
+    }
+    
+    /**
+     * If this object is already read-only according to {@link WriteProtectable}, throws {@link IllegalStateException},
+     * otherwise does nothing.
+     * 
+     * @since 2.3.21
+     */
+    protected void checkModifiable() {
+        if (readOnly) throw new IllegalStateException(
+                "Can't modify the " + this.getClass().getName() + " object, as it was set to read-only.");
     }
 
     /**
@@ -320,9 +568,10 @@ public class BeansWrapper implements ObjectWrapper
      * handle existing properties whose value is <tt>null</tt>, without the risk of
      * hiding typos in the property names. Typos will always cause error. But mind you, it
      * goes against the basic approach of FreeMarker, so use this feature only if you really
-     * know what are you doing.
+     * know what you are doing.
      */
     public void setStrict(boolean strict) {
+        checkModifiable();
     	this.strict = strict;
     }
 
@@ -337,6 +586,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setOuterIdentity(ObjectWrapper outerIdentity)
     {
+        checkModifiable();
         this.outerIdentity = outerIdentity;
     }
 
@@ -350,17 +600,31 @@ public class BeansWrapper implements ObjectWrapper
     }
 
     /**
-     * By default the BeansWrapper wraps classes implementing
-     * java.util.Map using {@link MapModel}. Setting this flag will
-     * cause it to use a {@link SimpleMapModel} instead. The biggest
-     * difference is that when using a {@link SimpleMapModel}, the
-     * map will be visible as <code>TemplateHashModelEx</code>,
-     * and the subvariables will be the content of the map,
-     * without the other methods and properties of the map object.
-     * @param simpleMapWrapper enable simple map wrapping
+     * When set to {@code true}, the keys in {@link Map}-s won't mix with the method names when looking at them
+     * from templates. The default is {@code false} for backward-compatibility, but is not recommended.
+     * 
+     * <p>When this is {@code false}, {@code myMap.foo} or {@code myMap['foo']} either returns the method {@code foo},
+     * or calls {@code Map.get("foo")}. If both exists (the method and the {@link Map} key), one will hide the other,
+     * depending on the {@link #isMethodsShadowItems()}, which default to {@code true} (the method
+     * wins). Some frameworks use this so that you can call {@code myMap.get(nonStringKey)} from templates [*], but it
+     * comes on the cost of polluting the key-set with the method names, and risking methods accidentally hiding
+     * {@link Map} entries (or the other way around). Thus, this setup is not recommended.
+     * (Technical note: {@link Map}-s will be wrapped into {@link MapModel} in this case.)  
+     *
+     * <p>When this is {@code true}, {@code myMap.foo} or {@code myMap['foo']} always calls {@code Map.get("foo")}.
+     * The methods of the {@link Map} object aren't visible from templates in this case. This, however, spoils the
+     * {@code myMap.get(nonStringKey)} workaround. But now you can use {@code myMap(nonStringKey)} instead, that is, you
+     * can use the map itself as the {@code get} method. 
+     * (Technical note: {@link Map}-s will be wrapped into {@link SimpleMapModel} in this case.)
+     * 
+     * <p>*: For historical reasons, FreeMarker 2.3.X doesn't support non-string keys with the {@code []} operator,
+     *       hence the workarounds. This will be likely fixed in FreeMarker 2.4.0. Also note that the method- and
+     *       the "field"-namespaces aren't separate in FreeMarker, hence {@code myMap.get} can return the {@code get}
+     *       method.
      */
     public void setSimpleMapWrapper(boolean simpleMapWrapper)
     {
+        checkModifiable();
         this.simpleMapWrapper = simpleMapWrapper;
     }
 
@@ -407,16 +671,21 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setExposureLevel(int exposureLevel)
     {
-        if(exposureLevel < EXPOSE_ALL || exposureLevel > EXPOSE_NOTHING)
-        {
-            throw new IllegalArgumentException("Illegal exposure level " + exposureLevel);
+        checkModifiable();
+     
+        if (classIntrospector.getExposureLevel() != exposureLevel) {
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setExposureLevel(exposureLevel);
+            setClassIntrospector(pa);
         }
-        this.exposureLevel = exposureLevel;
     }
     
-    int getExposureLevel()
+    /**
+     * @since 2.3.21
+     */
+    public int getExposureLevel()
     {
-        return exposureLevel;
+        return classIntrospector.getExposureLevel();
     }
     
     /**
@@ -431,7 +700,13 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setExposeFields(boolean exposeFields)
     {
-        this.exposeFields = exposeFields;
+        checkModifiable();
+        
+        if (classIntrospector.getExposeFields() != exposeFields) {
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setExposeFields(exposeFields);
+            setClassIntrospector(pa);
+        }
     }
     
     /**
@@ -441,9 +716,113 @@ public class BeansWrapper implements ObjectWrapper
      */
     public boolean isExposeFields()
     {
-        return exposeFields;
+        return classIntrospector.getExposeFields();
     }
     
+    public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
+        return classIntrospector.getMethodAppearanceFineTuner();
+    }
+
+    /**
+     * Used to tweak certain aspects of how methods appear in the data-model;
+     * see {@link MethodAppearanceFineTuner} for more.
+     */
+    public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
+        checkModifiable();
+        
+        if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+            setClassIntrospector(pa);
+        }
+    }
+
+    MethodSorter getMethodSorter() {
+        return classIntrospector.getMethodSorter();
+    }
+
+    void setMethodSorter(MethodSorter methodSorter) {
+        checkModifiable();
+        
+        if (classIntrospector.getMethodSorter() != methodSorter) {
+            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            pa.setMethodSorter(methodSorter);
+            setClassIntrospector(pa);
+        }
+    }
+    
+    /**
+     * Tells if this instance acts like if its class introspection cache is sharable with other {@link BeansWrapper}-s.
+     * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospecitonCache()}.
+     * The value depends on how the instance
+     * was created; with a public constructor (then this is {@code false}), or with {@link #getInstance(Version)} or
+     * its overloads (then it's {@code true}). Note that in the last case it's possible that the introspection cache
+     * will not be actually shared, but this will {@code true} even then. 
+     * 
+     * @since 2.3.21
+     */
+    public boolean isClassIntrospectionCacheRestricted() {
+        return classIntrospector.getHasSharedInstanceRestrictons();
+    }
+    
+    /** 
+     * Replaces the value of {@link #classIntrospector}, but first it unregisters
+     * the model factories in the old {@link #classIntrospector}.
+     */
+    private void setClassIntrospector(ClassIntrospector.PropertyAssignments pa) {
+        checkModifiable();
+        
+        final ClassIntrospector newCI = new ClassIntrospector(pa, sharedInrospectionLock);
+        final ClassIntrospector oldCI;
+        
+        // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
+        // even modify the wrapper after publishing. This doesn't give 100% protection from those violations,
+        // as classIntrospector reading aren't everywhere synchronized for performance reasons. It still decreases the
+        // chance of accidents, because some ops on classIntrospector are synchronized, and because it will at least
+        // push the new value into the common shared memory.
+        synchronized (sharedInrospectionLock) {
+            oldCI = classIntrospector;
+            if (oldCI != null) {
+                // Note that after unregistering the model factory might still gets some callback from the old
+                // classIntrospector
+                if (staticModels != null) {
+                    oldCI.unregisterModelFactory(staticModels);
+                    staticModels.clearCache();
+                }
+                if (enumModels != null) {
+                    oldCI.unregisterModelFactory(enumModels);
+                    enumModels.clearCache();
+                }
+                if (modelCache != null) {
+                    oldCI.unregisterModelFactory(modelCache);
+                    modelCache.clearCache();
+                }
+                if (trueModel != null) {
+                    trueModel.clearMemberCache();
+                }
+                if (falseModel != null) {
+                    falseModel.clearMemberCache();
+                }
+            }
+            
+            classIntrospector = newCI;
+            
+            registerModelFactories();
+        }
+    }
+
+    private void registerModelFactories() {
+        if (staticModels != null) {
+            classIntrospector.registerModelFactory(staticModels);
+        }
+        if (enumModels != null) {
+            classIntrospector.registerModelFactory(enumModels);
+        }
+        if (modelCache != null) {
+            classIntrospector.registerModelFactory(modelCache);
+        }
+    }
+
     /**
      * Sets whether methods shadow items in beans. When true (this is the
      * default value), <code>${object.name}</code> will first try to locate
@@ -454,9 +833,14 @@ public class BeansWrapper implements ObjectWrapper
      * When set to false, the lookup order is reversed and generic get method
      * is called first, and only if it returns null is method lookup attempted.
      */
-    public synchronized void setMethodsShadowItems(boolean methodsShadowItems)
+    public void setMethodsShadowItems(boolean methodsShadowItems)
     {
-        this.methodsShadowItems = methodsShadowItems;
+        // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
+        // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
+        synchronized (this) {
+            checkModifiable();
+            this.methodsShadowItems = methodsShadowItems;
+        }
     }
     
     boolean isMethodsShadowItems()
@@ -471,8 +855,14 @@ public class BeansWrapper implements ObjectWrapper
      * {@link TemplateDateModel#UNKNOWN}.
      * @param defaultDateType the new default date type.
      */
-    public synchronized void setDefaultDateType(int defaultDateType) {
-        this.defaultDateType = defaultDateType;
+    public void setDefaultDateType(int defaultDateType) {
+        // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
+        // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
+        synchronized (this) {
+            checkModifiable();
+            
+            this.defaultDateType = defaultDateType;
+        }
     }
 
     /**
@@ -480,19 +870,29 @@ public class BeansWrapper implements ObjectWrapper
      * details.
      * @return the default date type
      */
-    protected int getDefaultDateType() {
+    public int getDefaultDateType() {
         return defaultDateType;
     }
     
     /**
-     * Sets whether this wrapper caches model instances. Default is false.
-     * When set to true, calling {@link #wrap(Object)} multiple times for
+     * Sets whether this wrapper caches the {@link TemplateModel}-s created for the Java objects that has wrapped with
+     * this object wrapper. Default is {@code false}.
+     * When set to {@code true}, calling {@link #wrap(Object)} multiple times for
      * the same object will likely return the same model (although there is
-     * no guarantee as the cache items can be cleared anytime).
+     * no guarantee as the cache items can be cleared any time).
      */
     public void setUseCache(boolean useCache)
     {
+        checkModifiable();
         modelCache.setUseCache(useCache);
+    }
+
+    /**
+     * @since 2.3.21
+     */
+    public boolean getUseCache()
+    {
+        return modelCache.getUseCache();
     }
     
     /**
@@ -505,11 +905,14 @@ public class BeansWrapper implements ObjectWrapper
      */
     public void setNullModel(TemplateModel nullModel)
     {
+        checkModifiable();
         this.nullModel = nullModel;
     }
     
     /**
-     * See {@link #BeansWrapper(Version)}.
+     * Returns the version given with {@link #BeansWrapper(Version)}, normalized to the lowest version where a change
+     * has occurred. Thus, this is not necessarily the same version than that was given to the constructor.
+     * 
      * @since 2.3.21
      */
     public Version getIncompatibleImprovements() {
@@ -517,7 +920,22 @@ public class BeansWrapper implements ObjectWrapper
     }
     
     boolean is2321Bugfixed() {
-        return getIncompatibleImprovements().intValue() >= 2003021;
+        return is2321Bugfixed(getIncompatibleImprovements());
+    }
+
+    static boolean is2321Bugfixed(Version version) {
+        return version.intValue() >= 2003021;
+    }
+    
+    /** 
+     * Returns the lowest version number that is equivalent with the parameter version.
+     * @since 2.3.21
+     */
+    protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
+        NullArgumentException.check("version", incompatibleImprovements);
+        // Warning! If you add new results here, you must update getInstance in ObjectWrapper and DefaultObjectWrapper,
+        // as they will throw exception on unsupported version!
+        return is2321Bugfixed(incompatibleImprovements) ? _TemplateAPI.VERSION_2_3_21 : _TemplateAPI.VERSION_2_3_0;
     }
     
     /**
@@ -530,10 +948,12 @@ public class BeansWrapper implements ObjectWrapper
      * exposure level, null model) to affect its operation. By default, the
      * default instance is not caching, uses the <code>EXPOSE_SAFE</code>
      * exposure level, and uses null reference as the null model.
+     * 
+     * @deprecated Use {@link #getInstance(Version)}; as the instance returned is not read-only, it's dangerous to use.
      */
     public static final BeansWrapper getDefaultInstance()
     {
-        return INSTANCE;
+        return BeansWrapperSingletonHolder.INSTANCE;
     }
 
     /**
@@ -558,8 +978,7 @@ public class BeansWrapper implements ObjectWrapper
      */
     public TemplateModel wrap(Object object) throws TemplateModelException
     {
-        if(object == null)
-            return nullModel;
+        if(object == null) return nullModel;
         return modelCache.getInstance(object);
     }
 
@@ -577,7 +996,7 @@ public class BeansWrapper implements ObjectWrapper
 
     private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
         public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return ((Boolean)object).booleanValue() ? TRUE : FALSE; 
+            return ((Boolean)object).booleanValue() ? trueModel : falseModel; 
         }
     };
 
@@ -665,11 +1084,11 @@ public class BeansWrapper implements ObjectWrapper
     }
 
     /**
-     * Same as {@link #tryUnwrap(TemplateModel, Class, int)} with 0 last argument.
+     * Same as {@link #tryUnwrap(TemplateModel, Class, int, boolean)} with 0 and <tt>false</tt> last arguments.
      */
     Object tryUnwrap(TemplateModel model, Class hint) throws TemplateModelException
     {
-        return tryUnwrap(model, hint, 0);
+        return tryUnwrap(model, hint, 0, false);
     }
     
     /**
@@ -677,12 +1096,13 @@ public class BeansWrapper implements ObjectWrapper
      *        This will be ignored if the hint is already a concrete numerical type. (With overloaded methods the hint
      *        is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
      *        concrete overloaded method.)
+     * @param overloadedMode Set true {@code true} when unwrapping for an overloaded method parameter
      * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
      */
-    Object tryUnwrap(TemplateModel model, Class hint, int targetNumTypes) 
+    Object tryUnwrap(TemplateModel model, Class hint, int targetNumTypes, boolean overloadedMode) 
     throws TemplateModelException
     {
-        Object res = tryUnwrap(model, hint, null);
+        Object res = tryUnwrap(model, hint, overloadedMode, null);
         if (targetNumTypes != 0
                 && (targetNumTypes & OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
@@ -692,14 +1112,20 @@ public class BeansWrapper implements ObjectWrapper
         }
     }
 
-    private Object tryUnwrap(TemplateModel model, Class hint, Map recursionStops) 
+    /**
+     * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
+     */
+    private Object tryUnwrap(TemplateModel model, Class hint, boolean overloadedMode,  Map recursionStops) 
     throws TemplateModelException
     {
+        
         if(model == null || model == nullModel) {
             return null;
         }
         
-        if (is2321Bugfixed() && hint.isPrimitive()) {
+        final boolean is2321Bugfixed = is2321Bugfixed();
+        
+        if (is2321Bugfixed && hint.isPrimitive()) {
             hint = ClassUtil.primitiveClassToBoxingClass(hint);            
         }
         
@@ -708,14 +1134,15 @@ public class BeansWrapper implements ObjectWrapper
         // PyObject as its argument to receive a PyObject from a JythonModel
         // passed as an argument to TemplateMethodModelEx etc.
         if(model instanceof AdapterTemplateModel) {
-            Object adapted = ((AdapterTemplateModel)model).getAdaptedObject(
+            Object wrapped = ((AdapterTemplateModel)model).getAdaptedObject(
                     hint);
-            if(hint.isInstance(adapted)) {
-                return adapted;
+            if(hint.isInstance(wrapped)) {
+                return wrapped;
             }
-            // Attempt numeric conversion 
-            if(adapted instanceof Number && ClassUtil.isNumerical(hint)) {
-                Number number = forceUnwrappedNumberToType((Number) adapted, hint, is2321Bugfixed());
+            
+            // Attempt numeric conversion: 
+            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
+                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
                 if(number != null) return number;
             }
         }
@@ -725,9 +1152,10 @@ public class BeansWrapper implements ObjectWrapper
             if(hint.isInstance(wrapped)) {
                 return wrapped;
             }
-            // Attempt numeric conversion 
+            
+            // Attempt numeric conversion: 
             if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
-                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed());
+                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
                 if(number != null) {
                     return number;
                 }
@@ -752,7 +1180,7 @@ public class BeansWrapper implements ObjectWrapper
         if(ClassUtil.isNumerical(hint)) {
             if(model instanceof TemplateNumberModel) {
                 Number number = forceUnwrappedNumberToType(
-                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed());
+                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed);
                 if(number != null) {
                     return number;
                 }
@@ -800,32 +1228,7 @@ public class BeansWrapper implements ObjectWrapper
         // TemplateSequenceModels can be converted to arrays
         if(hint.isArray()) {
             if(model instanceof TemplateSequenceModel) {
-                if(recursionStops != null) {
-                    Object retval = recursionStops.get(model);
-                    if(retval != null) {
-                        return retval;
-                    }
-                } else {
-                    recursionStops = 
-                        new IdentityHashMap();
-                }
-                TemplateSequenceModel seq = (TemplateSequenceModel)model;
-                Class componentType = hint.getComponentType();
-                Object array = Array.newInstance(componentType, seq.size());
-                recursionStops.put(model, array);
-                try {
-                    int size = seq.size();
-                    for (int i = 0; i < size; i++) {
-                        Object val = tryUnwrap(seq.get(i), componentType, recursionStops);
-                        if(val == CAN_NOT_UNWRAP) {
-                            return CAN_NOT_UNWRAP;
-                        }
-                        Array.set(array, i, val);
-                    }
-                } finally {
-                    recursionStops.remove(model);
-                }
-                return array;
+                return unwrapSequenceToArray((TemplateSequenceModel) model, hint, true, recursionStops);
             }
             // array classes are final, no other conversion will work
             return CAN_NOT_UNWRAP;
@@ -889,6 +1292,13 @@ public class BeansWrapper implements ObjectWrapper
                 hint.isAssignableFrom(SETADAPTER_CLASS)) {
             return new SetAdapter((TemplateCollectionModel)model, this);
         }
+        if (overloadedMode && is2321Bugfixed) {
+            /** Because List-s are convertible to arrays later (but only overloaded method calls do that) */
+            if(model instanceof TemplateSequenceModel 
+                    && hint.isAssignableFrom(Object[].class)) {
+                return new SequenceAdapter((TemplateSequenceModel)model, this);
+            }
+        }
 
         // Last ditch effort - is maybe the model itself instance of the 
         // required type?
@@ -900,11 +1310,120 @@ public class BeansWrapper implements ObjectWrapper
     }
 
     /**
+     * @param tryOnly if <tt>true</true>, if the conversion of an item fails, the method returns {@link #CAN_NOT_UNWRAP}
+     *     instead of throwing a {@link TemplateModelException}.
+     */
+    Object unwrapSequenceToArray(TemplateSequenceModel seq, Class arrayClass, boolean tryOnly, Map recursionStops)
+            throws TemplateModelException {
+        if(recursionStops != null) {
+            Object retval = recursionStops.get(seq);
+            if(retval != null) {
+                return retval;
+            }
+        } else {
+            recursionStops = new IdentityHashMap();
+        }
+        Class componentType = arrayClass.getComponentType();
+        Object array = Array.newInstance(componentType, seq.size());
+        recursionStops.put(seq, array);
+        try {
+            final int size = seq.size();
+            for (int i = 0; i < size; i++) {
+                final TemplateModel seqItem = seq.get(i);
+                Object val = tryUnwrap(seqItem, componentType, false, recursionStops);
+                if(val == CAN_NOT_UNWRAP) {
+                    if (tryOnly) {
+                        return CAN_NOT_UNWRAP;
+                    } else {
+                        throw new TemplateModelException(
+                                "Failed to convert " + ClassUtil.getFTLTypeDescription(seq)
+                                + " object to " + ClassUtil.getShortClassNameOfObject(array)
+                                + ": Problematic sequence item at index " + i + " with value type: "
+                                + ClassUtil.getFTLTypeDescription(seqItem));
+                    }
+                    
+                }
+                Array.set(array, i, val);
+            }
+        } finally {
+            recursionStops.remove(seq);
+        }
+        return array;
+    }
+    
+    Object listToArray(List list, Class arrayClass, Map recursionStops)
+            throws TemplateModelException {
+        if (list instanceof SequenceAdapter) {
+            return unwrapSequenceToArray(
+                    ((SequenceAdapter) list).getTemplateSequenceModel(),
+                    arrayClass, false,
+                    recursionStops);
+        }
+        
+        if(recursionStops != null) {
+            Object retval = recursionStops.get(list);
+            if(retval != null) {
+                return retval;
+            }
+        } else {
+            recursionStops = new IdentityHashMap();
+        }
+        Class componentType = arrayClass.getComponentType();
+        Object array = Array.newInstance(componentType, list.size());
+        recursionStops.put(list, array);
+        try {
+            boolean isComponentTypeExamined = false;
+            boolean isComponentTypeNumerical = false;  // will be filled on demand
+            int i = 0;
+            for (Iterator it = list.iterator(); it.hasNext();) {
+                Object listItem = it.next();
+                if (listItem != null && !componentType.isInstance(listItem)) {
+                    // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
+                    if (!isComponentTypeExamined) {
+                        isComponentTypeNumerical = ClassUtil.isNumerical(componentType);
+                        isComponentTypeExamined = true;
+                    }
+                    if (isComponentTypeNumerical && listItem instanceof Number) {
+                        listItem = forceUnwrappedNumberToType((Number) listItem, componentType, true);
+                    } else if (componentType == String.class && listItem instanceof Character) {
+                        listItem = String.valueOf(((Character) listItem).charValue());
+                    } else if ((componentType == Character.class || componentType == char.class)
+                            && listItem instanceof String) {
+                        String listItemStr = (String) listItem;
+                        if (listItemStr.length() == 1) {
+                            // Java 5: use Character.valueOf
+                            listItem = new Character(listItemStr.charAt(0));
+                        }
+                    } else if (componentType.isArray()) {
+                        if (listItem instanceof List) {
+                            listItem = listToArray((List) listItem, componentType, recursionStops);
+                        } else if (listItem instanceof TemplateSequenceModel) {
+                            listItem = unwrapSequenceToArray((TemplateSequenceModel) listItem, componentType, false, recursionStops);
+                        }
+                    }
+                }
+                try {
+                    Array.set(array, i++, listItem);
+                } catch (IllegalArgumentException e) {
+                    throw new TemplateModelException(
+                            "Failed to convert " + ClassUtil.getShortClassNameOfObject(list)
+                            + " object to " + ClassUtil.getShortClassNameOfObject(array)
+                            + ": Problematic List item at index " + i + " with value type: "
+                            + ClassUtil.getShortClassNameOfObject(listItem), e);
+                }
+            }
+        } finally {
+            recursionStops.remove(list);
+        }
+        return array;
+    }
+
+    /**
      * Converts a number to the target type aggressively (possibly with overflow or significant loss of precision).
      * @param n Non-{@code null}
      * @return {@code null} if the conversion has failed.
      */
-    static Number forceUnwrappedNumberToType(final Number n, final Class targetType, boolean bugfixed) {
+    static Number forceUnwrappedNumberToType(final Number n, final Class targetType, final boolean bugfixed) {
         // We try to order the conditions by decreasing probability.
         if (targetType == n.getClass()) {
             return n;
@@ -1031,6 +1550,11 @@ public class BeansWrapper implements ObjectWrapper
         }
         return enumModels;
     }
+    
+    /** For Unit tests only */
+    ModelCache getModelCache() {
+        return modelCache;
+    }
 
     public Object newInstance(Class clazz, List arguments)
     throws
@@ -1038,7 +1562,7 @@ public class BeansWrapper implements ObjectWrapper
     {
         try
         {
-            Object ctors = getClassIntrospectionData(clazz).get(CONSTRUCTORS);
+            Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
             if(ctors == null)
             {
                 throw new TemplateModelException("Class " + clazz.getName() + 
@@ -1046,26 +1570,23 @@ public class BeansWrapper implements ObjectWrapper
             }
             Constructor ctor = null;
             Object[] objargs;
-            if(ctors instanceof SimpleMemberModel)
+            if(ctors instanceof SimpleMethod)
             {
-                SimpleMemberModel smm = (SimpleMemberModel)ctors;
-                ctor = (Constructor)smm.getMember();
-                objargs = smm.unwrapArguments(arguments, this);
+                SimpleMethod sm = (SimpleMethod)ctors;
+                ctor = (Constructor)sm.getMember();
+                objargs = sm.unwrapArguments(arguments, this);
+                return ctor.newInstance(objargs);
             }
             else if(ctors instanceof OverloadedMethods)
             {
                 OverloadedMethods overloadedConstructors = (OverloadedMethods) ctors; 
-                MemberAndArguments maa = 
-                    overloadedConstructors.getMemberAndArguments(arguments);
-                objargs = maa.getArgs();
-                ctor = (Constructor)maa.getMember();
+                return overloadedConstructors.getMemberAndArguments(arguments, this).invokeConstructor(this);
             }
             else
             {
                 // Cannot happen
-                throw new Error();
+                throw new BugException();
             }
-            return ctor.newInstance(objargs);
         }
         catch (TemplateModelException e)
         {
@@ -1079,62 +1600,6 @@ public class BeansWrapper implements ObjectWrapper
     }
 
     /**
-     * Gets the class introspection data from {@link #genericClassIntrospectionCache},
-     * automatically creating the genericClassIntrospectionCache entry if it's missing.
-     * 
-     * @return A {@link Map} where each key is a property/method name, each
-     *     value is a {@link MethodDescriptor} or a {@link PropertyDescriptor}
-     *     assigned to that property/method.
-     */
-    Map getClassIntrospectionData(Class clazz) {
-        if (isGenericClassIntrospectionCacheConcurrentMap) {
-            Map introspData = (Map) genericClassIntrospectionCache.get(clazz);
-            if (introspData != null) return introspData;
-        }
-        
-        String className;
-        synchronized (sharedClassIntrospectionCacheLock) {
-            Map introspData = (Map) genericClassIntrospectionCache.get(clazz);
-            if (introspData != null) return introspData;
-            
-            className = clazz.getName();
-            if (genericClassIntrospectionCacheClassNames.contains(className)) {
-                onSameNameClassesDetected(className);
-            }
-            
-            while (introspData == null
-                    && genericClassIntrospectionsInProgress.contains(clazz)) {
-                // Another thread is already introspecting this class;
-                // waiting for its result.
-                try {
-                    sharedClassIntrospectionCacheLock.wait();
-                    introspData = (Map) genericClassIntrospectionCache.get(clazz);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(
-                            "Class inrospection data lookup aborded: " + e);
-                }
-            }
-            if (introspData != null) return introspData;
-            
-            // This will be the thread that introspects this class.
-            genericClassIntrospectionsInProgress.add(clazz);
-        }
-        try {
-            Map introspData = createClassIntrospectionData(clazz);
-            synchronized (sharedClassIntrospectionCacheLock) {
-                genericClassIntrospectionCache.put(clazz, introspData);
-                genericClassIntrospectionCacheClassNames.add(className);
-            }
-            return introspData;
-        } finally {
-            synchronized (sharedClassIntrospectionCacheLock) {
-                genericClassIntrospectionsInProgress.remove(clazz);
-                sharedClassIntrospectionCacheLock.notifyAll();
-            }
-        }
-    }
-    
-    /**
      * Removes the introspection data for a class from the cache.
      * Use this if you know that a class is not used anymore in templates.
      * If the class will be still used, the cache entry will be silently
@@ -1143,612 +1608,56 @@ public class BeansWrapper implements ObjectWrapper
      * @since 2.3.20
      */
     public void removeFromClassIntrospectionCache(Class clazz) {
-        synchronized (sharedClassIntrospectionCacheLock) {
-            removeFromGenericClassIntrospectionCache(clazz);
-            staticModels.removeFromCache(clazz);
-            if (enumModels != null) enumModels.removeFromCache(clazz);
-        }
+        classIntrospector.remove(clazz);
     }
-
+    
     /**
-     * Removes all class introspection data from the cache.
-     * Use this if you want to free up memory on the expense of recreating
-     * the cache entries for the classes that will be used later in templates.
+     * Removes all classes from the introspection cache whose fully qualified name starts with the given prefix
+     * followed by {@code '.'} or {@code '$'} or the end of the string. For example, {@code "com.example.action"}
+     * will remove {@code com.example.action.Foo}, {@code com.example.action.shop.Foo}, but not
+     * {@code com.example.actions.Foo} (note the "s" as the end of "actions"). {@code "com.example.action.Foo"} will
+     * remove  {@code "com.example.action.Foo"} itself, and also nested classes like
+     * {@code "com.example.action.Foo$Bar"}.
+     * 
+     * @since 2.3.21
+     */
+    public void removeFromClassIntrospectionCache(String namePrefix) {
+        classIntrospector.removeFromClassIntrospectionCache(namePrefix);
+    }
+    
+    /**
+     * Removes all class introspection data from the cache;
+     * consider using {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * 
+     * <p>Use this if you want to free up memory on the expense of recreating
+     * the cache entries for the classes that will be used later in templates. If you only need to purge certain
+     * classes/packages, then use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * 
+     * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}; for
+     *     such singletons, you must use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
      * 
      * @since 2.3.20
      */
     public void clearClassIntrospecitonCache() {
-        synchronized (sharedClassIntrospectionCacheLock) {
-            clearGenericClassIntrospectionCache();
-            staticModels.clearCache();
-            if (enumModels != null) enumModels.clearCache();
-        }
+        classIntrospector.clearCache();
     }
     
-    void onSameNameClassesDetected(String className) {
-        // TODO: This behavior should be pluggable, as in environments where
-        // some classes are often reloaded or multiple versions of the
-        // same class is normal (OSGi), this will drop the cache contents
-        // too often. 
-        if(logger.isInfoEnabled()) {
-            logger.info(
-                    "Detected multiple classes with the same name, \"" + className + 
-                    "\". Assuming it was a class-reloading. Clearing BeansWrapper " +
-                    "caches to release old data.");
-        }
-        clearClassIntrospecitonCache();
-    }
-    
-    Object getSharedClassIntrospectionCacheLock() {
-        return sharedClassIntrospectionCacheLock;
-    }
-
-    private void removeFromGenericClassIntrospectionCache(Class clazz) {
-        synchronized (sharedClassIntrospectionCacheLock) {
-            genericClassIntrospectionCache.remove(clazz);
-            genericClassIntrospectionCacheClassNames.remove(clazz.getName());
-            modelCache.clearCache();
-        }
-    }
-    
-    private void clearGenericClassIntrospectionCache() {
-        synchronized (sharedClassIntrospectionCacheLock) {
-            genericClassIntrospectionCache.clear();
-            genericClassIntrospectionCacheClassNames.clear();
-            modelCache.clearCache();
-        }
+    ClassIntrospector getClassIntrospector() {
+        return classIntrospector;
     }
     
     /**
-     * Returns the number of introspected methods/properties that should
-     * be available via the TemplateHashModel interface. Affected by the
-     * {@link #setMethodsShadowItems(boolean)} and {@link
-     * #setExposureLevel(int)} settings.
-     */
-    int keyCount(Class clazz)
-    {
-        Map map = getClassIntrospectionData(clazz);
-        int count = map.size();
-        if (map.containsKey(CONSTRUCTORS))
-            count--;
-        if (map.containsKey(GENERIC_GET_KEY))
-            count--;
-        if (map.containsKey(ARGTYPES))
-            count--;
-        return count;
-    }
-
-    /**
-     * Returns the Set of names of introspected methods/properties that
-     * should be available via the TemplateHashModel interface. Affected
-     * by the {@link #setMethodsShadowItems(boolean)} and {@link
-     * #setExposureLevel(int)} settings.
-     */
-    Set keySet(Class clazz)
-    {
-        Set set = new HashSet(getClassIntrospectionData(clazz).keySet());
-        set.remove(CONSTRUCTORS);
-        set.remove(GENERIC_GET_KEY);
-        set.remove(ARGTYPES);
-        return set;
-    }
-    
-    /**
-     * Populates a map with property and method descriptors for a specified
-     * class. If any property or method descriptors specifies a read method
-     * that is not accessible, replaces it with appropriate accessible method
-     * from a superclass or interface.
-     */
-    private Map createClassIntrospectionData(Class clazz)
-    {
-        final Map introspData = new HashMap();
-
-        if (exposeFields) {
-            addFieldsToClassIntrospectionData(introspData, clazz);
-        }
-        
-        final Map accessibleMethods = discoverAccessibleMethods(clazz);
-        
-        addGenericGetToClassIntrospectionData(introspData, accessibleMethods);
-        
-        if(exposureLevel != EXPOSE_NOTHING) {
-            try {
-                addBeanInfoToClassInrospectionData(introspData, clazz, accessibleMethods);
-            } catch(IntrospectionException e) {
-                logger.warn("Couldn't properly perform introspection for class " + 
-                        clazz, e);
-                introspData.clear();  // FIXME NBC: Don't drop everything here. 
-            }
-        }
-        
-        addConstructorsToClassIntrospectionData(introspData, clazz);
-        
-        if (introspData.size() > 1) {
-            return introspData;
-        } else if (introspData.size() == 0) {
-            return Collections12.EMPTY_MAP;
-        } else { // map.size() == 1
-            Map.Entry e = (Map.Entry)introspData.entrySet().iterator().next();
-            return Collections12.singletonMap(e.getKey(), e.getValue()); 
-        }
-    }
-
-    private void addFieldsToClassIntrospectionData(Map introspData, Class clazz)
-            throws SecurityException {
-        Field[] fields = clazz.getFields();
-        for (int i = 0; i < fields.length; i++)
-        {
-            Field field = fields[i];
-            if((field.getModifiers() & Modifier.STATIC) == 0)
-            {
-                introspData.put(field.getName(), field);
-            }
-        }
-    }
-
-    private void addBeanInfoToClassInrospectionData(Map introspData, Class clazz,
-            Map accessibleMethods) throws IntrospectionException {
-        BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-        
-        PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
-        int pdaLength = pda != null ? pda.length : 0;
-        for(int i = pdaLength - 1; i >= 0; --i) {
-            addPropertyDescriptorToClassIntrospectionData(
-                    pda[i], clazz, accessibleMethods,
-                    introspData);
-        }
-        
-        if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
-        {
-            MethodAppearanceDecision decision = new MethodAppearanceDecision();  
-            MethodDescriptor[] mda = shortMethodDescriptors(beanInfo.getMethodDescriptors());
-            int mdaLength = mda != null ? mda.length : 0;  
-            for(int i = mdaLength - 1; i >= 0; --i)
-            {
-                MethodDescriptor md = mda[i];
-                Method publicMethod = getAccessibleMethod(
-                        md.getMethod(), accessibleMethods);
-                if(publicMethod != null && isSafeMethod(publicMethod))
-                {
-                    decision.setDefaults(publicMethod);
-                    finetuneMethodAppearance(clazz, publicMethod, decision);
-                    
-                    PropertyDescriptor propDesc = decision.getExposeAsProperty();
-                    if (propDesc != null
-                            && !(introspData.get(propDesc.getName())
-                                    instanceof PropertyDescriptor))
-                    {
-                        addPropertyDescriptorToClassIntrospectionData(
-                                propDesc, clazz, accessibleMethods,
-                                introspData);
-                    }
-                    
-                    String methodKey = decision.getExposeMethodAs();
-                    if (methodKey != null)
-                    {
-                        Object previous = introspData.get(methodKey);
-                        if(previous instanceof Method)
-                        {
-                            // Overloaded method - replace method with a method map
-                            OverloadedMethods overloadedMethods = new OverloadedMethods(this);
-                            overloadedMethods.addMethod((Method)previous);
-                            overloadedMethods.addMethod(publicMethod);
-                            introspData.put(methodKey, overloadedMethods);
-                            // remove parameter type information
-                            getArgTypes(introspData).remove(previous);
-                        }
-                        else if(previous instanceof OverloadedMethods)
-                        {
-                            // Already overloaded method - add new overload
-                            ((OverloadedMethods)previous).addMethod(publicMethod);
-                        }
-                        else if (decision.getMethodShadowsProperty()
-                                || !(previous instanceof PropertyDescriptor))
-                        {
-                            // Simple method (this far)
-                            introspData.put(methodKey, publicMethod);
-                            getArgTypes(introspData).put(publicMethod, 
-                                    publicMethod.getParameterTypes());
-                        }
-                    }
-                }
-            }
-        } // end if(exposureLevel < EXPOSE_PROPERTIES_ONLY)
-    }
-
-    /** As of this writing, this is only used for testing if method order really doesn't mater. */
-    MethodDescriptor[] shortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
-        return methodDescriptors; // do nothing;
-    }
-
-    private void addPropertyDescriptorToClassIntrospectionData(PropertyDescriptor pd,
-            Class clazz, Map accessibleMethods, Map classMap) {
-        if(pd instanceof IndexedPropertyDescriptor) {
-            IndexedPropertyDescriptor ipd = 
-                (IndexedPropertyDescriptor)pd;
-            Method readMethod = ipd.getIndexedReadMethod();
-            Method publicReadMethod = getAccessibleMethod(readMethod, 
-                    accessibleMethods);
-            if(publicReadMethod != null && isSafeMethod(publicReadMethod)) {
-                try {
-                    if(readMethod != publicReadMethod) {
-                        ipd = new IndexedPropertyDescriptor(
-                                ipd.getName(), ipd.getReadMethod(), 
-                                null, publicReadMethod, 
-                                null);
-                    }
-                    classMap.put(ipd.getName(), ipd);
-                    getArgTypes(classMap).put(publicReadMethod, 
-                            publicReadMethod.getParameterTypes());
-                }
-                catch(IntrospectionException e) {
-                    logger.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() + 
-                            " indexed property " + pd.getName() + 
-                            ", read method " + publicReadMethod, 
-                            e);
-                }
-            }
-        }
-        else {
-            Method readMethod = pd.getReadMethod();
-            Method publicReadMethod = getAccessibleMethod(readMethod, accessibleMethods);
-            if(publicReadMethod != null && isSafeMethod(publicReadMethod)) {
-                try {
-                    if(readMethod != publicReadMethod) {
-                        pd = new PropertyDescriptor(pd.getName(), 
-                                publicReadMethod, null);
-                        pd.setReadMethod(publicReadMethod);
-                    }
-                    classMap.put(pd.getName(), pd);
-                }
-                catch(IntrospectionException e) {
-                    logger.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() + 
-                            " property " + pd.getName() + ", read method " + 
-                            publicReadMethod, e);
-                }
-            }
-        }
-    }
-
-    private void addGenericGetToClassIntrospectionData(Map introspData,
-            Map accessibleMethods) {
-        Method genericGet = getFirstAccessibleMethod(
-                MethodSignature.GET_STRING_SIGNATURE, accessibleMethods);
-        if(genericGet == null)
-        {
-            genericGet = getFirstAccessibleMethod(
-                    MethodSignature.GET_OBJECT_SIGNATURE, accessibleMethods);
-        }
-        if(genericGet != null)
-        {
-            introspData.put(GENERIC_GET_KEY, genericGet);
-        }
-    }
-    
-    private void addConstructorsToClassIntrospectionData(final Map introspData,
-            Class clazz) {
-        try
-        {
-            Constructor[] ctors = clazz.getConstructors();
-            if(ctors.length == 1)
-            {
-                Constructor ctor = ctors[0];
-                introspData.put(CONSTRUCTORS, new SimpleMemberModel(ctor, ctor.getParameterTypes()));
-            }
-            else if(ctors.length > 1)
-            {
-                OverloadedMethods ctorMap = new OverloadedMethods(this);
-                for (int i = 0; i < ctors.length; i++)
-                {
-                    ctorMap.addConstructor(ctors[i]);
-                }
-                introspData.put(CONSTRUCTORS, ctorMap);
-            }
-        }
-        catch(SecurityException e)
-        {
-            logger.warn("Canont discover constructors for class " + 
-                    clazz.getName(), e);
-        }
-    }
-
-    /**
-     * <b>Experimental method; subject to change!</b>
-     * Override this to tweak certain aspects of how methods appear in the
-     * data-model. {@link BeansWrapper} will pass in all Java methods here that
-     * it intends to expose in the data-model as methods (so you can do
-     * <tt>obj.foo()</tt> in the template). By default this method does nothing.
-     * By overriding it you can do the following tweaks:
-     * <ul>
-     *   <li>Hide a method that would be otherwise shown by calling
-     *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
-     *     with <tt>null</tt> parameter. Note that you can't un-hide methods
-     *     that are not public or are considered to by unsafe
-     *     (like {@link Object#wait()}) because
-     *     {@link #finetuneMethodAppearance} is not called for those.</li>
-     *   <li>Show the method with a different name in the data-model than its
-     *     real name by calling
-     *     {@link MethodAppearanceDecision#setExposeMethodAs(String)}
-     *     with non-<tt>null</tt> parameter.
-     *   <li>Create a fake JavaBean property for this method by calling
-     *     {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)}.
-     *     For example, if you have <tt>int size()</tt> in a class, but you
-     *     want it to be accessed from the templates as <tt>obj.size</tt>,
-     *     rather than as <tt>obj.size()</tt>, you can do that with this.
-     *     The default is {@code null}, which means that no fake property is
-     *     created for the method. You need not and shouldn't set this
-     *     to non-<tt>null</tt> for the getter methods of real JavaBean
-     *     properties, as those are automatically shown as properties anyway.
-     *     The property name in the {@link PropertyDescriptor} can be anything,
-     *     but the method (or methods) in it must belong to the class that
-     *     is given as the <tt>clazz</tt> parameter or it must be inherited from
-     *     that class, or else whatever errors can occur later.
-     *     {@link IndexedPropertyDescriptor}-s are supported.
-     *     If a real JavaBean property of the same name exists, it won't be
-     *     replaced by the fake one. Also if a fake property of the same name
-     *     was assigned earlier, it won't be replaced.
-     *   <li>Prevent the method to hide a JavaBean property (fake or real) of
-     *     the same name by calling
-     *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)}
-     *     with <tt>false</tt>. The default is <tt>true</tt>, so if you have
-     *     both a property and a method called "foo", then in the template
-     *     <tt>myObject.foo</tt> will return the method itself instead
-     *     of the property value, which is often undesirable.
-     * </ul>
-     * 
-     * <p>Note that you can expose a Java method both as a method and as a
-     * JavaBean property on the same time, however you have to chose different
-     * names for them to prevent shadowing. 
-     * 
-     * @param decision Stores how the parameter method will be exposed in the
-     *   data-model after {@link #finetuneMethodAppearance} returns.
-     *   This is initialized so that it reflects the default
-     *   behavior of {@link BeansWrapper}.
+     * @deprecated Use {@link #setMethodAppearanceFineTuner(MethodAppearanceFineTuner)};
+     *     no need to extend this class anymore.
+     *     Soon this method will be final, so trying to override it will break your app.
+     *     Note that if the {@code methodAppearanceFineTuner} property is set to non-{@code null}, this method is not
+     *     called anymore.
      */
     protected void finetuneMethodAppearance(
             Class clazz, Method m, MethodAppearanceDecision decision) {
         // left everything on its default; do nothing
     }
-
-    private static Map getArgTypes(Map classMap) {
-        Map argTypes = (Map)classMap.get(ARGTYPES);
-        if(argTypes == null) {
-            argTypes = new HashMap();
-            classMap.put(ARGTYPES, argTypes);
-        }
-        return argTypes;
-    }
     
-    static Class[] getArgTypes(Map classMap, AccessibleObject methodOrCtor) {
-        return (Class[])((Map)classMap.get(ARGTYPES)).get(methodOrCtor);
-    }
-
-    private static Method getFirstAccessibleMethod(MethodSignature sig, Map accessibles)
-    {
-        List l = (List)accessibles.get(sig);
-        if(l == null || l.isEmpty()) {
-            return null;
-        }
-        return (Method)l.iterator().next();
-    }
-
-    private static Method getAccessibleMethod(Method m, Map accessibles)
-    {
-        if(m == null) {
-            return null;
-        }
-        MethodSignature sig = new MethodSignature(m);
-        List l = (List)accessibles.get(sig);
-        if(l == null) {
-            return null;
-        }
-        for (Iterator iterator = l.iterator(); iterator.hasNext();)
-        {
-            Method am = (Method) iterator.next();
-            if(am.getReturnType() == m.getReturnType()) {
-                return am;
-            }
-        }
-        return null;
-    }
-    
-    boolean isSafeMethod(Method method)
-    {
-        return exposureLevel < EXPOSE_SAFE || !UNSAFE_METHODS.contains(method);
-    }
-    
-    /**
-     * Retrieves mapping of methods to accessible methods for a class.
-     * In case the class is not public, retrieves methods with same 
-     * signature as its public methods from public superclasses and 
-     * interfaces (if they exist). Basically upcasts every method to the 
-     * nearest accessible method.
-     */
-    private static Map discoverAccessibleMethods(Class clazz)
-    {
-        Map map = new HashMap();
-        discoverAccessibleMethods(clazz, map);
-        return map;
-    }
-    
-    private static void discoverAccessibleMethods(Class clazz, Map map)
-    {
-        if(Modifier.isPublic(clazz.getModifiers()))
-        {
-            try
-            {
-                Method[] methods = clazz.getMethods();
-                for(int i = 0; i < methods.length; i++)
-                {
-                    Method method = methods[i];
-                    MethodSignature sig = new MethodSignature(method);
-                    // Contrary to intuition, a class can actually have several 
-                    // different methods with same signature *but* different
-                    // return types. These can't be constructed using Java the
-                    // language, as this is illegal on source code level, but 
-                    // the compiler can emit synthetic methods as part of 
-                    // generic type reification that will have same signature 
-                    // yet different return type than an existing explicitly
-                    // declared method. Consider:
-                    // public interface I<T> { T m(); }
-                    // public class C implements I<Integer> { Integer m() { return 42; } }
-                    // C.class will have both "Object m()" and "Integer m()" methods.
-                    List methodList = (List)map.get(sig);
-                    if(methodList == null) {
-                        methodList = new LinkedList();
-                        map.put(sig, methodList);
-                    }
-                    methodList.add(method);
-                }
-                return;
-            }
-            catch(SecurityException e)
-            {
-                logger.warn("Could not discover accessible methods of class " + 
-                        clazz.getName() + 
-                        ", attemping superclasses/interfaces.", e);
-                // Fall through and attempt to discover superclass/interface 
-                // methods
-            }
-        }
-
-        Class[] interfaces = clazz.getInterfaces();
-        for(int i = 0; i < interfaces.length; i++)
-        {
-            discoverAccessibleMethods(interfaces[i], map);
-        }
-        Class superclass = clazz.getSuperclass();
-        if(superclass != null)
-        {
-            discoverAccessibleMethods(superclass, map);
-        }
-    }
-
-    private static final class MethodSignature
-    {
-        private static final MethodSignature GET_STRING_SIGNATURE = 
-            new MethodSignature("get", new Class[] { STRING_CLASS });
-        private static final MethodSignature GET_OBJECT_SIGNATURE = 
-            new MethodSignature("get", new Class[] { OBJECT_CLASS });
-
-        private final String name;
-        private final Class[] args;
-        
-        private MethodSignature(String name, Class[] args)
-        {
-            this.name = name;
-            this.args = args;
-        }
-        
-        MethodSignature(Method method)
-        {
-            this(method.getName(), method.getParameterTypes());
-        }
-        
-        public boolean equals(Object o)
-        {
-            if(o instanceof MethodSignature)
-            {
-                MethodSignature ms = (MethodSignature)o;
-                return ms.name.equals(name) && Arrays.equals(args, ms.args);
-            }
-            return false;
-        }
-        
-        public int hashCode()
-        {
-            return name.hashCode() ^ args.length;
-        }
-    }
-    
-    private static final Set createUnsafeMethodsSet()
-    {
-        Properties props = new Properties();
-        InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.txt");
-        if(in != null)
-        {
-            String methodSpec = null;
-            try
-            {
-                try
-                {
-                    props.load(in);
-                }
-                finally
-                {
-                    in.close();
-                }
-                Set set = new HashSet(props.size() * 4/3, .75f);
-                Map primClasses = createPrimitiveClassesMap();
-                for (Iterator iterator = props.keySet().iterator(); iterator.hasNext();)
-                {
-                    methodSpec = (String) iterator.next();
-                    try {
-                        set.add(parseMethodSpec(methodSpec, primClasses));
-                    }
-                    catch(ClassNotFoundException e) {
-                        if(DEVELOPMENT) {
-                            throw e;
-                        }
-                    }
-                    catch(NoSuchMethodException e) {
-                        if(DEVELOPMENT) {
-                            throw e;
-                        }
-                    }
-                }
-                return set;
-            }
-            catch(Exception e)
-            {
-                throw new RuntimeException("Could not load unsafe method " + methodSpec + " " + e.getClass().getName() + " " + e.getMessage());
-            }
-        }
-        return Collections.EMPTY_SET;
-    }
-                                                                           
-    private static Method parseMethodSpec(String methodSpec, Map primClasses)
-    throws
-        ClassNotFoundException,
-        NoSuchMethodException
-    {
-        int brace = methodSpec.indexOf('(');
-        int dot = methodSpec.lastIndexOf('.', brace);
-        Class clazz = ClassUtil.forName(methodSpec.substring(0, dot));
-        String methodName = methodSpec.substring(dot + 1, brace);
-        String argSpec = methodSpec.substring(brace + 1, methodSpec.length() - 1);
-        StringTokenizer tok = new StringTokenizer(argSpec, ",");
-        int argcount = tok.countTokens();
-        Class[] argTypes = new Class[argcount];
-        for (int i = 0; i < argcount; i++)
-        {
-            String argClassName = tok.nextToken();
-            argTypes[i] = (Class)primClasses.get(argClassName);
-            if(argTypes[i] == null)
-            {
-                argTypes[i] = ClassUtil.forName(argClassName);
-            }
-        }
-        return clazz.getMethod(methodName, argTypes);
-    }
-
-    private static Map createPrimitiveClassesMap()
-    {
-        Map map = new HashMap();
-        map.put("boolean", Boolean.TYPE);
-        map.put("byte", Byte.TYPE);
-        map.put("char", Character.TYPE);
-        map.put("short", Short.TYPE);
-        map.put("int", Integer.TYPE);
-        map.put("long", Long.TYPE);
-        map.put("float", Float.TYPE);
-        map.put("double", Double.TYPE);
-        return map;
-    }
-
-
     /**
      * Converts any {@link BigDecimal}s in the passed array to the type of
      * the corresponding formal argument of the method.
@@ -1830,6 +1739,24 @@ public class BeansWrapper implements ObjectWrapper
             return bd;
         }
     }
+    
+    /**
+     * Returns the exact class name and the identity hash, also the values of the most often used {@link BeansWrapper}
+     * configuration properties, also if which (if any) shared class introspection cache it uses.
+     *  
+     * @since 2.3.21
+     */
+    public String toString() {
+        return ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
+                + "(" + incompatibleImprovements + ") { "
+                + "simpleMapWrapper = " + simpleMapWrapper + ", "
+                + "exposureLevel = " + classIntrospector.getExposureLevel() + ", "
+                + "exposeFields = " + classIntrospector.getExposeFields() + ", "
+                + "sharedClassIntrospCache = "
+                + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none")
+                + ", ... "
+                + " }";
+    }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
         if(ENUMS_MODEL_CTOR != null) {
@@ -1859,20 +1786,11 @@ public class BeansWrapper implements ObjectWrapper
         }
     }
 
-    
-    private static boolean isJavaRebelAvailable() {
-        try {
-            JavaRebelIntegration.testAvailability();
-            return true;
-        }
-        catch(NoClassDefFoundError e) {
-            return false;
-        }
-    }
-    
     /**
      * <b>Experimental class; subject to change!</b>
-     * Used for {@link #finetuneMethodAppearance} as output parameter; see there.
+     * Used for
+     * {@link MethodAppearanceFineTuner#process(MethodAppearanceDecisionInput, MethodAppearanceDecision)}
+     * to store the results; see there.
      */
     static public final class MethodAppearanceDecision {
         private PropertyDescriptor exposeAsProperty;
@@ -1909,6 +1827,201 @@ public class BeansWrapper implements ObjectWrapper
             this.methodShadowsProperty = shadowEarlierProperty;
         }
 
+    }
+    
+    /**
+     * <b>Experimental class; subject to change!</b>
+     * Used for
+     * {@link MethodAppearanceFineTuner#process(MethodAppearanceDecisionInput, MethodAppearanceDecision)}
+     * as input parameter; see there.
+     */
+    static public final class MethodAppearanceDecisionInput {
+        private Method method;
+        private Class containingClass;
+        
+        void setMethod(Method method) {
+            this.method = method;
+        }
+        
+        void setContainingClass(Class containingClass) {
+            this.containingClass = containingClass;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public Class getContainingClass() {
+            return containingClass;
+        }
+        
+    }
+    
+    /**
+     * Used as the parameter to {@link #getInstance(PropertyAssignments)}; see there.
+     */
+    static public final class PropertyAssignments implements freemarker.template.utility.PropertyAssignments, Cloneable {
+        private final Version incompatibleImprovements;
+        
+        private ClassIntrospector.PropertyAssignments classIntrospectorPropertyAssignments;
+        
+        // Properties and their *defaults*:
+        private boolean simpleMapWrapper = false;
+        private int defaultDateType = TemplateDateModel.UNKNOWN;
+        private ObjectWrapper outerIdentity = null;
+        private boolean strict = false;
+        private boolean useModelCache;
+        // Attention!
+        // - This is also used as a cache key, so non-normalized field values should be avoided.
+        // - If some field has a default value, it must be set until the end of the constructor. No field that has a
+        //   default can be left unset (like null).
+        // - If you add a new field, review all methods in this class
+        
+        public PropertyAssignments(Version incompatibleImprovements) {
+            NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+            _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+            
+            incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+            this.incompatibleImprovements = incompatibleImprovements;
+            
+            classIntrospectorPropertyAssignments = new ClassIntrospector.PropertyAssignments(incompatibleImprovements);
+        }
+
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + incompatibleImprovements.hashCode();
+            result = prime * result + (simpleMapWrapper ? 1231 : 1237);
+            result = prime * result + defaultDateType;
+            result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
+            result = prime * result + (strict ? 1231 : 1237);
+            result = prime * result + (useModelCache ? 1231 : 1237);
+            result = prime * result + classIntrospectorPropertyAssignments.hashCode();
+            return result;
+        }
+
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            PropertyAssignments other = (PropertyAssignments) obj;
+            
+            if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
+            if (simpleMapWrapper != other.simpleMapWrapper) return false;
+            if (defaultDateType != other.defaultDateType) return false;
+            if (outerIdentity != other.outerIdentity) return false;
+            if (strict != other.strict) return false;
+            if (useModelCache != other.useModelCache) return false;
+            if (!classIntrospectorPropertyAssignments.equals(other.classIntrospectorPropertyAssignments)) return false;
+            
+            return true;
+        }
+        
+        protected Object clone(boolean deepCloneKey) {
+            try {
+                PropertyAssignments newPA = (PropertyAssignments) super.clone();
+                if (deepCloneKey) {
+                    newPA.classIntrospectorPropertyAssignments
+                            = (ClassIntrospector.PropertyAssignments) classIntrospectorPropertyAssignments.clone();
+                }
+                return newPA;
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e.getMessage());  // Java 5: use cause
+            }
+        }
+        
+        public boolean isSimpleMapWrapper() {
+            return simpleMapWrapper;
+        }
+
+        /** See {@link BeansWrapper#setSimpleMapWrapper(boolean)}. */
+        public void setSimpleMapWrapper(boolean simpleMapWrapper) {
+            this.simpleMapWrapper = simpleMapWrapper;
+        }
+
+        public int getDefaultDateType() {
+            return defaultDateType;
+        }
+
+        /** See {@link BeansWrapper#setDefaultDateType(int)}. */
+        public void setDefaultDateType(int defaultDateType) {
+            this.defaultDateType = defaultDateType;
+        }
+
+        public ObjectWrapper getOuterIdentity() {
+            return outerIdentity;
+        }
+
+        /**
+         * See {@link BeansWrapper#setOuterIdentity(ObjectWrapper)}, except here the default is {@code null} that means
+         * the {@link ObjectWrapper} that you will set up with this {@link PropertyAssignments} object.
+         */
+        public void setOuterIdentity(ObjectWrapper outerIdentity) {
+            this.outerIdentity = outerIdentity;
+        }
+
+        public boolean isStrict() {
+            return strict;
+        }
+
+        /** See {@link BeansWrapper#setStrict(boolean)}. */
+        public void setStrict(boolean strict) {
+            this.strict = strict;
+        }
+
+        public boolean getUseModelCache() {
+            return useModelCache;
+        }
+
+        /** See {@link BeansWrapper#setUseCache(boolean)} (it means the same). */
+        public void setUseModelCache(boolean useModelCache) {
+            this.useModelCache = useModelCache;
+        }
+
+        public Version getIncompatibleImprovements() {
+            return incompatibleImprovements;
+        }
+        
+        public int getExposureLevel() {
+            return classIntrospectorPropertyAssignments.getExposureLevel();
+        }
+
+        /** See {@link BeansWrapper#setExposureLevel(int)}. */
+        public void setExposureLevel(int exposureLevel) {
+            classIntrospectorPropertyAssignments.setExposureLevel(exposureLevel);
+        }
+
+        public boolean getExposeFields() {
+            return classIntrospectorPropertyAssignments.getExposeFields();
+        }
+
+        /** See {@link BeansWrapper#setExposeFields(boolean)}. */
+        public void setExposeFields(boolean exposeFields) {
+            classIntrospectorPropertyAssignments.setExposeFields(exposeFields);
+        }
+
+        public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
+            return classIntrospectorPropertyAssignments.getMethodAppearanceFineTuner();
+        }
+
+        /**
+         * See {@link BeansWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}; additionally,
+         * note that currently setting this to non-{@code null} will disable class introspection cache sharing, unless
+         * the value implements {@link SingletonCustomizer}.
+         * See {@link BeansWrapper#getInstance(Version)} for more about these.
+         */
+        public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
+            classIntrospectorPropertyAssignments.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+        }
+
+        MethodSorter getMethodSorter() {
+            return classIntrospectorPropertyAssignments.getMethodSorter();
+        }
+
+        void setMethodSorter(MethodSorter methodSorter) {
+            classIntrospectorPropertyAssignments.setMethodSorter(methodSorter);
+        }
+        
     }
 
 }

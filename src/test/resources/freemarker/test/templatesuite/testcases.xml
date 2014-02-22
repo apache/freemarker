@@ -101,6 +101,7 @@
    <testcase name="sequence-builtins-with-SimpleObjectWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
       <config object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
    </testcase>
+   <testcase name="simplehash-char-key" nooutput="true" />
    <testcase name="strictinheader">
       <config strict_syntax="N"/>
    </testcase>
@@ -186,5 +187,17 @@
    </testcase>
    <testcase name="overloaded-methods-2-desc-ici-2.3.21" template="overloaded-methods-2-ici-2.3.21.ftl" nooutput="true">
       <config object_wrapper="freemarker.ext.beans.BeansWrapperDesc2003021"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-inc-ici-2.3.20-dow" template="overloaded-methods-2-inc-ici-2.3.20.ftl" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.DefaultObjectWrapperInc2003020"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-desc-ici-2.3.20-dow" template="overloaded-methods-2-desc-ici-2.3.20.ftl" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003020"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-inc-ici-2.3.21-dow" template="overloaded-methods-2-ici-2.3.21.ftl" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.DefaultObjectWrapperInc2003021"/>
+   </testcase>
+   <testcase name="overloaded-methods-2-desc-ici-2.3.21-dow" template="overloaded-methods-2-ici-2.3.21.ftl" nooutput="true">
+      <config object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003021"/>
    </testcase>
 </testcases>

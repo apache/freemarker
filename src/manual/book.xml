@@ -5125,34 +5125,28 @@ That's all.</programlisting>
         <literal>freemarker.template.Configuration</literal> instance and
         adjust its settings. A <literal>Configuration</literal> instance is a
         central place to store the application level settings of FreeMarker.
-        Also, it deals with the creation and caching of pre-parsed
-        templates.</para>
+        Also, it deals with the creation and caching of pre-parsed templates
+        (i.e., <literal>Template</literal> objects).</para>
 
         <para>Probably you will <emphasis>do it only once</emphasis> at the
         beginning of the application (possibly servlet) life-cycle:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration();
+        <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
+// version (here 2.3.21) do you want to apply the fixes that are not 100%
+// backward-compatible. Check the JavaDoc-s to see what changes.
+Configuration cfg = new Configuration(new Version(2, 3, 21));
 
-// Specify the data source where the template files come from. Here I set a
-// plain directory for it, but non-file-system are possible too:
+// Specify the source where the template files come from. Here I set a
+// plain directory for it, but non-file-system sources are possible too:
 cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
 
-// Specify how templates will see the data-model. This is an advanced topic...
-// for now just use this:
-cfg.setObjectWrapper(new DefaultObjectWrapper());
-
-// Set your preferred charset template files are stored in. UTF-8 is
+// Set the preferred charset template files are stored in. UTF-8 is
 // a good choice in most applications:
 cfg.setDefaultEncoding("UTF-8");
 
 // Sets how errors will appear. Here we assume we are developing HTML pages.
 // For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
-cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-
-// At least in new projects, specify that you want the fixes that aren't
-// 100% backward compatible too (these are very low-risk changes as far as the
-// 1st and 2nd version number remains):
-cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20</programlisting>
+cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -5161,6 +5155,17 @@ cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20</p
         <literal>Configuration</literal> instances. Do not needlessly
         re-create configuration instances; it's expensive as you lose the
         caches.</para>
+
+        <para>When using in multi-threaded applications (like for Web sites),
+        the settings in the <literal>Configuration</literal> instance must not
+        be modified anymore after this point. Then it can be treated as
+        <quote>effectively immutable</quote> object, so you can continue with
+        <emphasis>safe publishing</emphasis> techniques (see JSR 133 and
+        related literature) to make the instance available for the other
+        threads. Like, publish the instance through a final or volatile filed,
+        or through a thread-safe IoC container, but not through a plain field.
+        (<literal>Configuration</literal> methods that don't deal with
+        modifying settings are thread-safe.)</para>
       </section>
 
       <section xml:id="pgui_quickstart_createdatamodel">
@@ -5336,20 +5341,17 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
         
-        /* ----------------------------------------------------------------------- */    
-        /* You should do this ONLY ONCE in the whole application life-cycle:       */    
+        /* ------------------------------------------------------------------------ */    
+        /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration */
-        Configuration cfg = new Configuration();
-
+        Configuration cfg = new Configuration(new Version(2, 3, 21));
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
-        cfg.setObjectWrapper(new DefaultObjectWrapper());
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
 
-        /* ----------------------------------------------------------------------- */    
-        /* You usually do these for many times in the application life-cycle:      */    
+        /* ------------------------------------------------------------------------ */    
+        /* You usually do these for many times in the application life-cycle:       */    
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -6234,7 +6236,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
           <primary>wrapper</primary>
         </indexterm>
 
-        <para>When you add something to a container, it may receive any java
+        <para>When you add something to a container, it may receive any Java
         object as a parameter, not necessarily a
         <literal>TemplateModel</literal>, as you could see in the FreeMarker
         API. This is because the container implementation can silently replace
@@ -6273,8 +6275,8 @@ public class RepeatDirective implements TemplateDirectiveModel {
 
         <itemizedlist>
           <listitem>
-            <para><literal>ObjectWrapper.DEFAULT_WRAPPER</literal>: It
-            replaces <literal>String</literal> with
+            <para><literal>freemarker.template.DefaultObjectWrapper</literal>:
+            It replaces <literal>String</literal> with
             <literal>SimpleScalar</literal>, <literal>Number</literal> with
             <literal>SimpleNumber</literal>, <literal>List</literal> and array
             with <literal>SimpleSequence</literal>, <literal>Map</literal>
@@ -6285,27 +6287,22 @@ public class RepeatDirective implements TemplateDirectiveModel {
             objects, this wrapper will invoke
             <literal>freemarker.ext.jython.JythonWrapper</literal>. For all
             other objects, it will invoke <link
-            linkend="pgui_misc_beanwrapper"><literal>BEANS_WRAPPER</literal></link>.</para>
+            linkend="pgui_misc_beanwrapper"><literal>BeansWrapper</literal></link>.</para>
           </listitem>
 
           <listitem>
-            <para><literal>ObjectWrapper.BEANS_WRAPPER</literal>: It can
-            expose java Bean properties and other members of arbitrary objects
-            using Java reflection. At least in FreeMarker 2.3, it is a
-            <literal>freemarker.ext.beans.BeansWrapper</literal> instance;
-            there is a separated <link linkend="pgui_misc_beanwrapper">chapter
-            about it</link>.</para>
+            <para><literal>freemarker.ext.beans.BeansWrapper</literal>: It can
+            expose JavaBean properties and other members of arbitrary objects
+            using Java reflection; there is a separated <link
+            linkend="pgui_misc_beanwrapper">chapter about it</link>.
+            <literal>DefaultObjectWrapper</literal> extends this
+            wrapper.</para>
           </listitem>
         </itemizedlist>
 
         <para>For a concrete example, let's see how the
-        <literal>Simple<replaceable>Xxx</replaceable></literal> classes work.
-        <literal>SimpleHash</literal>, <literal>SimpleSequence</literal> and
-        <literal>SimpleCollection</literal> use
-        <literal>DEFAULT_WRAPPER</literal> to wrap the subvariables (unless
-        you pass in an alternative wrapper in their constructor). So this
-        example demonstrates <literal>DEFAULT_WRAPPER</literal> in
-        action:</para>
+        <literal>Simple<replaceable>Xxx</replaceable></literal> classes
+        work:</para>
 
         <programlisting role="unspecified">Map map = new HashMap();
 map.put("anotherString", "blah");
@@ -6315,14 +6312,24 @@ list.add("red");
 list.add("green");
 list.add("blue");
 
-SimpleHash root = new SimpleHash();  // will use the default wrapper
+// Create the object wrapper we will use. The details of the
+// construction aren't important now (see JavaDocs for that):
+ObjectWrapper wrapper
+        = DefaultObjectWrapper.getInstance(new Version(2, 3, 21));
+
+// Normaly, you would create a plain java.util.HashMap here, and
+// later let the ObjectWrapper wrap it in Template.process(...).
+// But for demonstration purposes we will bypass the object wrapper
+// and create a SimpleHash directly that's like the wrapper would
+// create:
+SimpleHash root = new SimpleHash(wrapper);
 root.put("theString", "wombat");
 root.put("theNumber", new Integer(8));
 root.put("theMap", map);
 root.put("theList", list);</programlisting>
 
-        <para>Assuming that root is the data-model root, the resulting
-        data-model is:</para>
+        <para>Assuming that <literal>root</literal> is the data-model root,
+        the resulting data-model is:</para>
 
         <programlisting role="dataModel">(root)
  |
@@ -6356,10 +6363,10 @@ root.put("theList", list);</programlisting>
         will replace that with a <literal>SimpleScalar</literal>.</para>
 
         <para>If you drop an ``arbitrary'' object into the data-model,
-        <literal>DEFAULT_WRAPPER</literal> will invoke
-        <literal>BEANS_WRAPPER</literal> to wrap the object:</para>
+        <literal>DefaultObjectWrapper</literal> will fall back to
+        <literal>BeansWrapper</literal> to wrap the it:</para>
 
-        <programlisting role="unspecified">SimpleHash root = new SimpleHash();
+        <programlisting role="unspecified">SimpleHash root = new SimpleHash(wrapper);
 // expose a "simple" java objects:
 root.put("theString", "wombat");
 // expose an "arbitrary" java objects:
@@ -6432,32 +6439,29 @@ ${theObject.sin(123)}</programlisting>
         wrapped so that it implements the <literal>TemplateHashModel</literal>
         interface.</para>
 
-        <para>The factory default value of the
-        <literal>object_wrapper</literal> setting is
-        <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>. If you want to
-        change it to, say, <literal>ObjectWrapper.BEANS_WRAPPER</literal>, you
-        can configure the FreeMarker engine (before starting to use it from
-        other threads) like this:</para>
-
-        <programlisting role="unspecified">cfg.setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);</programlisting>
-
-        <para>Note that you can set any object here that implements interface
-        <literal>ObjectWrapper</literal>, so you can set your custom
-        implementation as well.</para>
+        <para>You can configure what <literal>ObjectWrapper</literal>
+        FreeMarker uses with
+        <literal>cfg.setObjectWrapper(ObjectWrapper)</literal>, where
+        <literal>cfg</literal> is the <literal>Configuration</literal>
+        instance. Note that you can plug in your custom
+        <literal>ObjectWrapper</literal> implementation here, hence you have
+        full control over how templates see the data-model.</para>
 
         <para>For <literal>TemplateModel</literal> implementations that wrap
         basic Java container types, as <literal>java.util.Map</literal>-s and
         <literal>java.util.List</literal>-s, the convention is that they use
         the same object wrapper to wrap their subvariables as their parent
-        container does. Technically correctly said, they are instantiated by
-        their parent container (so it has full control over the creation of
-        them), and the parent container create them so they will use the same
-        object wrapper as the parent itself. Thus, if
-        <literal>BEANS_WRAPPER</literal> is used for the wrapping of the root
-        hash, it will be used for the wrapping of the subvariables (and the
-        subvariables of the subvariables, etc.) as well. This is exactly the
-        same phenomenon as you have seen with
-        <literal>theMap.anotherString</literal> earlier.</para>
+        container does (that's why the <literal>SimpleHash</literal>
+        constructor has an <literal>ObjectWrapper</literal> parameter).
+        Technically correctly said, they are instantiated by their parent
+        container (so it has full control over the creation of them), and the
+        parent container create them so they will use the same object wrapper
+        as the parent itself. Thus, if <literal>wrapper</literal> is used for
+        the wrapping of the root hash (see it in the examples above), it will
+        be used for the wrapping of the subvariables (and the subvariables of
+        the subvariables, etc.) as well. This is exactly the same phenomenon
+        as you have seen with <literal>theMap.anotherString</literal>
+        earlier.</para>
       </section>
     </chapter>
 
@@ -6475,23 +6479,29 @@ ${theObject.sin(123)}</programlisting>
       <section xml:id="pgui_config_basics">
         <title>Basics</title>
 
-        <para>A configuration is an object that stores your common
-        (application level) settings and defines certain variables that you
-        want to be available in all templates. Also it deals with the creation
-        and caching of <literal>Template</literal> instances. A configuration
-        is a <literal>freemarker.template.Configuration</literal> instances,
-        that you can create with its constructor. An application typically
-        uses only a single shared <literal>Configuration</literal>
+        <para>First of all, be sure you have read the <link
+        linkend="pgui_quickstart_createconfiguration">Getting Started</link>
+        chapter.</para>
+
+        <para>A configuration is a
+        <literal>freemarker.template.Configuration</literal> object that
+        stores your common (global, application level) settings and defines
+        variables that you want to be available in all templates (so called
+        shared variables). Also, it deals with the creation and caching of
+        <literal>Template</literal> instances.</para>
+
+        <para>An application typically should use only a single shared
+        <literal>Configuration</literal> instance. More precisely, typically
+        you should have one <literal>Configuration</literal> instance per
+        independently developed components (like projects, modules, etc.) that
+        internally use FreeMarker, as each should create its own
         instance.</para>
 
-        <para>Configurations are used by the <literal>Template</literal>
-        methods, especially by <literal>process</literal> method. Each
-        <literal>Template</literal> instance has exactly one
-        <literal>Configuration</literal> instance associated with it, which is
-        assigned to the <literal>Template</literal> instance by the
-        <literal>Template</literal> constructor; you can specify a
-        <literal>Configuration</literal> instance as its parameter. Usually
-        you obtain <literal>Template</literal> instances with
+        <para>As running templates are influenced by the configuration
+        settings, each <literal>Template</literal> instance has a
+        <literal>Configuration</literal> instance associated with it, via the
+        corresponding <literal>Template</literal> constructor parameter.
+        Usually you obtain <literal>Template</literal> instances with
         <literal>Configuration.getTemplate</literal> (not by directly calling
         the <literal>Template</literal> constructor), in which case the
         associated <literal>Configuration</literal> instance will be the one
@@ -6510,10 +6520,10 @@ ${theObject.sin(123)}</programlisting>
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration();
-<replaceable>...</replaceable>
-cfg.setSharedVariable("wrap", new WrapDirective());
-cfg.setSharedVariable("company", "Foo Inc.");  // Using ObjectWrapper.DEFAULT_WRAPPER</programlisting>
+        <programlisting role="unspecified">Configuration cfg = new Configuration(new Version(2, 3, 21));
+<replaceable>..</replaceable>.
+cfg.setSharedVariable("warp", new WarpDirective());
+cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 
         <para>In all templates that use this configuration, an user-defined
         directive with name <literal>wrap</literal> and a string with name
@@ -6704,7 +6714,7 @@ cfg.setSharedVariable("company", "Foo Inc.");  // Using ObjectWrapper.DEFAULT_WR
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration();
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(new Version(2, 3, 21));
 myCfg.setLocale(java.util.Locale.ITALY);
 myCfg.setNumberFormat("0.####");</programlisting>
 
@@ -6971,7 +6981,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           </section>
 
           <section>
-            <title>The template path</title>
+            <title>The template path (template name)</title>
 
             <indexterm>
               <primary>path</primary>
@@ -6981,23 +6991,27 @@ cfg.setTemplateLoader(mtl);</programlisting>
               <primary>template path</primary>
             </indexterm>
 
-            <para>It is up to the template loader how it interprets template
-            paths. But to work together with other components there are
-            restrictions regarding the format of the path. In general, it is
-            strongly recommended that template loaders use URL-style paths.
-            The path must not use <literal>/</literal>, <literal>./</literal>
-            and <literal>../</literal> and <literal>://</literal> with other
-            meaning as they have in URL paths (or in UN*X paths). The
-            characters <literal>*</literal> and <literal>?</literal> are
-            reserved. Also, the template loader must not want paths starting
-            with <literal>/</literal>; FreeMarker will never call template
-            loader with such path. Note that FreeMarker always normalizes the
-            paths before passing them to the template loader, so the paths do
-            not contain <literal>/../</literal> and such, and are relative to
-            the imaginary template root directory.</para>
+            <indexterm>
+              <primary>template name</primary>
+            </indexterm>
 
-            <para>Note that FreeMarker template loading always uses slash (not
-            backslash) regardless of the host OS.</para>
+            <para>It is up to the template loader how it interprets template
+            paths (also known as template names). But to work together with
+            other components there are restrictions regarding the format of
+            the path. In general, it is strongly recommended that template
+            loaders use URL-style paths. The path must not use
+            <literal>/</literal>, <literal>./</literal> and
+            <literal>../</literal> and <literal>://</literal> with other
+            meaning than they have in URL paths (or in UN*X paths). The
+            characters <literal>*</literal> and <literal>?</literal> are also
+            reserved. FreeMarker always normalizes the paths before passing
+            them to the template loader, so the paths don't contain
+            <literal>/../</literal> or such, and are relative to the imaginary
+            template root directory (that is, they don't start with
+            <literal>/</literal>).</para>
+
+            <para>Note that FreeMarker template path should always uses slash
+            (not backslash) regardless of the host OS.</para>
           </section>
         </section>
 
@@ -20330,7 +20344,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Versions</title>
 
-      <section>
+      <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
 
         <para>Date of release: [FIXME]</para>
@@ -20361,6 +20375,68 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Added new <literal>Configuration</literal> constructor,
+              <literal>Configuration(Version
+              incompatibleImprovements)</literal>. This deprecates the vague
+              <literal>Configuration()</literal> constructor, and makes using
+              <literal>setIncompatibleImprovements(Version)</literal> needless
+              in most cases. See an example <link
+              linkend="pgui_quickstart_createconfiguration">here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>When setting the
+              <literal>incompatible_improvements</literal> setting (like with
+              the constructor above) to 2.3.21, two things change:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>The default of the <literal>object_wrapper</literal>
+                  setting
+                  (<literal>Configuration.getObjectWrapper()</literal>)
+                  changes from
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
+                  almost identical <literal>DefaultObjectWrapper</literal>
+                  singleton, returned by
+                  <literal>DefaultObjectWrapper.getInstance(Version)</literal>.
+                  The new default object wrapper's <quote>incompatible
+                  improvements</quote> version is set to the same as of the
+                  <literal>Configuration</literal>. (See later regarding the
+                  2.3.21 <quote>incompatible improvements</quote> of
+                  <literal>BeansWrapper</literal> and
+                  <literal>DefaultObjectWrapper</literal>). Furthermore, the
+                  new default object wrapper doesn't allow changing its
+                  settings; setter methods will throw
+                  <literal>IllegalStateException</literal>. (If anything tries
+                  to call setters on the old default in your application,
+                  that's a dangerous bug that won't remain hidden now. As the
+                  old default is a singleton too, potentially shared by
+                  independently developed components, most of them expects the
+                  out-of-the-box behavior from it (and the others are
+                  necessarily buggy). Also, then concurrency glitches can
+                  occur (and even pollute the class introspection cache)
+                  because the singleton is modified after publishing.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>The default of the <literal>template_loader</literal>
+                  setting
+                  (<literal>Configuration.getTemplateLoader()</literal>})
+                  changes to <literal>null</literal>, which means that
+                  FreeMarker will not find any templates. Earlier the default
+                  was a <literal>FileTemplateLoader</literal> that used the
+                  current directory as the root. This was dangerous and
+                  fragile as you usually don't have good control over what the
+                  current directory will be. Luckily, the old default almost
+                  never looked for the templates at the right place anyway, so
+                  pretty much all applications had to set a
+                  <literal>template_loader</literal> setting, so it's unlikely
+                  that changing the default breaks your application.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>New <literal>BeansWrapper</literal>,
               <literal>DefaultObjectWrapper</literal> and
               <literal>SimpleObjectWrapper</literal> constructor that takes a
@@ -20370,11 +20446,105 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>incompatible_improvements</literal> setting of the
               <literal>Configuration</literal>, but it applies to the
               <literal>ObjectWrapper</literal> instead. (As
-              <literal>ObjectWrapper</literal> objects are often shared among
+              <literal>ObjectWrapper</literal>-s are often shared among
               multiple <literal>Configuration</literal>-s, they can't use that
               setting of the <literal>Configuration</literal>.) In new or
-              actively developed projects it's recommended to use
-              <literal>Version(2, 3, 21)</literal> or higher.</para>
+              actively developed projects it's recommended to use <literal>new
+              Version(2, 3, 21)</literal> now. The constructor without the
+              <literal>Version</literal> parameter are now deprecated.</para>
+            </listitem>
+
+            <listitem>
+              <para>Safer and more memory-efficient way of managing singletons
+              of <literal>DefaultObjectWrapper</literal>-s and
+              <literal>BeansWrapper</literal>-s that are possibly shared by
+              independently developed subsystems:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Instead of <literal>new
+                  DefaultObjectWrapper(<replaceable>...</replaceable>)</literal>
+                  and <literal>new
+                  BeansWrapper(<replaceable>...</replaceable>)</literal>, from
+                  now on you should use the
+                  <literal>DefaultObjectWrapper.getInstance</literal> and
+                  <literal>BeansWrapper.getInstance</literal> methods (these
+                  allow specifying some settings of the desired instance too).
+                  Compared to the traditional singletons, like
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,these will
+                  return a singleton (usually a VM-wide, or rather
+                  Web-Application-wide singleton), which is read-only (means,
+                  non-configurable, hence safe to share), created lazily
+                  (i.e., only when first requested with
+                  <literal>getInstance</literal>), and is only weak-referenced
+                  from inside FreeMarker, so it can be garbage collected when
+                  all the <literal>Configuration</literal>-s where they were
+                  used can be. The main benefit of using
+                  <literal>getInstance</literal> instead of creating new
+                  instances is that this allows FreeMarker to share the class
+                  introspection caches (an internal part of
+                  <literal>BeansWrapper</literal>-s/<literal>DefaultObjectWrapper</literal>-s
+                  that is expensive to populate) among the returned instances,
+                  even if there are multiple subsystems in an application that
+                  use FreeMarker internally and thus don't share the
+                  <literal>Configuration</literal> or the object wrapper
+                  instance.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Deprecated the static fields
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,
+                  <literal>BEANS_WRAPPER</literal> and
+                  <literal>SIMPLE_WRAPPER</literal>, because these
+                  <literal>ObjectWrapper</literal>-s are configurable (not
+                  read-only), and thus dangerous to use (a badly behaving 3rd
+                  party component can mess them up). Use the
+                  <literal>getInstance</literal> methods above instead.
+                  <literal>getInstance</literal> is also more flexible, as you
+                  can specify the desired incompatible-improvements version
+                  for it and various other <literal>BeansWrapper</literal>
+                  settings.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Deprecated all <literal>SimpleHash</literal>,
+                  <literal>SimpleCollection</literal> and
+                  <literal>SimpleSequence</literal> constructors that didn't
+                  take an <literal>ObjectWrapper</literal> argument, as they
+                  have usually used
+                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> as the
+                  default, which itself is deprecated.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>BeansWrapper</literal>,
+                  <literal>DefaultObjectWrapper</literal> and
+                  <literal>SimpleObjectWrapper</literal> now implements the
+                  <literal>freemarker.template.utility.WriteProtectable</literal>
+                  interface with which the configuration properties of the
+                  object wrapper can be set permanently to read-only by
+                  calling <literal>writeProtect()</literal>. An attempt to
+                  call a setter on a such <literal>ObjectWrapper</literal>
+                  will immediately cause
+                  <literal>IllegalStateException</literal>. (This is what's
+                  used for the singletons returned by the
+                  <literal>getInstance</literal> methods too; see
+                  earlier).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>From now on, if you try to set the <quote>incompatible
+              improvements</quote> to greater than the current FreeMarker
+              version, or less than 2.3.0, an
+              <literal>IllegalArgumentException</literal> will be thrown.
+              Thus, <literal>new Configuration(new Version(2, 3,
+              21))</literal> will not only activate the fixes up to 2.3.21,
+              but ensures that the application will not run in an environment
+              with an older FreeMarker version. After all, on an older
+              FreeMarker version the fixes that you have requested aren't
+              implemented yet.</para>
             </listitem>
 
             <listitem>
@@ -20384,15 +20554,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               applications use these), but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>Version(2, 3, 21)</literal>
-              or higher. There's a little chance that because of these
-              changes, a different overloaded method will chosen than before,
-              or even that ambiguity error will arise where earlier they
-              didn't (although the opposite is much more probable), hence the
-              fixes aren't automatically active, at least not unit FreeMarker
-              2.4. But the fix mostly only effect calls that were failing or
-              has chosen then wrong method, so it's recommended to activate it
-              for projects that are still actively developed. This fix
-              includes numerous changes:</para>
+              (or higher), or if you create the
+              <literal>Configuration</literal> with similar
+              <literal>Version</literal> parameter and leave the
+              <literal>object_wrapper</literal> setting on its default value.
+              There's a little chance that because of these changes, a
+              different overloaded method will be chosen than before, or even
+              that ambiguity errors will arise where earlier they didn't
+              (although the opposite is much more probable), hence the fixes
+              aren't automatically activated. But the fix mostly only effect
+              calls that were failing or has chosen then wrong method, so it's
+              recommended to activate it for projects that are still actively
+              developed. This fix includes numerous changes:</para>
 
               <itemizedlist>
                 <listitem>
@@ -20410,7 +20583,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   chosen <literal>m(Object o)</literal>, but now it will
                   choose <literal>m(String s)</literal> instead (because
                   <literal>String</literal> is also
-                  <literal>null</literal>-able and is more specific then
+                  <literal>null</literal>-able and is more specific than
                   <literal>Object</literal>). Furthermore, if you also had
                   <literal>m(File f)</literal> in the same class, now it will
                   cause an ambiguity exception, since the specificity of
@@ -20452,7 +20625,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <para>Method selection is now not only based on the type
                       of the wrapped number, but also on its value. For
                       example, a <literal>Long</literal> with value
-                      <literal>1</literal> is now seen to be compatible with a
+                      <literal>1</literal> is now seen as compatible with a
                       method with parameter type <literal>int</literal> or
                       <literal>short</literal> or <literal>byte</literal>, as
                       <literal>1</literal> can be stored in those without
@@ -20461,7 +20634,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       types (the type of the wrapped number, actually), as FTL
                       has no type declarations. (If multiple compatible
                       methods are available, it will still try to chose the
-                      one with the same or bigger type first.)</para>
+                      one with the same or bigger numerical type.)</para>
                     </listitem>
 
                     <listitem>
@@ -20480,28 +20653,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <itemizedlist>
                     <listitem>
                       <para>When comparing the overall specificity of two
-                      parameter lists: Earlier the more specific parameter
-                      list was the one that had some parameters that won in
-                      specificity, and if both had such parameters then it was
-                      an ambiguity. Now it's enough if a method has more such
-                      parameters where it's a better match than the other has,
-                      or if the two methods are still equal, if it has the
-                      first better matching parameter. While this can lead to
+                      parameter lists: Earlier the parameter list seen as more
+                      specific was the one that had some parameters that won
+                      in specificity, and if both had such parameters then it
+                      was an ambiguity. Now it's enough if a method has more
+                      such parameters where it's a better match than the other
+                      has, or if the two methods are still equal, if it has
+                      the first better matching parameter. This can lead to
                       choices that seem arbitrary (but are still
-                      deterministic), as there is no automated way of
+                      deterministic), but as there's no automated way of
                       discovering method selection ambiguities in templates
                       (unlike in Java source code, where they will be detected
                       during compilation), especially as overloaded selection
                       has to rely on the <emphasis>runtime</emphasis> type of
-                      the values which makes proper testing hard, this was
+                      the values which even make proper testing hard, this was
                       considered to be a better compromise than throwing an
                       exception whenever the choice of the method is not
-                      obvious. Also note that in fact it's more complicated
-                      then counting the <quote>winner</quote> parameter
-                      positions for each methods, as certain kind of wins are
-                      stronger than any number of the others: wins there the
-                      other possibility is risking the loss of substantial
-                      mantissa precision are the strongest (like dropping
+                      obvious. Also note that in fact this mechanism is more
+                      complicated than just counting the <quote>winner</quote>
+                      parameter positions for each methods, as certain kind of
+                      wins are stronger than any number of the others: wins
+                      where the other possibility is risking of substantial
+                      mantissa precision loss are the strongest (like dropping
                       decimals versus not to), wins where the primitive type
                       wins over the boxed class is the weakest (like
                       <literal>int</literal> versus
@@ -20520,7 +20693,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     </listitem>
 
                     <listitem>
-                      <para>The was a bug with overloaded varargs methods of
+                      <para>There was a bug with overloaded varargs methods of
                       different parameter counts, where sometimes the last
                       parameters of the compared methods was ignored, which is
                       taking away a potential deciding factor and thus can
@@ -20530,40 +20703,80 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       change at least after some Java updates, breaking the
                       application.</para>
                     </listitem>
+
+                    <listitem>
+                      <para>When comparing the specificity of two array types,
+                      until now they were seen as equal. Now the component
+                      types are compared, and then that with the less specific
+                      component type is preferred. For example, among
+                      <literal>f(String[])</literal> and
+                      <literal>f(Object[])</literal>, the last will always
+                      win. This might sounds controversial, but as we can't
+                      efficiently tell the common type of all the items in a
+                      sequence or <literal>List</literal>, an so we don't know
+                      if both arrays are indeed valid targets, we go for the
+                      safest choice.</para>
+                    </listitem>
                   </itemizedlist>
                 </listitem>
 
                 <listitem>
+                  <para>FTL sequence values (like Java
+                  <literal>List</literal>-s or FTL
+                  <literal>[<replaceable>x</replaceable>,
+                  <replaceable>y</replaceable>,
+                  <replaceable>...</replaceable>]</literal> constants) were
+                  not seen as applicable to a parameter with array type if
+                  there were multiple overloaded methods with the same number
+                  of parameters but with different types on the position of
+                  the array parameter. That is, if you had
+                  <literal>f(String[])</literal> and
+                  <literal>f(String)</literal> in Java, then
+                  <literal>f(['foo', 'bar'])</literal> in the template
+                  reported no compatible overloads. Now it will choose
+                  <literal>f(String[])</literal>. Note that if there's also an
+                  <literal>f(List)</literal> or even an
+                  <literal>f(Collection)</literal>, it will prefer those over
+                  arrays. (For consistency, this conversion will work even if
+                  the argument is a <literal>List</literal> that come directly
+                  from Java, i.e., when it was wrapped then unwrapped to the
+                  original object.) For a multidimensional array parameter
+                  type, this conversion works recursively, so you can pass in
+                  a sequence-of-sequences or
+                  <literal>List</literal>-of-<literal>List</literal>-s or
+                  <literal>List</literal>-of-sequences as the argument.</para>
+                </listitem>
+
+                <listitem>
                   <para>In many cases, less specific hint class was used for
-                  unwrapping than that was theoretically possible within the
-                  limitations of the applied hint generation algorithm. (The
-                  unwrapping hint has influence when there's an ambiguity
-                  regarding how to create a Java object form an FTL value. In
-                  the vast majority of the cases, a too generic hint has no
-                  effect.) (This is a highly technical topic. The way it works
-                  is that a single common unwrapping hint class is chosen for
-                  a given argument position shared by the overloads that has
-                  the same number of parameters, and that hint class has to be
-                  as specific as possible while it must fit all those
-                  parameter types. The issue with the too generic hints had
-                  several instances: (a) When the most specific common
-                  class/interface of two same-position parameter types were
-                  searched, if there was multiple common class/interfaces that
-                  had no relationship (this is always at most one class and
-                  one or more unrelated interfaces), due to the ambiguity it
-                  has felt back to using <literal>Object</literal> as the
-                  unwrapping hint. Now if there's a
-                  non-<literal>Object</literal> class among them in such case,
-                  it will be chosen as the hint (i.e., we ignore the common
-                  interfaces). Otherwise if only a single interface remains by
-                  removing <literal>Cloneable</literal>,
+                  unwrapping than that was possible within the limitations of
+                  the applied hint generation algorithm. (The unwrapping hint
+                  has influence when there's an ambiguity regarding how to
+                  create a Java object form an FTL value. In the vast majority
+                  of the cases, a too generic hint has no effect.) (This is a
+                  highly technical topic. The way it works is that a single
+                  common unwrapping hint class is chosen for a given argument
+                  position shared by the overloads that has the same number of
+                  parameters, and that hint class has to be as specific as
+                  possible while it must fit all those parameter types. The
+                  issue with the too generic hints had several instances: (a)
+                  When the most specific common class/interface of two
+                  same-position parameter types was searched, if there was
+                  multiple common classes/interfaces that had no relationship
+                  (this is always at most one class and one or more unrelated
+                  interfaces), due to the ambiguity it has felt back to using
+                  <literal>Object</literal> as the unwrapping hint. Now if
+                  there's a non-<literal>Object</literal> class among them in
+                  such case, it will be chosen as the hint (i.e., we ignore
+                  the common interfaces). Otherwise if only a single interface
+                  remains by removing <literal>Cloneable</literal>,
                   <literal>Serializable</literal>, and
                   <literal>Comparable</literal> (in that order), that will be
                   chosen. Only then it falls back to
                   <literal>Object</literal>. (b) The common most specific
                   class of a primitive type and the corresponding boxing class
                   was sometimes <literal>Object</literal> instead of the
-                  boxing class. This depended on Java's the internal ordering
+                  boxing class. This has depended on Java's internal ordering
                   of the methods, and so were quite unpredictable, like could
                   change after upgrading Java under the application. (c) The
                   common superclass of a numerical primitive value and a
@@ -20581,28 +20794,30 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed, fix is active only if you create the
+              <para>Bug fixed; active only if the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
-              with constructor parameter <literal>Version(2, 3, 21)</literal>
-              or higher: When <literal>BeansWrapper</literal> (and so also
-              <literal>DefaultObjectWrapper</literal>) has unwrapped method
-              call arguments before calling a Java method, when the argument
-              was a <literal>AdapterTemplateModel</literal> and the target
-              parameter type was primitive,
+              was created with constructor parameter <literal>Version(2, 3,
+              21)</literal> or higher: When <literal>BeansWrapper</literal>
+              (and so also <literal>DefaultObjectWrapper</literal>) has
+              unwrapped method call arguments before calling a Java method,
+              when the argument was an <literal>AdapterTemplateModel</literal>
+              and the target parameter type was primitive,
               <literal>AdapterTemplateModel.getAdaptedObject(Class
               hint)</literal> has received the primitive type of the target
               parameter (like <literal>int</literal> instead of
               <literal>Integer</literal>) as the hint. This did not make sense
               since <literal>getAdaptedObject</literal> can only return
-              <literal>Object</literal>-s, not primitive values. Furthermore,
+              <literal>Object</literal>-s, not primitive values. Yet,
               <literal>BeansWrapper</literal> has expected the returned value
               to be of the primitive type, otherwise it has discarded it.
               Exactly the same problem occurs with
               <literal>WrapperTemplateModel</literal>. Thus, ultimately, if
               the target parameter type was primitive and some of these
               interfaces were implemented, their return value was always
-              discarded, instead FreeMarker has felt back to other means of
-              unwrapping.</para>
+              discarded and FreeMarker has felt back to other means of
+              unwrapping. Now <literal>BeansWrapper</literal> always passes in
+              and expects the boxing type (like <literal>Integer</literal>)
+              instead of the primitive type.</para>
             </listitem>
 
             <listitem>
@@ -20610,6 +20825,72 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               end-location of the error, not just its start-location. This is
               useful if you want to underline the error in the source code,
               not just point at it.</para>
+            </listitem>
+
+            <listitem>
+              <para>The concurrent performance of overloaded method lookups
+              (from the cache) was improved under Java 5 and later.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>template.cache.NullTemplateLoader</literal>, which is a
+              dummy <literal>TemplateLoader</literal> that doesn't find any
+              templates.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed concurrency issues in <literal>Version</literal>
+              class <literal>hashCode</literal>, <literal>equals</literal>,
+              <literal>toString</literal> that could, in theory, result in
+              wrong return values.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/409/">409</link>]:
+              <literal>SimpleHash</literal>'s internal <literal>Map</literal>
+              is concurrently modified on a non-safe way when getting length-1
+              <literal>String</literal> key that exists but maps to
+              <literal>null</literal>. This operation will accidentally add a
+              <literal>Character</literal> key to the internal map, which is
+              not a thread-safe operation.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: <literal>ClassUtil.forName</literal>, used
+              inside FreeMarker everywhere to resolve class names to classes,
+              if the thread context class loader is <literal>null</literal>,
+              no longer tries to load with the bootstrap class loader before
+              loading with the defining class loader of FreeMarker.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new configuration setting,
+              <literal>show_error_tips</literal>, defaults to
+              <literal>true</literal>. Sets if tips should be shown in error
+              messages of errors arising during template processing.</para>
+            </listitem>
+
+            <listitem>
+              <para>Instead of overriding
+              <literal>BeansWrapper.finetuneMethodAppearance</literal> (now
+              deprecated), now you can use
+              <literal>BeansWrapper.setMethodAppearanceFineTuner(MethodAppearanceFineTuner)</literal>,
+              so you don't need to extend the class to customize this
+              aspect.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When changing the properties of
+              <literal>DefaultObjectWrapper</literal> or
+              <literal>BeansWrapper</literal> that influenced class
+              introspection results (like <literal>exposureLevel</literal> or
+              <literal>exposeFields</literal>), the introspection cache wasn't
+              cleared, and thus returned stale information for the classes
+              that were introspected before those properties were changed. Now
+              changing such properties always clears the introspection
+              caches.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -21212,6 +21493,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Various internal code cleanups.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>TODO: Licence</para>
+            </listitem>
+
+            <listitem>
+              <para>Many smaller additions and clarifications in the Manual
+              and API JavaDocs.</para>
             </listitem>
           </itemizedlist>
         </section>

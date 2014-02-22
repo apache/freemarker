@@ -1,5 +1,6 @@
 package freemarker.core;
 
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,12 +19,66 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * FreeMarker itself.
  */
 public class _ConcurrentMapFactory {
-    private static final Class concurrentMapClass = getConcurrentMapClass(); 
-    private static final Class bestHashMapClass = getBestHashMapClass();
+    private static final Class concurrentMapClass; 
+    static {
+        Class c;
+        try {
+            c = ClassUtil.forName("java.util.concurrent.ConcurrentMap");
+        } catch(ClassNotFoundException e) {
+            c =  null;
+        }
+        concurrentMapClass = c;
+    }
+    
+    private static final Class bestHashMapClass;
+    private static final Constructor bestHashMapClassConstructor;
+    private static final int bestHashMapClassConstructorParamCnt;
+    static {
+        Class c;
+        Constructor constr;
+        int constrParamCnt;
+        try {
+            c = ClassUtil.forName("java.util.concurrent.ConcurrentHashMap");
+            try {
+                constr = c.getConstructor(new Class[] { Integer.TYPE, Float.TYPE, Integer.TYPE });
+                constrParamCnt = 3;            
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to get ConcurrentHashMap constructor: " + e);  // Java 5: use cause 
+            }
+        } catch(ClassNotFoundException e) {
+            c = HashMap.class;
+            try {
+                constr = c.getConstructor(new Class[] { Integer.TYPE, Float.TYPE });
+                constrParamCnt = 2;            
+            } catch (Exception e2) {
+                throw new RuntimeException("Failed to get HashMap constructor: " + e2);   // Java 5: use cause
+            }
+        }
+        
+        bestHashMapClass = c;
+        bestHashMapClassConstructor = constr;
+        bestHashMapClassConstructorParamCnt = constrParamCnt;            
+    }
     
     static public Map newMaybeConcurrentHashMap() {
         try {
             return (Map) bestHashMapClass.newInstance();
+        } catch(Exception e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+
+    static public Map newMaybeConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
+        try {
+            if (bestHashMapClassConstructorParamCnt == 3) {
+                return (Map) bestHashMapClassConstructor.newInstance(new Object[] {
+                        new Integer(initialCapacity), new Float(loadFactor), new Integer(concurrencyLevel) });
+            } else if (bestHashMapClassConstructorParamCnt == 2) {
+                return (Map) bestHashMapClassConstructor.newInstance(new Object[] {
+                        new Integer(initialCapacity), new Float(loadFactor) });
+            } else {
+                throw new BugException();
+            }
         } catch(Exception e) {
             throw new UndeclaredThrowableException(e);
         }
@@ -47,22 +102,6 @@ public class _ConcurrentMapFactory {
      */
     static public boolean isConcurrent(Map map) {
         return concurrentMapClass != null && concurrentMapClass.isInstance(map);
-    }
-    
-    private static Class getConcurrentMapClass() {
-        try {
-            return ClassUtil.forName("java.util.concurrent.ConcurrentMap");
-        } catch(ClassNotFoundException e) {
-            return null;
-        }
-    }
-
-    private static Class getBestHashMapClass() {
-        try {
-            return ClassUtil.forName("java.util.concurrent.ConcurrentHashMap");
-        } catch(ClassNotFoundException e) {
-            return HashMap.class;
-        }
     }
     
 }

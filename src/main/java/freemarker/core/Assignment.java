@@ -125,7 +125,7 @@ final class Assignment extends TemplateElement {
                     namespace = env.getCurrentNamespace();
                 }
                 else {
-                    throw new RuntimeException("Unexpected scope type: " + scope);
+                    throw new BugException("Unexpected scope type: " + scope);
                 }
             }
             namespace.put(variableName, tm);

@@ -58,7 +58,7 @@
 <p>Test "catch-all" macro parameter:</p>
 
 <#macro "catch-all" foo bar...>
-foo=${foo} baz=[<#list bar?keys as key>${key}=${bar[key]}<#if key_has_next>, </#if></#list>]
+foo=${foo} baz=[<#list bar?keys?sort as key>${key}=${bar[key]}<#if key_has_next>, </#if></#list>]
 </#macro>
 <#assign catchall = .namespace["catch-all"]>
 

@@ -53,16 +53,17 @@ package freemarker.ext.beans;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
+import freemarker.template.utility._MethodUtil;
 
 /**
  * @author Attila Szegedi
@@ -86,19 +87,21 @@ abstract class OverloadedMethodsSubset {
     
     // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
     // and such need to be fixed in this regard. 
-    // Java 5: Use ConcurrentHashMap:
-    private final Map/*<ArgumentTypes, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache = new HashMap();
+    private final Map/*<ArgumentTypes, MaybeEmptyCallableMemberDescriptor>*/ argTypesToMemberDescCache
+            = _ConcurrentMapFactory.newMaybeConcurrentHashMap(6, 0.75f, 1);
+    private final boolean isArgTypesToMemberDescCacheConcurrentMap
+            = _ConcurrentMapFactory.isConcurrent(argTypesToMemberDescCache);
     
-    private final List/*<CallableMemberDescriptor>*/ memberDescs = new LinkedList();
+    private final List/*<ReflectionCallableMemberDescriptor>*/ memberDescs = new LinkedList();
     
     /** Enables 2.3.21 {@link BeansWrapper} incompatibleImprovements */
     protected final boolean bugfixed;
     
-    OverloadedMethodsSubset(BeansWrapper beansWrapper) {
-        bugfixed = beansWrapper.is2321Bugfixed();
+    OverloadedMethodsSubset(boolean bugfixed) {
+        this.bugfixed = bugfixed;
     }
     
-    void addCallableMemberDescriptor(CallableMemberDescriptor memberDesc) {
+    void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
         memberDescs.add(memberDesc);
         
         // Warning: Do not modify this array, or put it into unwrappingHintsByParamCount by reference, as the arrays
@@ -162,18 +165,23 @@ abstract class OverloadedMethodsSubset {
     
     final MaybeEmptyCallableMemberDescriptor getMemberDescriptorForArgs(Object[] args, boolean varArg) {
         ArgumentTypes argTypes = new ArgumentTypes(args, bugfixed);
-        MaybeEmptyCallableMemberDescriptor memberDesc;
-        synchronized(argTypesToMemberDescCache) {
-            memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
-            if(memberDesc == null) {
-                memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
-                argTypesToMemberDescCache.put(argTypes, memberDesc);
+        MaybeEmptyCallableMemberDescriptor memberDesc = 
+                isArgTypesToMemberDescCacheConcurrentMap
+                        ? (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes)
+                        : null;
+        if (memberDesc == null) {
+            synchronized(argTypesToMemberDescCache) {
+                memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
+                if (memberDesc == null) {
+                    memberDesc = argTypes.getMostSpecific(memberDescs, varArg);
+                    argTypesToMemberDescCache.put(argTypes, memberDesc);
+                }
             }
         }
         return memberDesc;
     }
     
-    Iterator/*<CallableMemberDescriptor>*/ getMemberDescriptors() {
+    Iterator/*<ReflectionCallableMemberDescriptor>*/ getMemberDescriptors() {
         return memberDescs.iterator();
     }
     
@@ -181,7 +189,7 @@ abstract class OverloadedMethodsSubset {
     abstract void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes);
     
     abstract MaybeEmptyMemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, 
-            BeansWrapper w) throws TemplateModelException;
+            BeansWrapper unwrapper) throws TemplateModelException;
 
     /**
      * Returns the most specific common class (or interface) of two parameter types for the purpose of unwrapping.
@@ -254,8 +262,8 @@ abstract class OverloadedMethodsSubset {
         // - One of classes was a primitive type
         // - One of classes was a numerical type (either boxing type or primitive)
         
-        Set commonTypes = MethodUtilities.getAssignables(c1, c2);
-        commonTypes.retainAll(MethodUtilities.getAssignables(c2, c1));
+        Set commonTypes = _MethodUtil.getAssignables(c1, c2);
+        commonTypes.retainAll(_MethodUtil.getAssignables(c2, c1));
         if(commonTypes.isEmpty()) {
             // Can happen when at least one of the arguments is an interface, as
             // they don't have Object at the root of their hierarchy
@@ -271,11 +279,11 @@ abstract class OverloadedMethodsSubset {
             Class clazz = (Class)commonTypesIter.next();
             for (Iterator maxIter = max.iterator(); maxIter.hasNext();) {
                 Class maxClazz = (Class)maxIter.next();
-                if(MethodUtilities.isMoreOrSameSpecificParameterType(maxClazz, clazz, false /*bugfixed [1]*/, 0) != 0) {
+                if(_MethodUtil.isMoreOrSameSpecificParameterType(maxClazz, clazz, false /*bugfixed [1]*/, 0) != 0) {
                     // clazz can't be maximal, if there's already a more specific or equal maximal than it.
                     continue listCommonTypes;
                 }
-                if(MethodUtilities.isMoreOrSameSpecificParameterType(clazz, maxClazz, false /*bugfixed [1]*/, 0) != 0) {
+                if(_MethodUtil.isMoreOrSameSpecificParameterType(clazz, maxClazz, false /*bugfixed [1]*/, 0) != 0) {
                     // If it's more specific than a currently maximal element,
                     // that currently maximal is no longer a maximal.
                     maxIter.remove();

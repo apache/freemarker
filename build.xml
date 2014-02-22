@@ -444,7 +444,7 @@
    
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="test" pathid="ivy.dep.test" />
-    <junit haltonfailure="off" fork="true">
+    <junit haltonfailure="on" fork="true" forkmode="once">
       <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
       <classpath>
         <pathelement path="${coverage.classes.dir}" />
@@ -461,14 +461,6 @@
         </fileset>
       </batchtest>
     </junit>
-  </target>
-  
-  <target name="test-with-coverage-report" depends="test">
-    <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
-    <taskdef
-      resource="emma_ant.properties" classpathref="ivy.dep.emma"
-      uri="http://emma.sourceforge.net/emma" 
-    />
     
     <property name="coverage.report.dir" location="build/coverage/report" />
     <mkdir dir="${coverage.report.dir}" />
@@ -492,7 +484,7 @@
       </report>
     </emma:emma>
   </target>
-
+  
   <!-- ================================================================= -->
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
@@ -603,15 +595,15 @@
     </sequential>
   </macrodef>
   
-  <target name="example-webapp1" depends="init">
+  <target name="example-webapp1" depends="jar">
     <u:buildExampleWebapp examplename="webapp1" />
   </target>
 
-  <target name="example-webapp2" depends="init">
+  <target name="example-webapp2" depends="jar">
     <u:buildExampleWebapp examplename="webapp2" />
   </target>
 
-  <target name="example-struts-webapp" depends="init">
+  <target name="example-struts-webapp" depends="jar">
     <fail unless="struts.available"><!--
       -->You have to copy the Struts 1.1 jar-s to <!--
       -->lib/struts to build this example!<!--
@@ -622,7 +614,7 @@
     <u:buildExampleWebapp examplename="struts-webapp" />
   </target>
   
-  <target name="example-ant" depends="init">
+  <target name="example-ant" depends="jar">
     <mkdir dir="build/examples/ant" />
     <copy toDir="build/examples/ant">
       <fileset dir="src/examples/ant" />

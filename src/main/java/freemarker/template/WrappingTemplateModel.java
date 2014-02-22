@@ -58,6 +58,7 @@ package freemarker.template;
  */
 abstract public class WrappingTemplateModel {
 
+    /** @deprecated Because it's a VM-wide modifiable field */
     private static ObjectWrapper defaultObjectWrapper = DefaultObjectWrapper.instance;
     
     private ObjectWrapper objectWrapper;
@@ -70,6 +71,9 @@ abstract public class WrappingTemplateModel {
      * {@link Template#process(Object, java.io.Writer)} don't use this setting,
      * they rather use whatever object wrapper their 
      * {@link Configuration#getObjectWrapper()} method returns.
+     * 
+     * @deprecated This method has VM-wide effect, which makes it unsuitable for application where multiple components
+     *      might use FreeMarker internally.
      */
     public static void setDefaultObjectWrapper(ObjectWrapper objectWrapper) {
         defaultObjectWrapper = objectWrapper;
@@ -82,6 +86,8 @@ abstract public class WrappingTemplateModel {
      * {@link Template#process(Object, java.io.Writer)} don't use this setting,
      * they rather use whatever object wrapper their 
      * {@link Configuration#getObjectWrapper()} method returns.
+     * 
+     * @deprecated Don't depend on this object, as it can be replace by anybody in the same JVM.
      */
     public static ObjectWrapper getDefaultObjectWrapper() {
         return defaultObjectWrapper;
@@ -90,16 +96,19 @@ abstract public class WrappingTemplateModel {
     /**
      * Protected constructor that creates a new wrapping template model using
      * the default object wrapper.
+     * 
+     * @deprecated Use {@link #WrappingTemplateModel(ObjectWrapper)} instead; this method uses the deprecated.
      */
     protected WrappingTemplateModel() {
         this(defaultObjectWrapper);
     }
 
     /**
-     * Protected constructor that creates a new wrapping template model using
-     * the specified object wrapper.
-     * @param objectWrapper the wrapper to use. If null is passed, the default
-     * object wrapper is used.
+     * Protected constructor that creates a new wrapping template model using the specified object wrapper.
+     * 
+     * @param objectWrapper the wrapper to use. Passing {@code null} to it
+     *     is allowed but deprecated. If {@code null} is passed, the deprecated default object wrapper
+     *     is used.
      */
     protected WrappingTemplateModel(ObjectWrapper objectWrapper) {
         this.objectWrapper = 

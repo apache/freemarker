@@ -68,7 +68,7 @@ public final class SimpleNumber implements TemplateNumberModel, Serializable {
     /**
      * @serial the value of this <tt>SimpleNumber</tt> 
      */
-    private Number value;
+    private final Number value;
 
     public SimpleNumber(Number value) {
         this.value = value;

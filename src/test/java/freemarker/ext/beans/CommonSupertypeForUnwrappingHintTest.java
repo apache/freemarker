@@ -9,8 +9,10 @@ import freemarker.template.Version;
 
 public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     
-    final OverloadedMethodsSubset buggy = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 20)));
-    final OverloadedMethodsSubset fixed = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 21)));
+    final OverloadedMethodsSubset buggy
+            = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 20)).is2321Bugfixed());
+    final OverloadedMethodsSubset fixed
+            = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 21)).is2321Bugfixed());
 
     public CommonSupertypeForUnwrappingHintTest(String name) {
         super(name);
@@ -53,6 +55,33 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     public void testFixedInterfaces() {
         assertEquals(CharSequence.class, fixed.getCommonSupertypeForUnwrappingHint(String.class, StringBuilder.class));
         assertEquals(C6.class, fixed.getCommonSupertypeForUnwrappingHint(C7ExtC6I1.class, C8ExtC6I1.class));
+    }
+
+    public void testArrayAndOther() {
+        testArrayAndOther(buggy);
+        testArrayAndOther(fixed);
+    }
+    
+    /** These will be the same with fixed and buggy: */
+    private void testArrayAndOther(OverloadedMethodsSubset oms) {
+        assertEquals(Serializable.class, oms.getCommonSupertypeForUnwrappingHint(int[].class, String.class));
+        assertEquals(Serializable.class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, String.class));
+        
+        assertEquals(Object.class, oms.getCommonSupertypeForUnwrappingHint(int[].class, List.class));
+        assertEquals(Object.class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, List.class));
+        
+        assertEquals(int[].class, oms.getCommonSupertypeForUnwrappingHint(int[].class, int[].class));
+        assertEquals(Object[].class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, Object[].class));
+    }
+    
+    public void testArrayAndDifferentArrayBuggy() {
+        assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(int[].class, Object[].class));
+        assertEquals(Object.class, buggy.getCommonSupertypeForUnwrappingHint(int[].class, long[].class));
+    }
+    
+    public void testArrayAndDifferentArrayFixed() {
+        assertEquals(Serializable.class, fixed.getCommonSupertypeForUnwrappingHint(int[].class, Object[].class));
+        assertEquals(Serializable.class, fixed.getCommonSupertypeForUnwrappingHint(int[].class, long[].class));
     }
     
     public void testFixedPrimitive() {
@@ -108,13 +137,13 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     
     private static class DummyOverloadedMethodsSubset extends OverloadedMethodsSubset {
 
-        DummyOverloadedMethodsSubset(BeansWrapper beansWrapper) {
-            super(beansWrapper);
+        DummyOverloadedMethodsSubset(boolean bugfixed) {
+            super(bugfixed);
         }
 
         @Override
         Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
-            return memberDesc.paramTypes;
+            return memberDesc.getParamTypes();
         }
 
         @Override

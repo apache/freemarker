@@ -55,6 +55,7 @@ package freemarker.log;
 import java.util.HashMap;
 import java.util.Map;
 
+import freemarker.core.BugException;
 import freemarker.template.utility.ClassUtil;
 
 /**
@@ -268,7 +269,7 @@ public abstract class Logger
                     catch(ClassNotFoundException e)
                     {
                         // This can't happen, really
-                        throw new RuntimeException(e.getMessage());
+                        throw new BugException(e.getMessage());  // Java 5: Use cause exc.
                     }
                 }
             }

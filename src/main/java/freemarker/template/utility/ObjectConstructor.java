@@ -71,7 +71,6 @@ import freemarker.template.TemplateModelException;
  * <br>
  * <br>&lt;#assign aList = objectConstructor("java.util.ArrayList", 100)&gt;
  */
-
 public class ObjectConstructor implements TemplateMethodModelEx
 {
     public Object exec(List args) throws TemplateModelException {

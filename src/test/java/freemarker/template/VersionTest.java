@@ -82,4 +82,40 @@ public class VersionTest extends TestCase {
         
     }
     
+    @SuppressWarnings("boxing")
+    public void testHashAndEquals() {
+        Version v1 = new Version("1.2.3-beta2");
+        Version v2 = new Version(1, 2, 3, "beta2", null, null);
+        assertEquals(v1, v2);
+        assertEquals(v1.hashCode(), v2.hashCode());
+        
+        v2 = new Version("1.2.3-beta3");
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+        
+        v2 = new Version(1, 2, 3, "beta2", true, null);
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+        
+        v2 = new Version(1, 2, 3, "beta2", null, new Date(5000));
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+        
+        v2 = new Version("1.2.9-beta2");
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+        
+        v2 = new Version("1.9.3-beta2");
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+        
+        v2 = new Version("9.2.3-beta2");
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+        
+        v2 = new Version("1.2.3");
+        assert(!v1.equals(v2));
+        assert(v1.hashCode() != v2.hashCode());
+    }
+    
 }

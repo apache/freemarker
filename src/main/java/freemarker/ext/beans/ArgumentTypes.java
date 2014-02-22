@@ -51,13 +51,18 @@
  */
 package freemarker.ext.beans;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import freemarker.core.BugException;
+import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility._MethodUtil;
 
 
 /**
@@ -68,6 +73,22 @@ import freemarker.template.utility.ClassUtil;
 final class ArgumentTypes {
     
     private static final int BIG_MANTISSA_LOSS_PRICE = 40000;
+    
+    
+    /**
+     * Conversion difficulty: Lowest; Java Reflection will do it automatically.
+     */
+    private static final int CONVERSION_DIFFICULTY_REFLECTION = 0;
+
+    /**
+     * Conversion difficulty: Java reflection API will won't convert it, FreeMarker has to do it.
+     */
+    private static final int CONVERSION_DIFFICULTY_FREEMARKER = 1;
+    
+    /**
+     * Conversion difficulty: Highest; conversion is not possible.
+     */
+    private static final int CONVERSION_DIFFICULTY_IMPOSSIBLE = 2;
 
     /**
      * The types of the arguments; for varags this contains the exploded list (not the array). 
@@ -82,14 +103,17 @@ final class ArgumentTypes {
      *      created with {@link Version} 2.3.21 or higher.
      */
     ArgumentTypes(Object[] args, boolean bugfixed) {
-        int l = args.length;
-        types = new Class[l];
-        for(int i = 0; i < l; ++i) {
-            Object obj = args[i];
-            types[i] = obj == null
+        int ln = args.length;
+        Class[] typesTmp = new Class[ln];
+        for(int i = 0; i < ln; ++i) {
+            Object arg = args[i];
+            typesTmp[i] = arg == null
                     ? (bugfixed ? Null.class : Object.class)
-                    : obj.getClass();
+                    : arg.getClass();
         }
+        
+        // `typesTmp` is used so the array is only modified before it's stored in the final `types` field (see JSR-133)
+        types = typesTmp;  
         this.bugfixed = bugfixed;
     }
     
@@ -121,9 +145,9 @@ final class ArgumentTypes {
      * @return Possibly {@link EmptyCallableMemberDescriptor#NO_SUCH_METHOD} or
      *         {@link EmptyCallableMemberDescriptor#AMBIGUOUS_METHOD}. 
      */
-    MaybeEmptyCallableMemberDescriptor getMostSpecific(List/*<CallableMemberDescriptor>*/ memberDescs, boolean varArg)
+    MaybeEmptyCallableMemberDescriptor getMostSpecific(List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg)
     {
-        LinkedList/*<CallableMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
+        LinkedList/*<ReflectionCallableMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
         if(applicables.isEmpty()) {
             return EmptyCallableMemberDescriptor.NO_SUCH_METHOD;
         }
@@ -140,7 +164,7 @@ final class ArgumentTypes {
                 maximalsIter.hasNext();)
             {
                 CallableMemberDescriptor maximal = (CallableMemberDescriptor) maximalsIter.next();
-                final int cmpRes = compareParameterListPreferability(applicable.paramTypes, maximal.paramTypes, varArg); 
+                final int cmpRes = compareParameterListPreferability(applicable.getParamTypes(), maximal.getParamTypes(), varArg); 
                 if (cmpRes > 0) {
                     maximalsIter.remove();
                 } else if (cmpRes < 0) {
@@ -234,25 +258,64 @@ final class ArgumentTypes {
                     
                     if (numConvPrice1 == Integer.MAX_VALUE) {
                         if (numConvPrice2 == Integer.MAX_VALUE) {  // No numerical conversions anywhere
-                            final int r = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
-                            if (r > 0) {
-                                winerParam = 1;
-                                if (r > 1) {
-                                    paramList1WinCnt++;
-                                } else {
-                                    paramList1WeakWinCnt++;
+                            // List to array conversions (unwrapping sometimes makes a List instead of an array)
+                            if (List.class.isAssignableFrom(argType) && (paramType1.isArray() || paramType2.isArray())) {
+                                if (paramType1.isArray()) {
+                                    if (paramType2.isArray()) {  // both paramType1 and paramType2 are arrays
+                                        int r = compareParameterListPreferability_cmpTypeSpecificty(
+                                                paramType1.getComponentType(), paramType2.getComponentType());
+                                        // Because we don't know if the List items are instances of the component
+                                        // type or not, we prefer the safer choice, which is the more generic array:
+                                        if (r > 0) {
+                                            winerParam = 2;
+                                            paramList2StrongWinCnt++;
+                                        } else if (r < 0) {
+                                            winerParam = 1;
+                                            paramList1StrongWinCnt++;
+                                        } else {
+                                            winerParam = 0;
+                                        }
+                                    } else {  // paramType1 is array, paramType2 isn't
+                                        // Avoid List to array conversion if the other way makes any sense:
+                                        if (Collection.class.isAssignableFrom(paramType2)) {
+                                            winerParam = 2;
+                                            paramList2StrongWinCnt++;
+                                        } else {
+                                            winerParam = 1;
+                                            paramList1WeakWinCnt++;
+                                        }
+                                    }
+                                } else {  // paramType2 is array, paramType1 isn't
+                                    // Avoid List to array conversion if the other way makes any sense:
+                                    if (Collection.class.isAssignableFrom(paramType1)) {
+                                        winerParam = 1;
+                                        paramList1StrongWinCnt++;
+                                    } else {
+                                        winerParam = 2;
+                                        paramList2WeakWinCnt++;
+                                    }
                                 }
-                            } else if (r < 0) {
-                                winerParam = -1;
-                                if (r < -1) {
-                                    paramList2WinCnt++;
+                            } else {  // No list to array conversion
+                                final int r = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
+                                if (r > 0) {
+                                    winerParam = 1;
+                                    if (r > 1) {
+                                        paramList1WinCnt++;
+                                    } else {
+                                        paramList1WeakWinCnt++;
+                                    }
+                                } else if (r < 0) {
+                                    winerParam = -1;
+                                    if (r < -1) {
+                                        paramList2WinCnt++;
+                                    } else {
+                                        paramList2WeakWinCnt++;
+                                    }
                                 } else {
-                                    paramList2WeakWinCnt++;
+                                    winerParam = 0;
                                 }
-                            } else {
-                                winerParam = 0;
                             }
-                        } else {     // No num. conv. of param1, num. conv. of param2
+                        } else {  // No num. conv. of param1, num. conv. of param2
                             winerParam = -1;
                             paramList2WinCnt++;
                         }
@@ -332,10 +395,10 @@ final class ArgumentTypes {
                 if(paramType1 != paramType2) {
                     paramTypes1HasAMoreSpecific = 
                         paramTypes1HasAMoreSpecific
-                        || MethodUtilities.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
+                        || _MethodUtil.isMoreOrSameSpecificParameterType(paramType1, paramType2, false, 0) != 0;
                     paramTypes2HasAMoreSpecific = 
                         paramTypes2HasAMoreSpecific
-                        || MethodUtilities.isMoreOrSameSpecificParameterType(paramType2, paramType1, false, 0) != 0;
+                        || _MethodUtil.isMoreOrSameSpecificParameterType(paramType2, paramType1, false, 0) != 0;
                 }
             }
             
@@ -350,7 +413,7 @@ final class ArgumentTypes {
     }
     
     /**
-     * Trivial comparison type specificities; unaware of numerical conversions. 
+     * Trivial comparison of type specificities; unaware of numerical conversions. 
      * 
      * @return Less-than-0, 0, or more-than-0 depending on which side is more specific. The absolute value is 1 if
      *     the difference is only in primitive VS non-primitive, more otherwise.
@@ -394,48 +457,68 @@ final class ArgumentTypes {
      * Returns all methods that are applicable to actual
      * parameter types represented by this ArgumentTypes object.
      */
-    LinkedList/*<CallableMemberDescriptor>*/ getApplicables(List/*<CallableMemberDescriptor>*/ memberDescs, boolean varArg) {
-        LinkedList/*<CallableMemberDescriptor>*/ list = new LinkedList();
+    LinkedList/*<ReflectionCallableMemberDescriptor>*/ getApplicables(
+            List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg) {
+        LinkedList applicables = new LinkedList();
         for (Iterator it = memberDescs.iterator(); it.hasNext();) {
-            CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) it.next();
-            if(isApplicable(memberDesc, varArg)) {
-                list.add(memberDesc);
+            ReflectionCallableMemberDescriptor memberDesc = (ReflectionCallableMemberDescriptor) it.next();
+            int difficulty = isApplicable(memberDesc, varArg);
+            if (difficulty != CONVERSION_DIFFICULTY_IMPOSSIBLE) {
+                if(difficulty == CONVERSION_DIFFICULTY_REFLECTION) {
+                    applicables.add(memberDesc);
+                } else if (difficulty == CONVERSION_DIFFICULTY_FREEMARKER) {
+                    applicables.add(new SpecialConversionCallableMemberDescriptor(memberDesc));
+                } else {
+                    throw new BugException();
+                }
             }
         }
-        return list;
+        return applicables;
     }
     
     /**
      * Returns true if the supplied method is applicable to actual
      * parameter types represented by this ArgumentTypes object.
+     * 
+     * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
      */
-    private boolean isApplicable(CallableMemberDescriptor memberDesc, boolean varArg) {
-        final Class[] paramTypes = memberDesc.paramTypes; 
+    private int isApplicable(ReflectionCallableMemberDescriptor memberDesc, boolean varArg) {
+        final Class[] paramTypes = memberDesc.getParamTypes(); 
         final int cl = types.length;
         final int fl = paramTypes.length - (varArg ? 1 : 0);
         if(varArg) {
             if(cl < fl) {
-                return false;
+                return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         } else {
             if(cl != fl) {
-                return false;
+                return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         }
+        
+        int maxDifficulty = 0;
         for(int i = 0; i < fl; ++i) {
-            if(!isMethodInvocationConvertible(paramTypes[i], types[i])) {
-                return false;
+            int difficulty = isMethodInvocationConvertible(paramTypes[i], types[i]);
+            if(difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
+                return CONVERSION_DIFFICULTY_IMPOSSIBLE;
+            }
+            if (maxDifficulty < difficulty) {
+                maxDifficulty = difficulty;
             }
         }
         if(varArg) {
             Class varArgParamType = paramTypes[fl].getComponentType();
             for(int i = fl; i < cl; ++i) {
-                if(!isMethodInvocationConvertible(varArgParamType, types[i])) {
-                    return false;
+                int difficulty = isMethodInvocationConvertible(varArgParamType, types[i]); 
+                if(difficulty == CONVERSION_DIFFICULTY_IMPOSSIBLE) {
+                    return CONVERSION_DIFFICULTY_IMPOSSIBLE;
+                }
+                if (maxDifficulty < difficulty) {
+                    maxDifficulty = difficulty;
                 }
             }
         }
-        return true;
+        return maxDifficulty;
     }
 
     /**
@@ -450,32 +533,34 @@ final class ArgumentTypes {
      * @param formal the parameter type to which the actual 
      * parameter type should be convertible; possibly a primitive type
      * @param actual the argument type; not a primitive type, maybe {@link Null}.
-     * @return true if either formal type is assignable from actual type, 
-     * or the formal type is a primitive type and the actual type is its corresponding object
-     * type or an object type of a primitive type that can be converted to
-     * the formal type.
+     * 
+     * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
      */
-    private boolean isMethodInvocationConvertible(final Class formal, final Class actual) {
+    private int isMethodInvocationConvertible(final Class formal, final Class actual) {
         // Check for identity or widening reference conversion
         if(formal.isAssignableFrom(actual)) {
-            return true;
+            return CONVERSION_DIFFICULTY_REFLECTION;
         } else if (actual == Null.class && bugfixed) {
-            return !formal.isPrimitive();
+            return formal.isPrimitive() ? CONVERSION_DIFFICULTY_IMPOSSIBLE : CONVERSION_DIFFICULTY_REFLECTION;
         } else if (bugfixed) {
             final Class formalNP;
             if (formal.isPrimitive()) {
                 formalNP = ClassUtil.primitiveClassToBoxingClass(formal);
                 if (actual == formalNP) {
                     // Character and char, etc.
-                    return true;
+                    return CONVERSION_DIFFICULTY_REFLECTION;
                 }
             } else {
                 formalNP = formal;
             }
             if (Number.class.isAssignableFrom(actual) && Number.class.isAssignableFrom(formalNP)) {
-                return OverloadedNumberUtil.getArgumentConversionPrice(actual, formalNP) != Integer.MAX_VALUE;
+                return OverloadedNumberUtil.getArgumentConversionPrice(actual, formalNP) == Integer.MAX_VALUE
+                        ? CONVERSION_DIFFICULTY_IMPOSSIBLE : CONVERSION_DIFFICULTY_REFLECTION;
+            } else if (formal.isArray()) {
+                // BeansWrapper method/constructor calls convert from List to array automatically
+                return List.class.isAssignableFrom(actual) ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
             } else {
-                return false;
+                return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         } else { // if !bugfixed
             // This non-bugfixed (backward-compatibile) branch:
@@ -488,43 +573,43 @@ final class ArgumentTypes {
                 // actual parameters are never primitives.
                 // It doesn't do the same with boxing types... that was a bug.
                 if(formal == Boolean.TYPE) {
-                    return actual == Boolean.class;
+                    return actual == Boolean.class ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 } else if (formal == Double.TYPE && 
                         (actual == Double.class || actual == Float.class || 
                          actual == Long.class || actual == Integer.class || 
                          actual == Short.class || actual == Byte.class)) {
-                     return true;
+                     return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (formal == Integer.TYPE && 
                         (actual == Integer.class || actual == Short.class || 
                          actual == Byte.class)) {
-                     return true;
+                     return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (formal == Long.TYPE && 
                         (actual == Long.class || actual == Integer.class || 
                          actual == Short.class || actual == Byte.class)) {
-                     return true;
+                     return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (formal == Float.TYPE && 
                         (actual == Float.class || actual == Long.class || 
                          actual == Integer.class || actual == Short.class || 
                          actual == Byte.class)) {
-                     return true;
+                     return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (formal == Character.TYPE) {
-                    return actual == Character.class;
+                    return actual == Character.class ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 } else if(formal == Byte.TYPE && actual == Byte.class) {
-                    return true;
+                    return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if(formal == Short.TYPE &&
                    (actual == Short.class || actual == Byte.class)) {
-                    return true;
+                    return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (BigDecimal.class.isAssignableFrom(actual) && ClassUtil.isNumerical(formal)) {
                     // Special case for BigDecimals as we deem BigDecimal to be
                     // convertible to any numeric type - either object or primitive.
                     // This can actually cause us trouble as this is a narrowing 
                     // conversion, not widening. 
-                    return true;
+                    return CONVERSION_DIFFICULTY_REFLECTION;
                 } else {
-                    return false;
+                    return CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 }
             } else {
-                return false;
+                return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         }
     }
@@ -537,6 +622,77 @@ final class ArgumentTypes {
         // Can't be instantiated
         private Null() { }
         
+    }
+    
+    /**
+     * Used instead of {@link ReflectionCallableMemberDescriptor} when the method is only applicable
+     * ({@link #isApplicable}) with conversion that Java reflection won't do. It delegates to a
+     * {@link ReflectionCallableMemberDescriptor}, but it adds the necessary conversion to the invocation methods. 
+     */
+    private static final class SpecialConversionCallableMemberDescriptor extends CallableMemberDescriptor {
+        
+        private final ReflectionCallableMemberDescriptor callableMemberDesc;
+
+        SpecialConversionCallableMemberDescriptor(ReflectionCallableMemberDescriptor callableMemberDesc) {
+            this.callableMemberDesc = callableMemberDesc;
+        }
+
+        Object invokeMethod(BeansWrapper bw, Object obj, Object[] args) throws TemplateModelException,
+                InvocationTargetException, IllegalAccessException {
+            convertArgsToReflectionCompatible(bw, args);
+            return callableMemberDesc.invokeMethod(bw, obj, args);
+        }
+
+        Object invokeConstructor(BeansWrapper bw, Object[] args) throws IllegalArgumentException,
+                InstantiationException, IllegalAccessException, InvocationTargetException, TemplateModelException {
+            convertArgsToReflectionCompatible(bw, args);
+            return callableMemberDesc.invokeConstructor(bw, args);
+        }
+
+        String getDeclaration() {
+            return callableMemberDesc.getDeclaration();
+        }
+
+        boolean isConstructor() {
+            return callableMemberDesc.isConstructor();
+        }
+
+        boolean isStatic() {
+            return callableMemberDesc.isStatic();
+        }
+
+        boolean isVarargs() {
+            return callableMemberDesc.isVarargs();
+        }
+
+        Class[] getParamTypes() {
+            return callableMemberDesc.getParamTypes();
+        }
+        
+        String getName() {
+            return callableMemberDesc.getName();
+        }
+
+        private void convertArgsToReflectionCompatible(BeansWrapper bw, Object[] args) throws TemplateModelException {
+            Class[] paramTypes = callableMemberDesc.getParamTypes();
+            int ln = paramTypes.length;
+            for (int i = 0; i < ln; i++) {
+                Class paramType = paramTypes[i];
+                final Object arg = args[i];
+                // Right now the only case that we have to handle here is when we have List argument value for an
+                // array parameter. Java reflection won't handle such conversion, so we have to.
+                // All other reflection-incompatible conversions were already addressed by the unwrapping. The reason this
+                // one isn't is that for overlapped methods the hint of a given parameter position is often vague,
+                // so we may end up with a List even if some parameter types at that position are arrays (remember, we have
+                // chose one unwrapping target type, despite that we have many possible overloaded methods).
+                // Later, the overloaded method selection will assume that a List argument is applicable to an array
+                // parameter, so we end up with this situation.
+                if (paramType.isArray() && arg instanceof List) {
+                   args[i] = bw.listToArray((List) arg, paramType, null);
+                }
+            }
+        }
+
     }
     
 }

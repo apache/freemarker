@@ -86,6 +86,8 @@ implements TemplateHashModelEx, Serializable {
     /**
      * Constructs an empty hash that uses the default wrapper set in
      * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
+     * 
+     * @deprecated Use {@link #SimpleHash(ObjectWrapper)}
      */
     public SimpleHash() {
         this((ObjectWrapper)null);
@@ -99,6 +101,8 @@ implements TemplateHashModelEx, Serializable {
      * internal use. If the map implements the {@link SortedMap} interface, the
      * internal copy will be a {@link TreeMap}, otherwise it will be a 
      * {@link HashMap}.
+     * 
+     * @deprecated Use {@link #SimpleHash(Map, ObjectWrapper)}
      */
     public SimpleHash(Map map) {
         this(map, null);
@@ -194,32 +198,31 @@ implements TemplateHashModelEx, Serializable {
         // new key in the map, avoiding spurious ConcurrentModificationException
         // from another thread iterating over the map, see bug #1939742 in 
         // SourceForge tracker.
-        final Object putKey;
+        Object putKey = null;
         if (result == null) {
-            if(key.length() == 1) {
+            if (key.length() == 1) {
                 // just check for Character key if this is a single-character string
                 Character charKey = new Character(key.charAt(0));
                 result = map.get(charKey);
-                if (result == null && !(map.containsKey(key) || map.containsKey(charKey))) {
-                    return null;
-                }
-                else {
+                if (result != null || map.containsKey(charKey)) {
                     putKey = charKey;
                 }
             }
-            else if(!map.containsKey(key)) {
-                return null;
+            if (putKey == null) {
+                if(!map.containsKey(key)) {
+                    return null;
+                } else {
+                    putKey = key;
+                }
             }
-            else {
-                putKey = key;
-            }
-        }
-        else {
+        } else {
             putKey = key;
         }
+        
         if (result instanceof TemplateModel) {
             return (TemplateModel) result;
         }
+        
         TemplateModel tm = wrap(result);
         if (!putFailed) {
             try {

@@ -5,7 +5,6 @@ import java.util.*;
 import java.lang.reflect.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import freemarker.core.Version;
 import freemarker.template.*;
 import freemarker.ext.beans.BeansWrapper;
 
@@ -16,42 +15,42 @@ import freemarker.ext.beans.BeansWrapper;
  * this class.
  */
 public class ControllerServlet extends HttpServlet {
-    private Configuration cfg; 
+
+    // Volatile so that it's properly published according to JSR 133 (JMM).
+    // Although, the servlet container most certainly makes this unnecessarry.
+    private volatile Configuration cfg; 
     
     public void init() {
         // Initialize the FreeMarker configuration;
-        // - Create a configuration instance
-        cfg = new Configuration();
-        // - At least in new projects, specify that you want the fixes that aren't
-        //   100% backward compatible too (these are always very low-risk changes):
-        cfg.setIncompatibleImprovements(new Version(2, 3, 20));
+        // - Create a configuration instance, with the not-100%-backward-compatible
+        //   fixes up until FreeMarker 2.3.21 applied (as far as it starts
+        //   with 2.3, these are only minor changes that doesn't affect most apps):
+        Configuration cfg = new Configuration(new Version(2, 3, 21));
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");
-        // - Set update dealy to 0 for now, to ease debugging and testing.
-        //   Higher value should be used in production environment.
-        cfg.setTemplateUpdateDelay(0);
+        // - At most how often should FreeMarker check if a template was updated:
+        cfg.setTemplateUpdateDelay(isInDevelopmentMode() ? 0 : 60);
         // - When developing, set an error handler that prints errors so they are
-		//   readable with a HTML browser, otherwise we just let the HTTP 500
-		//   handler to deal with it.
+        //   readable with a Web browser, otherwise we just let the HTTP 500
+        //   handler deal with it.
         cfg.setTemplateExceptionHandler(
-				isInDevelopmentMode()
-						? TemplateExceptionHandler.HTML_DEBUG_HANDLER
-						: TemplateExceptionHandler.RETHROW_HANDLER);
-        // - Use beans wrapper (recommmended for most applications)
-		BeansWrapper bw = new BeansWrapper();
-		bw.setSimpleMapWrapper(true);
-        cfg.setObjectWrapper(bw);
+                isInDevelopmentMode()
+                        ? TemplateExceptionHandler.HTML_DEBUG_HANDLER
+                        : TemplateExceptionHandler.RETHROW_HANDLER);
         // - Set the default charset of the template files
         cfg.setDefaultEncoding("ISO-8859-1");
         // - Set the charset of the output. This is actually just a hint, that
-        //   templates may require for URL encoding and for generating META element
-        //   that uses http-equiv="Content-type".
+        //   templates may require for URL encoding and for generating META
+        //   element that uses http-equiv="Content-type".
         cfg.setOutputEncoding("UTF-8");
         // - Set the default locale
         cfg.setLocale(Locale.US);
+        
+        // Finished modifying cfg, so let's publish it to other threads:
+        this.cfg = cfg;
     }
-	
+    
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         doGet(req, resp);
@@ -121,10 +120,10 @@ public class ControllerServlet extends HttpServlet {
             throw new ServletException("The action didn't specified a command.");
         }
     }
-	
-	private boolean isInDevelopmentMode() {
-		// This should detect this with a system property for example.
-		return true;
-	}
-	
+    
+    private boolean isInDevelopmentMode() {
+        // FIXME: Should detect this with a system property for example.
+        return true;
+    }
+    
 }

@@ -186,13 +186,14 @@ final class StaticModel implements TemplateHashModelEx
             {
                 Method method = methods[i];
                 int mod = method.getModifiers();
-                if (Modifier.isPublic(mod) && Modifier.isStatic(mod) && wrapper.isSafeMethod(method))
+                if (Modifier.isPublic(mod) && Modifier.isStatic(mod)
+                        && wrapper.getClassIntrospector().isAllowedToExpose(method))
                 {
                     String name = method.getName();
                     Object obj = map.get(name);
                     if (obj instanceof Method)
                     {
-                        OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper);
+                        OverloadedMethods overloadedMethods = new OverloadedMethods(wrapper.is2321Bugfixed());
                         overloadedMethods.addMethod((Method) obj);
                         overloadedMethods.addMethod(method);
                         map.put(name, overloadedMethods);
@@ -228,8 +229,7 @@ final class StaticModel implements TemplateHashModelEx
                 }
                 else if (value instanceof OverloadedMethods)
                 {
-                    entry.setValue(new OverloadedMethodsModel(null, 
-                            (OverloadedMethods)value));
+                    entry.setValue(new OverloadedMethodsModel(null, (OverloadedMethods) value, wrapper));
                 }
             }
         }

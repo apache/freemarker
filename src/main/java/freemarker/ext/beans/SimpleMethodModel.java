@@ -73,7 +73,7 @@ import freemarker.template.utility.StringUtil;
  * for non-overloaded methods.
  * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
-public final class SimpleMethodModel extends SimpleMemberModel
+public final class SimpleMethodModel extends SimpleMethod
     implements
     TemplateMethodModelEx,
     TemplateSequenceModel

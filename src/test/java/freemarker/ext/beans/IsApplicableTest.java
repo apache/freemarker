@@ -131,7 +131,7 @@ public class IsApplicableTest extends TestCase {
     
     private void assertNotApplicable(ArgumentTypes ats, boolean varargs, Class... paramTypes) {
         List tested = new ArrayList();
-        tested.add(new CallableMemberDescriptor((Method) null, paramTypes));
+        tested.add(new ReflectionCallableMemberDescriptor((Method) null, paramTypes));
         if (ats.getApplicables(tested, varargs).size() != 0) {
             fail("Parameter types were applicable");
         }
@@ -143,7 +143,7 @@ public class IsApplicableTest extends TestCase {
     
     private void assertApplicable(ArgumentTypes ats, boolean varargs, Class<?>... paramTypes) {
         List tested = new ArrayList();
-        tested.add(new CallableMemberDescriptor((Method) null, paramTypes));
+        tested.add(new ReflectionCallableMemberDescriptor((Method) null, paramTypes));
         if (ats.getApplicables(tested, varargs).size() != 1) {
             fail("Parameter types weren't applicable");
         }

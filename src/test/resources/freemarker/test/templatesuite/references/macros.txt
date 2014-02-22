@@ -40,7 +40,7 @@
 
 foo=a baz=[]
 foo=a baz=[bar=b]
-foo=a baz=[baz=c, bar=b]
+foo=a baz=[bar=b, baz=c]
 
 
 Hello World! Today is Monday.
