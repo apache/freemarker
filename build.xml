@@ -461,14 +461,6 @@
         </fileset>
       </batchtest>
     </junit>
-  </target>
-  
-  <target name="test-with-coverage-report" depends="test">
-    <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
-    <taskdef
-      resource="emma_ant.properties" classpathref="ivy.dep.emma"
-      uri="http://emma.sourceforge.net/emma" 
-    />
     
     <property name="coverage.report.dir" location="build/coverage/report" />
     <mkdir dir="${coverage.report.dir}" />
@@ -492,7 +484,7 @@
       </report>
     </emma:emma>
   </target>
-
+  
   <!-- ================================================================= -->
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
