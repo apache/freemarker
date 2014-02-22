@@ -20721,12 +20721,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>FTL sequence (or wrapped Java
-                  <literal>List</literal>-s) values were not seen as
-                  applicable to a parameter with array type if there were
-                  multiple overloaded methods with the same number of
-                  parameters but with different types on the position of the
-                  array parameter. That is, if you had
+                  <para>FTL sequence values (like Java
+                  <literal>List</literal>-s or FTL
+                  <literal>[<replaceable>x</replaceable>,
+                  <replaceable>y</replaceable>,
+                  <replaceable>...</replaceable>]</literal> constants) were
+                  not seen as applicable to a parameter with array type if
+                  there were multiple overloaded methods with the same number
+                  of parameters but with different types on the position of
+                  the array parameter. That is, if you had
                   <literal>f(String[])</literal> and
                   <literal>f(String)</literal> in Java, then
                   <literal>f(['foo', 'bar'])</literal> in the template

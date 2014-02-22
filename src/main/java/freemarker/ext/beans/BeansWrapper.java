@@ -1327,7 +1327,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         Object array = Array.newInstance(componentType, seq.size());
         recursionStops.put(seq, array);
         try {
-            int size = seq.size();
+            final int size = seq.size();
             for (int i = 0; i < size; i++) {
                 final TemplateModel seqItem = seq.get(i);
                 Object val = tryUnwrap(seqItem, componentType, false, recursionStops);
@@ -1337,9 +1337,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                     } else {
                         throw new TemplateModelException(
                                 "Failed to convert " + ClassUtil.getFTLTypeDescription(seq)
-                                + " object to " + ClassUtil.getShortClassNameOfObject(array) + " at index " + i
-                                + ". The type of the failing item was: " + ClassUtil.getFTLTypeDescription(seqItem));
+                                + " object to " + ClassUtil.getShortClassNameOfObject(array)
+                                + ": Problematic sequence item at index " + i + " with value type: "
+                                + ClassUtil.getFTLTypeDescription(seqItem));
                     }
+                    
                 }
                 Array.set(array, i, val);
             }
@@ -1370,17 +1372,44 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         Object array = Array.newInstance(componentType, list.size());
         recursionStops.put(list, array);
         try {
+            boolean isComponentTypeExamined = false;
+            boolean isComponentTypeNumerical = false;  // will be filled on demand
             int i = 0;
             for (Iterator it = list.iterator(); it.hasNext();) {
                 Object listItem = it.next();
-                // TODO: Component type conversion: numerical types, char -> String, Java 5 CharSequence -> String
+                if (listItem != null && !componentType.isInstance(listItem)) {
+                    // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
+                    if (!isComponentTypeExamined) {
+                        isComponentTypeNumerical = ClassUtil.isNumerical(componentType);
+                        isComponentTypeExamined = true;
+                    }
+                    if (isComponentTypeNumerical && listItem instanceof Number) {
+                        listItem = forceUnwrappedNumberToType((Number) listItem, componentType, true);
+                    } else if (componentType == String.class && listItem instanceof Character) {
+                        listItem = String.valueOf(((Character) listItem).charValue());
+                    } else if ((componentType == Character.class || componentType == char.class)
+                            && listItem instanceof String) {
+                        String listItemStr = (String) listItem;
+                        if (listItemStr.length() == 1) {
+                            // Java 5: use Character.valueOf
+                            listItem = new Character(listItemStr.charAt(0));
+                        }
+                    } else if (componentType.isArray()) {
+                        if (listItem instanceof List) {
+                            listItem = listToArray((List) listItem, componentType, recursionStops);
+                        } else if (listItem instanceof TemplateSequenceModel) {
+                            listItem = unwrapSequenceToArray((TemplateSequenceModel) listItem, componentType, false, recursionStops);
+                        }
+                    }
+                }
                 try {
                     Array.set(array, i++, listItem);
                 } catch (IllegalArgumentException e) {
                     throw new TemplateModelException(
                             "Failed to convert " + ClassUtil.getShortClassNameOfObject(list)
-                            + " object to " + ClassUtil.getShortClassNameOfObject(array) + " at index " + i
-                            + ". The type of the failing item was: " + ClassUtil.getShortClassNameOfObject(listItem), e);
+                            + " object to " + ClassUtil.getShortClassNameOfObject(array)
+                            + ": Problematic List item at index " + i + " with value type: "
+                            + ClassUtil.getShortClassNameOfObject(listItem), e);
                 }
             }
         } finally {
@@ -1394,7 +1423,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @param n Non-{@code null}
      * @return {@code null} if the conversion has failed.
      */
-    static Number forceUnwrappedNumberToType(final Number n, final Class targetType, boolean bugfixed) {
+    static Number forceUnwrappedNumberToType(final Number n, final Class targetType, final boolean bugfixed) {
         // We try to order the conditions by decreasing probability.
         if (targetType == n.getClass()) {
             return n;

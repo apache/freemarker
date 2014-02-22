@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import freemarker.core.Environment;
 import freemarker.ext.beans.RationalNumber;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
@@ -544,11 +547,135 @@ public class OverloadedMethods2 {
     public String mObjectArrayNonOverloaded(Object[] items) {
         return "mObjectArrayNonOverloaded(Object[] " + arrayToString(items) + ")";
     }
+
+    public String mIntegerArrayOverloaded(Integer[] items, int i) {
+        return "mIntegerArrayOverloaded(Integer[] " + arrayToString(items) + ", int " + i + ")";
+    }
+
+    public String mIntegerArrayOverloaded(Object obj, boolean b) {
+        return "mIntegerArrayOverloaded(Object " + obj + ", boolean " + b + ")";
+    }
+
+    public String mStringArrayOverloaded(String[] items, int i) {
+        return "mStringArrayOverloaded(String[] " + arrayToString(items) + ", int " + i + ")";
+    }
+
+    public String mStringArrayOverloaded(Object obj, boolean b) {
+        return "mStringArrayOverloaded(Object " + obj + ", boolean " + b + ")";
+    }
+
+    public String mCharArrayOverloaded(char[] items, int i) {
+        return "mCharArrayOverloaded(char[] " + arrayToString(items) + ", int " + i + ")";
+    }
+
+    public String mCharArrayOverloaded(Character[] items, String s) {
+        return "mCharArrayOverloaded(Character[] " + arrayToString(items) + ", String " + s + ")";
+    }
     
-    public List getJavaList() {
+    public String mCharArrayOverloaded(Object obj, boolean b) {
+        return "mCharArrayOverloaded(Object " + obj + ", boolean " + b + ")";
+    }
+
+    public String mStringArrayArrayOverloaded(String[][] arrayArray, int i) {
+        return "mStringArrayArrayOverloaded(String[][] " + arrayToString(arrayArray) + ", int " + i + ")";
+    }
+    
+    public String mStringArrayArrayOverloaded(Object obj, boolean b) {
+        return "mStringArrayArrayOverloaded(Object " + obj + ", boolean " + b + ")";
+    }
+    
+    public List getJavaStringList() {
         List list = new ArrayList();
         list.add("a");
         list.add("b");
+        return list;
+    }
+
+    public List getJavaString2List() {
+        List list = new ArrayList();
+        list.add("aa");
+        list.add("bb");
+        return list;
+    }
+
+    public List getJavaStringListList() {
+        List listList = new ArrayList();
+        {
+            List list = new ArrayList();
+            list.add("a");
+            list.add("b");
+            
+            listList.add(list);
+        }
+        {
+            List list = new ArrayList();
+            list.add("c");
+            
+            listList.add(list);
+        }
+        return listList;
+    }
+
+    public List getJavaStringSequenceList() throws TemplateModelException {
+        ObjectWrapper ow = Environment.getCurrentEnvironment().getObjectWrapper();
+        
+        List listList = new ArrayList();
+        {
+            List list = new ArrayList();
+            list.add("a");
+            list.add("b");
+            
+            listList.add(ow.wrap(list));
+        }
+        {
+            List list = new ArrayList();
+            list.add("c");
+            
+            listList.add(ow.wrap(list));
+        }
+        return listList;
+    }
+    
+    @SuppressWarnings("boxing")
+    public List getJavaIntegerListList() {
+        List listList = new ArrayList();
+        {
+            List list = new ArrayList();
+            list.add(1);
+            list.add(2);
+            
+            listList.add(list);
+        }
+        {
+            List list = new ArrayList();
+            list.add(3);
+            
+            listList.add(list);
+        }
+        return listList;
+    }
+    
+    @SuppressWarnings("boxing")
+    public List<Integer> getJavaIntegerList() {
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(1);
+        list.add(2);
+        return list;
+    }
+
+    @SuppressWarnings("boxing")
+    public List<Byte> getJavaByteList() {
+        List<Byte> list = new ArrayList<Byte>();
+        list.add((byte) 1);
+        list.add((byte) 2);
+        return list;
+    }
+
+    @SuppressWarnings("boxing")
+    public List<Character> getJavaCharacterList() {
+        List<Character> list = new ArrayList<Character>();
+        list.add('c');
+        list.add('C');
         return list;
     }
     
@@ -561,10 +688,39 @@ public class OverloadedMethods2 {
     }
     
     private String arrayToString(Object[] array) {
-        return listToString(Arrays.asList(array));
+        return array != null ? listToString(Arrays.asList(array)) : "null";
     }
 
+    private String arrayToString(Object[][] arrayArray) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        boolean first = true;
+        for (Object[] array : arrayArray) {
+            if (!first) {
+                sb.append(", ");
+            } else {
+                first = false;
+            }
+            sb.append(listToString(Arrays.asList(array)));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    
     private String arrayToString(int[] array) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < array.length; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append(array[i]);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String arrayToString(char[] array) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < array.length; i++) {

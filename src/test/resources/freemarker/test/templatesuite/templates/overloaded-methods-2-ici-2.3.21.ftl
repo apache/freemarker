@@ -227,3 +227,31 @@
 <@assertEquals actual=obj.mStringArrayVsListPreference(['a', 'b']) expected="mStringArrayVsListPreference(List [a, b])" />
 <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(['a', 'b']) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
 <@assertEquals actual=obj.mIntArrayVsIntegerArrayPreference([1, 2]) expected="mIntArrayVsIntegerArrayPreference(Integer[] [1, 2])" />
+
+<@assertEquals actual=obj.mIntegerArrayOverloaded([1, 2], 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
+<@assertEquals actual=obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
+<@assertEquals actual=obj.mIntegerArrayOverloaded(obj.javaIntegerList, 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
+<@assertEquals actual=obj.mIntegerArrayOverloaded(obj.javaByteList, 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
+
+<@assertEquals actual=obj.mStringArrayOverloaded(['a', 'b'], 3) expected="mStringArrayOverloaded(String[] [a, b], int 3)" />
+<@assertEquals actual=obj.mStringArrayOverloaded(obj.javaStringList, 3) expected="mStringArrayOverloaded(String[] [a, b], int 3)" />
+<@assertEquals actual=obj.mStringArrayOverloaded(obj.javaCharacterList, 3) expected="mStringArrayOverloaded(String[] [c, C], int 3)" />
+<@assertFails message="Failed to convert sequence" causeNestingLevel=1>${obj.mStringArrayOverloaded([1, 2], 3)}</@>
+<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayOverloaded(obj.javaIntegerList, 3)}</@>
+
+<@assertEquals actual=obj.mCharArrayOverloaded(['a', 'b'], 3) expected="mCharArrayOverloaded(char[] [a, b], int 3)" />
+<@assertEquals actual=obj.mCharArrayOverloaded(obj.javaCharacterList, 3) expected="mCharArrayOverloaded(char[] [c, C], int 3)" />
+<@assertEquals actual=obj.mCharArrayOverloaded(obj.javaStringList, 3) expected="mCharArrayOverloaded(char[] [a, b], int 3)" />
+<@assertFails message="Failed to convert sequence" causeNestingLevel=1>${obj.mCharArrayOverloaded(['aa', 'bb'], 3)}</@>
+<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mCharArrayOverloaded(obj.javaString2List, 3)}</@>
+<@assertEquals actual=obj.mCharArrayOverloaded(['a', 'b'], 's') expected="mCharArrayOverloaded(Character[] [a, b], String s)" />
+<@assertEquals actual=obj.mCharArrayOverloaded(obj.javaCharacterList, 's') expected="mCharArrayOverloaded(Character[] [c, C], String s)" />
+<@assertEquals actual=obj.mCharArrayOverloaded(obj.javaStringList, 's') expected="mCharArrayOverloaded(Character[] [a, b], String s)" />
+<@assertFails message="Failed to convert sequence" causeNestingLevel=1>${obj.mCharArrayOverloaded(['aa', 'bb'], 's')}</@>
+<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mCharArrayOverloaded(obj.javaString2List, 's')}</@>
+
+<@assertEquals actual=obj.mStringArrayArrayOverloaded([['a', 'b'], ['c']], 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
+<@assertEquals actual=obj.mStringArrayArrayOverloaded(obj.javaStringListList, 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
+<@assertEquals actual=obj.mStringArrayArrayOverloaded(obj.javaStringSequenceList, 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
+<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayArrayOverloaded(obj.javaStringList, 3)}</@>
+<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayArrayOverloaded(obj.javaIntegerListList, 3)}</@>
