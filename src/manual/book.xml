@@ -20737,7 +20737,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>f(String[])</literal>. Note that if there's also an
                   <literal>f(List)</literal> or even an
                   <literal>f(Collection)</literal>, it will prefer those over
-                  arrays.</para>
+                  arrays. (For consistency, this conversion will work even if
+                  the argument is a <literal>List</literal> that come directly
+                  from Java, i.e., when it was wrapped then unwrapped to the
+                  original object.) For a multidimensional array parameter
+                  type, this conversion works recursively, so you can pass in
+                  a sequence-of-sequences or
+                  <literal>List</literal>-of-<literal>List</literal>-s or
+                  <literal>List</literal>-of-sequences as the argument.</para>
                 </listitem>
 
                 <listitem>
