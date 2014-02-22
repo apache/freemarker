@@ -288,6 +288,13 @@ public class TemplateTestCase extends FileTestCase {
             HashMap mCharCNull = new HashMap();
             mCharCNull.put("c", null);
             dataModel.put("mCharCNull", mCharCNull);
+            
+            HashMap mMixed = new HashMap();
+            mMixed.put(Character.valueOf('c'), "char");
+            mMixed.put("s", "string");
+            mMixed.put("s2", "string2");
+            mMixed.put("s2n", null);
+            dataModel.put("mMixed", mMixed);
         }
     
         else if (testName.equals("default-xmlns")) {

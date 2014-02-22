@@ -17,3 +17,10 @@
 <@assertEquals expected=1 actual=mCharCNull?keys?size />
 <@assertEquals expected="null" actual=mCharCNull.d!'null' />
 <@assertEquals expected=1 actual=mCharCNull?keys?size />
+
+<@assertEquals expected="char" actual=mMixed.c />
+<@assertEquals expected="string" actual=mMixed.s />
+<@assertEquals expected="string2" actual=mMixed.s2 />
+<@assertEquals expected="null" actual=mMixed.s2n!'null' />
+<@assertEquals expected="null" actual=mMixed.wrong!'null' />
+<@assertEquals expected=4 actual=mMixed?keys?size />
