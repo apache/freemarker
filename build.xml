@@ -444,7 +444,7 @@
    
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="test" pathid="ivy.dep.test" />
-    <junit haltonfailure="off" fork="true">
+    <junit haltonfailure="on" fork="true" forkmode="once">
       <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
       <classpath>
         <pathelement path="${coverage.classes.dir}" />
