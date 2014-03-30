@@ -1,4 +1,4 @@
-<#-- The parts of the IcI 2.3.20 tests that give the same result regardless of method introspection order -->00000000000
+<#-- The parts of the IcI 2.3.20 tests that give the same result regardless of method introspection order -->
 <#-- Note that the point of 2.3.20 tests is to check if bugs fixed in 2.3.21 are still emulated in pre-2.3.21 mode -->
 
 <#include "overloaded-methods-2-common.ftl">
@@ -182,3 +182,13 @@
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaIntegerList, 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaByteList, 3)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(['a', 'b'])}</@>
+<#if dow>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(obj.javaStringList)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(obj.javaStringArray)}</@>
+<#else>
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringList) expected="mStringArrayVarargsOverloaded2(String[] [[a, b]])" /> <#-- toString() accident... -->
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringArray) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+</#if>
+<@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(['a'])}</@>

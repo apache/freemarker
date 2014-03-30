@@ -255,3 +255,9 @@
 <@assertEquals actual=obj.mStringArrayArrayOverloaded(obj.javaStringSequenceList, 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
 <@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayArrayOverloaded(obj.javaStringList, 3)}</@>
 <@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayArrayOverloaded(obj.javaIntegerListList, 3)}</@>
+
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a', 'b']) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringList) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringArray) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a']) expected="mStringArrayVarargsOverloaded2(String[] [a])" />
+

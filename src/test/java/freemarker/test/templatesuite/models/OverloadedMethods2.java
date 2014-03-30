@@ -13,11 +13,9 @@ import freemarker.ext.beans.RationalNumber;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
-import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
-import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 import freemarker.test.utility.Helpers;
 
@@ -584,6 +582,46 @@ public class OverloadedMethods2 {
         return "mStringArrayArrayOverloaded(Object " + obj + ", boolean " + b + ")";
     }
     
+    public String mStringArrayVarargsNonOverloaded(String... items) {
+        return "mStringArrayVarargsNonOverloaded(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded(String... items) {
+        return "mStringArrayVarargsNonOverloaded(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded1(String... items) {
+        return "mStringArrayVarargsOverloaded1(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded1(List<String> items) {
+        return "mStringArrayVarargsOverloaded1(List " + listToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded2(String... items) {
+        return "mStringArrayVarargsOverloaded2(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded2(String item) {
+        return "mStringArrayVarargsOverloaded2(String " + item + ")";
+    }
+    
+    public String mStringArrayVarargsOverloaded3(String... items) {
+        return "mStringArrayVarargsOverloaded3(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded3(String item1, String item2) {
+        return "mStringArrayVarargsOverloaded3(String " + item1 + ", String " + item2 + ")";
+    }
+    
+    public String mStringArrayVarargsOverloaded4(String... items) {
+        return "mStringArrayVarargsOverloaded4(String[] " + arrayToString(items) + ")";
+    }
+
+    public String mStringArrayVarargsOverloaded4(List... items) {
+        return "mStringArrayVarargsOverloaded4(List[] " + arrayToString(items) + ")";
+    }
+
     public List getJavaStringList() {
         List list = new ArrayList();
         list.add("a");

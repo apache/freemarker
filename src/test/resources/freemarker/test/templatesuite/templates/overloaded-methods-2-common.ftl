@@ -22,3 +22,29 @@
 <@assertEquals actual=obj.mObjectArrayNonOverloaded(['a', 'b', 3]) expected="mObjectArrayNonOverloaded(Object[] [a, b, 3])" />
 <@assertEquals actual=obj.mObjectArrayNonOverloaded(obj.javaStringList) expected="mObjectArrayNonOverloaded(Object[] [a, b])" />
 <@assertEquals actual=obj.mObjectArrayNonOverloaded(obj.javaStringArray) expected="mObjectArrayNonOverloaded(Object[] [a, b])" />
+
+<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringArray) expected=dow?string("mStringArrayVsListPreference(List [a, b])", "mStringArrayVsListPreference(String[] [a, b])") />
+
+<@assertEquals actual=obj.mStringArrayVarargsNonOverloaded('a', 'b') expected="mStringArrayVarargsNonOverloaded(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsNonOverloaded(['a', 'b']) expected="mStringArrayVarargsNonOverloaded(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsNonOverloaded(obj.javaStringList) expected="mStringArrayVarargsNonOverloaded(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsNonOverloaded(obj.javaStringArray) expected="mStringArrayVarargsNonOverloaded(String[] [a, b])" />
+
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded1('a', 'b') expected="mStringArrayVarargsOverloaded1(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded1(['a', 'b']) expected="mStringArrayVarargsOverloaded1(List [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded1(obj.javaStringList) expected="mStringArrayVarargsOverloaded1(List [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded1(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded1(List [a, b])", "mStringArrayVarargsOverloaded1(String[] [a, b])") />
+
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2('a', 'b') expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2('a') expected="mStringArrayVarargsOverloaded2(String a)" />
+
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded3(['a']) expected="mStringArrayVarargsOverloaded3(String[] [a])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded3(['a', 'b']) expected="mStringArrayVarargsOverloaded3(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded3(['a', 'b', 'c']) expected="mStringArrayVarargsOverloaded3(String[] [a, b, c])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded3('a') expected="mStringArrayVarargsOverloaded3(String[] [a])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded3('a', 'b') expected="mStringArrayVarargsOverloaded3(String a, String b)" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded3('a', 'b', 'c') expected="mStringArrayVarargsOverloaded3(String[] [a, b, c])" />
+
+<#-- Because the fixed arg interpretations are ambiguous, it only considers the vararg interpretations:  -->
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(['a', 'b', 'c']) expected="mStringArrayVarargsOverloaded4(List[] [[a, b, c]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4('a', 'b', 'c') expected="mStringArrayVarargsOverloaded4(String[] [a, b, c])" />
