@@ -62,6 +62,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -1416,6 +1417,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             recursionStops.remove(list);
         }
         return array;
+    }
+    
+    List arrayToList(Object[] array) throws TemplateModelException {
+        return array.length == 0 ? Collections.EMPTY_LIST : new ArrayBackedReadOnlyList(array);
     }
 
     /**

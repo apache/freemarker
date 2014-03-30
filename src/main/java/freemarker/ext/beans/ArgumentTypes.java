@@ -202,7 +202,9 @@ final class ArgumentTypes {
      * trickier when there's a possibility of numerical conversion from the actual argument type to the type of some of
      * the parameters. If such conversion is only possible for one of the competing parameter types, that parameter
      * automatically wins. If it's possible for both, {@link OverloadedNumberUtil#getArgumentConversionPrice} will
-     * be used to calculate the conversion "price", and the parameter type with lowest price wins.   
+     * be used to calculate the conversion "price", and the parameter type with lowest price wins. There are also
+     * a twist with array-to-list and list-to-array conversions; we try to avoid those, so the parameter where such
+     * conversion isn't needed will always win.
      * 
      * @param paramTypes1 The parameter types of one of the competing methods
      * @param paramTypes2 The parameter types of the other competing method
@@ -223,6 +225,8 @@ final class ArgumentTypes {
             int paramList2WinCnt = 0;
             int paramList1StrongWinCnt = 0;
             int paramList2StrongWinCnt = 0;
+            int paramList1VeryStrongWinCnt = 0;
+            int paramList2VeryStrongWinCnt = 0;
             int firstWinerParamList = 0;
             for (int i = 0; i < argTypesLen; i++) {
                 final Class paramType1 = getParamType(paramTypes1, paramTypes1Len, i, varArg);
@@ -295,6 +299,24 @@ final class ArgumentTypes {
                                         paramList2WeakWinCnt++;
                                     }
                                 }
+                            } else if (argType.isArray()
+                                    && (List.class.isAssignableFrom(paramType1)
+                                            || List.class.isAssignableFrom(paramType2))) {
+                                // Array to List conversions (unwrapping sometimes makes an array instead of a List)
+                                if (List.class.isAssignableFrom(paramType1)) {
+                                    if (List.class.isAssignableFrom(paramType2)) {
+                                        // Both paramType1 and paramType2 extends List
+                                        winerParam = 0;
+                                    } else {
+                                        // Only paramType1 extends List
+                                        winerParam = 2;
+                                        paramList2VeryStrongWinCnt++;
+                                    }
+                                } else {
+                                    // Only paramType2 extends List
+                                    winerParam = 1;
+                                    paramList1VeryStrongWinCnt++;
+                                }
                             } else {  // No list to array conversion
                                 final int r = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
                                 if (r > 0) {
@@ -352,7 +374,9 @@ final class ArgumentTypes {
                 }
             }  // for each parameter types
             
-            if (paramList1StrongWinCnt != paramList2StrongWinCnt) {
+            if (paramList1VeryStrongWinCnt != paramList2VeryStrongWinCnt) {
+                return paramList1VeryStrongWinCnt - paramList2VeryStrongWinCnt;
+            } else if (paramList1StrongWinCnt != paramList2StrongWinCnt) {
                 return paramList1StrongWinCnt - paramList2StrongWinCnt;
             } else if (paramList1WinCnt != paramList2WinCnt) {
                 return paramList1WinCnt - paramList2WinCnt;
@@ -477,8 +501,9 @@ final class ArgumentTypes {
     }
     
     /**
-     * Returns true if the supplied method is applicable to actual
-     * parameter types represented by this ArgumentTypes object.
+     * Returns if the supplied method is applicable to actual
+     * parameter types represented by this ArgumentTypes object, also tells
+     * how difficult that conversion is.
      * 
      * @return One of the <tt>CONVERSION_DIFFICULTY_...</tt> constants.
      */
@@ -559,15 +584,19 @@ final class ArgumentTypes {
             } else if (formal.isArray()) {
                 // BeansWrapper method/constructor calls convert from List to array automatically
                 return List.class.isAssignableFrom(actual) ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
+            } else if (List.class.isAssignableFrom(formal)) {
+                // BeansWrapper method/constructor calls convert from array to List automatically
+                return actual.isArray() ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
             } else {
                 return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
         } else { // if !bugfixed
-            // This non-bugfixed (backward-compatibile) branch:
+            // This non-bugfixed (backward-compatible, pre-2.3.21) branch:
             // - Doesn't convert *to* non-primitive numerical types (unless the argument is a BigDecimal).
             //   (This is like in Java language, which also doesn't coerce to non-primitive numerical types.) 
             // - Doesn't support BigInteger conversions
-            // - Doesn't support NumberWithFallbackType-s. Those are only produced in bugfixed mode anyway. 
+            // - Doesn't support NumberWithFallbackType-s. Those are only produced in bugfixed mode anyway.
+            // - Doesn't support conversion between array and List
             if(formal.isPrimitive()) {
                 // Check for boxing with widening primitive conversion. Note that 
                 // actual parameters are never primitives.
@@ -679,16 +708,23 @@ final class ArgumentTypes {
             for (int i = 0; i < ln; i++) {
                 Class paramType = paramTypes[i];
                 final Object arg = args[i];
-                // Right now the only case that we have to handle here is when we have List argument value for an
-                // array parameter. Java reflection won't handle such conversion, so we have to.
-                // All other reflection-incompatible conversions were already addressed by the unwrapping. The reason this
-                // one isn't is that for overlapped methods the hint of a given parameter position is often vague,
-                // so we may end up with a List even if some parameter types at that position are arrays (remember, we have
-                // chose one unwrapping target type, despite that we have many possible overloaded methods).
+                if (arg == null) continue;
+                
+                // Right now the cases that we have to handle here is conversion between List and array types, in both
+                // directions. Java reflection won't do such conversion, so we have to.
+                // All other reflection-incompatible conversions were already addressed by the unwrapping. The reason
+                // this one isn't is that for overlapped methods the hint of a given parameter position is often vague,
+                // so we may end up with a List even if some parameter types at that position are arrays (remember, we
+                // have chose one unwrapping target type, despite that we have many possible overloaded methods), or
+                // the other way around (that happens when AdapterTemplateMoldel returns an array).
                 // Later, the overloaded method selection will assume that a List argument is applicable to an array
-                // parameter, so we end up with this situation.
+                // parameter, and that an array argument is applicable to a List argument, so we end up with this
+                // situation.
                 if (paramType.isArray() && arg instanceof List) {
                    args[i] = bw.listToArray((List) arg, paramType, null);
+                }
+                if (List.class.isAssignableFrom(paramType) && arg.getClass().isArray()) {
+                    args[i] = bw.arrayToList((Object[]) arg);
                 }
             }
         }

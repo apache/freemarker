@@ -225,6 +225,7 @@
 <@assertFails message="multiple compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint3([1, 2]) expected='mSeqToArrayPoorHint3(int[] [a, b])' /></@>
 
 <@assertEquals actual=obj.mStringArrayVsListPreference(['a', 'b']) expected="mStringArrayVsListPreference(List [a, b])" />
+<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaObjectArray) expected="mStringArrayVsListPreference(List [a, b])" />
 <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(['a', 'b']) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
 <@assertEquals actual=obj.mIntArrayVsIntegerArrayPreference([1, 2]) expected="mIntArrayVsIntegerArrayPreference(Integer[] [1, 2])" />
 
@@ -261,3 +262,9 @@
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringArray) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a']) expected="mStringArrayVarargsOverloaded2(String[] [a])" />
 
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded4(List[] [[a, b]])", "mStringArrayVarargsOverloaded4(String[] [a, b])") />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />

@@ -20755,6 +20755,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>FTL sequence values that wrapped a Java array (when
+                  FreeMarker was also aware of that via
+                  <literal>AdapterTemplateModel</literal> or
+                  <literal>WrapperTemplateModel</literal>) were not seen as
+                  applicable to a parameter with <literal>List</literal> type
+                  if there were multiple overloaded methods with the same
+                  number of parameters but with different types on the
+                  position of the array parameter. So this is pretty much like
+                  the issue described in the previous point, but for array to
+                  <literal>List</literal> conversion. The array to
+                  <literal>List</literal> conversion will be avoided if
+                  possible, but it will be attempted if there's no other
+                  alternative. Note that unlike with <literal>List</literal>
+                  to array conversions, here FreeMarker can't cope with
+                  multi-dimensional lists, that is, an array-of-arrays won't
+                  be converted to a
+                  <literal>List</literal>-of-<literal>List</literal>-s.</para>
+                </listitem>
+
+                <listitem>
                   <para>In many cases, less specific hint class was used for
                   unwrapping than that was possible within the limitations of
                   the applied hint generation algorithm. (The unwrapping hint

@@ -176,6 +176,9 @@
 
 <@assertEquals actual=obj.mStringArrayVsListPreference(['a', 'b']) expected="mStringArrayVsListPreference(List [a, b])" />
 <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(['a', 'b'])}</@>
+<#if !dow>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsListPreference(obj.javaObjectArray)}</@>
+</#if>
 <@assertFails message="no compatible overloaded">${obj.mIntArrayVsIntegerArrayPreference([1, 2])}</@>
 
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1, 2], 3)}</@>
