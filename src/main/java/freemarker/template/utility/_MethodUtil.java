@@ -235,9 +235,6 @@ public class _MethodUtil {
         try {
             return ((Boolean)isVarArgsMethod.invoke(member, (Object[]) null)).booleanValue();
         }
-        catch(RuntimeException e) {
-            throw e;
-        }
         catch(Exception e) {
             throw new UndeclaredThrowableException(e);
         }
