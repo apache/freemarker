@@ -67,8 +67,8 @@ import freemarker.template.utility.ClassUtil;
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
  * and constructors.
  */
-final class OverloadedMethods
-{
+final class OverloadedMethods {
+    
     private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
     private final boolean bugfixed;
@@ -91,7 +91,7 @@ final class OverloadedMethods
     private void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
         if (memberDesc.isVarargs()) {
-            if(varargMethods == null) {
+            if (varargMethods == null) {
                 varargMethods = new OverloadedVarArgsMethods(bugfixed);
             }
             varargMethods.addCallableMemberDescriptor(memberDesc);
@@ -105,20 +105,22 @@ final class OverloadedMethods
         if ((fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
             return (MemberAndArguments) fixArgsRes;
         } else if (varargMethods != null
-                && (varargsRes = varargMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
+                && (varargsRes = varargMethods.getMemberAndArguments(tmArgs, unwrapper))
+                        instanceof MemberAndArguments) {
             return (MemberAndArguments) varargsRes;
         } else {
             MaybeEmptyMemberAndArguments res = getClosestToSuccess(fixArgsRes, varargsRes);
             if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
-                        "No compatible overloaded variation was found for the signature deducated from the actual " +
-                        "parameter values:\n" + getDeducedCallSignature(tmArgs)
+                        "No compatible overloaded variation was found for the signature deducated from the actual "
+                        + "parameter values:\n" + getDeducedCallSignature(tmArgs)
                         + "\nThe available overloaded variations are:\n" + memberListToString());
             } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
                 throw new TemplateModelException(
-                        "Multiple compatible overloaded variation was found for the signature deducated from the actual " +
-                        "parameter values:\n" + getDeducedCallSignature(tmArgs)
-                        + "\nThe available overloaded variations are (including non-matching):\n" + memberListToString());
+                        "Multiple compatible overloaded variation was found for the signature deducated from the "
+                        + "actual parameter values:\n" + getDeducedCallSignature(tmArgs)
+                        + "\nThe available overloaded variations are (including non-matching):\n"
+                        + memberListToString());
             } else {
                 throw new BugException("Unsupported EmptyMemberAndArguments: " + res); 
             }
@@ -209,7 +211,6 @@ final class OverloadedMethods
         sb.append(')');
         
         return sb.toString();
-        
     }
 
 }
