@@ -20349,6 +20349,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: [FIXME]</para>
 
+        <para>2.3.21 is designed to be backward compatible with the previous
+        2.3.x releases, just like any other release in the 2.3 series. Hence
+        some of the improvements and fixes described below are only activated
+        when you specifically ask for 2.3.21 <quote>incompatible
+        improvements</quote>, because they can, with small chance, break
+        existing applications. In general, if the dependent project is still
+        actively developed, allowing 2.3.21 "incompatible improvements" is
+        highly recommended.</para>
+
         <section>
           <title>Changes on the FTL side</title>
 
@@ -20429,9 +20438,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   fragile as you usually don't have good control over what the
                   current directory will be. Luckily, the old default almost
                   never looked for the templates at the right place anyway, so
-                  pretty much all applications had to set a
-                  <literal>template_loader</literal> setting, so it's unlikely
-                  that changing the default breaks your application.</para>
+                  pretty much all applications had to set
+                  <literal>template_loader</literal>, so it's unlikely that
+                  changing the default breaks your application.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20447,11 +20456,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Configuration</literal>, but it applies to the
               <literal>ObjectWrapper</literal> instead. (As
               <literal>ObjectWrapper</literal>-s are often shared among
-              multiple <literal>Configuration</literal>-s, they can't use that
-              setting of the <literal>Configuration</literal>.) In new or
+              multiple <literal>Configuration</literal>-s, so they can't use
+              that setting of the <literal>Configuration</literal>.) In new or
               actively developed projects it's recommended to use <literal>new
               Version(2, 3, 21)</literal> now. The constructor without the
-              <literal>Version</literal> parameter are now deprecated.</para>
+              <literal>Version</literal> parameter is now deprecated.</para>
             </listitem>
 
             <listitem>
@@ -20473,7 +20482,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   Compared to the traditional singletons, like
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,these will
                   return a singleton (usually a VM-wide, or rather
-                  Web-Application-wide singleton), which is read-only (means,
+                  Web-Application-wide singleton) that's read-only (means,
                   non-configurable, hence safe to share), created lazily
                   (i.e., only when first requested with
                   <literal>getInstance</literal>), and is only weak-referenced
@@ -20497,8 +20506,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>BEANS_WRAPPER</literal> and
                   <literal>SIMPLE_WRAPPER</literal>, because these
                   <literal>ObjectWrapper</literal>-s are configurable (not
-                  read-only), and thus dangerous to use (a badly behaving 3rd
-                  party component can mess them up). Use the
+                  read-only), and thus dangerous to use as singletons (a badly
+                  behaving 3rd party component can mess them up). Use the
                   <literal>getInstance</literal> methods above instead.
                   <literal>getInstance</literal> is also more flexible, as you
                   can specify the desired incompatible-improvements version
@@ -20540,21 +20549,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               version, or less than 2.3.0, an
               <literal>IllegalArgumentException</literal> will be thrown.
               Thus, <literal>new Configuration(new Version(2, 3,
-              21))</literal> will not only activate the fixes up to 2.3.21,
-              but ensures that the application will not run in an environment
-              with an older FreeMarker version. After all, on an older
-              FreeMarker version the fixes that you have requested aren't
-              implemented yet.</para>
+              21))</literal> not only activates the fixes up to 2.3.21, but
+              ensures that the application will not run in an environment with
+              an older FreeMarker version. After all, on an older FreeMarker
+              version the fixes that you have requested aren't implemented
+              yet.</para>
             </listitem>
 
             <listitem>
               <para>Fixes and reworkings in the overloaded method selection
-              rules when <literal>BeansWrapper</literal> or
-              <literal>DefaultObjectWrapper</literal> is used (almost all
-              applications use these), but only if you create the
+              rules, but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
-              with constructor parameter <literal>Version(2, 3, 21)</literal>
-              (or higher), or if you create the
+              with constructor parameter <literal>new Version(2, 3,
+              21)</literal> (or higher), or if you create the
               <literal>Configuration</literal> with similar
               <literal>Version</literal> parameter and leave the
               <literal>object_wrapper</literal> setting on its default value.
@@ -20563,9 +20570,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that ambiguity errors will arise where earlier they didn't
               (although the opposite is much more probable), hence the fixes
               aren't automatically activated. But the fix mostly only effect
-              calls that were failing or has chosen then wrong method, so it's
-              recommended to activate it for projects that are still actively
-              developed. This fix includes numerous changes:</para>
+              calls that were failing or has chosen then wrong method earlier,
+              so it's recommended to activate it for projects that are still
+              actively developed. This fix includes numerous changes:</para>
 
               <itemizedlist>
                 <listitem>
@@ -20739,12 +20746,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>f(Collection)</literal>, it will prefer those over
                   arrays. (For consistency, this conversion will work even if
                   the argument is a <literal>List</literal> that come directly
-                  from Java, i.e., when it was wrapped then unwrapped to the
-                  original object.) For a multidimensional array parameter
-                  type, this conversion works recursively, so you can pass in
-                  a sequence-of-sequences or
-                  <literal>List</literal>-of-<literal>List</literal>-s or
-                  <literal>List</literal>-of-sequences as the argument.</para>
+                  from Java (as opposed to be created inside FTL), i.e., when
+                  it was wrapped then unwrapped to the original
+                  <literal>List</literal> object.) For a multidimensional
+                  array parameter type, this conversion works recursively, so
+                  you can pass in a sequence-of-sequences as the
+                  argument.</para>
                 </listitem>
 
                 <listitem>
@@ -20777,18 +20784,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   class of a primitive type and the corresponding boxing class
                   was sometimes <literal>Object</literal> instead of the
                   boxing class. This has depended on Java's internal ordering
-                  of the methods, and so were quite unpredictable, like could
-                  change after upgrading Java under the application. (c) The
-                  common superclass of a numerical primitive value and a
-                  numerical non-primitive value was always
-                  <literal>Object</literal>, now if they are primitive-boxing
-                  class pair, then it's the boxing class, otherwise it's
-                  <literal>Number</literal>. (d) If the varags parameter
-                  position was not the same in all the overloaded varargs
-                  methods, sometimes some varargs arguments where unwrapped
-                  with too generic hints. When this happened was unpredictable
-                  as it depended on the internal method ordering
-                  again.)</para>
+                  of the methods, and so were quite unpredictable, like the
+                  result could change after upgrading Java under the
+                  application. (c) The common superclass of a numerical
+                  primitive value and a numerical non-primitive value was
+                  always <literal>Object</literal>, now if they are a
+                  primitive-boxing class pair, then it's the boxing class,
+                  otherwise it's <literal>Number</literal>. (d) If the varags
+                  parameter position was not the same in all the overloaded
+                  varargs methods, sometimes some varargs arguments where
+                  unwrapped with too generic hints. When this happened was
+                  unpredictable as it depended on Java's internal method
+                  ordering again.)</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -20799,9 +20806,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               was created with constructor parameter <literal>Version(2, 3,
               21)</literal> or higher: When <literal>BeansWrapper</literal>
               (and so also <literal>DefaultObjectWrapper</literal>) has
-              unwrapped method call arguments before calling a Java method,
-              when the argument was an <literal>AdapterTemplateModel</literal>
-              and the target parameter type was primitive,
+              unwrapped method call arguments before calling a Java method, if
+              the argument was an <literal>AdapterTemplateModel</literal> and
+              the target parameter type was primitive,
               <literal>AdapterTemplateModel.getAdaptedObject(Class
               hint)</literal> has received the primitive type of the target
               parameter (like <literal>int</literal> instead of
@@ -20877,8 +20884,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>BeansWrapper.finetuneMethodAppearance</literal> (now
               deprecated), now you can use
               <literal>BeansWrapper.setMethodAppearanceFineTuner(MethodAppearanceFineTuner)</literal>,
-              so you don't need to extend the class to customize this
-              aspect.</para>
+              so you don't need to extend the object wrapper class to
+              customize this aspect.</para>
             </listitem>
 
             <listitem>
