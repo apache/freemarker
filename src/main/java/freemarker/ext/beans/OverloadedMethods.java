@@ -53,8 +53,8 @@
 package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,7 +62,6 @@ import freemarker.core.BugException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
@@ -101,13 +100,15 @@ final class OverloadedMethods
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
-        MaybeEmptyMemberAndArguments res;
-        if ((res = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
-            return (MemberAndArguments) res;
+        MaybeEmptyMemberAndArguments fixArgsRes = null;
+        MaybeEmptyMemberAndArguments varargsRes = null;
+        if ((fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
+            return (MemberAndArguments) fixArgsRes;
         } else if (varargMethods != null
-                && (res = varargMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
-            return (MemberAndArguments) res;
+                && (varargsRes = varargMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
+            return (MemberAndArguments) varargsRes;
         } else {
+            MaybeEmptyMemberAndArguments res = getClosestToSuccess(fixArgsRes, varargsRes);
             if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
                 throw new TemplateModelException(
                         "No compatible overloaded variation was found for the signature deducated from the actual " +
@@ -124,6 +125,19 @@ final class OverloadedMethods
         }
     }
 
+    private MaybeEmptyMemberAndArguments getClosestToSuccess(MaybeEmptyMemberAndArguments res1,
+            MaybeEmptyMemberAndArguments res2) {
+        if (res1 == null) return res2;
+        if (res2 == null) return res1;
+        if (res1 == EmptyMemberAndArguments.AMBIGUOUS_METHOD || res2 == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
+            return EmptyMemberAndArguments.AMBIGUOUS_METHOD; 
+        }
+        if (res1 == EmptyMemberAndArguments.NO_SUCH_METHOD || res2 == EmptyMemberAndArguments.NO_SUCH_METHOD) {
+            return EmptyMemberAndArguments.NO_SUCH_METHOD; 
+        }
+        throw new BugException("Unhandled: " + res1 + " and " + res2);
+    }
+
     private String memberListToString() {
         Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
         Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
@@ -131,15 +145,25 @@ final class OverloadedMethods
         boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
         if (hasMethods) {
             StringBuffer sb = new StringBuffer();
-            while (fixArgMethodsIter.hasNext()) {
-                if (sb.length() != 0) sb.append(",\n");
-                sb.append("    ");
-                sb.append(((CallableMemberDescriptor) fixArgMethodsIter.next()).getDeclaration());
+            HashSet fixArgMethods = new HashSet();
+            if (fixArgMethodsIter != null) {
+                
+                while (fixArgMethodsIter.hasNext()) {
+                    if (sb.length() != 0) sb.append(",\n");
+                    sb.append("    ");
+                    CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
+                    fixArgMethods.add(callableMemberDesc);
+                    sb.append(callableMemberDesc.getDeclaration());
+                }
             }
             if (varargMethodsIter != null) {
                 while (varargMethodsIter.hasNext()) {
-                    if (sb.length() != 0) sb.append(",\n");
-                    sb.append(((CallableMemberDescriptor) varargMethodsIter.next()).getDeclaration());
+                    CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) varargMethodsIter.next();
+                    if (!fixArgMethods.contains(callableMemberDesc)) {
+                        if (sb.length() != 0) sb.append(",\n");
+                        sb.append("    ");
+                        sb.append(callableMemberDesc.getDeclaration());
+                    }
                 }
             }
             return sb.toString();

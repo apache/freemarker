@@ -56,7 +56,13 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
         Class[] paramTypes = _MethodUtil.getParameterTypes(member);
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getShortClassName(paramTypes[i]));
+            String paramTypeDecl = ClassUtil.getShortClassName(paramTypes[i]);
+            if (i == paramTypes.length - 1 && paramTypeDecl.endsWith("[]") && isVarargs()) {
+                sb.append(paramTypeDecl.substring(0, paramTypeDecl.length() - 2));
+                sb.append("...");
+            } else {
+                sb.append(paramTypeDecl);
+            }
         }
         sb.append(')');
         
