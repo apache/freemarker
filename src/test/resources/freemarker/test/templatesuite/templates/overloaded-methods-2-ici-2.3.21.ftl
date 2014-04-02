@@ -262,9 +262,8 @@
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringArray) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a']) expected="mStringArrayVarargsOverloaded2(String[] [a])" />
 
-<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b]])" />
-<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded4(List[] [[a, b]])", "mStringArrayVarargsOverloaded4(String[] [a, b])") />
-<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<#-- Situations that lead to array-to-List conversion: -->
+<@assertEquals actual=obj.mListOrString(obj.javaStringArray) expected="mListOrString(List [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />

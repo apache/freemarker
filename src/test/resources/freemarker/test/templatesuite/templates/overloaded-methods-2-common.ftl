@@ -43,6 +43,16 @@
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded3('a', 'b') expected="mStringArrayVarargsOverloaded3(String a, String b)" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded3('a', 'b', 'c') expected="mStringArrayVarargsOverloaded3(String[] [a, b, c])" />
 
+<@assertEquals actual=obj.mListOrString(['a', 'b']) expected="mListOrString(List [a, b])" />
+<@assertEquals actual=obj.mListOrString('a') expected="mListOrString(String a)" />
+
 <#-- Because the fixed arg interpretations are ambiguous, it only considers the vararg interpretations:  -->
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(['a', 'b', 'c']) expected="mStringArrayVarargsOverloaded4(List[] [[a, b, c]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4('a', 'b', 'c') expected="mStringArrayVarargsOverloaded4(String[] [a, b, c])" />
+
+<#-- Fixed arg solutions have priorty: -->
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded4(List[] [[a, b]])", "mStringArrayVarargsOverloaded4(String[] [a, b])") />
+
+<#-- Choses between the vararg solutions: -->
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />

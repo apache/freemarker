@@ -621,7 +621,15 @@ public class OverloadedMethods2 {
     public String mStringArrayVarargsOverloaded4(List... items) {
         return "mStringArrayVarargsOverloaded4(List[] " + arrayToString(items) + ")";
     }
+    
+    public String mListOrString(List<String> items) {
+        return "mListOrString(List " + listToString(items) + ")";
+    }
 
+    public String mListOrString(String item) {
+        return "mListOrString(String " + item + ")";
+    }
+    
     public List getJavaStringList() {
         List list = new ArrayList();
         list.add("a");
