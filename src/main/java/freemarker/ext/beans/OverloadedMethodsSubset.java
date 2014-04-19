@@ -63,7 +63,6 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * @author Attila Szegedi
@@ -336,7 +335,7 @@ abstract class OverloadedMethodsSubset {
     /**
      * Gets the numerical type "flags" of each parameter positions, or {@code null} if there's no method with this
      * parameter count or if we aren't in pre-2.3.21 mode, {@link #ALL_ZEROS_ARRAY} if there were no numerical
-     * parameters. The returned {@code int}-s are on or more {@link OverloadedNumberUtil}} {@code FLAG_...} constants
+     * parameters. The returned {@code int}-s are one or more {@link OverloadedNumberUtil}} {@code FLAG_...} constants
      * binary "or"-ed together.  
      */
     final protected int[] getPossibleNumericalTypes(int paramCount) {

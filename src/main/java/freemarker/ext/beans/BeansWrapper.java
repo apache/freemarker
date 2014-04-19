@@ -1294,7 +1294,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             return new SetAdapter((TemplateCollectionModel)model, this);
         }
         if (overloadedMode && is2321Bugfixed) {
-            /** Because List-s are convertible to arrays later (but only overloaded method calls do that) */
+            /** Because List-s are convertible to arrays later (but only overloaded method calls need this) */
             if(model instanceof TemplateSequenceModel 
                     && hint.isAssignableFrom(Object[].class)) {
                 return new SequenceAdapter((TemplateSequenceModel)model, this);
@@ -1580,12 +1580,20 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 SimpleMethod sm = (SimpleMethod)ctors;
                 ctor = (Constructor)sm.getMember();
                 objargs = sm.unwrapArguments(arguments, this);
-                return ctor.newInstance(objargs);
+                try {
+                    return ctor.newInstance(objargs);
+                } catch (Exception e) {
+                    throw _MethodUtil.newInvocationTemplateModelException(null, ctor, e);
+                }
             }
             else if(ctors instanceof OverloadedMethods)
             {
-                OverloadedMethods overloadedConstructors = (OverloadedMethods) ctors; 
-                return overloadedConstructors.getMemberAndArguments(arguments, this).invokeConstructor(this);
+                final MemberAndArguments mma = ((OverloadedMethods) ctors).getMemberAndArguments(arguments, this);
+                try {
+                    return mma.invokeConstructor(this);
+                } catch (Exception e) {
+                    throw _MethodUtil.newInvocationTemplateModelException(null, mma.getCallableMemberDescriptor(), e);
+                }
             }
             else
             {
@@ -1600,7 +1608,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         catch (Exception e)
         {
             throw new TemplateModelException(
-                    "Could not create instance of class " + clazz.getName(), e);
+                    "Error while creating new instance of class " + clazz.getName() + "; see cause exception", e);
         }
     }
 

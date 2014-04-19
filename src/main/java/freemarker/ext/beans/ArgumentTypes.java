@@ -62,7 +62,6 @@ import freemarker.core.BugException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility._MethodUtil;
 
 
 /**
@@ -656,7 +655,7 @@ final class ArgumentTypes {
     /**
      * Used instead of {@link ReflectionCallableMemberDescriptor} when the method is only applicable
      * ({@link #isApplicable}) with conversion that Java reflection won't do. It delegates to a
-     * {@link ReflectionCallableMemberDescriptor}, but it adds the necessary conversion to the invocation methods. 
+     * {@link ReflectionCallableMemberDescriptor}, but it adds the necessary conversions to the invocation methods. 
      */
     private static final class SpecialConversionCallableMemberDescriptor extends CallableMemberDescriptor {
         

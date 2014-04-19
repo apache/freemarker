@@ -203,7 +203,7 @@
   <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
   <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <#else>
-  <#-- Pure BeansWrapper unwraps to array-s, but prior IcI 2.3.21 it could treat them as Lists: -->
+  <#-- Pure BeansWrapper unwraps to array-s, but prior IcI 2.3.21 it couldn't treat them as Lists: -->
   <@assertFails message="no compatible overloaded">${obj.mListOrString(obj.javaStringArray)}</@>
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray)}</@>
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray)}</@>

@@ -780,8 +780,8 @@ public class StringUtil {
     }
     
     /**
-     * Converts the parameter with <code>toString</code> (if not
-     * <code>null</code>)and passes it to {@link #jQuote(String)}. 
+     * Converts the parameter with <code>toString</code> (if it's not <code>null</code>) and passes it to
+     * {@link #jQuote(String)}.
      */
     public static String jQuote(Object obj) {
         return jQuote(obj != null ? obj.toString() : null);
@@ -1514,7 +1514,7 @@ public class StringUtil {
 
     /**
      * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
-     * Also, it return {@code null} for {@code null} parameter.
+     * Also, it returns {@code null} for {@code null} parameter.
      * 
      * @since 2.3.20
      */
@@ -1524,12 +1524,18 @@ public class StringUtil {
         try {
             return object.toString();
         } catch (Throwable e) {
-            try {
-                return "[toString() failed: " + e + "]";
-            } catch (Throwable e2) {
-                return "[toString() failed: " + e.getClass().getName() + "]";
-            }
+            return failedToStringSubstitute(e);
         }
+    }
+
+    private static String failedToStringSubstitute(Throwable e) {
+        String eStr;
+        try {
+            eStr = e.toString();
+        } catch (Throwable e2) {
+            eStr = ClassUtil.getShortClassNameOfObject(e);
+        }
+        return "[toString() failed: " + eStr + "]";
     }
     
 }

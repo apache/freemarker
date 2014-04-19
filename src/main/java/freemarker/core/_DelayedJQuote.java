@@ -10,7 +10,7 @@ public class _DelayedJQuote extends _DelayedConversionToString {
     }
 
     protected String doConversion(Object obj) {
-        return StringUtil.jQuote(obj);
+        return StringUtil.jQuote(_ErrorDescriptionBuilder.toString(obj));
     }
 
 }

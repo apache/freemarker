@@ -49,21 +49,29 @@
  * information on the Visigoth Software Society, please see
  * http://www.visigoths.org/
  */
-package freemarker.template.utility;
+package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
 import freemarker.core.BugException;
+import freemarker.core._DelayedConversionToString;
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
+import freemarker.template.TemplateModelException;
+import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't.
- */
+ * access things inside this package that users shouldn't. 
+ */ 
 public class _MethodUtil {
     
     // Get rid of these on Java 5
@@ -218,17 +226,17 @@ public class _MethodUtil {
         throw new IllegalArgumentException("\"member\" must be Method or Constructor");
     }
 
-    public static boolean isVarArgs(Member member) {
+    public static boolean isVarargs(Member member) {
         if(member instanceof Method) { 
-            return isVarArgs(member, METHOD_IS_VARARGS);
+            return isVarargs(member, METHOD_IS_VARARGS);
         }
         if(member instanceof Constructor) {
-            return isVarArgs(member, CONSTRUCTOR_IS_VARARGS);
+            return isVarargs(member, CONSTRUCTOR_IS_VARARGS);
         }
         throw new BugException();
     }
-    
-    private static boolean isVarArgs(Member member, Method isVarArgsMethod) {
+
+    private static boolean isVarargs(Member member, Method isVarArgsMethod) {
         if(isVarArgsMethod == null) {
             return false;
         }
@@ -248,4 +256,94 @@ public class _MethodUtil {
             return null; // pre 1.5 JRE
         }
     }
+
+    /**
+     * Returns a more streamlined method or constructor description than {@code Member.toString()} does.
+     */
+    public static String toString(Member member) {
+        if (!(member instanceof Method || member instanceof Constructor)) {
+            throw new IllegalArgumentException("\"member\" must be a Method or Constructor");
+        }
+        
+        StringBuffer sb = new StringBuffer();
+        
+        if ((member.getModifiers() & Modifier.STATIC) != 0) {
+            sb.append("static ");
+        }
+        
+        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
+        if (className != null) {
+            sb.append(className);
+            sb.append('.');
+        }
+        sb.append(member.getName());
+
+        sb.append('(');
+        Class[] paramTypes = _MethodUtil.getParameterTypes(member);
+        for (int i = 0; i < paramTypes.length; i++) {
+            if (i != 0) sb.append(", ");
+            String paramTypeDecl = ClassUtil.getShortClassName(paramTypes[i]);
+            if (i == paramTypes.length - 1 && paramTypeDecl.endsWith("[]") && _MethodUtil.isVarargs(member)) {
+                sb.append(paramTypeDecl.substring(0, paramTypeDecl.length() - 2));
+                sb.append("...");
+            } else {
+                sb.append(paramTypeDecl);
+            }
+        }
+        sb.append(')');
+        
+        return sb.toString();
+    }
+
+    public static Object[] invocationErrorMessageStart(Member member) {
+        return invocationErrorMessageStart(member, member instanceof Constructor);
+    }
+    
+    public static Object[] invocationErrorMessageStart(Object member, boolean isConstructor) {
+        return new Object[] { isConstructor ? "Constructor " : "Method ", new _DelayedJQuote(member) };
+    }
+
+    public static TemplateModelException newInvocationTemplateModelException(Object object, Member member, Throwable e) {
+        return newInvocationTemplateModelException(
+                object,
+                member,
+                (member.getModifiers() & Modifier.STATIC) != 0,
+                member instanceof Constructor,
+                e);
+    }
+
+    public static TemplateModelException newInvocationTemplateModelException(Object object, CallableMemberDescriptor callableMemberDescriptor, Throwable e) {
+        return newInvocationTemplateModelException(
+                object,
+                new _DelayedConversionToString(callableMemberDescriptor) {
+                    protected String doConversion(Object callableMemberDescriptor) {
+                        return ((CallableMemberDescriptor) callableMemberDescriptor).getDeclaration();
+                    }
+                },
+                callableMemberDescriptor.isStatic(),
+                callableMemberDescriptor.isConstructor(),
+                e);
+    }
+    
+    private static TemplateModelException newInvocationTemplateModelException(
+            Object parentObject, Object member, boolean isStatic, boolean isConstructor, Throwable e) {
+        while (e instanceof InvocationTargetException) {
+            Throwable cause = ((InvocationTargetException) e).getTargetException();
+            if (cause != null) {
+                e = cause;
+            } else {
+                break;
+            }
+        }
+
+        return new _TemplateModelException(e, new Object[] {
+                invocationErrorMessageStart(member, isConstructor),
+                " threw an exception when invoked",
+                isStatic || isConstructor ? "" : new Object[] {
+                    " on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject) 
+                },
+                "; see cause exception."
+        });
+    }
+    
 }

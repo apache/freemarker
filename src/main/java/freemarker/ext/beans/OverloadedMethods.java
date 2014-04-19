@@ -59,6 +59,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import freemarker.core.BugException;
+import freemarker.core._DelayedConversionToString;
+import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
@@ -111,16 +113,16 @@ final class OverloadedMethods {
         } else {
             MaybeEmptyMemberAndArguments res = getClosestToSuccess(fixArgsRes, varargsRes);
             if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
-                throw new TemplateModelException(
+                throw new _TemplateModelException(new Object[] {
                         "No compatible overloaded variation was found for the signature deducated from the actual "
-                        + "parameter values:\n" + getDeducedCallSignature(tmArgs)
-                        + "\nThe available overloaded variations are:\n" + memberListToString());
+                        + "parameter values:\n", getDeducedCallSignature(tmArgs),
+                        "\nThe available overloaded variations are:\n", memberListToString() });
             } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
-                throw new TemplateModelException(
-                        "Multiple compatible overloaded variation was found for the signature deducated from the "
-                        + "actual parameter values:\n" + getDeducedCallSignature(tmArgs)
-                        + "\nThe available overloaded variations are (including non-matching):\n"
-                        + memberListToString());
+                throw new _TemplateModelException(new Object[] {
+                        "Multiple compatible overloaded variation was found for the signature deducated from the ",
+                        "actual parameter values:\n", getDeducedCallSignature(tmArgs),
+                        "\nThe available overloaded variations are (including non-matching):\n",
+                        memberListToString() });
             } else {
                 throw new BugException("Unsupported EmptyMemberAndArguments: " + res); 
             }
@@ -140,77 +142,94 @@ final class OverloadedMethods {
         throw new BugException("Unhandled: " + res1 + " and " + res2);
     }
 
-    private String memberListToString() {
-        Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
-        Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
-        
-        boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
-        if (hasMethods) {
-            StringBuffer sb = new StringBuffer();
-            HashSet fixArgMethods = new HashSet();
-            if (fixArgMethodsIter != null) {
+    private _DelayedConversionToString memberListToString() {
+        return new _DelayedConversionToString(null) {
+            
+            protected String doConversion(Object obj) {
+                Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
+                Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
                 
-                while (fixArgMethodsIter.hasNext()) {
-                    if (sb.length() != 0) sb.append(",\n");
-                    sb.append("    ");
-                    CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
-                    fixArgMethods.add(callableMemberDesc);
-                    sb.append(callableMemberDesc.getDeclaration());
-                }
-            }
-            if (varargMethodsIter != null) {
-                while (varargMethodsIter.hasNext()) {
-                    CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) varargMethodsIter.next();
-                    if (!fixArgMethods.contains(callableMemberDesc)) {
-                        if (sb.length() != 0) sb.append(",\n");
-                        sb.append("    ");
-                        sb.append(callableMemberDesc.getDeclaration());
+                boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
+                if (hasMethods) {
+                    StringBuffer sb = new StringBuffer();
+                    HashSet fixArgMethods = new HashSet();
+                    if (fixArgMethodsIter != null) {
+                        
+                        while (fixArgMethodsIter.hasNext()) {
+                            if (sb.length() != 0) sb.append(",\n");
+                            sb.append("    ");
+                            CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
+                            fixArgMethods.add(callableMemberDesc);
+                            sb.append(callableMemberDesc.getDeclaration());
+                        }
                     }
+                    if (varargMethodsIter != null) {
+                        while (varargMethodsIter.hasNext()) {
+                            CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) varargMethodsIter.next();
+                            if (!fixArgMethods.contains(callableMemberDesc)) {
+                                if (sb.length() != 0) sb.append(",\n");
+                                sb.append("    ");
+                                sb.append(callableMemberDesc.getDeclaration());
+                            }
+                        }
+                    }
+                    return sb.toString();
+                } else {
+                    return "No members";
                 }
             }
-            return sb.toString();
-        } else {
-            return "No members";
-        }
+            
+        };
     }
     
     /**
      * The description of the signature deduced from the method/constructor call, used in error messages.
      */
-    private String getDeducedCallSignature(List arguments) {
-        final CallableMemberDescriptor firstMemberDesc;
-        Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
-        if (fixArgMethodsIter.hasNext()) {
-            firstMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
-        } else {
-            Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
-            if (varArgMethods != null && varArgMethods.hasNext()) {
-                firstMemberDesc = (CallableMemberDescriptor) varArgMethods.next();
-            } else {
-                firstMemberDesc = null;
-            }
-        }
-        
-        StringBuffer sb = new StringBuffer();
-        if (firstMemberDesc != null) {
-            if (firstMemberDesc.isConstructor()) {
-                sb.append("constructor ");
-            } else {
-                sb.append("method ");
-            }
-            sb.append(firstMemberDesc.getName());
-        } else {
-            sb.append("???");
-        }
-        
-        sb.append('(');
+    private _DelayedConversionToString getDeducedCallSignature(List arguments) {
+        final String[] argumentTypeDescs = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
-            if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i)));
+            argumentTypeDescs[i] = ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i));
         }
-        sb.append(')');
         
-        return sb.toString();
+        return new _DelayedConversionToString(null) {
+
+            protected String doConversion(Object obj) {
+                final CallableMemberDescriptor firstMemberDesc;
+                Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
+                if (fixArgMethodsIter.hasNext()) {
+                    firstMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
+                } else {
+                    Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
+                    if (varArgMethods != null && varArgMethods.hasNext()) {
+                        firstMemberDesc = (CallableMemberDescriptor) varArgMethods.next();
+                    } else {
+                        firstMemberDesc = null;
+                    }
+                }
+                
+                StringBuffer sb = new StringBuffer();
+                if (firstMemberDesc != null) {
+                    if (firstMemberDesc.isConstructor()) {
+                        sb.append("constructor ");
+                    } else {
+                        sb.append("method ");
+                    }
+                    sb.append(firstMemberDesc.getName());
+                } else {
+                    sb.append("???");
+                }
+                
+                sb.append('(');
+                for (int i = 0; i < argumentTypeDescs.length; i++) {
+                    if (i != 0) sb.append(", ");
+                    sb.append(argumentTypeDescs[i]);
+                }
+                sb.append(')');
+                
+                return sb.toString();
+            }
+            
+        };
     }
 
 }

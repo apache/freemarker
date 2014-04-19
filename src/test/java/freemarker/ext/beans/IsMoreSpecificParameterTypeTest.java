@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import freemarker.template.utility._MethodUtil;
-
 import junit.framework.TestCase;
 
 public class IsMoreSpecificParameterTypeTest extends TestCase {

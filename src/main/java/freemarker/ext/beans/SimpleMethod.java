@@ -62,7 +62,6 @@ import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * This class is used for as a base for non-overloaded method models and for constructors.
@@ -85,19 +84,21 @@ class SimpleMethod
         if(arguments == null) {
             arguments = Collections.EMPTY_LIST;
         }
-        boolean isVarArg = _MethodUtil.isVarArgs(member);
+        boolean isVarArg = _MethodUtil.isVarargs(member);
         int typesLen = argTypes.length;
         if(isVarArg) {
             if(typesLen - 1 > arguments.size()) {
-                throw new TemplateModelException("Method " + member + 
-                        " takes at least " + (typesLen - 1) + 
-                        " arguments, " + arguments.size() + " was given.");
+                throw new _TemplateModelException(new Object[] {
+                        _MethodUtil.invocationErrorMessageStart(member),
+                        " takes at least ", new Integer(typesLen - 1), " arguments, ",
+                        new Integer(arguments.size()), " was given." });
             }
         }
         else if(typesLen != arguments.size()) {
-            throw new TemplateModelException("Method " + member + 
-                    " takes exactly " + typesLen + " arguments, " +
-                    arguments.size() + " was given.");
+            throw new _TemplateModelException(new Object[] {
+                    _MethodUtil.invocationErrorMessageStart(member), 
+                    " takes ", new Integer(typesLen), " arguments, ",
+                    new Integer(arguments.size()), " was given." });
         }
          
         Object[] args = unwrapArguments(arguments, argTypes, isVarArg, wrapper);
@@ -178,15 +179,16 @@ class SimpleMethod
     private static TemplateModelException createArgumentTypeMismarchException(
             int argIdx, TemplateModel argVal, Class targetType) {
         return new _TemplateModelException(new Object[] {
-                "Argument type mismatch; can't convert (unwrap) argument #", new Integer(argIdx + 1),
-                " value of type ", new _DelayedFTLTypeDescription(argVal),
-                " to ", ClassUtil.getShortClassName(targetType), "." });
+                "Argument type mismatch for argument #", new Integer(argIdx + 1),
+                "; can't convert (unwrap) to the target Java parameter type."
+                + "\nArgument value type: ", new _DelayedFTLTypeDescription(argVal),
+                ".\nTarget parameter type: ", ClassUtil.getShortClassName(targetType), "." });
     }
 
     private static TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
         return new _TemplateModelException(new Object[] {
                 "Argument type mismatch; argument #", new Integer(argIdx + 1),
-                " is null, which can't be converted to primitive type ", targetType.getName(), "." });
+                " is null, which can't be converted to the target primitive Java parameter type, ", targetType.getName(), "." });
     }
     
     protected Member getMember() {

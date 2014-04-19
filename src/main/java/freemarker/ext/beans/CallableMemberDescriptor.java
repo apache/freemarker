@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * Packs a {@link Method} or {@link Constructor} together with its parameter types.

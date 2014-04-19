@@ -17,7 +17,6 @@ import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.Collections12;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -65,7 +64,7 @@ public class _BeansAPI {
         for (int i = 0; i < constrs.length; i++) {
             Constructor constr = constrs[i];
             ReflectionCallableMemberDescriptor memberDesc = new ReflectionCallableMemberDescriptor(constr, constr.getParameterTypes());
-            if (!_MethodUtil.isVarArgs(constr)) {
+            if (!_MethodUtil.isVarargs(constr)) {
                 fixedArgMemberDescs.add(memberDesc);
             } else {
                 varArgsMemberDescs.add(memberDesc);

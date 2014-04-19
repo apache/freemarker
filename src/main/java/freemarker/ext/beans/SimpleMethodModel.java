@@ -52,6 +52,7 @@
 
 package freemarker.ext.beans;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -113,32 +114,7 @@ public final class SimpleMethodModel extends SimpleMethod
         }
         catch(Exception e)
         {
-            while(e instanceof InvocationTargetException)
-            {
-                Throwable t = ((InvocationTargetException)e).getTargetException();
-                if(t instanceof Exception)
-                {
-                    e = (Exception)t;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if((getMember().getModifiers() & Modifier.STATIC) != 0)
-            {
-                throw new TemplateModelException("Method " + StringUtil.jQuote(getMember()) + 
-                        " threw an exception; see cause exception", e);
-            }
-            else
-            {
-                throw new TemplateModelException(
-                        "Method " + StringUtil.jQuote(getMember()) + 
-                        " threw an exception when invoked on "
-                        + object.getClass().getName() + " object "
-                        + StringUtil.jQuote(StringUtil.tryToString(object)) + ". See cause exception.",
-                        e);
-            }
+            throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
         }
     }
     

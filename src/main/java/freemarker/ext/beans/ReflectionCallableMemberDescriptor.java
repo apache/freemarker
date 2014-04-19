@@ -8,7 +8,6 @@ import java.lang.reflect.Modifier;
 
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * The most commonly used {@link CallableMemberDescriptor} implementation. 
@@ -43,30 +42,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
     }
 
     String getDeclaration() {
-        StringBuffer sb = new StringBuffer();
-        
-        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
-        if (className != null) {
-            sb.append(className);
-            sb.append('.');
-        }
-        sb.append(member.getName());
-
-        sb.append('(');
-        Class[] paramTypes = _MethodUtil.getParameterTypes(member);
-        for (int i = 0; i < paramTypes.length; i++) {
-            if (i != 0) sb.append(", ");
-            String paramTypeDecl = ClassUtil.getShortClassName(paramTypes[i]);
-            if (i == paramTypes.length - 1 && paramTypeDecl.endsWith("[]") && isVarargs()) {
-                sb.append(paramTypeDecl.substring(0, paramTypeDecl.length() - 2));
-                sb.append("...");
-            } else {
-                sb.append(paramTypeDecl);
-            }
-        }
-        sb.append(')');
-        
-        return sb.toString();
+        return _MethodUtil.toString(member);
     }
     
     boolean isConstructor() {
@@ -78,7 +54,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
     }
 
     boolean isVarargs() {
-        return _MethodUtil.isVarArgs(member);
+        return _MethodUtil.isVarargs(member);
     }
 
     Class[] getParamTypes() {
