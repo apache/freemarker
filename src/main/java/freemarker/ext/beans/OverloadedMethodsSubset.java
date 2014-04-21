@@ -65,7 +65,9 @@ import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 
 /**
- * @author Attila Szegedi
+ * Encapsulates the rules and data structures (including cache) for choosing of the best matching callable member for
+ * a parameter list, from a given set of callable members. There are two subclasses of this, one for non-varags methods,
+ * and one for varargs methods.
  */
 abstract class OverloadedMethodsSubset {
     

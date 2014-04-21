@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.ClassUtil;
 
 /**
  * The most commonly used {@link CallableMemberDescriptor} implementation. 

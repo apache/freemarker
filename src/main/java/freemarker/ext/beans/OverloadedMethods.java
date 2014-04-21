@@ -66,8 +66,12 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 
 /**
- * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods
- * and constructors.
+ * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods and
+ * constructors.
+ * 
+ * <p>After the initialization with the {@link #addMethod(Method)} and {@link #addConstructor(Constructor)} calls are
+ * done, the instance must be thread-safe. Before that, it's the responsibility of the caller of those methods to
+ * ensure that the object is properly publishing to other threads.
  */
 final class OverloadedMethods {
     
@@ -80,17 +84,18 @@ final class OverloadedMethods {
         fixArgMethods = new OverloadedFixArgsMethods(bugfixed);
     }
     
-    void addMethod(Method member) {
-        final Class[] paramTypes = member.getParameterTypes();
-        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(member, paramTypes));
+    void addMethod(Method method) {
+        final Class[] paramTypes = method.getParameterTypes();
+        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(method, paramTypes));
     }
 
-    void addConstructor(Constructor member) {
-        final Class[] paramTypes = member.getParameterTypes();
-        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(member, paramTypes));
+    void addConstructor(Constructor constr) {
+        final Class[] paramTypes = constr.getParameterTypes();
+        addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(constr, paramTypes));
     }
     
     private void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
+        // Note: "varargs" methods are always callable as fixed args, with a sequence (array) as the last parameter.
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
         if (memberDesc.isVarargs()) {
             if (varargMethods == null) {
@@ -116,11 +121,12 @@ final class OverloadedMethods {
                 throw new _TemplateModelException(new Object[] {
                         "No compatible overloaded variation was found for the signature deducated from the actual "
                         + "parameter values:\n", getDeducedCallSignature(tmArgs),
-                        "\nThe available overloaded variations are:\n", memberListToString() });
+                        "\nThe available overloaded variations are:\n",
+                        memberListToString() });
             } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
                 throw new _TemplateModelException(new Object[] {
-                        "Multiple compatible overloaded variation was found for the signature deducated from the ",
-                        "actual parameter values:\n", getDeducedCallSignature(tmArgs),
+                        "Multiple compatible overloaded variation was found for the signature deducated from the "
+                        + "actual parameter values:\n", getDeducedCallSignature(tmArgs),
                         "\nThe available overloaded variations are (including non-matching):\n",
                         memberListToString() });
             } else {

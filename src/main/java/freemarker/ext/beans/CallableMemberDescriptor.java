@@ -2,14 +2,15 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import freemarker.template.TemplateModelException;
 
 /**
- * Packs a {@link Method} or {@link Constructor} together with its parameter types.
+ * Packs a {@link Method} or {@link Constructor} together with its parameter types. The actual
+ * {@link Method} or {@link Constructor} is not exposed by the API, because in rare cases calling them require
+ * type conversion that the Java reflection API can't do, hence the developer shouldn't be tempted to call them
+ * directly. 
  */
 abstract class CallableMemberDescriptor extends MaybeEmptyCallableMemberDescriptor {
 

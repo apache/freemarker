@@ -70,6 +70,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         super(bugfixed);
     }
     
+    /**
+     * Replaces the last parameter type with the array component type of it.
+     */
     Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
         final Class[] preprocessedParamTypes = (Class[]) memberDesc.getParamTypes().clone();
         int ln = preprocessedParamTypes.length;
