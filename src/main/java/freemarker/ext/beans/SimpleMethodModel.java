@@ -52,10 +52,7 @@
 
 package freemarker.ext.beans;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 import freemarker.template.SimpleNumber;
@@ -65,7 +62,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Collections12;
-import freemarker.template.utility.StringUtil;
 
 /**
  * A class that will wrap a reflected method call into a
@@ -114,6 +110,7 @@ public final class SimpleMethodModel extends SimpleMethod
         }
         catch(Exception e)
         {
+            if (e instanceof TemplateModelException) throw (TemplateModelException) e;
             throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
         }
     }

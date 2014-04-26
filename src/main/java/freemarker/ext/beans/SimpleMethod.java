@@ -58,6 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._DelayedOrdinal;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -90,14 +91,15 @@ class SimpleMethod
             if(typesLen - 1 > arguments.size()) {
                 throw new _TemplateModelException(new Object[] {
                         _MethodUtil.invocationErrorMessageStart(member),
-                        " takes at least ", new Integer(typesLen - 1), " arguments, ",
+                        " takes at least ", new Integer(typesLen - 1),
+                        typesLen - 1 == 1 ? " argument" : " arguments", ", but ",
                         new Integer(arguments.size()), " was given." });
             }
         }
         else if(typesLen != arguments.size()) {
             throw new _TemplateModelException(new Object[] {
                     _MethodUtil.invocationErrorMessageStart(member), 
-                    " takes ", new Integer(typesLen), " arguments, ",
+                    " takes ", new Integer(typesLen), typesLen == 1 ? " argument" : " arguments", ", but ",
                     new Integer(arguments.size()), " was given." });
         }
          
@@ -105,7 +107,7 @@ class SimpleMethod
         return args;
     }
 
-    static Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
+    private Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
             BeansWrapper w) 
     throws TemplateModelException {
         if(args == null) return null;
@@ -176,19 +178,22 @@ class SimpleMethod
         return unwrappedArgs;
     }
 
-    private static TemplateModelException createArgumentTypeMismarchException(
+    private TemplateModelException createArgumentTypeMismarchException(
             int argIdx, TemplateModel argVal, Class targetType) {
         return new _TemplateModelException(new Object[] {
-                "Argument type mismatch for argument #", new Integer(argIdx + 1),
-                "; can't convert (unwrap) to the target Java parameter type."
-                + "\nArgument value type: ", new _DelayedFTLTypeDescription(argVal),
-                ".\nTarget parameter type: ", ClassUtil.getShortClassName(targetType), "." });
+                _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
+                new _DelayedOrdinal(new Integer(argIdx + 1)),
+                " argument's value to the target Java type, ", ClassUtil.getShortClassName(targetType),
+                ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal),
+                });
     }
 
-    private static TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
+    private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
         return new _TemplateModelException(new Object[] {
-                "Argument type mismatch; argument #", new Integer(argIdx + 1),
-                " is null, which can't be converted to the target primitive Java parameter type, ", targetType.getName(), "." });
+                _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
+                new _DelayedOrdinal(new Integer(argIdx + 1)),
+                " argument was null, but the target Java parameter type (", ClassUtil.getShortClassName(targetType),
+                ") is primitive and so can't store null." });
     }
     
     protected Member getMember() {

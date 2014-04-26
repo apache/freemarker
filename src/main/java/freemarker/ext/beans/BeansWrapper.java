@@ -342,8 +342,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
             if (overridden) {
                 if (!testFailed && !ftmaDeprecationWarnLogged) {
-                    LOG.warn("Overriding BeansWrapper.finetuneMethodAppearance is deprecated and will be banned in the "
-                            + "future. Use BeansWrapper.setMethodAppearanceFineTuner instead.");
+                    LOG.warn("Overriding " + BeansWrapper.class.getName() + ".finetuneMethodAppearance is deprecated "
+                            + "and will be banned sometimes in the future. Use setMethodAppearanceFineTuner instead.");
                     ftmaDeprecationWarnLogged = true;
                 }
                 pa = (PropertyAssignments) pa.clone(false);
@@ -1581,6 +1581,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 try {
                     return ctor.newInstance(objargs);
                 } catch (Exception e) {
+                    if (e instanceof TemplateModelException) throw (TemplateModelException) e;
                     throw _MethodUtil.newInvocationTemplateModelException(null, ctor, e);
                 }
             }
@@ -1590,6 +1591,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                 try {
                     return mma.invokeConstructor(this);
                 } catch (Exception e) {
+                    if (e instanceof TemplateModelException) throw (TemplateModelException) e;
+                    
                     throw _MethodUtil.newInvocationTemplateModelException(null, mma.getCallableMemberDescriptor(), e);
                 }
             }

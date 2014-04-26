@@ -74,7 +74,7 @@ import freemarker.template.utility.ClassUtil;
  * ensure that the object is properly publishing to other threads.
  */
 final class OverloadedMethods {
-    
+
     private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
     private final boolean bugfixed;
@@ -105,6 +105,12 @@ final class OverloadedMethods {
         }
     }
     
+    private static final String MSG_PART_OVEARLOAD_WAS_FOUND_FOR_ACTUAL_PARAMETER_TYPES
+            = " overloaded variation was found for the signature deducated from the actual parameter values:\n";
+
+    private static final String MSG_PART_THE_MATCHING_OVERLOAD_WAS_SEARCHED_AMONG
+            = "\nThe matching overload was searched among:\n";
+    
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         MaybeEmptyMemberAndArguments fixArgsRes = null;
@@ -119,15 +125,17 @@ final class OverloadedMethods {
             MaybeEmptyMemberAndArguments res = getClosestToSuccess(fixArgsRes, varargsRes);
             if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
                 throw new _TemplateModelException(new Object[] {
-                        "No compatible overloaded variation was found for the signature deducated from the actual "
-                        + "parameter values:\n", getDeducedCallSignature(tmArgs),
-                        "\nThe available overloaded variations are:\n",
+                        "No compatible",
+                        MSG_PART_OVEARLOAD_WAS_FOUND_FOR_ACTUAL_PARAMETER_TYPES,
+                        getActualParameterTypes(tmArgs),
+                        MSG_PART_THE_MATCHING_OVERLOAD_WAS_SEARCHED_AMONG,
                         memberListToString() });
             } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
                 throw new _TemplateModelException(new Object[] {
-                        "Multiple compatible overloaded variation was found for the signature deducated from the "
-                        + "actual parameter values:\n", getDeducedCallSignature(tmArgs),
-                        "\nThe available overloaded variations are (including non-matching):\n",
+                        "Multiple compatible",
+                        MSG_PART_OVEARLOAD_WAS_FOUND_FOR_ACTUAL_PARAMETER_TYPES,
+                        getActualParameterTypes(tmArgs),
+                        MSG_PART_THE_MATCHING_OVERLOAD_WAS_SEARCHED_AMONG,
                         memberListToString() });
             } else {
                 throw new BugException("Unsupported EmptyMemberAndArguments: " + res); 
@@ -191,7 +199,7 @@ final class OverloadedMethods {
     /**
      * The description of the signature deduced from the method/constructor call, used in error messages.
      */
-    private _DelayedConversionToString getDeducedCallSignature(List arguments) {
+    private _DelayedConversionToString getActualParameterTypes(List arguments) {
         final String[] argumentTypeDescs = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
             argumentTypeDescs[i] = ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i));
@@ -215,11 +223,6 @@ final class OverloadedMethods {
                 
                 StringBuffer sb = new StringBuffer();
                 if (firstMemberDesc != null) {
-                    if (firstMemberDesc.isConstructor()) {
-                        sb.append("constructor ");
-                    } else {
-                        sb.append("method ");
-                    }
                     sb.append(firstMemberDesc.getName());
                 } else {
                     sb.append("???");

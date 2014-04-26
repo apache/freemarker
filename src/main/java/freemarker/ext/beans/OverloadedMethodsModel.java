@@ -101,6 +101,8 @@ implements
         }
         catch(Exception e)
         {
+            if (e instanceof TemplateModelException) throw (TemplateModelException) e;
+            
             throw _MethodUtil.newInvocationTemplateModelException(
                     object,
                     maa.getCallableMemberDescriptor(),

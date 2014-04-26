@@ -339,7 +339,7 @@ public class _MethodUtil {
         return new _TemplateModelException(e, new Object[] {
                 invocationErrorMessageStart(member, isConstructor),
                 " threw an exception",
-                isStatic || isConstructor ? "" : new Object[] {
+                isStatic || isConstructor ? (Object) "" : new Object[] {
                     " when invoked on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject) 
                 },
                 "; see cause exception in the Java stack trace."
