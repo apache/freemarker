@@ -1,12 +1,10 @@
 package freemarker.ext.beans;
 
-import java.beans.MethodDescriptor;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,31 +23,32 @@ public class OverloadedMethodsNumericalFlagsTest extends TestCase {
 
     public void testSingleNumType() {
         checkPossibleParamTypes(SingleTypeC.class, "mInt",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT);
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.INTEGER | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
+                | TypeFlags.ACCEPTS_STRING);
         checkPossibleParamTypes(SingleTypeC.class, "mLong",
-                OverloadedNumberUtil.FLAG_LONG);
+                TypeFlags.LONG | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(SingleTypeC.class, "mShort",
-                OverloadedNumberUtil.FLAG_SHORT);
+                TypeFlags.SHORT | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(SingleTypeC.class, "mByte",
-                OverloadedNumberUtil.FLAG_BYTE,
-                0);
+                TypeFlags.BYTE | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.ACCEPTS_ANY_OBJECT);
         checkPossibleParamTypes(SingleTypeC.class, "mDouble",
-                OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(SingleTypeC.class, "mFloat",
-                OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.FLOAT | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(SingleTypeC.class, "mUnknown",
-                OverloadedNumberUtil.FLAG_UNKNOWN_TYPE);
+                TypeFlags.UNKNOWN_NUMERICAL_TYPE | TypeFlags.ACCEPTS_NUMBER);
         
         checkPossibleParamTypes(SingleTypeC.class, "mVarParamCnt",
-                OverloadedNumberUtil.FLAG_BIG_DECIMAL);
+                TypeFlags.BIG_DECIMAL | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(SingleTypeC.class, "mVarParamCnt",
-                OverloadedNumberUtil.FLAG_BIG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.BIG_INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(SingleTypeC.class, "mVarParamCnt",
-                OverloadedNumberUtil.FLAG_DOUBLE,
-                OverloadedNumberUtil.FLAG_FLOAT,
-                OverloadedNumberUtil.FLAG_INTEGER);
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.FLOAT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER);
     }
     
     static public class SingleTypeC {
@@ -64,52 +63,58 @@ public class OverloadedMethodsNumericalFlagsTest extends TestCase {
         public void mDouble(double a1) { }
         public void mFloat(float a1) { }
         public void mUnknown(RationalNumber a1) { };
+        
         public void mVarParamCnt(BigDecimal a1) { }
         public void mVarParamCnt(BigInteger a1, Double a2) { }
-        public void mVarParamCnt(Double a1, Float a2, Integer a3) { }
-        public void mVarParamCnt(Object a1, char a2, boolean a3, File a4, Map a5, Boolean a6) { }
-        public void mVarParamCnt(Long a1, int a2, short a3, byte a4, double a5, float a6) { }
+        public void mVarParamCnt(Double a1,     Float a2, Integer a3) { }
+        public void mVarParamCnt(Object a1,     char a2,  boolean a3, File a4, Map a5,    Boolean a6) { }
+        public void mVarParamCnt(Long a1,       int a2,   short a3,   byte a4, double a5, float a6) { }
     }
 
-    public void testMultipleNumType() {
+    public void testMultipleNumTypes() {
         checkPossibleParamTypes(MultiTypeC.class, "m1",
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT 
-                | OverloadedNumberUtil.FLAG_BYTE | OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_INTEGER
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT 
+                | TypeFlags.BYTE | TypeFlags.DOUBLE | TypeFlags.INTEGER
+                | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(MultiTypeC.class, "m2",
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT 
-                | OverloadedNumberUtil.FLAG_SHORT | OverloadedNumberUtil.FLAG_LONG | OverloadedNumberUtil.FLAG_FLOAT
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT 
+                | TypeFlags.SHORT | TypeFlags.LONG | TypeFlags.FLOAT
+                | TypeFlags.ACCEPTS_NUMBER | TypeFlags.ACCEPTS_CHAR
                 );
 
         checkPossibleParamTypes(MultiTypeC.class, "m3",
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT 
-                | OverloadedNumberUtil.FLAG_BIG_DECIMAL| OverloadedNumberUtil.FLAG_BIG_INTEGER,
-                OverloadedNumberUtil.FLAG_BIG_INTEGER,
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
-                | OverloadedNumberUtil.FLAG_BIG_DECIMAL | OverloadedNumberUtil.FLAG_UNKNOWN_TYPE
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT 
+                | TypeFlags.BIG_DECIMAL| TypeFlags.BIG_INTEGER
+                | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.BIG_INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT
+                | TypeFlags.BIG_DECIMAL | TypeFlags.UNKNOWN_NUMERICAL_TYPE
+                | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(MultiTypeC.class, "m4",
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT | OverloadedNumberUtil.FLAG_FLOAT
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.FLOAT | TypeFlags.ACCEPTS_NUMBER
+                | TypeFlags.ACCEPTS_CHAR
                 );
         
         checkPossibleParamTypes(MultiTypeC.class, "m5",
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
-                | OverloadedNumberUtil.FLAG_FLOAT | OverloadedNumberUtil.FLAG_DOUBLE
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT
+                | TypeFlags.FLOAT | TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(MultiTypeC.class, "m6",
-                OverloadedNumberUtil.FLAG_INTEGER
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER
                 );
         assertEquals(getPossibleParamTypes(MultiTypeC.class, "m6", false, 2), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
         assertEquals(getPossibleParamTypes(MultiTypeC.class, "m6", true, 2), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
         assertEquals(getPossibleParamTypes(MultiTypeC.class, "m6", false, 3), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
         assertEquals(getPossibleParamTypes(MultiTypeC.class, "m6", true, 3), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
         checkPossibleParamTypes(MultiTypeC.class, "m6",
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT | OverloadedNumberUtil.FLAG_DOUBLE,
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT | OverloadedNumberUtil.FLAG_DOUBLE,
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
                 0
                 );
     }
@@ -135,118 +140,119 @@ public class OverloadedMethodsNumericalFlagsTest extends TestCase {
         public void m5(Enum a1) { };
         
         public void m6(int a1) { };
-        public void m6(String a1, char a2) { };
-        public void m6(String a1, char a2, boolean a3) { };
-        public void m6(String a1, char a2, char a3) { };
-        public void m6(double a1, int a2, String a3, String a4) { };
-        public void m6(String a1, int a2, double a3, String a4) { };
+        public void m6(File a1, Throwable a2) { };
+        public void m6(File a1, Throwable a2, StringBuilder a3) { };
+        public void m6(File a1, Throwable a2, Throwable a3) { };
+        public void m6(double a1, int a2, File a3, File a4) { };
+        public void m6(File a1, int a2, double a3, File a4) { };
     }
 
     public void testVarArgs() {
         checkPossibleParamTypes(VarArgsC.class, "m1",
-                OverloadedNumberUtil.FLAG_INTEGER
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER
                 );
         checkPossibleParamTypes(VarArgsC.class, "m2",
-                OverloadedNumberUtil.FLAG_DOUBLE,
-                OverloadedNumberUtil.FLAG_INTEGER
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m3",
-                OverloadedNumberUtil.FLAG_INTEGER
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER
                 );
         checkPossibleParamTypes(VarArgsC.class, "m3",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_INTEGER
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.INTEGER
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         checkPossibleParamTypes(VarArgsC.class, "m3",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_INTEGER
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_INTEGER
-                | OverloadedNumberUtil.FLAG_BIG_DECIMAL | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.INTEGER
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.INTEGER
+                | TypeFlags.BIG_DECIMAL | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m4",
-                OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_LONG
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.LONG
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m5",
-                OverloadedNumberUtil.FLAG_LONG
+                TypeFlags.LONG | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m6",
-                OverloadedNumberUtil.FLAG_LONG | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.LONG | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
+                | TypeFlags.ACCEPTS_STRING
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m7",
-                OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_BYTE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.BYTE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.FLOAT
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
 
         checkPossibleParamTypes(VarArgsC.class, "m8",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.FLOAT
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m9",
-                OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_BYTE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_DOUBLE
+                TypeFlags.INTEGER | TypeFlags.BYTE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m10",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER
                 );
         checkPossibleParamTypes(VarArgsC.class, "m10",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE,
-                OverloadedNumberUtil.FLAG_LONG | OverloadedNumberUtil.FLAG_DOUBLE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.LONG | TypeFlags.DOUBLE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m11",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_SHORT
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.SHORT | TypeFlags.ACCEPTS_NUMBER
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         checkPossibleParamTypes(VarArgsC.class, "m11",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_SHORT
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_LONG | OverloadedNumberUtil.FLAG_DOUBLE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.SHORT
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.LONG | TypeFlags.DOUBLE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m12",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER
                 );
         checkPossibleParamTypes(VarArgsC.class, "m12",
-                OverloadedNumberUtil.FLAG_INTEGER,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_SHORT
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_BYTE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_LONG | OverloadedNumberUtil.FLAG_DOUBLE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.SHORT
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.BYTE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.LONG | TypeFlags.DOUBLE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
         
         checkPossibleParamTypes(VarArgsC.class, "m13",
-                0,
-                OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.ACCEPTS_CHAR,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER);
         checkPossibleParamTypes(VarArgsC.class, "m13",
-                0,
-                OverloadedNumberUtil.FLAG_DOUBLE,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_UNKNOWN_TYPE
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT,
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_LONG
-                | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT
+                TypeFlags.ACCEPTS_CHAR,
+                TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.UNKNOWN_NUMERICAL_TYPE
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
+                TypeFlags.DOUBLE | TypeFlags.LONG
+                | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER
                 );
     }
     

@@ -162,7 +162,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         }
         
         if (bugfixed) {
-            mergeInNumericalTypes(paramCountOfWidened, wideningNumTypes);
+            mergeInTypesFlags(paramCountOfWidened, wideningNumTypes);
         }
     }
     

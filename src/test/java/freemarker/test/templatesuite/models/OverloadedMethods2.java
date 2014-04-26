@@ -6,7 +6,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import freemarker.core.Environment;
 import freemarker.ext.beans.RationalNumber;
@@ -14,6 +17,7 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.StringUtil;
@@ -630,6 +634,14 @@ public class OverloadedMethods2 {
         return "mListOrString(String " + item + ")";
     }
     
+    public String mTypeFlags1(Map v) {
+        return "mTypeFlags1(Map)";
+    }
+
+    public String mTypeFlags1(boolean v) {
+        return "mTypeFlags1(boolean " + v + ")";
+    }
+    
     public List getJavaStringList() {
         List list = new ArrayList();
         list.add("a");
@@ -733,6 +745,10 @@ public class OverloadedMethods2 {
         return new Object[] { "a", "b" };
     }
     
+    public TemplateModel getHashAndScalarModel() {
+        return new HashAndScalarModel();
+    }
+    
     private String arrayToString(Object[] array) {
         return array != null ? listToString(Arrays.asList(array)) : "null";
     }
@@ -778,18 +794,31 @@ public class OverloadedMethods2 {
         sb.append("]");
         return sb.toString();
     }
-    
-    private String listToString(List<?> list) {
+
+    private String collectionToString(String prefix, Collection<?> list) {
         StringBuilder sb = new StringBuilder();
+        sb.append(prefix);
         sb.append("[");
-        for (int i = 0; i < list.size(); i++) {
-            if (i != 0) {
+        boolean first = true;
+        for (Object item : list) {
+            if (!first) {
                 sb.append(", ");
+            } else {
+                first = false;
             }
-            sb.append(list.get(i));
+            sb.append(item);
         }
         sb.append("]");
         return sb.toString();
+    }
+    
+    private String listToString(List<?> list) {
+        return collectionToString("", list);
+    }
+    
+    
+    private String setToString(Set<?> list) {
+        return collectionToString("Set", list);
     }
     
     public TemplateNumberModel getAdaptedNumber() {

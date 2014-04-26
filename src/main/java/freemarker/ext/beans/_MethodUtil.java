@@ -299,8 +299,8 @@ public class _MethodUtil {
         return invocationErrorMessageStart(member, member instanceof Constructor);
     }
     
-    public static Object[] invocationErrorMessageStart(Object member, boolean isConstructor) {
-        return new Object[] { isConstructor ? "Constructor " : "Method ", new _DelayedJQuote(member) };
+    private static Object[] invocationErrorMessageStart(Object member, boolean isConstructor) {
+        return new Object[] { "Java ", isConstructor ? "constructor " : "method ", new _DelayedJQuote(member) };
     }
 
     public static TemplateModelException newInvocationTemplateModelException(Object object, Member member, Throwable e) {
@@ -338,11 +338,11 @@ public class _MethodUtil {
 
         return new _TemplateModelException(e, new Object[] {
                 invocationErrorMessageStart(member, isConstructor),
-                " threw an exception when invoked",
+                " threw an exception",
                 isStatic || isConstructor ? "" : new Object[] {
-                    " on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject) 
+                    " when invoked on ", parentObject.getClass(), " object ", new _DelayedJQuote(parentObject) 
                 },
-                "; see cause exception."
+                "; see cause exception in the Java stack trace."
         });
     }
     

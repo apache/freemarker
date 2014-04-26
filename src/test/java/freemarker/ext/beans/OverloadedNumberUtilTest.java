@@ -88,35 +88,35 @@ public class OverloadedNumberUtilTest extends TestCase {
     }
     
     public void testIntegerLimitedCoercions() {
-        cipEqu(new Integer(Byte.MAX_VALUE), new Integer(Byte.MAX_VALUE), OverloadedNumberUtil.FLAG_INTEGER);
-        cipEqu(new Integer(0), new Integer(0), OverloadedNumberUtil.FLAG_INTEGER);
-        cipEqu(new Integer(Byte.MIN_VALUE), new Integer(Byte.MIN_VALUE), OverloadedNumberUtil.FLAG_INTEGER);
+        cipEqu(new Integer(Byte.MAX_VALUE), new Integer(Byte.MAX_VALUE), TypeFlags.INTEGER);
+        cipEqu(new Integer(0), new Integer(0), TypeFlags.INTEGER);
+        cipEqu(new Integer(Byte.MIN_VALUE), new Integer(Byte.MIN_VALUE), TypeFlags.INTEGER);
         
-        cipEqu(new Long(Integer.MAX_VALUE + 1L), new Long(Integer.MAX_VALUE + 1L), OverloadedNumberUtil.FLAG_INTEGER);
+        cipEqu(new Long(Integer.MAX_VALUE + 1L), new Long(Integer.MAX_VALUE + 1L), TypeFlags.INTEGER);
         
         for (int n = -1; n < 2; n++) {
             final Long longN = new Long(n);
-            cipEqu(longN, new OverloadedNumberUtil.LongOrInteger(longN, n), OverloadedNumberUtil.FLAG_INTEGER);
-            cipEqu(longN, new OverloadedNumberUtil.LongOrShort(longN, (short) n), OverloadedNumberUtil.FLAG_SHORT);
-            cipEqu(longN, new OverloadedNumberUtil.LongOrByte(longN, (byte) n), OverloadedNumberUtil.FLAG_BYTE);
+            cipEqu(longN, new OverloadedNumberUtil.LongOrInteger(longN, n), TypeFlags.INTEGER);
+            cipEqu(longN, new OverloadedNumberUtil.LongOrShort(longN, (short) n), TypeFlags.SHORT);
+            cipEqu(longN, new OverloadedNumberUtil.LongOrByte(longN, (byte) n), TypeFlags.BYTE);
             cipEqu(longN, new OverloadedNumberUtil.LongOrShort(longN, (short) n),
-                    OverloadedNumberUtil.FLAG_SHORT | OverloadedNumberUtil.FLAG_INTEGER);
+                    TypeFlags.SHORT | TypeFlags.INTEGER);
         }
     }
 
     public void testBigDecimalCoercions() {
         cipEqu(new BigDecimal(123), new OverloadedNumberUtil.IntegerBigDecimal(new BigDecimal(123)));
         cipEqu(new BigDecimal(123), new OverloadedNumberUtil.IntegerBigDecimal(new BigDecimal(123)),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_INTEGER);
-        cipEqu(new BigDecimal(123), OverloadedNumberUtil.FLAG_INTEGER);
-        cipEqu(new BigDecimal(123), OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_LONG);
-        cipEqu(new BigDecimal(123), OverloadedNumberUtil.FLAG_DOUBLE);
-        cipEqu(new BigDecimal(123), OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.INTEGER);
+        cipEqu(new BigDecimal(123), TypeFlags.INTEGER);
+        cipEqu(new BigDecimal(123), TypeFlags.INTEGER | TypeFlags.LONG);
+        cipEqu(new BigDecimal(123), TypeFlags.DOUBLE);
+        cipEqu(new BigDecimal(123), TypeFlags.DOUBLE | TypeFlags.FLOAT);
         
         cipEqu(new BigDecimal(123.5));
         // Not wasting time with check if it's a whole number if we only have integer-only or non-integer-only targets:  
-        cipEqu(new BigDecimal(123.5), OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_LONG);
-        cipEqu(new BigDecimal(123.5), OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+        cipEqu(new BigDecimal(123.5), TypeFlags.INTEGER | TypeFlags.LONG);
+        cipEqu(new BigDecimal(123.5), TypeFlags.DOUBLE | TypeFlags.FLOAT);
         
         cipEqu(new BigDecimal(0.01));
         cipEqu(new BigDecimal(-0.01));
@@ -167,35 +167,35 @@ public class OverloadedNumberUtilTest extends TestCase {
                 new OverloadedNumberUtil.DoubleOrFloat((double) Long.MIN_VALUE));
 
         // When only certain target types are present:
-        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrByte(5.0, (byte) 5), OverloadedNumberUtil.FLAG_BYTE);
-        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrByte(5.0, (byte) 5), OverloadedNumberUtil.FLAG_BYTE | OverloadedNumberUtil.FLAG_SHORT);
-        cipEqu(Double.valueOf(-129), OverloadedNumberUtil.FLAG_BYTE);
-        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrShort(5.0, (short) 5), OverloadedNumberUtil.FLAG_SHORT);
-        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrInteger(5.0, 5), OverloadedNumberUtil.FLAG_INTEGER);
-        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrLong(5.0, 5), OverloadedNumberUtil.FLAG_LONG);
-        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrFloat(5.0), OverloadedNumberUtil.FLAG_FLOAT);
-        cipEqu(Double.valueOf(5), Double.valueOf(5), OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrByte(5.0, (byte) 5), TypeFlags.BYTE);
+        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrByte(5.0, (byte) 5), TypeFlags.BYTE | TypeFlags.SHORT);
+        cipEqu(Double.valueOf(-129), TypeFlags.BYTE);
+        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrShort(5.0, (short) 5), TypeFlags.SHORT);
+        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrInteger(5.0, 5), TypeFlags.INTEGER);
+        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrLong(5.0, 5), TypeFlags.LONG);
+        cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrFloat(5.0), TypeFlags.FLOAT);
+        cipEqu(Double.valueOf(5), Double.valueOf(5), TypeFlags.DOUBLE);
         cipEqu(Double.valueOf(5), new OverloadedNumberUtil.DoubleOrFloat(5.0),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         cipEqu(Double.valueOf(5.9), new OverloadedNumberUtil.DoubleOrFloat(5.9),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         cipEqu(Double.valueOf(5.9),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_INTEGER);
+                TypeFlags.DOUBLE | TypeFlags.INTEGER);
         cipEqu(Double.valueOf(5.9), new OverloadedNumberUtil.DoubleOrFloat(5.9),
-                OverloadedNumberUtil.FLAG_FLOAT | OverloadedNumberUtil.FLAG_INTEGER);
-        cipEqu(Double.valueOf(5.9), OverloadedNumberUtil.FLAG_INTEGER);
+                TypeFlags.FLOAT | TypeFlags.INTEGER);
+        cipEqu(Double.valueOf(5.9), TypeFlags.INTEGER);
         cipEqu(Double.valueOf(Long.MAX_VALUE),
                 new OverloadedNumberUtil.DoubleOrFloat((double) Long.MAX_VALUE),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         cipEqu(Double.valueOf(Long.MAX_VALUE),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_LONG);
+                TypeFlags.DOUBLE | TypeFlags.LONG);
         cipEqu(Double.valueOf(Long.MIN_VALUE),
                 new OverloadedNumberUtil.DoubleOrFloat((double) Long.MIN_VALUE),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         cipEqu(Double.valueOf(Float.MAX_VALUE * 10),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         cipEqu(Double.valueOf(-Float.MAX_VALUE * 10),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         
         // Rounded values:
         cipEqu(Double.valueOf(0.0000009),
@@ -208,21 +208,21 @@ public class OverloadedNumberUtilTest extends TestCase {
                 new OverloadedNumberUtil.DoubleOrByte(-0.9999991, (byte) -1));
         cipEqu(Double.valueOf(0.0000009),
                 new OverloadedNumberUtil.DoubleOrShort(0.0000009, (short) 0),
-                OverloadedNumberUtil.FLAG_SHORT | OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.SHORT | TypeFlags.DOUBLE);
         cipEqu(Double.valueOf(0.0000009), new OverloadedNumberUtil.DoubleOrInteger(0.0000009, 0),
-                OverloadedNumberUtil.FLAG_INTEGER | OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.INTEGER | TypeFlags.DOUBLE);
         cipEqu(Double.valueOf(0.0000009), new OverloadedNumberUtil.DoubleOrLong(0.0000009, 0),
-                OverloadedNumberUtil.FLAG_LONG | OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.LONG | TypeFlags.DOUBLE);
         cipEqu(Double.valueOf(0.0000009),
-                new OverloadedNumberUtil.DoubleOrByte(0.0000009, (byte) 0), OverloadedNumberUtil.FLAG_BYTE);
+                new OverloadedNumberUtil.DoubleOrByte(0.0000009, (byte) 0), TypeFlags.BYTE);
         cipEqu(Double.valueOf(0.0000009),
-                new OverloadedNumberUtil.DoubleOrShort(0.0000009, (short) 0), OverloadedNumberUtil.FLAG_SHORT);
+                new OverloadedNumberUtil.DoubleOrShort(0.0000009, (short) 0), TypeFlags.SHORT);
         cipEqu(Double.valueOf(0.0000009),
-                new OverloadedNumberUtil.DoubleOrInteger(0.0000009, 0), OverloadedNumberUtil.FLAG_INTEGER);
+                new OverloadedNumberUtil.DoubleOrInteger(0.0000009, 0), TypeFlags.INTEGER);
         cipEqu(Double.valueOf(0.0000009),
-                new OverloadedNumberUtil.DoubleOrLong(0.0000009, 0L), OverloadedNumberUtil.FLAG_LONG);
+                new OverloadedNumberUtil.DoubleOrLong(0.0000009, 0L), TypeFlags.LONG);
         cipEqu(Double.valueOf(0.9999999),
-                new OverloadedNumberUtil.DoubleOrInteger(0.9999999, 1), OverloadedNumberUtil.FLAG_INTEGER);
+                new OverloadedNumberUtil.DoubleOrInteger(0.9999999, 1), TypeFlags.INTEGER);
         cipEqu(Double.valueOf(Byte.MAX_VALUE + 0.9e-6),
                 new OverloadedNumberUtil.DoubleOrByte(Byte.MAX_VALUE + 0.9e-6, Byte.MAX_VALUE));
         cipEqu(Double.valueOf(Byte.MIN_VALUE - 0.9e-6),
@@ -291,15 +291,15 @@ public class OverloadedNumberUtilTest extends TestCase {
         cipEqu(-60000f, new OverloadedNumberUtil.FloatOrInteger(-60000f, -60000));
         cipEqu(60000.004f);
 
-        cipEqu(100f, new OverloadedNumberUtil.FloatOrByte(100f, (byte) 100), OverloadedNumberUtil.MASK_KNOWN_INTEGERS);
-        cipEqu(1000f, new OverloadedNumberUtil.FloatOrShort(1000f, (short) 1000), OverloadedNumberUtil.MASK_KNOWN_INTEGERS);
-        cipEqu(60000f, new OverloadedNumberUtil.FloatOrInteger(60000f, 60000), OverloadedNumberUtil.MASK_KNOWN_INTEGERS);
-        cipEqu(60000f, new OverloadedNumberUtil.FloatOrInteger(60000f, 60000), OverloadedNumberUtil.FLAG_LONG);
-        cipEqu((float) Integer.MAX_VALUE, (float) Integer.MAX_VALUE, OverloadedNumberUtil.FLAG_LONG);
+        cipEqu(100f, new OverloadedNumberUtil.FloatOrByte(100f, (byte) 100), TypeFlags.MASK_KNOWN_INTEGERS);
+        cipEqu(1000f, new OverloadedNumberUtil.FloatOrShort(1000f, (short) 1000), TypeFlags.MASK_KNOWN_INTEGERS);
+        cipEqu(60000f, new OverloadedNumberUtil.FloatOrInteger(60000f, 60000), TypeFlags.MASK_KNOWN_INTEGERS);
+        cipEqu(60000f, new OverloadedNumberUtil.FloatOrInteger(60000f, 60000), TypeFlags.LONG);
+        cipEqu((float) Integer.MAX_VALUE, (float) Integer.MAX_VALUE, TypeFlags.LONG);
         cipEqu((float) -Integer.MAX_VALUE, (float) -Integer.MAX_VALUE);
         
-        cipEqu(0.5f, 0.5f, OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
-        cipEqu(0.5f, 0.5f, OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(0.5f, 0.5f, TypeFlags.DOUBLE | TypeFlags.FLOAT);
+        cipEqu(0.5f, 0.5f, TypeFlags.DOUBLE);
     }
     
     public void testBigIntegerCoercion() {
@@ -343,60 +343,60 @@ public class OverloadedNumberUtilTest extends TestCase {
         
         bi = new BigInteger("0");
         cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi),
-                OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.DOUBLE | TypeFlags.FLOAT);
         cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi),
-                OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+                TypeFlags.MASK_KNOWN_NONINTEGERS);
         cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi),
-                OverloadedNumberUtil.FLAG_FLOAT);
+                TypeFlags.FLOAT);
         cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi),
-                OverloadedNumberUtil.FLAG_DOUBLE);
+                TypeFlags.DOUBLE);
 
         bi = new BigInteger("16777215");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
         bi = new BigInteger("-16777215");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
         
         bi = new BigInteger("16777216");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
         bi = new BigInteger("-16777216");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrFloat(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
         
         bi = new BigInteger("16777217");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_FLOAT);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, TypeFlags.FLOAT);
         bi = new BigInteger("-16777217");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_FLOAT);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, TypeFlags.FLOAT);
         
         bi = new BigInteger("9007199254740991");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.DOUBLE);
         bi = new BigInteger("-9007199254740991");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.DOUBLE);
         
         bi = new BigInteger("9007199254740992");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.DOUBLE);
         bi = new BigInteger("-9007199254740992");
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, new OverloadedNumberUtil.BigIntegerOrDouble(bi), TypeFlags.DOUBLE);
         
         bi = new BigInteger("9007199254740993");
-        cipEqu(bi, OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_FLOAT);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(bi, TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, TypeFlags.DOUBLE | TypeFlags.FLOAT);
+        cipEqu(bi, TypeFlags.FLOAT);
+        cipEqu(bi, TypeFlags.DOUBLE);
         bi = new BigInteger("-9007199254740993");
-        cipEqu(bi, OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_DOUBLE | OverloadedNumberUtil.FLAG_FLOAT);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_FLOAT);
-        cipEqu(bi, OverloadedNumberUtil.FLAG_DOUBLE);
+        cipEqu(bi, TypeFlags.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, TypeFlags.DOUBLE | TypeFlags.FLOAT);
+        cipEqu(bi, TypeFlags.FLOAT);
+        cipEqu(bi, TypeFlags.DOUBLE);
         
         bi = new BigInteger("9007199254740994");
-        cipEqu(bi, OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, TypeFlags.MASK_KNOWN_NONINTEGERS);
         bi = new BigInteger("-9007199254740994");
-        cipEqu(bi, OverloadedNumberUtil.MASK_KNOWN_NONINTEGERS);
+        cipEqu(bi, TypeFlags.MASK_KNOWN_NONINTEGERS);
     }
     
     private void cipEqu(Number actualAndExpected) {

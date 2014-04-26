@@ -1093,21 +1093,20 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * @param targetNumTypes Used when unwrapping for overloaded methods and so the hint is too generic; 0 otherwise.
+     * @param typeFlags Used when unwrapping for overloaded methods and so the hint is too generic; 0 otherwise.
      *        This will be ignored if the hint is already a concrete numerical type. (With overloaded methods the hint
      *        is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
      *        concrete overloaded method.)
      * @param overloadedMode Set true {@code true} when unwrapping for an overloaded method parameter
      * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
      */
-    Object tryUnwrap(TemplateModel model, Class hint, int targetNumTypes, boolean overloadedMode) 
+    Object tryUnwrap(TemplateModel model, Class hint, int typeFlags, boolean overloadedMode) 
     throws TemplateModelException
     {
         Object res = tryUnwrap(model, hint, overloadedMode, null);
-        if (targetNumTypes != 0
-                && (targetNumTypes & OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT) != 0
+        if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
-            return OverloadedNumberUtil.addFallbackType((Number) res, targetNumTypes);
+            return OverloadedNumberUtil.addFallbackType((Number) res, typeFlags);
         } else {
             return res;
         }
@@ -1257,9 +1256,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         
         // Translation of generic template models to POJOs. Since hint was of
-        // no help initially, now use an admittedly arbitrary order of 
-        // interfaces. Note we still test for isInstance and isAssignableFrom
-        // to guarantee we return a compatible value. 
+        // no help initially, now use an quite arbitrary order of interfaces.
+        // Note we still test for isInstance and isAssignableFrom to guarantee we return a compatible value. 
         if(model instanceof TemplateNumberModel) {
             Number number = ((TemplateNumberModel)model).getAsNumber();
             if(hint.isInstance(number)) {
