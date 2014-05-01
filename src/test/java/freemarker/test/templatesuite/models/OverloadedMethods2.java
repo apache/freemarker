@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -634,12 +635,76 @@ public class OverloadedMethods2 {
         return "mListOrString(String " + item + ")";
     }
     
-    public String mTypeFlags1(Map v) {
-        return "mTypeFlags1(Map)";
+    public String mMapOrBoolean(Map v) {
+        return "mMapOrBoolean(Map " + v +")";
     }
 
-    public String mTypeFlags1(boolean v) {
-        return "mTypeFlags1(boolean " + v + ")";
+    public String mMapOrBoolean(boolean v) {
+        return "mMapOrBoolean(boolean " + v + ")";
+    }
+
+    public String mNumberOrArray(Number v) {
+        return "mNumberOrArray(Number " + v + ")";
+    }
+
+    public String mNumberOrArray(Object[] v) {
+        return "mNumberOrArray(Object[] " + arrayToString(v) + ")";
+    }
+    
+    public String mIntOrArray(int v) {
+        return "mIntOrArray(int " + v + ")";
+    }
+
+    public String mIntOrArray(Object[] v) {
+        return "mIntOrArray(Object[] " + arrayToString(v) + ")";
+    }
+
+    public String mDateOrArray(Date v) {
+        return "mDateOrArray(Date " + v.getTime() + ")";
+    }
+
+    public String mDateOrArray(Object[] v) {
+        return "mDateOrArray(Object[] " + arrayToString(v) + ")";
+    }
+    
+    public String mStringOrArray(String v) {
+        return "mStringOrArray(String " + v + ")";
+    }
+
+    public String mStringOrArray(Object[] v) {
+        return "mStringOrArray(Object[] " + arrayToString(v) + ")";
+    }
+    
+    public String mBooleanOrArray(boolean v) {
+        return "mBooleanOrArray(boolean " + v + ")";
+    }
+
+    public String mBooleanOrArray(Object[] v) {
+        return "mBooleanOrArray(Object[] " + arrayToString(v) + ")";
+    }
+    
+    public String mMapOrArray(Map v) {
+        return "mMapOrArray(Map " + v + ")";
+    }
+
+    public String mMapOrArray(Object[] v) {
+        return "mMapOrArray(Object[] " + arrayToString(v) + ")";
+    }
+    
+    public String mListOrArray(List v) {
+        return "mListOrArray(List " + v + ")";
+    }
+
+    public String mListOrArray(Object[] v) {
+        return "mListOrArray(Object[] " + arrayToString(v) + ")";
+    }
+    
+    public String mSetOrArray(Set v) {
+        return "mSetOrArray(Set " + v + ")";
+    }
+
+    public String mSetOrArray(Object[] v) {
+        return "mSetOrArray(Object[] " + arrayToString(v) + ")";
     }
     
     public List getJavaStringList() {
@@ -746,7 +811,15 @@ public class OverloadedMethods2 {
     }
     
     public TemplateModel getHashAndScalarModel() {
-        return new HashAndScalarModel();
+        return HashAndScalarModel.INSTANCE;
+    }
+
+    public TemplateModel getBooleanAndScalarModel() {
+        return BooleanAndScalarModel.INSTANCE;
+    }
+    
+    public TemplateModel getAllModels() {
+        return AllTemplateModels.INSTANCE;
     }
     
     private String arrayToString(Object[] array) {

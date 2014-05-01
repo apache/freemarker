@@ -1094,8 +1094,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     
     /**
      * @param typeFlags Used when unwrapping for overloaded methods and so the hint is too generic; 0 otherwise.
-     *        This will be ignored if the hint is already a concrete numerical type. (With overloaded methods the hint
-     *        is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
+     *        This is usually not used if the hint is already a type specific enough type. (With overloaded methods the
+     *        hint is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
      *        concrete overloaded method.)
      * @param overloadedMode Set true {@code true} when unwrapping for an overloaded method parameter
      * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
@@ -1103,7 +1103,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     Object tryUnwrap(TemplateModel model, Class hint, int typeFlags, boolean overloadedMode) 
     throws TemplateModelException
     {
-        Object res = tryUnwrap(model, hint, overloadedMode, null);
+        Object res = tryUnwrap(model, hint, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
             return OverloadedNumberUtil.addFallbackType((Number) res, typeFlags);
@@ -1115,10 +1115,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     /**
      * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
      */
-    private Object tryUnwrap(TemplateModel model, Class hint, boolean overloadedMode,  Map recursionStops) 
-    throws TemplateModelException
-    {
-        
+    private Object tryUnwrap(TemplateModel model, Class hint, int typeFlags, Map recursionStops) 
+    throws TemplateModelException {
         if(model == null || model == nullModel) {
             return null;
         }
@@ -1255,53 +1253,70 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
         }
         
-        // Translation of generic template models to POJOs. Since hint was of
-        // no help initially, now use an quite arbitrary order of interfaces.
-        // Note we still test for isInstance and isAssignableFrom to guarantee we return a compatible value. 
-        if(model instanceof TemplateNumberModel) {
-            Number number = ((TemplateNumberModel)model).getAsNumber();
-            if(hint.isInstance(number)) {
-                return number;
+        // Since the hint class was of no help initially, now we use
+        // a quite arbitrary order of in which we walk through the TemplateModel subinterfaces, and unwrapp them to
+        // their "natural" Java correspondent. We still try exclude unwrappings that won't fit the target parameter
+        // type(s). This is mostly important because of multi-typed FTL values that could be unwrapped on multiple ways.
+        int itf = typeFlags; // Iteration's Type Flags. Should be always 0 for non-overloaded and when !is2321Bugfixed.
+        // If itf != 0, we possibly execute the following loop body at twice: once with utilizing itf, and if it has not
+        // returned, once more with itf == 0. Otherwise we execute this once with itf == 0.
+        do {
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_NUMBER) != 0)
+                    && model instanceof TemplateNumberModel) {
+                Number number = ((TemplateNumberModel) model).getAsNumber();
+                if (itf != 0 || hint.isInstance(number)) {
+                    return number;
+                }
             }
-        }
-        if(model instanceof TemplateDateModel) {
-            Date date = ((TemplateDateModel)model).getAsDate();
-            if(hint.isInstance(date)) {
-                return date;
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_DATE) != 0)
+                    && model instanceof TemplateDateModel) {
+                Date date = ((TemplateDateModel) model).getAsDate();
+                if (itf != 0 || hint.isInstance(date)) {
+                    return date;
+                }
             }
-        }
-        if(model instanceof TemplateScalarModel && 
-                hint.isAssignableFrom(STRING_CLASS)) {
-            return ((TemplateScalarModel)model).getAsString();
-        }
-        if(model instanceof TemplateBooleanModel && 
-                hint.isAssignableFrom(BOOLEAN_CLASS)) {
-            return ((TemplateBooleanModel)model).getAsBoolean() 
-            ? Boolean.TRUE : Boolean.FALSE;
-        }
-        if(model instanceof TemplateHashModel && hint.isAssignableFrom(
-                HASHADAPTER_CLASS)) {
-            return new HashAdapter((TemplateHashModel)model, this);
-        }
-        if(model instanceof TemplateSequenceModel 
-                && hint.isAssignableFrom(SEQUENCEADAPTER_CLASS)) {
-            return new SequenceAdapter((TemplateSequenceModel)model, this);
-        }
-        if(model instanceof TemplateCollectionModel && 
-                hint.isAssignableFrom(SETADAPTER_CLASS)) {
-            return new SetAdapter((TemplateCollectionModel)model, this);
-        }
-        if (overloadedMode && is2321Bugfixed) {
-            /** Because List-s are convertible to arrays later (but only overloaded method calls need this) */
-            if(model instanceof TemplateSequenceModel 
-                    && hint.isAssignableFrom(Object[].class)) {
-                return new SequenceAdapter((TemplateSequenceModel)model, this);
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_STRING) != 0)
+                    && model instanceof TemplateScalarModel
+                    && (itf != 0 || hint.isAssignableFrom(STRING_CLASS))) {
+                return ((TemplateScalarModel) model).getAsString();
             }
-        }
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
+                    && model instanceof TemplateBooleanModel
+                    && (itf != 0 || hint.isAssignableFrom(BOOLEAN_CLASS))) {
+                return ((TemplateBooleanModel) model).getAsBoolean() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_MAP) != 0)
+                    && model instanceof TemplateHashModel
+                    && (itf != 0 || hint.isAssignableFrom(HASHADAPTER_CLASS))) {
+                return new HashAdapter((TemplateHashModel) model, this);
+            }
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_LIST) != 0)
+                    && model instanceof TemplateSequenceModel 
+                    && (itf != 0 || hint.isAssignableFrom(SEQUENCEADAPTER_CLASS))) {
+                return new SequenceAdapter((TemplateSequenceModel) model, this);
+            }
+            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_SET) != 0)
+                    && model instanceof TemplateCollectionModel
+                    && (itf != 0 || hint.isAssignableFrom(SETADAPTER_CLASS))) {
+                return new SetAdapter((TemplateCollectionModel) model, this);
+            }
+            
+            // In 2.3.21 bugfixed mode only, List-s are convertible to arrays on invocation time. Only overloaded
+            // methods need this. As itf will be 0 in non-bugfixed mode and for non-overloaded method calls, it's
+            // enough to check if the TypeFlags.ACCEPTS_ARRAY bit is 1:
+            if ((itf & TypeFlags.ACCEPTS_ARRAY) != 0
+                    && model instanceof TemplateSequenceModel) {
+                return new SequenceAdapter((TemplateSequenceModel) model, this);
+            }
+            
+            if (itf == 0) {
+                break;
+            }
+            itf = 0; // start 2nd iteration
+        } while (true);
 
-        // Last ditch effort - is maybe the model itself instance of the 
-        // required type?
-        if(hint.isInstance(model)) {
+        // Last ditch effort - is maybe the model itself instance of the required type?
+        if (hint.isInstance(model)) {
             return model;
         }
         
@@ -1329,7 +1344,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             final int size = seq.size();
             for (int i = 0; i < size; i++) {
                 final TemplateModel seqItem = seq.get(i);
-                Object val = tryUnwrap(seqItem, componentType, false, recursionStops);
+                Object val = tryUnwrap(seqItem, componentType, 0, recursionStops);
                 if(val == CAN_NOT_UNWRAP) {
                     if (tryOnly) {
                         return CAN_NOT_UNWRAP;

@@ -94,9 +94,9 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         
         Object[] pojoArgs = new Object[argCount];
         
-        int[] possibleNumericalTypes = getPossibleNumericalTypes(argCount);
-        if (possibleNumericalTypes == ALL_ZEROS_ARRAY) {
-            possibleNumericalTypes = null;
+        int[] typeFlags = getTypeFlags(argCount);
+        if (typeFlags == ALL_ZEROS_ARRAY) {
+            typeFlags = null;
         }
 
         Iterator it = tmArgs.iterator();
@@ -104,7 +104,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
             Object pojo = unwrapper.tryUnwrap(
                     (TemplateModel) it.next(),
                     unwarppingHints[i],
-                    possibleNumericalTypes != null ? possibleNumericalTypes[i] : 0,
+                    typeFlags != null ? typeFlags[i] : 0,
                     true);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
@@ -116,11 +116,11 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             if (bugfixed) {
-                if (possibleNumericalTypes != null) {
+                if (typeFlags != null) {
                     // Note that overloaded method selection has already accounted for overflow errors when the method
                     // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
                     // BigDecimal is allowed to overflow for backward-compatibility.
-                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.getParamTypes(), possibleNumericalTypes);
+                    forceNumberArgumentsToParameterTypes(pojoArgs, memberDesc.getParamTypes(), typeFlags);
                 }
             } else {
                 BeansWrapper.coerceBigDecimals(memberDesc.getParamTypes(), pojoArgs);

@@ -268,6 +268,16 @@
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 
-<#-- TODO
-<@assertEquals actual=obj.mTypeFlags1(obj.hashAndScalarModel) expected="mTypeFlags(Map)" />
--->
+<@assertEquals actual=obj.mMapOrBoolean(obj.hashAndScalarModel) expected="mMapOrBoolean(Map {})" />
+<@assertEquals actual=obj.mMapOrBoolean(obj.booleanAndScalarModel) expected="mMapOrBoolean(boolean true)" />
+<@assertEquals actual=obj.mMapOrBoolean(obj.allModels) expected="mMapOrBoolean(boolean true)" />
+
+<@assertEquals actual=obj.mNumberOrArray(obj.allModels) expected="mNumberOrArray(Number 1)" />
+<@assertEquals actual=obj.mNumberOrArray([obj.allModels]) expected="mNumberOrArray(Object[] [1])" />
+<@assertEquals actual=obj.mIntOrArray(obj.allModels) expected="mIntOrArray(int 1)" />
+<@assertEquals actual=obj.mDateOrArray(obj.allModels) expected="mDateOrArray(Date 0)" />
+<@assertEquals actual=obj.mStringOrArray(obj.allModels) expected="mStringOrArray(String s)" />
+<@assertEquals actual=obj.mBooleanOrArray(obj.allModels) expected="mBooleanOrArray(boolean true)" />
+<@assertEquals actual=obj.mMapOrArray(obj.allModels) expected="mMapOrArray(Map {})" />
+<@assertEquals actual=obj.mListOrArray(obj.allModels) expected="mListOrArray(List [])" />
+<@assertEquals actual=obj.mSetOrArray(obj.allModels) expected="mSetOrArray(Set [])" />

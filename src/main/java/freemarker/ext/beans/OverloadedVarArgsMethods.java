@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.core.BugException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
@@ -77,6 +78,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         final Class[] preprocessedParamTypes = (Class[]) memberDesc.getParamTypes().clone();
         int ln = preprocessedParamTypes.length;
         final Class varArgsCompType = preprocessedParamTypes[ln - 1].getComponentType();
+        if (varArgsCompType == null) {
+            throw new BugException("Only varargs methods should be handled here");
+        }
         preprocessedParamTypes[ln - 1] = varArgsCompType;
         return preprocessedParamTypes;
     }
@@ -97,7 +101,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         final int paramCount = paramTypes.length;
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         
-        // The case of e(t1, t2), e(t1, t2, t2), e(t1, t2, t2, t2), ..., where e is an *earlier* added method.
+        // The case of e(t1, t2), e(t1, t2, t2), e(t1, t2, t2, t2), ..., where e is an *earlierly* added method.
         // When that was added, this method wasn't added yet, so it had no chance updating the hints of this method,
         // so we do that now:
         // FIXME: Only needed if m(t1, t2) was filled an empty slot, otherwise whatever was there was already
@@ -107,7 +111,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             if(previousHints != null) {
                 widenHintsToCommonSupertypes(
                         paramCount,
-                        previousHints, getPossibleNumericalTypes(i));
+                        previousHints, getTypeFlags(i));
                 break;  // we only do this for the first hit, as the methods before that has already widened it.
             }
         }
@@ -120,7 +124,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             if(oneLongerHints != null) {
                 widenHintsToCommonSupertypes(
                         paramCount,
-                        oneLongerHints, getPossibleNumericalTypes(paramCount + 1));
+                        oneLongerHints, getTypeFlags(paramCount + 1));
             }
         }
         
@@ -142,7 +146,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
     }
     
     private void widenHintsToCommonSupertypes(
-            int paramCountOfWidened, Class[] wideningTypes, int[] wideningNumTypes) {
+            int paramCountOfWidened, Class[] wideningTypes, int[] wideningTypeFlags) {
         final Class[] typesToWiden = getUnwrappingHintsByParamCount()[paramCountOfWidened];
         if (typesToWiden == null) { 
             return;  // no such overload exists; nothing to widen
@@ -162,7 +166,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         }
         
         if (bugfixed) {
-            mergeInTypesFlags(paramCountOfWidened, wideningNumTypes);
+            mergeInTypesFlags(paramCountOfWidened, wideningTypeFlags);
         }
     }
     
@@ -175,7 +179,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         final int argsLen = tmArgs.size();
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         final Object[] pojoArgs = new Object[argsLen];
-        int[] possibleNumericalTypes = null;
+        int[] typesFlags = null;
         // Going down starting from methods with args.length + 1 parameters, because we must try to match against a case
         // where all specified args are fixargs, and we have 0 varargs.
         outer: for(int paramCount = Math.min(argsLen + 1, unwrappingHintsByParamCount.length - 1); paramCount >= 0; --paramCount) {
@@ -187,9 +191,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 continue;
             }
             
-            possibleNumericalTypes = getPossibleNumericalTypes(paramCount);
-            if (possibleNumericalTypes == ALL_ZEROS_ARRAY) {
-                possibleNumericalTypes = null;
+            typesFlags = getTypeFlags(paramCount);
+            if (typesFlags == ALL_ZEROS_ARRAY) {
+                typesFlags = null;
             }
             
             // Try to unwrap the arguments
@@ -199,7 +203,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 Object pojo = unwrapper.tryUnwrap(
                         (TemplateModel)it.next(),
                         unwarappingHints[paramIdx],
-                        possibleNumericalTypes != null ? possibleNumericalTypes[paramIdx] : 0,
+                        typesFlags != null ? typesFlags[paramIdx] : 0,
                         true);
                 if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                     continue outer;
@@ -217,11 +221,11 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }
             if (bugfixed) {
-                if (possibleNumericalTypes != null) {
+                if (typesFlags != null) {
                     // Note that overloaded method selection has already accounted for overflow errors when the method
                     // was selected. So this forced conversion shouldn't cause such corruption. Except, conversion from
                     // BigDecimal is allowed to overflow for backward-compatibility.
-                    forceNumberArgumentsToParameterTypes(pojoArgsWithArray, memberDesc.getParamTypes(), possibleNumericalTypes);
+                    forceNumberArgumentsToParameterTypes(pojoArgsWithArray, memberDesc.getParamTypes(), typesFlags);
                 }
             } else {
                 BeansWrapper.coerceBigDecimals(memberDesc.getParamTypes(), pojoArgsWithArray);

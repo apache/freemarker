@@ -209,3 +209,16 @@
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray)}</@>
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList)}</@>
 </#if>
+
+<@assertFails message="no compatible overloaded">${obj.mMapOrBoolean(obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBoolean(obj.booleanAndScalarModel)}</@>
+
+<@assertEquals actual=obj.mNumberOrArray(obj.allModels) expected="mNumberOrArray(Number 1)" />
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mNumberOrArray([obj.allModels]) expected="mNumberOrArray(Object[] [1])" /></@>
+<@assertEquals actual=obj.mIntOrArray(obj.allModels) expected="mIntOrArray(int 1)" />
+<@assertFails message="no compatible overloaded">${obj.mDateOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mStringOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mBooleanOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mListOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mSetOrArray(obj.allModels)}</@>

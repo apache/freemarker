@@ -78,6 +78,11 @@ abstract class OverloadedMethodsSubset {
      */
     static final int[] ALL_ZEROS_ARRAY = new int[0];
 
+    private static final int[][] ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY = new int[1][];
+    static {
+        ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY[0] = ALL_ZEROS_ARRAY;
+    }
+
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
     
     /**
@@ -130,7 +135,7 @@ abstract class OverloadedMethodsSubset {
                     // hint for the unwrapping. For correct behavior, for each overloaded methods its own parameter
                     // types should be used as a hint. But without unwrapping the arguments, we couldn't select the
                     // overloaded method. So we had to unwrap with all possible target types of each parameter position,
-                    // which would be slow and it's result would be uncacheable (as we don't have anything usable as
+                    // which would be slow and its result would be uncacheable (as we don't have anything usable as
                     // a lookup key). So we just use this compromise.
                     unwrappingHints[paramIdx] = getCommonSupertypeForUnwrappingHint(
                             unwrappingHints[paramIdx], prepedParamTypes[paramIdx]);
@@ -333,12 +338,11 @@ abstract class OverloadedMethodsSubset {
     }
     
     /**
-     * Gets the numerical type "flags" of each parameter positions, or {@code null} if there's no method with this
-     * parameter count or if we aren't in pre-2.3.21 mode, {@link #ALL_ZEROS_ARRAY} if there were no numerical
-     * parameters. The returned {@code int}-s are one or more {@link OverloadedNumberUtil}} {@code FLAG_...} constants
-     * binary "or"-ed together.  
+     * Gets the "type flags" of each parameter positions, or {@code null} if there's no method with this parameter
+     * count or if we are in pre-2.3.21 mode, or {@link #ALL_ZEROS_ARRAY} if there were no parameters that turned
+     * on a flag. The returned {@code int}-s are one or more {@link TypeFlags} constants binary "or"-ed together.  
      */
-    final protected int[] getPossibleNumericalTypes(int paramCount) {
+    final protected int[] getTypeFlags(int paramCount) {
         return typeFlagsByParamCount != null && typeFlagsByParamCount.length > paramCount
                 ? typeFlagsByParamCount[paramCount]
                 : null;
@@ -348,31 +352,37 @@ abstract class OverloadedMethodsSubset {
      * @param dstParamCount The parameter count for which we want to merge in the type flags 
      * @param srcTypeFlagsByParamIdx If shorter than {@code dstParamCount}, it's last item will be repeated until
      *        dstParamCount length is reached. If longer, the excessive items will be ignored.
-     *        Maybe {@link #ALL_ZEROS_ARRAY}. Cant'be a 0-length array. Can't be {@code null}.
+     *        Maybe {@link #ALL_ZEROS_ARRAY}. Maybe a 0-length array. Can't be {@code null}.
      */
     final protected void mergeInTypesFlags(int dstParamCount, int[] srcTypeFlagsByParamIdx) {
         NullArgumentException.check("srcTypesFlagsByParamIdx", srcTypeFlagsByParamIdx);
-        if (dstParamCount == 0) return;
+        
+        // Special case of 0 param count:
+        if (dstParamCount == 0) {
+            if (typeFlagsByParamCount == null) {
+                typeFlagsByParamCount = ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY;
+            } else if (typeFlagsByParamCount != ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY) {
+                typeFlagsByParamCount[0] = ALL_ZEROS_ARRAY;
+            }
+            return;
+        }
         
         // Ensure that typesFlagsByParamCount[dstParamCount] exists:
         if (typeFlagsByParamCount == null) {
             typeFlagsByParamCount = new int[dstParamCount + 1][];
         } else if (typeFlagsByParamCount.length <= dstParamCount) {
-            if (srcTypeFlagsByParamIdx == null) return;
-            
             int[][] newTypeFlagsByParamCount = new int[dstParamCount + 1][];
             System.arraycopy(typeFlagsByParamCount, 0, newTypeFlagsByParamCount, 0,
                     typeFlagsByParamCount.length);
             typeFlagsByParamCount = newTypeFlagsByParamCount;
         }
         
-        final int srcParamCount = srcTypeFlagsByParamIdx.length;
-        
         int[] dstTypeFlagsByParamIdx = typeFlagsByParamCount[dstParamCount];
         if (dstTypeFlagsByParamIdx == null) {
             // This is the first method added with this number of params => no merging
             
             if (srcTypeFlagsByParamIdx != ALL_ZEROS_ARRAY) {
+                int srcParamCount = srcTypeFlagsByParamIdx.length;
                 dstTypeFlagsByParamIdx = new int[dstParamCount];
                 for (int paramIdx = 0; paramIdx < dstParamCount; paramIdx++) {
                     dstTypeFlagsByParamIdx[paramIdx]
@@ -398,10 +408,14 @@ abstract class OverloadedMethodsSubset {
             }
             
             for (int paramIdx = 0; paramIdx < dstParamCount; paramIdx++) {
-                final int srcParamTypeFlags
-                        = srcTypeFlagsByParamIdx != ALL_ZEROS_ARRAY
-                            ? srcTypeFlagsByParamIdx[paramIdx < srcParamCount ? paramIdx : srcParamCount - 1]
-                            : 0;
+                final int srcParamTypeFlags;
+                if (srcTypeFlagsByParamIdx != ALL_ZEROS_ARRAY) {
+                    int srcParamCount = srcTypeFlagsByParamIdx.length;
+                    srcParamTypeFlags = srcTypeFlagsByParamIdx[paramIdx < srcParamCount ? paramIdx : srcParamCount - 1]; 
+                } else {
+                    srcParamTypeFlags = 0;
+                }
+                
                 final int dstParamTypesFlags = dstTypeFlagsByParamIdx[paramIdx];
                 if (dstParamTypesFlags != srcParamTypeFlags) {
                     int mergedTypeFlags = dstParamTypesFlags | srcParamTypeFlags;
