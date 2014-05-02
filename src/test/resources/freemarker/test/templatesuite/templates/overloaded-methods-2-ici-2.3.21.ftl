@@ -272,6 +272,18 @@
 <@assertEquals actual=obj.mMapOrBoolean(obj.booleanAndScalarModel) expected="mMapOrBoolean(boolean true)" />
 <@assertEquals actual=obj.mMapOrBoolean(obj.allModels) expected="mMapOrBoolean(boolean true)" />
 
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.hashAndScalarModel) expected="mMapOrBooleanVarargs(Map... [{}])" />
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel) expected="mMapOrBooleanVarargs(Map... [{}, {}])" />
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.allModels) expected="mMapOrBooleanVarargs(boolean... [true])" />
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.allModels, obj.allModels) expected="mMapOrBooleanVarargs(boolean... [true, true])" />
+
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel) expected="mMapOrBooleanFixedAndVarargs(Map {})" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel) expected="mMapOrBooleanFixedAndVarargs(Map... [{}, {}])" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel, obj.hashAndScalarModel) expected="mMapOrBooleanFixedAndVarargs(Map... [{}, {}, {}])" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.allModels) expected="mMapOrBooleanFixedAndVarargs(boolean true)" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels) expected="mMapOrBooleanFixedAndVarargs(boolean... [true, true])" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels, obj.allModels) expected="mMapOrBooleanFixedAndVarargs(boolean... [true, true, true])" />
+
 <@assertEquals actual=obj.mNumberOrArray(obj.allModels) expected="mNumberOrArray(Number 1)" />
 <@assertEquals actual=obj.mNumberOrArray([obj.allModels]) expected="mNumberOrArray(Object[] [1])" />
 <@assertEquals actual=obj.mIntOrArray(obj.allModels) expected="mIntOrArray(int 1)" />

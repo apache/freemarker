@@ -643,6 +643,30 @@ public class OverloadedMethods2 {
         return "mMapOrBoolean(boolean " + v + ")";
     }
 
+    public String mMapOrBooleanVarargs(Map... v) {
+        return "mMapOrBooleanVarargs(Map... " + arrayToString(v) +")";
+    }
+
+    public String mMapOrBooleanVarargs(boolean... v) {
+        return "mMapOrBooleanVarargs(boolean... " + arrayToString(v) + ")";
+    }
+
+    public String mMapOrBooleanFixedAndVarargs(Map v) {
+        return "mMapOrBooleanFixedAndVarargs(Map " + v +")";
+    }
+
+    public String mMapOrBooleanFixedAndVarargs(boolean v) {
+        return "mMapOrBooleanFixedAndVarargs(boolean " + v + ")";
+    }
+
+    public String mMapOrBooleanFixedAndVarargs(Map... v) {
+        return "mMapOrBooleanFixedAndVarargs(Map... " + arrayToString(v) +")";
+    }
+
+    public String mMapOrBooleanFixedAndVarargs(boolean... v) {
+        return "mMapOrBooleanFixedAndVarargs(boolean... " + arrayToString(v) + ")";
+    }
+    
     public String mNumberOrArray(Number v) {
         return "mNumberOrArray(Number " + v + ")";
     }
@@ -856,6 +880,19 @@ public class OverloadedMethods2 {
     }
 
     private String arrayToString(char[] array) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < array.length; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append(array[i]);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    
+    private String arrayToString(boolean[] array) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < array.length; i++) {

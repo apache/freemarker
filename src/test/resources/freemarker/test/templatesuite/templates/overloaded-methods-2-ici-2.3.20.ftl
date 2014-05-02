@@ -213,6 +213,18 @@
 <@assertFails message="no compatible overloaded">${obj.mMapOrBoolean(obj.hashAndScalarModel)}</@>
 <@assertFails message="no compatible overloaded">${obj.mMapOrBoolean(obj.booleanAndScalarModel)}</@>
 
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.allModels, obj.allModels)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel, obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels, obj.allModels)}</@>
+
 <@assertEquals actual=obj.mNumberOrArray(obj.allModels) expected="mNumberOrArray(Number 1)" />
 <@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mNumberOrArray([obj.allModels]) expected="mNumberOrArray(Object[] [1])" /></@>
 <@assertEquals actual=obj.mIntOrArray(obj.allModels) expected="mIntOrArray(int 1)" />
