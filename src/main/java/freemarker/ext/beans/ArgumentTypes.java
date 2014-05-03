@@ -592,9 +592,9 @@ final class ArgumentTypes {
             } else if (formal.isArray()) {
                 // BeansWrapper method/constructor calls convert from List to array automatically
                 return List.class.isAssignableFrom(actual) ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
-            } else if (List.class.isAssignableFrom(formal)) {
+            } else if (actual.isArray() && formal.isAssignableFrom(List.class)) {
                 // BeansWrapper method/constructor calls convert from array to List automatically
-                return actual.isArray() ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
+                return CONVERSION_DIFFICULTY_FREEMARKER;
             } else if (actual == CharacterOrString.class
                     && (formal.isAssignableFrom(String.class)
                             || formal.isAssignableFrom(Character.class) || formal == char.class)) {
@@ -736,7 +736,7 @@ final class ArgumentTypes {
                 if (paramType.isArray() && arg instanceof List) {
                    args[i] = bw.listToArray((List) arg, paramType, null);
                 }
-                if (arg.getClass().isArray() && List.class.isAssignableFrom(paramType)) {
+                if (arg.getClass().isArray() && paramType.isAssignableFrom(List.class)) {
                     args[i] = bw.arrayToList((Object[]) arg);
                 }
                 
