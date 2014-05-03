@@ -20775,6 +20775,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Decreased the chance of choosing the wrong target Java
+                  type when unwrapping multi-typed FTL values: When unwrapping
+                  a parameter value that implements multiple FTL types (e.g.
+                  string and hash) but doesn't implement
+                  <literal>AdapterTemplateModel</literal> or
+                  <literal>WrapperTemplateModel</literal>, a decision has to
+                  be made if to what Java type the value should be unwrapped
+                  to (e.g. to <literal>String</literal> or to
+                  <literal>Map</literal>). In earlier versions that decision
+                  was made based on the most specific common super type of the
+                  parameters types of the given parameter position. However,
+                  it's quite common that the common super type is too generic,
+                  usually <literal>Object</literal>. Now
+                  <literal>BeansWrapper</literal> stores <quote>type
+                  flags</quote> for each parameter position of overloaded
+                  methods, from which it can tell whether a potential target
+                  Java type occurs in any of the overloads on the given
+                  parameter position.</para>
+                </listitem>
+
+                <listitem>
                   <para>In many cases, less specific hint class was used for
                   unwrapping than that was possible within the limitations of
                   the applied hint generation algorithm. (The unwrapping hint
