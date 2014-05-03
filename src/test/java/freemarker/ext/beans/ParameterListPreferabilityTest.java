@@ -8,9 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import freemarker.template.utility.NumberUtil;
-
 import junit.framework.TestCase;
+import freemarker.template.utility.NumberUtil;
 
 @SuppressWarnings("boxing")
 public class ParameterListPreferabilityTest extends TestCase {
@@ -192,6 +191,23 @@ public class ParameterListPreferabilityTest extends TestCase {
                     new Class[] { Character.class }
                 },
                 new Object[] { 'x' });
+    }
+    
+    public void testCharIsMoreSpecificThanString() {
+        testAllCmpPermutationsInc(
+                new Class[][] {
+                    new Class[] { char.class },
+                    new Class[] { Character.class },
+                    new Class[] { String.class }
+                },
+                new Object[] { "s" });
+        testAllCmpPermutationsInc(
+                new Class[][] {
+                    new Class[] { char.class },
+                    new Class[] { Character.class },
+                    new Class[] { String.class }
+                },
+                new Object[] { 'c' });
     }
     
     public void testClassHierarchy() {

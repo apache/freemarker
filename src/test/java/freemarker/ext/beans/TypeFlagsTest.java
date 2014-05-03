@@ -86,7 +86,7 @@ public class TypeFlagsTest extends TestCase {
         checkTypeFlags(MultiNumTypeC.class, "m2",
                 TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT 
                 | TypeFlags.SHORT | TypeFlags.LONG | TypeFlags.FLOAT
-                | TypeFlags.ACCEPTS_NUMBER | TypeFlags.ACCEPTS_CHAR
+                | TypeFlags.ACCEPTS_NUMBER | TypeFlags.CHARACTER
                 );
 
         checkTypeFlags(MultiNumTypeC.class, "m3",
@@ -101,7 +101,7 @@ public class TypeFlagsTest extends TestCase {
         
         checkTypeFlags(MultiNumTypeC.class, "m4",
                 TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.FLOAT | TypeFlags.ACCEPTS_NUMBER
-                | TypeFlags.ACCEPTS_CHAR
+                | TypeFlags.CHARACTER
                 );
         
         checkTypeFlags(MultiNumTypeC.class, "m5",
@@ -249,10 +249,10 @@ public class TypeFlagsTest extends TestCase {
                 );
         
         checkTypeFlags(VarArgsC.class, "m13",
-                TypeFlags.ACCEPTS_CHAR,
+                TypeFlags.CHARACTER,
                 TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER);
         checkTypeFlags(VarArgsC.class, "m13",
-                TypeFlags.ACCEPTS_CHAR,
+                TypeFlags.CHARACTER,
                 TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
                 TypeFlags.DOUBLE | TypeFlags.UNKNOWN_NUMERICAL_TYPE
                 | TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.ACCEPTS_NUMBER,
@@ -358,8 +358,8 @@ public class TypeFlagsTest extends TestCase {
         
         checkTypeFlags(AcceptanceNonoverloadedC.class, "mCollection", TypeFlags.ACCEPTS_SET | TypeFlags.ACCEPTS_LIST);
         
-        checkTypeFlags(AcceptanceNonoverloadedC.class, "mChar1", TypeFlags.ACCEPTS_CHAR);
-        checkTypeFlags(AcceptanceNonoverloadedC.class, "mChar2", TypeFlags.ACCEPTS_CHAR);
+        checkTypeFlags(AcceptanceNonoverloadedC.class, "mChar1", TypeFlags.CHARACTER);
+        checkTypeFlags(AcceptanceNonoverloadedC.class, "mChar2", TypeFlags.CHARACTER);
         
         checkTypeFlags(AcceptanceNonoverloadedC.class, "mArray1", TypeFlags.ACCEPTS_ARRAY);
         checkTypeFlags(AcceptanceNonoverloadedC.class, "mArray2", TypeFlags.ACCEPTS_ARRAY);
@@ -374,7 +374,7 @@ public class TypeFlagsTest extends TestCase {
         assertTrue((TypeFlags.ACCEPTS_ANY_OBJECT & TypeFlags.ACCEPTS_LIST) != 0);
         assertTrue((TypeFlags.ACCEPTS_ANY_OBJECT & TypeFlags.ACCEPTS_SET) != 0);
         assertTrue((TypeFlags.ACCEPTS_ANY_OBJECT & TypeFlags.ACCEPTS_ARRAY) != 0);
-        assertTrue((TypeFlags.ACCEPTS_ANY_OBJECT & TypeFlags.ACCEPTS_CHAR) != 0);
+        assertTrue((TypeFlags.ACCEPTS_ANY_OBJECT & TypeFlags.CHARACTER) == 0);  // deliberatly 0 
         
         checkTypeFlags(AcceptanceNonoverloadedC.class, "mMapDate", 0);
         
@@ -443,7 +443,7 @@ public class TypeFlagsTest extends TestCase {
                 | TypeFlags.ACCEPTS_DATE | TypeFlags.ACCEPTS_LIST);
         checkTypeFlags(AcceptanceOverloadedC.class, "mBoolean", TypeFlags.ACCEPTS_BOOLEAN);
         checkTypeFlags(AcceptanceOverloadedC.class, "mStringChar",
-                TypeFlags.ACCEPTS_STRING | TypeFlags.ACCEPTS_CHAR);
+                TypeFlags.ACCEPTS_STRING | TypeFlags.CHARACTER);
         checkTypeFlags(AcceptanceOverloadedC.class, "mStringFile", TypeFlags.ACCEPTS_STRING);
         checkTypeFlags(AcceptanceOverloadedC.class, "mMapObject", TypeFlags.ACCEPTS_ANY_OBJECT);
         checkTypeFlags(AcceptanceOverloadedC.class, "mSetMap", TypeFlags.ACCEPTS_MAP | TypeFlags.ACCEPTS_SET);
@@ -518,7 +518,7 @@ public class TypeFlagsTest extends TestCase {
         checkTypeFlags(AcceptanceVarArgsC.class, "m3",
                 TypeFlags.ACCEPTS_BOOLEAN | TypeFlags.ACCEPTS_STRING,
                 TypeFlags.ACCEPTS_BOOLEAN | TypeFlags.ACCEPTS_MAP,
-                TypeFlags.ACCEPTS_BOOLEAN | TypeFlags.ACCEPTS_CHAR,
+                TypeFlags.ACCEPTS_BOOLEAN | TypeFlags.CHARACTER,
                 TypeFlags.ACCEPTS_BOOLEAN);
     }
     

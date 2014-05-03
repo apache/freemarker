@@ -731,6 +731,67 @@ public class OverloadedMethods2 {
         return "mSetOrArray(Object[] " + arrayToString(v) + ")";
     }
     
+    public String mCharNonOverloaded(char c) {
+        return "mCharNonOverloaded(char " + c + ")";
+    }
+
+    public String mCharacterNonOverloaded(Character c) {
+        return "mCharacterNonOverloaded(Character " + c + ")";
+    }
+    
+    public String mCharOrCharacterOverloaded(char c) {
+        return "mCharOrCharacterOverloaded(char " + c + ")";
+    }
+
+    public String mCharOrCharacterOverloaded(Character c) {
+        return "mCharOrCharacterOverloaded(Character " + c + ")";
+    }
+
+    public String mCharOrBooleanOverloaded(char c) {
+        return "mCharOrBooleanOverloaded(char " + c + ")";
+    }
+
+    public String mCharOrBooleanOverloaded(boolean b) {
+        return "mCharOrBooleanOverloaded(boolean " + b + ")";
+    }
+
+    public String mCharOrStringOverloaded(char c, boolean b) {
+        return "mCharOrStringOverloaded(char " + c + ", boolean " + b + ")";
+    }
+
+    public String mCharOrStringOverloaded(String s, int i) {
+        return "mCharOrStringOverloaded(String " + s + ", int " + i + ")";
+    }
+
+    public String mCharacterOrStringOverloaded(Character c, boolean b) {
+        return "mCharacterOrStringOverloaded(Character " + c + ", boolean " + b + ")";
+    }
+
+    public String mCharacterOrStringOverloaded(String s, int i) {
+        return "mCharacterOrStringOverloaded(String " + s + ", int " + i + ")";
+    }
+    
+    public String mCharOrStringOverloaded2(String s) {
+        return "mCharOrStringOverloaded2(String " + s + ")";
+    }
+
+    public String mCharOrStringOverloaded2(char c) {
+        return "mCharOrStringOverloaded2(char " + c + ")";
+    }
+    
+    public String mCharacterOrStringOverloaded2(String s) {
+        return "mCharacterOrStringOverloaded2(String " + s + ")";
+    }
+
+    public String mCharacterOrStringOverloaded2(Character c) {
+        return "mCharacterOrStringOverloaded2(Character " + c + ")";
+    }
+    
+
+    public String getJavaString() {
+        return "s";
+    }
+    
     public List getJavaStringList() {
         List list = new ArrayList();
         list.add("a");

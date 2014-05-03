@@ -293,3 +293,18 @@
 <@assertEquals actual=obj.mMapOrArray(obj.allModels) expected="mMapOrArray(Map {})" />
 <@assertEquals actual=obj.mListOrArray(obj.allModels) expected="mListOrArray(List [])" />
 <@assertEquals actual=obj.mSetOrArray(obj.allModels) expected="mSetOrArray(Set [])" />
+
+<@assertEquals actual=obj.mCharOrCharacterOverloaded('c') expected="mCharOrCharacterOverloaded(char c)" />
+<@assertEquals actual=obj.mCharOrCharacterOverloaded(obj.javaString) expected="mCharOrCharacterOverloaded(char s)" />
+<@assertEquals actual=obj.mCharOrCharacterOverloaded(null) expected="mCharOrCharacterOverloaded(Character null)" />
+
+<@assertEquals actual=obj.mCharOrBooleanOverloaded('c') expected="mCharOrBooleanOverloaded(char c)" />
+<@assertEquals actual=obj.mCharOrBooleanOverloaded(true) expected="mCharOrBooleanOverloaded(boolean true)" />
+
+<@assertEquals actual=obj.mCharOrStringOverloaded('c', true) expected="mCharOrStringOverloaded(char c, boolean true)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded('c', true) expected="mCharacterOrStringOverloaded(Character c, boolean true)" />
+
+<@assertEquals actual=obj.mCharOrStringOverloaded2('c') expected="mCharOrStringOverloaded2(char c)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('c') expected="mCharacterOrStringOverloaded2(Character c)" />
+<@assertEquals actual=obj.mCharOrStringOverloaded2('ss') expected="mCharOrStringOverloaded2(String ss)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('ss') expected="mCharacterOrStringOverloaded2(String ss)" />

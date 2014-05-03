@@ -50,9 +50,20 @@
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(['a', 'b', 'c']) expected="mStringArrayVarargsOverloaded4(List[] [[a, b, c]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4('a', 'b', 'c') expected="mStringArrayVarargsOverloaded4(String[] [a, b, c])" />
 
-<#-- Fixed arg solutions have priorty: -->
+<#-- Fixed arg solutions have priority: -->
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded4(List[] [[a, b]])", "mStringArrayVarargsOverloaded4(String[] [a, b])") />
 
 <#-- Choses between the vararg solutions: -->
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+
+<#-- Until there's no overloading String->Character conversion work: -->
+<@assertEquals actual=obj.mCharNonOverloaded('c') expected="mCharNonOverloaded(char c)" />
+<@assertEquals actual=obj.mCharNonOverloaded(obj.javaString) expected="mCharNonOverloaded(char s)" />
+<@assertEquals actual=obj.mCharacterNonOverloaded('c') expected="mCharacterNonOverloaded(Character c)" />
+<@assertEquals actual=obj.mCharacterNonOverloaded(obj.javaString) expected="mCharacterNonOverloaded(Character s)" />
+
+<@assertEquals actual=obj.mCharOrStringOverloaded('s', 1) expected="mCharOrStringOverloaded(String s, int 1)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded('s', 1) expected="mCharacterOrStringOverloaded(String s, int 1)" />
+<@assertEquals actual=obj.mCharOrStringOverloaded2('ss') expected="mCharOrStringOverloaded2(String ss)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('ss') expected="mCharacterOrStringOverloaded2(String ss)" />

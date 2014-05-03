@@ -234,3 +234,12 @@
 <@assertFails message="no compatible overloaded">${obj.mMapOrArray(obj.allModels)}</@>
 <@assertFails message="no compatible overloaded">${obj.mListOrArray(obj.allModels)}</@>
 <@assertFails message="no compatible overloaded">${obj.mSetOrArray(obj.allModels)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mCharOrCharacterOverloaded(null)}</@>
+<@assertFails message="no compatible overloaded">${obj.mCharOrBooleanOverloaded('c')}</@>
+<@assertEquals actual=obj.mCharOrBooleanOverloaded(true) expected="mCharOrBooleanOverloaded(boolean true)" />
+
+<@assertFails message="no compatible overloaded">${obj.mCharOrStringOverloaded('c', true)}</@>
+<@assertFails message="no compatible overloaded">${obj.mCharacterOrStringOverloaded('c', true)}</@>
+<@assertEquals actual=obj.mCharOrStringOverloaded2('c') expected="mCharOrStringOverloaded2(String c)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('c') expected="mCharacterOrStringOverloaded2(String c)" />

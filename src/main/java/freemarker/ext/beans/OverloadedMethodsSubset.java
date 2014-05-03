@@ -349,8 +349,11 @@ abstract class OverloadedMethodsSubset {
     }
 
     /**
+     * Updates the content of the {@link #typeFlagsByParamCount} field with the parameter type flags of a method.
+     * Don't call this when {@link #bugfixed} is {@code false}! 
+     * 
      * @param dstParamCount The parameter count for which we want to merge in the type flags 
-     * @param srcTypeFlagsByParamIdx If shorter than {@code dstParamCount}, it's last item will be repeated until
+     * @param srcTypeFlagsByParamIdx If shorter than {@code dstParamCount}, its last item will be repeated until
      *        dstParamCount length is reached. If longer, the excessive items will be ignored.
      *        Maybe {@link #ALL_ZEROS_ARRAY}. Maybe a 0-length array. Can't be {@code null}.
      */

@@ -316,7 +316,7 @@ final class ArgumentTypes {
                                     winerParam = 1;
                                     paramList1VeryStrongWinCnt++;
                                 }
-                            } else {  // No list to array conversion
+                            } else {  // No list to/from array conversion
                                 final int r = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
                                 if (r > 0) {
                                     winerParam = 1;
@@ -465,7 +465,11 @@ final class ArgumentTypes {
             return 2;
         } else if (nonPrimParamType1.isAssignableFrom(nonPrimParamType2)) {
             return -2;
-        } else  {
+        } if (nonPrimParamType1 == Character.class && nonPrimParamType2 == String.class) {
+            return 2;  // A character is a 1 long string in FTL, so it's like a string subtype.
+        } if (nonPrimParamType1 == String.class && nonPrimParamType2 == Character.class) {
+            return -2;
+        } else {
             return 0;  // unrelated types
         }
     }
@@ -546,11 +550,10 @@ final class ArgumentTypes {
     }
 
     /**
-     * Determines whether a type represented by a class object is
-     * convertible to another type represented by a class object using a 
-     * method invocation conversion, treating object types of primitive 
-     * types as if they were primitive types (that is, a Boolean actual 
-     * parameter type matches boolean primitive formal type). This behavior
+     * Determines whether a type is convertible to another type via 
+     * method invocation conversion, and if so, what kind of conversion is needed.
+     * It treates the object type counterpart of primitive types as if they were the primitive types
+     * (that is, a Boolean actual parameter type matches boolean primitive formal type). This behavior
      * is because this method is used to determine applicable methods for 
      * an actual parameter list, and primitive types are represented by 
      * their object duals in reflective method calls.
@@ -562,19 +565,25 @@ final class ArgumentTypes {
      */
     private int isMethodInvocationConvertible(final Class formal, final Class actual) {
         // Check for identity or widening reference conversion
-        if(formal.isAssignableFrom(actual)) {
+        if(formal.isAssignableFrom(actual) && actual != CharacterOrString.class) {
             return CONVERSION_DIFFICULTY_REFLECTION;
-        } else if (actual == Null.class && bugfixed) {
-            return formal.isPrimitive() ? CONVERSION_DIFFICULTY_IMPOSSIBLE : CONVERSION_DIFFICULTY_REFLECTION;
         } else if (bugfixed) {
             final Class formalNP;
             if (formal.isPrimitive()) {
+                if (actual == Null.class) {
+                    return CONVERSION_DIFFICULTY_IMPOSSIBLE;
+                }
+                
                 formalNP = ClassUtil.primitiveClassToBoxingClass(formal);
                 if (actual == formalNP) {
                     // Character and char, etc.
                     return CONVERSION_DIFFICULTY_REFLECTION;
                 }
-            } else {
+            } else {  // formal is non-primitive
+                if (actual == Null.class) {
+                    return CONVERSION_DIFFICULTY_REFLECTION;
+                }
+                
                 formalNP = formal;
             }
             if (Number.class.isAssignableFrom(actual) && Number.class.isAssignableFrom(formalNP)) {
@@ -586,6 +595,10 @@ final class ArgumentTypes {
             } else if (List.class.isAssignableFrom(formal)) {
                 // BeansWrapper method/constructor calls convert from array to List automatically
                 return actual.isArray() ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
+            } else if (actual == CharacterOrString.class
+                    && (formal.isAssignableFrom(String.class)
+                            || formal.isAssignableFrom(Character.class) || formal == char.class)) {
+                return CONVERSION_DIFFICULTY_FREEMARKER;
             } else {
                 return CONVERSION_DIFFICULTY_IMPOSSIBLE;
             }
@@ -594,7 +607,8 @@ final class ArgumentTypes {
             // - Doesn't convert *to* non-primitive numerical types (unless the argument is a BigDecimal).
             //   (This is like in Java language, which also doesn't coerce to non-primitive numerical types.) 
             // - Doesn't support BigInteger conversions
-            // - Doesn't support NumberWithFallbackType-s. Those are only produced in bugfixed mode anyway.
+            // - Doesn't support NumberWithFallbackType-s and CharacterOrString-s. Those are only produced in bugfixed
+            //   mode anyway.
             // - Doesn't support conversion between array and List
             if(formal.isPrimitive()) {
                 // Check for boxing with widening primitive conversion. Note that 
@@ -709,12 +723,12 @@ final class ArgumentTypes {
                 final Object arg = args[i];
                 if (arg == null) continue;
                 
-                // Right now the cases that we have to handle here is conversion between List and array types, in both
-                // directions. Java reflection won't do such conversion, so we have to.
-                // All other reflection-incompatible conversions were already addressed by the unwrapping. The reason
+                // Handle conversion between List and array types, in both directions. Java reflection won't do such
+                // conversion, so we have to.
+                // Most reflection-incompatible conversions were already addressed by the unwrapping. The reason
                 // this one isn't is that for overlapped methods the hint of a given parameter position is often vague,
                 // so we may end up with a List even if some parameter types at that position are arrays (remember, we
-                // have chose one unwrapping target type, despite that we have many possible overloaded methods), or
+                // have to chose one unwrapping target type, despite that we have many possible overloaded methods), or
                 // the other way around (that happens when AdapterTemplateMoldel returns an array).
                 // Later, the overloaded method selection will assume that a List argument is applicable to an array
                 // parameter, and that an array argument is applicable to a List argument, so we end up with this
@@ -722,8 +736,19 @@ final class ArgumentTypes {
                 if (paramType.isArray() && arg instanceof List) {
                    args[i] = bw.listToArray((List) arg, paramType, null);
                 }
-                if (List.class.isAssignableFrom(paramType) && arg.getClass().isArray()) {
+                if (arg.getClass().isArray() && List.class.isAssignableFrom(paramType)) {
                     args[i] = bw.arrayToList((Object[]) arg);
+                }
+                
+                // Handle the conversion from CharacterOrString to Character or String:
+                if (arg instanceof CharacterOrString) {
+                    if (paramType == Character.class || paramType == char.class
+                            || (!paramType.isAssignableFrom(String.class)
+                                    && paramType.isAssignableFrom(Character.class))) {
+                        args[i] = new Character(((CharacterOrString) arg).getAsChar());
+                    } else {
+                            args[i] = ((CharacterOrString) arg).getAsString();
+                    }
                 }
             }
         }

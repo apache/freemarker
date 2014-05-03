@@ -20775,6 +20775,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>FTL string to Java
+                  <literal>char</literal>/<literal>Character</literal>
+                  conversion now works for overloaded method parameters;
+                  earlier it has worked for non-overloaded methods only. If
+                  the string length is 1, it will be seen as compatible with
+                  parameters with <literal>char</literal> or
+                  <literal>Character</literal> type.</para>
+                </listitem>
+
+                <listitem>
                   <para>Decreased the chance of choosing the wrong target Java
                   type when unwrapping multi-typed FTL values: When unwrapping
                   a parameter value that implements multiple FTL types (e.g.

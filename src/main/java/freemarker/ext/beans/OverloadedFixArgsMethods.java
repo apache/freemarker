@@ -104,8 +104,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
             Object pojo = unwrapper.tryUnwrap(
                     (TemplateModel) it.next(),
                     unwarppingHints[i],
-                    typeFlags != null ? typeFlags[i] : 0,
-                    true);
+                    typeFlags != null ? typeFlags[i] : 0);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                 return EmptyMemberAndArguments.NO_SUCH_METHOD;
             }

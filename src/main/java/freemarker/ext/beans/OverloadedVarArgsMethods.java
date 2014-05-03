@@ -203,8 +203,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
                 Object pojo = unwrapper.tryUnwrap(
                         (TemplateModel)it.next(),
                         unwarappingHints[paramIdx],
-                        typesFlags != null ? typesFlags[paramIdx] : 0,
-                        true);
+                        typesFlags != null ? typesFlags[paramIdx] : 0);
                 if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
                     continue outer;
                 }

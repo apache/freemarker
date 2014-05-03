@@ -1085,22 +1085,20 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
 
     /**
-     * Same as {@link #tryUnwrap(TemplateModel, Class, int, boolean)} with 0 and <tt>false</tt> last arguments.
+     * Same as {@link #tryUnwrap(TemplateModel, Class, int)} with 0 type flags argument.
      */
     Object tryUnwrap(TemplateModel model, Class hint) throws TemplateModelException
     {
-        return tryUnwrap(model, hint, 0, false);
+        return tryUnwrap(model, hint, 0);
     }
     
     /**
-     * @param typeFlags Used when unwrapping for overloaded methods and so the hint is too generic; 0 otherwise.
-     *        This is usually not used if the hint is already a type specific enough type. (With overloaded methods the
-     *        hint is often {@link Number} or {@link Object}, because the unwrapping has to happen before choosing the
-     *        concrete overloaded method.)
-     * @param overloadedMode Set true {@code true} when unwrapping for an overloaded method parameter
+     * @param typeFlags Used when unwrapping for overloaded methods and so the {@code hint} is possibly too generic.
+     *        Must be 0 when unwrapping parameter values for non-overloaded methods, also if {@link #is2321Bugfixed()}
+     *        is {@code false}.
      * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
      */
-    Object tryUnwrap(TemplateModel model, Class hint, int typeFlags, boolean overloadedMode) 
+    Object tryUnwrap(TemplateModel model, Class hint, int typeFlags) 
     throws TemplateModelException
     {
         Object res = tryUnwrap(model, hint, typeFlags, null);
@@ -1254,7 +1252,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         
         // Since the hint class was of no help initially, now we use
-        // a quite arbitrary order of in which we walk through the TemplateModel subinterfaces, and unwrapp them to
+        // a quite arbitrary order in which we walk through the TemplateModel subinterfaces, and unwrapp them to
         // their "natural" Java correspondent. We still try exclude unwrappings that won't fit the target parameter
         // type(s). This is mostly important because of multi-typed FTL values that could be unwrapped on multiple ways.
         int itf = typeFlags; // Iteration's Type Flags. Should be always 0 for non-overloaded and when !is2321Bugfixed.
@@ -1275,10 +1273,24 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                     return date;
                 }
             }
-            if ((itf == 0 || (itf & TypeFlags.ACCEPTS_STRING) != 0)
+            if ((itf == 0 || (itf & (TypeFlags.ACCEPTS_STRING | TypeFlags.CHARACTER)) != 0)
                     && model instanceof TemplateScalarModel
                     && (itf != 0 || hint.isAssignableFrom(STRING_CLASS))) {
-                return ((TemplateScalarModel) model).getAsString();
+                String strVal = ((TemplateScalarModel) model).getAsString();
+                if (itf == 0 || (itf & TypeFlags.CHARACTER) == 0) {
+                    return strVal;
+                } else { // TypeFlags.CHAR == 1
+                    if (strVal.length() == 1) {
+                        if ((itf & TypeFlags.ACCEPTS_STRING) != 0) {
+                            return new CharacterOrString(strVal);
+                        } else {
+                            return new Character(strVal.charAt(0));
+                        }
+                    } else if ((itf & TypeFlags.ACCEPTS_STRING) != 0) {
+                        return strVal; 
+                    }
+                    // It had to be unwrapped to Character, but the string length wasn't 1 => Fall through
+                }
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
                     && model instanceof TemplateBooleanModel

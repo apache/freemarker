@@ -37,10 +37,14 @@ class TypeFlags {
     static final int ACCEPTS_LIST = 0x10000;
     static final int ACCEPTS_SET = 0x20000;
     static final int ACCEPTS_ARRAY = 0x40000;
-    static final int ACCEPTS_CHAR = 0x80000;
+    
+    /**
+     * Indicates the presence of the char or Character type
+     */
+    static final int CHARACTER = 0x80000;
     
     static final int ACCEPTS_ANY_OBJECT = ACCEPTS_NUMBER | ACCEPTS_DATE | ACCEPTS_STRING | ACCEPTS_BOOLEAN
-            | ACCEPTS_MAP | ACCEPTS_LIST | ACCEPTS_SET | ACCEPTS_ARRAY | ACCEPTS_CHAR;
+            | ACCEPTS_MAP | ACCEPTS_LIST | ACCEPTS_SET | ACCEPTS_ARRAY;
     
     static final int MASK_KNOWN_INTEGERS = BYTE | SHORT | INTEGER | LONG | BIG_INTEGER;
     static final int MASK_KNOWN_NONINTEGERS = FLOAT | DOUBLE | BIG_DECIMAL;
@@ -60,7 +64,7 @@ class TypeFlags {
             else if (pClass == Float.TYPE) return FLOAT | ACCEPTS_NUMBER;
             else if (pClass == Byte.TYPE) return BYTE | ACCEPTS_NUMBER;
             else if (pClass == Short.TYPE) return SHORT | ACCEPTS_NUMBER;
-            else if (pClass == Character.TYPE) return ACCEPTS_CHAR;
+            else if (pClass == Character.TYPE) return CHARACTER;
             else if (pClass == Boolean.TYPE) return ACCEPTS_BOOLEAN;
             else return 0;
         } else if (Number.class.isAssignableFrom(pClass)) {
@@ -95,9 +99,11 @@ class TypeFlags {
             if (pClass.isAssignableFrom(Set.class)) {
                 flags |= ACCEPTS_SET;
             }
-            if (pClass.isAssignableFrom(Character.class)) {
-                flags |= ACCEPTS_CHAR;
+            
+            if (pClass == Character.class) {
+                flags |= CHARACTER;
             }
+            
             return flags;
         } 
     }
