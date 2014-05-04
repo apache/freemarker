@@ -85,11 +85,11 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         final int argCount = tmArgs.size();
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         if(unwrappingHintsByParamCount.length <= argCount) {
-            return EmptyMemberAndArguments.NO_SUCH_METHOD;
+            return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENT;
         }
         Class[] unwarppingHints = unwrappingHintsByParamCount[argCount];
         if(unwarppingHints == null) {
-            return EmptyMemberAndArguments.NO_SUCH_METHOD;
+            return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENT;
         }
         
         Object[] pojoArgs = new Object[argCount];
@@ -106,7 +106,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
                     unwarppingHints[i],
                     typeFlags != null ? typeFlags[i] : 0);
             if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
-                return EmptyMemberAndArguments.NO_SUCH_METHOD;
+                return EmptyMemberAndArguments.noCompatibleOverload(i + 1);
             }
             pojoArgs[i] = pojo;
         }
@@ -126,7 +126,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
             }
             return new MemberAndArguments(memberDesc, pojoArgs);
         } else {
-            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc);
+            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc, pojoArgs);
         }
     }
     

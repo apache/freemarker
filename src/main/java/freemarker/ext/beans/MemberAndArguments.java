@@ -12,11 +12,17 @@ class MemberAndArguments extends MaybeEmptyMemberAndArguments {
     private final CallableMemberDescriptor callableMemberDesc;
     private final Object[] args;
     
+    /**
+     * @param args The already unwrapped arguments
+     */
     MemberAndArguments(CallableMemberDescriptor memberDesc, Object[] args) {
         this.callableMemberDesc = memberDesc;
         this.args = args;
     }
     
+    /**
+     * The already unwrapped arguments.
+     */
     Object[] getArgs() {
         return args;
     }

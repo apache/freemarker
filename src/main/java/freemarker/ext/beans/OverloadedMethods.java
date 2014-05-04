@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import freemarker.core.BugException;
 import freemarker.core._DelayedConversionToString;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
@@ -105,12 +104,6 @@ final class OverloadedMethods {
         }
     }
     
-    private static final String MSG_PART_OVEARLOAD_WAS_FOUND_FOR_ACTUAL_PARAMETER_TYPES
-            = " overloaded variation was found for the signature deducated from the actual parameter values:\n";
-
-    private static final String MSG_PART_THE_MATCHING_OVERLOAD_WAS_SEARCHED_AMONG
-            = "\nThe matching overload was searched among:\n";
-    
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
         MaybeEmptyMemberAndArguments fixArgsRes = null;
@@ -122,38 +115,45 @@ final class OverloadedMethods {
                         instanceof MemberAndArguments) {
             return (MemberAndArguments) varargsRes;
         } else {
-            MaybeEmptyMemberAndArguments res = getClosestToSuccess(fixArgsRes, varargsRes);
-            if (res == EmptyMemberAndArguments.NO_SUCH_METHOD) {
-                throw new _TemplateModelException(new Object[] {
-                        "No compatible",
-                        MSG_PART_OVEARLOAD_WAS_FOUND_FOR_ACTUAL_PARAMETER_TYPES,
-                        getActualParameterTypes(tmArgs),
-                        MSG_PART_THE_MATCHING_OVERLOAD_WAS_SEARCHED_AMONG,
-                        memberListToString() });
-            } else if (res == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
-                throw new _TemplateModelException(new Object[] {
-                        "Multiple compatible",
-                        MSG_PART_OVEARLOAD_WAS_FOUND_FOR_ACTUAL_PARAMETER_TYPES,
-                        getActualParameterTypes(tmArgs),
-                        MSG_PART_THE_MATCHING_OVERLOAD_WAS_SEARCHED_AMONG,
-                        memberListToString() });
-            } else {
-                throw new BugException("Unsupported EmptyMemberAndArguments: " + res); 
+            final Object[] argsErrorMsg;
+            {
+                final EmptyMemberAndArguments fixArgsEmptyRes = (EmptyMemberAndArguments) fixArgsRes; 
+                final EmptyMemberAndArguments varargsEmptyRes = (EmptyMemberAndArguments) varargsRes;
+                if (varargsEmptyRes != null) {
+                    if (fixArgsEmptyRes == null || fixArgsEmptyRes.isNumberOfArgumentsWrong()) {
+                        argsErrorMsg = toErrorMessage(varargsEmptyRes, tmArgs);
+                    } else {
+                        argsErrorMsg = new Object[] {
+                                "When trying to call the non-varargs overloads:\n",
+                                toErrorMessage(fixArgsEmptyRes, tmArgs),
+                                "\nWhen trying to call the varargs overloads:\n",
+                                toErrorMessage(varargsEmptyRes, null)
+                        };
+                    }
+                } else {
+                    argsErrorMsg = toErrorMessage((EmptyMemberAndArguments) fixArgsRes, tmArgs);
+                }
             }
+            throw new _TemplateModelException(new Object[] {
+                    argsErrorMsg,
+                    "\nThe matching overload was searched among these members:\n",
+                    memberListToString()});
         }
     }
 
-    private MaybeEmptyMemberAndArguments getClosestToSuccess(MaybeEmptyMemberAndArguments res1,
-            MaybeEmptyMemberAndArguments res2) {
-        if (res1 == null) return res2;
-        if (res2 == null) return res1;
-        if (res1 == EmptyMemberAndArguments.AMBIGUOUS_METHOD || res2 == EmptyMemberAndArguments.AMBIGUOUS_METHOD) {
-            return EmptyMemberAndArguments.AMBIGUOUS_METHOD; 
-        }
-        if (res1 == EmptyMemberAndArguments.NO_SUCH_METHOD || res2 == EmptyMemberAndArguments.NO_SUCH_METHOD) {
-            return EmptyMemberAndArguments.NO_SUCH_METHOD; 
-        }
-        throw new BugException("Unhandled: " + res1 + " and " + res2);
+    private Object[] toErrorMessage(EmptyMemberAndArguments res, List/*<TemplateModel>*/ tmArgs) {
+        final Object[] unwrappedArgs = res.getUnwrappedArguments();
+        return new Object[] {
+                res.getErrorDescription(),
+                tmArgs != null
+                        ? new Object[] {
+                                "\nThe FTL type of the argument values were: ", getTMActualParameterTypes(tmArgs), "." }
+                        : (Object) "",
+                unwrappedArgs != null
+                        ? new Object[] {
+                                "\nThe Java type of the argument values were: ",
+                                getUnwrappedActualParameterTypes(unwrappedArgs) + "." }
+                        : (Object) ""};
     }
 
     private _DelayedConversionToString memberListToString() {
@@ -196,49 +196,59 @@ final class OverloadedMethods {
         };
     }
     
-    /**
-     * The description of the signature deduced from the method/constructor call, used in error messages.
-     */
-    private _DelayedConversionToString getActualParameterTypes(List arguments) {
+    private _DelayedConversionToString getTMActualParameterTypes(List arguments) {
         final String[] argumentTypeDescs = new String[arguments.size()];
         for (int i = 0; i < arguments.size(); i++) {
             argumentTypeDescs[i] = ClassUtil.getFTLTypeDescription((TemplateModel) arguments.get(i));
         }
         
-        return new _DelayedConversionToString(null) {
+        return new DelayedCallSignatureToString(argumentTypeDescs) {
 
-            protected String doConversion(Object obj) {
-                final CallableMemberDescriptor firstMemberDesc;
-                Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
-                if (fixArgMethodsIter.hasNext()) {
-                    firstMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
-                } else {
-                    Iterator varArgMethods = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
-                    if (varArgMethods != null && varArgMethods.hasNext()) {
-                        firstMemberDesc = (CallableMemberDescriptor) varArgMethods.next();
-                    } else {
-                        firstMemberDesc = null;
-                    }
-                }
-                
-                StringBuffer sb = new StringBuffer();
-                if (firstMemberDesc != null) {
-                    sb.append(firstMemberDesc.getName());
-                } else {
-                    sb.append("???");
-                }
-                
-                sb.append('(');
-                for (int i = 0; i < argumentTypeDescs.length; i++) {
-                    if (i != 0) sb.append(", ");
-                    sb.append(argumentTypeDescs[i]);
-                }
-                sb.append(')');
-                
-                return sb.toString();
+            String argumentToString(Object argType) {
+                return (String) argType;
             }
             
         };
+    }
+    
+    private Object getUnwrappedActualParameterTypes(Object[] unwrappedArgs) {
+        final Class[] argumentTypes = new Class[unwrappedArgs.length];
+        for (int i = 0; i < unwrappedArgs.length; i++) {
+            Object unwrappedArg = unwrappedArgs[i];
+            argumentTypes[i] = unwrappedArg != null ? unwrappedArg.getClass() : null;
+        }
+        
+        return new DelayedCallSignatureToString(argumentTypes) {
+
+            String argumentToString(Object argType) {
+                return argType != null
+                        ? ClassUtil.getShortClassName((Class) argType)
+                        : ClassUtil.getShortClassNameOfObject(null);
+            }
+            
+        };
+    }
+    
+    private abstract class DelayedCallSignatureToString extends _DelayedConversionToString {
+
+        public DelayedCallSignatureToString(Object[] argTypeArray) {
+            super(argTypeArray);
+        }
+
+        protected String doConversion(Object obj) {
+            Object[] argTypes = (Object[]) obj;
+            
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < argTypes.length; i++) {
+                if (i != 0) sb.append(", ");
+                sb.append(argumentToString(argTypes[i]));
+            }
+            
+            return sb.toString();
+        }
+        
+        abstract String argumentToString(Object argType);
+        
     }
 
 }

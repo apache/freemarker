@@ -186,7 +186,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             Class[] unwarappingHints = unwrappingHintsByParamCount[paramCount];
             if(unwarappingHints == null) {
                 if (paramCount == 0) {
-                    return EmptyMemberAndArguments.NO_SUCH_METHOD;
+                    return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENT;
                 }
                 continue;
             }
@@ -216,8 +216,8 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
             Object[] pojoArgsWithArray = replaceVarargsSectionWithArray(pojoArgs, tmArgs, memberDesc, unwrapper);
-            if(pojoArgsWithArray == null) {
-                return EmptyMemberAndArguments.NO_SUCH_METHOD;
+            if(pojoArgsWithArray instanceof Integer[]) {
+                return EmptyMemberAndArguments.noCompatibleOverload(((Integer[]) pojoArgsWithArray)[0].intValue());
             }
             if (bugfixed) {
                 if (typesFlags != null) {
@@ -231,7 +231,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             }
             return new MemberAndArguments(memberDesc, pojoArgsWithArray);
         } else {
-            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc); // either NOT_FOUND or AMBIGUOUS
+            return EmptyMemberAndArguments.from((EmptyCallableMemberDescriptor) maybeEmtpyMemberDesc, pojoArgs);
         }
     }
     
@@ -239,6 +239,9 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
      * Converts a flat argument list to one where the last argument is an array that collects the varargs, also
      * re-unwraps the varargs to the component type. Note that this couldn't be done until we had the concrete
      * member selected.
+     * 
+     * @return An {@code Object[]} if everything went well, an {@code Integer[]} that contains a single number, the
+     *    order (1-based index) of the argument that couldn't be unwrapped. 
      */
     private Object[] replaceVarargsSectionWithArray(
             Object[] args, List modelArgs, CallableMemberDescriptor memberDesc, BeansWrapper unwrapper) 
@@ -255,7 +258,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             for (int i = fixArgCount; i < totalArgCount; ++i) {
                 Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
                 if (val == BeansWrapper.CAN_NOT_UNWRAP) {
-                    return null;
+                    return new Integer[] { new Integer(i + 1) };
                 }
                 Array.set(varargs, i - fixArgCount, val);
             }
@@ -264,7 +267,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         } else {
             Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
             if (val == BeansWrapper.CAN_NOT_UNWRAP) {
-                return null;
+                return new Integer[] { new Integer(fixArgCount + 1) };
             }
             Object array = Array.newInstance(varArgsCompType, 1);
             Array.set(array, 0, val);
