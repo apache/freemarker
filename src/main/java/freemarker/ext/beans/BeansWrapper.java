@@ -113,20 +113,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 
     static final Object CAN_NOT_UNWRAP = new Object();
-    private static final Class BIGINTEGER_CLASS = java.math.BigInteger.class;
-    private static final Class BOOLEAN_CLASS = Boolean.class;
-    private static final Class CHARACTER_CLASS = Character.class;
-    private static final Class COLLECTION_CLASS = Collection.class;
-    private static final Class DATE_CLASS = Date.class;
-    private static final Class HASHADAPTER_CLASS = HashAdapter.class;
     private static final Class ITERABLE_CLASS;
-    private static final Class LIST_CLASS = List.class;
-    private static final Class MAP_CLASS = Map.class;
-    private static final Class OBJECT_CLASS = Object.class;
-    private static final Class SEQUENCEADAPTER_CLASS = SequenceAdapter.class;
-    private static final Class SET_CLASS = Set.class;
-    private static final Class SETADAPTER_CLASS = SetAdapter.class;
-    private static final Class STRING_CLASS = String.class;
     static {
         Class iterable;
         try {
@@ -1059,7 +1046,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     public Object unwrap(TemplateModel model) throws TemplateModelException
     {
-        return unwrap(model, OBJECT_CLASS);
+        return unwrap(model, Object.class);
     }
     
     /**
@@ -1164,7 +1151,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // know what is expected as the return type.
 
         // Java 5: Also should check for CharSequence at the end
-        if(STRING_CLASS == hint) {
+        if(String.class == hint) {
             if(model instanceof TemplateScalarModel) {
                 return ((TemplateScalarModel)model).getAsString();
             }
@@ -1183,7 +1170,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
         }
         
-        if(Boolean.TYPE == hint || BOOLEAN_CLASS == hint) {
+        if(boolean.class == hint || Boolean.class == hint) {
             if(model instanceof TemplateBooleanModel) {
                 return ((TemplateBooleanModel)model).getAsBoolean() 
                 ? Boolean.TRUE : Boolean.FALSE;
@@ -1192,26 +1179,25 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             return CAN_NOT_UNWRAP;
         }
 
-        if(MAP_CLASS == hint) {
+        if(Map.class == hint) {
             if(model instanceof TemplateHashModel) {
                 return new HashAdapter((TemplateHashModel)model, this);
             }
         }
         
-        if(LIST_CLASS == hint) {
+        if(List.class == hint) {
             if(model instanceof TemplateSequenceModel) {
                 return new SequenceAdapter((TemplateSequenceModel)model, this);
             }
         }
         
-        if(SET_CLASS == hint) {
+        if(Set.class == hint) {
             if(model instanceof TemplateCollectionModel) {
                 return new SetAdapter((TemplateCollectionModel)model, this);
             }
         }
         
-        if(COLLECTION_CLASS == hint 
-                || ITERABLE_CLASS == hint) {
+        if(Collection.class == hint || ITERABLE_CLASS == hint) {
             if(model instanceof TemplateCollectionModel) {
                 return new CollectionAdapter((TemplateCollectionModel)model, 
                         this);
@@ -1231,7 +1217,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         
         // Allow one-char strings to be coerced to characters
-        if(Character.TYPE == hint || hint == CHARACTER_CLASS) {
+        if(char.class == hint || hint == Character.class) {
             if(model instanceof TemplateScalarModel) {
                 String s = ((TemplateScalarModel)model).getAsString();
                 if(s.length() == 1) {
@@ -1242,12 +1228,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             return CAN_NOT_UNWRAP;
         }
 
-        if(DATE_CLASS.isAssignableFrom(hint)) {
-            if(model instanceof TemplateDateModel) {
-                Date date = ((TemplateDateModel)model).getAsDate();
-                if(hint.isInstance(date)) {
-                    return date;
-                }
+        if(Date.class.isAssignableFrom(hint) && model instanceof TemplateDateModel) {
+            Date date = ((TemplateDateModel)model).getAsDate();
+            if(hint.isInstance(date)) {
+                return date;
             }
         }
         
@@ -1275,7 +1259,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
             if ((itf == 0 || (itf & (TypeFlags.ACCEPTS_STRING | TypeFlags.CHARACTER)) != 0)
                     && model instanceof TemplateScalarModel
-                    && (itf != 0 || hint.isAssignableFrom(STRING_CLASS))) {
+                    && (itf != 0 || hint.isAssignableFrom(String.class))) {
                 String strVal = ((TemplateScalarModel) model).getAsString();
                 if (itf == 0 || (itf & TypeFlags.CHARACTER) == 0) {
                     return strVal;
@@ -1294,22 +1278,22 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
                     && model instanceof TemplateBooleanModel
-                    && (itf != 0 || hint.isAssignableFrom(BOOLEAN_CLASS))) {
+                    && (itf != 0 || hint.isAssignableFrom(Boolean.class))) {
                 return ((TemplateBooleanModel) model).getAsBoolean() ? Boolean.TRUE : Boolean.FALSE;
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_MAP) != 0)
                     && model instanceof TemplateHashModel
-                    && (itf != 0 || hint.isAssignableFrom(HASHADAPTER_CLASS))) {
+                    && (itf != 0 || hint.isAssignableFrom(HashAdapter.class))) {
                 return new HashAdapter((TemplateHashModel) model, this);
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_LIST) != 0)
                     && model instanceof TemplateSequenceModel 
-                    && (itf != 0 || hint.isAssignableFrom(SEQUENCEADAPTER_CLASS))) {
+                    && (itf != 0 || hint.isAssignableFrom(SequenceAdapter.class))) {
                 return new SequenceAdapter((TemplateSequenceModel) model, this);
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_SET) != 0)
                     && model instanceof TemplateCollectionModel
-                    && (itf != 0 || hint.isAssignableFrom(SETADAPTER_CLASS))) {
+                    && (itf != 0 || hint.isAssignableFrom(SetAdapter.class))) {
                 return new SetAdapter((TemplateCollectionModel) model, this);
             }
             
@@ -1457,11 +1441,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // We try to order the conditions by decreasing probability.
         if (targetType == n.getClass()) {
             return n;
-        } else if (targetType == Integer.TYPE || targetType == Integer.class) {
+        } else if (targetType == int.class || targetType == Integer.class) {
             return n instanceof Integer ? (Integer) n : new Integer(n.intValue());
-        } else if (targetType == Long.TYPE || targetType == Long.class) {
+        } else if (targetType == long.class || targetType == Long.class) {
             return n instanceof Long ? (Long) n : new Long(n.longValue());
-        } else if (targetType == Double.TYPE || targetType == Double.class) {
+        } else if (targetType == double.class || targetType == Double.class) {
             return n instanceof Double ? (Double) n : new Double(n.doubleValue());
         } else if(targetType == BigDecimal.class) {
             if(n instanceof BigDecimal) {
@@ -1474,11 +1458,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             } else {
                 return new BigDecimal(n.doubleValue());
             }
-        } else if (targetType == Float.TYPE || targetType == Float.class) {
+        } else if (targetType == float.class || targetType == Float.class) {
             return n instanceof Float ? (Float) n : new Float(n.floatValue());
-        } else if (targetType == Byte.TYPE || targetType == Byte.class) {
+        } else if (targetType == byte.class || targetType == Byte.class) {
             return n instanceof Byte ? (Byte) n : new Byte(n.byteValue());
-        } else if (targetType == Short.TYPE || targetType == Short.class) {
+        } else if (targetType == short.class || targetType == Short.class) {
             return n instanceof Short ? (Short) n : new Short(n.shortValue());
         } else if (targetType == BigInteger.class) {
             if (n instanceof BigInteger) {
@@ -1534,7 +1518,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
         return 
-            method.getReturnType() == Void.TYPE 
+            method.getReturnType() == void.class 
             ? TemplateModel.NOTHING
             : getOuterIdentity().wrap(retval); 
     }
@@ -1756,25 +1740,25 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
 
     public static Object coerceBigDecimal(BigDecimal bd, Class formalType) {
         // int is expected in most situations, so we check it first
-        if(formalType == Integer.TYPE || formalType == Integer.class) {
+        if(formalType == int.class || formalType == Integer.class) {
             return new Integer(bd.intValue());
         }
-        else if(formalType == Double.TYPE || formalType == Double.class) {
+        else if(formalType == double.class || formalType == Double.class) {
             return new Double(bd.doubleValue());
         }
-        else if(formalType == Long.TYPE || formalType == Long.class) {
+        else if(formalType == long.class || formalType == Long.class) {
             return new Long(bd.longValue());
         }
-        else if(formalType == Float.TYPE || formalType == Float.class) {
+        else if(formalType == float.class || formalType == Float.class) {
             return new Float(bd.floatValue());
         }
-        else if(formalType == Short.TYPE || formalType == Short.class) {
+        else if(formalType == short.class || formalType == Short.class) {
             return new Short(bd.shortValue());
         }
-        else if(formalType == Byte.TYPE || formalType == Byte.class) {
+        else if(formalType == byte.class || formalType == Byte.class) {
             return new Byte(bd.byteValue());
         }
-        else if(BIGINTEGER_CLASS.isAssignableFrom(formalType)) {
+        else if(java.math.BigInteger.class.isAssignableFrom(formalType)) {
             return bd.toBigInteger();
         } else {
             return bd;
