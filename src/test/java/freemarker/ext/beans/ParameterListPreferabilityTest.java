@@ -198,7 +198,8 @@ public class ParameterListPreferabilityTest extends TestCase {
                 new Class[][] {
                     new Class[] { char.class },
                     new Class[] { Character.class },
-                    new Class[] { String.class }
+                    new Class[] { String.class },
+                    new Class[] { CharSequence.class }
                 },
                 new Object[] { "s" });
         testAllCmpPermutationsInc(

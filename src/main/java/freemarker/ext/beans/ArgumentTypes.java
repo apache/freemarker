@@ -465,9 +465,9 @@ final class ArgumentTypes {
             return 2;
         } else if (nonPrimParamType1.isAssignableFrom(nonPrimParamType2)) {
             return -2;
-        } if (nonPrimParamType1 == Character.class && nonPrimParamType2 == String.class) {
-            return 2;  // A character is a 1 long string in FTL, so it's like a string subtype.
-        } if (nonPrimParamType1 == String.class && nonPrimParamType2 == Character.class) {
+        } if (nonPrimParamType1 == Character.class && nonPrimParamType2.isAssignableFrom(String.class)) {
+            return 2;  // A character is a 1 long string in FTL, so we pretend that it's a String subtype.
+        } if (nonPrimParamType2 == Character.class && nonPrimParamType1.isAssignableFrom(String.class)) {
             return -2;
         } else {
             return 0;  // unrelated types
@@ -747,7 +747,7 @@ final class ArgumentTypes {
                                     && paramType.isAssignableFrom(Character.class))) {
                         args[i] = new Character(((CharacterOrString) arg).getAsChar());
                     } else {
-                            args[i] = ((CharacterOrString) arg).getAsString();
+                        args[i] = ((CharacterOrString) arg).getAsString();
                     }
                 }
             }
