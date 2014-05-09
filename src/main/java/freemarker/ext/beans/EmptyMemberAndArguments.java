@@ -8,7 +8,7 @@ import freemarker.core._DelayedOrdinal;
  */
 final class EmptyMemberAndArguments extends MaybeEmptyMemberAndArguments {
     
-    static final EmptyMemberAndArguments WRONG_NUMBER_OF_ARGUMENT
+    static final EmptyMemberAndArguments WRONG_NUMBER_OF_ARGUMENTS
             = new EmptyMemberAndArguments(
                     "No compatible overloaded variation was found; wrong number of arguments.", true, null);
     

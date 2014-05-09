@@ -85,11 +85,11 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
         final int argCount = tmArgs.size();
         final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         if(unwrappingHintsByParamCount.length <= argCount) {
-            return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENT;
+            return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
         }
         Class[] unwarppingHints = unwrappingHintsByParamCount[argCount];
         if(unwarppingHints == null) {
-            return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENT;
+            return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
         }
         
         Object[] pojoArgs = new Object[argCount];

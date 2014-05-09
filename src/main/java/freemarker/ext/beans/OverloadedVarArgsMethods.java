@@ -186,7 +186,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             Class[] unwarappingHints = unwrappingHintsByParamCount[paramCount];
             if(unwarappingHints == null) {
                 if (paramCount == 0) {
-                    return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENT;
+                    return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
                 }
                 continue;
             }
