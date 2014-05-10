@@ -215,9 +215,12 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         MaybeEmptyCallableMemberDescriptor maybeEmtpyMemberDesc = getMemberDescriptorForArgs(pojoArgs, true);
         if(maybeEmtpyMemberDesc instanceof CallableMemberDescriptor) {
             CallableMemberDescriptor memberDesc = (CallableMemberDescriptor) maybeEmtpyMemberDesc;
-            Object[] pojoArgsWithArray = replaceVarargsSectionWithArray(pojoArgs, tmArgs, memberDesc, unwrapper);
-            if(pojoArgsWithArray instanceof Integer[]) {
-                return EmptyMemberAndArguments.noCompatibleOverload(((Integer[]) pojoArgsWithArray)[0].intValue());
+            Object[] pojoArgsWithArray;
+            Object argsOrErrorIdx = replaceVarargsSectionWithArray(pojoArgs, tmArgs, memberDesc, unwrapper);
+            if(argsOrErrorIdx instanceof Object[]) {
+                pojoArgsWithArray = (Object[]) argsOrErrorIdx;
+            } else {
+                return EmptyMemberAndArguments.noCompatibleOverload(((Integer) argsOrErrorIdx).intValue());
             }
             if (bugfixed) {
                 if (typesFlags != null) {
@@ -240,10 +243,10 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
      * re-unwraps the varargs to the component type. Note that this couldn't be done until we had the concrete
      * member selected.
      * 
-     * @return An {@code Object[]} if everything went well, an {@code Integer[]} that contains a single number, the
+     * @return An {@code Object[]} if everything went well, or an {@code Integer} the
      *    order (1-based index) of the argument that couldn't be unwrapped. 
      */
-    private Object[] replaceVarargsSectionWithArray(
+    private Object replaceVarargsSectionWithArray(
             Object[] args, List modelArgs, CallableMemberDescriptor memberDesc, BeansWrapper unwrapper) 
     throws TemplateModelException {
         final Class[] paramTypes = memberDesc.getParamTypes();
@@ -258,7 +261,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
             for (int i = fixArgCount; i < totalArgCount; ++i) {
                 Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(i), varArgsCompType);
                 if (val == BeansWrapper.CAN_NOT_UNWRAP) {
-                    return new Integer[] { new Integer(i + 1) };
+                    return new Integer(i + 1);
                 }
                 Array.set(varargs, i - fixArgCount, val);
             }
@@ -267,7 +270,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset
         } else {
             Object val = unwrapper.tryUnwrap((TemplateModel)modelArgs.get(fixArgCount), varArgsCompType);
             if (val == BeansWrapper.CAN_NOT_UNWRAP) {
-                return new Integer[] { new Integer(fixArgCount + 1) };
+                return new Integer(fixArgCount + 1);
             }
             Object array = Array.newInstance(varArgsCompType, 1);
             Array.set(array, 0, val);

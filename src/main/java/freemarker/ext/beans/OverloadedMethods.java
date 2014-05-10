@@ -106,39 +106,50 @@ final class OverloadedMethods {
     
     MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, BeansWrapper unwrapper) 
     throws TemplateModelException {
-        MaybeEmptyMemberAndArguments fixArgsRes = null;
-        MaybeEmptyMemberAndArguments varargsRes = null;
-        if ((fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper)) instanceof MemberAndArguments) {
+        // Try to find a fixed args match:
+        MaybeEmptyMemberAndArguments fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper);
+        if (fixArgsRes instanceof MemberAndArguments) {
             return (MemberAndArguments) fixArgsRes;
-        } else if (varargMethods != null
-                && (varargsRes = varargMethods.getMemberAndArguments(tmArgs, unwrapper))
-                        instanceof MemberAndArguments) {
-            return (MemberAndArguments) varargsRes;
-        } else {
-            final Object[] argsErrorMsg;
-            {
-                final EmptyMemberAndArguments fixArgsEmptyRes = (EmptyMemberAndArguments) fixArgsRes; 
-                final EmptyMemberAndArguments varargsEmptyRes = (EmptyMemberAndArguments) varargsRes;
-                if (varargsEmptyRes != null) {
-                    if (fixArgsEmptyRes == null || fixArgsEmptyRes.isNumberOfArgumentsWrong()) {
-                        argsErrorMsg = toErrorMessage(varargsEmptyRes, tmArgs);
-                    } else {
-                        argsErrorMsg = new Object[] {
-                                "When trying to call the non-varargs overloads:\n",
-                                toErrorMessage(fixArgsEmptyRes, tmArgs),
-                                "\nWhen trying to call the varargs overloads:\n",
-                                toErrorMessage(varargsEmptyRes, null)
-                        };
-                    }
-                } else {
-                    argsErrorMsg = toErrorMessage((EmptyMemberAndArguments) fixArgsRes, tmArgs);
-                }
-            }
-            throw new _TemplateModelException(new Object[] {
-                    argsErrorMsg,
-                    "\nThe matching overload was searched among these members:\n",
-                    memberListToString()});
         }
+
+        // Try to find a varargs match:
+        MaybeEmptyMemberAndArguments varargsRes;
+        if (varargMethods != null) {
+            varargsRes = varargMethods.getMemberAndArguments(tmArgs, unwrapper);
+            if (varargsRes instanceof MemberAndArguments) {
+                return (MemberAndArguments) varargsRes;
+            }
+        } else {
+            varargsRes = null;
+        }
+        
+        throw new _TemplateModelException(new Object[] {
+                toCompositeErrorMessage(
+                        (EmptyMemberAndArguments) fixArgsRes,
+                        (EmptyMemberAndArguments) varargsRes,
+                        tmArgs),
+                "\nThe matching overload was searched among these members:\n",
+                memberListToString()});
+    }
+
+    private Object[] toCompositeErrorMessage(final EmptyMemberAndArguments fixArgsEmptyRes, final EmptyMemberAndArguments varargsEmptyRes,
+            List tmArgs) {
+        final Object[] argsErrorMsg;
+        if (varargsEmptyRes != null) {
+            if (fixArgsEmptyRes == null || fixArgsEmptyRes.isNumberOfArgumentsWrong()) {
+                argsErrorMsg = toErrorMessage(varargsEmptyRes, tmArgs);
+            } else {
+                argsErrorMsg = new Object[] {
+                        "When trying to call the non-varargs overloads:\n",
+                        toErrorMessage(fixArgsEmptyRes, tmArgs),
+                        "\nWhen trying to call the varargs overloads:\n",
+                        toErrorMessage(varargsEmptyRes, null)
+                };
+            }
+        } else {
+            argsErrorMsg = toErrorMessage(fixArgsEmptyRes, tmArgs);
+        }
+        return argsErrorMsg;
     }
 
     private Object[] toErrorMessage(EmptyMemberAndArguments res, List/*<TemplateModel>*/ tmArgs) {

@@ -73,6 +73,9 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import freemarker.core.BugException;
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._DelayedShortClassName;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.util.IdentityHashMap;
 import freemarker.ext.util.ModelCache;
 import freemarker.ext.util.ModelFactory;
@@ -1345,11 +1348,11 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                     if (tryOnly) {
                         return CAN_NOT_UNWRAP;
                     } else {
-                        throw new TemplateModelException(
-                                "Failed to convert " + ClassUtil.getFTLTypeDescription(seq)
-                                + " object to " + ClassUtil.getShortClassNameOfObject(array)
-                                + ": Problematic sequence item at index " + i + " with value type: "
-                                + ClassUtil.getFTLTypeDescription(seqItem));
+                        throw new _TemplateModelException(new Object[] {
+                                "Failed to convert ",  new _DelayedFTLTypeDescription(seq),
+                                " object to ", new _DelayedShortClassName(array.getClass()),
+                                ": Problematic sequence item at index ", new Integer(i) ," with value type: ",
+                                new _DelayedFTLTypeDescription(seqItem)});
                     }
                     
                 }
