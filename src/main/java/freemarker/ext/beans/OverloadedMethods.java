@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import freemarker.core._DelayedConversionToString;
+import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -123,13 +124,18 @@ final class OverloadedMethods {
             varargsRes = null;
         }
         
-        throw new _TemplateModelException(new Object[] {
+        _ErrorDescriptionBuilder edb = new _ErrorDescriptionBuilder(new Object[] {
                 toCompositeErrorMessage(
                         (EmptyMemberAndArguments) fixArgsRes,
                         (EmptyMemberAndArguments) varargsRes,
                         tmArgs),
                 "\nThe matching overload was searched among these members:\n",
                 memberListToString()});
+        if (!bugfixed) {
+            edb.tip("You seem to use BeansWrapper in 2.3.0-compatible mode. If you think this error is unfounded, "
+                    + "enabling 2.3.21 fixes may helps. See version history for more.");
+        }
+        throw new _TemplateModelException(edb);
     }
 
     private Object[] toCompositeErrorMessage(final EmptyMemberAndArguments fixArgsEmptyRes, final EmptyMemberAndArguments varargsEmptyRes,
