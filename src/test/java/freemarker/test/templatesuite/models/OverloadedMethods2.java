@@ -634,6 +634,14 @@ public class OverloadedMethods2 {
     public String mListOrString(String item) {
         return "mListOrString(String " + item + ")";
     }
+
+    public String mListListOrString(List<List<Object>> items) {
+        return "mListListOrString(List " + listToString(items) + ")";
+    }
+
+    public String mListListOrString(String item) {
+        return "mListListOrString(String " + item + ")";
+    }
     
     public String mMapOrBoolean(Map v) {
         return "mMapOrBoolean(Map " + v +")";
@@ -891,6 +899,18 @@ public class OverloadedMethods2 {
         return new String[] { "a", "b" };
     }
 
+    public int[] getJavaIntArray() {
+        return new int[] { 11, 22 };
+    }
+
+    public String[] getJavaEmptyStringArray() {
+        return new String[] { };
+    }
+    
+    public String[][] getJavaStringArrayArray() {
+        return new String[][] { new String[] { "a", "b" }, new String[] { }, new String[] { "c" } };
+    }
+    
     public Object[] getJavaObjectArray() {
         return new Object[] { "a", "b" };
     }
@@ -977,7 +997,7 @@ public class OverloadedMethods2 {
             } else {
                 first = false;
             }
-            sb.append(item);
+            sb.append(item instanceof Object[] ? arrayToString((Object[]) item) : item);
         }
         sb.append("]");
         return sb.toString();

@@ -264,6 +264,9 @@
 
 <#-- Situations that lead to array-to-List conversion: -->
 <@assertEquals actual=obj.mListOrString(obj.javaStringArray) expected="mListOrString(List [a, b])" />
+<@assertEquals actual=obj.mListOrString(obj.javaEmptyStringArray) expected="mListOrString(List [])" />
+<@assertEquals actual=obj.mListOrString(obj.javaIntArray) expected="mListOrString(List [11, 22])" />
+<@assertEquals actual=obj.mListListOrString(obj.javaStringArrayArray) expected="mListListOrString(List [[a, b], [], [c]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />

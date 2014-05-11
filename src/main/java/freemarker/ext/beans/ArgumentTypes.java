@@ -737,7 +737,7 @@ final class ArgumentTypes {
                    args[i] = bw.listToArray((List) arg, paramType, null);
                 }
                 if (arg.getClass().isArray() && paramType.isAssignableFrom(List.class)) {
-                    args[i] = bw.arrayToList((Object[]) arg);
+                    args[i] = bw.arrayToList(arg);
                 }
                 
                 // Handle the conversion from CharacterOrString to Character or String:

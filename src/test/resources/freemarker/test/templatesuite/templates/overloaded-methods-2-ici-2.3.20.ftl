@@ -199,12 +199,16 @@
 <#if dow>
   <#-- As with DOW we never end up with array-s after unwrapping, they just work like Lists: -->
   <@assertEquals actual=obj.mListOrString(obj.javaStringArray) expected="mListOrString(List [a, b])" />
+  <@assertEquals actual=obj.mListListOrString(obj.javaStringArrayArray) expected="mListListOrString(List [[a, b], [], [c]])" />
+  <@assertEquals actual=obj.mListOrString(obj.javaIntArray) expected="mListOrString(List [11, 22])" />
   <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
   <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
   <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
 <#else>
   <#-- Pure BeansWrapper unwraps to array-s, but prior IcI 2.3.21 it couldn't treat them as Lists: -->
   <@assertFails message="no compatible overloaded">${obj.mListOrString(obj.javaStringArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mListListOrString(obj.javaStringArrayArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mListOrString(obj.javaIntArray)}</@>
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray)}</@>
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray)}</@>
   <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList)}</@>

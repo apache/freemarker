@@ -45,6 +45,8 @@
 
 <@assertEquals actual=obj.mListOrString(['a', 'b']) expected="mListOrString(List [a, b])" />
 <@assertEquals actual=obj.mListOrString('a') expected="mListOrString(String a)" />
+<@assertEquals actual=obj.mListListOrString([['a'], 'b', 3]) expected="mListListOrString(List [[a], b, 3])" />
+<@assertEquals actual=obj.mListListOrString('s') expected="mListListOrString(String s)" />
 
 <#-- Because the fixed arg interpretations are ambiguous, it only considers the vararg interpretations:  -->
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(['a', 'b', 'c']) expected="mStringArrayVarargsOverloaded4(List[] [[a, b, c]])" />

@@ -1431,8 +1431,19 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         return array;
     }
     
-    List arrayToList(Object[] array) throws TemplateModelException {
-        return array.length == 0 ? Collections.EMPTY_LIST : new ArrayBackedReadOnlyList(array);
+    /**
+     * @param array Must be an array (of either a reference or primitive type)
+     */
+    List arrayToList(Object array) throws TemplateModelException {
+        if (array instanceof Object[]) {
+            // Array of any non-primitive type.
+            // Note that an array of non-primitive type is always instanceof Object[].
+            Object[] objArray = (Object[]) array;
+            return objArray.length == 0 ? Collections.EMPTY_LIST : new NonPrimitiveArrayBackedReadOnlyList(objArray);
+        } else {
+            // Array of any primitive type
+            return Array.getLength(array) == 0 ? Collections.EMPTY_LIST : new PrimtiveArrayBackedReadOnlyList(array);
+        }
     }
 
     /**

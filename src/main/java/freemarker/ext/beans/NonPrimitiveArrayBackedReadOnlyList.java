@@ -2,11 +2,11 @@ package freemarker.ext.beans;
 
 import java.util.AbstractList;
 
-class ArrayBackedReadOnlyList extends AbstractList {
+class NonPrimitiveArrayBackedReadOnlyList extends AbstractList {
     
     private final Object[] array;
     
-    ArrayBackedReadOnlyList(Object[] array) {
+    NonPrimitiveArrayBackedReadOnlyList(Object[] array) {
         this.array = array;
     }
 
