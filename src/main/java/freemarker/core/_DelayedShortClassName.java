@@ -8,7 +8,6 @@ public class _DelayedShortClassName extends _DelayedConversionToString {
         super(pClass);
     }
 
-    @Override
     protected String doConversion(Object obj) {
         return ClassUtil.getShortClassName((Class) obj, true);
     }
