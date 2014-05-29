@@ -229,6 +229,15 @@
 <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(['a', 'b']) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
 <@assertEquals actual=obj.mIntArrayVsIntegerArrayPreference([1, 2]) expected="mIntArrayVsIntegerArrayPreference(Integer[] [1, 2])" />
 
+<#if dow>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
+<#else>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(String[] [a, b])" />
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray)}</@>
+</#if>
+<@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntegerArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
+
 <@assertEquals actual=obj.mIntegerArrayOverloaded([1, 2], 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
 <@assertEquals actual=obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
 <@assertEquals actual=obj.mIntegerArrayOverloaded(obj.javaIntegerList, 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />

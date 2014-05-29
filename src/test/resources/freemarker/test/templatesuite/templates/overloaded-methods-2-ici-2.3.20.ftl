@@ -181,6 +181,16 @@
 </#if>
 <@assertFails message="no compatible overloaded">${obj.mIntArrayVsIntegerArrayPreference([1, 2])}</@>
 
+<#if dow>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntegerArray)}</@>
+<#else>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(String[] [a, b])" />
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray)}</@>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntegerArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
+</#if>
+
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1, 2], 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaIntegerList, 3)}</@>

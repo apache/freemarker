@@ -927,6 +927,10 @@ public class OverloadedMethods2 {
         return new int[] { 11, 22 };
     }
 
+    public Integer[] getJavaIntegerArray() {
+        return new Integer[] { Integer.valueOf(11), Integer.valueOf(22) };
+    }
+    
     public String[] getJavaEmptyStringArray() {
         return new String[] { };
     }
