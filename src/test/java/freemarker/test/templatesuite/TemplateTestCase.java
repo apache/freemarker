@@ -80,6 +80,7 @@ import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.ResourceBundleModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
@@ -367,6 +368,7 @@ public class TemplateTestCase extends FileTestCase {
 
         else if (testName.startsWith("overloaded-methods-2-")) {
             dataModel.put("obj", new OverloadedMethods2());
+            dataModel.put("dow", Boolean.valueOf(conf.getObjectWrapper() instanceof DefaultObjectWrapper));
         }
         
         else if (testName.startsWith("overloaded-methods-")) {

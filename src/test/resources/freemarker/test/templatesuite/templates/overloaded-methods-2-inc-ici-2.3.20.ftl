@@ -1,3 +1,5 @@
+<#-- Note that the point of 2.3.20 tests is to check if bugs fixed in 2.3.21 are still emulated in pre-2.3.21 mode -->
+
 <@assertEquals actual=obj.mVarargs('a', obj.getNnS('b'), obj.getNnS('c')) expected='mVarargs(String... a1 = abc)' />
 <@assertFails message="multiple compatible overload">${obj.mChar('a')}</@>
 <@assertFails message="multiple compatible overload">${obj.mIntPrimVSBoxed(123?long)}</@>
@@ -20,5 +22,8 @@
                expected='mRareWrappings(Object o = 124, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
 <@assertEquals actual=obj.mRareWrappings(obj.booleanWrappedAsAnotherBoolean, 0, 0, 0, !obj.stringAdaptedToBoolean)
                expected='mRareWrappings(Object o = true, double d1 = 0.0, Double d2 = 0.0, double d3 = 0.0, b = true)' />
+
+<@assertFails message="multiple compatible overloaded">${obj.mCharOrCharacterOverloaded('c')}</@>
+<@assertFails message="multiple compatible overloaded">${obj.mCharOrCharacterOverloaded(obj.javaString)}</@>
 
 <#include 'overloaded-methods-2-ici-2.3.20.ftl'>
