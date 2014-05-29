@@ -170,11 +170,6 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     // -----------------------------------------------------------------------------------------------------------------
     // Instance cache:
     
-    /**
-     * @deprecated Don't use this outside FreeMarker; will be soon removed.
-     */
-    protected final Object _preJava5Sync = _BeansAPI.JVM_USES_JSR133 ? null : new Object(); 
-    
     private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<BeansWrapper>>*/
             INSTANCE_CACHE = new WeakHashMap();
     private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();

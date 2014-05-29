@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -14,7 +15,7 @@ import freemarker.template.TemplateModelException;
  */
 abstract class CallableMemberDescriptor extends MaybeEmptyCallableMemberDescriptor {
 
-    abstract Object invokeMethod(BeansWrapper bw, Object obj, Object[] args)
+    abstract TemplateModel invokeMethod(BeansWrapper bw, Object obj, Object[] args)
             throws TemplateModelException, InvocationTargetException, IllegalAccessException;
 
     abstract Object invokeConstructor(BeansWrapper bw, Object[] args)

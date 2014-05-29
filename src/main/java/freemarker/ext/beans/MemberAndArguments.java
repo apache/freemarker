@@ -2,6 +2,7 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.InvocationTargetException;
 
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -27,7 +28,7 @@ class MemberAndArguments extends MaybeEmptyMemberAndArguments {
         return args;
     }
     
-    Object invokeMethod(BeansWrapper bw, Object obj)
+    TemplateModel invokeMethod(BeansWrapper bw, Object obj)
             throws TemplateModelException, InvocationTargetException, IllegalAccessException {
         return callableMemberDesc.invokeMethod(bw, obj, args);
     }

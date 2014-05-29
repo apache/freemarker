@@ -6,6 +6,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -30,7 +31,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
         this.paramTypes = paramTypes;
     }
 
-    Object invokeMethod(BeansWrapper bw, Object obj, Object[] args)
+    TemplateModel invokeMethod(BeansWrapper bw, Object obj, Object[] args)
             throws TemplateModelException, InvocationTargetException, IllegalAccessException {
         return bw.invokeMethod(obj, (Method) member, args);
     }

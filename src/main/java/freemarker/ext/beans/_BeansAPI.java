@@ -27,18 +27,6 @@ public class _BeansAPI {
 
     private _BeansAPI() { }
     
-    // Get rid of this with Java 5
-    public static final boolean JVM_USES_JSR133;
-    static {
-        Class cl;
-        try {
-            cl = Class.forName("java.util.concurrent.atomic.AtomicInteger");
-        } catch (Throwable e) {
-            cl = null;
-        }
-        JVM_USES_JSR133 = cl != null;
-    }
-    
     public static String getAsClassicCompatibleString(BeanModel bm) {
         return bm.getAsClassicCompatibleString();
     }

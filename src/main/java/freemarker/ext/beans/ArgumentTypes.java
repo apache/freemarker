@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import freemarker.core.BugException;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
@@ -684,7 +685,7 @@ final class ArgumentTypes {
             this.callableMemberDesc = callableMemberDesc;
         }
 
-        Object invokeMethod(BeansWrapper bw, Object obj, Object[] args) throws TemplateModelException,
+        TemplateModel invokeMethod(BeansWrapper bw, Object obj, Object[] args) throws TemplateModelException,
                 InvocationTargetException, IllegalAccessException {
             convertArgsToReflectionCompatible(bw, args);
             return callableMemberDesc.invokeMethod(bw, obj, args);
