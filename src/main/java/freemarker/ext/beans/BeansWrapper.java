@@ -1387,6 +1387,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         try {
             boolean isComponentTypeExamined = false;
             boolean isComponentTypeNumerical = false;  // will be filled on demand
+            boolean isComponentTypeList = false;  // will be filled on demand
             int i = 0;
             for (Iterator it = list.iterator(); it.hasNext();) {
                 Object listItem = it.next();
@@ -1394,6 +1395,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                     // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
                     if (!isComponentTypeExamined) {
                         isComponentTypeNumerical = ClassUtil.isNumerical(componentType);
+                        isComponentTypeList = List.class.isAssignableFrom(componentType);
                         isComponentTypeExamined = true;
                     }
                     if (isComponentTypeNumerical && listItem instanceof Number) {
@@ -1413,10 +1415,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                         } else if (listItem instanceof TemplateSequenceModel) {
                             listItem = unwrapSequenceToArray((TemplateSequenceModel) listItem, componentType, false, recursionStops);
                         }
+                    } else if (isComponentTypeList && listItem.getClass().isArray()) {
+                        listItem = arrayToList(listItem);
                     }
                 }
                 try {
-                    Array.set(array, i++, listItem);
+                    Array.set(array, i, listItem);
                 } catch (IllegalArgumentException e) {
                     throw new TemplateModelException(
                             "Failed to convert " + ClassUtil.getShortClassNameOfObject(list)
@@ -1424,6 +1428,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                             + ": Problematic List item at index " + i + " with value type: "
                             + ClassUtil.getShortClassNameOfObject(listItem), e);
                 }
+                i++;
             }
         } finally {
             recursionStops.remove(list);
