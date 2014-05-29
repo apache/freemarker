@@ -63,16 +63,12 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
 import freemarker.template.utility.ClassUtil;
 
-
 /**
  * The argument types of a method call; usable as cache key.
  * 
  * @author Attila Szegedi
  */
 final class ArgumentTypes {
-    
-    private static final int BIG_MANTISSA_LOSS_PRICE = 40000;
-    
     
     /**
      * Conversion difficulty: Lowest; Java Reflection will do it automatically.
@@ -144,7 +140,8 @@ final class ArgumentTypes {
      * @return Possibly {@link EmptyCallableMemberDescriptor#NO_SUCH_METHOD} or
      *         {@link EmptyCallableMemberDescriptor#AMBIGUOUS_METHOD}. 
      */
-    MaybeEmptyCallableMemberDescriptor getMostSpecific(List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg)
+    MaybeEmptyCallableMemberDescriptor getMostSpecific(
+            List/*<ReflectionCallableMemberDescriptor>*/ memberDescs, boolean varArg)
     {
         LinkedList/*<ReflectionCallableMemberDescriptor>*/ applicables = getApplicables(memberDescs, varArg);
         if(applicables.isEmpty()) {
@@ -163,7 +160,8 @@ final class ArgumentTypes {
                 maximalsIter.hasNext();)
             {
                 CallableMemberDescriptor maximal = (CallableMemberDescriptor) maximalsIter.next();
-                final int cmpRes = compareParameterListPreferability(applicable.getParamTypes(), maximal.getParamTypes(), varArg); 
+                final int cmpRes = compareParameterListPreferability(
+                        applicable.getParamTypes(), maximal.getParamTypes(), varArg); 
                 if (cmpRes > 0) {
                     maximalsIter.remove();
                 } else if (cmpRes < 0) {
@@ -262,7 +260,8 @@ final class ArgumentTypes {
                     if (numConvPrice1 == Integer.MAX_VALUE) {
                         if (numConvPrice2 == Integer.MAX_VALUE) {  // No numerical conversions anywhere
                             // List to array conversions (unwrapping sometimes makes a List instead of an array)
-                            if (List.class.isAssignableFrom(argType) && (paramType1.isArray() || paramType2.isArray())) {
+                            if (List.class.isAssignableFrom(argType)
+                                    && (paramType1.isArray() || paramType2.isArray())) {
                                 if (paramType1.isArray()) {
                                     if (paramType2.isArray()) {  // both paramType1 and paramType2 are arrays
                                         int r = compareParameterListPreferability_cmpTypeSpecificty(
@@ -317,7 +316,8 @@ final class ArgumentTypes {
                                     paramList1VeryStrongWinCnt++;
                                 }
                             } else {  // No list to/from array conversion
-                                final int r = compareParameterListPreferability_cmpTypeSpecificty(paramType1, paramType2);
+                                final int r = compareParameterListPreferability_cmpTypeSpecificty(
+                                        paramType1, paramType2);
                                 if (r > 0) {
                                     winerParam = 1;
                                     if (r > 1) {
@@ -347,14 +347,16 @@ final class ArgumentTypes {
                         if (numConvPrice1 != numConvPrice2) {
                             if (numConvPrice1 < numConvPrice2) {
                                 winerParam = 1;
-                                if (numConvPrice1 < BIG_MANTISSA_LOSS_PRICE && numConvPrice2 > BIG_MANTISSA_LOSS_PRICE) {
+                                if (numConvPrice1 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
+                                        && numConvPrice2 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
                                     paramList1StrongWinCnt++;
                                 } else {
                                     paramList1WinCnt++;
                                 }
                             } else {
                                 winerParam = -1;
-                                if (numConvPrice2 < BIG_MANTISSA_LOSS_PRICE && numConvPrice1 > BIG_MANTISSA_LOSS_PRICE) {
+                                if (numConvPrice2 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
+                                        && numConvPrice1 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
                                     paramList2StrongWinCnt++;
                                 } else {
                                     paramList2WinCnt++;
@@ -591,7 +593,8 @@ final class ArgumentTypes {
                         ? CONVERSION_DIFFICULTY_IMPOSSIBLE : CONVERSION_DIFFICULTY_REFLECTION;
             } else if (formal.isArray()) {
                 // BeansWrapper method/constructor calls convert from List to array automatically
-                return List.class.isAssignableFrom(actual) ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
+                return List.class.isAssignableFrom(actual)
+                        ? CONVERSION_DIFFICULTY_FREEMARKER : CONVERSION_DIFFICULTY_IMPOSSIBLE;
             } else if (actual.isArray() && formal.isAssignableFrom(List.class)) {
                 // BeansWrapper method/constructor calls convert from array to List automatically
                 return CONVERSION_DIFFICULTY_FREEMARKER;
@@ -615,7 +618,8 @@ final class ArgumentTypes {
                 // actual parameters are never primitives.
                 // It doesn't do the same with boxing types... that was a bug.
                 if(formal == Boolean.TYPE) {
-                    return actual == Boolean.class ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
+                    return actual == Boolean.class
+                            ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 } else if (formal == Double.TYPE && 
                         (actual == Double.class || actual == Float.class || 
                          actual == Long.class || actual == Integer.class || 
@@ -635,7 +639,8 @@ final class ArgumentTypes {
                          actual == Byte.class)) {
                      return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if (formal == Character.TYPE) {
-                    return actual == Character.class ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
+                    return actual == Character.class
+                            ? CONVERSION_DIFFICULTY_REFLECTION : CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 } else if(formal == Byte.TYPE && actual == Byte.class) {
                     return CONVERSION_DIFFICULTY_REFLECTION;
                 } else if(formal == Short.TYPE &&

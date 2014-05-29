@@ -14,6 +14,12 @@ class OverloadedNumberUtil {
 
     // Can't be instantiated
     private OverloadedNumberUtil() { }
+
+    /**
+     * The lower limit of conversion prices where there's a risk of significant mantissa loss.
+     * The value comes from misc/overloadedNumberRules/prices.ods and generator.ftl.
+     */
+    static final int BIG_MANTISSA_LOSS_PRICE = 4 * 10000;
     
     /** The highest long that can be stored in double without precision loss: 2**53. */
     private static final long MAX_DOUBLE_OR_LONG = 9007199254740992L;
@@ -147,11 +153,14 @@ class OverloadedNumberUtil {
                 
                 // If we reach this, it can be treated as a whole number.
                 
-                if ((typeFlags & TypeFlags.BYTE) != 0 && longN <= Byte.MAX_VALUE && longN >= Byte.MIN_VALUE) {
+                if ((typeFlags & TypeFlags.BYTE) != 0
+                        && longN <= Byte.MAX_VALUE && longN >= Byte.MIN_VALUE) {
                     return new DoubleOrByte((Double) num, (byte) longN);
-                } else if ((typeFlags & TypeFlags.SHORT) != 0 && longN <= Short.MAX_VALUE && longN >= Short.MIN_VALUE) {
+                } else if ((typeFlags & TypeFlags.SHORT) != 0
+                        && longN <= Short.MAX_VALUE && longN >= Short.MIN_VALUE) {
                     return new DoubleOrShort((Double) num, (short) longN);
-                } else if ((typeFlags & TypeFlags.INTEGER) != 0 && longN <= Integer.MAX_VALUE && longN >= Integer.MIN_VALUE) {
+                } else if ((typeFlags & TypeFlags.INTEGER) != 0
+                        && longN <= Integer.MAX_VALUE && longN >= Integer.MIN_VALUE) {
                     final int intN = (int) longN; 
                     // Java 5: remove the "? (Number)" and ": (Number)" casts
                     return (typeFlags & TypeFlags.FLOAT) != 0 && intN >= MIN_FLOAT_OR_INT && intN <= MAX_FLOAT_OR_INT
@@ -848,7 +857,8 @@ class OverloadedNumberUtil {
      *       <li>[0, 30000): Lossless conversion
      *       <li>[30000, 40000): Smaller precision loss in mantissa is possible.
      *       <li>[40000, 50000): Bigger precision loss in mantissa is possible.
-     *       <li>{@link Integer#MAX_VALUE}: Conversion not allowed due to the possibility of magnitude loss or overflow</li>
+     *       <li>{@link Integer#MAX_VALUE}: Conversion not allowed due to the possibility of magnitude loss or
+     *          overflow</li>
      *     </ul>
      * 
      *     <p>At some places, we only care if the conversion is possible, i.e., whether the return value is
