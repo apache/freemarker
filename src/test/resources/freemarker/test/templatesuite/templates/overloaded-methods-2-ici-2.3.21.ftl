@@ -225,8 +225,18 @@
 <@assertFails message="multiple compatible overloaded"><@assertEquals actual=obj.mSeqToArrayPoorHint3([1, 2]) expected='mSeqToArrayPoorHint3(int[] [a, b])' /></@>
 
 <@assertEquals actual=obj.mStringArrayVsListPreference(['a', 'b']) expected="mStringArrayVsListPreference(List [a, b])" />
+<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaObjectArray) expected="mStringArrayVsListPreference(List [a, b])" />
 <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(['a', 'b']) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
 <@assertEquals actual=obj.mIntArrayVsIntegerArrayPreference([1, 2]) expected="mIntArrayVsIntegerArrayPreference(Integer[] [1, 2])" />
+
+<#if dow>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
+<#else>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(String[] [a, b])" />
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray)}</@>
+</#if>
+<@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntegerArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
 
 <@assertEquals actual=obj.mIntegerArrayOverloaded([1, 2], 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
 <@assertEquals actual=obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3) expected="mIntegerArrayOverloaded(Integer[] [1, 2], int 3)" />
@@ -236,22 +246,79 @@
 <@assertEquals actual=obj.mStringArrayOverloaded(['a', 'b'], 3) expected="mStringArrayOverloaded(String[] [a, b], int 3)" />
 <@assertEquals actual=obj.mStringArrayOverloaded(obj.javaStringList, 3) expected="mStringArrayOverloaded(String[] [a, b], int 3)" />
 <@assertEquals actual=obj.mStringArrayOverloaded(obj.javaCharacterList, 3) expected="mStringArrayOverloaded(String[] [c, C], int 3)" />
-<@assertFails message="Failed to convert sequence" causeNestingLevel=1>${obj.mStringArrayOverloaded([1, 2], 3)}</@>
-<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayOverloaded(obj.javaIntegerList, 3)}</@>
+<@assertFails message="Failed to convert sequence">${obj.mStringArrayOverloaded([1, 2], 3)}</@>
+<@assertFails message="Failed to convert">${obj.mStringArrayOverloaded(obj.javaIntegerList, 3)}</@>
 
 <@assertEquals actual=obj.mCharArrayOverloaded(['a', 'b'], 3) expected="mCharArrayOverloaded(char[] [a, b], int 3)" />
 <@assertEquals actual=obj.mCharArrayOverloaded(obj.javaCharacterList, 3) expected="mCharArrayOverloaded(char[] [c, C], int 3)" />
 <@assertEquals actual=obj.mCharArrayOverloaded(obj.javaStringList, 3) expected="mCharArrayOverloaded(char[] [a, b], int 3)" />
-<@assertFails message="Failed to convert sequence" causeNestingLevel=1>${obj.mCharArrayOverloaded(['aa', 'bb'], 3)}</@>
-<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mCharArrayOverloaded(obj.javaString2List, 3)}</@>
+<@assertFails message="Failed to convert sequence">${obj.mCharArrayOverloaded(['aa', 'bb'], 3)}</@>
+<@assertFails message="Failed to convert">${obj.mCharArrayOverloaded(obj.javaString2List, 3)}</@>
 <@assertEquals actual=obj.mCharArrayOverloaded(['a', 'b'], 's') expected="mCharArrayOverloaded(Character[] [a, b], String s)" />
 <@assertEquals actual=obj.mCharArrayOverloaded(obj.javaCharacterList, 's') expected="mCharArrayOverloaded(Character[] [c, C], String s)" />
 <@assertEquals actual=obj.mCharArrayOverloaded(obj.javaStringList, 's') expected="mCharArrayOverloaded(Character[] [a, b], String s)" />
-<@assertFails message="Failed to convert sequence" causeNestingLevel=1>${obj.mCharArrayOverloaded(['aa', 'bb'], 's')}</@>
-<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mCharArrayOverloaded(obj.javaString2List, 's')}</@>
+<@assertFails message="Failed to convert sequence">${obj.mCharArrayOverloaded(['aa', 'bb'], 's')}</@>
+<@assertFails message="Failed to convert">${obj.mCharArrayOverloaded(obj.javaString2List, 's')}</@>
 
 <@assertEquals actual=obj.mStringArrayArrayOverloaded([['a', 'b'], ['c']], 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
 <@assertEquals actual=obj.mStringArrayArrayOverloaded(obj.javaStringListList, 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
 <@assertEquals actual=obj.mStringArrayArrayOverloaded(obj.javaStringSequenceList, 3) expected="mStringArrayArrayOverloaded(String[][] [[a, b], [c]], int 3)" />
-<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayArrayOverloaded(obj.javaStringList, 3)}</@>
-<@assertFails message="Failed to convert" causeNestingLevel=1>${obj.mStringArrayArrayOverloaded(obj.javaIntegerListList, 3)}</@>
+<@assertFails message="Failed to convert">${obj.mStringArrayArrayOverloaded(obj.javaStringList, 3)}</@>
+<@assertFails message="Failed to convert">${obj.mStringArrayArrayOverloaded(obj.javaIntegerListList, 3)}</@>
+<@assertEquals actual=obj.mIntArrayArrayOverloaded(obj.javaListOfIntArrays) expected="mIntArrayArrayOverloaded([[1, 2, 3], [], [4]])" />
+<@assertEquals actual=obj.mArrayOfListsOverloaded(obj.javaListOfIntArrays) expected="mArrayOfListsOverloaded([[1, 2, 3], [], [4]])" />
+
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a', 'b']) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringList) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringArray) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a']) expected="mStringArrayVarargsOverloaded2(String[] [a])" />
+
+<#-- Situations that lead to array-to-List conversion: -->
+<@assertEquals actual=obj.mListOrString(obj.javaStringArray) expected="mListOrString(List [a, b])" />
+<@assertEquals actual=obj.mListOrString(obj.javaEmptyStringArray) expected="mListOrString(List [])" />
+<@assertEquals actual=obj.mListOrString(obj.javaIntArray) expected="mListOrString(List [11, 22])" />
+<@assertEquals actual=obj.mListListOrString(obj.javaStringArrayArray) expected="mListListOrString(List [[a, b], [], [c]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+
+<@assertEquals actual=obj.mMapOrBoolean(obj.hashAndScalarModel) expected="mMapOrBoolean(Map {})" />
+<@assertEquals actual=obj.mMapOrBoolean(obj.booleanAndScalarModel) expected="mMapOrBoolean(boolean true)" />
+<@assertEquals actual=obj.mMapOrBoolean(obj.allModels) expected="mMapOrBoolean(boolean true)" />
+
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.hashAndScalarModel) expected="mMapOrBooleanVarargs(Map... [{}])" />
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel) expected="mMapOrBooleanVarargs(Map... [{}, {}])" />
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.allModels) expected="mMapOrBooleanVarargs(boolean... [true])" />
+<@assertEquals actual=obj.mMapOrBooleanVarargs(obj.allModels, obj.allModels) expected="mMapOrBooleanVarargs(boolean... [true, true])" />
+
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel) expected="mMapOrBooleanFixedAndVarargs(Map {})" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel) expected="mMapOrBooleanFixedAndVarargs(Map... [{}, {}])" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel, obj.hashAndScalarModel) expected="mMapOrBooleanFixedAndVarargs(Map... [{}, {}, {}])" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.allModels) expected="mMapOrBooleanFixedAndVarargs(boolean true)" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels) expected="mMapOrBooleanFixedAndVarargs(boolean... [true, true])" />
+<@assertEquals actual=obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels, obj.allModels) expected="mMapOrBooleanFixedAndVarargs(boolean... [true, true, true])" />
+
+<@assertEquals actual=obj.mNumberOrArray(obj.allModels) expected="mNumberOrArray(Number 1)" />
+<@assertEquals actual=obj.mNumberOrArray([obj.allModels]) expected="mNumberOrArray(Object[] [1])" />
+<@assertEquals actual=obj.mIntOrArray(obj.allModels) expected="mIntOrArray(int 1)" />
+<@assertEquals actual=obj.mDateOrArray(obj.allModels) expected="mDateOrArray(Date 0)" />
+<@assertEquals actual=obj.mStringOrArray(obj.allModels) expected="mStringOrArray(String s)" />
+<@assertEquals actual=obj.mBooleanOrArray(obj.allModels) expected="mBooleanOrArray(boolean true)" />
+<@assertEquals actual=obj.mMapOrArray(obj.allModels) expected="mMapOrArray(Map {})" />
+<@assertEquals actual=obj.mListOrArray(obj.allModels) expected="mListOrArray(List [])" />
+<@assertEquals actual=obj.mSetOrArray(obj.allModels) expected="mSetOrArray(Set [])" />
+
+<@assertEquals actual=obj.mCharOrCharacterOverloaded('c') expected="mCharOrCharacterOverloaded(char c)" />
+<@assertEquals actual=obj.mCharOrCharacterOverloaded(obj.javaString) expected="mCharOrCharacterOverloaded(char s)" />
+<@assertEquals actual=obj.mCharOrCharacterOverloaded(null) expected="mCharOrCharacterOverloaded(Character null)" />
+
+<@assertEquals actual=obj.mCharOrBooleanOverloaded('c') expected="mCharOrBooleanOverloaded(char c)" />
+<@assertEquals actual=obj.mCharOrBooleanOverloaded(true) expected="mCharOrBooleanOverloaded(boolean true)" />
+
+<@assertEquals actual=obj.mCharOrStringOverloaded('c', true) expected="mCharOrStringOverloaded(char c, boolean true)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded('c', true) expected="mCharacterOrStringOverloaded(Character c, boolean true)" />
+
+<@assertEquals actual=obj.mCharOrStringOverloaded2('c') expected="mCharOrStringOverloaded2(char c)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('c') expected="mCharacterOrStringOverloaded2(Character c)" />
+<@assertEquals actual=obj.mCharOrStringOverloaded2('ss') expected="mCharOrStringOverloaded2(String ss)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('ss') expected="mCharacterOrStringOverloaded2(String ss)" />

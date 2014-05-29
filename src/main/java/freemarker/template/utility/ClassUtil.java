@@ -351,7 +351,7 @@ public class ClassUtil
             return sb.toString();
         }
     }
-
+    
     /**
      * Gets the wrapper class for a primitive class, like {@link Integer} for {@code int}, also returns {@link Void}
      * for {@code void}. 

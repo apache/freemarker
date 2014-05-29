@@ -14,25 +14,13 @@ class OverloadedNumberUtil {
 
     // Can't be instantiated
     private OverloadedNumberUtil() { }
-    
-    /** The unwrapping hint will not be a specific numerical type. */
-    static final int FLAG_WIDENED_UNWRAPPING_HINT = 1;
-    
-    static final int FLAG_BYTE = 4;
-    static final int FLAG_SHORT = 8;
-    static final int FLAG_INTEGER = 16;
-    static final int FLAG_LONG = 32;
-    static final int FLAG_FLOAT = 64;
-    static final int FLAG_DOUBLE = 128;
-    static final int FLAG_BIG_INTEGER = 256;
-    static final int FLAG_BIG_DECIMAL = 512;
-    static final int FLAG_UNKNOWN_TYPE = 1024;
-    
-    static final int MASK_KNOWN_INTEGERS = FLAG_BYTE | FLAG_SHORT | FLAG_INTEGER | FLAG_LONG | FLAG_BIG_INTEGER;
-    static final int MASK_KNOWN_NONINTEGERS = FLAG_FLOAT | FLAG_DOUBLE | FLAG_BIG_DECIMAL;
-    static final int MASK_ALL_KNOWN_TYPES = MASK_KNOWN_INTEGERS | MASK_KNOWN_NONINTEGERS;
-    static final int MASK_ALL_TYPES = MASK_ALL_KNOWN_TYPES | FLAG_UNKNOWN_TYPE;
 
+    /**
+     * The lower limit of conversion prices where there's a risk of significant mantissa loss.
+     * The value comes from misc/overloadedNumberRules/prices.ods and generator.ftl.
+     */
+    static final int BIG_MANTISSA_LOSS_PRICE = 4 * 10000;
+    
     /** The highest long that can be stored in double without precision loss: 2**53. */
     private static final long MAX_DOUBLE_OR_LONG = 9007199254740992L;
     /** The lowest long that can be stored in double without precision loss: -(2**53). */
@@ -44,34 +32,10 @@ class OverloadedNumberUtil {
     /** The lowest long that can be stored in float without precision loss: -(2**24). */
     private static final int MIN_FLOAT_OR_INT = -16777216;
     private static final int MAX_FLOAT_OR_INT_LOG_2 = 24;
-
-    static boolean hasCommonFlags(Class pClass, int numberTypeFlags) {
-         return (OverloadedNumberUtil.classToTypeFlags(pClass) & numberTypeFlags) != 0;
-    }
-
-    static int classToTypeFlags(Class pClass) {
-        if (pClass.isPrimitive()) {
-            if (pClass == Integer.TYPE) return FLAG_INTEGER;
-            else if (pClass == Long.TYPE) return FLAG_LONG;
-            else if (pClass == Double.TYPE) return FLAG_DOUBLE;
-            else if (pClass == Float.TYPE) return FLAG_FLOAT;
-            else if (pClass == Byte.TYPE) return FLAG_BYTE;
-            else if (pClass == Short.TYPE) return FLAG_SHORT;
-            else return 0;
-        } else if (Number.class.isAssignableFrom(pClass)) {
-            if (pClass == Integer.class) return FLAG_INTEGER;
-            else if (pClass == Long.class) return FLAG_LONG;
-            else if (pClass == Double.class) return FLAG_DOUBLE;
-            else if (pClass == Float.class) return FLAG_FLOAT;
-            else if (pClass == Byte.class) return FLAG_BYTE;
-            else if (pClass == Short.class) return FLAG_SHORT;
-            else if (BigDecimal.class.isAssignableFrom(pClass)) return FLAG_BIG_DECIMAL;
-            else if (BigInteger.class.isAssignableFrom(pClass)) return FLAG_BIG_INTEGER;
-            else return FLAG_UNKNOWN_TYPE;
-        } else {
-            return 0;
-        }
-    }
+    /** Lowest number that we don't thread as possible integer 0. */
+    private static final double LOWEST_ABOVE_ZERO = 0.000001;
+    /** Highest number that we don't thread as possible integer 1. */
+    private static final double HIGHEST_BELOW_ONE = 0.999999;
 
     /**
      * Attaches the lowest alternative number type to the parameter number via {@link NumberWithFallbackType}, if
@@ -81,7 +45,7 @@ class OverloadedNumberUtil {
      * <p>Note that as of this writing, this method is only used when
      * {@link BeansWrapper#getIncompatibleImprovements()} >= 2.3.21.
      * 
-     * <p>Why's this needed, how it works: Overloaded methods selection only selects methods where the <em>type</em>
+     * <p>Why's this needed, how it works: Overloaded method selection only selects methods where the <em>type</em>
      * (not the value!) of the argument is "smaller" or the same as the parameter type. This is similar to how it's in
      * the Java language. That it only decides based on the parameter type is important because this way
      * {@link OverloadedMethodsSubset} can cache method lookup decisions using the types as the cache key. Problem is,
@@ -92,7 +56,7 @@ class OverloadedNumberUtil {
      * is especially important as FTL often stores numbers in {@link BigDecimal}-s, which will hardly ever match any
      * method parameters.) We could simply return that number, like {@code Byte(0)} for an {@code Integer(0)},
      * however, then we would lose the information about what the original type was. The original type is sometimes
-     * important, as in ambiguous situations the method where the there's an exact type match should be selected (like,
+     * important, as in ambiguous situations the method where there's an exact type match should be selected (like,
      * when someone wants to select an overload explicitly with {@code m(x?int)}). Also, if an overload wins where
      * the parameter type at the position of the number is {@code Number} or {@code Object} (or {@code Comparable}
      * etc.), it's expected that we pass in the original value (an {@code Integer} in this example), especially if that
@@ -104,12 +68,12 @@ class OverloadedNumberUtil {
      * <p>See also: <tt>src\main\misc\overloadedNumberRules\prices.ods</tt>.
      * 
      * @param num the number to coerce
-     * @param targetNumTypes a bit-set of {@link #FLAG_INTEGER} and such.
+     * @param typeFlags the type flags of the target parameter position; see {@link TypeFlags}
      * 
      * @returns The original number or a {@link NumberWithFallbackType}, depending on the actual value and the types
      *     indicated in the {@code targetNumTypes} parameter.
      */
-    static Number addFallbackType(Number num, int targetNumTypes) {
+    static Number addFallbackType(final Number num, final int typeFlags) {
         // Java 5: use valueOf where possible
         final Class numClass = num.getClass();
         if (numClass == BigDecimal.class) {
@@ -117,7 +81,8 @@ class OverloadedNumberUtil {
             // However, we push the overloaded selection to the right direction, so we will at least indicate if the
             // number has decimals.
             BigDecimal n = (BigDecimal) num; 
-            if ((targetNumTypes & MASK_KNOWN_INTEGERS) != 0 && (targetNumTypes & MASK_KNOWN_NONINTEGERS) != 0
+            if ((typeFlags & TypeFlags.MASK_KNOWN_INTEGERS) != 0
+                    && (typeFlags & TypeFlags.MASK_KNOWN_NONINTEGERS) != 0
                     && NumberUtil.isBigDecimalInteger(n) /* <- can be expensive */) {
                 return new IntegerBigDecimal(n);
             } else {
@@ -131,22 +96,22 @@ class OverloadedNumberUtil {
             // only among the types that are possible targets. Like if the only target is int and the value is 1, we
             // will return Integer 1, not Byte 1, even though byte is automatically converted to int so it would
             // work too. Why we avoid unnecessarily specific types is that they generate more overloaded method lookup
-            // cache entries, since the cache key is the array of types of the argument values. So we want as few
+            // cache entries, since the cache key is the array of the types of the argument values. So we want as few
             // permutations as possible. 
-            if ((targetNumTypes & FLAG_BYTE) != 0 && pn <= Byte.MAX_VALUE && pn >= Byte.MIN_VALUE) {
+            if ((typeFlags & TypeFlags.BYTE) != 0 && pn <= Byte.MAX_VALUE && pn >= Byte.MIN_VALUE) {
                 return new IntegerOrByte((Integer) num, (byte) pn);
-            } else if ((targetNumTypes & FLAG_SHORT) != 0 && pn <= Short.MAX_VALUE && pn >= Short.MIN_VALUE) {
+            } else if ((typeFlags & TypeFlags.SHORT) != 0 && pn <= Short.MAX_VALUE && pn >= Short.MIN_VALUE) {
                 return new IntegerOrShort((Integer) num, (short) pn);
             } else {
                 return num;
             }
         } else if (numClass == Long.class) {
             final long pn = num.longValue(); 
-            if ((targetNumTypes & FLAG_BYTE) != 0 && pn <= Byte.MAX_VALUE && pn >= Byte.MIN_VALUE) {
+            if ((typeFlags & TypeFlags.BYTE) != 0 && pn <= Byte.MAX_VALUE && pn >= Byte.MIN_VALUE) {
                 return new LongOrByte((Long) num, (byte) pn);
-            } else if ((targetNumTypes & FLAG_SHORT) != 0 && pn <= Short.MAX_VALUE && pn >= Short.MIN_VALUE) {
+            } else if ((typeFlags & TypeFlags.SHORT) != 0 && pn <= Short.MAX_VALUE && pn >= Short.MIN_VALUE) {
                 return new LongOrShort((Long) num, (short) pn);
-            } else if ((targetNumTypes & FLAG_INTEGER) != 0 && pn <= Integer.MAX_VALUE && pn >= Integer.MIN_VALUE) {
+            } else if ((typeFlags & TypeFlags.INTEGER) != 0 && pn <= Integer.MAX_VALUE && pn >= Integer.MIN_VALUE) {
                 return new LongOrInteger((Long) num, (int) pn);
             } else {
                 return num;
@@ -156,7 +121,7 @@ class OverloadedNumberUtil {
             
             // Can we store it in an integer type?
             checkIfWholeNumber: do {
-                if ((targetNumTypes & MASK_KNOWN_INTEGERS) == 0) break checkIfWholeNumber;
+                if ((typeFlags & TypeFlags.MASK_KNOWN_INTEGERS) == 0) break checkIfWholeNumber;
                 
                 // There's no hope to be 1-precise outside this region. (Although problems can occur even inside it...)
                 if (doubleN > MAX_DOUBLE_OR_LONG || doubleN < MIN_DOUBLE_OR_LONG) break checkIfWholeNumber;
@@ -167,18 +132,18 @@ class OverloadedNumberUtil {
                 if (diff == 0) {
                     exact = true;
                 } else if (diff > 0) {
-                    if (diff < 0.000001) {
+                    if (diff < LOWEST_ABOVE_ZERO) {
                         exact = false;
-                    } else if (diff > 0.999999) {
+                    } else if (diff > HIGHEST_BELOW_ONE) {
                         exact = false;
                         longN++;
                     } else {
                         break checkIfWholeNumber;
                     }
                 } else {  // => diff < 0
-                    if (diff > -0.000001) {
+                    if (diff > -LOWEST_ABOVE_ZERO) {
                         exact = false;
-                    } else if (diff < -0.999999) {
+                    } else if (diff < -HIGHEST_BELOW_ONE) {
                         exact = false;
                         longN--;
                     } else {
@@ -188,17 +153,20 @@ class OverloadedNumberUtil {
                 
                 // If we reach this, it can be treated as a whole number.
                 
-                if ((targetNumTypes & FLAG_BYTE) != 0 && longN <= Byte.MAX_VALUE && longN >= Byte.MIN_VALUE) {
+                if ((typeFlags & TypeFlags.BYTE) != 0
+                        && longN <= Byte.MAX_VALUE && longN >= Byte.MIN_VALUE) {
                     return new DoubleOrByte((Double) num, (byte) longN);
-                } else if ((targetNumTypes & FLAG_SHORT) != 0 && longN <= Short.MAX_VALUE && longN >= Short.MIN_VALUE) {
+                } else if ((typeFlags & TypeFlags.SHORT) != 0
+                        && longN <= Short.MAX_VALUE && longN >= Short.MIN_VALUE) {
                     return new DoubleOrShort((Double) num, (short) longN);
-                } else if ((targetNumTypes & FLAG_INTEGER) != 0 && longN <= Integer.MAX_VALUE && longN >= Integer.MIN_VALUE) {
+                } else if ((typeFlags & TypeFlags.INTEGER) != 0
+                        && longN <= Integer.MAX_VALUE && longN >= Integer.MIN_VALUE) {
                     final int intN = (int) longN; 
                     // Java 5: remove the "? (Number)" and ": (Number)" casts
-                    return (targetNumTypes & FLAG_FLOAT) != 0 && intN >= MIN_FLOAT_OR_INT && intN <= MAX_FLOAT_OR_INT
+                    return (typeFlags & TypeFlags.FLOAT) != 0 && intN >= MIN_FLOAT_OR_INT && intN <= MAX_FLOAT_OR_INT
                                     ? (Number) new DoubleOrIntegerOrFloat((Double) num, intN)
                                     : (Number) new DoubleOrInteger((Double) num, intN);
-                } else if ((targetNumTypes & FLAG_LONG) != 0) {
+                } else if ((typeFlags & TypeFlags.LONG) != 0) {
                     if (exact) {
                         return new DoubleOrLong((Double) num, longN);
                     } else {
@@ -216,7 +184,7 @@ class OverloadedNumberUtil {
             } while (false);
             // If we reach this that means that it can't be treated as a whole number.
             
-            if ((targetNumTypes & FLAG_FLOAT) != 0 && doubleN >= -Float.MAX_VALUE && doubleN <= Float.MAX_VALUE) {
+            if ((typeFlags & TypeFlags.FLOAT) != 0 && doubleN >= -Float.MAX_VALUE && doubleN <= Float.MAX_VALUE) {
                 return new DoubleOrFloat((Double) num);
             } else {
                 // Simply Double:
@@ -227,7 +195,7 @@ class OverloadedNumberUtil {
             
             // Can we store it in an integer type?
             checkIfWholeNumber: do {
-                if ((targetNumTypes & MASK_KNOWN_INTEGERS) == 0) break checkIfWholeNumber;
+                if ((typeFlags & TypeFlags.MASK_KNOWN_INTEGERS) == 0) break checkIfWholeNumber;
                 
                 // There's no hope to be 1-precise outside this region. (Although problems can occur even inside it...)
                 if (floatN > MAX_FLOAT_OR_INT || floatN < MIN_FLOAT_OR_INT) break checkIfWholeNumber;
@@ -264,13 +232,13 @@ class OverloadedNumberUtil {
                 
                 // If we reach this, it can be treated as a whole number.
                 
-                if ((targetNumTypes & FLAG_BYTE) != 0 && intN <= Byte.MAX_VALUE && intN >= Byte.MIN_VALUE) {
+                if ((typeFlags & TypeFlags.BYTE) != 0 && intN <= Byte.MAX_VALUE && intN >= Byte.MIN_VALUE) {
                     return new FloatOrByte((Float) num, (byte) intN);
-                } else if ((targetNumTypes & FLAG_SHORT) != 0 && intN <= Short.MAX_VALUE && intN >= Short.MIN_VALUE) {
+                } else if ((typeFlags & TypeFlags.SHORT) != 0 && intN <= Short.MAX_VALUE && intN >= Short.MIN_VALUE) {
                     return new FloatOrShort((Float) num, (short) intN);
-                } else if ((targetNumTypes & FLAG_INTEGER) != 0) {
+                } else if ((typeFlags & TypeFlags.INTEGER) != 0) {
                     return new FloatOrInteger((Float) num, intN);
-                } else if ((targetNumTypes & FLAG_LONG) != 0) {
+                } else if ((typeFlags & TypeFlags.LONG) != 0) {
                     // We can't even go outside the range of integers, so we don't need Long variation:
                     return exact
                             ? (Number) new FloatOrInteger((Float) num, intN)
@@ -285,30 +253,31 @@ class OverloadedNumberUtil {
             return num;
         } else if (numClass == Short.class) {
             short pn = num.shortValue(); 
-            if ((targetNumTypes & FLAG_BYTE) != 0 && pn <= Byte.MAX_VALUE && pn >= Byte.MIN_VALUE) {
+            if ((typeFlags & TypeFlags.BYTE) != 0 && pn <= Byte.MAX_VALUE && pn >= Byte.MIN_VALUE) {
                 return new ShortOrByte((Short) num, (byte) pn);
             } else {
                 return num;
             }
         } else if (numClass == BigInteger.class) {
-            if ((targetNumTypes
-                    & ((MASK_KNOWN_INTEGERS | MASK_KNOWN_NONINTEGERS) ^ (FLAG_BIG_INTEGER | FLAG_BIG_DECIMAL))) != 0) {
+            if ((typeFlags
+                    & ((TypeFlags.MASK_KNOWN_INTEGERS | TypeFlags.MASK_KNOWN_NONINTEGERS)
+                            ^ (TypeFlags.BIG_INTEGER | TypeFlags.BIG_DECIMAL))) != 0) {
                 BigInteger biNum = (BigInteger) num;
                 final int bitLength = biNum.bitLength();  // Doesn't include sign bit, so it's one less than expected
-                if ((targetNumTypes & FLAG_BYTE) != 0 && bitLength <= 7) {
+                if ((typeFlags & TypeFlags.BYTE) != 0 && bitLength <= 7) {
                     return new BigIntegerOrByte(biNum);
-                } else if ((targetNumTypes & FLAG_SHORT) != 0 && bitLength <= 15) {
+                } else if ((typeFlags & TypeFlags.SHORT) != 0 && bitLength <= 15) {
                     return new BigIntegerOrShort(biNum);
-                } else if ((targetNumTypes & FLAG_INTEGER) != 0 && bitLength <= 31) {
+                } else if ((typeFlags & TypeFlags.INTEGER) != 0 && bitLength <= 31) {
                     return new BigIntegerOrInteger(biNum);
-                } else if ((targetNumTypes & FLAG_LONG) != 0 && bitLength <= 63) {
+                } else if ((typeFlags & TypeFlags.LONG) != 0 && bitLength <= 63) {
                     return new BigIntegerOrLong(biNum);
-                } else if ((targetNumTypes & FLAG_FLOAT) != 0
+                } else if ((typeFlags & TypeFlags.FLOAT) != 0
                         && (bitLength <= MAX_FLOAT_OR_INT_LOG_2
                             || bitLength == MAX_FLOAT_OR_INT_LOG_2 + 1
                                && biNum.getLowestSetBit() >= MAX_FLOAT_OR_INT_LOG_2)) {
                     return new BigIntegerOrFloat(biNum);
-                } else if ((targetNumTypes & FLAG_DOUBLE) != 0
+                } else if ((typeFlags & TypeFlags.DOUBLE) != 0
                         && (bitLength <= MAX_DOUBLE_OR_LONG_LOG_2
                             || bitLength == MAX_DOUBLE_OR_LONG_LOG_2 + 1
                                && biNum.getLowestSetBit() >= MAX_DOUBLE_OR_LONG_LOG_2)) {
@@ -888,7 +857,8 @@ class OverloadedNumberUtil {
      *       <li>[0, 30000): Lossless conversion
      *       <li>[30000, 40000): Smaller precision loss in mantissa is possible.
      *       <li>[40000, 50000): Bigger precision loss in mantissa is possible.
-     *       <li>{@link Integer#MAX_VALUE}: Conversion not allowed due to the possibility of magnitude loss or overflow</li>
+     *       <li>{@link Integer#MAX_VALUE}: Conversion not allowed due to the possibility of magnitude loss or
+     *          overflow</li>
      *     </ul>
      * 
      *     <p>At some places, we only care if the conversion is possible, i.e., whether the return value is

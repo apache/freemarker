@@ -1,4 +1,4 @@
-<#-- The parts of the IcI 2.3.20 tests that give the same result regardless of method introspection order -->00000000000
+<#-- The parts of the IcI 2.3.20 tests that give the same result regardless of method introspection order -->
 <#-- Note that the point of 2.3.20 tests is to check if bugs fixed in 2.3.21 are still emulated in pre-2.3.21 mode -->
 
 <#include "overloaded-methods-2-common.ftl">
@@ -176,9 +176,87 @@
 
 <@assertEquals actual=obj.mStringArrayVsListPreference(['a', 'b']) expected="mStringArrayVsListPreference(List [a, b])" />
 <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(['a', 'b'])}</@>
+<#if !dow>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsListPreference(obj.javaObjectArray)}</@>
+</#if>
 <@assertFails message="no compatible overloaded">${obj.mIntArrayVsIntegerArrayPreference([1, 2])}</@>
+
+<#if dow>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntegerArray)}</@>
+<#else>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(String[] [a, b])" />
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray)}</@>
+  <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntegerArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
+</#if>
 
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1, 2], 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded([1?byte, 2?byte], 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaIntegerList, 3)}</@>
 <@assertFails message="no compatible overloaded">${obj.mIntegerArrayOverloaded(obj.javaByteList, 3)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(['a', 'b'])}</@>
+<#if dow>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(obj.javaStringList)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(obj.javaStringArray)}</@>
+<#else>
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringList) expected="mStringArrayVarargsOverloaded2(String[] [[a, b]])" /> <#-- toString() accident... -->
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringArray) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
+</#if>
+<@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded2(['a'])}</@>
+
+<#if dow>
+  <#-- As with DOW we never end up with array-s after unwrapping, they just work like Lists: -->
+  <@assertEquals actual=obj.mListOrString(obj.javaStringArray) expected="mListOrString(List [a, b])" />
+  <@assertEquals actual=obj.mListListOrString(obj.javaStringArrayArray) expected="mListListOrString(List [[a, b], [], [c]])" />
+  <@assertEquals actual=obj.mListOrString(obj.javaIntArray) expected="mListOrString(List [11, 22])" />
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+  <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
+<#else>
+  <#-- Pure BeansWrapper unwraps to array-s, but before IcI 2.3.21 it couldn't treat them as Lists: -->
+  <@assertFails message="no compatible overloaded">${obj.mListOrString(obj.javaStringArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mListListOrString(obj.javaStringArrayArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mListOrString(obj.javaIntArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringArray)}</@>
+  <@assertFails message="no compatible overloaded">${obj.mStringArrayVarargsOverloaded4(obj.javaStringArray, obj.javaStringList)}</@>
+</#if>
+
+<@assertFails message="no compatible overloaded">${obj.mIntArrayArrayOverloaded(obj.javaListOfIntArrays)}</@>
+<@assertFails message="no compatible overloaded">${obj.mArrayOfListsOverloaded(obj.javaListOfIntArrays)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mMapOrBoolean(obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBoolean(obj.booleanAndScalarModel)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanVarargs(obj.allModels, obj.allModels)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.hashAndScalarModel, obj.hashAndScalarModel, obj.hashAndScalarModel)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrBooleanFixedAndVarargs(obj.allModels, obj.allModels, obj.allModels)}</@>
+
+<@assertEquals actual=obj.mNumberOrArray(obj.allModels) expected="mNumberOrArray(Number 1)" />
+<@assertFails message="no compatible overloaded"><@assertEquals actual=obj.mNumberOrArray([obj.allModels]) expected="mNumberOrArray(Object[] [1])" /></@>
+<@assertEquals actual=obj.mIntOrArray(obj.allModels) expected="mIntOrArray(int 1)" />
+<@assertFails message="no compatible overloaded">${obj.mDateOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mStringOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mBooleanOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mMapOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mListOrArray(obj.allModels)}</@>
+<@assertFails message="no compatible overloaded">${obj.mSetOrArray(obj.allModels)}</@>
+
+<@assertFails message="no compatible overloaded">${obj.mCharOrCharacterOverloaded(null)}</@>
+<@assertFails message="no compatible overloaded">${obj.mCharOrBooleanOverloaded('c')}</@>
+<@assertEquals actual=obj.mCharOrBooleanOverloaded(true) expected="mCharOrBooleanOverloaded(boolean true)" />
+
+<@assertFails message="no compatible overloaded">${obj.mCharOrStringOverloaded('c', true)}</@>
+<@assertFails message="no compatible overloaded">${obj.mCharacterOrStringOverloaded('c', true)}</@>
+<@assertEquals actual=obj.mCharOrStringOverloaded2('c') expected="mCharOrStringOverloaded2(String c)" />
+<@assertEquals actual=obj.mCharacterOrStringOverloaded2('c') expected="mCharacterOrStringOverloaded2(String c)" />

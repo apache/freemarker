@@ -53,9 +53,6 @@
 package freemarker.ext.beans;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 import freemarker.template.SimpleNumber;
@@ -64,7 +61,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.Collections12;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Wraps a set of same-name overloaded methods behind {@link freemarker.template.TemplateMethodModel} interface,
@@ -105,41 +101,12 @@ implements
         }
         catch(Exception e)
         {
-            while(e instanceof InvocationTargetException)
-            {
-                Throwable t = ((InvocationTargetException)e).getTargetException();
-                if(t instanceof Exception)
-                {
-                    e = (Exception)t;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            if(maa.getCallableMemberDescriptor().isStatic())
-            {
-                throw new TemplateModelException("Method " + maa.getCallableMemberDescriptor().getDeclaration() + 
-                        " threw an exception. See cause exception.", e);
-            }
-            else
-            {
-                StringBuffer buf = new StringBuffer();
-                Object[] args = maa.getArgs();
-                for(int i = 0; i < args.length; ++i)
-                {
-                    if (i != 0) {
-                        buf.append(',');                        
-                    }
-                    Object arg = args[i];
-                    buf.append(arg == null ? "null" : arg.getClass().getName());
-                }
-                throw new TemplateModelException("Method " + maa.getCallableMemberDescriptor().getDeclaration() + 
-                        " threw an exception when invoked on "
-                        + object.getClass().getName() + " object "
-                        + StringUtil.jQuote(StringUtil.tryToString(object))
-                        + " with arguments of types [" + buf + "]. See cause exception.", e);
-            }
+            if (e instanceof TemplateModelException) throw (TemplateModelException) e;
+            
+            throw _MethodUtil.newInvocationTemplateModelException(
+                    object,
+                    maa.getCallableMemberDescriptor(),
+                    e);
         }
     }
 

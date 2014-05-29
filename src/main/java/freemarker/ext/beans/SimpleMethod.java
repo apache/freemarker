@@ -58,11 +58,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._DelayedOrdinal;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * This class is used for as a base for non-overloaded method models and for constructors.
@@ -85,26 +85,29 @@ class SimpleMethod
         if(arguments == null) {
             arguments = Collections.EMPTY_LIST;
         }
-        boolean isVarArg = _MethodUtil.isVarArgs(member);
+        boolean isVarArg = _MethodUtil.isVarargs(member);
         int typesLen = argTypes.length;
         if(isVarArg) {
             if(typesLen - 1 > arguments.size()) {
-                throw new TemplateModelException("Method " + member + 
-                        " takes at least " + (typesLen - 1) + 
-                        " arguments, " + arguments.size() + " was given.");
+                throw new _TemplateModelException(new Object[] {
+                        _MethodUtil.invocationErrorMessageStart(member),
+                        " takes at least ", new Integer(typesLen - 1),
+                        typesLen - 1 == 1 ? " argument" : " arguments", ", but ",
+                        new Integer(arguments.size()), " was given." });
             }
         }
         else if(typesLen != arguments.size()) {
-            throw new TemplateModelException("Method " + member + 
-                    " takes exactly " + typesLen + " arguments, " +
-                    arguments.size() + " was given.");
+            throw new _TemplateModelException(new Object[] {
+                    _MethodUtil.invocationErrorMessageStart(member), 
+                    " takes ", new Integer(typesLen), typesLen == 1 ? " argument" : " arguments", ", but ",
+                    new Integer(arguments.size()), " was given." });
         }
          
         Object[] args = unwrapArguments(arguments, argTypes, isVarArg, wrapper);
         return args;
     }
 
-    static Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
+    private Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
             BeansWrapper w) 
     throws TemplateModelException {
         if(args == null) return null;
@@ -175,18 +178,22 @@ class SimpleMethod
         return unwrappedArgs;
     }
 
-    private static TemplateModelException createArgumentTypeMismarchException(
+    private TemplateModelException createArgumentTypeMismarchException(
             int argIdx, TemplateModel argVal, Class targetType) {
         return new _TemplateModelException(new Object[] {
-                "Argument type mismatch; can't convert (unwrap) argument #", new Integer(argIdx + 1),
-                " value of type ", new _DelayedFTLTypeDescription(argVal),
-                " to ", ClassUtil.getShortClassName(targetType), "." });
+                _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
+                new _DelayedOrdinal(new Integer(argIdx + 1)),
+                " argument's value to the target Java type, ", ClassUtil.getShortClassName(targetType),
+                ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal),
+                });
     }
 
-    private static TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
+    private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
         return new _TemplateModelException(new Object[] {
-                "Argument type mismatch; argument #", new Integer(argIdx + 1),
-                " is null, which can't be converted to primitive type ", targetType.getName(), "." });
+                _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
+                new _DelayedOrdinal(new Integer(argIdx + 1)),
+                " argument was null, but the target Java parameter type (", ClassUtil.getShortClassName(targetType),
+                ") is primitive and so can't store null." });
     }
     
     protected Member getMember() {

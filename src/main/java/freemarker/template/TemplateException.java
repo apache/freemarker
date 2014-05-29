@@ -74,6 +74,8 @@ import freemarker.template.utility.Collections12;
 public class TemplateException extends Exception {
 
     private static final String THE_FAILING_INSTRUCTION = "The failing instruction";
+    private static final String THE_FAILING_INSTRUCTION_FTL_STACK_TRACE
+            = THE_FAILING_INSTRUCTION + " (FTL stack trace):";
 
     private static final boolean BEFORE_1_4 = before14();
     private static boolean before14() {
@@ -378,9 +380,8 @@ public class TemplateException extends Exception {
                 String stackTrace = getFTLInstructionStack();
                 if (stackTrace != null) {
                     out.println(getMessageWithoutStackTop());  // Not getMessage()!
-                    out.println();
-                    out.print(THE_FAILING_INSTRUCTION);
-                    out.println(" (FTL stack trace):");
+                    out.println("");
+                    out.println(THE_FAILING_INSTRUCTION_FTL_STACK_TRACE);
                     out.print(stackTrace);
                 } else {
                     ftlStackTrace = false;

@@ -1,18 +1,26 @@
 package freemarker.core;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+
+import freemarker.ext.beans._MethodUtil;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
  * Used internally only, might changes without notice!
  * Packs a structured from of the error description from which the error message can be rendered on-demand.
+ * Note that this class isn't serializable, thus the containing exception should render the message before it's
+ * serialized.
  */
 public class _ErrorDescriptionBuilder {
 
     private static final Logger logger = Logger.getLogger("freemarker.runtime");
-    
+
     private final String description;
     private final Object[] descriptionParts;
     private Expression blamed;
@@ -184,30 +192,60 @@ public class _ErrorDescriptionBuilder {
             if (partObj instanceof Object[]) {
                 appendParts(sb, (Object[]) partObj);
             } else {
-                String part = parts[i].toString();
+                String partStr;
+                partStr = tryToString(partObj);
+                if (partStr == null) {
+                    partStr = "null";
+                }
+                
                 if (template != null) {
-                    if (part.length() > 4
-                            && part.charAt(0) == '<'
+                    if (partStr.length() > 4
+                            && partStr.charAt(0) == '<'
                             && (
-                                    (part.charAt(1) == '#' || part.charAt(1) == '@')
-                                    || (part.charAt(1) == '/') && (part.charAt(2) == '#' || part.charAt(2) == '@')
+                                    (partStr.charAt(1) == '#' || partStr.charAt(1) == '@')
+                                    || (partStr.charAt(1) == '/') && (partStr.charAt(2) == '#' || partStr.charAt(2) == '@')
                                )
-                            && part.charAt(part.length() - 1) == '>') {
+                            && partStr.charAt(partStr.length() - 1) == '>') {
                         if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
                             sb.append('[');
-                            sb.append(part.substring(1, part.length() - 1));
+                            sb.append(partStr.substring(1, partStr.length() - 1));
                             sb.append(']');
                         } else {
-                            sb.append(part);
+                            sb.append(partStr);
                         }
                     } else {
-                        sb.append(part);
+                        sb.append(partStr);
                     }
                 } else {
-                    sb.append(part);
+                    sb.append(partStr);
                 }
             }
         }
+    }
+
+    /**
+     * A twist on Java's toString that generates more appropriate results for generating error messages.
+     */
+    public static String toString(Object partObj) {
+        return toString(partObj, false);
+    }
+
+    public static String tryToString(Object partObj) {
+        return toString(partObj, true);
+    }
+    
+    private static String toString(Object partObj, boolean suppressToStringException) {
+        final String partStr;
+        if (partObj == null) {
+            return null;
+        } else if (partObj instanceof Class) {
+            partStr = ClassUtil.getShortClassName((Class) partObj);
+        } else if (partObj instanceof Method || partObj instanceof Constructor) {
+            partStr = _MethodUtil.toString((Member) partObj);
+        } else {
+            partStr = suppressToStringException ? StringUtil.tryToString(partObj) : partObj.toString();
+        }
+        return partStr;
     }
 
     private String[] splitToLines(String s) {

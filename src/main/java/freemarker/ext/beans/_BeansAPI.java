@@ -17,7 +17,6 @@ import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.Collections12;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -27,18 +26,6 @@ import freemarker.template.utility._MethodUtil;
 public class _BeansAPI {
 
     private _BeansAPI() { }
-    
-    // Get rid of this with Java 5
-    public static final boolean JVM_USES_JSR133;
-    static {
-        Class cl;
-        try {
-            cl = Class.forName("java.util.concurrent.atomic.AtomicInteger");
-        } catch (Throwable e) {
-            cl = null;
-        }
-        JVM_USES_JSR133 = cl != null;
-    }
     
     public static String getAsClassicCompatibleString(BeanModel bm) {
         return bm.getAsClassicCompatibleString();
@@ -65,7 +52,7 @@ public class _BeansAPI {
         for (int i = 0; i < constrs.length; i++) {
             Constructor constr = constrs[i];
             ReflectionCallableMemberDescriptor memberDesc = new ReflectionCallableMemberDescriptor(constr, constr.getParameterTypes());
-            if (!_MethodUtil.isVarArgs(constr)) {
+            if (!_MethodUtil.isVarargs(constr)) {
                 fixedArgMemberDescs.add(memberDesc);
             } else {
                 varArgsMemberDescs.add(memberDesc);

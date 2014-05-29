@@ -73,6 +73,7 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -111,7 +112,11 @@ import freemarker.test.utility.AssertEqualsDirective;
 import freemarker.test.utility.AssertFailsDirective;
 import freemarker.test.utility.FileTestCase;
 
-
+/**
+ * Instances of this are created and called by {@link TemplateTestSuite}. (It's on "Ignore" so that Eclipse doesn't try
+ * to run this alone.) 
+ */
+@Ignore
 public class TemplateTestCase extends FileTestCase {
     
     private Template template;
@@ -123,10 +128,6 @@ public class TemplateTestCase extends FileTestCase {
     
     private Configuration conf = new Configuration();
 
-    public TemplateTestCase(String name) {
-        this(name, null, null, false);
-    }
-    
     public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
         super(name);
         

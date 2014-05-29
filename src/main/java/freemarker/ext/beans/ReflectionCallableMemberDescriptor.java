@@ -6,9 +6,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility._MethodUtil;
 
 /**
  * The most commonly used {@link CallableMemberDescriptor} implementation. 
@@ -32,7 +31,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
         this.paramTypes = paramTypes;
     }
 
-    Object invokeMethod(BeansWrapper bw, Object obj, Object[] args)
+    TemplateModel invokeMethod(BeansWrapper bw, Object obj, Object[] args)
             throws TemplateModelException, InvocationTargetException, IllegalAccessException {
         return bw.invokeMethod(obj, (Method) member, args);
     }
@@ -43,24 +42,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
     }
 
     String getDeclaration() {
-        StringBuffer sb = new StringBuffer();
-        
-        String className = ClassUtil.getShortClassName(member.getDeclaringClass());
-        if (className != null) {
-            sb.append(className);
-            sb.append('.');
-        }
-        sb.append(member.getName());
-
-        sb.append('(');
-        Class[] paramTypes = _MethodUtil.getParameterTypes(member);
-        for (int i = 0; i < paramTypes.length; i++) {
-            if (i != 0) sb.append(", ");
-            sb.append(ClassUtil.getShortClassName(paramTypes[i]));
-        }
-        sb.append(')');
-        
-        return sb.toString();
+        return _MethodUtil.toString(member);
     }
     
     boolean isConstructor() {
@@ -72,7 +54,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
     }
 
     boolean isVarargs() {
-        return _MethodUtil.isVarArgs(member);
+        return _MethodUtil.isVarargs(member);
     }
 
     Class[] getParamTypes() {

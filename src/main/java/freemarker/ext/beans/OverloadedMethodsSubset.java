@@ -63,10 +63,11 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
-import freemarker.template.utility._MethodUtil;
 
 /**
- * @author Attila Szegedi
+ * Encapsulates the rules and data structures (including cache) for choosing of the best matching callable member for
+ * a parameter list, from a given set of callable members. There are two subclasses of this, one for non-varags methods,
+ * and one for varargs methods.
  */
 abstract class OverloadedMethodsSubset {
     
@@ -77,13 +78,17 @@ abstract class OverloadedMethodsSubset {
      */
     static final int[] ALL_ZEROS_ARRAY = new int[0];
 
+    private static final int[][] ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY = new int[1][];
+    static {
+        ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY[0] = ALL_ZEROS_ARRAY;
+    }
+
     private Class[/*number of args*/][/*arg index*/] unwrappingHintsByParamCount;
     
     /**
-     * Tells what numerical types occur at a given parameter position with a bit field, also if the
-     * unwrapping will do proper conversion. See {@link OverloadedNumberUtil#FLAG_INTEGER}, etc.
+     * Tells what types occur at a given parameter position with a bit field. See {@link TypeFlags}.
      */
-    private int[/*number of args*/][/*arg index*/] possibleNumericalTypesByParamCount;
+    private int[/*number of args*/][/*arg index*/] typeFlagsByParamCount;
     
     // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
     // and such need to be fixed in this regard. 
@@ -129,34 +134,33 @@ abstract class OverloadedMethodsSubset {
                     // stores the most specific common types for each position. Hence we will possibly use a too generic
                     // hint for the unwrapping. For correct behavior, for each overloaded methods its own parameter
                     // types should be used as a hint. But without unwrapping the arguments, we couldn't select the
-                    // overloaded method. So this is a circular reference problem. We could try selecting the
-                    // method based on the wrapped value, but that's quite tricky, and the result of such selection
-                    // is not cacheable (the TM types are not enough as cache key then). So we just use this
-                    // compromise.
+                    // overloaded method. So we had to unwrap with all possible target types of each parameter position,
+                    // which would be slow and its result would be uncacheable (as we don't have anything usable as
+                    // a lookup key). So we just use this compromise.
                     unwrappingHints[paramIdx] = getCommonSupertypeForUnwrappingHint(
                             unwrappingHints[paramIdx], prepedParamTypes[paramIdx]);
                 }
             }
         }
 
-        int[] paramNumericalTypes = ALL_ZEROS_ARRAY;
+        int[] typeFlagsByParamIdx = ALL_ZEROS_ARRAY;
         if (bugfixed) {
-            // Fill possibleNumericalTypesByParamCount (if necessary)
+            // Fill typeFlagsByParamCount (if necessary)
             for (int paramIdx = 0; paramIdx < paramCount; paramIdx++) {
-                final int numType = OverloadedNumberUtil.classToTypeFlags(prepedParamTypes[paramIdx]);
-                if (numType != 0) {  // It's a numerical type
-                    if (paramNumericalTypes == ALL_ZEROS_ARRAY) {
-                        paramNumericalTypes = new int[paramCount];
+                final int typeFlags = TypeFlags.classToTypeFlags(prepedParamTypes[paramIdx]);
+                if (typeFlags != 0) {
+                    if (typeFlagsByParamIdx == ALL_ZEROS_ARRAY) {
+                        typeFlagsByParamIdx = new int[paramCount];
                     }
-                    paramNumericalTypes[paramIdx] = numType;
+                    typeFlagsByParamIdx[paramIdx] = typeFlags;
                 }
             }
-            mergeInNumericalTypes(paramCount, paramNumericalTypes);
+            mergeInTypesFlags(paramCount, typeFlagsByParamIdx);
         }
         
         afterWideningUnwrappingHints(
                 bugfixed ? prepedParamTypes : unwrappingHintsByParamCount[paramCount],
-                paramNumericalTypes);
+                typeFlagsByParamIdx);
     }
     
     Class[][] getUnwrappingHintsByParamCount() {
@@ -334,99 +338,111 @@ abstract class OverloadedMethodsSubset {
     }
     
     /**
-     * Gets the numerical type "flags" of each parameter positions, or {@code null} if there's no method with this
-     * parameter count or if we aren't in pre-2.3.21 mode, {@link #ALL_ZEROS_ARRAY} if there were no numerical
-     * parameters. The returned {@code int}-s are on or more {@link OverloadedNumberUtil}} {@code FLAG_...} constants
-     * binary "or"-ed together.  
+     * Gets the "type flags" of each parameter positions, or {@code null} if there's no method with this parameter
+     * count or if we are in pre-2.3.21 mode, or {@link #ALL_ZEROS_ARRAY} if there were no parameters that turned
+     * on a flag. The returned {@code int}-s are one or more {@link TypeFlags} constants binary "or"-ed together.  
      */
-    final protected int[] getPossibleNumericalTypes(int paramCount) {
-        return possibleNumericalTypesByParamCount != null && possibleNumericalTypesByParamCount.length > paramCount
-                ? possibleNumericalTypesByParamCount[paramCount]
+    final protected int[] getTypeFlags(int paramCount) {
+        return typeFlagsByParamCount != null && typeFlagsByParamCount.length > paramCount
+                ? typeFlagsByParamCount[paramCount]
                 : null;
     }
 
     /**
-     * @param dstParamCount The parameter count for which we want to merge in the possible numerical types 
-     * @param srcNumTypesByParamIdx If shorter than {@code dstParamCount}, it's last item will be repeated until
+     * Updates the content of the {@link #typeFlagsByParamCount} field with the parameter type flags of a method.
+     * Don't call this when {@link #bugfixed} is {@code false}! 
+     * 
+     * @param dstParamCount The parameter count for which we want to merge in the type flags 
+     * @param srcTypeFlagsByParamIdx If shorter than {@code dstParamCount}, its last item will be repeated until
      *        dstParamCount length is reached. If longer, the excessive items will be ignored.
-     *        Maybe {@link #ALL_ZEROS_ARRAY}. Cant'be a 0-length array. Can't be {@code null}.
+     *        Maybe {@link #ALL_ZEROS_ARRAY}. Maybe a 0-length array. Can't be {@code null}.
      */
-    final protected void mergeInNumericalTypes(int dstParamCount, int[] srcNumTypesByParamIdx) {
-        NullArgumentException.check("srcNumTypesByParamIdx", srcNumTypesByParamIdx);
-        if (dstParamCount == 0) return;
+    final protected void mergeInTypesFlags(int dstParamCount, int[] srcTypeFlagsByParamIdx) {
+        NullArgumentException.check("srcTypesFlagsByParamIdx", srcTypeFlagsByParamIdx);
         
-        // Ensure that possibleNumericalTypesByParamCount[dstParamCount] exists:
-        if (possibleNumericalTypesByParamCount == null) {
-            possibleNumericalTypesByParamCount = new int[dstParamCount + 1][];
-        } else if (possibleNumericalTypesByParamCount.length <= dstParamCount) {
-            if (srcNumTypesByParamIdx == null) return;
-            
-            int[][] newNumericalTypeByParamCount = new int[dstParamCount + 1][];
-            System.arraycopy(possibleNumericalTypesByParamCount, 0, newNumericalTypeByParamCount, 0,
-                    possibleNumericalTypesByParamCount.length);
-            possibleNumericalTypesByParamCount = newNumericalTypeByParamCount;
+        // Special case of 0 param count:
+        if (dstParamCount == 0) {
+            if (typeFlagsByParamCount == null) {
+                typeFlagsByParamCount = ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY;
+            } else if (typeFlagsByParamCount != ZERO_PARAM_COUNT_TYPE_FLAGS_ARRAY) {
+                typeFlagsByParamCount[0] = ALL_ZEROS_ARRAY;
+            }
+            return;
         }
         
-        final int srcParamCount = srcNumTypesByParamIdx.length;
+        // Ensure that typesFlagsByParamCount[dstParamCount] exists:
+        if (typeFlagsByParamCount == null) {
+            typeFlagsByParamCount = new int[dstParamCount + 1][];
+        } else if (typeFlagsByParamCount.length <= dstParamCount) {
+            int[][] newTypeFlagsByParamCount = new int[dstParamCount + 1][];
+            System.arraycopy(typeFlagsByParamCount, 0, newTypeFlagsByParamCount, 0,
+                    typeFlagsByParamCount.length);
+            typeFlagsByParamCount = newTypeFlagsByParamCount;
+        }
         
-        int[] dstNumTypesByParamIdx = possibleNumericalTypesByParamCount[dstParamCount];
-        if (dstNumTypesByParamIdx == null) {
+        int[] dstTypeFlagsByParamIdx = typeFlagsByParamCount[dstParamCount];
+        if (dstTypeFlagsByParamIdx == null) {
             // This is the first method added with this number of params => no merging
             
-            if (srcNumTypesByParamIdx != ALL_ZEROS_ARRAY) {
-                dstNumTypesByParamIdx = new int[dstParamCount];
+            if (srcTypeFlagsByParamIdx != ALL_ZEROS_ARRAY) {
+                int srcParamCount = srcTypeFlagsByParamIdx.length;
+                dstTypeFlagsByParamIdx = new int[dstParamCount];
                 for (int paramIdx = 0; paramIdx < dstParamCount; paramIdx++) {
-                    dstNumTypesByParamIdx[paramIdx]
-                            = srcNumTypesByParamIdx[paramIdx < srcParamCount ? paramIdx : srcParamCount - 1];
+                    dstTypeFlagsByParamIdx[paramIdx]
+                            = srcTypeFlagsByParamIdx[paramIdx < srcParamCount ? paramIdx : srcParamCount - 1];
                 }
             } else {
-                dstNumTypesByParamIdx = ALL_ZEROS_ARRAY;
+                dstTypeFlagsByParamIdx = ALL_ZEROS_ARRAY;
             }
             
-            possibleNumericalTypesByParamCount[dstParamCount] = dstNumTypesByParamIdx;
+            typeFlagsByParamCount[dstParamCount] = dstTypeFlagsByParamIdx;
         } else {
-            // dstNumTypesByParamIdx != null, so we need to merge into it.
+            // dstTypeFlagsByParamIdx != null, so we need to merge into it.
             
-            if (srcNumTypesByParamIdx == dstNumTypesByParamIdx) {
+            if (srcTypeFlagsByParamIdx == dstTypeFlagsByParamIdx) {
                 // Used to occur when both are ALL_ZEROS_ARRAY
                 return;
             }
             
-            // As we will write dstNumTypesByParamIdx, it can't remain ALL_ZEROS_ARRAY anymore. 
-            if (dstNumTypesByParamIdx == ALL_ZEROS_ARRAY && dstParamCount > 0) {
-                dstNumTypesByParamIdx = new int[dstParamCount];
-                possibleNumericalTypesByParamCount[dstParamCount] = dstNumTypesByParamIdx;
+            // As we will write dstTypeFlagsByParamIdx, it can't remain ALL_ZEROS_ARRAY anymore. 
+            if (dstTypeFlagsByParamIdx == ALL_ZEROS_ARRAY && dstParamCount > 0) {
+                dstTypeFlagsByParamIdx = new int[dstParamCount];
+                typeFlagsByParamCount[dstParamCount] = dstTypeFlagsByParamIdx;
             }
             
             for (int paramIdx = 0; paramIdx < dstParamCount; paramIdx++) {
-                final int srcParamNumTypes
-                        = srcNumTypesByParamIdx != ALL_ZEROS_ARRAY
-                            ? srcNumTypesByParamIdx[paramIdx < srcParamCount ? paramIdx : srcParamCount - 1]
-                            : 0;
-                final int dstParamNumTypes = dstNumTypesByParamIdx[paramIdx];
-                if (dstParamNumTypes != srcParamNumTypes) {
-                    dstNumTypesByParamIdx[paramIdx]
-                            = dstParamNumTypes | srcParamNumTypes | OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT; 
+                final int srcParamTypeFlags;
+                if (srcTypeFlagsByParamIdx != ALL_ZEROS_ARRAY) {
+                    int srcParamCount = srcTypeFlagsByParamIdx.length;
+                    srcParamTypeFlags = srcTypeFlagsByParamIdx[paramIdx < srcParamCount ? paramIdx : srcParamCount - 1]; 
+                } else {
+                    srcParamTypeFlags = 0;
                 }
-                // Note that if a parameter is non-numerical, its paraNumTypes is 0. So if we have a non-number and
-                // a some kind of number (non-0), the merged result will be marked with FLAG_WIDENED_UNWRAPPING_HINT.
-                // (I.e., the same happens as with two different numerical types.)
+                
+                final int dstParamTypesFlags = dstTypeFlagsByParamIdx[paramIdx];
+                if (dstParamTypesFlags != srcParamTypeFlags) {
+                    int mergedTypeFlags = dstParamTypesFlags | srcParamTypeFlags;
+                    if ((mergedTypeFlags & TypeFlags.MASK_ALL_NUMERICALS) != 0) {
+                        // Must not be set if we don't have numerical type at this index! 
+                        mergedTypeFlags |= TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT;
+                    }
+                    dstTypeFlagsByParamIdx[paramIdx] = mergedTypeFlags; 
+                }
             }
         }
     }
     
     protected void forceNumberArgumentsToParameterTypes(
-            Object[] args, Class[] paramTypes, int[] unwrappingNumTypesByParamIndex) {
+            Object[] args, Class[] paramTypes, int[] typeFlagsByParamIndex) {
         final int paramTypesLen = paramTypes.length;
         final int argsLen = args.length;
         for (int argIdx = 0; argIdx < argsLen; argIdx++) {
             final int paramTypeIdx = argIdx < paramTypesLen ? argIdx : paramTypesLen - 1;
-            final int unwrappingNumTypes = unwrappingNumTypesByParamIndex[paramTypeIdx];
+            final int typeFlags = typeFlagsByParamIndex[paramTypeIdx];
             
             // Forcing the number type can only be interesting if there are numerical parameter types on that index,
             // and the unwrapping was not to an exact numerical type.
-            if (unwrappingNumTypes != 0
-                    && (unwrappingNumTypes & OverloadedNumberUtil.FLAG_WIDENED_UNWRAPPING_HINT) != 0) {
+            if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0) {
                 final Object arg = args[argIdx];
                 // If arg isn't a number, we can't do any conversions anyway, regardless of the param type.
                 if (arg instanceof Number) {
