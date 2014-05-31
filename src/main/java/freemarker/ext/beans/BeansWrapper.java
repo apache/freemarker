@@ -278,7 +278,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *       applicable to parameters of type {@code Object}. Now {@code null}-s are seen to be applicable to any
      *       non-primitive parameters, and among those the one with the most specific type will be preferred (just
      *       like in Java), which is hence never the one with the {@code Object} parameter type. For more details
-     *       about overloaded method selection changes see the version History in the FreeMarker Manual.
+     *       about overloaded method selection changes see the version history in the FreeMarker Manual.
      *     </li>
      *   </ul>
      *
@@ -292,8 +292,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     private static volatile boolean ftmaDeprecationWarnLogged;
     
     /**
-     * @param readOnly makes the instance read-only via {@link WriteProtectable#writeProtect()}; this way it can use the shared
-     *     introspection cache.
+     * @param readOnly makes the instance's configuration settings read-only via
+     *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
      * 
      * @since 2.3.21
      */
@@ -357,7 +357,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             sharedInrospectionLock = new Object();
             classIntrospector = new ClassIntrospector(pa.classIntrospectorPropertyAssignments, sharedInrospectionLock);
         } else {
-            // As in this read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
+            // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
             classIntrospector = ClassIntrospector.getInstance(pa.classIntrospectorPropertyAssignments);
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
@@ -498,7 +498,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * Makes the JavaBean properties of this object read-only.
+     * Makes the configuration properties (settings) of this {@link BeansWrapper} object read-only. As changing them
+     * after the object has become visible to multiple threads leads to undefined behavior, it's recommended to call
+     * this when you have finished configuring the object.
+     * 
+     * <p>Consider using {@link #getInstance(PropertyAssignments)} instead, which gives an instance that's already
+     * write protected and also uses some shared caches/pools. 
      * 
      * @since 2.3.21
      */
