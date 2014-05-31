@@ -732,12 +732,12 @@ final class ArgumentTypes {
                 // Handle conversion between List and array types, in both directions. Java reflection won't do such
                 // conversion, so we have to.
                 // Most reflection-incompatible conversions were already addressed by the unwrapping. The reason
-                // this one isn't is that for overlapped methods the hint of a given parameter position is often vague,
+                // this one isn't is that for overloaded methods the hint of a given parameter position is often vague,
                 // so we may end up with a List even if some parameter types at that position are arrays (remember, we
                 // have to chose one unwrapping target type, despite that we have many possible overloaded methods), or
                 // the other way around (that happens when AdapterTemplateMoldel returns an array).
                 // Later, the overloaded method selection will assume that a List argument is applicable to an array
-                // parameter, and that an array argument is applicable to a List argument, so we end up with this
+                // parameter, and that an array argument is applicable to a List parameter, so we end up with this
                 // situation.
                 if (paramType.isArray() && arg instanceof List) {
                    args[i] = bw.listToArray((List) arg, paramType, null);

@@ -267,6 +267,8 @@
 <@assertFails message="Failed to convert">${obj.mStringArrayArrayOverloaded(obj.javaIntegerListList, 3)}</@>
 <@assertEquals actual=obj.mIntArrayArrayOverloaded(obj.javaListOfIntArrays) expected="mIntArrayArrayOverloaded([[1, 2, 3], [], [4]])" />
 <@assertEquals actual=obj.mArrayOfListsOverloaded(obj.javaListOfIntArrays) expected="mArrayOfListsOverloaded([[1, 2, 3], [], [4]])" />
+<@assertEquals actual=obj.mIntArrayArrayNonOverloaded(obj.javaListOfIntArrays) expected="mIntArrayArrayNonOverloaded([[1, 2, 3], [], [4]])" />
+<@assertEquals actual=obj.mArrayOfListsNonOverloaded(obj.javaListOfIntArrays) expected="mArrayOfListsNonOverloaded([[1, 2, 3], [], [4]])" />
 
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(['a', 'b']) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2(obj.javaStringList) expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />

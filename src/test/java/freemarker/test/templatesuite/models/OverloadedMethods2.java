@@ -589,6 +589,10 @@ public class OverloadedMethods2 {
         return "mIntArrayArrayOverloaded(" + Helpers.arrayToString(xss) + ")";
     }
 
+    public String mIntArrayArrayOverloaded(String s) {
+        return "mIntArrayArrayOverloaded(" + s + ")";
+    }
+    
     public String mArrayOfListsOverloaded(List[] xss) {
         return "mArrayOfListsOverloaded(" + Helpers.arrayToString(xss) + ")";
     }
@@ -597,8 +601,12 @@ public class OverloadedMethods2 {
         return "mArrayOfListsOverloaded(" + x + ")";
     }
     
-    public String mIntArrayArrayOverloaded(String s) {
-        return "mIntArrayArrayOverloaded(" + s + ")";
+    public String mIntArrayArrayNonOverloaded(int[][] xss) {
+        return "mIntArrayArrayNonOverloaded(" + Helpers.arrayToString(xss) + ")";
+    }
+
+    public String mArrayOfListsNonOverloaded(List[] xss) {
+        return "mArrayOfListsNonOverloaded(" + Helpers.arrayToString(xss) + ")";
     }
     
     public String mStringArrayVarargsNonOverloaded(String... items) {
