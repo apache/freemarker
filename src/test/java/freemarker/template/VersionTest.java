@@ -90,32 +90,87 @@ public class VersionTest extends TestCase {
         assertEquals(v1.hashCode(), v2.hashCode());
         
         v2 = new Version("1.2.3-beta3");
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version(1, 2, 3, "beta2", true, null);
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version(1, 2, 3, "beta2", null, new Date(5000));
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version("1.2.9-beta2");
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version("1.9.3-beta2");
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version("9.2.3-beta2");
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
         
         v2 = new Version("1.2.3");
-        assert(!v1.equals(v2));
-        assert(v1.hashCode() != v2.hashCode());
+        assertTrue(!v1.equals(v2));
+        assertTrue(v1.hashCode() != v2.hashCode());
     }
+
+    public void testShortForms() {
+        Version v = new Version("1.0.0-beta2");
+        assertEquals(v, new Version("1.0-beta2"));
+        assertEquals(v, new Version("1-beta2"));
+
+        v = new Version("1.0.0");
+        assertEquals(v, new Version("1.0"));
+        assertEquals(v, new Version("1"));
+    }
+    
+    public void testMalformed() {
+        try {
+            new Version("1.2.");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        
+        try {
+            new Version("1.2.3.");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        
+        try {
+            new Version("1..3");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        try {
+            new Version(".2");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        
+        try {
+            new Version("a");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        
+        try {
+            new Version("-a");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+    
     
 }

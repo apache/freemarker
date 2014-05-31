@@ -20898,10 +20898,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed concurrency issues in <literal>Version</literal>
-              class <literal>hashCode</literal>, <literal>equals</literal>,
-              <literal>toString</literal> that could, in theory, result in
-              wrong return values.</para>
+              <para>Fixed various issues in <literal>Version</literal> class,
+              such as wrong <literal>hashCode</literal>, possible concurrency
+              glitches, and acceptance of some malformed version
+              strings.</para>
             </listitem>
 
             <listitem>

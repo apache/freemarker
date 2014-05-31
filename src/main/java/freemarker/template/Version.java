@@ -41,15 +41,24 @@ public final class Version implements Serializable {
         String extraInfoTmp = null;
         {
             int partIdx = 0;
-            boolean valid = false;
             for (int i = 0; i < stringValue.length(); i++) {
                 char c = stringValue.charAt(i);
-                if (c >= '0' && c <= '9') {
+                if (isNumber(c)) {
                     parts[partIdx] = parts[partIdx] * 10 + (c - '0');
-                    valid = true;
                 } else {
+                    if (i == 0) {
+                        throw new IllegalArgumentException(
+                                "The version number string " + StringUtil.jQuote(stringValue)
+                                + " doesn't start with a number.");
+                    }
                     if (c == '.') {
-                        if (partIdx == 2) {
+                        char nextC = i + 1 >= stringValue.length() ? 0 : stringValue.charAt(i + 1);
+                        if (nextC == '.') {
+                            throw new IllegalArgumentException(
+                                    "The version number string " + StringUtil.jQuote(stringValue)
+                                    + " contains multiple dots after a number.");
+                        }
+                        if (partIdx == 2 || !isNumber(nextC)) {
                             extraInfoTmp = stringValue.substring(i);
                             break;
                         } else {
@@ -61,14 +70,16 @@ public final class Version implements Serializable {
                     }
                 }
             }
-            if (!valid) throw new IllegalArgumentException(
-                    "A version number string " + StringUtil.jQuote(stringValue)
-                    + " must start with a number.");
             
             if (extraInfoTmp != null) {
                 char firstChar = extraInfoTmp.charAt(0); 
                 if (firstChar == '.' || firstChar == '-' || firstChar == '_') {
                     extraInfoTmp = extraInfoTmp.substring(1);
+                    if (extraInfoTmp.length() == 0) {
+                        throw new IllegalArgumentException(
+                            "The version number string " + StringUtil.jQuote(stringValue)
+                            + " has an extra info section opened with \"" + firstChar + "\", but it's empty.");
+                    }
                 }
             }
         }
@@ -82,6 +93,10 @@ public final class Version implements Serializable {
         this.gaeCompliant = gaeCompliant;
         this.buildDate = buildDate;
         
+    }
+
+    private boolean isNumber(char c) {
+        return c >= '0' && c <= '9';
     }
 
     public Version(int major, int minor, int micro) {
@@ -189,8 +204,6 @@ public final class Version implements Serializable {
                 result = prime * result + (extraInfo == null ? 0 : extraInfo.hashCode());
                 result = prime * result + (gaeCompliant == null ? 0 : gaeCompliant.hashCode());
                 result = prime * result + intValue;
-                String stringValue = getStringValue();
-                result = prime * result + (stringValue == null ? 0 : stringValue.hashCode());
                 if (result == 0) result = -1;  // 0 is reserved for "not set"
                 hashCode = result;
             }
