@@ -1064,25 +1064,20 @@ public class Configurable
                             .newInstance());
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
-                if (value.indexOf('.') == -1) {
-                    if ("default".equalsIgnoreCase(value)) {
-                        setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
-                    } else if ("simple".equalsIgnoreCase(value)) {
-                        setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
-                    } else if ("beans".equalsIgnoreCase(value)) {
-                        setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
-                    } else if ("jython".equalsIgnoreCase(value)) {
-                        Class clazz = Class.forName(
-                                "freemarker.ext.jython.JythonWrapper");
-                        setObjectWrapper(
-                                (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
-                    } else {
-                        throw invalidSettingValueException(name, value);
-                    }
-                    
+                if ("default".equalsIgnoreCase(value)) {
+                    setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
+                } else if ("simple".equalsIgnoreCase(value)) {
+                    setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
+                } else if ("beans".equalsIgnoreCase(value)) {
+                    setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
+                } else if ("jython".equalsIgnoreCase(value)) {
+                    Class clazz = Class.forName(
+                            "freemarker.ext.jython.JythonWrapper");
+                    setObjectWrapper(
+                            (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                 } else {
-                    setObjectWrapper((ObjectWrapper) ClassUtil.forName(value)
-                            .newInstance());
+                    setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
+                                    value, ObjectWrapper.class, _SettingEvaluationEnvironment.getInstance()));
                 }
             } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
                 setBooleanFormat(value);
@@ -1208,10 +1203,14 @@ public class Configurable
      *     while changing the settings.
      */    
     public void setSettings(Properties props) throws TemplateException {
-        Iterator it = props.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            setSetting(key, props.getProperty(key).trim()); 
+        final _SettingEvaluationEnvironment prevEnv = _SettingEvaluationEnvironment.startScope();
+        try {
+            for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+                String key = (String) it.next();
+                setSetting(key, props.getProperty(key).trim()); 
+            }
+        } finally {
+            _SettingEvaluationEnvironment.endScope(prevEnv);
         }
     }
     

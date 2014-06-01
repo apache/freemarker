@@ -806,6 +806,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         NullArgumentException.check("version", incompatibleImprovements);
+        if (incompatibleImprovements.intValue() < 2003000) {
+            throw new IllegalArgumentException("Version must be at least 2.3.0.");
+        }
         return is2321Bugfixed(incompatibleImprovements) ? _TemplateAPI.VERSION_2_3_21 : _TemplateAPI.VERSION_2_3_0;
     }
     
@@ -1470,7 +1473,15 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         return modelCache;
     }
 
-    public Object newInstance(Class clazz, List arguments)
+    /**
+     * Creates a new instance of the specified class using the method call logic of this object wrapper for calling the
+     * constructor. Overloaded constructors and varargs are supported. Only public constructors will be called.
+     * 
+     * @param clazz The class whose constructor we will call.
+     * @param arguments The list of {@link TemplateModel}-s to pass to the constructor after unwrapping them
+     * @return The instance created; it's not wrapped into {@link TemplateModel}.
+     */
+    public Object newInstance(Class clazz, List/*<TemplateModel>*/ arguments)
     throws
         TemplateModelException
     {
