@@ -1,0 +1,190 @@
+package freemarker.ext.beans;
+
+import freemarker.template.DefaultObjectWrapperBuilder;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.TemplateDateModel;
+import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
+import freemarker.template.utility.NullArgumentException;
+
+/**
+ * Holds {@link BeansWrapper} configuration settings and defines their defaults.
+ * You will not use this abstract class directly, but concrete subclasses like {@link BeansWrapperBuilder} and
+ * {@link DefaultObjectWrapperBuilder}. Unless, you are developing a builder for a custom {@link BeansWrapper} subclass.
+ * 
+ * <p>This class is designed so that its instances can be used as lookup keys in a singleton cache. This is also why
+ * this class defines the configuration setting defaults for {@link BeansWrapper}, instead of leaving that to
+ * {@link BeansWrapper} itself. (Because, the default values influence the lookup key, and the singleton needs to be
+ * looked up without creating a {@link BeansWrapper} instance.) However, because instances are mutable, you should
+ * deep-clone it with {@link #clone(boolean)} before using it as cache key.
+ */
+public abstract class BeansWrapperConfiguration implements Cloneable {
+
+    private final Version incompatibleImprovements;
+    
+    ClassIntrospectorFactory classIntrospectorFactory;
+    
+    // Properties and their *defaults*:
+    private boolean simpleMapWrapper = false;
+    private int defaultDateType = TemplateDateModel.UNKNOWN;
+    private ObjectWrapper outerIdentity = null;
+    private boolean strict = false;
+    private boolean useModelCache = false;
+    // Attention!
+    // - As this object is a cache key, non-normalized field values should be avoided.
+    // - Fields with default values must be set until the end of the constructor to ensure that when the lookup happens,
+    //   there will be no unset fields.
+    // - If you add a new field, review all methods in this class
+    
+    /**
+     * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
+     *     Not {@code null}.
+     *     Note that the version will be normalized to the lowest version where the same incompatible
+     *     {@link BeansWrapper} improvements were already present, so for the returned instance
+     *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
+     */
+    protected BeansWrapperConfiguration(Version incompatibleImprovements) {
+        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
+        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        
+        incompatibleImprovements = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        this.incompatibleImprovements = incompatibleImprovements;
+        
+        classIntrospectorFactory = new ClassIntrospectorFactory(incompatibleImprovements);
+    }
+
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + incompatibleImprovements.hashCode();
+        result = prime * result + (simpleMapWrapper ? 1231 : 1237);
+        result = prime * result + defaultDateType;
+        result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
+        result = prime * result + (strict ? 1231 : 1237);
+        result = prime * result + (useModelCache ? 1231 : 1237);
+        result = prime * result + classIntrospectorFactory.hashCode();
+        return result;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        BeansWrapperConfiguration other = (BeansWrapperConfiguration) obj;
+        
+        if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
+        if (simpleMapWrapper != other.simpleMapWrapper) return false;
+        if (defaultDateType != other.defaultDateType) return false;
+        if (outerIdentity != other.outerIdentity) return false;
+        if (strict != other.strict) return false;
+        if (useModelCache != other.useModelCache) return false;
+        if (!classIntrospectorFactory.equals(other.classIntrospectorFactory)) return false;
+        
+        return true;
+    }
+    
+    protected Object clone(boolean deepCloneKey) {
+        try {
+            BeansWrapperConfiguration clone = (BeansWrapperConfiguration) super.clone();
+            if (deepCloneKey) {
+                clone.classIntrospectorFactory
+                        = (ClassIntrospectorFactory) classIntrospectorFactory.clone();
+            }
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e.getMessage());  // Java 5: use cause
+        }
+    }
+    
+    public boolean isSimpleMapWrapper() {
+        return simpleMapWrapper;
+    }
+
+    /** See {@link BeansWrapper#setSimpleMapWrapper(boolean)}. */
+    public void setSimpleMapWrapper(boolean simpleMapWrapper) {
+        this.simpleMapWrapper = simpleMapWrapper;
+    }
+
+    public int getDefaultDateType() {
+        return defaultDateType;
+    }
+
+    /** See {@link BeansWrapper#setDefaultDateType(int)}. */
+    public void setDefaultDateType(int defaultDateType) {
+        this.defaultDateType = defaultDateType;
+    }
+
+    public ObjectWrapper getOuterIdentity() {
+        return outerIdentity;
+    }
+
+    /**
+     * See {@link BeansWrapper#setOuterIdentity(ObjectWrapper)}, except here the default is {@code null} that means
+     * the {@link ObjectWrapper} that you will set up with this {@link BeansWrapperBuilder} object.
+     */
+    public void setOuterIdentity(ObjectWrapper outerIdentity) {
+        this.outerIdentity = outerIdentity;
+    }
+
+    public boolean isStrict() {
+        return strict;
+    }
+
+    /** See {@link BeansWrapper#setStrict(boolean)}. */
+    public void setStrict(boolean strict) {
+        this.strict = strict;
+    }
+
+    public boolean getUseModelCache() {
+        return useModelCache;
+    }
+
+    /** See {@link BeansWrapper#setUseCache(boolean)} (it means the same). */
+    public void setUseModelCache(boolean useModelCache) {
+        this.useModelCache = useModelCache;
+    }
+
+    public Version getIncompatibleImprovements() {
+        return incompatibleImprovements;
+    }
+    
+    public int getExposureLevel() {
+        return classIntrospectorFactory.getExposureLevel();
+    }
+
+    /** See {@link BeansWrapper#setExposureLevel(int)}. */
+    public void setExposureLevel(int exposureLevel) {
+        classIntrospectorFactory.setExposureLevel(exposureLevel);
+    }
+
+    public boolean getExposeFields() {
+        return classIntrospectorFactory.getExposeFields();
+    }
+
+    /** See {@link BeansWrapper#setExposeFields(boolean)}. */
+    public void setExposeFields(boolean exposeFields) {
+        classIntrospectorFactory.setExposeFields(exposeFields);
+    }
+
+    public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
+        return classIntrospectorFactory.getMethodAppearanceFineTuner();
+    }
+
+    /**
+     * See {@link BeansWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}; additionally,
+     * note that currently setting this to non-{@code null} will disable class introspection cache sharing, unless
+     * the value implements {@link SingletonCustomizer}.
+     */
+    public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
+        classIntrospectorFactory.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+    }
+
+    MethodSorter getMethodSorter() {
+        return classIntrospectorFactory.getMethodSorter();
+    }
+
+    void setMethodSorter(MethodSorter methodSorter) {
+        classIntrospectorFactory.setMethodSorter(methodSorter);
+    }
+ 
+}

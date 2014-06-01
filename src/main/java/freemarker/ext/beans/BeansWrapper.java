@@ -53,7 +53,6 @@
 package freemarker.ext.beans;
 
 import java.beans.PropertyDescriptor;
-import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -70,7 +69,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import freemarker.core.BugException;
 import freemarker.core._DelayedFTLTypeDescription;
@@ -104,8 +102,8 @@ import freemarker.template.utility.WriteProtectable;
 
 /**
  * {@link ObjectWrapper} that is able to expose the Java API of arbitrary Java objects. This is also the superclass of
- * {@link DefaultObjectWrapper}. Note that instances of this class generally should be made by
- * {@link #getInstance(Version)} and its overloads, not with its constructor.
+ * {@link DefaultObjectWrapper}. Note that instances of this class generally should be created with
+ * {@link BeansWrapperBuilder}, not with its public constructors.
  * 
  * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
@@ -168,13 +166,6 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     public static final int EXPOSE_NOTHING = 3;
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Instance cache:
-    
-    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<BeansWrapper>>*/
-            INSTANCE_CACHE = new WeakHashMap();
-    private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
-    
-    // -----------------------------------------------------------------------------------------------------------------
     // Introspection cache:
     
     private final Object sharedInrospectionLock;
@@ -183,7 +174,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * {@link Class} to class info cache.
      * This object is possibly shared with other {@link BeansWrapper}-s!
      * 
-     * <p>To write this, always use {@link #setClassIntrospector(ClassIntrospector.PropertyAssignments)}.
+     * <p>To write this, always use {@link #replaceClassIntrospector(ClassIntrospectorFactory)}.
      * 
      * <p>When reading this, it's good idea to synchronize on sharedInrospectionLock when it doesn't hurt overall
      * performance. In theory that's not needed, but apps might fail to keep the rules.
@@ -235,19 +226,17 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
      * 
-     * @deprecated Use {@link #getInstance(Version)}, {@link #getInstance(Version, boolean)} or
-     *     {@link #getInstance(PropertyAssignments)}, or in rare cases {@link #BeansWrapper(Version)} instead.
+     * @deprecated Use {@link BeansWrapperBuilder} or, in rare cases, {@link #BeansWrapper(Version)} instead.
      */
     public BeansWrapper() {
         this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-        // Attention! Don't don anything here, as the instance is possibly already visible to other threads.  
+        // Attention! Don't change fields here, as the instance is possibly already visible to other threads.  
     }
     
     /**
-     * Use {@link #getInstance(Version)} or {@link #getInstance(Version, boolean)} or
-     * {@link #getInstance(PropertyAssignments)} instead if possible.
-     * Instances created with this constructor won't share the class introspection caches with other instances. That's
-     * also why you may want to use it instead of {@code getInstance} (you don't want to use common caches).
+     * Use {@link BeansWrapperBuilder} instead of the public constructors if possible.
+     * The main disadvantage of using the public constructors is that the instances won't share caches. So unless having
+     * a private cache is your goal, don't use them. See 
      * 
      * @param incompatibleImprovements
      *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
@@ -256,8 +245,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *   <p>For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
      *   For released products that are still actively developed it's a low risk change to increase the 3rd
      *   version number further as FreeMarker is updated, but of course you should always check the list of effects
-     *   below. Increasing the 2nd or 1st version number can mean substantial changes with higher risk of breaking
-     *   the application.
+     *   below. Increasing the 2nd or 1st version number possibly mean substantial changes with higher risk of breaking
+     *   the application, but again, see the list of effects below.
      *   
      *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
      *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
@@ -270,7 +259,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *     </li>
      *     <li>
      *       <p>2.3.21 (or higher):
-     *       Several glitches were fixed in overloaded method selection. This usually just gets
+     *       Several glitches were fixed in <em>overloaded</em> method selection. This usually just gets
      *       rid of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method
      *       choices), still, as in some cases the method chosen can be a different one now (that was the point of
      *       the reworking after all), it can mean a change in the behavior of the application. The most important
@@ -281,25 +270,32 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      *       about overloaded method selection changes see the version history in the FreeMarker Manual.
      *     </li>
      *   </ul>
+     *   
+     *   <p>Note that the version will be normalized to the lowest version where the same incompatible
+     *   {@link BeansWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might returns
+     *   a lower version than what you have specified.
      *
      * @since 2.3.21
      */
     public BeansWrapper(Version incompatibleImprovements) {
-        this(new PropertyAssignments(incompatibleImprovements), false);
-        // Attention! Don't don anything here, as the instance is possibly already visible to other threads.  
+        this(new BeansWrapperConfiguration(incompatibleImprovements) {}, false);
+        // Attention! Don't don anything here, as the instance is possibly already visible to other threads through the
+        // model factory callbacks.
     }
     
     private static volatile boolean ftmaDeprecationWarnLogged;
     
     /**
+     * Initializes the instance based on the the {@link BeansWrapperConfiguration} specified.
+     * 
      * @param readOnly makes the instance's configuration settings read-only via
      *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
      * 
      * @since 2.3.21
      */
-    protected BeansWrapper(PropertyAssignments pa, boolean readOnly) {
+    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
-        if (pa.getMethodAppearanceFineTuner() == null) {
+        if (bwConf.getMethodAppearanceFineTuner() == null) {
             Class thisClass = this.getClass();
             boolean overridden = false;
             boolean testFailed = false;
@@ -331,8 +327,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                             + "and will be banned sometimes in the future. Use setMethodAppearanceFineTuner instead.");
                     ftmaDeprecationWarnLogged = true;
                 }
-                pa = (PropertyAssignments) pa.clone(false);
-                pa.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
+                bwConf = (BeansWrapperConfiguration) bwConf.clone(false);
+                bwConf.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
 
                     public void process(
                             MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
@@ -343,23 +339,23 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             }
         }
         
-        this.incompatibleImprovements = pa.getIncompatibleImprovements();  // normalized
+        this.incompatibleImprovements = bwConf.getIncompatibleImprovements();  // normalized
         
-        simpleMapWrapper = pa.isSimpleMapWrapper();
-        defaultDateType = pa.getDefaultDateType();
-        outerIdentity = pa.getOuterIdentity() != null ? pa.getOuterIdentity() : this;
-        strict = pa.isStrict();
+        simpleMapWrapper = bwConf.isSimpleMapWrapper();
+        defaultDateType = bwConf.getDefaultDateType();
+        outerIdentity = bwConf.getOuterIdentity() != null ? bwConf.getOuterIdentity() : this;
+        strict = bwConf.isStrict();
         
         if (!readOnly) {
             // As this is not a read-only BeansWrapper, the classIntrospector will be possibly replaced for a few times,
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
             sharedInrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(pa.classIntrospectorPropertyAssignments, sharedInrospectionLock);
+            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorFactory, sharedInrospectionLock);
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = ClassIntrospector.getInstance(pa.classIntrospectorPropertyAssignments);
+            classIntrospector = bwConf.classIntrospectorFactory.getObject();
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
         }
         
@@ -369,7 +365,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         staticModels = new StaticModels(BeansWrapper.this);
         enumModels = createEnumModels(BeansWrapper.this);
         modelCache = new BeansModelCache(BeansWrapper.this);
-        setUseCache(pa.useModelCache);
+        setUseCache(bwConf.getUseModelCache());
 
         if (readOnly) {
             writeProtect();
@@ -377,124 +373,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         
         // Attention! At this point, the BeansWrapper must be fully initialized, as when the model factories are
         // registered below, the BeansWrapper can immediately get concurrent callbacks. That those other threads will
-        // see consistent image of the BeansWrapper is ensured that callback are always sync-ed on
+        // see consistent image of the BeansWrapper is ensured that callbacks are always sync-ed on
         // classIntrospector.sharedLock, and so is classIntrospector.registerModelFactory(...).
         
         registerModelFactories();
-    }
-    
-    /**
-     * Returns an unconfigurable (read-only) {@link BeansWrapper} instance that's already configured as specified in the
-     * argument; this is preferred over using the constructors. The returned instance is often, but not always a
-     * VM-wide (or rather, Web-Application-wide) singleton. Note that other overloads of this method allows you to
-     * configure more properties.
-     * 
-     * <p>Note that what this method documentation says about {@link BeansWrapper} also applies to
-     * {@link DefaultObjectWrapper}.
-     * 
-     * <p>The main benefit of using this method instead of the constructors is that this way the internal
-     * object wrapping-related caches will be reused/shared when appropriate. As the caches are expensive to build and
-     * take memory, if multiple independent components use FreeMarker in an application, this can mean some resource
-     * savings.
-     * 
-     * <p>The object wrapping-related caches are:
-     * <ul>
-     *   <li><p>Class introspection cache: Stores information about classes that once had to be wrapped. The cache is
-     *     stored in the static fields of certain FreeMarker classes. Thus, if you have two {@link BeansWrapper}
-     *     instances, they might share the same class introspection cache. But if you have two
-     *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
-     *     share their caches (as they don't share the same FreeMarker classes).
-     *     Also, currently there's a separate cache for each permutation of the property values that influence class
-     *     introspection: {@link PropertyAssignments#setExposeFields(boolean) expose_fields} and
-     *     {@link PropertyAssignments#setExposureLevel(int) exposure_level}. So only {@link BeansWrapper} where those
-     *     properties are the same may share class introspection caches among each other.
-     *   </li>
-     *   <li><p>Model caches: These are local to a {@link BeansWrapper}. {@code getInstance} returns the same
-     *     {@link BeansWrapper} instance for equivalent properties (unless the existing instance was garbage collected
-     *     and thus a new one had to be created), hence these caches will be re-used too. {@link BeansWrapper} instances
-     *     are cached in the static fields of FreeMarker here too, but there's a separate cache for each
-     *     Thread Context Class Loader, which in a servlet container practically means a separate cache for each Web
-     *     Application (each servlet context). (This is like so because when resolving class names to classes FreeMarker
-     *     will turn to the Thread Context Class Loader first, and only then to the defining class loader of FreeMarker,
-     *     so the result of the resolution can be different for different Thread Context Class Loaders.) The caches
-     *     local to a {@link BeansWrapper} are:
-     *     <ul>
-     *       <li><p>
-     *         Static model caches: These are used by the hash returned by {@link #getEnumModels()} and
-     *         {@link #getStaticModels()}, for caching {@link TemplateModel}-s for the static methods/fields
-     *         and Java 5 enums that were accessed through them. To use said hashes, you have to put them
-     *         explicitly into the data-model or expose them to template explicitly otherwise, so in most applications
-     *         these cache are unused. 
-     *       </li>
-     *       <li><p>
-     *         Instance model cache: By default off (see {@link #setUseCache(boolean)}). Caches the
-     *         {@link TemplateModel}-s for all Java objects that were accessed from templates.
-     *       </li>
-     *     </ul>
-     *   </li>
-     * </ul>
-     * 
-     * <p>Note that if you set {@link PropertyAssignments#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)} to
-     * non-{@code null}, you will always get a new instance, and the class introspection cache won't be shared.
-     * 
-     * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
-     *     Not {@code null}.
-     *     Note that the version will be normalized to the lowest version where the same incompatible
-     *     {@link BeansWrapper} improvements were already present, so for the returned instance
-     *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        return getInstance(new PropertyAssignments(incompatibleImprovements));
-    }
-    
-    /**
-     * Same as {@link #getInstance(Version)}, but also specifies the {@code simpleMapWrapper} property of the desired
-     * instance. Without this, that will be set to its default.
-     *     
-     * @param simpleMapsWrapper See {@link BeansWrapper#setSimpleMapWrapper(boolean)}.
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapsWrapper) {
-        PropertyAssignments pa = new PropertyAssignments(incompatibleImprovements);
-        pa.setSimpleMapWrapper(simpleMapsWrapper);
-        return getInstance(pa);
-    }
-    
-    /**
-     * Same as {@link #getInstance(Version)}, but you can specify more properties of the desired instance.
-     *     
-     * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getInstance(PropertyAssignments pa) {
-        return _BeansAPI.getBeansWrapperSubclassInstance(
-                pa, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, BeansWrapperFactory.INSTANCE);
-    }
-    
-    private static class BeansWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
-        
-        private static final BeansWrapperFactory INSTANCE = new BeansWrapperFactory(); 
-
-        public BeansWrapper create(PropertyAssignments pa) {
-            return new BeansWrapper(pa, true);
-        }
-        
-    }
-
-    /** For unit testing only */
-    static void clearInstanceCache() {
-        synchronized (INSTANCE_CACHE) {
-            INSTANCE_CACHE.clear();
-        }
-    }
-
-    /** For unit testing only */
-    static Map getInstanceCache() {
-        return INSTANCE_CACHE;
     }
     
     /**
@@ -502,7 +384,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * after the object has become visible to multiple threads leads to undefined behavior, it's recommended to call
      * this when you have finished configuring the object.
      * 
-     * <p>Consider using {@link #getInstance(PropertyAssignments)} instead, which gives an instance that's already
+     * <p>Consider using {@link BeansWrapperBuilder} instead, which gives an instance that's already
      * write protected and also uses some shared caches/pools. 
      * 
      * @since 2.3.21
@@ -665,9 +547,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
      
         if (classIntrospector.getExposureLevel() != exposureLevel) {
-            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
             pa.setExposureLevel(exposureLevel);
-            setClassIntrospector(pa);
+            replaceClassIntrospector(pa);
         }
     }
     
@@ -694,9 +576,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getExposeFields() != exposeFields) {
-            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
             pa.setExposeFields(exposeFields);
-            setClassIntrospector(pa);
+            replaceClassIntrospector(pa);
         }
     }
     
@@ -722,9 +604,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
-            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
             pa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
-            setClassIntrospector(pa);
+            replaceClassIntrospector(pa);
         }
     }
 
@@ -736,9 +618,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getMethodSorter() != methodSorter) {
-            ClassIntrospector.PropertyAssignments pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
             pa.setMethodSorter(methodSorter);
-            setClassIntrospector(pa);
+            replaceClassIntrospector(pa);
         }
     }
     
@@ -746,9 +628,9 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * Tells if this instance acts like if its class introspection cache is sharable with other {@link BeansWrapper}-s.
      * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospecitonCache()}.
      * The value depends on how the instance
-     * was created; with a public constructor (then this is {@code false}), or with {@link #getInstance(Version)} or
-     * its overloads (then it's {@code true}). Note that in the last case it's possible that the introspection cache
-     * will not be actually shared, but this will {@code true} even then. 
+     * was created; with a public constructor (then this is {@code false}), or with {@link BeansWrapperBuilder}
+     * (then it's {@code true}). Note that in the last case it's possible that the introspection cache
+     * will not be actually shared because there's no one to share with, but this will {@code true} even then. 
      * 
      * @since 2.3.21
      */
@@ -760,7 +642,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * Replaces the value of {@link #classIntrospector}, but first it unregisters
      * the model factories in the old {@link #classIntrospector}.
      */
-    private void setClassIntrospector(ClassIntrospector.PropertyAssignments pa) {
+    private void replaceClassIntrospector(ClassIntrospectorFactory pa) {
         checkModifiable();
         
         final ClassIntrospector newCI = new ClassIntrospector(pa, sharedInrospectionLock);
@@ -924,8 +806,6 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         NullArgumentException.check("version", incompatibleImprovements);
-        // Warning! If you add new results here, you must update getInstance in ObjectWrapper and DefaultObjectWrapper,
-        // as they will throw exception on unsupported version!
         return is2321Bugfixed(incompatibleImprovements) ? _TemplateAPI.VERSION_2_3_21 : _TemplateAPI.VERSION_2_3_0;
     }
     
@@ -940,7 +820,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * default instance is not caching, uses the <code>EXPOSE_SAFE</code>
      * exposure level, and uses null reference as the null model.
      * 
-     * @deprecated Use {@link #getInstance(Version)}; as the instance returned is not read-only, it's dangerous to use.
+     * @deprecated Use {@link BeansWrapperBuilder} instead. The instance returned here is not read-only, so it's
+     *     dangerous to use.
      */
     public static final BeansWrapper getDefaultInstance()
     {
@@ -1897,173 +1778,6 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
 
         public Class getContainingClass() {
             return containingClass;
-        }
-        
-    }
-    
-    /**
-     * Used as the parameter to {@link #getInstance(PropertyAssignments)}; see there.
-     */
-    static public final class PropertyAssignments implements freemarker.template.utility.PropertyAssignments, Cloneable {
-        private final Version incompatibleImprovements;
-        
-        private ClassIntrospector.PropertyAssignments classIntrospectorPropertyAssignments;
-        
-        // Properties and their *defaults*:
-        private boolean simpleMapWrapper = false;
-        private int defaultDateType = TemplateDateModel.UNKNOWN;
-        private ObjectWrapper outerIdentity = null;
-        private boolean strict = false;
-        private boolean useModelCache;
-        // Attention!
-        // - This is also used as a cache key, so non-normalized field values should be avoided.
-        // - If some field has a default value, it must be set until the end of the constructor. No field that has a
-        //   default can be left unset (like null).
-        // - If you add a new field, review all methods in this class
-        
-        public PropertyAssignments(Version incompatibleImprovements) {
-            NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
-            _TemplateAPI.checkVersionSupported(incompatibleImprovements);
-            
-            incompatibleImprovements = normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
-            this.incompatibleImprovements = incompatibleImprovements;
-            
-            classIntrospectorPropertyAssignments = new ClassIntrospector.PropertyAssignments(incompatibleImprovements);
-        }
-
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + incompatibleImprovements.hashCode();
-            result = prime * result + (simpleMapWrapper ? 1231 : 1237);
-            result = prime * result + defaultDateType;
-            result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
-            result = prime * result + (strict ? 1231 : 1237);
-            result = prime * result + (useModelCache ? 1231 : 1237);
-            result = prime * result + classIntrospectorPropertyAssignments.hashCode();
-            return result;
-        }
-
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            PropertyAssignments other = (PropertyAssignments) obj;
-            
-            if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
-            if (simpleMapWrapper != other.simpleMapWrapper) return false;
-            if (defaultDateType != other.defaultDateType) return false;
-            if (outerIdentity != other.outerIdentity) return false;
-            if (strict != other.strict) return false;
-            if (useModelCache != other.useModelCache) return false;
-            if (!classIntrospectorPropertyAssignments.equals(other.classIntrospectorPropertyAssignments)) return false;
-            
-            return true;
-        }
-        
-        protected Object clone(boolean deepCloneKey) {
-            try {
-                PropertyAssignments newPA = (PropertyAssignments) super.clone();
-                if (deepCloneKey) {
-                    newPA.classIntrospectorPropertyAssignments
-                            = (ClassIntrospector.PropertyAssignments) classIntrospectorPropertyAssignments.clone();
-                }
-                return newPA;
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e.getMessage());  // Java 5: use cause
-            }
-        }
-        
-        public boolean isSimpleMapWrapper() {
-            return simpleMapWrapper;
-        }
-
-        /** See {@link BeansWrapper#setSimpleMapWrapper(boolean)}. */
-        public void setSimpleMapWrapper(boolean simpleMapWrapper) {
-            this.simpleMapWrapper = simpleMapWrapper;
-        }
-
-        public int getDefaultDateType() {
-            return defaultDateType;
-        }
-
-        /** See {@link BeansWrapper#setDefaultDateType(int)}. */
-        public void setDefaultDateType(int defaultDateType) {
-            this.defaultDateType = defaultDateType;
-        }
-
-        public ObjectWrapper getOuterIdentity() {
-            return outerIdentity;
-        }
-
-        /**
-         * See {@link BeansWrapper#setOuterIdentity(ObjectWrapper)}, except here the default is {@code null} that means
-         * the {@link ObjectWrapper} that you will set up with this {@link PropertyAssignments} object.
-         */
-        public void setOuterIdentity(ObjectWrapper outerIdentity) {
-            this.outerIdentity = outerIdentity;
-        }
-
-        public boolean isStrict() {
-            return strict;
-        }
-
-        /** See {@link BeansWrapper#setStrict(boolean)}. */
-        public void setStrict(boolean strict) {
-            this.strict = strict;
-        }
-
-        public boolean getUseModelCache() {
-            return useModelCache;
-        }
-
-        /** See {@link BeansWrapper#setUseCache(boolean)} (it means the same). */
-        public void setUseModelCache(boolean useModelCache) {
-            this.useModelCache = useModelCache;
-        }
-
-        public Version getIncompatibleImprovements() {
-            return incompatibleImprovements;
-        }
-        
-        public int getExposureLevel() {
-            return classIntrospectorPropertyAssignments.getExposureLevel();
-        }
-
-        /** See {@link BeansWrapper#setExposureLevel(int)}. */
-        public void setExposureLevel(int exposureLevel) {
-            classIntrospectorPropertyAssignments.setExposureLevel(exposureLevel);
-        }
-
-        public boolean getExposeFields() {
-            return classIntrospectorPropertyAssignments.getExposeFields();
-        }
-
-        /** See {@link BeansWrapper#setExposeFields(boolean)}. */
-        public void setExposeFields(boolean exposeFields) {
-            classIntrospectorPropertyAssignments.setExposeFields(exposeFields);
-        }
-
-        public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
-            return classIntrospectorPropertyAssignments.getMethodAppearanceFineTuner();
-        }
-
-        /**
-         * See {@link BeansWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}; additionally,
-         * note that currently setting this to non-{@code null} will disable class introspection cache sharing, unless
-         * the value implements {@link SingletonCustomizer}.
-         * See {@link BeansWrapper#getInstance(Version)} for more about these.
-         */
-        public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
-            classIntrospectorPropertyAssignments.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
-        }
-
-        MethodSorter getMethodSorter() {
-            return classIntrospectorPropertyAssignments.getMethodSorter();
-        }
-
-        void setMethodSorter(MethodSorter methodSorter) {
-            classIntrospectorPropertyAssignments.setMethodSorter(methodSorter);
         }
         
     }

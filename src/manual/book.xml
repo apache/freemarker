@@ -6312,10 +6312,11 @@ list.add("red");
 list.add("green");
 list.add("blue");
 
-// Create the object wrapper we will use. The details of the
+// Get the object wrapper we will use. The details of the
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
-        = DefaultObjectWrapper.getInstance(new Version(2, 3, 21));
+        = new DefaultObjectWrapperBuilder(new Version(2, 3, 21))
+          .getObject();
 
 // Normaly, you would create a plain java.util.HashMap here, and
 // later let the ObjectWrapper wrap it in Template.process(...).
@@ -20406,8 +20407,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   changes from
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
                   almost identical <literal>DefaultObjectWrapper</literal>
-                  singleton, returned by
-                  <literal>DefaultObjectWrapper.getInstance(Version)</literal>.
+                  singleton, returned by <literal>new
+                  DefaultObjectWrapperBuilder(Version).getObject()</literal>.
                   The new default object wrapper's <quote>incompatible
                   improvements</quote> version is set to the same as of the
                   <literal>Configuration</literal>. (See later regarding the
@@ -20475,29 +20476,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   DefaultObjectWrapper(<replaceable>...</replaceable>)</literal>
                   and <literal>new
                   BeansWrapper(<replaceable>...</replaceable>)</literal>, from
-                  now on you should use the
-                  <literal>DefaultObjectWrapper.getInstance</literal> and
-                  <literal>BeansWrapper.getInstance</literal> methods (these
-                  allow specifying some settings of the desired instance too).
-                  Compared to the traditional singletons, like
-                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,these will
-                  return a singleton (usually a VM-wide, or rather
-                  Web-Application-wide singleton) that's read-only (means,
-                  non-configurable, hence safe to share), created lazily
-                  (i.e., only when first requested with
-                  <literal>getInstance</literal>), and is only weak-referenced
-                  from inside FreeMarker, so it can be garbage collected when
-                  all the <literal>Configuration</literal>-s where they were
-                  used can be. The main benefit of using
-                  <literal>getInstance</literal> instead of creating new
-                  instances is that this allows FreeMarker to share the class
-                  introspection caches (an internal part of
+                  now on you should use <literal>new
+                  DefaultObjectWrapperBuilder(version).getObject()</literal>
+                  and <literal>new
+                  BeansWrapperBuilder(version).getObject()</literal>. (The
+                  builder objects have properties (configuration settings)
+                  like <literal>BeansWrapper</literal> has, which specify the
+                  properties of the objects created.) The created objects are
+                  <emphasis>singletons</emphasis> (VM-wide, or at least
+                  Web-Application-wide) and read-only (means,
+                  non-configurable, hence safe to share). The main benefit of
+                  using these factories instead of creating new instances is
+                  that it allows FreeMarker to share the class introspection
+                  caches (an internal part of
                   <literal>BeansWrapper</literal>-s/<literal>DefaultObjectWrapper</literal>-s
-                  that is expensive to populate) among the returned instances,
-                  even if there are multiple subsystems in an application that
-                  use FreeMarker internally and thus don't share the
-                  <literal>Configuration</literal> or the object wrapper
-                  instance.</para>
+                  that is expensive to populate) among the returned instances.
+                  This allow sharing the caches (and the object wrappers)
+                  between components that aren't aware of each other and use
+                  FreeMarker internally.</para>
                 </listitem>
 
                 <listitem>
@@ -20508,11 +20504,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper</literal>-s are configurable (not
                   read-only), and thus dangerous to use as singletons (a badly
                   behaving 3rd party component can mess them up). Use the
-                  <literal>getInstance</literal> methods above instead.
-                  <literal>getInstance</literal> is also more flexible, as you
-                  can specify the desired incompatible-improvements version
-                  for it and various other <literal>BeansWrapper</literal>
-                  settings.</para>
+                  factories described above instead. They are also more
+                  flexible, as you can specify the desired
+                  incompatible-improvements version for them and various other
+                  <literal>BeansWrapper</literal> settings.</para>
                 </listitem>
 
                 <listitem>

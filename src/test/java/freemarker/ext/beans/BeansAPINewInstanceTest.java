@@ -6,7 +6,7 @@ import freemarker.test.utility.Helpers;
 
 public class BeansAPINewInstanceTest extends TestCase {
 
-    private BeansWrapper beansWrapper = BeansWrapper.getInstance(new Version(2, 3, 21));
+    private BeansWrapper beansWrapper = new BeansWrapperBuilder(new Version(2, 3, 21)).getObject();
 
     public BeansAPINewInstanceTest(String name) {
         super(name);

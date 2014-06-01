@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import freemarker.core.BugException;
-import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.Collections12;
@@ -118,11 +117,11 @@ public class _BeansAPI {
      * @param beansWrapperSubclassFactory Creates a <em>new</em> read-only object wrapper of the desired
      *     {@link BeansWrapper} subclass. 
      */
-    public static BeansWrapper getBeansWrapperSubclassInstance(
-            PropertyAssignments pa,
+    public static BeansWrapper getBeansWrapperSubclassSingleton(
+            BeansWrapperConfiguration settings,
             Map instanceCache,
             ReferenceQueue instanceCacheRefQue,
-            BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
+            _BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
         // BeansWrapper can't be cached across different Thread Context Class Loaders (TCCL), because the result of
         // a class name (String) to Class mappings depends on it, and the staticModels and enumModels need that.
         // (The ClassIntrospector doesn't have to consider the TCCL, as it only works with Class-es, not class
@@ -138,7 +137,7 @@ public class _BeansAPI {
                 instanceCache.put(tccl, tcclScopedCache);
                 instanceRef = null;
             } else {
-                instanceRef = (Reference) tcclScopedCache.get(pa);
+                instanceRef = (Reference) tcclScopedCache.get(settings);
             }
         }
 
@@ -148,17 +147,17 @@ public class _BeansAPI {
         }
         // cache miss
         
-        pa = (PropertyAssignments) pa.clone(true);  // prevent any aliasing issues 
-        instance = beansWrapperSubclassFactory.create(pa);
+        settings = (BeansWrapperConfiguration) settings.clone(true);  // prevent any aliasing issues 
+        instance = beansWrapperSubclassFactory.create(settings);
         if (!instance.isWriteProtected()) {
             throw new BugException();
         }
         
         synchronized (instanceCache) {
-            instanceRef = (Reference) tcclScopedCache.get(pa);
+            instanceRef = (Reference) tcclScopedCache.get(settings);
             BeansWrapper concurrentInstance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
             if (concurrentInstance == null) {
-                tcclScopedCache.put(pa, new WeakReference(instance, instanceCacheRefQue));
+                tcclScopedCache.put(settings, new WeakReference(instance, instanceCacheRefQue));
             } else {
                 instance = concurrentInstance;
             }
@@ -186,10 +185,13 @@ public class _BeansAPI {
         } // while poll
     }
     
-    public interface BeansWrapperSubclassFactory {
+    /**
+     * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+     */
+    public interface _BeansWrapperSubclassFactory {
         
-        /** Creates a new read-only wrapper; used for {@link BeansWrapper#getInstance} and in its subclasses. */
-        BeansWrapper create(PropertyAssignments sa);
+        /** Creates a new read-only {@link BeansWrapper}; used for {@link BeansWrapperBuilder} and such. */
+        BeansWrapper create(BeansWrapperConfiguration sa);
     }
     
 }

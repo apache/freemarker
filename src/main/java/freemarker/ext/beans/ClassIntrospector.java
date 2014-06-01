@@ -29,7 +29,6 @@ import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
 import freemarker.log.Logger;
-import freemarker.template.Version;
 import freemarker.template.utility.Collections12;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
@@ -76,25 +75,15 @@ class ClassIntrospector {
     static final Object GENERIC_GET_KEY = new Object();
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Instance-cache fields:
-    
-    /**
-     * Caches {@link ClassIntrospector}-s so that {@link BeansWrapper} instances can share them.
-     * Used by {@link #getInstance(PropertyAssignments)}.
-     */
-    private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
-    private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue(); 
-
-    // -----------------------------------------------------------------------------------------------------------------
     // Introspection configuration properties:
     
     // Note: These all must be *declared* final (or else synchronization is needed everywhere where they are accessed). 
     
-    final private int exposureLevel;
-    final private boolean exposeFields;
-    final private MethodAppearanceFineTuner methodAppearanceFineTuner;
-    final private MethodSorter methodSorter;
-    final private boolean bugfixed;
+    final int exposureLevel;
+    final boolean exposeFields;
+    final MethodAppearanceFineTuner methodAppearanceFineTuner;
+    final MethodSorter methodSorter;
+    final boolean bugfixed;
     
     /** See {@link #getHasSharedInstanceRestrictons()} */
     final private boolean hasSharedInstanceRestrictons;
@@ -125,24 +114,23 @@ class ClassIntrospector {
      * 
      * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
      */
-    ClassIntrospector(PropertyAssignments pa, Object sharedLock) {
+    ClassIntrospector(ClassIntrospectorFactory pa, Object sharedLock) {
         this(pa, sharedLock, false, false);
     }
 
     /**
      * @param hasSharedInstanceRestrictons {@code true} exactly if we are creating a new instance with
-     *     {@link #getInstance(PropertyAssignments)}. Then it's {@code true} even if
-     *     {@link #getInstance(PropertyAssignments)} won't put the instance into the cache. 
+     *     {@link ClassIntrospectorFactory}. Then it's {@code true} even if it won't put the instance into the cache. 
      */
-    private ClassIntrospector(PropertyAssignments pa, Object sharedLock,
+    ClassIntrospector(ClassIntrospectorFactory settings, Object sharedLock,
             boolean hasSharedInstanceRestrictons, boolean shared) {
         NullArgumentException.check("sharedLock", sharedLock);
         
-        this.exposureLevel = pa.exposureLevel;
-        this.exposeFields = pa.exposeFields;
-        this.methodAppearanceFineTuner = pa.methodAppearanceFineTuner;
-        this.methodSorter = pa.methodSorter; 
-        this.bugfixed = pa.bugfixed;
+        this.exposureLevel = settings.getExposureLevel();
+        this.exposeFields = settings.getExposeFields();
+        this.methodAppearanceFineTuner = settings.getMethodAppearanceFineTuner();
+        this.methodSorter = settings.getMethodSorter(); 
+        this.bugfixed = settings.isBugfixed();
         
         this.sharedLock = sharedLock;
         
@@ -153,162 +141,14 @@ class ClassIntrospector {
             JavaRebelIntegration.register(this);
         }
     }
-    
-    /**
-     * Returns a {@link PropertyAssignments}-s that could be used to create an identical {@link #ClassIntrospector}.
-     * The returned {@link PropertyAssignments} can be modified without interfering with anything.
-     */
-    PropertyAssignments getPropertyAssignments() {
-        return new PropertyAssignments(this);
-    }
-    
-    /**
-     * Returns an instance that is possibly shared (singleton). Note that this comes with its own "shared lock",
-     * since everyone who uses this object will have to lock with that common object.
-     */
-    static ClassIntrospector getInstance(PropertyAssignments pa) {
-        if ((pa.methodAppearanceFineTuner == null || pa.methodAppearanceFineTuner instanceof SingletonCustomizer)
-                && (pa.methodSorter == null || pa.methodSorter instanceof SingletonCustomizer)) {
-            // Instance can be cached.
-            ClassIntrospector instance;
-            synchronized (INSTANCE_CACHE) {
-                Reference instanceRef = (Reference) INSTANCE_CACHE.get(pa);
-                instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
-                if (instance == null) {
-                    pa = (PropertyAssignments) pa.clone();  // prevent any aliasing issues
-                    instance = new ClassIntrospector(pa, new Object(), true, true);
-                    INSTANCE_CACHE.put(pa, new WeakReference(instance, INSTANCE_CACHE_REF_QUEUE));
-                }
-            }
-            
-            removeClearedReferencesFromInstanceCache();
-            
-            return instance;
-        } else {
-            // If methodAppearanceFineTuner or methodSorter is specified and isn't marked as a singleton, the
-            // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
-            // BeansWrapper.
-            return new ClassIntrospector(pa, new Object(), true, false);
-        }
-    }
 
-    private static void removeClearedReferencesFromInstanceCache() {
-        Reference clearedRef;
-        while ((clearedRef = INSTANCE_CACHE_REF_QUEUE.poll()) != null) {
-            synchronized (INSTANCE_CACHE) {
-                findClearedRef: for (Iterator it = INSTANCE_CACHE.values().iterator(); it.hasNext(); ) {
-                    if (it.next() == clearedRef) {
-                        it.remove();
-                        break findClearedRef;
-                    }
-                }
-            }
-        }
+    /**
+     * Returns a {@link ClassIntrospectorFactory}-s that could be used to create an identical {@link #ClassIntrospector}.
+     * The returned {@link ClassIntrospectorFactory} can be modified without interfering with anything.
+     */
+    ClassIntrospectorFactory getPropertyAssignments() {
+        return new ClassIntrospectorFactory(this);
     }
-    
-    final static class PropertyAssignments implements freemarker.template.utility.PropertyAssignments, Cloneable {
-        private final boolean bugfixed;
-        
-        // Properties and their *defaults*:
-        private int exposureLevel = BeansWrapper.EXPOSE_SAFE;
-        private boolean exposeFields;
-        private MethodAppearanceFineTuner methodAppearanceFineTuner;
-        private MethodSorter methodSorter;
-        // Attention:
-        // - This is also used as a cache key, so non-normalized field values should be avoided.
-        // - If some field has a default value, it must be set until the end of the constructor. No field that has a
-        //   default can be left unset (like null).
-        // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
-        
-        private PropertyAssignments(ClassIntrospector ci) {
-            bugfixed = ci.bugfixed;
-            exposureLevel = ci.exposureLevel;
-            exposeFields = ci.exposeFields;
-            methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
-            methodSorter = ci.methodSorter; 
-        }
-        
-        PropertyAssignments(Version incompatibleImprovements) {
-            // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
-            // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
-            // to some version changes that affects BeansWrapper, but not the other way around. 
-            bugfixed = BeansWrapper.is2321Bugfixed(incompatibleImprovements);
-        }
-        
-        protected Object clone() {
-            try {
-                return super.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException();  // Java 5: use cause
-            }
-        }
-    
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (bugfixed ? 1231 : 1237);
-            result = prime * result + (exposeFields ? 1231 : 1237);
-            result = prime * result + exposureLevel;
-            result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
-            result = prime * result + System.identityHashCode(methodSorter);
-            return result;
-        }
-    
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            PropertyAssignments other = (PropertyAssignments) obj;
-            
-            if (bugfixed != other.bugfixed) return false;
-            if (exposeFields != other.exposeFields) return false;
-            if (exposureLevel != other.exposureLevel) return false;
-            if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
-            if (methodSorter != other.methodSorter) return false;
-            
-            return true;
-        }
-        
-        public int getExposureLevel() {
-            return exposureLevel;
-        }
-    
-        /** See {@link BeansWrapper#setExposureLevel(int)}. */
-        public void setExposureLevel(int exposureLevel) {
-            if (exposureLevel < BeansWrapper.EXPOSE_ALL || exposureLevel > BeansWrapper.EXPOSE_NOTHING) {
-                throw new IllegalArgumentException("Illegal exposure level: " + exposureLevel);
-            }
-            
-            this.exposureLevel = exposureLevel;
-        }
-    
-        public boolean getExposeFields() {
-            return exposeFields;
-        }
-    
-        /** See {@link BeansWrapper#setExposeFields(boolean)}. */
-        public void setExposeFields(boolean exposeFields) {
-            this.exposeFields = exposeFields;
-        }
-    
-        public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
-            return methodAppearanceFineTuner;
-        }
-    
-        public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
-            this.methodAppearanceFineTuner = methodAppearanceFineTuner;
-        }
-    
-        public MethodSorter getMethodSorter() {
-            return methodSorter;
-        }
-    
-        public void setMethodSorter(MethodSorter methodSorter) {
-            this.methodSorter = methodSorter;
-        }
-        
-    }
-
     
     //------------------------------------------------------------------------------------------------------------------
     // Introspection:
@@ -898,7 +738,7 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns {@code true} if this instance was created for {@link #getInstance(PropertyAssignments)}, even
+     * Returns {@code true} if this instance was created with {@link ClassIntrospectorFactory}, even
      * if it wasn't actually put into the cache (as we reserve the right to do so in later versions). 
      */
     boolean getHasSharedInstanceRestrictons() {
@@ -930,18 +770,5 @@ class ClassIntrospector {
             return modelFactories.toArray();
         }
     }
-
-    /** For unit testing only */
-    static void clearInstanceCache() {
-        synchronized (INSTANCE_CACHE) {
-            INSTANCE_CACHE.clear();
-        }
-    }
-    
-    /** For unit testing only */
-    static Map getInstanceCache() {
-        return INSTANCE_CACHE;
-    }
-
     
 }

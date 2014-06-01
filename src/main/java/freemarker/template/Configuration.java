@@ -91,6 +91,7 @@ import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
@@ -285,7 +286,7 @@ public class Configuration extends Configurable implements Cloneable {
      *       <li><p>
      *         The <em>default</em> of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
      *         {@link ObjectWrapper#DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
-     *         returned by {@link DefaultObjectWrapper#getInstance(Version)}. The new default object wrapper's
+     *         returned by {@link DefaultObjectWrapperBuilder#getObject()}. The new default object wrapper's
      *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
      *         See {@link BeansWrapper#BeansWrapper(Version)} for further details. Furthermore, the new default
      *         object wrapper doesn't allow changing its settings; setter methods throw {@link IllegalStateException}).
@@ -295,7 +296,7 @@ public class Configuration extends Configurable implements Cloneable {
      *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
      *         cache) because the singleton is modified after publishing.)
      *         Furthermore the new default object wrapper shares class introspection cache with other
-     *         {@link BeansWrapper}-s get with {@code getInstance} calls, which has an impact as
+     *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
      *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
      *       </li>
      *       <li><p>

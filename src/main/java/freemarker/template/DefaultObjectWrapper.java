@@ -52,21 +52,20 @@
 
 package freemarker.template;
 
-import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans._BeansAPI;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Note that instances of this class generally should
- * be made by {@link #getInstance(Version)} and its overloads, not with its constructor.
+ * be made by {@link DefaultObjectWrapperBuilder} and its overloads, not with its constructor.
  * 
  * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
@@ -74,12 +73,8 @@ import freemarker.ext.dom.NodeModel;
  */
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
-    /** @deprecated Use {@link #getInstance(Version)} instead, but mind its performance */
+    /** @deprecated Use {@link DefaultObjectWrapperBuilder} instead, but mind its performance */
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
-    
-    private final static WeakHashMap/*<ClassLoader, Map<PropertyAssignments, WeakReference<DefaultObjectWrapper>>*/
-            INSTANCE_CACHE = new WeakHashMap();
-    private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
     
     static final private Class W3C_DOM_NODE_CLASS, JYTHON_OBJ_CLASS;
     
@@ -89,15 +84,15 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
      * 
-     * @deprecated Use {@link #getInstance(Version)} or {@link #getInstance(PropertyAssignments)}, or
-     *     in rare cases {@link #DefaultObjectWrapper(Version)} instead.
+     * @deprecated Use {@link DefaultObjectWrapperBuilder}, or in rare cases,
+     *          {@link #DefaultObjectWrapper(Version)} instead.
      */
     public DefaultObjectWrapper() {
         super();
     }
     
     /**
-     * Use {@link #getInstance(Version)} or {@link #getInstance(PropertyAssignments)} instead if possible.
+     * Use {@link DefaultObjectWrapperBuilder} instead if possible.
      * Instances created with this constructor won't share the class introspection caches with other instances.
      * See {@link BeansWrapper#BeansWrapper(Version)} (the superclass constructor) for more details.
      * 
@@ -110,62 +105,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapper.PropertyAssignments, boolean)}.
+     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapperBuilder, boolean)}.
      * 
      * @since 2.3.21
      */
-    protected DefaultObjectWrapper(BeansWrapper.PropertyAssignments pa, boolean readOnly) {
-        super(pa, readOnly);
-    }
-    
-    /**
-     * Returns an unconfigurable (read-only) {@link DefaultObjectWrapper} instance that's already configured as
-     * specified in the argument; this is preferred over using the constructors.
-     * If you need to configure more than the {@code incompatibleImprovements version}, use
-     * {@link #getInstance(PropertyAssignments)}.
-     * 
-     * <p>See {@link BeansWrapper#getInstance(Version)} for more info (that's what this delegates to). 
-     * 
-     * @return A {@link DefaultObjectWrapper} (Java doesn't allow declaring that as return type here, that's only
-     *      why it's declared as {@link BeansWrapper}).
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getInstance(Version incompatibleImprovements) {
-        return getInstance(new PropertyAssignments(incompatibleImprovements));
-    }
-
-    /**
-     * Don't call this; always fails because {@link DefaultObjectWrapper} is not affected by the
-     * <tt>simpleMapWrapper</tt> property. This method exists only so that it hides the one "inherited" from
-     * {@link BeansWrapper}, which wouldn't return a {@link DefaultObjectWrapper}.
-     */
-    public static BeansWrapper getInstance(Version incompatibleImprovements, boolean simpleMapWrapper) {
-        throw new IllegalArgumentException(
-                "DefaultObjectWrapper is not affected by the simpleMapWrapper property; "
-                + "use getInstance(Version).");
-    }
-    
-    /**
-     * Same as {@link #getInstance(Version)}, but you can specify more properties of the desired instance.
-     *     
-     * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
-     * 
-     * @since 2.3.21
-     */
-    public static BeansWrapper getInstance(PropertyAssignments pa) {
-        return _BeansAPI.getBeansWrapperSubclassInstance(
-                pa, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, DefaultObjectWrapperFactory.INSTANCE);
-    }
-
-    private static class DefaultObjectWrapperFactory implements _BeansAPI.BeansWrapperSubclassFactory {
-        
-        private static final DefaultObjectWrapperFactory INSTANCE = new DefaultObjectWrapperFactory(); 
-
-        public BeansWrapper create(PropertyAssignments pa) {
-            return new DefaultObjectWrapper(pa, true);
-        }
-        
+    protected DefaultObjectWrapper(BeansWrapperConfiguration dowCfg, boolean readOnly) {
+        super(dowCfg, readOnly);
     }
 
     static {
@@ -265,13 +210,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             list.add(Array.get(arr, i));
         }
         return list;
-    }
-    
-    /** For unit testing only */
-    static void clearInstanceCache() {
-        synchronized (INSTANCE_CACHE) {
-            INSTANCE_CACHE.clear();
-        }
     }
     
 }

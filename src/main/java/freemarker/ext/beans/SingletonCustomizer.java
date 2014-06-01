@@ -6,9 +6,8 @@ import freemarker.template.ObjectWrapper;
  * Marker interface useful when used together with {@like MethodAppearanceFineTuner} and such customizer objects, to
  * indicate that it <b>doesn't contain reference to the {@link ObjectWrapper}</b> (so beware with non-static inner
  * classes) and can be and should be used in call introspection cache keys. This also implies that you won't
- * create many instances of the class, rather just reuse the same (or same few) instances over and over. Furhtermore,
- * the instances must be thread-safe. The typically pattern in which this instance should be used is like this
- * (hence the name):
+ * create many instances of the class, rather just reuse the same (or same few) instances over and over. Furthermore,
+ * the instances must be thread-safe. The typical pattern in which this instance should be used is like this:
  * 
  * <pre>static class MyMethodAppearanceFineTuner implements MethodAppearanceFineTuner, SingletonCustomizer {
  *      

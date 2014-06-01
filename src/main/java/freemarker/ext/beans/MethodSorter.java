@@ -4,7 +4,7 @@ import java.beans.MethodDescriptor;
 
 /**
  * Used for JUnit testing method-order dependence bugs via
- * {@link BeansWrapper.PropertyAssignments#setMethodSorter(MethodSorter)}.
+ * {@link BeansWrapperBuilder#setMethodSorter(MethodSorter)}.
  */
 interface MethodSorter {
 

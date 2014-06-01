@@ -71,8 +71,9 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -648,7 +649,7 @@ public class Configurable
                 || incompatibleImprovements.intValue() < DEFAULT_TL_AND_OW_CHANGE_VERSION) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
-            return DefaultObjectWrapper.getInstance(incompatibleImprovements);
+            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getObject();
         }
     }
     
@@ -832,10 +833,10 @@ public class Configurable
      *       its parameterless constructor. If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
      *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
-     *       or {@link DefaultObjectWrapper#getInstance(Version)}),
+     *       or {@link DefaultObjectWrapperBuilder#getObject}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
-     *       or {@link BeansWrapper#getInstance(Version)}),
+     *       or {@link BeansWrapperBuilder#getObject()}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
