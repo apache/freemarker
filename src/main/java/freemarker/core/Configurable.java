@@ -649,7 +649,7 @@ public class Configurable
                 || incompatibleImprovements.intValue() < DEFAULT_TL_AND_OW_CHANGE_VERSION) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
-            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getObject();
+            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();
         }
     }
     
@@ -833,10 +833,10 @@ public class Configurable
      *       its parameterless constructor. If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
      *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
-     *       or {@link DefaultObjectWrapperBuilder#getObject}),
+     *       or {@link DefaultObjectWrapperBuilder#getResult()}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
-     *       or {@link BeansWrapperBuilder#getObject()}),
+     *       or {@link BeansWrapperBuilder#getResult()}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.

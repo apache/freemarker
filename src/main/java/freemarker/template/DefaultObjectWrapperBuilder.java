@@ -38,7 +38,7 @@ public class DefaultObjectWrapperBuilder extends BeansWrapperConfiguration {
      * Returns a {@link DefaultObjectWrapper} instance that matches the settings of this builder. This will be possibly
      * a singleton that is also in use elsewhere. 
      */
-    public DefaultObjectWrapper getObject() {
+    public DefaultObjectWrapper getResult() {
         return (DefaultObjectWrapper) _BeansAPI.getBeansWrapperSubclassSingleton(
                 this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, DefaultObjectWrapperFactory.INSTANCE);
     }

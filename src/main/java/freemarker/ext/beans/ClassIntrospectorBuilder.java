@@ -9,7 +9,7 @@ import java.util.Map;
 
 import freemarker.template.Version;
 
-final class ClassIntrospectorFactory implements Cloneable {
+final class ClassIntrospectorBuilder implements Cloneable {
     
     private final boolean bugfixed;
 
@@ -27,7 +27,7 @@ final class ClassIntrospectorFactory implements Cloneable {
     //   default can be left unset (like null).
     // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
     
-    ClassIntrospectorFactory(ClassIntrospector ci) {
+    ClassIntrospectorBuilder(ClassIntrospector ci) {
         bugfixed = ci.bugfixed;
         exposureLevel = ci.exposureLevel;
         exposeFields = ci.exposeFields;
@@ -35,7 +35,7 @@ final class ClassIntrospectorFactory implements Cloneable {
         methodSorter = ci.methodSorter; 
     }
     
-    ClassIntrospectorFactory(Version incompatibleImprovements) {
+    ClassIntrospectorBuilder(Version incompatibleImprovements) {
         // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
         // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
         // to some version changes that affects BeansWrapper, but not the other way around. 
@@ -65,7 +65,7 @@ final class ClassIntrospectorFactory implements Cloneable {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        ClassIntrospectorFactory other = (ClassIntrospectorFactory) obj;
+        ClassIntrospectorBuilder other = (ClassIntrospectorBuilder) obj;
         
         if (bugfixed != other.bugfixed) return false;
         if (exposeFields != other.exposeFields) return false;
@@ -144,7 +144,7 @@ final class ClassIntrospectorFactory implements Cloneable {
      * Returns an instance that is possibly shared (singleton). Note that this comes with its own "shared lock",
      * since everyone who uses this object will have to lock with that common object.
      */
-    public ClassIntrospector getObject() {
+    ClassIntrospector getResult() {
         if ((methodAppearanceFineTuner == null || methodAppearanceFineTuner instanceof SingletonCustomizer)
                 && (methodSorter == null || methodSorter instanceof SingletonCustomizer)) {
             // Instance can be cached.
@@ -153,7 +153,7 @@ final class ClassIntrospectorFactory implements Cloneable {
                 Reference instanceRef = (Reference) INSTANCE_CACHE.get(this);
                 instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
                 if (instance == null) {
-                    ClassIntrospectorFactory thisClone = (ClassIntrospectorFactory) clone();  // prevent any aliasing issues
+                    ClassIntrospectorBuilder thisClone = (ClassIntrospectorBuilder) clone();  // prevent any aliasing issues
                     instance = new ClassIntrospector(thisClone, new Object(), true, true);
                     INSTANCE_CACHE.put(thisClone, new WeakReference(instance, INSTANCE_CACHE_REF_QUEUE));
                 }
@@ -168,15 +168,6 @@ final class ClassIntrospectorFactory implements Cloneable {
             // BeansWrapper.
             return new ClassIntrospector(this, new Object(), true, false);
         }
-    }
-
-    public Class getObjectType() {
-        return ClassIntrospector.class;
-    }
-
-    public boolean isSingleton() {
-        // Not always a singleton
-        return false;
     }
 
     public boolean isBugfixed() {

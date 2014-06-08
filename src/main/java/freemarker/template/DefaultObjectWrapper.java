@@ -194,7 +194,6 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         }
         return super.wrap(obj); 
     }
-
     
     public TemplateModel wrapDomNode(Object obj) {
         return NodeModel.wrap((org.w3c.dom.Node) obj);

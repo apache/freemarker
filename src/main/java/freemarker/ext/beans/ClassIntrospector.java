@@ -114,23 +114,23 @@ class ClassIntrospector {
      * 
      * @param pa Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
      */
-    ClassIntrospector(ClassIntrospectorFactory pa, Object sharedLock) {
+    ClassIntrospector(ClassIntrospectorBuilder pa, Object sharedLock) {
         this(pa, sharedLock, false, false);
     }
 
     /**
      * @param hasSharedInstanceRestrictons {@code true} exactly if we are creating a new instance with
-     *     {@link ClassIntrospectorFactory}. Then it's {@code true} even if it won't put the instance into the cache. 
+     *     {@link ClassIntrospectorBuilder}. Then it's {@code true} even if it won't put the instance into the cache. 
      */
-    ClassIntrospector(ClassIntrospectorFactory settings, Object sharedLock,
+    ClassIntrospector(ClassIntrospectorBuilder builder, Object sharedLock,
             boolean hasSharedInstanceRestrictons, boolean shared) {
         NullArgumentException.check("sharedLock", sharedLock);
         
-        this.exposureLevel = settings.getExposureLevel();
-        this.exposeFields = settings.getExposeFields();
-        this.methodAppearanceFineTuner = settings.getMethodAppearanceFineTuner();
-        this.methodSorter = settings.getMethodSorter(); 
-        this.bugfixed = settings.isBugfixed();
+        this.exposureLevel = builder.getExposureLevel();
+        this.exposeFields = builder.getExposeFields();
+        this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
+        this.methodSorter = builder.getMethodSorter(); 
+        this.bugfixed = builder.isBugfixed();
         
         this.sharedLock = sharedLock;
         
@@ -143,11 +143,11 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns a {@link ClassIntrospectorFactory}-s that could be used to create an identical {@link #ClassIntrospector}.
-     * The returned {@link ClassIntrospectorFactory} can be modified without interfering with anything.
+     * Returns a {@link ClassIntrospectorBuilder}-s that could be used to create an identical {@link #ClassIntrospector}.
+     * The returned {@link ClassIntrospectorBuilder} can be modified without interfering with anything.
      */
-    ClassIntrospectorFactory getPropertyAssignments() {
-        return new ClassIntrospectorFactory(this);
+    ClassIntrospectorBuilder getPropertyAssignments() {
+        return new ClassIntrospectorBuilder(this);
     }
     
     //------------------------------------------------------------------------------------------------------------------
@@ -738,7 +738,7 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns {@code true} if this instance was created with {@link ClassIntrospectorFactory}, even
+     * Returns {@code true} if this instance was created with {@link ClassIntrospectorBuilder}, even
      * if it wasn't actually put into the cache (as we reserve the right to do so in later versions). 
      */
     boolean getHasSharedInstanceRestrictons() {

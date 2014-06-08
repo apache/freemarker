@@ -107,7 +107,7 @@ import freemarker.template.utility.WriteProtectable;
  * 
  * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
- * was safely published and then left unmodified. 
+ * was safely published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety. 
  */
 public class BeansWrapper implements ObjectWrapper, WriteProtectable
 {
@@ -174,7 +174,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * {@link Class} to class info cache.
      * This object is possibly shared with other {@link BeansWrapper}-s!
      * 
-     * <p>To write this, always use {@link #replaceClassIntrospector(ClassIntrospectorFactory)}.
+     * <p>To write this, always use {@link #replaceClassIntrospector(ClassIntrospectorBuilder)}.
      * 
      * <p>When reading this, it's good idea to synchronize on sharedInrospectionLock when it doesn't hurt overall
      * performance. In theory that's not needed, but apps might fail to keep the rules.
@@ -355,7 +355,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = bwConf.classIntrospectorFactory.getObject();
+            classIntrospector = bwConf.classIntrospectorFactory.getResult();
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
         }
         
@@ -547,7 +547,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
      
         if (classIntrospector.getExposureLevel() != exposureLevel) {
-            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
             pa.setExposureLevel(exposureLevel);
             replaceClassIntrospector(pa);
         }
@@ -576,7 +576,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getExposeFields() != exposeFields) {
-            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
             pa.setExposeFields(exposeFields);
             replaceClassIntrospector(pa);
         }
@@ -604,7 +604,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
-            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
             pa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
             replaceClassIntrospector(pa);
         }
@@ -618,7 +618,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         checkModifiable();
         
         if (classIntrospector.getMethodSorter() != methodSorter) {
-            ClassIntrospectorFactory pa = classIntrospector.getPropertyAssignments();
+            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
             pa.setMethodSorter(methodSorter);
             replaceClassIntrospector(pa);
         }
@@ -642,7 +642,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * Replaces the value of {@link #classIntrospector}, but first it unregisters
      * the model factories in the old {@link #classIntrospector}.
      */
-    private void replaceClassIntrospector(ClassIntrospectorFactory pa) {
+    private void replaceClassIntrospector(ClassIntrospectorBuilder pa) {
         checkModifiable();
         
         final ClassIntrospector newCI = new ClassIntrospector(pa, sharedInrospectionLock);

@@ -17,7 +17,7 @@ public class ModelCacheTest {
     
     @Test
     public void modelCacheOff() throws Exception {
-        BeansWrapper bw = new BeansWrapperBuilder(new Version(2, 3, 21)).getObject();
+        BeansWrapper bw = new BeansWrapperBuilder(new Version(2, 3, 21)).getResult();
         assertFalse(bw.getUseCache());  // default is off
         
         String s = "foo";

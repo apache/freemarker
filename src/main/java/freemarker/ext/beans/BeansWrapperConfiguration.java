@@ -22,7 +22,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
 
     private final Version incompatibleImprovements;
     
-    ClassIntrospectorFactory classIntrospectorFactory;
+    ClassIntrospectorBuilder classIntrospectorFactory;
     
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
@@ -50,7 +50,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         incompatibleImprovements = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
-        classIntrospectorFactory = new ClassIntrospectorFactory(incompatibleImprovements);
+        classIntrospectorFactory = new ClassIntrospectorBuilder(incompatibleImprovements);
     }
 
     public int hashCode() {
@@ -88,7 +88,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
             BeansWrapperConfiguration clone = (BeansWrapperConfiguration) super.clone();
             if (deepCloneKey) {
                 clone.classIntrospectorFactory
-                        = (ClassIntrospectorFactory) classIntrospectorFactory.clone();
+                        = (ClassIntrospectorBuilder) classIntrospectorFactory.clone();
             }
             return clone;
         } catch (CloneNotSupportedException e) {

@@ -6316,7 +6316,7 @@ list.add("blue");
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
         = new DefaultObjectWrapperBuilder(new Version(2, 3, 21))
-          .getObject();
+          .getResult();
 
 // Normaly, you would create a plain java.util.HashMap here, and
 // later let the ObjectWrapper wrap it in Template.process(...).
@@ -20408,7 +20408,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
                   almost identical <literal>DefaultObjectWrapper</literal>
                   singleton, returned by <literal>new
-                  DefaultObjectWrapperBuilder(Version).getObject()</literal>.
+                  DefaultObjectWrapperBuilder(Version).getResult()</literal>.
                   The new default object wrapper's <quote>incompatible
                   improvements</quote> version is set to the same as of the
                   <literal>Configuration</literal>. (See later regarding the
@@ -20477,9 +20477,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   and <literal>new
                   BeansWrapper(<replaceable>...</replaceable>)</literal>, from
                   now on you should use <literal>new
-                  DefaultObjectWrapperBuilder(version).getObject()</literal>
+                  DefaultObjectWrapperBuilder(version).getResult()</literal>
                   and <literal>new
-                  BeansWrapperBuilder(version).getObject()</literal>. (The
+                  BeansWrapperBuilder(version).getResult()</literal>. (The
                   builder objects have properties (configuration settings)
                   like <literal>BeansWrapper</literal> has, which specify the
                   properties of the objects created.) The created objects are
