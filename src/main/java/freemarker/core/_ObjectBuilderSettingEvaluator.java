@@ -456,7 +456,6 @@ public class _ObjectBuilderSettingEvaluator {
         private List/*<String>*/ namedParamNames = new ArrayList();
         private List/*<Object>*/ namedParamValues = new ArrayList();
         
-        @Override
         Object eval() throws _ObjectBuilderSettingEvaluationException {
             Class cl;
             try {
