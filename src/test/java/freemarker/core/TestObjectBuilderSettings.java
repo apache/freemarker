@@ -2,7 +2,9 @@ package freemarker.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -23,65 +25,306 @@ public class TestObjectBuilderSettings {
 
     @Test
     public void newInstanceTest() throws Exception {
-        TestBean1 tb;
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(4f, res.f, 0);
+            assertFalse(res.b);
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(4f, tb.f, 0);
-        assertFalse(tb.b);
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1()",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(4f, res.f, 0);
+            assertFalse(res.b);
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1()",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(4f, tb.f, 0);
-        assertFalse(tb.b);
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1(1.5, -20, 8589934592, true)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(1.5f, res.f, 0);
+            assertEquals(Integer.valueOf(-20), res.i);
+            assertEquals(8589934592l, res.l);
+            assertTrue(res.b);
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1(1.5, -20, 8589934592, true)",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(1.5f, tb.f, 0);
-        assertEquals(-20, tb.i);
-        assertEquals(8589934592l, tb.l);
-        assertTrue(tb.b);
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1(1, true)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(2f, res.f, 0);
+            assertEquals(Integer.valueOf(1), res.i);
+            assertEquals(2l, res.l);
+            assertTrue(res.b);
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1(1, true)",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(2f, tb.f, 0);
-        assertEquals(1, tb.i);
-        assertEquals(2l, tb.l);
-        assertTrue(tb.b);
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1(11, 22)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(3f, res.f, 0);
+            assertEquals(Integer.valueOf(11), res.i);
+            assertEquals(22l, res.l);
+            assertFalse(res.b);
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1(11, 22)",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(3f, tb.f, 0);
-        assertEquals(11, tb.i);
-        assertEquals(22l, tb.l);
-        assertFalse(tb.b);
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1(p1 = 1, p2 = 2, p3 = true, p4 = 's')",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(4f, res.f, 0);
+            assertFalse(res.b);
+            assertEquals(1d, res.getP1(), 0);
+            assertEquals(2, res.getP2());
+            assertTrue(res.isP3());
+            assertEquals("s", res.getP4());
+        }
+
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1("
+                    + "null, 2, p1 = 1, p2 = 2, p3 = false, p4 = null)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertNull(res.i);
+            assertEquals(2, res.l, 0);
+            assertEquals(3f, res.f, 0);
+            assertFalse(res.b);
+            assertEquals(1d, res.getP1(), 0);
+            assertEquals(2, res.getP2());
+            assertFalse(res.isP3());
+            assertNull(res.getP4());
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1(p1 = 1, p2 = 2, p3 = true)",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(4f, tb.f, 0);
-        assertFalse(tb.b);
-        assertEquals(1d, tb.getP1(), 0);
-        assertEquals(2, tb.getP2());
-        assertTrue(tb.isP3());
+        {
+            // Deliberately odd spacings
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "\t\tfreemarker . core.\n\tTestObjectBuilderSettings$TestBean1(\n\r\tp1=1\n,p2=2,p3=true,p4='s'  )",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(4f, res.f, 0);
+            assertFalse(res.b);
+            assertEquals(1d, res.getP1(), 0);
+            assertEquals(2, res.getP2());
+            assertTrue(res.isP3());
+            assertEquals("s", res.getP4());
+        }
         
-        tb = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
-                "freemarker.core.TestObjectBuilderSettings$TestBean1(1, true, p2 = 2)",
-                Object.class, _SettingEvaluationEnvironment.getInstance());
-        assertEquals(2f, tb.f, 0);
-        assertEquals(1, tb.i);
-        assertEquals(2l, tb.l);
-        assertTrue(tb.b);
-        assertEquals(0d, tb.getP1(), 0);
-        assertEquals(2, tb.getP2());
-        assertFalse(tb.isP3());
+        {
+            TestBean1 res = (TestBean1) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean1(1, true, p2 = 2)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(2f, res.f, 0);
+            assertEquals(Integer.valueOf(1), res.i);
+            assertEquals(2l, res.l);
+            assertTrue(res.b);
+            assertEquals(0d, res.getP1(), 0);
+            assertEquals(2, res.getP2());
+            assertFalse(res.isP3());
+        }
+    }
+    
+    @Test
+    public void builderTest() throws Exception {
+        {
+            // Backward-compatible mode, no builder:
+            TestBean2 res = (TestBean2) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean2",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertFalse(res.built);
+            assertEquals(0, res.x);
+        }
+        
+        {
+            TestBean2 res = (TestBean2) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean2()",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertTrue(res.built);
+            assertEquals(0, res.x);
+        }
+        
+        {
+            TestBean2 res = (TestBean2) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean2(x = 1)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertTrue(res.built);
+            assertEquals(1, res.x);
+        }
+        
+        {
+            TestBean2 res = (TestBean2) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean2(1)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertTrue(res.built);
+            assertEquals(1, res.x);
+        }
     }
 
+    @Test
+    public void staticInstanceTest() throws Exception {
+        // Backward compatible mode:
+        {
+            TestBean5 res = (TestBean5) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean5",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(0, res.i);
+            assertEquals(0, res.x);
+            assertNotSame(TestBean5.INSTANCE, res);
+        }
+        
+        {
+            TestBean5 res = (TestBean5) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean5()",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(0, res.i);
+            assertEquals(0, res.x);
+            assertSame(TestBean5.INSTANCE, res); //!
+        }
+        
+        {
+            TestBean5 res = (TestBean5) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean5(x = 1)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(0, res.i);
+            assertEquals(1, res.x);
+            assertNotSame(TestBean5.INSTANCE, res);
+        }
+
+        {
+            TestBean5 res = (TestBean5) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean5(1)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(1, res.i);
+            assertEquals(0, res.x);
+            assertNotSame(TestBean5.INSTANCE, res);
+        }
+    }
+    
+    @Test
+    public void writeProtectionTest() throws Exception {
+        {
+            TestBean3 res = (TestBean3) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean3(x = 1)",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(1, res.x);
+            assertTrue(res.isWriteProtected());
+            try {
+                res.setX(2);
+                fail();
+            } catch (IllegalStateException e) {
+                // expected
+            }
+        }
+        
+        {
+            // Backward-compatible mode
+            TestBean3 res = (TestBean3) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean3",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(0, res.x);
+            assertFalse(res.isWriteProtected());
+            res.setX(2);
+        }
+    }
+
+    @Test
+    public void stringLiteralsTest() throws Exception {
+        {
+            TestBean4 res = (TestBean4) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean4(\"\", '', s3 = r\"\", s4 = r'')",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals("", res.getS1());
+            assertEquals("", res.getS2());
+            assertEquals("", res.getS3());
+            assertEquals("", res.getS4());
+        }
+        
+        {
+            TestBean4 res = (TestBean4) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean4(\"a\", 'b', s3 = r\"c\", s4 = r'd')",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals("a", res.getS1());
+            assertEquals("b", res.getS2());
+            assertEquals("c", res.getS3());
+            assertEquals("d", res.getS4());
+        }
+        
+        {
+            TestBean4 res = (TestBean4) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean4(\"a'A\", 'b\"B', s3 = r\"c'C\", s4 = r'd\"D')",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals("a'A", res.getS1());
+            assertEquals("b\"B", res.getS2());
+            assertEquals("c'C", res.getS3());
+            assertEquals("d\"D", res.getS4());
+        }
+        
+        {
+            TestBean4 res = (TestBean4) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean4("
+                    + "\"a\\nA\\\"a\\\\A\", 'a\\nA\\'a\\\\A', s3 = r\"a\\n\\A\", s4 = r'a\\n\\A')",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals("a\nA\"a\\A", res.getS1());
+            assertEquals("a\nA'a\\A", res.getS2());
+            assertEquals("a\\n\\A", res.getS3());
+            assertEquals("a\\n\\A", res.getS4());
+        }
+    }
+
+    @Test
+    public void nestedBuilderTest() throws Exception {
+        {
+            TestBean6 res = (TestBean6) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean6("
+                    + "freemarker.core.TestObjectBuilderSettings$TestBean1(11, 22, p4 = 'foo'),"
+                    + "1,"
+                    + "freemarker.core.TestObjectBuilderSettings$TestBean2(11),"
+                    + "y=2,"
+                    + "b3=freemarker.core.TestObjectBuilderSettings$TestBean2(x = 22)"
+                    + ")",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertEquals(Integer.valueOf(11), res.b1.i);
+            assertEquals(22, res.b1.l);
+            assertEquals("foo", res.b1.p4);
+            assertEquals(1, res.x);
+            assertEquals(11, res.b2.x);
+            assertEquals(2, res.y);
+            assertEquals(22, res.b3.x);
+            assertNull(res.b4);
+        }
+        
+        {
+            TestBean6 res = (TestBean6) _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.TestObjectBuilderSettings$TestBean6("
+                    + "null,"
+                    + "-1,"
+                    + "null,"
+                    + "b4=freemarker.core.TestObjectBuilderSettings$TestBean6("
+                    + "   freemarker.core.TestObjectBuilderSettings$TestBean1(11, 22, p4 = 'foo'),"
+                    + "   1,"
+                    + "   freemarker.core.TestObjectBuilderSettings$TestBean2(11),"
+                    + "   y=2,"
+                    + "   b3=freemarker.core.TestObjectBuilderSettings$TestBean2(x = 22)"
+                    + "),"
+                    + "y=2"
+                    + ")",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            assertNull(res.b1);
+            assertEquals(-1, res.x);
+            assertNull(res.b2);
+            assertEquals(2, res.y);
+            assertEquals(Integer.valueOf(11), res.b4.b1.i);
+            assertEquals(22, res.b4.b1.l);
+            assertEquals("foo", res.b4.b1.p4);
+            assertEquals(1, res.b4.x);
+            assertEquals(11, res.b4.b2.x);
+            assertEquals(2, res.b4.y);
+            assertEquals(22, res.b4.b3.x);
+            assertNull(res.b4.b4);
+        }
+    }
+    
     @Test
     public void beansWrapperTest() throws Exception {
         BeansWrapper bw = (BeansWrapper) _ObjectBuilderSettingEvaluator.eval(
@@ -106,110 +349,60 @@ public class TestObjectBuilderSettings {
         JythonWrapper jw = (JythonWrapper) _ObjectBuilderSettingEvaluator.eval(
                 "freemarker.ext.jython.JythonWrapper()",
                 ObjectWrapper.class, _SettingEvaluationEnvironment.getInstance());
-        assertNotNull(jw);
+        assertSame(JythonWrapper.INSTANCE, jw);
     }
 
-    public static class TestBean1 {
-        float f;
-        int i;
-        long l;
-        boolean b;
-        
-        double p1;
-        int p2;
-        boolean p3;
-        
-        public TestBean1(float f, int i, long l, boolean b) {
-            this.f = f;
-            this.i = i;
-            this.l = l;
-            this.b = b;
-        }
-        
-        public TestBean1(int i, boolean b) {
-            this.f = 2;
-            this.i = i;
-            this.l = 2;
-            this.b = b;
-        }
-
-        public TestBean1(int i, long l) {
-            this.f = 3;
-            this.i = i;
-            this.l = l;
-            this.b = false;
-        }
-        
-        public TestBean1() {
-            this.f = 4;
-        }
-
-        public double getP1() {
-            return p1;
-        }
-
-        public void setP1(double p1) {
-            this.p1 = p1;
-        }
-
-        public int getP2() {
-            return p2;
-        }
-
-        public void setP2(int p2) {
-            this.p2 = p2;
-        }
-
-        public boolean isP3() {
-            return p3;
-        }
-
-        public void setP3(boolean p3) {
-            this.p3 = p3;
-        }
-        
-    }
-    
     @Test
     public void configurationPropertiesTest() throws TemplateException {
-        Properties props = new Properties();
-        props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper(2.3.21)");
-        props.setProperty(Configuration.DEFAULT_ENCODING_KEY, "utf-8");
-        Configuration cfg = new Configuration();
-        cfg.setSettings(props);
-        assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
-        assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-        assertEquals(new Version(2, 3, 21), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
-        assertEquals("utf-8", cfg.getDefaultEncoding());
+        final Configuration cfg = new Configuration();
         
-        props = new Properties();
-        props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "defAult");
-        cfg.setSettings(props);
-        assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
-        assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-        assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
-        assertEquals("utf-8", cfg.getDefaultEncoding());
-
-        props = new Properties();
-        props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "Beans");
-        cfg.setSettings(props);
-        assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
-        assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-        assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
-
-        props = new Properties();
-        props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper");
-        cfg.setSettings(props);
-        assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
-        assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-        assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+        {
+            Properties props = new Properties();
+            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper(2.3.21)");
+            props.setProperty(Configuration.DEFAULT_ENCODING_KEY, "utf-8");
+            cfg.setSettings(props);
+            assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
+            assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
+            assertEquals(new Version(2, 3, 21), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals("utf-8", cfg.getDefaultEncoding());
+        }
         
-        props = new Properties();
-        props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(2.3.19)");
-        cfg.setSettings(props);
-        assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
-        assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
-        assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+        {
+            Properties props = new Properties();
+            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            cfg.setSettings(props);
+            assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
+            assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
+            assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals("utf-8", cfg.getDefaultEncoding());
+        }
+
+        {
+            Properties props = new Properties();
+            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "Beans");
+            cfg.setSettings(props);
+            assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
+            assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
+            assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+        }
+
+        {
+            Properties props = new Properties();
+            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper");
+            cfg.setSettings(props);
+            assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
+            assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
+            assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+        }
+        
+        {
+            Properties props = new Properties();
+            props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(2.3.19)");
+            cfg.setSettings(props);
+            assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
+            assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
+            assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+        }
     }
     
     @Test
@@ -289,6 +482,274 @@ public class TestObjectBuilderSettings {
         } catch (_ObjectBuilderSettingEvaluationException e) {
             assertTrue(e.getMessage().contains("twice"));
         }
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "java.util.HashMap()",
+                    ObjectWrapper.class, _SettingEvaluationEnvironment.getInstance());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertTrue(e.getMessage().contains("is not a(n) " + ObjectWrapper.class.getName()));
+        }
+    }
+
+    public static class TestBean1 {
+        float f;
+        Integer i;
+        long l;
+        boolean b;
+        
+        double p1;
+        int p2;
+        boolean p3;
+        String p4;
+        
+        public TestBean1(float f, Integer i, long l, boolean b) {
+            this.f = f;
+            this.i = i;
+            this.l = l;
+            this.b = b;
+        }
+        
+        public TestBean1(Integer i, boolean b) {
+            this.f = 2;
+            this.i = i;
+            this.l = 2;
+            this.b = b;
+        }
+    
+        public TestBean1(Integer i, long l) {
+            this.f = 3;
+            this.i = i;
+            this.l = l;
+            this.b = false;
+        }
+        
+        public TestBean1() {
+            this.f = 4;
+        }
+    
+        public double getP1() {
+            return p1;
+        }
+    
+        public void setP1(double p1) {
+            this.p1 = p1;
+        }
+    
+        public int getP2() {
+            return p2;
+        }
+    
+        public void setP2(int p2) {
+            this.p2 = p2;
+        }
+    
+        public boolean isP3() {
+            return p3;
+        }
+    
+        public void setP3(boolean p3) {
+            this.p3 = p3;
+        }
+
+        public String getP4() {
+            return p4;
+        }
+
+        public void setP4(String p4) {
+            this.p4 = p4;
+        }
+        
+    }
+    
+    public static class TestBean2 {
+        final boolean built;
+        final int x;
+
+        public TestBean2() {
+            this.built = false;
+            this.x = 0;
+        }
+        
+        public TestBean2(int x) {
+            this.built = false;
+            this.x = x;
+        }
+
+        public TestBean2(TestBean2Builder builder) {
+            this.built = true;
+            this.x = builder.x;
+        }
+        
+    }
+
+    public static class TestBean2Builder {
+        int x;
+        
+        public TestBean2Builder() { }
+
+        public TestBean2Builder(int x) {
+            this.x = x;
+        }
+        
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+        
+        public TestBean2 getResult() {
+            return new TestBean2(this);
+        }
+        
+    }
+
+    public static class TestBean3 implements WriteProtectable {
+        
+        private boolean writeProtected;
+        
+        private int x;
+
+        public void writeProtect() {
+            writeProtected = true;
+        }
+
+        public boolean isWriteProtected() {
+            return writeProtected;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            if (writeProtected) throw new IllegalStateException();
+            this.x = x;
+        }
+        
+    }
+    
+    public static class TestBean4 {
+        private final String s1, s2;
+        private String s3, s4;
+        
+        public TestBean4(String s1, String s2) {
+            this.s1 = s1;
+            this.s2 = s2;
+        }
+        
+        public String getS1() {
+            return s1;
+        }
+
+        public String getS2() {
+            return s2;
+        }
+
+        public String getS3() {
+            return s3;
+        }
+        
+        public void setS3(String s3) {
+            this.s3 = s3;
+        }
+        
+        public String getS4() {
+            return s4;
+        }
+        
+        public void setS4(String s4) {
+            this.s4 = s4;
+        }
+        
+    }
+    
+    public static class TestBean5 {
+        
+        public final static TestBean5 INSTANCE = new TestBean5();
+        
+        private final int i;
+        private int x;
+        
+        public TestBean5() {
+            i = 0;
+        }
+
+        public TestBean5(int i) {
+            this.i = i;
+        }
+
+        public int getI() {
+            return i;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+        
+    }
+
+    public static class TestBean6 {
+        private final TestBean1 b1;
+        private int x;
+        private final TestBean2 b2;
+        private int y;
+        private TestBean2 b3;
+        private TestBean6 b4;
+        
+        public TestBean6(TestBean1 b1, int x, TestBean2 b2) {
+            this.b1 = b1;
+            this.x = x;
+            this.b2 = b2;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void setY(int y) {
+            this.y = y;
+        }
+
+        public TestBean2 getB3() {
+            return b3;
+        }
+
+        public void setB3(TestBean2 b3) {
+            this.b3 = b3;
+        }
+
+        public TestBean1 getB1() {
+            return b1;
+        }
+
+        public TestBean2 getB2() {
+            return b2;
+        }
+
+        public TestBean6 getB4() {
+            return b4;
+        }
+
+        public void setB4(TestBean6 b4) {
+            this.b4 = b4;
+        }
+        
     }
     
 }

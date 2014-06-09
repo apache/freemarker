@@ -2,8 +2,10 @@ package freemarker.core;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,12 +37,14 @@ import freemarker.template.utility.WriteProtectable;
 // Java 5: Introduce ObjectBuilder interface
 public class _ObjectBuilderSettingEvaluator {
     
-    private static final String GET_RESULT = "getResult";
+    private static final String INSTANCE_FIELD_NAME = "INSTANCE";
+
+    private static final String GET_RESULT_METHOD_NAME = "getResult";
 
     private static final String BUILDER_CLASS_POSTFIX = "Builder";
 
-    private static final Object NULL = new Object();
-    
+    private static Map/*<String,String>*/ SHORTHANDS;
+
     private final String src;
     private final Class expectedClass;
     private final _SettingEvaluationEnvironment env;
@@ -49,11 +53,8 @@ public class _ObjectBuilderSettingEvaluator {
     private int pos;
     
     // Parsing results:
-    private String className;
-    private List positionalParamValues = new ArrayList();
-    private List/*<String>*/ namedParamNames = new ArrayList();
-    private List/*<Object>*/ namedParamValues = new ArrayList();
-    boolean v2321Mode = false;
+    private boolean v2321Mode = false;
+    private BuilderExpression rootExp;
     
     private _ObjectBuilderSettingEvaluator(String src, Class expectedClass, _SettingEvaluationEnvironment env) {
         this.src = src;
@@ -61,19 +62,6 @@ public class _ObjectBuilderSettingEvaluator {
         this.env = env;
     }
     
-    private static Map/*<String,String>*/ SHORTHANDS;
-    
-    private static synchronized String shorthandToFullQualified(String className) {
-        if (SHORTHANDS == null) {
-            SHORTHANDS = new HashMap/*<String,String>*/();
-            SHORTHANDS.put("DefaultObjectWrapper", DefaultObjectWrapper.class.getName());
-            SHORTHANDS.put("BeansWrapper", BeansWrapper.class.getName());
-            SHORTHANDS.put("SimpleObjectWrapper", SimpleObjectWrapper.class.getName());
-        }
-        String fullClassName = (String) SHORTHANDS.get(className);
-        return fullClassName == null ? className : fullClassName;
-    }
-
     static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env) throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new _ObjectBuilderSettingEvaluator(src, expectedClass, env).eval();
@@ -85,190 +73,60 @@ public class _ObjectBuilderSettingEvaluator {
         return execute();
     }
 
+    private void parse() throws _ObjectBuilderSettingEvaluationException {
+        skipWS();
+        rootExp = fetchBuilderCall(true, false);
+        skipWS();
+        if (pos != src.length()) {
+            throw new _ObjectBuilderSettingEvaluationException("end-of-expression", src, pos);
+        }
+    }
+
     private Object execute() throws _ObjectBuilderSettingEvaluationException,
     // Don't pack these into {@link ObjectFactorySettingEvaluationException} for backward compatibility:
     ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (!v2321Mode) {
-            return ClassUtil.forName(className).newInstance();
+            return ClassUtil.forName(rootExp.className).newInstance();
         } else {
-            return execute2321();
+            return rootExp.eval();
         }
     }
+
+    private Object eval(Object value) throws _ObjectBuilderSettingEvaluationException {
+        return value instanceof SettingExpression ? ((SettingExpression) value).eval() : value;
+    }
+
+    private BuilderExpression fetchBuilderCall(boolean topLevel, boolean optional)
+            throws _ObjectBuilderSettingEvaluationException {
+        int startPos = pos;
+        
+        BuilderExpression exp = new BuilderExpression();
+        
+        {
+            final String fetchedClassName = fetchClassName(optional);
+            if (fetchedClassName == null) {
+                return null;
+            }
+            exp.className = shorthandToFullQualified(fetchedClassName);
+            if (fetchedClassName != exp.className) {
+                // Before 2.3.21 only full-qualified class names were allowed
+                v2321Mode = true;
+            }
+        }
+        
+        skipWS();
+        
+        char openParen = fetchOptionalChar("(");
+        // Only the top-level expression can omit the "(...)"
+        if (openParen == 0 && !topLevel) {
+            if (!optional) {
+                throw new _ObjectBuilderSettingEvaluationException("(", src, pos);
+            }
+            pos = startPos;
+            return null;
+        }
     
-    private Object execute2321() throws _ObjectBuilderSettingEvaluationException {
-        Class cl;
-        try {
-            cl = ClassUtil.forName(className);
-        } catch (Exception e) {
-            throw new _ObjectBuilderSettingEvaluationException(
-                    "Failed to get class " + StringUtil.jQuote(className) + ".", e);
-        }
-        
-        boolean clIsBuilderClass;
-        try {
-            cl = ClassUtil.forName(cl.getName() + BUILDER_CLASS_POSTFIX);
-            clIsBuilderClass = true;
-        } catch (ClassNotFoundException e) {
-            clIsBuilderClass = false;
-        }
-        
-        // Create the object to return or its builder:
-        Object constructorResult = callConstructor(cl);
-        
-        // Named parameters will set JavaBeans properties:
-        setJavaBeanProperties(constructorResult);
-
-        final Object result;
-        if (clIsBuilderClass) {
-            result = callGetResult(constructorResult);
-        } else {
-            if (constructorResult instanceof WriteProtectable) {
-                ((WriteProtectable) constructorResult).writeProtect();
-            }
-            result = constructorResult;
-        }
-        
-        if (!expectedClass.isInstance(result)) {
-            throw new _ObjectBuilderSettingEvaluationException("The resulting object (of class "
-                    + result.getClass() + ") is not a(n) " + expectedClass.getName() + ".");
-        }
-        
-        return result;
-        
-        /*
-        // !!T
-        return "class=" + className + ", v2321Mode=" + v2321Mode
-                + ", positional=" + positionalParamValues + ", named=" + namedParamNames + namedParamValues;
-        */
-    }
-
-    private Object callGetResult(Object constructorResult)
-            throws _ObjectBuilderSettingEvaluationException {
-        final Class cl = constructorResult.getClass();
-        Method getResultMethod; 
-        try {
-            getResultMethod = constructorResult.getClass().getMethod(GET_RESULT, (Class[]) null);
-        } catch (NoSuchMethodException e) {
-            throw new _ObjectBuilderSettingEvaluationException("The " + cl.getName()
-                    + " builder class must have a public " + GET_RESULT + "() method", e);
-        } catch (Exception e) {
-            throw new _ObjectBuilderSettingEvaluationException("Failed to get the " + GET_RESULT
-                    + "() method of the " + cl.getName() + " builder class", e);
-        }
-        
-        try {
-            return getResultMethod.invoke(constructorResult, (Object[]) null);
-        } catch (Exception e) {
-            Throwable cause;
-            if (e instanceof InvocationTargetException) {
-                cause = ((InvocationTargetException) e).getTargetException();
-            } else {
-                cause = e;
-            }
-            throw new _ObjectBuilderSettingEvaluationException("Failed to call " + GET_RESULT + "() method on "
-                    + cl.getName() + " instance", cause);
-        }
-    }
-
-    private void setJavaBeanProperties(Object bean)
-            throws _ObjectBuilderSettingEvaluationException {
-        if (namedParamNames.isEmpty()) {
-            return;
-        }
-        
-        final Class cl = bean.getClass();
-        Map/*<String,Method>*/ beanPropSetters;
-        try {
-            PropertyDescriptor[] propDescs = Introspector.getBeanInfo(cl).getPropertyDescriptors();
-            beanPropSetters = new HashMap(propDescs.length * 4 / 3, 1.0f);
-            for (int i = 0; i < propDescs.length; i++) {
-                PropertyDescriptor propDesc = propDescs[i];
-                final Method writeMethod = propDesc.getWriteMethod();
-                if (writeMethod != null) {
-                    beanPropSetters.put(propDesc.getName(), writeMethod);
-                }
-            }
-        } catch (Exception e) {
-            throw new _ObjectBuilderSettingEvaluationException("Failed to inspect " + cl.getName() + " class", e);
-        }
-
-        TemplateHashModel beanTM = null;
-        for (int i = 0; i < namedParamNames.size(); i++) {
-            String name = (String) namedParamNames.get(i);
-            if (!beanPropSetters.containsKey(name)) {
-                throw new _ObjectBuilderSettingEvaluationException(
-                        "The " + cl.getName() + " class has no writeable JavaBeans property called "
-                        + StringUtil.jQuote(name) + ".");
-            }
-            
-            Method beanPropSetter = (Method) beanPropSetters.put(name, null);
-            if (beanPropSetter == null) {
-                    throw new _ObjectBuilderSettingEvaluationException(
-                            "JavaBeans property " + StringUtil.jQuote(name) + " is set twice.");
-            }
-            
-            try {
-                if (beanTM == null) {
-                    TemplateModel wrappedObj = env.getObjectWrapper().wrap(bean);
-                    if (!(wrappedObj instanceof TemplateHashModel)) {
-                        throw new _ObjectBuilderSettingEvaluationException(
-                                "The " + cl.getName() + " class is not a wrapped as TemplateHashModel.");
-                    }
-                    beanTM = (TemplateHashModel) wrappedObj;
-                }
-                
-                TemplateModel m = beanTM.get(beanPropSetter.getName());
-                if (m == null) {
-                    throw new _ObjectBuilderSettingEvaluationException(
-                            "Can't find " + beanPropSetter + " as FreeMarker method.");
-                }
-                if (!(m instanceof TemplateMethodModelEx)) {
-                    throw new _ObjectBuilderSettingEvaluationException(
-                            StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
-                }
-                List/*TemplateModel*/ args = new ArrayList();
-                args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
-                ((TemplateMethodModelEx) m).exec(args);
-            } catch (Exception e) {
-                throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to set " + StringUtil.jQuote(name), e);
-            }
-        }
-    }
-
-    private Object callConstructor(Class cl)
-            throws _ObjectBuilderSettingEvaluationException {
-        Object constructorResult;
-        BeansWrapper ow = env.getObjectWrapper();
-        List/*<TemplateModel>*/ tmArgs = new ArrayList(positionalParamValues.size());
-        for (int i = 0; i < positionalParamValues.size(); i++) {
-            try {
-                tmArgs.add(ow.wrap(positionalParamValues.get(i)));
-            } catch (TemplateModelException e) {
-                throw new _ObjectBuilderSettingEvaluationException("Failed to wrap arg #" + (i + 1), e);
-            }
-        }
-        try {
-            constructorResult = ow.newInstance(cl, tmArgs);
-        } catch (Exception e) {
-            throw new _ObjectBuilderSettingEvaluationException("Failed to call " + cl.getName() + " constructor", e);
-        }
-        return constructorResult;
-    }
-
-    private void parse() throws _ObjectBuilderSettingEvaluationException {
-        skipWS();
-        
-        final String fetchedClassName = fetchClassName();
-        className = shorthandToFullQualified(fetchedClassName);
-        if (fetchedClassName != className) {
-            // Before 2.3.21 only full-qualified class names were allowed
-            v2321Mode = true;
-        }
-        
-        skipWS();
-
-        if (fetchCharOrEOS("(") != 0) {
+        if (openParen != 0) {
             // Before 2.3.21 there was no parameter list
             v2321Mode = true;
             
@@ -280,99 +138,69 @@ public class _ObjectBuilderSettingEvaluator {
                     Object paramNameOrValue = fetchValueOrName(false);
                     if (paramNameOrValue != null) {
                         skipWS();
-                        if (paramNameOrValue instanceof Name) {
-                            namedParamNames.add(((Name) paramNameOrValue).name);
+                        if (paramNameOrValue instanceof ParameterName) {
+                            exp.namedParamNames.add(((ParameterName) paramNameOrValue).name);
                             
                             skipWS();
-                            fetchChar("=");
+                            fetchRequiredChar("=");
                             skipWS();
                             
                             int paramValPos = pos;
                             Object paramValue = fetchValueOrName(false);
-                            if (paramValue instanceof Name) {
+                            if (paramValue instanceof ParameterName) {
                                 throw new _ObjectBuilderSettingEvaluationException("concrete value", src, paramValPos);
                             }
-                            namedParamValues.add(paramValue);
+                            exp.namedParamValues.add(eval(paramValue));
                         } else {
-                            if (!namedParamNames.isEmpty()) {
+                            if (!exp.namedParamNames.isEmpty()) {
                                 throw new _ObjectBuilderSettingEvaluationException(
                                         "Positional parameters must precede named parameters");
                             }
-                            positionalParamValues.add(paramNameOrValue);
+                            exp.positionalParamValues.add(eval(paramNameOrValue));
                         }
                         
                         skipWS();
                     }
-                } while (fetchChar(",)") == ',');
+                } while (fetchRequiredChar(",)") == ',');
+            }
+        }
+        
+        return exp;
+    }
+
+    private Object fetchValueOrName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+        if (pos < src.length()) {
+            Object val = fetchNumberLike(true);
+            if (val != null) {
+                return val;
+            }
+    
+            val = fetchStringLiteral(true);
+            if (val != null) {
+                return val;
             }
             
-            skipWS();
-            if (pos != src.length()) {
-                throw new _ObjectBuilderSettingEvaluationException("end-of-expression", src, pos);
+            val = fetchBuilderCall(false, true);
+            if (val != null) {
+                return val;
             }
+            
+            String name = fetchSimpleName(true);
+            if (name != null) {
+                if (name.equals("true")) return Boolean.TRUE;
+                if (name.equals("false")) return Boolean.FALSE;
+                if (name.equals("null")) return NullExpression.INSTANCE;
+                return new ParameterName(name);
+            }
+        }
+        
+        if (optional) {
+            return null;
+        } else {
+            throw new _ObjectBuilderSettingEvaluationException("value or name", src, pos);
         }
     }
 
-    private char fetchOptionalChar(String expectedChars) {
-        if (pos < src.length()) {
-            char c = src.charAt(pos);
-            if (expectedChars.indexOf(c) != -1) {
-                pos++;
-                return c;
-            }
-        }
-        return 0;
-    }
-    
-    private char fetchChar(String expectedChars) throws _ObjectBuilderSettingEvaluationException {
-        return fetchChar(expectedChars, false);
-    }
-    
-    private char fetchChar(String expectedChars, boolean allowEOS) throws _ObjectBuilderSettingEvaluationException {
-        char c = pos < src.length() ? src.charAt(pos) : 0;
-        if (c == 0 && allowEOS) {
-            return c;
-        }
-        if (expectedChars.indexOf(c) != -1) {
-            pos++;
-            return c;
-        }
-        
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < expectedChars.length(); i++) {
-            if (i != 0) {
-                sb.append(" or ");
-            }
-            sb.append(StringUtil.jQuote(expectedChars.substring(i, i + 1)));
-        }
-        if (allowEOS) {
-            sb.append(" or end-of-string");
-        }
-        throw new _ObjectBuilderSettingEvaluationException(
-                sb.toString(),
-                src, pos);
-    }
-    
-    private char fetchCharOrEOS(String expectedChars) throws _ObjectBuilderSettingEvaluationException {
-        return fetchChar(expectedChars, true);
-    }
-
-    private String fetchClassName() throws _ObjectBuilderSettingEvaluationException {
-        StringBuffer sb = new StringBuffer();
-        do {
-            sb.append(fetchSimpleName(false));
-            skipWS();
-            if (pos >= src.length() || src.charAt(pos) != '.') {
-                break;
-            }
-            sb.append('.');
-            pos++;
-            skipWS();
-        } while (true);
-        
-        return sb.toString();
-    }
-    
     private String fetchSimpleName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
         char c = pos < src.length() ? src.charAt(pos) : 0;
         if (!isIdentifierStart(c)) {
@@ -398,28 +226,34 @@ public class _ObjectBuilderSettingEvaluator {
         
         return src.substring(startPos, pos);
     }
-    
-    private Object fetchValueOrName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
-        if (pos < src.length()) {
-            Object val = fetchNumberLike(true);
-            if (val != null) {
-                return val;
-            }
-            
+
+    private String fetchClassName(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+        int startPos = pos;
+        StringBuffer sb = new StringBuffer();
+        do {
             String name = fetchSimpleName(true);
-            if (name != null) {
-                if (name.equals("true")) return Boolean.TRUE;
-                if (name.equals("false")) return Boolean.FALSE;
-                if (name.equals("null")) return NULL;
-                return new Name(name);
+            if (name == null) {
+                if (!optional) {
+                    throw new _ObjectBuilderSettingEvaluationException("name", src, pos);
+                } else {
+                    pos = startPos;
+                    return null;
+                }
             }
-        }
+            sb.append(name);
+            
+            skipWS();
+            
+            if (pos >= src.length() || src.charAt(pos) != '.') {
+                break;
+            }
+            sb.append('.');
+            pos++;
+            
+            skipWS();
+        } while (true);
         
-        if (optional) {
-            return null;
-        } else {
-            throw new _ObjectBuilderSettingEvaluationException("value or name", src, pos);
-        }
+        return sb.toString();
     }
 
     private Object fetchNumberLike(boolean optional) throws _ObjectBuilderSettingEvaluationException {
@@ -474,16 +308,65 @@ public class _ObjectBuilderSettingEvaluator {
         }
     }
 
-    private boolean isIdentifierMiddle(char c) {
-        return isIdentifierStart(c) || isASCIIDigit(c);
-    }
-
-    private boolean isASCIIDigit(char c) {
-        return c >= '0' && c <= '9';
-    }
-
-    private boolean isIdentifierStart(char c) {
-        return Character.isLetter(c) || c == '_' || c == '$';
+    private Object fetchStringLiteral(boolean optional) throws _ObjectBuilderSettingEvaluationException {
+        int startPos = pos;
+        char q = 0;
+        boolean afterEscape = false;
+        boolean raw = false;
+        seekTokenEnd: while (true) {
+            if (pos == src.length()) {
+                if (q != 0) {
+                    // We had an open quotation
+                    throw new _ObjectBuilderSettingEvaluationException(String.valueOf(q), src, pos);
+                }
+                break seekTokenEnd;
+            }
+            char c = src.charAt(pos);
+            if (q == 0) {
+                if (c == 'r' && (pos + 1 < src.length())) {
+                    // Maybe it's like r"foo\bar"
+                    raw = true;
+                    c = src.charAt(pos + 1);
+                }
+                if (c == '\'') {
+                    q = '\'';
+                } else if (c == '"') {
+                    q = '"';
+                } else {
+                    break seekTokenEnd;
+                }
+                if (raw) {
+                    // because of the preceding "r"
+                    pos++;
+                }
+            } else {
+                if (!afterEscape) {
+                    if (c == '\\' && !raw) {
+                        afterEscape = true;
+                    } else if (c == q) {
+                        break seekTokenEnd;
+                    }
+                } else {
+                    afterEscape = false;
+                }
+            }
+            pos++;
+        }
+        if (startPos == pos) {
+            if (optional) {
+                return null;
+            } else {
+                throw new _ObjectBuilderSettingEvaluationException("string literal", src, pos);
+            }
+        }
+            
+        final String sInside = src.substring(startPos + (raw ? 2 : 1), pos);
+        try {
+            pos++; // skip closing quotation mark
+            return raw ? sInside : StringUtil.FTLStringLiteralDec(sInside);
+        } catch (ParseException e) {
+            throw new _ObjectBuilderSettingEvaluationException("Malformed string literal: " + sInside, e);
+        }
     }
 
     private void skipWS() {
@@ -498,14 +381,281 @@ public class _ObjectBuilderSettingEvaluator {
             pos++;
         }
     }
+
+    private char fetchOptionalChar(String expectedChars) throws _ObjectBuilderSettingEvaluationException {
+        return fetchChar(expectedChars, true);
+    }
     
-    private static class Name {
+    private char fetchRequiredChar(String expectedChars) throws _ObjectBuilderSettingEvaluationException {
+        return fetchChar(expectedChars, false);
+    }
+    
+    private char fetchChar(String expectedChars, boolean optional) throws _ObjectBuilderSettingEvaluationException {
+        char c = pos < src.length() ? src.charAt(pos) : 0;
+        if (expectedChars.indexOf(c) != -1) {
+            pos++;
+            return c;
+        } else if (optional) {
+            return 0;
+        } else {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < expectedChars.length(); i++) {
+                if (i != 0) {
+                    sb.append(" or ");
+                }
+                sb.append(StringUtil.jQuote(expectedChars.substring(i, i + 1)));
+            }
+            if (optional) {
+                sb.append(" or end-of-string");
+            }
+            throw new _ObjectBuilderSettingEvaluationException(
+                    sb.toString(),
+                    src, pos);
+        }
+    }
+    
+    private boolean isASCIIDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    private boolean isIdentifierStart(char c) {
+        return Character.isLetter(c) || c == '_' || c == '$';
+    }
+
+    private boolean isIdentifierMiddle(char c) {
+        return isIdentifierStart(c) || isASCIIDigit(c);
+    }
+
+    private static synchronized String shorthandToFullQualified(String className) {
+        if (SHORTHANDS == null) {
+            SHORTHANDS = new HashMap/*<String,String>*/();
+            SHORTHANDS.put("DefaultObjectWrapper", DefaultObjectWrapper.class.getName());
+            SHORTHANDS.put("BeansWrapper", BeansWrapper.class.getName());
+            SHORTHANDS.put("SimpleObjectWrapper", SimpleObjectWrapper.class.getName());
+        }
+        String fullClassName = (String) SHORTHANDS.get(className);
+        return fullClassName == null ? className : fullClassName;
+    }
+
+    private static class ParameterName {
         
-        public Name(String name) {
+        public ParameterName(String name) {
             this.name = name;
         }
 
         private final String name;
     }
+    
+    private abstract static class SettingExpression {
+        abstract Object eval() throws _ObjectBuilderSettingEvaluationException;
+    }
+    
+    private class BuilderExpression extends SettingExpression {
+        private String className;
+        private List positionalParamValues = new ArrayList();
+        private List/*<String>*/ namedParamNames = new ArrayList();
+        private List/*<Object>*/ namedParamValues = new ArrayList();
+        
+        @Override
+        Object eval() throws _ObjectBuilderSettingEvaluationException {
+            Class cl;
+            try {
+                cl = ClassUtil.forName(className);
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException(
+                        "Failed to get class " + StringUtil.jQuote(className) + ".", e);
+            }
+            
+            boolean clIsBuilderClass;
+            try {
+                cl = ClassUtil.forName(cl.getName() + BUILDER_CLASS_POSTFIX);
+                clIsBuilderClass = true;
+            } catch (ClassNotFoundException e) {
+                clIsBuilderClass = false;
+            }
+            
+            if (!clIsBuilderClass && hasNoParameters()) {
+                try {
+                    Field f = cl.getField(INSTANCE_FIELD_NAME);
+                    if ((f.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == (Modifier.PUBLIC | Modifier.STATIC)) {
+                        return f.get(null);
+                    }
+                } catch (NoSuchFieldException e) {
+                    // Expected
+                } catch (Exception e) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "Error when trying to access " + StringUtil.jQuote(className) + "." + INSTANCE_FIELD_NAME, e);
+                }
+            }
+            
+            // Create the object to return or its builder:
+            Object constructorResult = callConstructor(cl);
+            
+            // Named parameters will set JavaBeans properties:
+            setJavaBeanProperties(constructorResult);
+
+            final Object result;
+            if (clIsBuilderClass) {
+                result = callGetResult(constructorResult);
+            } else {
+                if (constructorResult instanceof WriteProtectable) {
+                    ((WriteProtectable) constructorResult).writeProtect();
+                }
+                result = constructorResult;
+            }
+            
+            if (!expectedClass.isInstance(result)) {
+                throw new _ObjectBuilderSettingEvaluationException("The resulting object (of class "
+                        + result.getClass() + ") is not a(n) " + expectedClass.getName() + ".");
+            }
+            
+            return result;
+            
+            /*
+            // !!T
+            return "class=" + className + ", v2321Mode=" + v2321Mode
+                    + ", positional=" + positionalParamValues + ", named=" + namedParamNames + namedParamValues;
+            */
+        }
+        
+        private Object callConstructor(Class cl)
+                throws _ObjectBuilderSettingEvaluationException {
+            if (hasNoParameters()) {
+                // No need to create ObjectWrapper
+                try {
+                    return cl.newInstance();
+                } catch (Exception e) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "Failed to call " + cl.getName() + " constructor", e);
+                }
+            } else {
+                BeansWrapper ow = env.getObjectWrapper();
+                List/*<TemplateModel>*/ tmArgs = new ArrayList(positionalParamValues.size());
+                for (int i = 0; i < positionalParamValues.size(); i++) {
+                    try {
+                        tmArgs.add(ow.wrap(positionalParamValues.get(i)));
+                    } catch (TemplateModelException e) {
+                        throw new _ObjectBuilderSettingEvaluationException("Failed to wrap arg #" + (i + 1), e);
+                    }
+                }
+                try {
+                    return ow.newInstance(cl, tmArgs);
+                } catch (Exception e) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "Failed to call " + cl.getName() + " constructor", e);
+                }
+            }
+        }
+
+        private void setJavaBeanProperties(Object bean)
+                throws _ObjectBuilderSettingEvaluationException {
+            if (namedParamNames.isEmpty()) {
+                return;
+            }
+            
+            final Class cl = bean.getClass();
+            Map/*<String,Method>*/ beanPropSetters;
+            try {
+                PropertyDescriptor[] propDescs = Introspector.getBeanInfo(cl).getPropertyDescriptors();
+                beanPropSetters = new HashMap(propDescs.length * 4 / 3, 1.0f);
+                for (int i = 0; i < propDescs.length; i++) {
+                    PropertyDescriptor propDesc = propDescs[i];
+                    final Method writeMethod = propDesc.getWriteMethod();
+                    if (writeMethod != null) {
+                        beanPropSetters.put(propDesc.getName(), writeMethod);
+                    }
+                }
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException("Failed to inspect " + cl.getName() + " class", e);
+            }
+
+            TemplateHashModel beanTM = null;
+            for (int i = 0; i < namedParamNames.size(); i++) {
+                String name = (String) namedParamNames.get(i);
+                if (!beanPropSetters.containsKey(name)) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "The " + cl.getName() + " class has no writeable JavaBeans property called "
+                            + StringUtil.jQuote(name) + ".");
+                }
+                
+                Method beanPropSetter = (Method) beanPropSetters.put(name, null);
+                if (beanPropSetter == null) {
+                        throw new _ObjectBuilderSettingEvaluationException(
+                                "JavaBeans property " + StringUtil.jQuote(name) + " is set twice.");
+                }
+                
+                try {
+                    if (beanTM == null) {
+                        TemplateModel wrappedObj = env.getObjectWrapper().wrap(bean);
+                        if (!(wrappedObj instanceof TemplateHashModel)) {
+                            throw new _ObjectBuilderSettingEvaluationException(
+                                    "The " + cl.getName() + " class is not a wrapped as TemplateHashModel.");
+                        }
+                        beanTM = (TemplateHashModel) wrappedObj;
+                    }
+                    
+                    TemplateModel m = beanTM.get(beanPropSetter.getName());
+                    if (m == null) {
+                        throw new _ObjectBuilderSettingEvaluationException(
+                                "Can't find " + beanPropSetter + " as FreeMarker method.");
+                    }
+                    if (!(m instanceof TemplateMethodModelEx)) {
+                        throw new _ObjectBuilderSettingEvaluationException(
+                                StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
+                    }
+                    List/*TemplateModel*/ args = new ArrayList();
+                    args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
+                    ((TemplateMethodModelEx) m).exec(args);
+                } catch (Exception e) {
+                    throw new _ObjectBuilderSettingEvaluationException(
+                            "Failed to set " + StringUtil.jQuote(name), e);
+                }
+            }
+        }
+
+        private Object callGetResult(Object constructorResult)
+                throws _ObjectBuilderSettingEvaluationException {
+            final Class cl = constructorResult.getClass();
+            Method getResultMethod; 
+            try {
+                getResultMethod = constructorResult.getClass().getMethod(GET_RESULT_METHOD_NAME, (Class[]) null);
+            } catch (NoSuchMethodException e) {
+                throw new _ObjectBuilderSettingEvaluationException("The " + cl.getName()
+                        + " builder class must have a public " + GET_RESULT_METHOD_NAME + "() method", e);
+            } catch (Exception e) {
+                throw new _ObjectBuilderSettingEvaluationException("Failed to get the " + GET_RESULT_METHOD_NAME
+                        + "() method of the " + cl.getName() + " builder class", e);
+            }
+            
+            try {
+                return getResultMethod.invoke(constructorResult, (Object[]) null);
+            } catch (Exception e) {
+                Throwable cause;
+                if (e instanceof InvocationTargetException) {
+                    cause = ((InvocationTargetException) e).getTargetException();
+                } else {
+                    cause = e;
+                }
+                throw new _ObjectBuilderSettingEvaluationException("Failed to call " + GET_RESULT_METHOD_NAME + "() method on "
+                        + cl.getName() + " instance", cause);
+            }
+        }
+
+        private boolean hasNoParameters() {
+            return positionalParamValues.isEmpty() && namedParamValues.isEmpty();
+        }
+        
+    }
+    
+    private static class NullExpression extends SettingExpression {
+        
+        static final NullExpression INSTANCE = new NullExpression();
+
+        Object eval() throws _ObjectBuilderSettingEvaluationException {
+            return null;
+        }
+        
+    };
+    
 
 }
