@@ -1725,7 +1725,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     /**
      * <b>Experimental class; subject to change!</b>
      * Used for
-     * {@link MethodAppearanceFineTuner#process(MethodAppearanceDecisionInput, MethodAppearanceDecision)}
+     * {@link MethodAppearanceFineTuner#process}
      * to store the results; see there.
      */
     static public final class MethodAppearanceDecision {
@@ -1768,7 +1768,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     /**
      * <b>Experimental class; subject to change!</b>
      * Used for
-     * {@link MethodAppearanceFineTuner#process(MethodAppearanceDecisionInput, MethodAppearanceDecision)}
+     * {@link MethodAppearanceFineTuner#process}
      * as input parameter; see there.
      */
     static public final class MethodAppearanceDecisionInput {

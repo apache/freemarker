@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
 
@@ -105,7 +104,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapperBuilder, boolean)}.
+     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapperConfiguration, boolean)}.
      * 
      * @since 2.3.21
      */
