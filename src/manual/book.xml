@@ -20539,6 +20539,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>When configuring FreeMarker with
+              <literal>java.util.Properties</literal> (typically, when the
+              configuration is stored in a <literal>.properties</literal>
+              file), for the <literal>object_wrapper</literal>,
+              <literal>template_exception_handler</literal> and
+              <literal>arithmetic_engine</literal> settings now you can
+              specify not only the class name, but also the constructor
+              arguments and JavaBean property assignments. For example,
+              <literal>object_wrapper=com.example.MyObjectWrapper(1, 2,
+              exposeFields=true, cacheSize=5000)</literal>. Earlier, you could
+              only specify the class whose parameterless public constructor
+              will be called. Also, if there's a builder class for the
+              requested class, that will be automatically used. For example,
+              <literal>object_wrapper=DefaultObjectWrapper(2.3.21)</literal>
+              will create a <literal>DefaultObjectWrapperBuilder</literal> to
+              build the final instance, thus the object wrapper will be a
+              singleton instead of a new instance. For more details see the
+              Java API documentation of
+              <literal>Configuration.setSetting</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>From now on, if you try to set the <quote>incompatible
               improvements</quote> to greater than the current FreeMarker
               version, or less than 2.3.0, an
@@ -20546,19 +20568,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               Thus, <literal>new Configuration(new Version(2, 3,
               21))</literal> not only activates the fixes up to 2.3.21, but
               ensures that the application will not run in an environment with
-              an older FreeMarker version. After all, on an older FreeMarker
-              version the fixes that you have requested aren't implemented
-              yet.</para>
+              an older FreeMarker version. (On an older FreeMarker version the
+              fixes that you have requested aren't implemented yet, so you
+              should get an exception.)</para>
             </listitem>
 
             <listitem>
-              <para>Fixes and reworkings in the overloaded method selection
-              rules, but only if you create the
+              <para>Many fixes and improvements in overloaded method
+              selection/invocation, but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>new Version(2, 3,
-              21)</literal> (or higher), or if you create the
-              <literal>Configuration</literal> with similar
-              <literal>Version</literal> parameter and leave the
+              21)</literal> (if you are using <literal>Properties</literal> to
+              configure FreeMarker, you can do that like
+              <literal>object_wrapper=BeansWrapper(2.3.21)</literal>), or if
+              you have a <literal>Configuration</literal> with similar
+              <literal>Version</literal> and you leave the
               <literal>object_wrapper</literal> setting on its default value.
               There's a little chance that because of these changes, a
               different overloaded method will be chosen than before, or even

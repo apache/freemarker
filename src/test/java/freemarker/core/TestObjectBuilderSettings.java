@@ -8,6 +8,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.Writer;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -18,6 +19,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 import freemarker.template.utility.WriteProtectable;
 
@@ -359,20 +361,32 @@ public class TestObjectBuilderSettings {
         {
             Properties props = new Properties();
             props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "freemarker.ext.beans.BeansWrapper(2.3.21)");
+            props.setProperty(Configuration.ARITHMETIC_ENGINE_KEY,
+                    "freemarker.core.TestObjectBuilderSettings$DummyArithmeticEngine");
+            props.setProperty(Configuration.TEMPLATE_EXCEPTION_HANDLER_KEY,
+                    "freemarker.core.TestObjectBuilderSettings$DummyTemplateExceptionHandler");
             props.setProperty(Configuration.DEFAULT_ENCODING_KEY, "utf-8");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(new Version(2, 3, 21), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+            assertEquals(DummyArithmeticEngine.class, cfg.getArithmeticEngine().getClass());
+            assertEquals(DummyTemplateExceptionHandler.class, cfg.getTemplateExceptionHandler().getClass());
             assertEquals("utf-8", cfg.getDefaultEncoding());
         }
         
         {
             Properties props = new Properties();
             props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            props.setProperty(Configuration.ARITHMETIC_ENGINE_KEY,
+                    "freemarker.core.TestObjectBuilderSettings$DummyArithmeticEngine(x = 1)");
+            props.setProperty(Configuration.TEMPLATE_EXCEPTION_HANDLER_KEY,
+                    "freemarker.core.TestObjectBuilderSettings$DummyTemplateExceptionHandler(x = 1)");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
+            assertEquals(1, ((DummyArithmeticEngine) cfg.getArithmeticEngine()).getX());
+            assertEquals(1, ((DummyTemplateExceptionHandler) cfg.getTemplateExceptionHandler()).getX());
             assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals("utf-8", cfg.getDefaultEncoding());
         }
@@ -380,8 +394,12 @@ public class TestObjectBuilderSettings {
         {
             Properties props = new Properties();
             props.setProperty(Configuration.OBJECT_WRAPPER_KEY, "Beans");
+            props.setProperty(Configuration.ARITHMETIC_ENGINE_KEY, "bigdecimal");
+            props.setProperty(Configuration.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
+            assertSame(ArithmeticEngine.BIGDECIMAL_ENGINE, cfg.getArithmeticEngine());
+            assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
             assertFalse(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(new Version(2, 3, 0), ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
@@ -442,6 +460,24 @@ public class TestObjectBuilderSettings {
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
             assertTrue(e.getMessage().contains("\")\""));
+        }
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "foo.Bar('s${x}s'))",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertTrue(e.getMessage().contains("${...}"));
+        }
+        
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "foo.Bar('s#{x}s'))",
+                    Object.class, _SettingEvaluationEnvironment.getInstance());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertTrue(e.getMessage().contains("#{...}"));
         }
     }
 
@@ -748,6 +784,65 @@ public class TestObjectBuilderSettings {
 
         public void setB4(TestBean6 b4) {
             this.b4 = b4;
+        }
+        
+    }
+    
+    public static class DummyArithmeticEngine extends ArithmeticEngine {
+        
+        private int x;
+
+        public int compareNumbers(Number first, Number second) throws TemplateException {
+            return 0;
+        }
+
+        public Number add(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        public Number subtract(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        public Number multiply(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        public Number divide(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        public Number modulus(Number first, Number second) throws TemplateException {
+            return null;
+        }
+
+        public Number toNumber(String s) {
+            return null;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+        
+    }
+    
+    public static class DummyTemplateExceptionHandler implements TemplateExceptionHandler {
+        
+        private int x;
+
+        public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
         }
         
     }

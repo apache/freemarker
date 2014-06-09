@@ -345,6 +345,12 @@ public class _ObjectBuilderSettingEvaluator {
                         afterEscape = true;
                     } else if (c == q) {
                         break seekTokenEnd;
+                    } else if (c == '{') {
+                        char prevC = src.charAt(pos - 1);
+                        if (prevC == '$' || prevC == '#') {
+                            throw new _ObjectBuilderSettingEvaluationException(
+                                    "${...} and #{...} aren't allowed here.");
+                        }
                     }
                 } else {
                     afterEscape = false;

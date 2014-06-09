@@ -73,8 +73,10 @@ import java.util.TimeZone;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
@@ -809,10 +811,9 @@ public class Configurable
      *       
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as a class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these predefined values (case insensitive):
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
      *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
@@ -820,18 +821,20 @@ public class Configurable
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
      *       {@code "bigdecimal"}, {@code "conservative"}.
      *       
      *   <li><p>{@code "object_wrapper"}:
      *       See {@link #setObjectWrapper(ObjectWrapper)}.
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these special values (case insensitive):
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>, with the addition that {@link BeansWrapper}, {@link DefaultObjectWrapper} and
+     *       {@link SimpleObjectWrapper} can be referred without package name. For example, these strings are valid
+     *       values: {@code "DefaultObjectWrapper(2.3.21)"},
+     *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
+     *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
      *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
      *       or {@link DefaultObjectWrapperBuilder#getResult()}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
@@ -995,6 +998,55 @@ public class Configurable
      *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
      * </ul>
      * 
+     * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
+     * indicated):
+     * <ul>
+     *   <li><p>The generic syntax is:
+     *       <tt><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
+     *       <i>propName1</i>=<i>propValue1</i>, <i>propName2</i>=<i>propValue2</i>, ...
+     *       <i>propNameN</i>=<i>propValueN</i>)</tt>,
+     *       where
+     *       <tt><i>className</i></tt> is the full-qualified class name of the instance to create,
+     *       <tt><i>constrArg</i></tt>-s are the values of constructor arguments,
+     *       and <tt><i>propName</i>=<i>propValue</i></tt>-s set JavaBean properties (like <tt>x=1</tt> means
+     *       <tt>setX(1)</tt>) on the created instance. You can have any number of constructor arguments and property
+     *       setters, including 0. Constructors arguments must precede any property setters.   
+     *   </li>
+     *   <li>
+     *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
+     *      a public static <tt>INSTANCE</tt> field, the value of that filed will be the value of the expression, and
+     *      the constructor won't be called.
+     *   </li>
+     *   <li>
+     *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
+     *      instead with the given constructor arguments, and the JavaBean properties of that instance will be set.
+     *      After that, the public <tt>getResult()</tt> method of the instance will be called, whose return value
+     *      will be value of the whole expression. (The builder class and the <tt>getResult()</tt> method is simply
+     *      found by name, there's no special interface to implement.) 
+     *   </li>
+     *   <li>
+     *      <p>Currently, the values of arguments and properties can only be one of these:
+     *      <ul>
+     *        <li>A numerical literal, like {@code 123} or {@code -1.5}. Like in FTL, there are no numerical types,
+     *            the value will be automatically converted to the type of the target.</li>
+     *        <li>A boolean literal: {@code true} or {@code false}
+     *        <li>The null literal: {@code null}
+     *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
+     *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
+     *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
+     *      </ul>
+     *   </li>
+     *   <li>
+     *     <p>The top-level object builder expressions may omit {@code ()}. In that case, for backward compatibility,
+     *     the {@code INSTANCE} field and the builder class is not searched, so the instance will be always
+     *     created with its parameterless constructor. (This behavior will possibly change in 2.4.) The {@code ()}
+     *     can't be omitted for nested expressions.
+     *   </li>
+     *   <li>
+     *     <p>The classes and methods that the expression meant to access must be all public.
+     *   </li>
+     * </ul>
+     * 
      * @param name the name of the setting.
      * @param value the string that describes the new value of the setting.
      * 
@@ -1045,9 +1097,8 @@ public class Configurable
                         throw invalidSettingValueException(name, value);
                     }
                 } else {
-                    setTemplateExceptionHandler(
-                            (TemplateExceptionHandler) ClassUtil.forName(value)
-                            .newInstance());
+                    setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getInstance()));
                 }
             } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) { 
@@ -1059,9 +1110,8 @@ public class Configurable
                         throw invalidSettingValueException(name, value);
                     }
                 } else {
-                    setArithmeticEngine(
-                            (ArithmeticEngine) ClassUtil.forName(value)
-                            .newInstance());
+                    setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
+                            value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getInstance()));
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
                 if ("default".equalsIgnoreCase(value)) {
