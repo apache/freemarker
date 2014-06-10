@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.MruCacheStorage;
+import freemarker.core.subpkg.PublicWithMixedConstructors;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.jython.JythonWrapper;
 import freemarker.template.Configuration;
@@ -543,6 +544,58 @@ public class TestObjectBuilderSettings {
             assertTrue(e.getMessage().contains("is not a(n) " + ObjectWrapper.class.getName()));
         }
     }
+    
+    @Test
+    public void visibilityTest() throws Exception {
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.subpkg.PackageVisibleAll()",
+                    Object.class, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertEquals(IllegalAccessException.class, e.getCause().getClass());
+        }
+
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.subpkg.PackageVisibleWithPublicConstructor()",
+                    Object.class, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertEquals(IllegalAccessException.class, e.getCause().getClass());
+        }
+
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.subpkg.PublicWithPackageVisibleConstructor()",
+                    Object.class, _SettingEvaluationEnvironment.getCurrent());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertEquals(IllegalAccessException.class, e.getCause().getClass());
+        }
+        
+        {
+            Object o = _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.subpkg.PublicAll()",
+                    Object.class, _SettingEvaluationEnvironment.getCurrent());
+            assertEquals(freemarker.core.subpkg.PublicAll.class, o.getClass());
+        }
+        
+        {
+            Object o = _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.subpkg.PublicWithMixedConstructors(1)",
+                    Object.class, _SettingEvaluationEnvironment.getCurrent());
+            assertEquals("Integer", ((PublicWithMixedConstructors) o).getS());
+        }
+        
+        
+        {
+            Object o = _ObjectBuilderSettingEvaluator.eval(
+                    "freemarker.core.subpkg.PackageVisibleAllWithBuilder()",
+                    Object.class, _SettingEvaluationEnvironment.getCurrent());
+            assertEquals("freemarker.core.subpkg.PackageVisibleAllWithBuilder", o.getClass().getName());
+        }
+    }
 
     public static class TestBean1 {
         float f;
@@ -863,7 +916,7 @@ public class TestObjectBuilderSettings {
     }
     
     public static class DummyCacheStorage implements CacheStorage {
-
+        
         public Object get(Object key) {
             return null;
         }
