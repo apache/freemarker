@@ -83,7 +83,6 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -868,7 +867,8 @@ public class Configurable
      *   <li><p>{@code "new_builtin_class_resolver"}:
      *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
      *       Since 2.3.17.
-     *       <br>String value: The value must be one of these (ignore the quotation marks):
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>. Otherwise the value must be one of these (ignore the quotation marks):
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
@@ -960,9 +960,9 @@ public class Configurable
      *       
      *   <li><p>{@code "cache_storage"}:
      *       See {@link Configuration#setCacheStorage}.
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot,
      *       then a {@link freemarker.cache.MruCacheStorage} will be used with the
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
@@ -1001,16 +1001,23 @@ public class Configurable
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
      * indicated):
      * <ul>
-     *   <li><p>The generic syntax is:
+     *   <li><p>Before FreeMarker 2.3.21 it had to be a fully qualified class name, and nothing else.</li>
+     *   <li><p>Since 2.3.21, the generic syntax is:
      *       <tt><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
      *       <i>propName1</i>=<i>propValue1</i>, <i>propName2</i>=<i>propValue2</i>, ...
      *       <i>propNameN</i>=<i>propValueN</i>)</tt>,
      *       where
-     *       <tt><i>className</i></tt> is the full-qualified class name of the instance to create,
+     *       <tt><i>className</i></tt> is the fully qualified class name of the instance to create (except if we have
+     *       builder class or <tt>INSTANCE</tt> field around, but see that later),
      *       <tt><i>constrArg</i></tt>-s are the values of constructor arguments,
      *       and <tt><i>propName</i>=<i>propValue</i></tt>-s set JavaBean properties (like <tt>x=1</tt> means
      *       <tt>setX(1)</tt>) on the created instance. You can have any number of constructor arguments and property
-     *       setters, including 0. Constructors arguments must precede any property setters.   
+     *       setters, including 0. Constructor arguments must precede any property setters.   
+     *   </li>
+     *   <li>
+     *     Example: <tt>com.example.MyObjectWrapper(1, 2, exposeFields=true, cacheSize=5000)</tt> is nearly
+     *     equivalent with this Java code:
+     *     <tt>obj = new com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true); obj.setCacheSize(5000);</tt>
      *   </li>
      *   <li>
      *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
@@ -1019,10 +1026,11 @@ public class Configurable
      *   </li>
      *   <li>
      *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
-     *      instead with the given constructor arguments, and the JavaBean properties of that instance will be set.
-     *      After that, the public <tt>getResult()</tt> method of the instance will be called, whose return value
-     *      will be value of the whole expression. (The builder class and the <tt>getResult()</tt> method is simply
-     *      found by name, there's no special interface to implement.) 
+     *      instead with the given constructor arguments, and the JavaBean properties of that builder instance will be
+     *      set. After that, the public <tt>getResult()</tt> method of the instance will be called, whose return value
+     *      will be the value of the whole expression. (The builder class and the <tt>getResult()</tt> method is simply
+     *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
+     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class.
      *   </li>
      *   <li>
      *      <p>Currently, the values of arguments and properties can only be one of these:
@@ -1098,7 +1106,7 @@ public class Configurable
                     }
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getInstance()));
+                            value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) { 
@@ -1111,7 +1119,7 @@ public class Configurable
                     }
                 } else {
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
-                            value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getInstance()));
+                            value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
                 if ("default".equalsIgnoreCase(value)) {
@@ -1127,7 +1135,7 @@ public class Configurable
                             (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
-                                    value, ObjectWrapper.class, _SettingEvaluationEnvironment.getInstance()));
+                                    value, ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
                 setBooleanFormat(value);
@@ -1169,9 +1177,9 @@ public class Configurable
                     }
                     setNewBuiltinClassResolver(
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
-                } else if (value.indexOf('.') == -1) {
-                    setNewBuiltinClassResolver((TemplateClassResolver) ClassUtil.forName(value)
-                            .newInstance());
+                } else if (value.indexOf('.') != -1) {
+                    setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
+                                    value, TemplateClassResolver.class, _SettingEvaluationEnvironment.getCurrent()));
                 } else {
                     throw invalidSettingValueException(name, value);
                 }

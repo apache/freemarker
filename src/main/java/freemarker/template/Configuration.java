@@ -90,6 +90,8 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._DelayedJQuote;
 import freemarker.core._MiscTemplateException;
+import freemarker.core._ObjectBuilderSettingEvaluator;
+import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.utility.CaptureOutput;
@@ -1208,8 +1210,8 @@ public class Configuration extends Configurable implements Cloneable {
                     }
                     setCacheStorage(new MruCacheStorage(strongSize, softSize));
                 } else {
-                    setCacheStorage((CacheStorage) ClassUtil.forName(value)
-                            .newInstance());
+                    setCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
+                            value, CacheStorage.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(key)) {
                 setTemplateUpdateDelay(Integer.parseInt(value));

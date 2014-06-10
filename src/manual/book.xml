@@ -20542,21 +20542,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>When configuring FreeMarker with
               <literal>java.util.Properties</literal> (typically, when the
               configuration is stored in a <literal>.properties</literal>
-              file), for the <literal>object_wrapper</literal>,
-              <literal>template_exception_handler</literal> and
-              <literal>arithmetic_engine</literal> settings now you can
-              specify not only the class name, but also the constructor
-              arguments and JavaBean property assignments. For example,
+              file), for the settings where you could specify a fully
+              qualified class name (most notably for the
+              <literal>object_wrapper</literal> setting) now you can also
+              specify constructor arguments and JavaBean property assignments.
+              For example, now you can write
               <literal>object_wrapper=com.example.MyObjectWrapper(1, 2,
-              exposeFields=true, cacheSize=5000)</literal>. Earlier, you could
-              only specify the class whose parameterless public constructor
-              will be called. Also, if there's a builder class for the
-              requested class, that will be automatically used. For example,
+              exposeFields=true, cacheSize=5000)</literal>is nearly equivalent
+              with this Java code: <literal>obj = new
+              com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true);
+              obj.setCacheSize(5000); object_wrapper = obj;</literal>. If you
+              are using this new syntax (i.e., if you have parentheses after
+              the class name, even if they are empty), and there's a builder
+              class for the requested class, that will be automatically used.
+              For example,
               <literal>object_wrapper=DefaultObjectWrapper(2.3.21)</literal>
               will create a <literal>DefaultObjectWrapperBuilder</literal> to
               build the final instance, thus the object wrapper will be a
-              singleton instead of a new instance. For more details see the
-              Java API documentation of
+              singleton instead of a new instance. The new syntax will also
+              look for a public static <literal>INSTANCE</literal> field if
+              there are 0 arguments and property assignments. For more details
+              see the Java API documentation of
               <literal>Configuration.setSetting</literal>.</para>
             </listitem>
 

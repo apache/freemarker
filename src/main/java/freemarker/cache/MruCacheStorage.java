@@ -239,6 +239,20 @@ public class MruCacheStorage implements CacheStorage
         }
     }
     
+    /**
+     * @since 2.3.21
+     */
+    public int getMaxStrongSize() {
+        return maxStrongSize;
+    }
+
+    /**
+     * @since 2.3.21
+     */
+    public int getMaxSoftSize() {
+        return maxSoftSize;
+    }
+
     private static final class MruEntry
     {
         private MruEntry prev;
@@ -308,4 +322,6 @@ public class MruCacheStorage implements CacheStorage
             return key;
         }
     }
+    
+    
 }

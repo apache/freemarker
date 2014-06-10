@@ -62,7 +62,7 @@ public class _ObjectBuilderSettingEvaluator {
         this.env = env;
     }
     
-    static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env) throws _ObjectBuilderSettingEvaluationException,
+    public static Object eval(String src, Class expectedClass, _SettingEvaluationEnvironment env) throws _ObjectBuilderSettingEvaluationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new _ObjectBuilderSettingEvaluator(src, expectedClass, env).eval();
     }

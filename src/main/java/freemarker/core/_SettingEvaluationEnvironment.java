@@ -15,7 +15,7 @@ public class _SettingEvaluationEnvironment {
 
     private BeansWrapper objectWrapper;
     
-    public static _SettingEvaluationEnvironment getInstance() {
+    public static _SettingEvaluationEnvironment getCurrent() {
         Object r = CURRENT.get();
         if (r != null) {
             return (_SettingEvaluationEnvironment) r;
