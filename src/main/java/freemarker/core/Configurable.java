@@ -1245,7 +1245,7 @@ public class Configurable
 
     /**
      * @param name The wrong name
-     * @returns The corrected name, or {@code null} if there's no known correction
+     * @return The corrected name, or {@code null} if there's no known correction
      * @since 2.3.21
      */
     protected String getCorrectedNameForUnknownSetting(String name) {
@@ -1274,7 +1274,7 @@ public class Configurable
             super(env, new Object[] {
                     "Unknown setting: ", new _DelayedJQuote(name),
                     correctedName == null
-                            ? "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
+                            ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
         
     }
