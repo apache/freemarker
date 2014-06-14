@@ -88,8 +88,6 @@ import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
-import freemarker.core._DelayedJQuote;
-import freemarker.core._MiscTemplateException;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
@@ -1171,23 +1169,24 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setLocalizedLookup(localizedLookup);
     }
     
-    public void setSetting(String key, String value) throws TemplateException {
+    public void setSetting(String name, String value) throws TemplateException {
+        boolean unknown = false;
         try {
-            if ("TemplateUpdateInterval".equalsIgnoreCase(key)) {
-                key = TEMPLATE_UPDATE_DELAY_KEY;
-            } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
-                key = DEFAULT_ENCODING_KEY;
+            if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
+                name = TEMPLATE_UPDATE_DELAY_KEY;
+            } else if ("DefaultEncoding".equalsIgnoreCase(name)) {
+                name = DEFAULT_ENCODING_KEY;
             }
             
-            if (DEFAULT_ENCODING_KEY.equals(key)) {
+            if (DEFAULT_ENCODING_KEY.equals(name)) {
                 setDefaultEncoding(value);
-            } else if (LOCALIZED_LOOKUP_KEY.equals(key)) {
+            } else if (LOCALIZED_LOOKUP_KEY.equals(name)) {
                 setLocalizedLookup(StringUtil.getYesNo(value));
-            } else if (STRICT_SYNTAX_KEY.equals(key)) {
+            } else if (STRICT_SYNTAX_KEY.equals(name)) {
                 setStrictSyntaxMode(StringUtil.getYesNo(value));
-            } else if (WHITESPACE_STRIPPING_KEY.equals(key)) {
+            } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
-            } else if (CACHE_STORAGE_KEY.equals(key)) {
+            } else if (CACHE_STORAGE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     int strongSize = 0;
                     int softSize = 0;
@@ -1201,31 +1200,31 @@ public class Configuration extends Configurable implements Cloneable {
                         try {
                             pvalue = Integer.parseInt((String) ent.getValue());
                         } catch (NumberFormatException e) {
-                            throw invalidSettingValueException(key, value);
+                            throw invalidSettingValueException(name, value);
                         }
                         if ("soft".equalsIgnoreCase(pname)) {
                             softSize = pvalue;
                         } else if ("strong".equalsIgnoreCase(pname)) {
                             strongSize = pvalue;
                         } else {
-                            throw invalidSettingValueException(key, value);
+                            throw invalidSettingValueException(name, value);
                         }
                     }
                     if (softSize == 0 && strongSize == 0) {
-                        throw invalidSettingValueException(key, value);
+                        throw invalidSettingValueException(name, value);
                     }
                     setCacheStorage(new MruCacheStorage(strongSize, softSize));
                 } else {
                     setCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
                             value, CacheStorage.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(key)) {
+            } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(name)) {
                 setTemplateUpdateDelay(Integer.parseInt(value));
-            } else if (AUTO_INCLUDE_KEY.equals(key)) {
+            } else if (AUTO_INCLUDE_KEY.equals(name)) {
                 setAutoIncludes(parseAsList(value));
-            } else if (AUTO_IMPORT_KEY.equals(key)) {
+            } else if (AUTO_IMPORT_KEY.equals(name)) {
                 setAutoImports(parseAsImportList(value));
-            } else if (TAG_SYNTAX_KEY.equals(key)) {
+            } else if (TAG_SYNTAX_KEY.equals(name)) {
                 if ("auto_detect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
                 } else if ("angle_bracket".equals(value)) {
@@ -1233,20 +1232,28 @@ public class Configuration extends Configurable implements Cloneable {
                 } else if ("square_bracket".equals(value)) {
                     setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX);
                 } else {
-                    throw invalidSettingValueException(key, value);
+                    throw invalidSettingValueException(name, value);
                 }
-            } else if (INCOMPATIBLE_IMPROVEMENTS.equals(key)) {
+            } else if (INCOMPATIBLE_IMPROVEMENTS.equals(name)) {
                 setIncompatibleImprovements(new Version(value));
-            } else if (INCOMPATIBLE_ENHANCEMENTS.equals(key)) {
+            } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
                 setIncompatibleEnhancements(value);
             } else {
-                super.setSetting(key, value);
+                unknown = true;
             }
         } catch(Exception e) {
-            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(key),
-                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+            throw settingValueAssignmentException(name, value, e);
         }
+        if (unknown) {
+            super.setSetting(name, value);
+        }
+    }
+
+    protected String getCorrectedNameForUnknownSetting(String name) {
+        if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
+            return DEFAULT_ENCODING_KEY;
+        }
+        return super.getCorrectedNameForUnknownSetting(name);
     }
     
     /**

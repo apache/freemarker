@@ -21,7 +21,7 @@ public class _ObjectBuilderSettingEvaluationException extends Exception {
     }
 
     public _ObjectBuilderSettingEvaluationException(String expected, String src, int location) {
-        super("Expected a(n) " + expected + ", but "
+        super("Expression syntax error: Expected a(n) " + expected + ", but "
                 + (location < src.length()
                         ? "found character " + StringUtil.jQuote("" + src.charAt(location)) + " at position "
                             + (location + 1) + "."

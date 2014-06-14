@@ -417,7 +417,7 @@ public class Configurable
         int commaIdx = booleanFormat.indexOf(',');
         if(commaIdx == -1) {
             throw new IllegalArgumentException(
-                    "Setting \"boolean_format\" must consist of two comma-separated values for true and false," +
+                    "Setting value must be string that contains two comma-separated values for true and false, " +
                     "respectively.");
         }
         
@@ -1062,6 +1062,7 @@ public class Configurable
      * @throws TemplateException if the new value of the setting can't be set for any other reasons.
      */
     public void setSetting(String name, String value) throws TemplateException {
+        boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
                 setLocale(StringUtil.deduceLocale(value));
@@ -1184,12 +1185,13 @@ public class Configurable
                     throw invalidSettingValueException(name, value);
                 }
             } else {
-                throw unknownSettingException(name);
+                unknown = true;
             }
         } catch(Exception e) {
-            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(name),
-                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+            throw settingValueAssignmentException(name, value, e);
+        }
+        if (unknown) {
+            throw unknownSettingException(name);
         }
     }
 
@@ -1238,21 +1240,61 @@ public class Configurable
     }
     
     protected TemplateException unknownSettingException(String name) {
-        return new UnknownSettingException(name, getEnvironment());
+        return new UnknownSettingException(getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
     }
 
+    /**
+     * @param name The wrong name
+     * @returns The corrected name, or {@code null} if there's no known correction
+     * @since 2.3.21
+     */
+    protected String getCorrectedNameForUnknownSetting(String name) {
+        return null;
+    }
+    
+    /**
+     * @since 2.3.21
+     */
+    protected TemplateException settingValueAssignmentException(String name, String value, Throwable cause) {
+        return new SettingValueAssignmentException(getEnvironment(), name, value, cause);
+    }
+    
     protected TemplateException invalidSettingValueException(String name, String value) {
         return new _MiscTemplateException(getEnvironment(), new Object[] {
                 "Invalid value for setting ", new _DelayedJQuote(name), ": ",
                 new _DelayedJQuote(value) });
     }
     
+    /**
+     * The setting name was not recognized. 
+     */
     public static class UnknownSettingException extends _MiscTemplateException {
-        private UnknownSettingException(String name, Environment env) {
-            super(env, new Object[] { "Unknown setting: ", new _DelayedJQuote(name) });
+        
+        private UnknownSettingException(Environment env, String name, String correctedName) {
+            super(env, new Object[] {
+                    "Unknown setting: ", new _DelayedJQuote(name),
+                    correctedName == null
+                            ? "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
+        
     }
 
+    /**
+     * The setting name was recognized, but it's value couldn't be parsed or the setting couldn't be set for some 
+     * reason. This exception always has a cause exception.
+     *  
+     * @since 2.3.21
+     */
+    public static class SettingValueAssignmentException extends _MiscTemplateException {
+        
+        private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
+            super(cause, env, new Object[] {
+                    "Failed to set setting ", new _DelayedJQuote(name),
+                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+        }
+        
+    }
+    
     /**
      * Set the settings stored in a <code>Properties</code> object.
      * 

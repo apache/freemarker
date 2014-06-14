@@ -20337,7 +20337,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     </appendix>
 
     <appendix xml:id="app_versions">
-      <title>Versions</title>
+      <title>Version history</title>
 
       <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
@@ -20977,6 +20977,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that were introspected before those properties were changed. Now
               changing such properties always clears the introspection
               caches.</para>
+            </listitem>
+
+            <listitem>
+              <para>Various smaller improvements in configuration setting
+              errors messages</para>
             </listitem>
           </itemizedlist>
         </section>
