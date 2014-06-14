@@ -20941,10 +20941,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/411/">411</link>]:
-              Invalid execution environment names were fixed: J2SE-1.6 to
-              Java2SE-1.6, J2SE-1.7 to JavaSE-1.7. Also, J2SE-1.8 was removed
-              for now, as we don't utilize any features in it dynamically (to
-              prevent misunderstandings, Java 8 is still supported).</para>
+              Invalid execution environment names in the OSGi bundle manifest
+              were fixed: J2SE-1.6 to Java2SE-1.6, J2SE-1.7 to JavaSE-1.7.
+              Also, J2SE-1.8 was removed for now, as we don't utilize any
+              features in it dynamically (to prevent misunderstandings, Java 8
+              is still supported).</para>
             </listitem>
 
             <listitem>
