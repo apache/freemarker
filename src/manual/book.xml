@@ -7503,14 +7503,14 @@ c</programlisting>
         linkend="gloss.unicode">UNICODE</link> text" (UTF-16). Nonetheless,
         there are situations when it must deal with <link
         linkend="gloss.charset">charsets</link>, because it has to exchange
-        data with the outer world that may uses various charsets.</para>
+        data with the outer world that may uses various other charsets.</para>
 
         <section>
           <title>The charset of the input</title>
 
           <para>When FreeMarker has to load a template file (or an unparsed
           text file), then it must know the charset of the file, since files
-          are just raw byte arrays. You can use the
+          are just raw byte sequences. You can use the
           <literal>encoding</literal> <link
           linkend="pgui_config_settings">setting</link> to specify the
           charset. This setting takes effect only when FreeMarker loads a
@@ -7533,9 +7533,11 @@ c</programlisting>
           <literal>setEncoding(Locale locale, String encoding)</literal>
           method of the configuration; the encoding map is initially empty.
           The default encoding is initially the value of the
-          <literal>file.encoding</literal> system property, but you can set a
-          different default with the <literal>setDefaultEncoding</literal>
-          method.</para>
+          <literal>file.encoding</literal> system property, but you always
+          should set a default default with the
+          <literal>setDefaultEncoding</literal> method, rather than relying on
+          that. For new projects, a popular default encoding is
+          <literal>utf-8</literal>.</para>
 
           <para>You can give the charset directly by overriding the
           <literal>encoding</literal> setting in the template layer or runtime
@@ -7549,18 +7551,10 @@ c</programlisting>
 
           <para>Also, instead of relying on this charset guessing mechanism,
           you can specify the charset of the template in the template file
-          itself, with the <link
+          itself, with the <link linkend="ref.directive.ftl"><link
           linkend="ref.directive.ftl"><literal>ftl</literal></link>
-          directive.</para>
-
-          <para>You may wonder what charset you should choose for the
-          templates. It primarily depends on the tools (as text editors) that
-          you want to use to create and modify templates. In principle, using
-          UTF-8 is the best, but currently (2004) only a few tools supports
-          it, actually most of them doesn't even know about charsets. So in
-          that case you should use the widely used charset of your language,
-          which is probably also the default charset of you working
-          environment.</para>
+          directive</link>, like <literal>&lt;#ftl
+          encoding="utf-8"&gt;</literal>.</para>
 
           <para>Note that the charset of the template is independent from the
           charset of the output that the tempalte generates (unless the

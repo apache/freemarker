@@ -373,8 +373,9 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Loads a preset language-to-encoding map. It assumes the usual character
-     * encodings for most languages.
+     * Loads a preset language-to-encoding map, similarly as if you have called
+     * {@link #clearEncodingMap()} and then did multiple {@link #setEncoding(Locale, String)} calls.
+     * It assumes the usual character encodings for most languages.
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
      * 
@@ -920,12 +921,17 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the default encoding for converting bytes to characters when
+     * Sets the charset used for decoding byte sequences to character sequences when
      * reading template files in a locale for which no explicit encoding
-     * was specified.
+     * was specified via {@link #setEncoding(Locale, String)}. Note that by default there is no locale specified for
+     * any locale, so the default encoding is always in effect.
      * 
      * <p>Defaults to the default system encoding, which can change from one server to
-     * another, so <b>you should always set this setting</b>.
+     * another, so <b>you should always set this setting</b>. If you don't know what charset your should chose,
+     * {@code "UTF-8"} is usually a good choice.
+     * 
+     * <p>Note that individual templates may specify their own charset by starting with
+     * <tt>&lt;#ftl encoding="..."></tt>
      * 
      * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
