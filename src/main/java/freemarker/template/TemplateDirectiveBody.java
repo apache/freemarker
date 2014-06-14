@@ -26,7 +26,6 @@ import java.io.Writer;
  * free to invoke it for any number of times, with any writer.
  *
  * @since 2.3.11
- * @author Attila Szegedi
  */
 public interface TemplateDirectiveBody
 {

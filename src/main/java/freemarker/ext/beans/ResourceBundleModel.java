@@ -46,7 +46,6 @@ import freemarker.template.TemplateModelException;
  * from resource bundle with key <tt>patternKey</tt>, and will use it as a pattern
  * for MessageFormat with arguments arg1, arg2 and arg3</li>
  * </ul>
- * @author Attila Szegedi
  */
 public class ResourceBundleModel
     extends

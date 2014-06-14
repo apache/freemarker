@@ -25,7 +25,6 @@ import freemarker.template.TemplateSequenceModel;
  * A class that represents a Range between two integers.
  * inclusive of the end-points. It can be ascending or
  * descending. 
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
 

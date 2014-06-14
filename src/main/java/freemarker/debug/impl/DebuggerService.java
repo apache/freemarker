@@ -28,7 +28,6 @@ import freemarker.template.utility.SecurityUtilities;
  * This class provides debugging hooks for the core FreeMarker engine. It is
  * not usable for anyone outside the FreeMarker core classes. It is public only
  * as an implementation detail.
- * @author Attila Szegedi
  */
 public abstract class DebuggerService
 {

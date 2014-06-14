@@ -37,7 +37,6 @@ import freemarker.template.TemplateSequenceModel;
  * An operator for the + operator. Note that this is treated
  * separately from the other 4 arithmetic operators,
  * since + is overloaded to mean string concatenation.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 final class AddConcatExpression extends Expression {
 

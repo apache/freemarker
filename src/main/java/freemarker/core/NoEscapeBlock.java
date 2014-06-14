@@ -21,7 +21,6 @@ import java.io.IOException;
 import freemarker.template.TemplateException;
 
 /**
- * @author Attila Szegedi
  */
 class NoEscapeBlock extends TemplateElement {
 

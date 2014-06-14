@@ -25,8 +25,6 @@ import java.net.URLConnection;
 
 /**
  * Wraps a <code>java.net.URL</code>, and implements methods required for a typical template source.
- * @author Daniel Dekany
- * @author TJ Laurenzo
  */
 class URLTemplateSource {
     private final URL url;

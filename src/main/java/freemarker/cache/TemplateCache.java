@@ -45,8 +45,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * {@link Configuration} API-s. Then {@link TemplateLoader} and {@link CacheStorage} can be set with
  * {@link Configuration#setTemplateLoader(TemplateLoader)} and
  * {@link Configuration#setCacheStorage(CacheStorage)}.
- *
- * @author Attila Szegedi
  */
 public class TemplateCache
 {

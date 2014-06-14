@@ -28,8 +28,6 @@ import freemarker.template.utility.DeepUnwrap;
  * accept string parameters.
  * 
  * <p>In templates they are used like {@code myMethod(1, "foo")} or {@code myJavaObject.myJavaMethod(1, "foo")}.
- *  
- * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
 public interface TemplateMethodModelEx extends TemplateMethodModel {
 

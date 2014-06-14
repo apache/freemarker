@@ -31,7 +31,6 @@ import freemarker.template.TemplateSequenceModel;
  * <p>A special case of {@link BeanModel} that can wrap Java collections
  * and that implements the {@link TemplateCollectionModel} in order to be usable 
  * in a <tt>&lt;foreach></tt> block.</p>
- * @author Attila Szegedi
  */
 public class CollectionModel
 extends

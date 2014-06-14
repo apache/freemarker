@@ -23,8 +23,6 @@ import freemarker.template.TemplateModel;
 
 /**
  * Tests the impact that the isEmpty() has on template hash models.
- *
- * @author  <a href="mailto:run2000@users.sourceforge.net">Nicholas Cull</a>
  */
 public class BooleanHash1 implements TemplateHashModel {
 

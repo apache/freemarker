@@ -27,7 +27,6 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 class CollectionAdapter extends AbstractCollection implements TemplateModelAdapter {
     private final BeansWrapper wrapper;

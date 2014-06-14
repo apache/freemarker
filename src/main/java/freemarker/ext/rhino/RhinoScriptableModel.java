@@ -37,7 +37,6 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * @author Attila Szegedi
  */
 public class RhinoScriptableModel implements TemplateHashModelEx, 
 TemplateSequenceModel, AdapterTemplateModel, TemplateScalarModel, 

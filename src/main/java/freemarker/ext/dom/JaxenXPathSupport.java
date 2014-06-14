@@ -60,7 +60,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 
 
 /**
- * @author Jonathan Revusky
  */
 class JaxenXPathSupport implements XPathSupport {
     

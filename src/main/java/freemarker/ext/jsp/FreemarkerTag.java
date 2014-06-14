@@ -32,7 +32,6 @@ import freemarker.template.Template;
  * Simple implementation of JSP tag to allow use of FreeMarker templates in
  * JSP. Inspired by similar class in Velocity template engine developed by
  * <a href="mailto:geirm@optonline.net">Geir Magnusson Jr.</a>
- * @author Attila Szegedi
  */
 public class FreemarkerTag implements BodyTag
 {

@@ -20,7 +20,6 @@ import freemarker.template.TemplateException;
 
 /**
  * Represents a &lt;return&gt; instruction to jump out of a macro.
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 public final class ReturnInstruction extends TemplateElement {
 

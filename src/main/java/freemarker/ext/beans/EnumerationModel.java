@@ -32,7 +32,6 @@ import freemarker.template.TemplateModelIterator;
  * Further, you can iterate over it only once. Attempts to call the
  * {@link #iterator()} method after it was already driven to the end once will 
  * throw an exception.</p>
- * @author Attila Szegedi
  */
 
 public class EnumerationModel

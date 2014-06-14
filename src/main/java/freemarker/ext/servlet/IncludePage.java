@@ -56,7 +56,6 @@ import freemarker.template.utility.DeepUnwrap;
  * means that the include inherits the request parameters from the current 
  * request. In this case values in 'params' will get prepended to the existing
  * values of parameters.
- * @author Attila Szegedi
  */
 public class IncludePage implements TemplateDirectiveModel
 {

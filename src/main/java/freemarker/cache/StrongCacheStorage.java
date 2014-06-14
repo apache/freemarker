@@ -29,8 +29,6 @@ import freemarker.core._ConcurrentMapFactory;
  * thread-safe in that case.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
- *
- * @author Attila Szegedi
  */
 public class StrongCacheStorage implements ConcurrentCacheStorage
 {

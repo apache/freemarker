@@ -24,8 +24,6 @@ import freemarker.template.TemplateModel;
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
- *  
- * @author Attila Szegedi
  */
 public class _EnumModels extends ClassBasedModelFactory {
 

@@ -28,8 +28,6 @@ import freemarker.template.utility.StringUtil;
 
 /**
  * Class to perform arithmetic operations.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
- * @author Attila Szegedi
  */
 
 public abstract class ArithmeticEngine {

@@ -24,8 +24,6 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * Model for testing the impact of isEmpty() on template list models. Every
  * other method simply delegates to a SimpleList model.
- *
- * @author  <a href="mailto:run2000@users.sourceforge.net">Nicholas Cull</a>
  */
 public class BooleanList1 implements TemplateSequenceModel {
 

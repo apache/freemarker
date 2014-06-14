@@ -111,9 +111,6 @@ import freemarker.template.utility.XmlEscape;
  * everything directly after you have instantiated the {@link Configuration} object, then you don't change the settings
  * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
  * The methods that aren't about modifying setting, like {@link #getTemplate(String)}, are thread-safe.
- *
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
- * @author Attila Szegedi
  */
 public class Configuration extends Configurable implements Cloneable {
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";

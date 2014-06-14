@@ -22,7 +22,6 @@ import org.zeroturnaround.javarebel.ClassEventListener;
 import org.zeroturnaround.javarebel.ReloaderFactory;
 
 /**
- * @author Attila Szegedi
  */
 class JavaRebelIntegration
 {

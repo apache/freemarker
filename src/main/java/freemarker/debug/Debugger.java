@@ -24,7 +24,6 @@ import java.util.List;
 /**
  * The main debugger interface. Allows management of breakpoints as well as
  * installation of listeners for debug events.
- * @author Attila Szegedi
  */
 public interface Debugger extends Remote
 {

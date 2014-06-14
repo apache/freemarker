@@ -31,7 +31,6 @@ import java.rmi.RemoteException;
  * configuration also support all the setting keys of 
  * {@link freemarker.core.Configurable} objects. 
 
- * @author Attila Szegedi
  */
 public interface DebuggedEnvironment extends DebugModel
 {

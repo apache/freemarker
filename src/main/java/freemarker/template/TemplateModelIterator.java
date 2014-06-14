@@ -19,8 +19,6 @@ package freemarker.template;
 /**
  * Used to iterate over a set of template models <em>once</em>; usually returned from
  * {@link TemplateCollectionModel#iterator()}. Note that it's not a {@link TemplateModel}.
- * 
- * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
 public interface TemplateModelIterator {
 

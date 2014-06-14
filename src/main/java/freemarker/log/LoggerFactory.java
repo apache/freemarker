@@ -17,7 +17,6 @@
 package freemarker.log;
 
 /**
- * @author Attila Szegedi
  */
 interface LoggerFactory
 {

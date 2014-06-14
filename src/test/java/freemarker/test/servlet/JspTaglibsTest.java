@@ -48,7 +48,6 @@ import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.test.utility.FileTestCase;
 
 /**
- * @author Attila Szegedi
  */
 public class JspTaglibsTest extends FileTestCase {
     

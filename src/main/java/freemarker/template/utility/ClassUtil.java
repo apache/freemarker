@@ -51,7 +51,6 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 
 /**
- * @author Attila Szegedi
  */
 public class ClassUtil
 {

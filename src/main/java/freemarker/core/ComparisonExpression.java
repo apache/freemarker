@@ -20,8 +20,6 @@ import freemarker.template.TemplateException;
 
 /**
  * A class that handles comparisons.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
- * @author Attila Szegedi
  */
 
 final class ComparisonExpression extends BooleanExpression {

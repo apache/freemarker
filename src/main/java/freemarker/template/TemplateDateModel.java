@@ -25,8 +25,6 @@ import java.util.List;
  * "date" template language data type: similar to {@link java.util.Date}; a time-zone-independent date-only, time-only
  * or date-time value. Contrary to Java, FreeMarker distinguishes values that represent only a time, only a date, or a
  * combined date and time.
- *
- * @author Attila Szegedi
  */
 public interface TemplateDateModel extends TemplateModel {
     

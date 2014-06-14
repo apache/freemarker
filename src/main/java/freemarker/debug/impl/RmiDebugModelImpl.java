@@ -39,7 +39,6 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 
 /**
- * @author Attila Szegedi
  */
 class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel
 {

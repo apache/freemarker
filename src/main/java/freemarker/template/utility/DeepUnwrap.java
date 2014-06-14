@@ -36,7 +36,6 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * Utility methods for unwrapping {@link TemplateModel}-s.
- * @author Attila Szegedi
  */
 public class DeepUnwrap
 {

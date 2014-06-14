@@ -37,7 +37,6 @@ import freemarker.template.WrappingTemplateModel;
  * mode is enabled. Provides a simple hash model interface to the
  * underlying map (does not copy like {@link freemarker.template.SimpleHash}),
  * and a method interface to non-string keys.
- * @author Chris Nokleberg
  */
 public class SimpleMapModel extends WrappingTemplateModel 
 implements TemplateHashModelEx, TemplateMethodModelEx, AdapterTemplateModel, 

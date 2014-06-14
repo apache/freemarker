@@ -23,8 +23,6 @@ import java.util.List;
  * Singleton object representing nothing, used by ?if_exists built-in.
  * It is meant to be interpreted in the most sensible way possible in various contexts.
  * This can be returned to avoid exceptions.
- *
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 
 final class GeneralPurposeNothing

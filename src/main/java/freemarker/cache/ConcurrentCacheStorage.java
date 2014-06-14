@@ -19,7 +19,6 @@ package freemarker.cache;
 /**
  * An optional interface for cache storage that knows whether it can be 
  * concurrently accessible without synchronization.
- * @author Attila Szegedi
  */
 public interface ConcurrentCacheStorage extends CacheStorage {
     

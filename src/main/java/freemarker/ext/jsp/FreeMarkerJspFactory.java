@@ -24,7 +24,6 @@ import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.PageContext;
 
 /**
- * @author Attila Szegedi
  */
 abstract class FreeMarkerJspFactory extends JspFactory
 {

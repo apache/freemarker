@@ -56,7 +56,6 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * A base class for wrapping a W3C DOM Node as a FreeMarker template model.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 abstract public class NodeModel
 implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,

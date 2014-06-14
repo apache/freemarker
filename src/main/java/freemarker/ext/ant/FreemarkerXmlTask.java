@@ -223,9 +223,6 @@ import freemarker.template.utility.SecurityUtilities;
  *    <td valign="top" align="center">No</td>
  *   </tr>
  * </table>
- * 
- * @author Attila Szegedi
- * @author Jonathan Revusky, jon@revusky.com
  * @deprecated <a href="http://fmpp.sourceforge.net">FMPP</a> is a more complete solution.
  */
 public class FreemarkerXmlTask

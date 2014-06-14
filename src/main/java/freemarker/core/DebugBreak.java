@@ -22,7 +22,6 @@ import freemarker.debug.impl.DebuggerService;
 import freemarker.template.TemplateException;
 
 /**
- * @author Attila Szegedi
  */
 public class DebugBreak extends TemplateElement
 {

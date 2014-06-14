@@ -29,7 +29,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.
- * @author Attila Szegedi
  */
 
 public final class HttpSessionHashModel implements TemplateHashModel, Serializable

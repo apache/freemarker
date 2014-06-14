@@ -22,8 +22,6 @@ package freemarker.template;
  * 
  * <p>In templates they are used like hashes, but these will also work (among others):
  * {@code myExtHash?size}, {@code myExtHash?keys}, {@code myExtHash?values}.
- * 
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  * @see SimpleHash
  */
 public interface TemplateHashModelEx extends TemplateHashModel {

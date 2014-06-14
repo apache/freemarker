@@ -31,7 +31,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 public class RhinoWrapper extends BeansWrapper {
     // The type of the "instance" field changed between Rhino versions, so a

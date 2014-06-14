@@ -25,8 +25,6 @@ package freemarker.cache;
  * synchronization.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
- *
- * @author Attila Szegedi
  */
 public interface CacheStorage
 {

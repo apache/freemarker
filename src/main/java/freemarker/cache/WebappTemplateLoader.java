@@ -32,7 +32,6 @@ import freemarker.template.utility.StringUtil;
 /**
  * A {@link TemplateLoader} that uses streams reachable through 
  * {@link ServletContext#getResource(String)} as its source of templates.
- * @author Attila Szegedi
  */
 public class WebappTemplateLoader implements TemplateLoader
 {

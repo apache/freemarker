@@ -32,7 +32,6 @@ import freemarker.template.utility.DeepUnwrap;
  * {@code <@myDirective foo=1 bar="wombat" />} - the nested content is optional).
  *
  * @since 2.3.11
- * @author Attila Szegedi
  */
 public interface TemplateDirectiveModel extends TemplateModel
 {

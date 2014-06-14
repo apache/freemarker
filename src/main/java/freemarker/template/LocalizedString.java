@@ -36,7 +36,6 @@ import freemarker.core.Environment;
  *        }  
  *    };
  * </code>
- * @author Jonathan Revusky
  */
 
 abstract public class LocalizedString implements TemplateScalarModel {

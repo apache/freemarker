@@ -25,7 +25,6 @@ import freemarker.template.Template;
  * Allows exposure of a FreeMarker template's AST as a Swing tree.
  * 
  * @deprecated Will be removed, as Swing classes aren't accessible on Google App Engine.
- * 
  */
 public class FreeMarkerTree extends JTree {
 

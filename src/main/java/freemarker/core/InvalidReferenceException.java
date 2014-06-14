@@ -21,7 +21,6 @@ import freemarker.template.TemplateException;
 /**
  * A subclass of TemplateException that says there
  * is no value associated with a given expression.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 public class InvalidReferenceException extends TemplateException {
 

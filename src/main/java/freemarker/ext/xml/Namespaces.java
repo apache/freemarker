@@ -23,7 +23,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 
 /**
- * @author Attila Szegedi
  */
 class Namespaces
 implements

@@ -52,7 +52,6 @@ import freemarker.template.utility.StringUtil;
  * invoke methods on it. You can also use the <tt>object.foo[index]</tt> syntax to
  * access indexed properties. It uses Beans {@link java.beans.Introspector}
  * to dynamically discover the properties and methods. 
- * @author Attila Szegedi
  */
 
 public class BeanModel

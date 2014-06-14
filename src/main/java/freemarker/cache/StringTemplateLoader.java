@@ -53,9 +53,6 @@ import java.util.Map;
  * After that you should be able to use the templates as usual. Often you will
  * want to combine a <tt>StringTemplateLoader</tt> with another loader. You can
  * do so using a {@link freemarker.cache.MultiTemplateLoader}.
- *
- * @author Meikel Bisping
- * @author Attila Szegedi
  */
 public class StringTemplateLoader implements TemplateLoader {
     private final Map templates = new HashMap();

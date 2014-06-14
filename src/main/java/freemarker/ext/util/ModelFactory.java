@@ -21,7 +21,6 @@ import freemarker.template.TemplateModel;
 
 /**
  * Interface used to create various wrapper models in the {@link ModelCache}.
- * @author Attila Szegedi, szegedia at freemail dot hu
  */
 public interface ModelFactory
 {

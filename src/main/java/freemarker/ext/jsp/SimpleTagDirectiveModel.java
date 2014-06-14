@@ -36,7 +36,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * @author Attila Szegedi
  */
 class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel
 {

@@ -29,7 +29,6 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * Model for Jython sequence objects ({@link org.python.core.PySequence} descendants).
- * @author Attila Szegedi
  */
 public class JythonSequenceModel
 extends

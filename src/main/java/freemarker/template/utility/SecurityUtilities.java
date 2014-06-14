@@ -23,7 +23,6 @@ import java.security.PrivilegedAction;
 import freemarker.log.Logger;
 
 /**
- * @author Attila Szegedi
  */
 public class SecurityUtilities
 {

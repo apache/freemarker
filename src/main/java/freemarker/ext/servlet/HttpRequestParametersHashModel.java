@@ -31,7 +31,6 @@ import freemarker.template.TemplateModel;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest parameters.
- * @author Attila Szegedi
  */
 
 public class HttpRequestParametersHashModel
