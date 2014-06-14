@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package freemarker.ext.beans;
 
 import java.lang.ref.Reference;
@@ -13,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import freemarker.core.BugException;
-import freemarker.ext.beans.BeansWrapper.PropertyAssignments;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.Collections12;
@@ -118,11 +133,11 @@ public class _BeansAPI {
      * @param beansWrapperSubclassFactory Creates a <em>new</em> read-only object wrapper of the desired
      *     {@link BeansWrapper} subclass. 
      */
-    public static BeansWrapper getBeansWrapperSubclassInstance(
-            PropertyAssignments pa,
+    public static BeansWrapper getBeansWrapperSubclassSingleton(
+            BeansWrapperConfiguration settings,
             Map instanceCache,
             ReferenceQueue instanceCacheRefQue,
-            BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
+            _BeansWrapperSubclassFactory beansWrapperSubclassFactory) {
         // BeansWrapper can't be cached across different Thread Context Class Loaders (TCCL), because the result of
         // a class name (String) to Class mappings depends on it, and the staticModels and enumModels need that.
         // (The ClassIntrospector doesn't have to consider the TCCL, as it only works with Class-es, not class
@@ -138,7 +153,7 @@ public class _BeansAPI {
                 instanceCache.put(tccl, tcclScopedCache);
                 instanceRef = null;
             } else {
-                instanceRef = (Reference) tcclScopedCache.get(pa);
+                instanceRef = (Reference) tcclScopedCache.get(settings);
             }
         }
 
@@ -148,17 +163,17 @@ public class _BeansAPI {
         }
         // cache miss
         
-        pa = (PropertyAssignments) pa.clone(true);  // prevent any aliasing issues 
-        instance = beansWrapperSubclassFactory.create(pa);
+        settings = (BeansWrapperConfiguration) settings.clone(true);  // prevent any aliasing issues 
+        instance = beansWrapperSubclassFactory.create(settings);
         if (!instance.isWriteProtected()) {
             throw new BugException();
         }
         
         synchronized (instanceCache) {
-            instanceRef = (Reference) tcclScopedCache.get(pa);
+            instanceRef = (Reference) tcclScopedCache.get(settings);
             BeansWrapper concurrentInstance = instanceRef != null ? (BeansWrapper) instanceRef.get() : null;
             if (concurrentInstance == null) {
-                tcclScopedCache.put(pa, new WeakReference(instance, instanceCacheRefQue));
+                tcclScopedCache.put(settings, new WeakReference(instance, instanceCacheRefQue));
             } else {
                 instance = concurrentInstance;
             }
@@ -186,10 +201,13 @@ public class _BeansAPI {
         } // while poll
     }
     
-    public interface BeansWrapperSubclassFactory {
+    /**
+     * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+     */
+    public interface _BeansWrapperSubclassFactory {
         
-        /** Creates a new read-only wrapper; used for {@link BeansWrapper#getInstance} and in its subclasses. */
-        BeansWrapper create(PropertyAssignments sa);
+        /** Creates a new read-only {@link BeansWrapper}; used for {@link BeansWrapperBuilder} and such. */
+        BeansWrapper create(BeansWrapperConfiguration sa);
     }
     
 }

@@ -1,53 +1,17 @@
 /*
- * Copyright (c) 2003 The Visigoth Software Society. All rights
- * reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowledgement:
- *       "This product includes software developed by the
- *        Visigoth Software Society (http://www.visigoths.org/)."
- *    Alternately, this acknowledgement may appear in the software itself,
- *    if and wherever such third-party acknowledgements normally appear.
- *
- * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the 
- *    project contributors may be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact visigoths@visigoths.org.
- *
- * 5. Products derived from this software may not be called "FreeMarker" or "Visigoth"
- *    nor may "FreeMarker" or "Visigoth" appear in their names
- *    without prior written permission of the Visigoth Software Society.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE VISIGOTH SOFTWARE SOCIETY OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Visigoth Software Society. For more
- * information on the Visigoth Software Society, please see
- * http://www.visigoths.org/
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package freemarker.core;
@@ -71,16 +35,18 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
-import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -415,7 +381,7 @@ public class Configurable
         int commaIdx = booleanFormat.indexOf(',');
         if(commaIdx == -1) {
             throw new IllegalArgumentException(
-                    "Setting \"boolean_format\" must consist of two comma-separated values for true and false," +
+                    "Setting value must be string that contains two comma-separated values for true and false, " +
                     "respectively.");
         }
         
@@ -648,7 +614,7 @@ public class Configurable
                 || incompatibleImprovements.intValue() < DEFAULT_TL_AND_OW_CHANGE_VERSION) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
-            return DefaultObjectWrapper.getInstance(incompatibleImprovements);
+            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();
         }
     }
     
@@ -808,10 +774,9 @@ public class Configurable
      *       
      *   <li><p>{@code "template_exception_handler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as a class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these predefined values (case insensitive):
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
      *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
@@ -819,23 +784,25 @@ public class Configurable
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot,
      *       then it must be one of these special values (case insensitive):
      *       {@code "bigdecimal"}, {@code "conservative"}.
      *       
      *   <li><p>{@code "object_wrapper"}:
      *       See {@link #setObjectWrapper(ObjectWrapper)}.
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
-     *       then it must be one of these special values (case insensitive):
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>, with the addition that {@link BeansWrapper}, {@link DefaultObjectWrapper} and
+     *       {@link SimpleObjectWrapper} can be referred without package name. For example, these strings are valid
+     *       values: {@code "DefaultObjectWrapper(2.3.21)"},
+     *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
+     *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
      *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
-     *       or {@link DefaultObjectWrapper#getInstance(Version)}),
+     *       or {@link DefaultObjectWrapperBuilder#getResult()}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
-     *       or {@link BeansWrapper#getInstance(Version)}),
+     *       or {@link BeansWrapperBuilder#getResult()}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
@@ -864,7 +831,8 @@ public class Configurable
      *   <li><p>{@code "new_builtin_class_resolver"}:
      *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
      *       Since 2.3.17.
-     *       <br>String value: The value must be one of these (ignore the quotation marks):
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>. Otherwise the value must be one of these (ignore the quotation marks):
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
@@ -956,9 +924,9 @@ public class Configurable
      *       
      *   <li><p>{@code "cache_storage"}:
      *       See {@link Configuration#setCacheStorage}.
-     *       <br>String value: If the value contains dot, then it's
-     *       interpreted as class name, and the object will be created with
-     *       its parameterless constructor. If the value does not contain dot,
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot,
      *       then a {@link freemarker.cache.MruCacheStorage} will be used with the
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
@@ -994,6 +962,63 @@ public class Configurable
      *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
      * </ul>
      * 
+     * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
+     * indicated):
+     * <ul>
+     *   <li><p>Before FreeMarker 2.3.21 it had to be a fully qualified class name, and nothing else.</li>
+     *   <li><p>Since 2.3.21, the generic syntax is:
+     *       <tt><i>className</i>(<i>constrArg1</i>, <i>constrArg2</i>, ... <i>constrArgN</i>,
+     *       <i>propName1</i>=<i>propValue1</i>, <i>propName2</i>=<i>propValue2</i>, ...
+     *       <i>propNameN</i>=<i>propValueN</i>)</tt>,
+     *       where
+     *       <tt><i>className</i></tt> is the fully qualified class name of the instance to create (except if we have
+     *       builder class or <tt>INSTANCE</tt> field around, but see that later),
+     *       <tt><i>constrArg</i></tt>-s are the values of constructor arguments,
+     *       and <tt><i>propName</i>=<i>propValue</i></tt>-s set JavaBean properties (like <tt>x=1</tt> means
+     *       <tt>setX(1)</tt>) on the created instance. You can have any number of constructor arguments and property
+     *       setters, including 0. Constructor arguments must precede any property setters.   
+     *   </li>
+     *   <li>
+     *     Example: <tt>com.example.MyObjectWrapper(1, 2, exposeFields=true, cacheSize=5000)</tt> is nearly
+     *     equivalent with this Java code:
+     *     <tt>obj = new com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true); obj.setCacheSize(5000);</tt>
+     *   </li>
+     *   <li>
+     *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
+     *      a public static <tt>INSTANCE</tt> field, the value of that filed will be the value of the expression, and
+     *      the constructor won't be called.
+     *   </li>
+     *   <li>
+     *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
+     *      instead with the given constructor arguments, and the JavaBean properties of that builder instance will be
+     *      set. After that, the public <tt>getResult()</tt> method of the instance will be called, whose return value
+     *      will be the value of the whole expression. (The builder class and the <tt>getResult()</tt> method is simply
+     *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
+     *      syntax, where these's no parenthesis after the class name, then it will not look for builder class.
+     *   </li>
+     *   <li>
+     *      <p>Currently, the values of arguments and properties can only be one of these:
+     *      <ul>
+     *        <li>A numerical literal, like {@code 123} or {@code -1.5}. Like in FTL, there are no numerical types,
+     *            the value will be automatically converted to the type of the target.</li>
+     *        <li>A boolean literal: {@code true} or {@code false}
+     *        <li>The null literal: {@code null}
+     *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
+     *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
+     *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
+     *      </ul>
+     *   </li>
+     *   <li>
+     *     <p>The top-level object builder expressions may omit {@code ()}. In that case, for backward compatibility,
+     *     the {@code INSTANCE} field and the builder class is not searched, so the instance will be always
+     *     created with its parameterless constructor. (This behavior will possibly change in 2.4.) The {@code ()}
+     *     can't be omitted for nested expressions.
+     *   </li>
+     *   <li>
+     *     <p>The classes and methods that the expression meant to access must be all public.
+     *   </li>
+     * </ul>
+     * 
      * @param name the name of the setting.
      * @param value the string that describes the new value of the setting.
      * 
@@ -1001,6 +1026,7 @@ public class Configurable
      * @throws TemplateException if the new value of the setting can't be set for any other reasons.
      */
     public void setSetting(String name, String value) throws TemplateException {
+        boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
                 setLocale(StringUtil.deduceLocale(value));
@@ -1044,9 +1070,8 @@ public class Configurable
                         throw invalidSettingValueException(name, value);
                     }
                 } else {
-                    setTemplateExceptionHandler(
-                            (TemplateExceptionHandler) ClassUtil.forName(value)
-                            .newInstance());
+                    setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateExceptionHandler.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) { 
@@ -1058,30 +1083,24 @@ public class Configurable
                         throw invalidSettingValueException(name, value);
                     }
                 } else {
-                    setArithmeticEngine(
-                            (ArithmeticEngine) ClassUtil.forName(value)
-                            .newInstance());
+                    setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
+                            value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
-                if (value.indexOf('.') == -1) {
-                    if ("default".equalsIgnoreCase(value)) {
-                        setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
-                    } else if ("simple".equalsIgnoreCase(value)) {
-                        setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
-                    } else if ("beans".equalsIgnoreCase(value)) {
-                        setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
-                    } else if ("jython".equalsIgnoreCase(value)) {
-                        Class clazz = Class.forName(
-                                "freemarker.ext.jython.JythonWrapper");
-                        setObjectWrapper(
-                                (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
-                    } else {
-                        throw invalidSettingValueException(name, value);
-                    }
-                    
+                if ("default".equalsIgnoreCase(value)) {
+                    setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
+                } else if ("simple".equalsIgnoreCase(value)) {
+                    setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
+                } else if ("beans".equalsIgnoreCase(value)) {
+                    setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
+                } else if ("jython".equalsIgnoreCase(value)) {
+                    Class clazz = Class.forName(
+                            "freemarker.ext.jython.JythonWrapper");
+                    setObjectWrapper(
+                            (ObjectWrapper) clazz.getField("INSTANCE").get(null));        
                 } else {
-                    setObjectWrapper((ObjectWrapper) ClassUtil.forName(value)
-                            .newInstance());
+                    setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
+                                    value, ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
                 setBooleanFormat(value);
@@ -1123,19 +1142,20 @@ public class Configurable
                     }
                     setNewBuiltinClassResolver(
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
-                } else if (value.indexOf('.') == -1) {
-                    setNewBuiltinClassResolver((TemplateClassResolver) ClassUtil.forName(value)
-                            .newInstance());
+                } else if (value.indexOf('.') != -1) {
+                    setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
+                                    value, TemplateClassResolver.class, _SettingEvaluationEnvironment.getCurrent()));
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
             } else {
-                throw unknownSettingException(name);
+                unknown = true;
             }
         } catch(Exception e) {
-            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(name),
-                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+            throw settingValueAssignmentException(name, value, e);
+        }
+        if (unknown) {
+            throw unknownSettingException(name);
         }
     }
 
@@ -1184,21 +1204,61 @@ public class Configurable
     }
     
     protected TemplateException unknownSettingException(String name) {
-        return new UnknownSettingException(name, getEnvironment());
+        return new UnknownSettingException(getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
     }
 
+    /**
+     * @param name The wrong name
+     * @return The corrected name, or {@code null} if there's no known correction
+     * @since 2.3.21
+     */
+    protected String getCorrectedNameForUnknownSetting(String name) {
+        return null;
+    }
+    
+    /**
+     * @since 2.3.21
+     */
+    protected TemplateException settingValueAssignmentException(String name, String value, Throwable cause) {
+        return new SettingValueAssignmentException(getEnvironment(), name, value, cause);
+    }
+    
     protected TemplateException invalidSettingValueException(String name, String value) {
         return new _MiscTemplateException(getEnvironment(), new Object[] {
                 "Invalid value for setting ", new _DelayedJQuote(name), ": ",
                 new _DelayedJQuote(value) });
     }
     
+    /**
+     * The setting name was not recognized. 
+     */
     public static class UnknownSettingException extends _MiscTemplateException {
-        private UnknownSettingException(String name, Environment env) {
-            super(env, new Object[] { "Unknown setting: ", new _DelayedJQuote(name) });
+        
+        private UnknownSettingException(Environment env, String name, String correctedName) {
+            super(env, new Object[] {
+                    "Unknown setting: ", new _DelayedJQuote(name),
+                    correctedName == null
+                            ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
+        
     }
 
+    /**
+     * The setting name was recognized, but it's value couldn't be parsed or the setting couldn't be set for some 
+     * reason. This exception always has a cause exception.
+     *  
+     * @since 2.3.21
+     */
+    public static class SettingValueAssignmentException extends _MiscTemplateException {
+        
+        private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
+            super(cause, env, new Object[] {
+                    "Failed to set setting ", new _DelayedJQuote(name),
+                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+        }
+        
+    }
+    
     /**
      * Set the settings stored in a <code>Properties</code> object.
      * 
@@ -1207,10 +1267,14 @@ public class Configurable
      *     while changing the settings.
      */    
     public void setSettings(Properties props) throws TemplateException {
-        Iterator it = props.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            setSetting(key, props.getProperty(key).trim()); 
+        final _SettingEvaluationEnvironment prevEnv = _SettingEvaluationEnvironment.startScope();
+        try {
+            for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+                String key = (String) it.next();
+                setSetting(key, props.getProperty(key).trim()); 
+            }
+        } finally {
+            _SettingEvaluationEnvironment.endScope(prevEnv);
         }
     }
     

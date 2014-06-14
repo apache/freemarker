@@ -1,53 +1,17 @@
 /*
- * Copyright (c) 2003-2006 The Visigoth Software Society. All rights
- * reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowledgement:
- *       "This product includes software developed by the
- *        Visigoth Software Society (http://www.visigoths.org/)."
- *    Alternately, this acknowledgement may appear in the software itself,
- *    if and wherever such third-party acknowledgements normally appear.
- *
- * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the 
- *    project contributors may be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact visigoths@visigoths.org.
- *
- * 5. Products derived from this software may not be called "FreeMarker" or "Visigoth"
- *    nor may "FreeMarker" or "Visigoth" appear in their names
- *    without prior written permission of the Visigoth Software Society.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE VISIGOTH SOFTWARE SOCIETY OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Visigoth Software Society. For more
- * information on the Visigoth Software Society, please see
- * http://www.visigoths.org/
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package freemarker.template;
@@ -88,9 +52,10 @@ import freemarker.core.Environment;
 import freemarker.core.ParseException;
 import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
-import freemarker.core._DelayedJQuote;
-import freemarker.core._MiscTemplateException;
+import freemarker.core._ObjectBuilderSettingEvaluator;
+import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.HtmlEscape;
@@ -285,7 +250,7 @@ public class Configuration extends Configurable implements Cloneable {
      *       <li><p>
      *         The <em>default</em> of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
      *         {@link ObjectWrapper#DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
-     *         returned by {@link DefaultObjectWrapper#getInstance(Version)}. The new default object wrapper's
+     *         returned by {@link DefaultObjectWrapperBuilder#getResult()}. The new default object wrapper's
      *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
      *         See {@link BeansWrapper#BeansWrapper(Version)} for further details. Furthermore, the new default
      *         object wrapper doesn't allow changing its settings; setter methods throw {@link IllegalStateException}).
@@ -295,7 +260,7 @@ public class Configuration extends Configurable implements Cloneable {
      *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
      *         cache) because the singleton is modified after publishing.)
      *         Furthermore the new default object wrapper shares class introspection cache with other
-     *         {@link BeansWrapper}-s get with {@code getInstance} calls, which has an impact as
+     *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
      *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
      *       </li>
      *       <li><p>
@@ -370,8 +335,9 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Loads a preset language-to-encoding map. It assumes the usual character
-     * encodings for most languages.
+     * Loads a preset language-to-encoding map, similarly as if you have called
+     * {@link #clearEncodingMap()} and then did multiple {@link #setEncoding(Locale, String)} calls.
+     * It assumes the usual character encodings for most languages.
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
      * 
@@ -917,12 +883,17 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets the default encoding for converting bytes to characters when
+     * Sets the charset used for decoding byte sequences to character sequences when
      * reading template files in a locale for which no explicit encoding
-     * was specified.
+     * was specified via {@link #setEncoding(Locale, String)}. Note that by default there is no locale specified for
+     * any locale, so the default encoding is always in effect.
      * 
      * <p>Defaults to the default system encoding, which can change from one server to
-     * another, so <b>you should always set this setting</b>.
+     * another, so <b>you should always set this setting</b>. If you don't know what charset your should chose,
+     * {@code "UTF-8"} is usually a good choice.
+     * 
+     * <p>Note that individual templates may specify their own charset by starting with
+     * <tt>&lt;#ftl encoding="..."></tt>
      * 
      * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
@@ -1162,23 +1133,24 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setLocalizedLookup(localizedLookup);
     }
     
-    public void setSetting(String key, String value) throws TemplateException {
+    public void setSetting(String name, String value) throws TemplateException {
+        boolean unknown = false;
         try {
-            if ("TemplateUpdateInterval".equalsIgnoreCase(key)) {
-                key = TEMPLATE_UPDATE_DELAY_KEY;
-            } else if ("DefaultEncoding".equalsIgnoreCase(key)) {
-                key = DEFAULT_ENCODING_KEY;
+            if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
+                name = TEMPLATE_UPDATE_DELAY_KEY;
+            } else if ("DefaultEncoding".equalsIgnoreCase(name)) {
+                name = DEFAULT_ENCODING_KEY;
             }
             
-            if (DEFAULT_ENCODING_KEY.equals(key)) {
+            if (DEFAULT_ENCODING_KEY.equals(name)) {
                 setDefaultEncoding(value);
-            } else if (LOCALIZED_LOOKUP_KEY.equals(key)) {
+            } else if (LOCALIZED_LOOKUP_KEY.equals(name)) {
                 setLocalizedLookup(StringUtil.getYesNo(value));
-            } else if (STRICT_SYNTAX_KEY.equals(key)) {
+            } else if (STRICT_SYNTAX_KEY.equals(name)) {
                 setStrictSyntaxMode(StringUtil.getYesNo(value));
-            } else if (WHITESPACE_STRIPPING_KEY.equals(key)) {
+            } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
-            } else if (CACHE_STORAGE_KEY.equals(key)) {
+            } else if (CACHE_STORAGE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     int strongSize = 0;
                     int softSize = 0;
@@ -1192,31 +1164,31 @@ public class Configuration extends Configurable implements Cloneable {
                         try {
                             pvalue = Integer.parseInt((String) ent.getValue());
                         } catch (NumberFormatException e) {
-                            throw invalidSettingValueException(key, value);
+                            throw invalidSettingValueException(name, value);
                         }
                         if ("soft".equalsIgnoreCase(pname)) {
                             softSize = pvalue;
                         } else if ("strong".equalsIgnoreCase(pname)) {
                             strongSize = pvalue;
                         } else {
-                            throw invalidSettingValueException(key, value);
+                            throw invalidSettingValueException(name, value);
                         }
                     }
                     if (softSize == 0 && strongSize == 0) {
-                        throw invalidSettingValueException(key, value);
+                        throw invalidSettingValueException(name, value);
                     }
                     setCacheStorage(new MruCacheStorage(strongSize, softSize));
                 } else {
-                    setCacheStorage((CacheStorage) ClassUtil.forName(value)
-                            .newInstance());
+                    setCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
+                            value, CacheStorage.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(key)) {
+            } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(name)) {
                 setTemplateUpdateDelay(Integer.parseInt(value));
-            } else if (AUTO_INCLUDE_KEY.equals(key)) {
+            } else if (AUTO_INCLUDE_KEY.equals(name)) {
                 setAutoIncludes(parseAsList(value));
-            } else if (AUTO_IMPORT_KEY.equals(key)) {
+            } else if (AUTO_IMPORT_KEY.equals(name)) {
                 setAutoImports(parseAsImportList(value));
-            } else if (TAG_SYNTAX_KEY.equals(key)) {
+            } else if (TAG_SYNTAX_KEY.equals(name)) {
                 if ("auto_detect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
                 } else if ("angle_bracket".equals(value)) {
@@ -1224,20 +1196,28 @@ public class Configuration extends Configurable implements Cloneable {
                 } else if ("square_bracket".equals(value)) {
                     setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX);
                 } else {
-                    throw invalidSettingValueException(key, value);
+                    throw invalidSettingValueException(name, value);
                 }
-            } else if (INCOMPATIBLE_IMPROVEMENTS.equals(key)) {
+            } else if (INCOMPATIBLE_IMPROVEMENTS.equals(name)) {
                 setIncompatibleImprovements(new Version(value));
-            } else if (INCOMPATIBLE_ENHANCEMENTS.equals(key)) {
+            } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
                 setIncompatibleEnhancements(value);
             } else {
-                super.setSetting(key, value);
+                unknown = true;
             }
         } catch(Exception e) {
-            throw new _MiscTemplateException(e, getEnvironment(), new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(key),
-                    " to value ", new _DelayedJQuote(value), "; see cause exception." });
+            throw settingValueAssignmentException(name, value, e);
         }
+        if (unknown) {
+            super.setSetting(name, value);
+        }
+    }
+
+    protected String getCorrectedNameForUnknownSetting(String name) {
+        if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
+            return DEFAULT_ENCODING_KEY;
+        }
+        return super.getCorrectedNameForUnknownSetting(name);
     }
     
     /**

@@ -6312,10 +6312,11 @@ list.add("red");
 list.add("green");
 list.add("blue");
 
-// Create the object wrapper we will use. The details of the
+// Get the object wrapper we will use. The details of the
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
-        = DefaultObjectWrapper.getInstance(new Version(2, 3, 21));
+        = new DefaultObjectWrapperBuilder(new Version(2, 3, 21))
+          .getResult();
 
 // Normaly, you would create a plain java.util.HashMap here, and
 // later let the ObjectWrapper wrap it in Template.process(...).
@@ -7502,14 +7503,14 @@ c</programlisting>
         linkend="gloss.unicode">UNICODE</link> text" (UTF-16). Nonetheless,
         there are situations when it must deal with <link
         linkend="gloss.charset">charsets</link>, because it has to exchange
-        data with the outer world that may uses various charsets.</para>
+        data with the outer world that may uses various other charsets.</para>
 
         <section>
           <title>The charset of the input</title>
 
           <para>When FreeMarker has to load a template file (or an unparsed
           text file), then it must know the charset of the file, since files
-          are just raw byte arrays. You can use the
+          are just raw byte sequences. You can use the
           <literal>encoding</literal> <link
           linkend="pgui_config_settings">setting</link> to specify the
           charset. This setting takes effect only when FreeMarker loads a
@@ -7532,9 +7533,11 @@ c</programlisting>
           <literal>setEncoding(Locale locale, String encoding)</literal>
           method of the configuration; the encoding map is initially empty.
           The default encoding is initially the value of the
-          <literal>file.encoding</literal> system property, but you can set a
-          different default with the <literal>setDefaultEncoding</literal>
-          method.</para>
+          <literal>file.encoding</literal> system property, but you always
+          should set a default default with the
+          <literal>setDefaultEncoding</literal> method, rather than relying on
+          that. For new projects, a popular default encoding is
+          <literal>utf-8</literal>.</para>
 
           <para>You can give the charset directly by overriding the
           <literal>encoding</literal> setting in the template layer or runtime
@@ -7548,18 +7551,10 @@ c</programlisting>
 
           <para>Also, instead of relying on this charset guessing mechanism,
           you can specify the charset of the template in the template file
-          itself, with the <link
+          itself, with the <link linkend="ref.directive.ftl"><link
           linkend="ref.directive.ftl"><literal>ftl</literal></link>
-          directive.</para>
-
-          <para>You may wonder what charset you should choose for the
-          templates. It primarily depends on the tools (as text editors) that
-          you want to use to create and modify templates. In principle, using
-          UTF-8 is the best, but currently (2004) only a few tools supports
-          it, actually most of them doesn't even know about charsets. So in
-          that case you should use the widely used charset of your language,
-          which is probably also the default charset of you working
-          environment.</para>
+          directive</link>, like <literal>&lt;#ftl
+          encoding="utf-8"&gt;</literal>.</para>
 
           <para>Note that the charset of the template is independent from the
           charset of the output that the tempalte generates (unless the
@@ -20342,7 +20337,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     </appendix>
 
     <appendix xml:id="app_versions">
-      <title>Versions</title>
+      <title>Version history</title>
 
       <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
@@ -20354,9 +20349,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         some of the improvements and fixes described below are only activated
         when you specifically ask for 2.3.21 <quote>incompatible
         improvements</quote>, because they can, with small chance, break
-        existing applications. In general, if the dependent project is still
-        actively developed, allowing 2.3.21 "incompatible improvements" is
-        highly recommended.</para>
+        existing applications. But if the dependent project is still actively
+        developed, allowing 2.3.21 "incompatible improvements" is highly
+        recommended.</para>
+
+        <para>Note that we have changed our proprietary BSD-style license to
+        Apache License, Version 2.0. See the <link linkend="app_license">new
+        license here</link>.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -20406,8 +20405,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   changes from
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
                   almost identical <literal>DefaultObjectWrapper</literal>
-                  singleton, returned by
-                  <literal>DefaultObjectWrapper.getInstance(Version)</literal>.
+                  singleton, returned by <literal>new
+                  DefaultObjectWrapperBuilder(Version).getResult()</literal>.
                   The new default object wrapper's <quote>incompatible
                   improvements</quote> version is set to the same as of the
                   <literal>Configuration</literal>. (See later regarding the
@@ -20475,29 +20474,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   DefaultObjectWrapper(<replaceable>...</replaceable>)</literal>
                   and <literal>new
                   BeansWrapper(<replaceable>...</replaceable>)</literal>, from
-                  now on you should use the
-                  <literal>DefaultObjectWrapper.getInstance</literal> and
-                  <literal>BeansWrapper.getInstance</literal> methods (these
-                  allow specifying some settings of the desired instance too).
-                  Compared to the traditional singletons, like
-                  <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>,these will
-                  return a singleton (usually a VM-wide, or rather
-                  Web-Application-wide singleton) that's read-only (means,
-                  non-configurable, hence safe to share), created lazily
-                  (i.e., only when first requested with
-                  <literal>getInstance</literal>), and is only weak-referenced
-                  from inside FreeMarker, so it can be garbage collected when
-                  all the <literal>Configuration</literal>-s where they were
-                  used can be. The main benefit of using
-                  <literal>getInstance</literal> instead of creating new
-                  instances is that this allows FreeMarker to share the class
-                  introspection caches (an internal part of
+                  now on you should use <literal>new
+                  DefaultObjectWrapperBuilder(version).getResult()</literal>
+                  and <literal>new
+                  BeansWrapperBuilder(version).getResult()</literal>. (The
+                  builder objects have properties (configuration settings)
+                  like <literal>BeansWrapper</literal> has, which specify the
+                  properties of the objects created.) The created objects are
+                  <emphasis>singletons</emphasis> (VM-wide, or at least
+                  Web-Application-wide) and read-only (means,
+                  non-configurable, hence safe to share). The main benefit of
+                  using these factories instead of creating new instances is
+                  that it allows FreeMarker to share the class introspection
+                  caches (an internal part of
                   <literal>BeansWrapper</literal>-s/<literal>DefaultObjectWrapper</literal>-s
-                  that is expensive to populate) among the returned instances,
-                  even if there are multiple subsystems in an application that
-                  use FreeMarker internally and thus don't share the
-                  <literal>Configuration</literal> or the object wrapper
-                  instance.</para>
+                  that is expensive to populate) among the returned instances.
+                  This allow sharing the caches (and the object wrappers)
+                  between components that aren't aware of each other and use
+                  FreeMarker internally.</para>
                 </listitem>
 
                 <listitem>
@@ -20508,11 +20502,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper</literal>-s are configurable (not
                   read-only), and thus dangerous to use as singletons (a badly
                   behaving 3rd party component can mess them up). Use the
-                  <literal>getInstance</literal> methods above instead.
-                  <literal>getInstance</literal> is also more flexible, as you
-                  can specify the desired incompatible-improvements version
-                  for it and various other <literal>BeansWrapper</literal>
-                  settings.</para>
+                  factories described above instead. They are also more
+                  flexible, as you can specify the desired
+                  incompatible-improvements version for them and various other
+                  <literal>BeansWrapper</literal> settings.</para>
                 </listitem>
 
                 <listitem>
@@ -20544,6 +20537,34 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>When configuring FreeMarker with
+              <literal>java.util.Properties</literal> (typically, when the
+              configuration is stored in a <literal>.properties</literal>
+              file), for the settings where you could specify a fully
+              qualified class name (most notably for the
+              <literal>object_wrapper</literal> setting) now you can also
+              specify constructor arguments and JavaBean property assignments.
+              For example, now you can write
+              <literal>object_wrapper=com.example.MyObjectWrapper(1, 2,
+              exposeFields=true, cacheSize=5000)</literal>is nearly equivalent
+              with this Java code: <literal>obj = new
+              com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true);
+              obj.setCacheSize(5000); object_wrapper = obj;</literal>. If you
+              are using this new syntax (i.e., if you have parentheses after
+              the class name, even if they are empty), and there's a builder
+              class for the requested class, that will be automatically used.
+              For example,
+              <literal>object_wrapper=DefaultObjectWrapper(2.3.21)</literal>
+              will create a <literal>DefaultObjectWrapperBuilder</literal> to
+              build the final instance, thus the object wrapper will be a
+              singleton instead of a new instance. The new syntax will also
+              look for a public static <literal>INSTANCE</literal> field if
+              there are 0 arguments and property assignments. For more details
+              see the Java API documentation of
+              <literal>Configuration.setSetting</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>From now on, if you try to set the <quote>incompatible
               improvements</quote> to greater than the current FreeMarker
               version, or less than 2.3.0, an
@@ -20551,19 +20572,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               Thus, <literal>new Configuration(new Version(2, 3,
               21))</literal> not only activates the fixes up to 2.3.21, but
               ensures that the application will not run in an environment with
-              an older FreeMarker version. After all, on an older FreeMarker
-              version the fixes that you have requested aren't implemented
-              yet.</para>
+              an older FreeMarker version. (On an older FreeMarker version the
+              fixes that you have requested aren't implemented yet, so you
+              should get an exception.)</para>
             </listitem>
 
             <listitem>
-              <para>Fixes and reworkings in the overloaded method selection
-              rules, but only if you create the
+              <para>Many fixes and improvements in overloaded method
+              selection/invocation, but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter <literal>new Version(2, 3,
-              21)</literal> (or higher), or if you create the
-              <literal>Configuration</literal> with similar
-              <literal>Version</literal> parameter and leave the
+              21)</literal> (if you are using <literal>Properties</literal> to
+              configure FreeMarker, you can do that like
+              <literal>object_wrapper=BeansWrapper(2.3.21)</literal>), or if
+              you have a <literal>Configuration</literal> with similar
+              <literal>Version</literal> and you leave the
               <literal>object_wrapper</literal> setting on its default value.
               There's a little chance that because of these changes, a
               different overloaded method will be chosen than before, or even
@@ -20898,10 +20921,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Fixed concurrency issues in <literal>Version</literal>
-              class <literal>hashCode</literal>, <literal>equals</literal>,
-              <literal>toString</literal> that could, in theory, result in
-              wrong return values.</para>
+              <para>Fixed various issues in <literal>Version</literal> class,
+              such as wrong <literal>hashCode</literal>, possible concurrency
+              glitches, and acceptance of some malformed version
+              strings.</para>
             </listitem>
 
             <listitem>
@@ -20958,6 +20981,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that were introspected before those properties were changed. Now
               changing such properties always clears the introspection
               caches.</para>
+            </listitem>
+
+            <listitem>
+              <para>Various smaller improvements in configuration setting
+              errors messages</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>The license has changed from our proprietary BSD-Style
+              license to the well know "Apache License, Version 2.0", and the
+              copyright owner has changed from "Visigoth Software Society"
+              (founded by Jonathan Revusky) to the three main FreeMarker 2
+              developers/contributors, "Attila Szegedi, Daniel Dekany, and
+              Jonathan Revusky".</para>
+            </listitem>
+
+            <listitem>
+              <para>Many smaller additions and clarifications in the Manual
+              and API JavaDocs.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -21560,21 +21608,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Various internal code cleanups.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Other changes</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>TODO: Licence</para>
-            </listitem>
-
-            <listitem>
-              <para>Many smaller additions and clarifications in the Manual
-              and API JavaDocs.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -27988,66 +28021,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <primary>license</primary>
       </indexterm>
 
-      <programlisting role="unspecified">FreeMarker 1.x was released under the LGPL license. Later, by community
-consensus, we have switched over to a BSD-style license. As of FreeMarker
-2.2pre1, the original author, Benjamin Geer, has relinquished the copyright in
-behalf of Visigoth Software Society. The current copyright holder is the
-Visigoth Software Society.
+      <programlisting role="unspecified">Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
 
-------------------------------------------------------------------------------
-Copyright (c) 2003 The Visigoth Software Society. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+http://www.apache.org/licenses/LICENSE-2.0
 
-1.  Redistributions of source code must retain the above copyright notice,
-    this list of conditions and the following disclaimer.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
-2.  The end-user documentation included with the redistribution, if any, must
-    include the following acknowlegement:
-      "This product includes software developed by the 
-      Visigoth Software Society (http://www.visigoths.org/)."
-    Alternately, this acknowlegement may appear in the software itself, if and
-    wherever such third-party acknowlegements normally appear.
+==============================================================================
+END LICENSE
 
-3.  Neither the name "FreeMarker", "Visigoth", nor any of the names of the
-    project contributors may be used to endorse or promote products derived
-    from this software without prior written permission. For written
-    permission, please contact visigoths@visigoths.org.
 
-4.  Products derived from this software may not be called "FreeMarker" or
-    "Visigoth" nor may "FreeMarker" or "Visigoth" appear in their names
-    without prior written permission of the Visigoth Software Society.
+FreeMarker subcomponents with different copyright owners
+--------------------------------------------------------
 
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-VISIGOTH SOFTWARE SOCIETY OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-------------------------------------------------------------------------------
-
-This software consists of voluntary contributions made by many individuals on
-behalf of the Visigoth Software Society. For more information on the Visigoth
-Software Society, please see http://www.visigoths.org/
-
-------------------------------------------------------------------------------
-
-FREEMARKER SUBCOMPONENTS UNDER DIFFERENT LICENSE: 
-
-FreeMarker includes a number of subcomponents that are licensed by the Apache
-Software Foundation under the Apache License, Version 2.0. Your use of these
-subcomponents is subject to the terms and conditions of the Apache License,
-Version 2.0. You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-    
-The subcomponents under this licence are the following files, which are
-included both in freemarker.jar and in the source code:
+FreeMarker, both in its source code and binary form (freemarker.jar)
+includes a number of files that are licensed by the Apache Software
+Foundation under the Apache License, Version 2.0. This is the same
+license as the license of FreeMaker, but the copyright owner is the
+Apache Software Foundation. These files are:
   
     freemarker/ext/jsp/web-app_2_2.dtd
     freemarker/ext/jsp/web-app_2_3.dtd
@@ -28057,7 +28056,20 @@ included both in freemarker.jar and in the source code:
     freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
     freemarker/ext/jsp/web-jsptaglibrary_2_0.xsd
     freemarker/ext/jsp/web-jsptaglibrary_2_1.xsd
-</programlisting>
+
+
+Historical notes
+----------------
+
+FreeMarker 1.x was released under the LGPL license. Later, by
+community consensus, we have switched over to a BSD-style license. As
+of FreeMarker 2.2pre1, the original author, Benjamin Geer, has
+relinquished the copyright in behalf of Visigoth Software Society.
+
+With FreeMarker 2.3.21 the license has changed to Apache License,
+Version 2.0, and the owner has changed from Visigoth Software Society
+to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
+Dekany, and Jonathan Revusky.</programlisting>
     </appendix>
   </part>
 

@@ -1,53 +1,17 @@
 /*
- * Copyright (c) 2003 The Visigoth Software Society. All rights
- * reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowledgement:
- *       "This product includes software developed by the
- *        Visigoth Software Society (http://www.visigoths.org/)."
- *    Alternately, this acknowledgement may appear in the software itself,
- *    if and wherever such third-party acknowledgements normally appear.
- *
- * 4. Neither the name "FreeMarker", "Visigoth", nor any of the names of the 
- *    project contributors may be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact visigoths@visigoths.org.
- *
- * 5. Products derived from this software may not be called "FreeMarker" or "Visigoth"
- *    nor may "FreeMarker" or "Visigoth" appear in their names
- *    without prior written permission of the Visigoth Software Society.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE VISIGOTH SOFTWARE SOCIETY OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Visigoth Software Society. For more
- * information on the Visigoth Software Society, please see
- * http://www.visigoths.org/
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package freemarker.ext.beans;
 
@@ -732,12 +696,12 @@ final class ArgumentTypes {
                 // Handle conversion between List and array types, in both directions. Java reflection won't do such
                 // conversion, so we have to.
                 // Most reflection-incompatible conversions were already addressed by the unwrapping. The reason
-                // this one isn't is that for overlapped methods the hint of a given parameter position is often vague,
+                // this one isn't is that for overloaded methods the hint of a given parameter position is often vague,
                 // so we may end up with a List even if some parameter types at that position are arrays (remember, we
                 // have to chose one unwrapping target type, despite that we have many possible overloaded methods), or
                 // the other way around (that happens when AdapterTemplateMoldel returns an array).
                 // Later, the overloaded method selection will assume that a List argument is applicable to an array
-                // parameter, and that an array argument is applicable to a List argument, so we end up with this
+                // parameter, and that an array argument is applicable to a List parameter, so we end up with this
                 // situation.
                 if (paramType.isArray() && arg instanceof List) {
                    args[i] = bw.listToArray((List) arg, paramType, null);
