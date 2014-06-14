@@ -23,7 +23,6 @@ import freemarker.template.TemplateNumberModel;
 /**
  * A simple implementation of the <tt>TemplateNumberModel</tt>
  * interface. Note that this class is immutable.
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 final class NumberLiteral extends Expression implements TemplateNumberModel {
 

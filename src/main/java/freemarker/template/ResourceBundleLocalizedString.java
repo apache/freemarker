@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 /**
  * A concrete implementation of {@link LocalizedString} that gets 
  * a localized string from a {@link java.util.ResourceBundle}  
- * @author Jonathan Revusky
  */
 
 public class ResourceBundleLocalizedString extends LocalizedString {

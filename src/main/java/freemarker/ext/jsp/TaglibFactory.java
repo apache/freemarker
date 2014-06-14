@@ -60,7 +60,6 @@ import freemarker.template.utility.StringUtil;
  * {@link freemarker.ext.servlet.FreemarkerServlet} under key
  * <tt>JspTaglibs</tt>. It can be added to custom servlets as well to enable JSP
  * taglib integration in them as well.
- * @author Attila Szegedi
  */
 public class TaglibFactory implements TemplateHashModel {
     private static final Logger logger = Logger.getLogger("freemarker.jsp");

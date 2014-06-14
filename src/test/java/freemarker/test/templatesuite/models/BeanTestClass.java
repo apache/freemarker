@@ -17,7 +17,6 @@
 package freemarker.test.templatesuite.models;
 
 /**
- * @author Attila Szegedi, szegedia at freemail dot hu
  */
 public class BeanTestClass extends BeanTestSuperclass implements BeanTestInterface<Integer>
 {

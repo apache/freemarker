@@ -23,7 +23,6 @@ import freemarker.template.TemplateModel;
  * A {@link TemplateException} that 
  * indicates that the internals expected an expression
  * to evaluate to a string or numeric value and it didn't.
- * @author Attila Szegedi
  */
 public class NonStringException extends UnexpectedTypeException {
 

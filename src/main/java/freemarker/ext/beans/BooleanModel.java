@@ -21,7 +21,6 @@ import freemarker.template.TemplateBooleanModel;
 /**
  * <p>A class that will wrap instances of {@link java.lang.Boolean} into a
  * {@link TemplateBooleanModel}.
- * @author Attila Szegedi
  */
 public class BooleanModel extends BeanModel implements TemplateBooleanModel
 {

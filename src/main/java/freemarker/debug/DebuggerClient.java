@@ -33,7 +33,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 /**
  * A utility class that allows you to connect to the FreeMarker debugger service
  * running on a specific host and port. 
- * @author Attila Szegedi
  */
 public class DebuggerClient
 {

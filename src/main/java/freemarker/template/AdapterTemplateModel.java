@@ -24,8 +24,6 @@ package freemarker.template;
  * 
  * <p>This is rarely implemented by applications. It is typically implemented by the model classes belonging to
  * {@link ObjectWrapper}-s.
- *   
- * @author Attila Szegedi
  */
 public interface AdapterTemplateModel extends TemplateModel {
     /**

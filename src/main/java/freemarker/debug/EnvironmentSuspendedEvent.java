@@ -21,7 +21,6 @@ import java.util.EventObject;
 /**
  * Event describing a suspension of an environment (ie because it hit a
  * breakpoint).
- * @author Attila Szegedi
  */
 public class EnvironmentSuspendedEvent extends EventObject
 {

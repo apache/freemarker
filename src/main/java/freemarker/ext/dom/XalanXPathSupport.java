@@ -43,7 +43,6 @@ import freemarker.template.TemplateModelException;
 /**
  * Some glue code that bridges the Xalan XPath stuff (that is built into the JDK 1.4.x)
  * with FreeMarker TemplateModel semantics
- * @author Jonathan Revusky
  */
 
 class XalanXPathSupport implements XPathSupport {

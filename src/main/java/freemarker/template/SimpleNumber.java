@@ -24,8 +24,6 @@ import java.io.Serializable;
  * interface. Note that this class is immutable.
  *
  * <p>This class is thread-safe.
- *
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 public final class SimpleNumber implements TemplateNumberModel, Serializable {
 

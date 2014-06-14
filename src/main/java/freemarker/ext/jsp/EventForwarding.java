@@ -37,7 +37,6 @@ import freemarker.log.Logger;
  * An instance of this class should be registered as a <tt>&lt;listener></tt> in
  * the <tt>web.xml</tt> descriptor in order to correctly dispatch events to
  * event listeners that are specified in TLD files.
- * @author Attila Szegedi
  */
 public class EventForwarding
     implements

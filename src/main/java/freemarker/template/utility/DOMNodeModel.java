@@ -37,7 +37,6 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * A convenient wrapper class for wrapping a Node in the W3C DOM API.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 
 public class DOMNodeModel implements TemplateHashModel {

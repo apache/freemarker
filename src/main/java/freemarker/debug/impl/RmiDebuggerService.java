@@ -42,7 +42,6 @@ import freemarker.template.Template;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  * @version $Id
  */
 class RmiDebuggerService

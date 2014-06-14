@@ -59,7 +59,6 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 abstract class FreeMarkerPageContext extends PageContext implements TemplateModel
 {

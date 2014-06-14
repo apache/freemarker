@@ -17,7 +17,6 @@
 package freemarker.test.templatesuite.models;
 
 /**
- * @author Attila Szegedi
  */
 public enum EnumTestClass
 {

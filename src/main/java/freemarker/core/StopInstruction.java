@@ -20,7 +20,6 @@ import freemarker.template.TemplateException;
 
 /**
  * Represents a &lt;stop&gt; instruction to abort template processing.
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 final class StopInstruction extends TemplateElement {
 

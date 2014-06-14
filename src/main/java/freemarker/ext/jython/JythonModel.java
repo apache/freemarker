@@ -36,7 +36,6 @@ import freemarker.template.TemplateScalarModel;
 
 /**
  * Generic model for arbitrary Jython objects.
- * @author Attila Szegedi
  */
 public class JythonModel
 implements TemplateBooleanModel, TemplateScalarModel, TemplateHashModel, 

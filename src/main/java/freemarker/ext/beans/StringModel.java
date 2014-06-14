@@ -25,7 +25,6 @@ import freemarker.template.TemplateScalarModel;
  * Subclass of {@link BeanModel} that exposes the return value of the {@link
  * java.lang.Object#toString()} method through the {@link TemplateScalarModel}
  * interface.
- * @author Attila Szegedi
  */
 public class StringModel extends BeanModel
 implements TemplateScalarModel

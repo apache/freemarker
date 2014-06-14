@@ -29,7 +29,6 @@ package freemarker.template;
  * Processing Guide</a> for a concrete application.
  *
  * @since FreeMarker 2.3
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 public interface TemplateNodeModel extends TemplateModel {
     

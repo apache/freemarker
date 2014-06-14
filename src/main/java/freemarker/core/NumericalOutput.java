@@ -24,7 +24,6 @@ import freemarker.template.TemplateException;
 
 /**
  * An instruction that outputs the value of a numerical expression.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 final class NumericalOutput extends TemplateElement {
 

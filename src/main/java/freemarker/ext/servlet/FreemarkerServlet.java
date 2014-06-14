@@ -132,8 +132,6 @@ import freemarker.template.utility.StringUtil;
  * level setting. See {@link Configuration#setSetting}</li>
  * 
  * </ul>
- * 
- * @author Attila Szegedi
  */
 
 public class FreemarkerServlet extends HttpServlet

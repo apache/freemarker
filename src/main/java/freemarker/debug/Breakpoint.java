@@ -20,7 +20,6 @@ import java.io.Serializable;
 
 /**
  * Represents a breakpoint location consisting of a template name and a line number.
- * @author Attila Szegedi
  */
 public class Breakpoint implements Serializable, Comparable
 {

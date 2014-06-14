@@ -36,8 +36,6 @@ import freemarker.template.utility.ClassUtil;
  * and recommended, but are never selected automatically (until FreeMarker 2.4)
  * due to backward compatibility constraints; you have to  select them
  * explicitly with {@link #selectLoggerLibrary(int)}.
- * 
- * @author Attila Szegedi
  */
 public abstract class Logger
 {

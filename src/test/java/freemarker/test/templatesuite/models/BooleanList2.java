@@ -23,8 +23,6 @@ import freemarker.template.TemplateSequenceModel;
 /**
  * Model for testing list models. Every
  * other method simply delegates to a SimpleList model.
- *
- * @author  <a href="mailto:run2000@users.sourceforge.net">Nicholas Cull</a>
  */
 public class BooleanList2 implements TemplateSequenceModel {
 

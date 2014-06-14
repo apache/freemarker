@@ -32,8 +32,6 @@ import java.io.IOException;
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  * 
  * Implementation of PageContext that contains JSP 2.0 specific methods.
- * 
- * @author Attila Szegedi
  */
 public class _FreeMarkerPageContext2 extends FreeMarkerPageContext {
     private static final Logger logger = Logger.getLogger("freemarker.jsp");

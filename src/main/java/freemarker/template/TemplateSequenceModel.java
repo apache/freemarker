@@ -21,8 +21,6 @@ package freemarker.template;
  * an integer 0-based index.
  * 
  * <p>Used in templates like: {@code mySeq[index]}, {@code <#list mySeq as i>...</#list>}, {@code mySeq?size}, etc. 
- * 
- * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
 public interface TemplateSequenceModel extends TemplateModel {
 

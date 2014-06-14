@@ -21,7 +21,6 @@ import java.net.URL;
 /**
  * A {@link TemplateLoader} that uses streams reachable through 
  * {@link Class#getResourceAsStream(String)} as its source of templates.
- * @author Attila Szegedi, szegedia at freemail dot hu
  */
 public class ClassTemplateLoader extends URLTemplateLoader
 {

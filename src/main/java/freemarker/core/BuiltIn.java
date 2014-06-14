@@ -77,7 +77,6 @@ import freemarker.template.utility.StringUtil;
 
 /**
  * The {@code ?} operator used for things like {@code foo?upper_case}.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 abstract class BuiltIn extends Expression implements Cloneable {
     

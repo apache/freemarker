@@ -61,8 +61,6 @@ import freemarker.template.utility.StringUtil;
  * <code>Environment</code> object is a <code>Template</code> object, the
  * parent of a <code>Template</code> object is a <code>Configuration</code>
  * object.
- *
- * @author Attila Szegedi
  */
 public class Configurable
 {

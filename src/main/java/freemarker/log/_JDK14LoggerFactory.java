@@ -21,8 +21,6 @@ import java.util.logging.Level;
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
- * 
- * @author Attila Szegedi
  */
 public class _JDK14LoggerFactory implements LoggerFactory
 {

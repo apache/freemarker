@@ -25,7 +25,6 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
     private final BeansWrapper wrapper;

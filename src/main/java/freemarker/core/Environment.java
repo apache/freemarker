@@ -81,9 +81,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  *
  * <p>If you need to modify or read this object before or after the <tt>process</tt>
  * call, use {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
- *
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
- * @author Attila Szegedi
  */
 public final class Environment extends Configurable {
 

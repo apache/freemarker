@@ -19,7 +19,6 @@ package freemarker.ext.xml;
 import java.util.List;
 
 /**
- * @author Attila Szegedi
  */
 interface NodeOperator {
     void process(Object node, String localName, String namespaceUri, List result);

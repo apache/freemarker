@@ -34,8 +34,6 @@ import java.util.Map;
  * Note that {@link TemplateCache}, the natural user of this class, provides the
  * necessary synchronizations when it uses this class, so then you don't have to worry
  * this.
- * 
- * @author Attila Szegedi, szegedia at freemail dot hu
  */
 public class MultiTemplateLoader implements StatefulTemplateLoader
 {

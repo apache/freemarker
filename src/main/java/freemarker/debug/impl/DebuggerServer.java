@@ -34,7 +34,6 @@ import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 class DebuggerServer
 {

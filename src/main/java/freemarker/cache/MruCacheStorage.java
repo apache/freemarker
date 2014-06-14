@@ -49,8 +49,6 @@ import java.util.Map;
  * {@link SoftCacheStorage} as well.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
- *
- * @author Attila Szegedi
  */
 public class MruCacheStorage implements CacheStorage
 {

@@ -28,7 +28,6 @@ import freemarker.template.utility.ClassUtil;
 
 /**
  * Base class for hash models keyed by Java class names. 
- * @author Attila Szegedi
  */
 abstract class ClassBasedModelFactory implements TemplateHashModel {
     private final BeansWrapper wrapper;

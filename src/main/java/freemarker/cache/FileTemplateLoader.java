@@ -35,7 +35,6 @@ import freemarker.template.utility.SecurityUtilities;
  * serving templates outside the template directory (like <code>&lt;include /etc/passwd></code>.
  * It compares canonical paths for this, so templates that are symbolically
  * linked into the template directory from outside of it won't work either.
- * @author Attila Szegedi, szegedia at freemail dot hu
  */
 public class FileTemplateLoader implements TemplateLoader
 {

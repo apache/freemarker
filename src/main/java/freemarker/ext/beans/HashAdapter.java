@@ -31,7 +31,6 @@ import freemarker.template.TemplateModelIterator;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
     private final BeansWrapper wrapper;

@@ -23,8 +23,6 @@ import freemarker.template.TemplateModelException;
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  * 
  * Implementation of PageContext that contains JSP 1.1 specific methods.
- * 
- * @author Attila Szegedi
  */
 public class _FreeMarkerPageContext1 extends FreeMarkerPageContext {
 

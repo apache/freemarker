@@ -23,7 +23,6 @@ import freemarker.template.TemplateModel;
 /**
  * An operator for arithmetic operations. Note that the + operator
  * also does string concatenation for backward compatibility.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 final class ArithmeticExpression extends Expression {
 

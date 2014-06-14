@@ -31,7 +31,6 @@ import freemarker.template.utility.ClassUtil;
 /**
  * This class is used for as a base for non-overloaded method models and for constructors.
  * (For overloaded methods and constructors see {@link OverloadedMethods}.)
- * @author Attila Szegedi
  */
 class SimpleMethod
 {

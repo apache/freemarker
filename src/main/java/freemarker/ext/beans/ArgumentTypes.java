@@ -30,8 +30,6 @@ import freemarker.template.utility.ClassUtil;
 
 /**
  * The argument types of a method call; usable as cache key.
- * 
- * @author Attila Szegedi
  */
 final class ArgumentTypes {
     

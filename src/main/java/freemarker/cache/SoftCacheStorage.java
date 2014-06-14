@@ -36,8 +36,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * thread-safe in that case.
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
- *
- * @author Attila Szegedi
  */
 public class SoftCacheStorage implements ConcurrentCacheStorage
 {

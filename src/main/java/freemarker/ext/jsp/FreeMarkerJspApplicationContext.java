@@ -41,7 +41,6 @@ import freemarker.log.Logger;
 import freemarker.template.utility.ClassUtil;
 
 /**
- * @author Attila Szegedi
  */
 class FreeMarkerJspApplicationContext implements JspApplicationContext
 {

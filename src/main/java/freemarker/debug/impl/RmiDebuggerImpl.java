@@ -26,7 +26,6 @@ import freemarker.debug.Debugger;
 import freemarker.debug.DebuggerListener;
 
 /**
- * @author Attila Szegedi
  */
 class RmiDebuggerImpl
 extends

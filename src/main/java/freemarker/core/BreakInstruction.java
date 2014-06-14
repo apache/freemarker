@@ -18,7 +18,6 @@ package freemarker.core;
 
 /**
  * Represents a &lt;break&gt; instruction to break out of a loop.
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 final class BreakInstruction extends TemplateElement {
 

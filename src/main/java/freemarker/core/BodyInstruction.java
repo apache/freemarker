@@ -27,7 +27,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * An instruction that processes the nested block within a macro instruction.
- * @author <a href="mailto:jon@revusky.com">Jonathan Revusky</a>
  */
 final class BodyInstruction extends TemplateElement {
     

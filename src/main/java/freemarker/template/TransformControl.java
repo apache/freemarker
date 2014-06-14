@@ -27,8 +27,6 @@ import java.io.IOException;
  * body. The writer can instruct the engine to skip or to repeat body 
  * evaluation, and gets notified about exceptions that are thrown during the
  * body evaluation.
- *
- * @author Attila Szegedi
  */
 public interface TransformControl
 {

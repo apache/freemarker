@@ -37,8 +37,6 @@ import freemarker.template.TemplateModelException;
  * 
  * Implementation of PageContext that contains JSP 2.0 and JSP 2.1 specific 
  * methods.
- * 
- * @author Attila Szegedi
  */
 public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
     private static final Logger logger = Logger.getLogger("freemarker.jsp");

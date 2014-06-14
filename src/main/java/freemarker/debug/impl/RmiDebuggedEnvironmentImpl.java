@@ -46,7 +46,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 class RmiDebuggedEnvironmentImpl
 extends

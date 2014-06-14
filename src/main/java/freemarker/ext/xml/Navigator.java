@@ -27,7 +27,6 @@ import org.jaxen.NamespaceContext;
 import freemarker.template.TemplateModelException;
 
 /**
- * @author Attila Szegedi
  */
 abstract class Navigator {
     // Cache of already parsed XPath expressions

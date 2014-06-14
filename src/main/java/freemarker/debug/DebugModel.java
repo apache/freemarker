@@ -32,8 +32,6 @@ import freemarker.template.TemplateModelException;
  * for sequences and hashes, as well as a {@link #getModelTypes()} method that
  * returns a bit mask of various <tt>TYPE_xxx</tt> constants flagging which
  * template models are implemented by the mirrored object.
- *  
- * @author Attila Szegedi
  */
 public interface DebugModel extends Remote
 {

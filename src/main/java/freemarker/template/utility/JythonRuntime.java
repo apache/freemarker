@@ -28,7 +28,6 @@ import freemarker.template.TemplateTransformModel;
 
 /**
  * A crude first pass at an embeddable Jython interpreter
- * @author <mailto:jon@revusky.com>Jonathan Revusky</a>
  */
 
 public class JythonRuntime extends PythonInterpreter

@@ -24,7 +24,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
- * @author Attila Szegedi
  */
 class PageContextFactory {
     private static final Class pageContextImpl = getPageContextImpl();

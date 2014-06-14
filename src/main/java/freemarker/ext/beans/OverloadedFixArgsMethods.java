@@ -24,7 +24,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * Stores the non-varargs methods for a {@link OverloadedMethods} object.
- * @author Attila Szegedi
  */
 class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     

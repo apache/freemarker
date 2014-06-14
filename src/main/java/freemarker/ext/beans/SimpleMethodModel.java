@@ -32,7 +32,6 @@ import freemarker.template.utility.Collections12;
  * {@link freemarker.template.TemplateMethodModel} interface. 
  * It is used by {@link BeanModel} to wrap reflected method calls
  * for non-overloaded methods.
- * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
 public final class SimpleMethodModel extends SimpleMethod
     implements

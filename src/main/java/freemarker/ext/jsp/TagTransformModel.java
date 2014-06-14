@@ -38,7 +38,6 @@ import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
 
 /**
- * @author Attila Szegedi
  */
 class TagTransformModel extends JspTagModelBase implements TemplateTransformModel
 {

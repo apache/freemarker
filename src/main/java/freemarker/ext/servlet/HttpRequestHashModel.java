@@ -31,7 +31,6 @@ import freemarker.template.TemplateModelException;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.
- * @author Attila Szegedi
  */
 public final class HttpRequestHashModel implements TemplateHashModelEx
 {

@@ -39,7 +39,6 @@ import freemarker.template.TemplateModelException;
  * subclass of <tt>FreemarkerServlet</tt> that overrides
  * <tt>preTemplateProcess</tt>) are discovered as "page" variables by the FM
  * JSP PageContext implementation.
- * @author Attila Szegedi
  */
 public class AllHttpScopesHashModel extends SimpleHash
 {

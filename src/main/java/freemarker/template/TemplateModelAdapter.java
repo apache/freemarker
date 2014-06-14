@@ -22,7 +22,6 @@ package freemarker.template;
  * {@link AdapterTemplateModel}. You will rarely implement this interface 
  * directly. It is usually implemented by unwrapping adapter classes of various 
  * object wrapper implementations.
- * @author Attila Szegedi
  */
 public interface TemplateModelAdapter {
     /**

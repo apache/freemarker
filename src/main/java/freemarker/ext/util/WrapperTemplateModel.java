@@ -23,8 +23,6 @@ import freemarker.template.TemplateModel;
  * object, and wish to provide access to that wrapped object.
  * 
  * <p>You may also want to implement {@link freemarker.template.AdapterTemplateModel}.
- * 
- * @author Attila Szegedi
  */
 public interface WrapperTemplateModel extends TemplateModel
 {

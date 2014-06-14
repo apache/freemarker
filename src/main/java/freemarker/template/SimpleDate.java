@@ -20,8 +20,6 @@ package freemarker.template;
  * A simple implementation of the <tt>TemplateDateModel</tt>
  * interface. Note that this class is immutable.
  * <p>This class is thread-safe.
- * 
- * @author Attila Szegedi
  */
 public class SimpleDate implements TemplateDateModel
 {

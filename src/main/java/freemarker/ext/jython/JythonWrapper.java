@@ -51,7 +51,6 @@ import freemarker.template.utility.OptimizerUtil;
 /**
  * An object wrapper that wraps Jython objects into FreeMarker template models
  * and vice versa.
- * @author Attila Szegedi
  */
 public class JythonWrapper implements ObjectWrapper
 {

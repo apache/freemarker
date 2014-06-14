@@ -22,7 +22,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * @author Attila Szegedi
  */
 class MemberAndArguments extends MaybeEmptyMemberAndArguments {
     

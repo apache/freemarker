@@ -81,7 +81,6 @@ import freemarker.template.utility.Collections12;
  *   {@link freemarker.ext.xml.NodeListModel freemarker.ext.xml.NodeListModel}
  * 
  * @deprecated Use {@link freemarker.ext.dom.NodeModel} instead.
- * @author Attila Szegedi
  */
 public class NodeListModel
 implements

@@ -23,7 +23,6 @@ import freemarker.template.TemplateException;
 
 /**
  * Representation of the compile-time #escape directive.
- * @author Attila Szegedi
  */
 class EscapeBlock extends TemplateElement {
 

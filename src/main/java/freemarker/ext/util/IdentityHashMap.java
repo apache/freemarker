@@ -31,7 +31,6 @@ import java.util.Set;
  * {@link System#identityHashCode(Object)} for hashing, and reference comparison
  * instead of {@link Object#equals(Object)}. Note that this applies only to keys,
  * and not to values, i.e. {@link #containsValue(Object)} still uses {@link Object#equals(Object)}.
- * @author  Attila Szegedi
  */
 public class IdentityHashMap
     extends AbstractMap

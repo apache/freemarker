@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author Attila Szegedi
  */
 public class OptimizerUtil
 {

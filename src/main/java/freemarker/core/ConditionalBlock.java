@@ -23,8 +23,6 @@ import freemarker.template.TemplateException;
 /**
  * An element that represents a conditionally executed block: #if, #elseif or #elseif. Note that when an #if has
  * related #elseif-s or #else, an {@link IfBlock} parent must be used. For a lonely #if, no such parent is needed. 
- * 
- * @author <A HREF="mailto:jon@revusky.com">Jonathan Revusky</A>
  */
 
 final class ConditionalBlock extends TemplateElement {

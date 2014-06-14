@@ -29,8 +29,6 @@ import freemarker.template.utility.Collections12;
 /**
  * Wraps a set of same-name overloaded methods behind {@link freemarker.template.TemplateMethodModel} interface,
  * like if it was a single method, chooses among them behind the scenes on call-time based on the argument values.
- *  
- * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
 public class OverloadedMethodsModel
 implements

@@ -22,7 +22,6 @@ import freemarker.template.Template;
  * A class that allows one to associate custom data with a configuration, 
  * a template, or environment. It works pretty much like {@link ThreadLocal}, a
  * class that allows one to associate custom data with a thread.
- * @author Attila Szegedi
  */
 public class CustomAttribute
 {

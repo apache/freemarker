@@ -38,7 +38,6 @@ import freemarker.template.TemplateModelException;
  * You can, however use <tt>map.entrySet()</tt>, <tt>map.keySet()</tt>, or
  * <tt>map.values()</tt> to obtain {@link freemarker.template.TemplateCollectionModel} instances for 
  * various aspects of the map.</p>
- * @author Attila Szegedi
  */
 public class MapModel
 extends

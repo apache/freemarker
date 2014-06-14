@@ -22,8 +22,6 @@ package freemarker.template;
  * its size can't be queried.
  *  
  * <p>They are mostly used in template languages like {@code <#list myCollection as i>...</#list>}.  
- *
- * @author Attila Szegedi, szegedia at users dot sourceforge dot net
  */
 public interface TemplateCollectionModel extends TemplateModel {
 
