@@ -20349,9 +20349,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         some of the improvements and fixes described below are only activated
         when you specifically ask for 2.3.21 <quote>incompatible
         improvements</quote>, because they can, with small chance, break
-        existing applications. In general, if the dependent project is still
-        actively developed, allowing 2.3.21 "incompatible improvements" is
-        highly recommended.</para>
+        existing applications. But if the dependent project is still actively
+        developed, allowing 2.3.21 "incompatible improvements" is highly
+        recommended.</para>
+
+        <para>Note that we have changed our proprietary BSD-style license to
+        Apache License, Version 2.0. See the <link linkend="app_license">new
+        license here</link>.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -20985,6 +20989,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
           </itemizedlist>
         </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>The license has changed from our proprietary BSD-Style
+              license to the well know "Apache License, Version 2.0", and the
+              copyright owner has changed from "Visigoth Software Society"
+              (founded by Jonathan Revusky) to the three main FreeMarker 2
+              developers/contributors, "Attila Szegedi, Daniel Dekany, and
+              Jonathan Revusky".</para>
+            </listitem>
+
+            <listitem>
+              <para>Many smaller additions and clarifications in the Manual
+              and API JavaDocs.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
       </section>
 
       <section xml:id="versions_2_3_20">
@@ -21584,21 +21608,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Various internal code cleanups.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Other changes</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>TODO: Licence</para>
-            </listitem>
-
-            <listitem>
-              <para>Many smaller additions and clarifications in the Manual
-              and API JavaDocs.</para>
             </listitem>
           </itemizedlist>
         </section>
