@@ -496,11 +496,13 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
      */
-    public void setTemplateLoader(TemplateLoader loader) {
+    public void setTemplateLoader(TemplateLoader templateLoader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(loader, cache.getCacheStorage());
-            templateLoaderWasSet = true;
+            if (cache.getTemplateLoader() != templateLoader) {
+                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage());
+                templateLoaderWasSet = true;
+            }
         }
     }
 
