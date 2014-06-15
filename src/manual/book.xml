@@ -20930,7 +20930,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/373/">373</link>]:
-              This are three bugs actually, which can cause problems when
+              These are three bugs actually, which can cause problems when
               FreeMarker re-loads a template because of a charset override
               with <literal>&lt;#ftl encoding="..."&gt;</literal>: First, if
               the template loader was a <literal>URLTemplateLoader</literal>,
