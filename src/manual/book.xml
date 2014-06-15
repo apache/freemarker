@@ -21566,6 +21566,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fix [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/394/">394</link>]:
+              When trying to access the optional Jython (or W3C DOM) classes
+              has failed in <literal>DefaultObjectWrapper</literal> with an
+              <literal>Error</literal>, rather than with an
+              <literal>Exception</literal>, loading the
+              <literal>DefaultObjectWrapper</literal> class itself has failed,
+              instead of the Jython (or W3C DOM) support being disabled. From
+              now in, it will survive any kind of <literal>Throwable</literal>
+              there, and if the <literal>Throwable</literal> is not an
+              <literal>ClassNotFoundException</literal>, it will also log the
+              <literal>Throwable</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Improved the performance of
               <literal>(thisVarIsMissing.foo)!default</literal> and similar
               <emphasis>parenthetical</emphasis> existence operators and

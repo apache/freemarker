@@ -25,6 +25,7 @@ import java.util.Map;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
+import freemarker.log.Logger;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Note that instances of this class generally should
@@ -80,8 +81,16 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         Class cl;
         try {
             cl = Class.forName("org.w3c.dom.Node");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             cl = null;
+            if (!(e instanceof ClassNotFoundException)) {
+                try {
+                    Logger.getLogger("freemarker.template.DefaultObjectWrapper")
+                            .error("Failed to init W3C DOM support, so it was disabled.", e);
+                } catch (Throwable e2) {
+                    // ignore
+                }
+            }
         }
         W3C_DOM_NODE_CLASS = cl;
         
@@ -91,9 +100,17 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             ow = (ObjectWrapper) Class.forName(
                     "freemarker.ext.jython.JythonWrapper")
                     .getField("INSTANCE").get(null);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             cl = null;
             ow = null;
+            if (!(e instanceof ClassNotFoundException)) {
+                try {
+                    Logger.getLogger("freemarker.template.DefaultObjectWrapper")
+                            .error("Failed to init Jython support, so it was disabled.", e);
+                } catch (Throwable e2) {
+                    // ignore
+                }
+            }
         }
         JYTHON_OBJ_CLASS = cl;
         JYTHON_WRAPPER = ow;
