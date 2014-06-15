@@ -20,8 +20,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import junit.framework.TestCase;
+import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.StrongCacheStorage;
 import freemarker.template.utility.NullWriter;
 
 public class ConfigurationTest extends TestCase{
@@ -166,6 +168,29 @@ public class ConfigurationTest extends TestCase{
         } catch (TemplateException e) {
             assertFalse(e.getMessage().contains("Tip:"));
         }
+    }
+
+    public void testSetTemplateLoaderAndCache() throws Exception {
+        Configuration cfg = new Configuration();
+        
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        assertEquals(0, cache.getSize());
+        cfg.setCacheStorage(new StrongCacheStorage());
+        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        assertEquals(0, cache.getSize());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.getTemplate("toCache2.ftl");
+        assertEquals(2, cache.getSize());
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateLoader(cfg.getTemplateLoader());
+        assertEquals(1, cache.getSize());
     }
     
 }

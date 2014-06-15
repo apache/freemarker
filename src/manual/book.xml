@@ -21484,9 +21484,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>With default arithmetic engine, performance optimizations
-              of comparison operations when some of the numbers is 0, and when
-              the sign of the numbers differ.</para>
+              <para>With the default arithmetic engine, performance
+              optimizations of comparison operations when some of the numbers
+              is 0, and when the sign of the numbers differ.</para>
             </listitem>
 
             <listitem>
@@ -21575,6 +21575,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               now, measured on Java 6. In other cases (when all variables
               exists, or the the last step is missing) the performance is
               about the same (relatively fast) as before.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added interface
+              <literal>freemarker.cache.CacheStorageWithGetSize</literal>
+              which allows querying the current number of cache entries in a
+              <literal>CacheStorage</literal> that implements it. It's
+              implemented by all out-of-the-box
+              <literal>CacheStorage</literal> implementations. Also added
+              <literal>getStrongSize()</literal> and
+              <literal>getSoftSize()</literal> to
+              <literal>MRUCacheStorage</literal>.</para>
             </listitem>
 
             <listitem>
