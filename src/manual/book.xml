@@ -20945,7 +20945,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               case-sensitive comparison, thus often re-loaded needlessly (like
               "UTF-8" and "utf-8" mean the same). Now this comparison is
               case-insensitive. Last not least, when retrying with the second
-              charset, The <literal>TemplateCache</literal> has forgotten to
+              charset, the <literal>TemplateCache</literal> has forgotten to
               close the first <literal>Reader</literal>, which can be a handle
               leak.</para>
             </listitem>
@@ -21012,6 +21012,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">311</link>]:
               <literal>TemplateBooleanModel.TRUE</literal> and
               <literal>FALSE</literal> are now serializable</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">300</link>]:
+              Logger class availability check was incorrect in that it has
+              checked the availability of logger libraries with the thread
+              context class loader, then later it tried to link to them with
+              the defining class loader of the FreeMarker classes. With some
+              class loader setups (notably under Netbeans sometimes) this led
+              to <literal>ClassDefNotFoundError</literal>-s that made
+              FreeMarker unusable. (The check itself was also not very
+              durable, as it didn't expected <literal>LinakeError</literal>-s,
+              only <literal>ClassNotFoundException</literal>.)</para>
             </listitem>
 
             <listitem>

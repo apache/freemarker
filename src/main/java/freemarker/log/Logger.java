@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import freemarker.core.BugException;
-import freemarker.template.utility.ClassUtil;
 
 /**
  * The FreeMarker logging facility. This is a polymorphic implementation
@@ -270,6 +269,10 @@ public abstract class Logger
                 {
                     ;//Intentionally ignored
                 }
+                catch(LinkageError e)
+                {
+                    ;//Intentionally ignored
+                }
             }
             System.err.println("*** WARNING: FreeMarker logging suppressed.");
             return new _NullLoggerFactory();
@@ -289,7 +292,7 @@ public abstract class Logger
 
         try
         {
-            ClassUtil.forName(loggerClassName);
+            Class.forName(loggerClassName);
             return (LoggerFactory)Class.forName("freemarker.log." + factoryType + "LoggerFactory").newInstance();
         }
         catch(IllegalAccessException e)
