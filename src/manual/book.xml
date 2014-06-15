@@ -20985,6 +20985,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">311</link>]:
+              <literal>TemplateBooleanModel.TRUE</literal> and
+              <literal>FALSE</literal> are now serializable</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller improvements in configuration setting
               errors messages</para>
             </listitem>
