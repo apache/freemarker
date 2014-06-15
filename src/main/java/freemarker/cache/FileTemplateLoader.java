@@ -176,7 +176,7 @@ public class FileTemplateLoader implements TemplateLoader
                 {
                     if (!(templateSource instanceof File)) {
                         throw new IllegalArgumentException(
-                                "templateSource is a: " + 
+                                "templateSource wasn't a File, but a: " + 
                                 templateSource.getClass().getName());
                     }
                     return new InputStreamReader(new FileInputStream(

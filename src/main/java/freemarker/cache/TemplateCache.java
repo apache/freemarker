@@ -377,6 +377,7 @@ public class TemplateCache
                 }
                 catch (Template.WrongEncodingException wee) {
                     encoding = wee.specifiedEncoding;
+                    reader.close();
                     reader = loader.getReader(source, encoding);
                     template = new Template(name, reader, config, encoding);
                 }

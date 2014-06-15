@@ -89,6 +89,16 @@ class URLTemplateSource {
     }
 
     InputStream getInputStream() throws IOException {
+        if (inputStream != null) {
+            // Ensure that the returned InputStream reads from the beginning of the resource when getInputStream()
+            // is called for the second time:
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                // Ignore; this is maybe because it was closed for the 2nd time now
+            }
+            this.conn = url.openConnection();
+        }
         inputStream = conn.getInputStream();
         return inputStream;
     }

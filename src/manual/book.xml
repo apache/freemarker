@@ -20929,6 +20929,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/373/">373</link>]:
+              This are three bugs actually, which can cause problems when
+              FreeMarker re-loads a template because of a charset override
+              with <literal>&lt;#ftl encoding="..."&gt;</literal>: First, if
+              the template loader was a <literal>URLTemplateLoader</literal>,
+              when <literal>TemplateLoader.getReader()</literal> was called
+              for the second time, and the <literal>Reader</literal> returned
+              for the first time was already used, it might returned an empty
+              or corrupted template, depending on the backing URL
+              implementation. Secondly, when FreeMarer has decided if a
+              template file has to be re-loaded because its encoding specified
+              with <literal>&lt;#ftl encoding="..."&gt;</literal> differs from
+              the encoding used for loading the template first, it has used
+              case-sensitive comparison, thus often re-loaded needlessly (like
+              "UTF-8" and "utf-8" mean the same). Now this comparison is
+              case-insensitive. Last not least, when retrying with the second
+              charset, The <literal>TemplateCache</literal> has forgotten to
+              close the first <literal>Reader</literal>, which can be a handle
+              leak.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/409/">409</link>]:
               <literal>SimpleHash</literal>'s internal <literal>Map</literal>
               is concurrently modified on a non-safe way when getting length-1

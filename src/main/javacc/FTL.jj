@@ -2944,7 +2944,7 @@ void HeaderElement() :
                         throw new ParseException("Expecting an encoding string.", exp);
                      }
                      String encoding = template.getEncoding();
-                     if (encoding != null && !encoding.equals(vs)) {
+                     if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
                          throw new Template.WrongEncodingException(vs);
                      }
                  }
