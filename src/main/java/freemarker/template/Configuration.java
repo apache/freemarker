@@ -987,23 +987,24 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Adds shared variable to the configuration.
-     * It uses {@link Configurable#getObjectWrapper()} to wrap the 
-     * <code>obj</code>.
+     * Adds shared variable to the configuration; It uses {@link Configurable#getObjectWrapper()} to wrap the 
+     * {@code value}, so it's important that the object wrapper is set before this.
      * 
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
      * 
      * @see #setSharedVariable(String,TemplateModel)
      * @see #setAllSharedVariables
      */
-    public void setSharedVariable(String name, Object obj) throws TemplateModelException {
-        setSharedVariable(name, getObjectWrapper().wrap(obj));
+    public void setSharedVariable(String name, Object value) throws TemplateModelException {
+        setSharedVariable(name, getObjectWrapper().wrap(value));
     }
 
     /**
-     * Adds all object in the hash as shared variable to the configuration.
+     * Adds all object in the hash as shared variable to the configuration; it's like doing several
+     * {@link #setSharedVariable(String, Object)} calls, one for each hash entry. It doesn't remove the already added
+     * shared variable before doing this.
      *
-     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
+     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared shared variable values,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
      *
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
