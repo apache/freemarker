@@ -19,7 +19,10 @@ package freemarker.cache;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import freemarker.template.utility.StringUtil;
 
 /**
  * A {@link TemplateLoader} that uses a Map with Strings as its source of 
@@ -133,4 +136,33 @@ public class StringTemplateLoader implements TemplateLoader {
             return name.hashCode();
         }
     }
+    
+    /**
+     * Show class name and some details that are useful in template-not-found errors.
+     * 
+     * @since 2.3.21
+     */
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("StringTemplateLoader(Map { ");
+        int cnt = 0;
+        for (Iterator it = templates.keySet().iterator(); it.hasNext(); ) {
+            cnt++;
+            if (cnt != 1) {
+                sb.append(", ");
+            }
+            if (cnt > 10) {
+                sb.append("...");
+                break;
+            }
+            sb.append(StringUtil.jQuote(it.next()));
+            sb.append("=...");
+        }
+        if (cnt != 0) {
+            sb.append(' ');
+        }
+        sb.append("})");
+        return sb.toString();
+    }
+    
 }

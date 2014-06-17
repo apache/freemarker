@@ -204,5 +204,17 @@ public class FileTemplateLoader implements TemplateLoader
     public File getBaseDirectory() {
         return baseDir;
     }
+
+    /**
+     * Show class name and some details that are useful in template-not-found errors.
+     * 
+     * @since 2.3.21
+     */
+    public String toString() {
+        // We don't StringUtil.jQuote paths here, because on Windows there will be \\-s then that some may find
+        // confusing.
+        return "FileTemplateLoader(baseDir=\"" + baseDir
+                + "\", canonicalPath=\"" + canonicalPath + "\")";
+    }
     
 }

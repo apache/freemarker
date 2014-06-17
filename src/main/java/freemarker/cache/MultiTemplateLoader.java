@@ -166,4 +166,23 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
             return source.toString();
         }
     }
+    
+    /**
+     * Show class name and some details that are useful in template-not-found errors.
+     * 
+     * @since 2.3.21
+     */
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("MultiTemplateLoader(");
+        for (int i = 0; i < loaders.length; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append("loader").append(i + 1).append(" = ").append(loaders[i]);
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+    
 }

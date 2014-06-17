@@ -38,7 +38,7 @@ public class WebappTemplateLoader implements TemplateLoader
     private static final Logger logger = Logger.getLogger("freemarker.cache");
     
     private final ServletContext servletContext;
-    private final String path;
+    private final String subdirPath;
     
     /**
      * Creates a resource template cache that will use the specified servlet
@@ -55,37 +55,37 @@ public class WebappTemplateLoader implements TemplateLoader
 
     /**
      * Creates a template loader that will use the specified servlet
-     * context to load the resources. It will use the specified base path.
-     * The is interpreted as relative to the current context root (does not mater
+     * context to load the resources. It will use the specified base path,
+     * which is interpreted relatively to the context root (does not mater
      * if you start it with "/" or not). Path components
      * should be separated by forward slashes independently of the separator 
      * character used by the underlying operating system.
      * @param servletContext the servlet context whose
      * {@link ServletContext#getResource(String)} will be used to load the
      * templates.
-     * @param path the base path to template resources.
+     * @param subdirPath the base path to template resources.
      */
-    public WebappTemplateLoader(ServletContext servletContext, String path) {
+    public WebappTemplateLoader(ServletContext servletContext, String subdirPath) {
         if(servletContext == null) {
             throw new IllegalArgumentException("servletContext == null");
         }
-        if(path == null) {
+        if(subdirPath == null) {
             throw new IllegalArgumentException("path == null");
         }
         
-        path = path.replace('\\', '/');
-        if(!path.endsWith("/")) {
-            path += "/";
+        subdirPath = subdirPath.replace('\\', '/');
+        if(!subdirPath.endsWith("/")) {
+            subdirPath += "/";
         }
-        if (!path.startsWith("/")) {
-            path = "/" + path;
+        if (!subdirPath.startsWith("/")) {
+            subdirPath = "/" + subdirPath;
         }
-        this.path = path;
+        this.subdirPath = subdirPath;
         this.servletContext = servletContext;
     }
 
     public Object findTemplateSource(String name) throws IOException {
-        String fullPath = path + name;
+        String fullPath = subdirPath + name;
         // First try to open as plain file (to bypass servlet container resource caches).
         try {
             String realPath = servletContext.getRealPath(fullPath);
@@ -142,4 +142,16 @@ public class WebappTemplateLoader implements TemplateLoader
             ((URLTemplateSource) templateSource).close();
         }
     }
+
+    /**
+     * Show class name and some details that are useful in template-not-found errors.
+     * 
+     * @since 2.3.21
+     */
+    public String toString() {
+        return "WebappTemplateLoader(servletContext.name="
+                + StringUtil.jQuote(servletContext.getServletContextName()) + ", subdirPath=" + StringUtil.jQuote(subdirPath)
+                + ")";
+    }
+    
 }

@@ -20902,6 +20902,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Template not found exceptions now explain that the
+              template path is relative to a virtual file system, and show the
+              <literal>toString</literal> of the
+              <literal>TemplateLoader</literal>. The out-of-the-box
+              <literal>TemplateLoader</literal> implementations now have an
+              overridden <literal>toString</literal> to show the actual base
+              directory and such details. Custom
+              <literal>TemplateLoader</literal> implementations are encouraged
+              to override <literal>toString</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para><literal>ParseException</literal>-s now also store the
               end-location of the error, not just its start-location. This is
               useful if you want to underline the error in the source code,

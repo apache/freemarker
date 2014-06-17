@@ -866,17 +866,22 @@ public class Configuration extends Configurable implements Cloneable {
             TemplateLoader tl = getTemplateLoader();  
             String msg; 
             if (tl == null) {
-                msg = "Don't know from where to load template " + StringUtil.jQuote(name)
-                      + " because the \"template_loader\" FreeMarker setting wasn't set.";
+                msg = "Don't know where to load template " + StringUtil.jQuote(name)
+                      + " from because the \"template_loader\" FreeMarker setting wasn't set.";
             } else {
                 msg = "Template " + StringUtil.jQuote(name) + " not found.";
                 if (!templateLoaderWasSet) {
                     msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
                             + "default value, which is most certainly not intended and the cause of this problem."; 
                 }
-                if (tl instanceof FileTemplateLoader) {            
-                    msg += " The template directory used was: " + ((FileTemplateLoader) tl).getBaseDirectory();
+                String tlDesc;
+                try {
+                    tlDesc = tl.toString();
+                } catch (Throwable e) {
+                    tlDesc = tl.getClass().getName() + " object (toString failed)";
                 }
+                msg += " Note that the template path is relative to the virtual file system implemented by: "
+                        + tlDesc;
             }
             throw new FileNotFoundException(msg);
         }

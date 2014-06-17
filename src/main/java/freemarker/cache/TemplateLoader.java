@@ -28,12 +28,17 @@ import freemarker.template.Configuration;
  * {@link TemplateLoader} implementations out-of-the-box, it's normal for embedding
  * frameworks to use their own implementations.
  * 
- * To set the {@link TemplateLoader} used by FreeMaker, use
+ * <p>To set the {@link TemplateLoader} used by FreeMaker, use
  * {@link Configuration#setTemplateLoader(TemplateLoader)}.
  * 
- * Implementations of this interface should be thread-safe.
+ * <p>Implementations of this interface should be thread-safe.
  * 
- * For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
+ * <p>Implementations should override {@link Object#toString()} to show information about from where the
+ * {@link TemplateLoader} loads the templates. For example, a template loader that loads template from database table
+ * could show something like {@code "MyDatabaseTemplateLoader(user=\"cms\", table=\"mail_templates\")"}.
+ * This string will be shown in template-not-found exception messages.
+ * 
+ * <p>For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
  * the {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly
  * by the {@link TemplateCache}, and templates are get via the {@link TemplateCache} API-s.
  */
