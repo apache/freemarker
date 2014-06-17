@@ -34,7 +34,7 @@ import freemarker.template.utility.WriteProtectable;
  */
 public class BeansWrapperReadOnlyTest extends TestCase {
 
-    private static final String EXPECTED_MESSAGE_PART = "read-only";
+    private static final String EXPECTED_MESSAGE_PART = "write protected";
 
     public BeansWrapperReadOnlyTest(String name) {
         super(name);
