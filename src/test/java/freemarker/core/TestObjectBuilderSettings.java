@@ -24,6 +24,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Properties;
 
@@ -31,6 +33,7 @@ import org.junit.Test;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.MruCacheStorage;
+import freemarker.cache.TemplateLoader;
 import freemarker.core.subpkg.PublicWithMixedConstructors;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.jython.JythonWrapper;
@@ -390,6 +393,8 @@ public class TestObjectBuilderSettings {
             props.setProperty(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "freemarker.core.TestObjectBuilderSettings$DummyNewBuiltinClassResolver()");
             props.setProperty(Configuration.DEFAULT_ENCODING_KEY, "utf-8");
+            props.setProperty(Configuration.TEMPLATE_LOADER_KEY,
+                    "freemarker.core.TestObjectBuilderSettings$DummyTemplateLoader()");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
@@ -398,6 +403,7 @@ public class TestObjectBuilderSettings {
             assertEquals(DummyTemplateExceptionHandler.class, cfg.getTemplateExceptionHandler().getClass());
             assertEquals(DummyCacheStorage.class, cfg.getCacheStorage().getClass());
             assertEquals(DummyNewBuiltinClassResolver.class, cfg.getNewBuiltinClassResolver().getClass());
+            assertEquals(DummyTemplateLoader.class, cfg.getTemplateLoader().getClass());
             assertEquals("utf-8", cfg.getDefaultEncoding());
         }
         
@@ -952,6 +958,25 @@ public class TestObjectBuilderSettings {
 
         public Class resolve(String className, Environment env, Template template) throws TemplateException {
             return null;
+        }
+        
+    }
+    
+    public static class DummyTemplateLoader implements TemplateLoader {
+
+        public Object findTemplateSource(String name) throws IOException {
+            return null;
+        }
+
+        public long getLastModified(Object templateSource) {
+            return 0;
+        }
+
+        public Reader getReader(Object templateSource, String encoding) throws IOException {
+            return null;
+        }
+
+        public void closeTemplateSource(Object templateSource) throws IOException {
         }
         
     }

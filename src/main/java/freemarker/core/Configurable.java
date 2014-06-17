@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 
+import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
@@ -958,6 +959,10 @@ public class Configurable
      *   <li><p>{@code "incompatible_enhancements"}:
      *       See: {@link Configuration#setIncompatibleEnhancements(String)}.
      *       This setting name is deprecated, use {@code "incompatible_improvements"} instead.
+     *       
+     *   <li><p>{@code "template_loader"}:
+     *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
+     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was

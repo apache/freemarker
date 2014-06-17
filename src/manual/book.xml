@@ -20914,13 +20914,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>template.cache.NullTemplateLoader</literal>, which is a
-              dummy <literal>TemplateLoader</literal> that doesn't find any
-              templates.</para>
-            </listitem>
-
-            <listitem>
               <para>Fixed various issues in <literal>Version</literal> class,
               such as wrong <literal>hashCode</literal>, possible concurrency
               glitches, and acceptance of some malformed version
@@ -21029,8 +21022,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>template_loader</literal> was added as possible
+              configuration setting <literal>Properties</literal> key.</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller improvements in configuration setting
-              errors messages</para>
+              errors messages.</para>
             </listitem>
           </itemizedlist>
         </section>

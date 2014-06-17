@@ -123,6 +123,8 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
+    public static final String TEMPLATE_LOADER_KEY = "template_loader";
+    
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
@@ -1201,6 +1203,9 @@ public class Configuration extends Configurable implements Cloneable {
                 setIncompatibleImprovements(new Version(value));
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
                 setIncompatibleEnhancements(value);
+            } else if (TEMPLATE_LOADER_KEY.equals(name)) {
+                setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
+                        value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {
                 unknown = true;
             }
