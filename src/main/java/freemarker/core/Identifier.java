@@ -52,6 +52,10 @@ final class Identifier extends Expression {
         return name;
     }
     
+    String getName() {
+        return name;
+    }
+    
     String getNodeTypeSymbol() {
         return getCanonicalForm();
     }

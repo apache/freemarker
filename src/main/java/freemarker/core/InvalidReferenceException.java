@@ -36,6 +36,9 @@ public class InvalidReferenceException extends TemplateException {
         ". (These only cover the last step of the expression; to cover the whole expression, "
         + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"
     };
+
+    private static final String TIP_NO_DOLAR =
+            "Variable references must not start with \"$\", unless that's really part of the name.";
     
     public InvalidReferenceException(Environment env) {
         super("Invalid reference", env);
@@ -50,7 +53,7 @@ public class InvalidReferenceException extends TemplateException {
     }
 
     /**
-     * Use this whenever possible, as it returns {@link #FAST_INSTANCE} instead of creatin a new instance when
+     * Use this whenever possible, as it returns {@link #FAST_INSTANCE} instead of creating a new instance, when
      * appropriate.
      */
     static InvalidReferenceException getInstance(Expression blame, Environment env) {
@@ -58,15 +61,23 @@ public class InvalidReferenceException extends TemplateException {
             return FAST_INSTANCE;
         } else {
             if (blame != null) {
-                return new InvalidReferenceException(
-                        new _ErrorDescriptionBuilder("The following has evaluated to null or missing:")
-                                .blame(blame)
-                                .tip(InvalidReferenceException.TIP),
-                            env);
+                final _ErrorDescriptionBuilder errDescBuilder
+                        = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blame);
+                if (endsWithDollarVariable(blame)) {
+                    errDescBuilder.tips(new Object[] { TIP_NO_DOLAR, TIP });
+                } else {
+                    errDescBuilder.tip(TIP);
+                }
+                return new InvalidReferenceException(errDescBuilder, env);
             } else {
                 return new InvalidReferenceException(env);
             }
         }
+    }
+
+    private static boolean endsWithDollarVariable(Expression blame) {
+        return blame instanceof Identifier && ((Identifier) blame).getName().startsWith("$")
+                || blame instanceof Dot && ((Dot) blame).getRHO().startsWith("$");
     }
     
 }

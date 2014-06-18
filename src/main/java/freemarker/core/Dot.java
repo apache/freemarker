@@ -75,6 +75,10 @@ final class Dot extends Expression {
     ParameterRole getParameterRole(int idx) {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }
+    
+    String getRHO() {
+        return key;
+    }
 
     boolean onlyHasIdentifiers() {
         return (target instanceof Identifier) || ((target instanceof Dot) && ((Dot) target).onlyHasIdentifiers());

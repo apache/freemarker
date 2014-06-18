@@ -20373,6 +20373,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   wasn't hidden in the FTL stack trace when the error was
                   inside its nested block.</para>
                 </listitem>
+
+                <listitem>
+                  <para>When the undefined variable's name is started with
+                  <literal>$</literal> (frequent mistake of Velocity users), a
+                  hint is added that explains that the <literal>$</literal> is
+                  probably not needed.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
