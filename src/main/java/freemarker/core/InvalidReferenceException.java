@@ -39,6 +39,12 @@ public class InvalidReferenceException extends TemplateException {
 
     private static final String TIP_NO_DOLAR =
             "Variable references must not start with \"$\", unless that's really part of the name.";
+
+    private static final String TIP_LAST_STEP_DOT =
+            "It's the step after the last dot that caused this error, not those before it.";
+
+    private static final String TIP_LAST_STEP_SQUARE_BRACKET =
+            "It's the final [] step that caused this error, not those before it.";
     
     public InvalidReferenceException(Environment env) {
         super("Invalid reference", env);
@@ -65,6 +71,10 @@ public class InvalidReferenceException extends TemplateException {
                         = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blame);
                 if (endsWithDollarVariable(blame)) {
                     errDescBuilder.tips(new Object[] { TIP_NO_DOLAR, TIP });
+                } else if (blame instanceof Dot) {
+                    errDescBuilder.tips(new Object[] { TIP_LAST_STEP_DOT, TIP });
+                } else if (blame instanceof DynamicKeyName) {
+                    errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
                 } else {
                     errDescBuilder.tip(TIP);
                 }
