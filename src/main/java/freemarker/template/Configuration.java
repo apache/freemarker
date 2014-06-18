@@ -819,7 +819,9 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>See {@link Configuration} for an example of basic usage.
      *
-     * @param name The name of the template. Can't be {@code null}. The exact syntax of the name
+     * @param name The name or path of the template, which is not a real path,
+     *     but interpreted inside the current {@link TemplateLoader}.
+     *     Can't be {@code null}. The exact syntax of the name
      *     is interpreted by the underlying {@link TemplateLoader}, but the
      *     cache makes some assumptions. First, the name is expected to be
      *     a hierarchical path, with path components separated by a slash
@@ -869,19 +871,20 @@ public class Configuration extends Configurable implements Cloneable {
                 msg = "Don't know where to load template " + StringUtil.jQuote(name)
                       + " from because the \"template_loader\" FreeMarker setting wasn't set.";
             } else {
-                msg = "Template " + StringUtil.jQuote(name) + " not found.";
-                if (!templateLoaderWasSet) {
-                    msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
-                            + "default value, which is most certainly not intended and the cause of this problem."; 
-                }
+                msg = "Template " + StringUtil.jQuote(name) + " not found. "
+                        + "The quoted name was interpreted by this template loader: ";
                 String tlDesc;
                 try {
                     tlDesc = tl.toString();
                 } catch (Throwable e) {
                     tlDesc = tl.getClass().getName() + " object (toString failed)";
                 }
-                msg += " Note that the template path is relative to the virtual file system implemented by: "
-                        + tlDesc;
+                msg += tlDesc + ".";
+                
+                if (!templateLoaderWasSet) {
+                    msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
+                            + "default value, which is most certainly not intended and the cause of this problem."; 
+                }
             }
             throw new FileNotFoundException(msg);
         }

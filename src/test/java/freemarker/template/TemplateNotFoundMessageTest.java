@@ -84,7 +84,7 @@ public class TemplateNotFoundMessageTest {
     }
 
     private void showErrorMessage(String errMsg) {
-        System.out.println(errMsg);
+        //System.out.println(errMsg);
     }
 
     private String failWith(TemplateLoader tl) {
