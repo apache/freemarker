@@ -202,7 +202,7 @@ public class Configuration extends Configurable implements Cloneable {
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
     /**
-     * @deprecated Use {@link Configuration} instead.
+     * @deprecated Use {@link #Configuration(Version)} instead.
      */
     public Configuration() {
         this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
