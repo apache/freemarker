@@ -303,11 +303,6 @@ public class _ErrorDescriptionBuilder {
         this.tips = tips;
         return this;
     }
-
-    public _ErrorDescriptionBuilder tips(String[][] tips) {
-        this.tips = tips;
-        return this;
-    }
     
     private static class Blaming {
         TemplateObject blamer;

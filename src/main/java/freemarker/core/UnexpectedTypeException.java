@@ -47,7 +47,8 @@ public class UnexpectedTypeException extends TemplateException {
     }
 
     UnexpectedTypeException(
-            Expression blamed, TemplateModel model, String expectedType, String[] tips, Environment env) throws InvalidReferenceException {
+            Expression blamed, TemplateModel model, String expectedType, String[] tips, Environment env)
+            throws InvalidReferenceException {
         super(null, env, newDesciptionBuilder(blamed, model, expectedType, env).tips(tips), true);
     }
     

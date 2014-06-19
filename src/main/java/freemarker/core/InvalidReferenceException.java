@@ -62,18 +62,28 @@ public class InvalidReferenceException extends TemplateException {
      * Use this whenever possible, as it returns {@link #FAST_INSTANCE} instead of creating a new instance, when
      * appropriate.
      */
-    static InvalidReferenceException getInstance(Expression blame, Environment env) {
+    static InvalidReferenceException getInstance(Expression blamed, Environment env) {
         if (env != null && env.getFastInvalidReferenceExceptions()) {
             return FAST_INSTANCE;
         } else {
-            if (blame != null) {
+            if (blamed != null) {
                 final _ErrorDescriptionBuilder errDescBuilder
-                        = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blame);
-                if (endsWithDollarVariable(blame)) {
+                        = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blamed);
+                if (endsWithDollarVariable(blamed)) {
                     errDescBuilder.tips(new Object[] { TIP_NO_DOLAR, TIP });
-                } else if (blame instanceof Dot) {
-                    errDescBuilder.tips(new Object[] { TIP_LAST_STEP_DOT, TIP });
-                } else if (blame instanceof DynamicKeyName) {
+                } else if (blamed instanceof Dot) {
+                    final String rho = ((Dot) blamed).getRHO();
+                    String nameFixTip = null;
+                    if ("size".equals(rho)) {
+                        nameFixTip = "To query the size of a collection or map use ?size, like myList?size";
+                    } else if ("length".equals(rho)) {
+                        nameFixTip = "To query the length of a string use ?length, like myString?size";
+                    }
+                    errDescBuilder.tips(
+                            nameFixTip == null
+                                    ? new Object[] { TIP_LAST_STEP_DOT, TIP }
+                                    : new Object[] { TIP_LAST_STEP_DOT, nameFixTip, TIP });
+                } else if (blamed instanceof DynamicKeyName) {
                     errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
                 } else {
                     errDescBuilder.tip(TIP);
