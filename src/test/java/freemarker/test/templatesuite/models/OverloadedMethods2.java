@@ -1001,6 +1001,15 @@ public class OverloadedMethods2 {
         return new MyBooleanWrapperAsAnotherBooleanModel(); 
     }
     
+    public String bugReport363(Map<String, ? extends Object> fields, List<?> listField) {
+        return "Executed: testMethod(Map fields, List listField) on input: fields=" + fields
+                + " and listField=" + listField;
+    }
+
+    public String bugReport363(Object... fields) {
+        return "Executed: testMethod(Object... fields) on input: fields=" + Helpers.arrayToString(fields);
+    }
+    
     private static class MyAdapterNumberModel implements TemplateNumberModel, AdapterTemplateModel {
 
         public Object getAdaptedObject(Class hint) {
