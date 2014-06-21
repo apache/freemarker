@@ -11603,7 +11603,9 @@ Green Mouse</programlisting>
           </indexterm>
 
           <para>The string converted to a date value. It is recommended to
-          specify a parameter that specifies the format. For example:</para>
+          specify a parameter that specifies the format, using <link
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
+          date format syntax</link>. For example:</para>
 
           <programlisting role="template">&lt;#assign test1 = "10/25/1995"?date("MM/dd/yyyy")&gt;
 &lt;#assign test2 = "15:05:30"?time("HH:mm:ss")&gt;
@@ -11620,7 +11622,7 @@ ${test3}</programlisting>
 Oct 25, 1995 3:05:00 PM
 </programlisting>
 
-          <para>Note that the dates was converted back to string according to
+          <para>Note that the dates were converted back to string according to
           the <literal>date_format</literal>, <literal>time_format</literal>
           and <literal>datetime_format</literal> <link
           linkend="ref.directive.setting">settings</link> (for more
@@ -13271,7 +13273,7 @@ Apr 8, 2003 9:24 PM</programlisting>
           formatting pattern explicitly with
           <literal>?string(<replaceable>pattern_string</replaceable>)</literal>.
           The pattern uses <link
-          xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/SimpleDateFormat.html">Java
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
           date format syntax</link>. Example:</para>
 
           <programlisting role="template">${lastUpdated?string("yyyy-MM-dd HH:mm:ss zzzz")}
