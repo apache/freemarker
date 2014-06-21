@@ -21041,6 +21041,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
+              Fixed misleading parser error message when a directive called
+              without its required parameters (like
+              <literal>&lt;#list&gt;</literal>) was reported as unknown
+              directive.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configuration.getCoreDirecticeNames()</literal> which
+              returns the names of all directives that are provided by
+              FreeMarker. This can useful for IDE-s.</para>
+            </listitem>
+
+            <listitem>
               <para><literal>template_loader</literal> was added as possible
               configuration setting <literal>Properties</literal> key.</para>
             </listitem>

@@ -454,6 +454,9 @@ TOKEN:
     |
     <#CLOSE_TAG2 : (<BLANK>)* ("/")? (">" | "]")>
     |
+    /*
+     * ATTENTION: Update _CoreAPI.BUTILTIN_DIRECTIVE_NAMES if you add new directives!
+     */
     <ATTEMPT : <START_TAG> "attempt" <CLOSE_TAG1>> {strictSyntaxCheck(matchedToken, DEFAULT);}
     |
     <RECOVER : <START_TAG> "recover" <CLOSE_TAG1>> {strictSyntaxCheck(matchedToken, DEFAULT);} 
@@ -576,6 +579,9 @@ TOKEN:
     |
     <TRIVIAL_FTL_HEADER : ("<#ftl" | "[#ftl") ("/")? (">" | "]")> {ftlHeader(matchedToken);}
     |
+    /*
+     * ATTENTION: Update _CoreAPI.BUTILTIN_DIRECTIVE_NAMES if you add new directives!
+     */
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
         if (!directiveSyntaxEstablished && incompatibleImprovements < 2003019) {
@@ -591,33 +597,53 @@ TOKEN:
 			} else if (firstChar == '[' && !squBracTagSyntax) {
 			    matchedToken.kind = PRINTABLE_CHARS;
 			} else if (strictEscapeSyntax) {
-			    String s = matchedToken.image;
-			    int index = s.indexOf('#');
-			    s = s.substring(index);
-			    
-			    String tip = null;
-			    if (!s.toLowerCase().equals(s))			    {
-			        tip = "Directive names are all-lower-case.";			    }
-			    else if (s.equals("#set"))			    {			        tip = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
-			    }
-			    else if (s.equals("#else_if")) tip = "Use #elseif.";
-			    else if (s.equals("#no_escape")) tip = "Use #noescape instead.";
-			    else if (s.equals("#method")) tip = "Use #function instead.";
-			    else if (s.equals("#head") || s.equals("#template") || s.equals("#fm")) tip = "You may meant #ftl.";
-			    else if (s.equals("#try") || s.equals("#atempt")) tip = "You may meant #attempt.";
-			    else if (s.equals("#for") || s.equals("#each") || s.equals("#iterate") || s.equals("#iterator"))			    {			        tip = "You may meant #list "
-			               + "(http://freemarker.org/docs/ref_directive_list.html).";
-			    }
-			    else
-			    {			        tip = "Help (latest version): "
-			      		   + "http://freemarker.org/docs/ref_directive_alphaidx.html; "
-			      		   + "you're using FreeMarker " + Configuration.getVersion() +".";
-			    }
-			    throw new TokenMgrError(
-			      		"Unknown directive: " + s + (tip != null ? ". " + tip : ""),
-			      		TokenMgrError.LEXICAL_ERROR,
-			      		matchedToken.beginLine, matchedToken.beginColumn + 1,
-			      		matchedToken.endLine, matchedToken.endColumn);
+                String dn = matchedToken.image;
+                int index = dn.indexOf('#');
+                dn = dn.substring(index + 1);
+
+                // Until the tokenizer/parser is reworked, we have this quirk where something like <#list>
+                // doesn't match any directive starter tokens, because that token requires whitespace after the
+                // name as it should be followed by parameters. For now we work this around so we don't report
+                // unknown directive:
+                if (_CoreAPI.CORE_DIRECTIVE_NAMES.contains(dn))
+                {
+                        throw new TokenMgrError(
+                                    "The start-tag of #" + dn + " must contain parameters.",
+                                    TokenMgrError.LEXICAL_ERROR,
+                                    matchedToken.beginLine, matchedToken.beginColumn + 1,
+                                    matchedToken.endLine, matchedToken.endColumn);
+                }
+
+                String tip = null;
+                if (!dn.toLowerCase().equals(dn))
+                {
+                    tip = "Directive names are all-lower-case.";
+                }
+                else if (dn.equals("set"))
+                {
+                    tip = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
+                }
+                else if (dn.equals("else_if")) tip = "Use #elseif.";
+                else if (dn.equals("no_escape")) tip = "Use #noescape instead.";
+                else if (dn.equals("method")) tip = "Use #function instead.";
+                else if (dn.equals("head") || dn.equals("template") || dn.equals("fm")) tip = "You may meant #ftl.";
+                else if (dn.equals("try") || dn.equals("atempt")) tip = "You may meant #attempt.";
+                else if (dn.equals("for") || dn.equals("each") || dn.equals("iterate") || dn.equals("iterator"))
+                {
+                    tip = "You may meant #list "
+                           + "(http://freemarker.org/docs/ref_directive_list.html).";
+                }
+                else
+                {
+                    tip = "Help (latest version): "
+                               + "http://freemarker.org/docs/ref_directive_alphaidx.html; "
+                               + "you're using FreeMarker " + Configuration.getVersion() +".";
+                }
+                throw new TokenMgrError(
+                            "Unknown directive: #" + dn + (tip != null ? ". " + tip : ""),
+                            TokenMgrError.LEXICAL_ERROR,
+                            matchedToken.beginLine, matchedToken.beginColumn + 1,
+                            matchedToken.endLine, matchedToken.endColumn);
 			}
         }
     }

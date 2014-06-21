@@ -1382,10 +1382,24 @@ public class Configuration extends Configurable implements Cloneable {
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
      * to be future-proof, it's an instance method. 
      * 
-     * @return {@link Set} of {@link String}-s. 
+     * @return {@link Set} of {@link String}-s.
+     * 
+     * @since 2.3.20
      */
     public Set getSupportedBuiltInNames() {
         return _CoreAPI.getSupportedBuiltInNames();
+    }
+    
+    /**
+     * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
+     * <tt>&lt;#directiveName ...></tt>.
+     * 
+     * @return {@link Set} of {@link String}-s.
+     * 
+     * @since 2.3.21
+     */
+    public Set getSupportedCoreDirectiveNames() {
+        return _CoreAPI.CORE_DIRECTIVE_NAMES;
     }
 
     private static String getRequiredVersionProperty(Properties vp, String properyName) {

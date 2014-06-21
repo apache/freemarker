@@ -19,6 +19,7 @@ package freemarker.core;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
 
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Version;
@@ -37,6 +38,50 @@ public class _CoreAPI {
     public static final String STACK_SECTION_SEPARATOR = Environment.STACK_SECTION_SEPARATOR;
     
     public static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = Configurable.DEFAULT_TL_AND_OW_CHANGE_VERSION;
+    
+    public static final Set/*<String>*/ CORE_DIRECTIVE_NAMES;
+    static {
+        Set/*<String>*/ names = new TreeSet();
+        names.add("assign");
+        names.add("attempt");
+        names.add("break");
+        names.add("call");
+        names.add("case");
+        names.add("comment");
+        names.add("compress");
+        names.add("default");
+        names.add("else");
+        names.add("elseif");
+        names.add("escape");
+        names.add("fallback");
+        names.add("flush");
+        names.add("foreach");
+        names.add("ftl");
+        names.add("function");
+        names.add("global");
+        names.add("if");
+        names.add("import");
+        names.add("include");
+        names.add("list");
+        names.add("local");
+        names.add("lt");
+        names.add("macro");
+        names.add("nested");
+        names.add("noescape");
+        names.add("noparse");
+        names.add("nt");
+        names.add("recover");
+        names.add("recurse");
+        names.add("return");
+        names.add("rt");
+        names.add("setting");
+        names.add("stop");
+        names.add("switch");
+        names.add("t");
+        names.add("transform");
+        names.add("visit");
+        CORE_DIRECTIVE_NAMES = Collections.unmodifiableSet(names);
+    }
     
     /**
      * Returns the names of the currently supported "built-ins" ({@code expr?builtin_name}-like things).

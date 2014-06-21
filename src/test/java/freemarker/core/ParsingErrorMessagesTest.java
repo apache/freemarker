@@ -14,6 +14,9 @@ import freemarker.template.utility.StringUtil;
 public class ParsingErrorMessagesTest {
 
     private Configuration cfg = new Configuration(new Version(2, 3, 21));
+    {
+        cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+    }
     
     @Test
     public void testNeedlessInterpolation() {
@@ -24,12 +27,27 @@ public class ParsingErrorMessagesTest {
 
     @Test
     public void testWrongDirectiveNames() {
-        errorContains("<#foo />", "nknown directive", "foo");
-        errorContains("<#set x = 1 />", "nknown directive", "set", "assign");
+        errorContains("<#foo />", "nknown directive", "#foo");
+        errorContains("<#set x = 1 />", "nknown directive", "#set", "#assign");
+        errorContains("<#iterator></#iterator>", "nknown directive", "#iterator", "#list");
+    }
+
+    @Test
+    public void testBug402() {
+        errorContains("<#list 1..i as k>${k}<#list>", "parameters", "start-tag", "#list");
+        errorContains("<#assign>", "parameters", "start-tag", "#assign");
     }
     
     private void errorContains(String ftl, String... expectedSubstrings) {
+        errorContains(false, ftl, expectedSubstrings);
+        errorContains(true, ftl, expectedSubstrings);
+    }
+
+    private void errorContains(boolean squareTags, String ftl, String... expectedSubstrings) {
         try {
+            if (squareTags) {
+                ftl = ftl.replace('<', '[').replace('>', ']');
+            }
             new Template("adhoc", ftl, cfg);
             fail("The tempalte had to fail");
         } catch (ParseException e) {
