@@ -37,6 +37,22 @@ public class ParsingErrorMessagesTest {
         errorContains("<#list 1..i as k>${k}<#list>", "parameters", "start-tag", "#list");
         errorContains("<#assign>", "parameters", "start-tag", "#assign");
     }
+
+    @Test
+    public void testUnclosedDirectives() {
+        errorContains("<#macro x>", "#macro", "unclosed");
+        errorContains("<#function x>", "#macro", "unclosed");
+        errorContains("<#assign x>", "#assign", "unclosed");
+        errorContains("<#macro m><#local x>", "#local", "unclosed");
+        errorContains("<#global x>", "#global", "unclosed");
+        errorContains("<@foo>", "@...", "unclosed");
+        errorContains("<#list xs as x>", "#list", "unclosed");
+        errorContains("<#list xs as x><#if x>", "#if", "unclosed");
+        errorContains("<#list xs as x><#if x><#if q><#else>", "#if", "unclosed");
+        errorContains("<#list xs as x><#if x><#if q><#else><#macro x>qwe", "#macro", "unclosed");
+        errorContains("${(blah", "\"(\"", "unclosed");
+        errorContains("${blah", "\"{\"", "unclosed");
+    }
     
     private void errorContains(String ftl, String... expectedSubstrings) {
         errorContains(false, ftl, expectedSubstrings);

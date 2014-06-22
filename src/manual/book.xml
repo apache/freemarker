@@ -17456,10 +17456,7 @@ or
 
 <literal>&lt;#lt&gt;</literal>
 
-<literal>&lt;#rt&gt;</literal>
-
-<literal>&lt;#nt&gt;</literal>
-</programlisting>
+<literal>&lt;#rt&gt;</literal></programlisting>
         </section>
 
         <section>
@@ -20379,6 +20376,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Some new context sensitive hints in undefined variable
                   exception error messages.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Fixed unclosed directive error messages at end of file
+                  where the wrong unclosed directive name was reported</para>
                 </listitem>
               </itemizedlist>
             </listitem>
