@@ -18,6 +18,7 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
 
 /**
  * A {@link TemplateException} that 
@@ -26,6 +27,8 @@ import freemarker.template.TemplateModel;
  */
 public class NonNumericalException extends UnexpectedTypeException {
 
+    private static final Class[] EXPECTED_TYPES = new Class[] { TemplateNumberModel.class };
+    
     public NonNumericalException(Environment env) {
         super(env, "Expecting numerical value here");
     }
@@ -41,19 +44,19 @@ public class NonNumericalException extends UnexpectedTypeException {
     NonNumericalException(
             Expression blamed, TemplateModel model, Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, "number", env);
+        super(blamed, model, "number", EXPECTED_TYPES, env);
     }
 
     NonNumericalException(
             Expression blamed, TemplateModel model, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, "number", tip, env);
+        super(blamed, model, "number", EXPECTED_TYPES, tip, env);
     }
 
     NonNumericalException(
             Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
-        super(blamed, model, "number", tips, env);
+        super(blamed, model, "number", EXPECTED_TYPES, tips, env);
     }
 
     

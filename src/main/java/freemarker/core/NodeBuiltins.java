@@ -43,7 +43,7 @@ class NodeBuiltins {
             if (model instanceof TemplateNodeModel) {
                 return calculateResult((TemplateNodeModel) model, env);
             } else {
-                throw new UnexpectedTypeException(target, model, "node", env);
+                throw new NonNodeException(target, model, env);
             }
         }
         abstract TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env)

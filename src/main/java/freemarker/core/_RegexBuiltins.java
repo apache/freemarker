@@ -226,7 +226,10 @@ public class _RegexBuiltins {
             } else if (targetModel instanceof RegexMatchModel.Match) {
                 return ((RegexMatchModel.Match) targetModel).subs;
             } else {
-                throw new UnexpectedTypeException(target, targetModel, "regular expression matcher", env);
+                throw new UnexpectedTypeException(target, targetModel,
+                        "regular expression matcher",
+                        new Class[] { RegexMatchModel.class, RegexMatchModel.Match.class },
+                        env);
             }
         }
     }

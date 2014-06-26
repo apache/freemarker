@@ -20382,6 +20382,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Fixed unclosed directive error messages at end of file
                   where the wrong unclosed directive name was reported</para>
                 </listitem>
+
+                <listitem>
+                  <para>Trying to use obj.someMethod without
+                  <literal>()</literal> on a place where method value is not
+                  expected will recommend calling the method.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Trying to use methods like
+                  <literal>obj.getFoo</literal> or
+                  <literal>obj.isFoo</literal> without <literal>()</literal>on
+                  a place where method value is not expected will recommend
+                  using the <literal>obj.foo</literal> form</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>

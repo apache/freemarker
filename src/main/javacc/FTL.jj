@@ -1677,8 +1677,8 @@ DollarVariable StringOutput() :
    begin=<OUTPUT_ESCAPE>
    exp=Expression()
    {
-      notHashLiteral(exp, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED);
-      notListLiteral(exp, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED);
+      notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
+      notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
    }
    end=<CLOSE_BRACE>
    {

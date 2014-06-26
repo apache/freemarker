@@ -16,9 +16,11 @@
 
 package freemarker.ext.beans;
 
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
@@ -36,7 +38,8 @@ import freemarker.template.utility.Collections12;
 public final class SimpleMethodModel extends SimpleMethod
     implements
     TemplateMethodModelEx,
-    TemplateSequenceModel
+    TemplateSequenceModel,
+    _UnexpectedTypeErrorExplainerTemplateModel
 {
     private final Object object;
     private final BeansWrapper wrapper;
@@ -97,4 +100,37 @@ public final class SimpleMethodModel extends SimpleMethod
     public String toString() {
         return getMember().toString();
     }
+
+    /**
+     * Implementation of experimental interface; don't use it, no backward compatibility guarantee!
+     */
+    public Object[] explainTypeError(Class[] expectedClasses) {
+        final Member member = getMember();
+        if (!(member instanceof Method)) {
+            return null;  // This shouldn't occur
+        }
+        Method m = (Method) member;
+        
+        final Class returnType = m.getReturnType();
+        if (returnType == null || returnType == void.class || returnType == Void.class) {
+            return null;  // Calling it won't help
+        }
+        
+        String mName = m.getName();
+        if (mName.startsWith("get") && mName.length() > 3 && Character.isUpperCase(mName.charAt(3))
+                && (m.getParameterTypes().length == 0)) {
+            return new Object[] {
+                    "Maybe using obj.something instead of obj.getSomething will yield the desired value." };
+        } else if (mName.startsWith("is") && mName.length() > 2 && Character.isUpperCase(mName.charAt(2))
+                && (m.getParameterTypes().length == 0)) {
+            return new Object[] {
+                    "Maybe using obj.something instead of obj.isSomething will yield the desired value." };
+        } else {
+            return new Object[] {
+                    "Maybe using obj.something(",
+                    (m.getParameterTypes().length != 0 ? "params" : ""),
+                    ") instead of obj.something will yield the desired value" };
+        }
+    }
+    
 }

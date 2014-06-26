@@ -16,8 +16,12 @@
 
 package freemarker.core;
 
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateNumberModel;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * A {@link TemplateException} that 
@@ -26,11 +30,15 @@ import freemarker.template.TemplateModel;
  */
 public class NonStringException extends UnexpectedTypeException {
 
-    private static final String DEFAULT_DESCRIPTION
-            = "Expecting " + NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " value here";
-    
-    static final String TYPES_USABLE_WHERE_STRING_IS_EXPECTED
+    static final String STRING_COERCABLE_TYPES_DESC
             = "string or something automatically convertible to string (number, date or boolean)";
+    
+    static final Class[] STRING_COERCABLE_TYPES = new Class[] {
+        TemplateScalarModel.class, TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class
+    };
+    
+    private static final String DEFAULT_DESCRIPTION
+            = "Expecting " + NonStringException.STRING_COERCABLE_TYPES_DESC + " value here";
 
     public NonStringException(Environment env) {
         super(env, DEFAULT_DESCRIPTION);
@@ -47,19 +55,19 @@ public class NonStringException extends UnexpectedTypeException {
     NonStringException(
             Expression blamed, TemplateModel model, Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, env);
+        super(blamed, model, NonStringException.STRING_COERCABLE_TYPES_DESC, STRING_COERCABLE_TYPES, env);
     }
 
     NonStringException(
             Expression blamed, TemplateModel model, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tip, env);
+        super(blamed, model, NonStringException.STRING_COERCABLE_TYPES_DESC, STRING_COERCABLE_TYPES, tip, env);
     }
 
     NonStringException(
             Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
-        super(blamed, model, NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED, tips, env);
+        super(blamed, model, NonStringException.STRING_COERCABLE_TYPES_DESC, STRING_COERCABLE_TYPES, tips, env);
     }
         
 }

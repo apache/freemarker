@@ -16,12 +16,15 @@
 
 package freemarker.core;
 
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
 
 /**
  * Indicates that a date, time or date+time was expected.
  */
 public class NonDateException extends UnexpectedTypeException {
+
+    private static final Class[] EXPECTED_TYPES = new Class[] { TemplateDateModel.class };
 
     public NonDateException(Environment env) {
         super(env, "Expecting date/time value here");
@@ -30,27 +33,23 @@ public class NonDateException extends UnexpectedTypeException {
     public NonDateException(String description, Environment env) {
         super(env, description);
     }
-    
-    NonDateException(Environment env, _ErrorDescriptionBuilder description) {
-        super(env, description);
-    }
 
     NonDateException(
             Expression blamed, TemplateModel model, Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, "date", env);
+        super(blamed, model, "date/time", EXPECTED_TYPES, env);
     }
 
     NonDateException(
             Expression blamed, TemplateModel model, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, "date", tip, env);
+        super(blamed, model, "date/time", EXPECTED_TYPES, tip, env);
     }
 
     NonDateException(
             Expression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
-        super(blamed, model, "date", tips, env);
+        super(blamed, model, "date/time", EXPECTED_TYPES, tips, env);
     }    
         
 }

@@ -64,7 +64,10 @@ class MiscellaneousBuiltins {
                 int size = ((TemplateHashModelEx) model).size();
                 return new SimpleNumber(size);
             }
-            throw new UnexpectedTypeException(target, model, "extended-hash or sequence", env);
+            throw new UnexpectedTypeException(
+                    target, model,
+                    "extended-hash or sequence", new Class[] { TemplateHashModelEx.class, TemplateSequenceModel.class },
+                    env);
         }
     }
 
@@ -189,7 +192,14 @@ class MiscellaneousBuiltins {
             } else if (env.isClassicCompatible() && model instanceof BeanModel) {
                 return new SimpleScalar(_BeansAPI.getAsClassicCompatibleString((BeanModel) model));
             } else {            
-                throw new UnexpectedTypeException(target, model, "number, date, or string", env);
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "number, date, boolean or string",
+                        new Class[] {
+                            TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class,
+                            TemplateScalarModel.class
+                        },
+                        env);
             }
         }
     
@@ -460,7 +470,10 @@ class MiscellaneousBuiltins {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             if (!(tm instanceof Macro)) {
-                throw new UnexpectedTypeException(target, tm, "macro or function", env);
+                throw new UnexpectedTypeException(
+                        target, tm,
+                        "macro or function", new Class[] { Macro.class },
+                        env);
             } else {
                 return env.getMacroNamespace((Macro) tm);
             }
@@ -482,7 +495,10 @@ class MiscellaneousBuiltins {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
                         ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
             } else {
-                throw new UnexpectedTypeException(target, model, "number or boolean", env);
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
+                        env);
             }
         }
     }

@@ -20,46 +20,46 @@ public class ParsingErrorMessagesTest {
     
     @Test
     public void testNeedlessInterpolation() {
-        errorContains("<#if ${x} == 3></#if>", "instead of ${");
-        errorContains("<#if ${x == 3}></#if>", "instead of ${");
-        errorContains("<@foo ${x == 3} />", "instead of ${");
+        assertErrorContains("<#if ${x} == 3></#if>", "instead of ${");
+        assertErrorContains("<#if ${x == 3}></#if>", "instead of ${");
+        assertErrorContains("<@foo ${x == 3} />", "instead of ${");
     }
 
     @Test
     public void testWrongDirectiveNames() {
-        errorContains("<#foo />", "nknown directive", "#foo");
-        errorContains("<#set x = 1 />", "nknown directive", "#set", "#assign");
-        errorContains("<#iterator></#iterator>", "nknown directive", "#iterator", "#list");
+        assertErrorContains("<#foo />", "nknown directive", "#foo");
+        assertErrorContains("<#set x = 1 />", "nknown directive", "#set", "#assign");
+        assertErrorContains("<#iterator></#iterator>", "nknown directive", "#iterator", "#list");
     }
 
     @Test
     public void testBug402() {
-        errorContains("<#list 1..i as k>${k}<#list>", "parameters", "start-tag", "#list");
-        errorContains("<#assign>", "parameters", "start-tag", "#assign");
+        assertErrorContains("<#list 1..i as k>${k}<#list>", "parameters", "start-tag", "#list");
+        assertErrorContains("<#assign>", "parameters", "start-tag", "#assign");
     }
 
     @Test
     public void testUnclosedDirectives() {
-        errorContains("<#macro x>", "#macro", "unclosed");
-        errorContains("<#function x>", "#macro", "unclosed");
-        errorContains("<#assign x>", "#assign", "unclosed");
-        errorContains("<#macro m><#local x>", "#local", "unclosed");
-        errorContains("<#global x>", "#global", "unclosed");
-        errorContains("<@foo>", "@...", "unclosed");
-        errorContains("<#list xs as x>", "#list", "unclosed");
-        errorContains("<#list xs as x><#if x>", "#if", "unclosed");
-        errorContains("<#list xs as x><#if x><#if q><#else>", "#if", "unclosed");
-        errorContains("<#list xs as x><#if x><#if q><#else><#macro x>qwe", "#macro", "unclosed");
-        errorContains("${(blah", "\"(\"", "unclosed");
-        errorContains("${blah", "\"{\"", "unclosed");
+        assertErrorContains("<#macro x>", "#macro", "unclosed");
+        assertErrorContains("<#function x>", "#macro", "unclosed");
+        assertErrorContains("<#assign x>", "#assign", "unclosed");
+        assertErrorContains("<#macro m><#local x>", "#local", "unclosed");
+        assertErrorContains("<#global x>", "#global", "unclosed");
+        assertErrorContains("<@foo>", "@...", "unclosed");
+        assertErrorContains("<#list xs as x>", "#list", "unclosed");
+        assertErrorContains("<#list xs as x><#if x>", "#if", "unclosed");
+        assertErrorContains("<#list xs as x><#if x><#if q><#else>", "#if", "unclosed");
+        assertErrorContains("<#list xs as x><#if x><#if q><#else><#macro x>qwe", "#macro", "unclosed");
+        assertErrorContains("${(blah", "\"(\"", "unclosed");
+        assertErrorContains("${blah", "\"{\"", "unclosed");
     }
     
-    private void errorContains(String ftl, String... expectedSubstrings) {
-        errorContains(false, ftl, expectedSubstrings);
-        errorContains(true, ftl, expectedSubstrings);
+    private void assertErrorContains(String ftl, String... expectedSubstrings) {
+        assertErrorContains(false, ftl, expectedSubstrings);
+        assertErrorContains(true, ftl, expectedSubstrings);
     }
 
-    private void errorContains(boolean squareTags, String ftl, String... expectedSubstrings) {
+    private void assertErrorContains(boolean squareTags, String ftl, String... expectedSubstrings) {
         try {
             if (squareTags) {
                 ftl = ftl.replace('<', '[').replace('>', ']');

@@ -290,17 +290,51 @@ public class _ErrorDescriptionBuilder {
     }
     
     public _ErrorDescriptionBuilder tip(String tip) {
-        this.tip = tip;
+        tip((Object) tip);
         return this;
     }
     
     public _ErrorDescriptionBuilder tip(Object tip[]) {
-        this.tip = tip;
+        tip((Object) tip);
+        return this;
+    }
+    
+    private _ErrorDescriptionBuilder tip(Object tip) {
+        if (this.tip == null) {
+            this.tip = tip;
+        } else {
+            if (tips == null) {
+                tips = new Object[] { tip };
+            } else {
+                final int origTipsLen = tips.length;
+                
+                Object[] newTips = new Object[origTipsLen + 1];
+                for (int i = 0; i < origTipsLen; i++) {
+                    newTips[i] = tips[i];
+                }
+                newTips[origTipsLen] = tip;
+                tips = newTips;
+            }
+        }
         return this;
     }
     
     public _ErrorDescriptionBuilder tips(Object[] tips) {
-        this.tips = tips;
+        if (this.tips == null) {
+            this.tips = tips;
+        } else {
+            final int origTipsLen = this.tips.length;
+            final int additionalTipsLen = tips.length;
+            
+            Object[] newTips = new Object[origTipsLen + additionalTipsLen];
+            for (int i = 0; i < origTipsLen; i++) {
+                newTips[i] = this.tips[i];
+            }
+            for (int i = 0; i < additionalTipsLen; i++) {
+                newTips[origTipsLen + i] = tips[i];
+            }
+            this.tips = newTips;
+        }
         return this;
     }
     

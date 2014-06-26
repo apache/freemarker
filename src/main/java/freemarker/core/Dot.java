@@ -42,7 +42,7 @@ final class Dot extends Expression {
         if (leftModel == null && env.isClassicCompatible()) {
             return null; // ${noSuchVar.foo} has just printed nothing in FM 1.
         }
-        throw new UnexpectedTypeException(target, leftModel, "hash", env);
+        throw new NonHashException(target, leftModel, env);
     }
 
     public String getCanonicalForm() {

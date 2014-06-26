@@ -80,7 +80,7 @@ final class MethodCall extends Expression {
             return env.getLastReturnValue();
         }
         else {
-            throw new UnexpectedTypeException(target, targetModel, "method", env);
+            throw new NonMethodException(target, targetModel, env);
         }
     }
 

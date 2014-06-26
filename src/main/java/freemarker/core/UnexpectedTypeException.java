@@ -25,7 +25,7 @@ import freemarker.template.TemplateModel;
  * @since 2.3.20
  */
 public class UnexpectedTypeException extends TemplateException {
-
+    
     public UnexpectedTypeException(Environment env, String description) {
         super(description, env);
     }
@@ -35,35 +35,45 @@ public class UnexpectedTypeException extends TemplateException {
     }
 
     UnexpectedTypeException(
-            Expression blamed, TemplateModel model, String expectedType, Environment env)
+            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
-        super(null, env, newDesciptionBuilder(blamed, model, expectedType, env), true);
+        super(null, env, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env), true);
     }
 
     UnexpectedTypeException(
-            Expression blamed, TemplateModel model, String expectedType, String tip, Environment env)
+            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String tip,
+            Environment env)
             throws InvalidReferenceException {
-        super(null, env, newDesciptionBuilder(blamed, model, expectedType, env).tip(tip), true);
+        super(null, env, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tip(tip), true);
     }
 
     UnexpectedTypeException(
-            Expression blamed, TemplateModel model, String expectedType, String[] tips, Environment env)
+            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String[] tips,
+            Environment env)
             throws InvalidReferenceException {
-        super(null, env, newDesciptionBuilder(blamed, model, expectedType, env).tips(tips), true);
+        super(null, env, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tips(tips), true);
     }
     
     private static _ErrorDescriptionBuilder newDesciptionBuilder(
-            Expression blamed, TemplateModel model, String expectedType, Environment env)
+            Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
         if (model == null) throw InvalidReferenceException.getInstance(blamed, env);
-        return new _ErrorDescriptionBuilder(
-                unexpectedTypeErrorDescription(expectedType, model))
+
+        _ErrorDescriptionBuilder errorDescBuilder = new _ErrorDescriptionBuilder(
+                unexpectedTypeErrorDescription(expectedTypesDesc, model))
                 .blame(blamed).showBlamer(true);
+        if (model instanceof _UnexpectedTypeErrorExplainerTemplateModel) {
+            Object[] tip = ((_UnexpectedTypeErrorExplainerTemplateModel) model).explainTypeError(expectedTypes);
+            if (tip != null) {
+                errorDescBuilder.tip(tip);
+            }
+        }
+        return errorDescBuilder;
     }
 
-    private static Object[] unexpectedTypeErrorDescription(String expectedType, TemplateModel model) {
+    private static Object[] unexpectedTypeErrorDescription(String expectedTypesDesc, TemplateModel model) {
         return new Object[] {
-                "Expected ", new _DelayedAOrAn(expectedType), ", but this evaluated to ",
+                "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but this evaluated to ",
                 new _DelayedAOrAn(new _DelayedFTLTypeDescription(model)), ":"};
     }
     

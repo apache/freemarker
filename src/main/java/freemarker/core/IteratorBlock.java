@@ -165,8 +165,8 @@ final class IteratorBlock extends TemplateElement {
                 }
             }
             else {
-                throw new UnexpectedTypeException(
-                        listSource, list, "collection or sequence", env);
+                throw new NonSequenceOrCollectionException(
+                        listSource, list, env);
             }
         }
 
