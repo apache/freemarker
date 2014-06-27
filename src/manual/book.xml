@@ -20384,6 +20384,38 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Better type error messages when accessing XML data
+                  (applies when wrapped with
+                  <literal>freemarker.ext.dom</literal>):</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.noSuchChildNodes</literal> on a place
+                      where scalar value is expected will explain that the
+                      problem is that you had no matches in the constructing
+                      XML query.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.multipleSuchChildNodes</literal> on a
+                      place where scalar value is expected will explain that
+                      the problem is that you had multiple matches in the
+                      constructing XML query.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.exactlyOneChildNode</literal> as number,
+                      date/time/datetime or boolean will explain that values
+                      coming from XML are always strings (text), and must be
+                      converted explicitly.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
                   <para>Trying to use obj.someMethod without
                   <literal>()</literal> on a place where method value is not
                   expected will recommend calling the method.</para>
@@ -20394,7 +20426,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>obj.getFoo</literal> or
                   <literal>obj.isFoo</literal> without <literal>()</literal>on
                   a place where method value is not expected will recommend
-                  using the <literal>obj.foo</literal> form</para>
+                  using the <literal>obj.foo</literal> form.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

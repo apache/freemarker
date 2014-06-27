@@ -44,14 +44,18 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
@@ -59,7 +63,7 @@ import freemarker.template.TemplateSequenceModel;
  */
 abstract public class NodeModel
 implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
-    AdapterTemplateModel, WrapperTemplateModel
+    AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel
 {
 
     static final Logger logger = Logger.getLogger("freemarker.dom");
@@ -657,4 +661,21 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     public Object getWrappedObject() {
         return node;
     }
+    
+    public Object[] explainTypeError(Class[] expectedClasses) {
+        for (int i = 0; i < expectedClasses.length; i++) {
+            Class expectedClass = expectedClasses[i];
+            if (TemplateDateModel.class.isAssignableFrom(expectedClass)
+                    || TemplateNumberModel.class.isAssignableFrom(expectedClass)
+                    || TemplateBooleanModel.class.isAssignableFrom(expectedClass)) {
+                return new Object[] {
+                        "XML node values are always strings (text), that is, they can't be used as number, "
+                        + "date/time/datetime or boolean without explicit conversion (such as "
+                        + "someNode?number, someNode?datetime).",
+                        };
+            }
+        }
+        return null;
+    }
+    
 }
