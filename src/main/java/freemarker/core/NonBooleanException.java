@@ -17,13 +17,10 @@
 package freemarker.core;
 
 import freemarker.template.TemplateBooleanModel;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected an expression
- * to evaluate to a boolean value and it didn't.
+ * Indicates that a {@link TemplateBooleanModel} value was expected, but the value had a different type.
  */
 public class NonBooleanException extends UnexpectedTypeException {
     

@@ -1,14 +1,12 @@
 package freemarker.core;
 
 import freemarker.template.TemplateCollectionModel;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected an expression
- * to evaluate to a sequence or collection ({@link TemplateCollectionModel}) value and it didn't.
+ * Indicates that a {@link TemplateSequenceModel} or {@link TemplateCollectionModel} value was expected, but the value
+ * had a different type.
  * 
  * @since 2.3.21
  */

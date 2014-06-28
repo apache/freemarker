@@ -16,14 +16,11 @@
 
 package freemarker.core;
 
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected an expression
- * to evaluate to a numerical value and it didn't.
+ * Indicates that a {@link TemplateNumberModel} value was expected, but the value had a different type.
  */
 public class NonNumericalException extends UnexpectedTypeException {
 

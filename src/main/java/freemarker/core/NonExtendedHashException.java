@@ -1,15 +1,10 @@
 package freemarker.core;
 
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected an expression
- * to evaluate to a extended hash value and it didn't.
- * 
- * @since 2.3.21
+ * Indicates that a {@link TemplateHashModelEx} value was expected, but the value had a different type.
  */
 public class NonExtendedHashException extends UnexpectedTypeException {
 

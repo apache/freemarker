@@ -1,13 +1,10 @@
 package freemarker.core;
 
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected an expression
- * to evaluate to a hash value and it didn't.
+ * Indicates that a {@link TemplateHashModel} value was expected, but the value had a different type.
  * 
  * @since 2.3.21
  */

@@ -20361,7 +20361,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Error message quality improvements:</para>
+              <para>Error message quality improvements (targeting frequent
+              support requests and some error message bugs):</para>
 
               <itemizedlist>
                 <listitem>
@@ -20416,9 +20417,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Trying to use obj.someMethod without
-                  <literal>()</literal> on a place where method value is not
-                  expected will recommend calling the method.</para>
+                  <para>Trying to use <literal>obj.someMethod</literal>
+                  without <literal>()</literal> on a place where method value
+                  is not expected will recommend calling the method.</para>
                 </listitem>
 
                 <listitem>

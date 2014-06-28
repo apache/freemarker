@@ -18,15 +18,13 @@ package freemarker.core;
 
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected an expression
- * to evaluate to a string or numeric value and it didn't.
+ * Indicates that a {@link TemplateScalarModel} value was expected (or maybe something that can be automatically coerced
+ * to that), but the value had a different type.
  */
 public class NonStringException extends UnexpectedTypeException {
 

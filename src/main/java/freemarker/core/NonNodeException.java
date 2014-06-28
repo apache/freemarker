@@ -1,13 +1,10 @@
 package freemarker.core;
 
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNodeModel;
 
 /**
- * A {@link TemplateException} that 
- * indicates that the internals expected ah expression
- * to evaluate to a node value and it didn't.
+ * Indicates that a {@link TemplateNodeModel} value was expected, but the value had a different type.
  * 
  * @since 2.3.21
  */

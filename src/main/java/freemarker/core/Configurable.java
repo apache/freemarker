@@ -1247,8 +1247,8 @@ public class Configurable
     }
 
     /**
-     * The setting name was recognized, but it's value couldn't be parsed or the setting couldn't be set for some 
-     * reason. This exception always has a cause exception.
+     * The setting name was recognized, but its value couldn't be parsed or the setting couldn't be set for some 
+     * other reason. This exception always has a cause exception.
      *  
      * @since 2.3.21
      */

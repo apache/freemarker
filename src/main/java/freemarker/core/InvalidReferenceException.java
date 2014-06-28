@@ -19,8 +19,8 @@ package freemarker.core;
 import freemarker.template.TemplateException;
 
 /**
- * A subclass of TemplateException that says there
- * is no value associated with a given expression.
+ * A subclass of {@link TemplateException} that says that an FTL expression has evaluated to {@code null} or it refers
+ * to something that doesn't exist. At least in FreeMarker 2.3.x these two cases aren't distinguished.
  */
 public class InvalidReferenceException extends TemplateException {
 
@@ -30,15 +30,15 @@ public class InvalidReferenceException extends TemplateException {
             null);
     
     private static final String[] TIP = new String[] {
-        "If the failing expression is known to be legally null/missing, either specify a "
-        + "default value with myOptionalVar!myDefault, or use ",
+        "If the failing expression is known to be legally refer to something that's null or missing, either specify a "
+        + "default value like myOptionalVar!myDefault, or use ",
         "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
         ". (These only cover the last step of the expression; to cover the whole expression, "
         + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"
     };
 
     private static final String TIP_NO_DOLAR =
-            "Variable references must not start with \"$\", unless that's really part of the name.";
+            "Variable references must not start with \"$\", unless the \"$\" is really part of the variable name.";
 
     private static final String TIP_LAST_STEP_DOT =
             "It's the step after the last dot that caused this error, not those before it.";
@@ -47,7 +47,8 @@ public class InvalidReferenceException extends TemplateException {
             "It's the final [] step that caused this error, not those before it.";
     
     public InvalidReferenceException(Environment env) {
-        super("Invalid reference", env);
+        super("Invalid reference: The expression has evaluated to null or refers to something that doesn't exist.",
+                env);
     }
 
     public InvalidReferenceException(String description, Environment env) {
