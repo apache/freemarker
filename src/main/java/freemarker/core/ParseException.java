@@ -26,8 +26,8 @@ import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Parsing-time exception in a template (as opposed to runtime: {@link TemplateException}). This usually signals
- * syntactical/lexical errors.
+ * Parsing-time exception in a template (as opposed to a runtime exception, a {@link TemplateException}). This usually
+ * signals syntactical/lexical errors.
  * 
  * Note that on JavaCC-level lexical errors throw {@link TokenMgrError} instead of this, however with the API-s that
  * most users use those will be wrapped into {@link ParseException}-s. 
@@ -323,7 +323,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
 
         String prefix;
         if (!isInJBossToolsMode()) {
-            prefix = "Parsing error "
+            prefix = "Syntax error "
                     + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
                     + ":\n";  
         } else {
