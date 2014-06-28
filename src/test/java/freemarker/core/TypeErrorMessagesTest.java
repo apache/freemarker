@@ -33,7 +33,8 @@ public class TypeErrorMessagesTest extends TemplateErrorMessageTest {
         try {
             DocumentBuilder docBuilder;
             docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            doc = docBuilder.parse(new InputSource(new StringReader("<a><b>123</b><c a=''>1</c><c a=''>2</c></a>")));
+            doc = docBuilder.parse(new InputSource(new StringReader(
+                    "<a><b>123</b><c a='true'>1</c><c a='false'>2</c></a>")));
         } catch (Exception e) {
             throw new RuntimeException("Failed to build data-model", e);
         }
@@ -67,8 +68,12 @@ public class TypeErrorMessagesTest extends TemplateErrorMessageTest {
     public void testXMLTypeMismarches() throws Exception {
         assertErrorContains("${doc.a.c}",
                 "string", "query result", "2", "multiple matches");
+        assertErrorContains("${doc.a.c?boolean}",
+                "string", "query result", "2", "multiple matches");
         assertErrorContains("${doc.a.d}",
-                "string", "query result", "x", "no matches");
+                "string", "query result", "0", "no matches");
+        assertErrorContains("${doc.a.d?boolean}",
+                "string", "query result", "0", "no matches");
         
         assertErrorContains("${doc.a.c.@a}",
                 "string", "query result", "2", "multiple matches");

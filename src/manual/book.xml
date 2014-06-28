@@ -11069,6 +11069,10 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_boolean">boolean</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_numType">byte</link></para>
           </listitem>
 
@@ -12192,7 +12196,50 @@ Matching sub-strings:
 
           <para>Known problem: If you use earlier Java2 platform than v1.3,
           the built-ins will not recognize + prefix and scientific
-          notation.</para>
+          notation.<phrase role="forProgrammers"/></para>
+
+          <para><phrase role="forProgrammers">In fact, the string is parsed by
+          the <literal>toNumber</literal> method of the current
+          <literal>arithmetic_engine</literal>, which is configuration
+          setting. However, that method should behave similarly as described
+          above.</phrase></para>
+        </section>
+
+        <section xml:id="ref_builtin_boolean">
+          <title>boolean</title>
+
+          <indexterm>
+            <primary>type-casting</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting between types</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>boolean built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>string to boolean</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting string to boolean</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>parse string as boolean</primary>
+          </indexterm>
+
+          <para>The string converted to boolean value. The string must be
+          <literal>true</literal> or <literal>false</literal> (case
+          sensitive!), or must be in the format specified by the
+          <literal>boolean_format</literal> setting.</para>
+
+          <para>If the string is not in the appropriate format, an error will
+          abort template processing when you try to access this
+          built-in.</para>
         </section>
 
         <section xml:id="ref_builtin_replace">
@@ -20360,6 +20407,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>New built-in:
+              <literal><replaceable>someString</replaceable>?boolean</literal>.
+              This is for example useful for converting "true" and "false"
+              strings coming from XML to real boolean values. <link
+              linkend="ref_builtin_boolean">More...</link></para>
+            </listitem>
+
             <listitem>
               <para>Error message quality improvements (targeting frequent
               support requests and some error message bugs):</para>

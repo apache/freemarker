@@ -52,6 +52,7 @@ import freemarker.core.SequenceBuiltins.seq_containsBI;
 import freemarker.core.SequenceBuiltins.seq_index_ofBI;
 import freemarker.core.SequenceBuiltins.sortBI;
 import freemarker.core.SequenceBuiltins.sort_byBI;
+import freemarker.core.StringBuiltins.booleanBI;
 import freemarker.core.StringBuiltins.cap_firstBI;
 import freemarker.core.StringBuiltins.capitalizeBI;
 import freemarker.core.StringBuiltins.chop_linebreakBI;
@@ -89,6 +90,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static {
         builtins.put("abs", new absBI());
         builtins.put("ancestors", new ancestorsBI());
+        builtins.put("boolean", new booleanBI());
         builtins.put("byte", new byteBI());
         builtins.put("c", new MiscellaneousBuiltins.cBI());
         builtins.put("cap_first", new cap_firstBI());
