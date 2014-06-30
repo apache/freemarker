@@ -19,6 +19,7 @@ package freemarker.ext.xml;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +34,6 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Collections12;
 
 /**
  * <p>A data model adapter for three widespread XML document object model
@@ -103,7 +103,7 @@ implements
             node = this.nodes.isEmpty() ? null : this.nodes.get(0);
         }
         else if(nodes != null) {
-            this.nodes = Collections12.singletonList(nodes);
+            this.nodes = Collections.singletonList(nodes);
         }
         else {
             throw new IllegalArgumentException("nodes == null");
@@ -202,7 +202,7 @@ implements
      * @see freemarker.template.TemplateSequenceModel#get(int)
      */
     public TemplateModel get(int index) {
-        return deriveModel(Collections12.singletonList(nodes.get(index)));
+        return deriveModel(Collections.singletonList(nodes.get(index)));
     }
 
     /**

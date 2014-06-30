@@ -57,7 +57,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.Collections12;
 
 /**
  * Provides a template for wrapping JDOM objects. It is capable of storing not only
@@ -120,7 +119,7 @@ implements
      */
     public NodeListModel(Document document)
     {
-        nodes = document == null ? Collections.EMPTY_LIST : Collections12.singletonList(document);
+        nodes = document == null ? Collections.EMPTY_LIST : Collections.singletonList(document);
         namespaces = new HashMap();
     }
 
@@ -129,13 +128,13 @@ implements
      */
     public NodeListModel(Element element)
     {
-        nodes = element == null ? Collections.EMPTY_LIST : Collections12.singletonList(element);
+        nodes = element == null ? Collections.EMPTY_LIST : Collections.singletonList(element);
         namespaces = new HashMap();
     }
 
     private NodeListModel(Object object, Map namespaces)
     {
-        nodes = object == null ? Collections.EMPTY_LIST : Collections12.singletonList(object);
+        nodes = object == null ? Collections.EMPTY_LIST : Collections.singletonList(object);
         this.namespaces = namespaces;
     }
 
@@ -631,7 +630,7 @@ implements
                 return((Element)node).getChildren();
             else if (node instanceof Document) {
                 Element root = ((Document)node).getRootElement();
-                return root == null ? Collections.EMPTY_LIST : Collections12.singletonList(root);
+                return root == null ? Collections.EMPTY_LIST : Collections.singletonList(root);
             } 
  // With 2.1 semantics it  makes more sense to just return a null and let the core 
  // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -653,7 +652,7 @@ implements
                 if (root != null &&
                     root.getName().equals(localName) &&
                     root.getNamespaceURI().equals(namespace.getURI())) {
-                    return Collections12.singletonList(root);
+                    return Collections.singletonList(root);
                 } else
                     return Collections.EMPTY_LIST;
             } 
@@ -716,7 +715,7 @@ implements
             else
                 throw new TemplateModelException("_allAttributes can not be applied on " + node.getClass());
 */
-            return attr == null ? Collections.EMPTY_LIST : Collections12.singletonList(attr);
+            return attr == null ? Collections.EMPTY_LIST : Collections.singletonList(attr);
         }
     }
 
@@ -724,15 +723,15 @@ implements
         public List operate(Object node)
         {
             if (node instanceof Element)
-                return Collections12.singletonList(((Element)node).getName());
+                return Collections.singletonList(((Element)node).getName());
             else if (node instanceof Attribute)
-                return Collections12.singletonList(((Attribute)node).getName());
+                return Collections.singletonList(((Attribute)node).getName());
             else if (node instanceof EntityRef)
-                return Collections12.singletonList(((EntityRef)node).getName());
+                return Collections.singletonList(((EntityRef)node).getName());
             else if (node instanceof ProcessingInstruction)
-                return Collections12.singletonList(((ProcessingInstruction)node).getTarget());
+                return Collections.singletonList(((ProcessingInstruction)node).getTarget());
             else if (node instanceof DocType)
-                return Collections12.singletonList(((DocType)node).getPublicID());
+                return Collections.singletonList(((DocType)node).getPublicID());
             else
                 return null;
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
@@ -745,9 +744,9 @@ implements
         public List operate(Object node)
         {
             if (node instanceof Element)
-                return Collections12.singletonList(((Element)node).getQualifiedName());
+                return Collections.singletonList(((Element)node).getQualifiedName());
             else if (node instanceof Attribute)
-                return Collections12.singletonList(((Attribute)node).getQualifiedName());
+                return Collections.singletonList(((Attribute)node).getQualifiedName());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -759,9 +758,9 @@ implements
         public List operate(Object node)
         {
             if (node instanceof Element)
-                return Collections12.singletonList(((Element)node).getNamespace().getURI());
+                return Collections.singletonList(((Element)node).getNamespace().getURI());
             else if (node instanceof Attribute)
-                return Collections12.singletonList(((Attribute)node).getNamespace().getURI());
+                return Collections.singletonList(((Attribute)node).getNamespace().getURI());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -773,9 +772,9 @@ implements
         public List operate(Object node)
         {
             if (node instanceof Element)
-                return Collections12.singletonList(((Element)node).getNamespace().getPrefix());
+                return Collections.singletonList(((Element)node).getNamespace().getPrefix());
             else if (node instanceof Attribute)
-                return Collections12.singletonList(((Attribute)node).getNamespace().getPrefix());
+                return Collections.singletonList(((Attribute)node).getNamespace().getPrefix());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;
@@ -789,12 +788,12 @@ implements
             if (node instanceof Element)
             {
                 Element element = (Element)node;
-                return Collections12.singletonList(element.getNamespace().getURI() + element.getName());
+                return Collections.singletonList(element.getNamespace().getURI() + element.getName());
             }
             else if (node instanceof Attribute)
             {
                 Attribute attribute = (Attribute)node;
-                return Collections12.singletonList(attribute.getNamespace().getURI() + attribute.getName());
+                return Collections.singletonList(attribute.getNamespace().getURI() + attribute.getName());
             }
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -829,7 +828,7 @@ implements
         public List operate(Object node)
         {
             Element parent = getParent(node);
-            return parent == null ? Collections.EMPTY_LIST : Collections12.singletonList(parent);
+            return parent == null ? Collections.EMPTY_LIST : Collections.singletonList(parent);
         }
     }
 
@@ -852,7 +851,7 @@ implements
         public List operate(Object node)
         {
             Element parent = getParent(node);
-            if (parent == null) return Collections12.singletonList(node);
+            if (parent == null) return Collections.singletonList(node);
             LinkedList list = new LinkedList();
             list.addFirst(node);
             do {
@@ -932,7 +931,7 @@ implements
                 return null;
 //                throw new TemplateModelException("_document can not be applied on " + node.getClass());
 
-            return doc == null ? Collections.EMPTY_LIST : Collections12.singletonList(doc);
+            return doc == null ? Collections.EMPTY_LIST : Collections.singletonList(doc);
         }
     }
 
@@ -941,7 +940,7 @@ implements
         {
             if (node instanceof Document) {
                 DocType doctype = ((Document)node).getDocType();
-                return doctype == null ? Collections.EMPTY_LIST : Collections12.singletonList(doctype);
+                return doctype == null ? Collections.EMPTY_LIST : Collections.singletonList(doctype);
             } else
                 // With 2.1 semantics it  makes more sense to just return a null and let the core 
                 // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
@@ -968,15 +967,15 @@ implements
         public List operate(Object node)
         {
             if (node instanceof Element)
-                return Collections12.singletonList(((Element)node).getTextTrim());
+                return Collections.singletonList(((Element)node).getTextTrim());
             if (node instanceof Attribute)
-                return Collections12.singletonList(((Attribute)node).getValue());
+                return Collections.singletonList(((Attribute)node).getValue());
             if (node instanceof CDATA)
-                return Collections12.singletonList(((CDATA)node).getText());
+                return Collections.singletonList(((CDATA)node).getText());
             if (node instanceof Comment)
-                return Collections12.singletonList(((Comment)node).getText());
+                return Collections.singletonList(((Comment)node).getText());
             if (node instanceof ProcessingInstruction)
-                return Collections12.singletonList(((ProcessingInstruction)node).getData());
+                return Collections.singletonList(((ProcessingInstruction)node).getData());
             // With 2.1 semantics it  makes more sense to just return a null and let the core 
             // throw an InvalidReferenceException and the template writer can use ?exists etcetera. (JR)
             return null;

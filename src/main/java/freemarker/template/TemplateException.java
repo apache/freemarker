@@ -29,7 +29,7 @@ import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core._CoreAPI;
 import freemarker.core._ErrorDescriptionBuilder;
-import freemarker.template.utility.Collections12;
+import freemarker.template.utility.CollectionUtils;
 
 /**
  * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
@@ -41,20 +41,8 @@ public class TemplateException extends Exception {
     private static final String THE_FAILING_INSTRUCTION_FTL_STACK_TRACE
             = THE_FAILING_INSTRUCTION + " (FTL stack trace):";
 
-    private static final boolean BEFORE_1_4 = before14();
-    private static boolean before14() {
-        Class ec = Exception.class;
-        try {
-            ec.getMethod("getCause", Collections12.EMPTY_CLASS_ARRAY);
-        } catch (Throwable e) {
-            return true;
-        }
-        return false;
-    }
-
     // Set in constructor:
     private transient _ErrorDescriptionBuilder descriptionBuilder;
-    private final Throwable causeException;
     private final transient Environment env;
     private transient TemplateElement[] ftlInstructionStackSnapshot;
     
@@ -146,12 +134,10 @@ public class TemplateException extends Exception {
             Environment env, _ErrorDescriptionBuilder descriptionBuilder) {
         // Note: Keep this constructor lightweight.
         
-        super();  // No args, because both the message and the cause exception is managed locally.
+        super(cause);  // Message managed locally.
         
         if (env == null) env = Environment.getCurrentEnvironment();
         this.env = env;
-
-        causeException = cause;  // for Java 1.2(?) compatibility
         
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;
@@ -194,23 +180,11 @@ public class TemplateException extends Exception {
      * @deprecated Use {@link #getCause()} instead, as this can't return runtime exceptions and errors as is.
      */
     public Exception getCauseException() {
-        return causeException instanceof Exception
-                ? (Exception) causeException
-                : new Exception("Wrapped to Exception: " + causeException);
+        return getCause() instanceof Exception
+                ? (Exception) getCause()
+                : new Exception("Wrapped to Exception: " + getCause(), getCause());
     }
 
-    /**
-     * Returns the cause exception.
-     *
-     * @return the underlying {@link Exception}, if any, that caused this
-     * exception to be raised
-     * 
-     * @see Throwable#getCause()
-     */
-    public Throwable getCause() {
-        return causeException;
-    }
-    
     /**
      * Returns the snapshot of the FTL stack strace at the time this exception was created.
      */
@@ -374,31 +348,22 @@ public class TemplateException extends Exception {
                     out.printStandardStackTrace(this);
                 }
                 
-                if (BEFORE_1_4 && causeException != null) {
-                    out.println("Underlying cause: ");
-                    out.printStandardStackTrace(causeException);
-                }
-                
-                // Dirty hack to fight with stupid ServletException class whose
-                // getCause() method doesn't work properly. Also an aid for pre-J2xE 1.4
-                // users.
-                try {
-                    // Reflection is used to prevent dependency on Servlet classes.
-                    Method m = causeException.getClass().getMethod("getRootCause", Collections12.EMPTY_CLASS_ARRAY);
-                    Throwable rootCause = (Throwable) m.invoke(causeException, Collections12.EMPTY_OBJECT_ARRAY);
-                    if (rootCause != null) {
-                        Throwable j14Cause = null;
-                        if (!BEFORE_1_4) {
-                            m = causeException.getClass().getMethod("getCause", Collections12.EMPTY_CLASS_ARRAY);
-                            j14Cause = (Throwable) m.invoke(causeException, Collections12.EMPTY_OBJECT_ARRAY);
-                        }
-                        if (j14Cause == null) {
-                            out.println("ServletException root cause: ");
-                            out.printStandardStackTrace(rootCause);
+                if (getCause() != null) {
+                    // Dirty hack to fight with ServletException class whose getCause() method doesn't work properly:
+                    Throwable causeCause = getCause().getCause();
+                    if (causeCause == null) {
+                        try {
+                            // Reflection is used to prevent dependency on Servlet classes.
+                            Method m = getCause().getClass().getMethod("getRootCause", CollectionUtils.EMPTY_CLASS_ARRAY);
+                            Throwable rootCause = (Throwable) m.invoke(getCause(), CollectionUtils.EMPTY_OBJECT_ARRAY);
+                            if (rootCause != null) {
+                                out.println("ServletException root cause: ");
+                                out.printStandardStackTrace(rootCause);
+                            }
+                        } catch (Throwable exc) {
+                            ; // ignore
                         }
                     }
-                } catch (Throwable exc) {
-                    ; // ignore
                 }
             }  // if (javaStackTrace)
         }

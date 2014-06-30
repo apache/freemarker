@@ -27,7 +27,6 @@ import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.Collections12;
 
 /**
  * Objects that represent elements in the compiled 
@@ -169,7 +168,7 @@ abstract public class TemplateElement extends TemplateObject {
             return nestedBlock.children();
         }
         if (nestedBlock != null) {
-            return Collections.enumeration(Collections12.singletonList(nestedBlock));
+            return Collections.enumeration(Collections.singletonList(nestedBlock));
         }
         else if (nestedElements != null) {
             return Collections.enumeration(nestedElements);

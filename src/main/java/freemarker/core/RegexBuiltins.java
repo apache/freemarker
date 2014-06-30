@@ -41,18 +41,15 @@ import freemarker.template.utility.StringUtil;
 
 
 /**
- * Don't use this class; it's only public to work around Google App Engine Java
- * compliance issues. FreeMarker developers only: treat this class as package-visible.
- * 
- * Contains the string built-ins that require J2SE 1.4 regular expression classes.
+ * Contains the string built-ins that deal with regular expressions.
  */
 // TODO: I think that the implementator has neglected that Matcher-s are
 // stateful and hence the result of ?matches can produce glitches if it's
 // accessed while iterated through. (This is a single-thread issue.)
-public class _RegexBuiltins {
+class RegexBuiltins {
 
     // Can't be instantiated
-    private _RegexBuiltins() { }
+    private RegexBuiltins() { }
     
     private static final Logger logger = Logger.getLogger("freemarker.runtime");
     

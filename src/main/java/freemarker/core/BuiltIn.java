@@ -229,15 +229,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("word_list", new word_listBI());
         builtins.put("xhtml", new StringBuiltins.xhtmlBI());
         builtins.put("xml", new StringBuiltins.xmlBI());
-        try {
-            Class.forName("java.util.regex.Pattern");
-            builtins.put("matches", instantiateBI("freemarker.core._RegexBuiltins$matchesBI"));
-            builtins.put("groups", instantiateBI("freemarker.core._RegexBuiltins$groupsBI"));
-            builtins.put("replace", instantiateBI("freemarker.core._RegexBuiltins$replace_reBI"));
-            builtins.put("split", instantiateBI("freemarker.core._RegexBuiltins$split_reBI"));
-        } catch (Exception e) {
-            logger.debug("Regular expression built-ins won't be avilable", e);
-        }
+        builtins.put("matches", new RegexBuiltins.matchesBI());
+        builtins.put("groups", new RegexBuiltins.groupsBI());
+        builtins.put("replace", new RegexBuiltins.replace_reBI());
+        builtins.put("split", new RegexBuiltins.split_reBI());
     }
 
     private static Object instantiateBI(String className) throws Exception

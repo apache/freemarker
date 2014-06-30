@@ -31,7 +31,7 @@ import java.util.Map;
 import freemarker.core.BugException;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.Collections12;
+import freemarker.template.utility.CollectionUtils;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -58,7 +58,7 @@ public class _BeansAPI {
      * overloaded method selection logic of {@link BeansWrapper}.
      */
     private static CallableMemberDescriptor getConstructorDescriptor(Class pClass, Object[] args) throws NoSuchMethodException {
-        if (args == null) args = Collections12.EMPTY_OBJECT_ARRAY;
+        if (args == null) args = CollectionUtils.EMPTY_OBJECT_ARRAY;
         
         final ArgumentTypes argTypes = new ArgumentTypes(args, true);
         final List fixedArgMemberDescs = new ArrayList();
@@ -99,7 +99,7 @@ public class _BeansAPI {
     private static Object newInstance(CallableMemberDescriptor constrDesc, Object[] args, BeansWrapper bw)
             throws InstantiationException, IllegalAccessException, InvocationTargetException, IllegalArgumentException,
             TemplateModelException {
-        if (args == null) args = Collections12.EMPTY_OBJECT_ARRAY;
+        if (args == null) args = CollectionUtils.EMPTY_OBJECT_ARRAY;
         
         final Object[] packedArgs;
         if (constrDesc.isVarargs()) {

@@ -18,6 +18,7 @@ package freemarker.ext.beans;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
@@ -27,7 +28,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.Collections12;
 
 /**
  * A class that will wrap a reflected method call into a
@@ -83,7 +83,7 @@ public final class SimpleMethodModel extends SimpleMethod
     
     public TemplateModel get(int index) throws TemplateModelException
     {
-        return (TemplateModel) exec(Collections12.singletonList(
+        return (TemplateModel) exec(Collections.singletonList(
                 new SimpleNumber(new Integer(index))));
     }
 

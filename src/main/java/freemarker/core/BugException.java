@@ -23,19 +23,25 @@ package freemarker.core;
  */
 public class BugException extends RuntimeException {
 
-    // Java 5: add the constructors with cause exception.
-    
     private static final String COMMON_MESSAGE
         = "A bug was detected in FreeMarker; please report it with stack-trace";
 
     public BugException() {
-        super(COMMON_MESSAGE);
+        this((Throwable) null);
     }
 
     public BugException(String message) {
-        super(COMMON_MESSAGE + ": " + message);
+        this(message, null);
     }
 
+    public BugException(Throwable cause) {
+        super(COMMON_MESSAGE, cause);
+    }
+
+    public BugException(String message, Throwable cause) {
+        super(COMMON_MESSAGE + ": " + message, cause);
+    }
+    
     public BugException(int value) {
         this(String.valueOf(value));
     }

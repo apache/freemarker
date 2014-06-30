@@ -174,8 +174,7 @@ public class Configuration extends Configurable implements Cloneable {
                 version = new Version(versionString, gaeCompliant, buildDate);
             }
         } catch (IOException e) {
-            // Java 5: use cause
-            throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH + ": " + e);
+            throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
     }
     
@@ -600,8 +599,8 @@ public class Configuration extends Configurable implements Cloneable {
                     webappTemplateLoaderClass
                             .getConstructor(constructorParamTypes)
                                     .newInstance(constructorParams));
-        } catch (Exception exc) {
-            throw new BugException(exc.toString());  // Java 5: use cause exc.
+        } catch (Exception e) {
+            throw new BugException(e);
         }
     }
 

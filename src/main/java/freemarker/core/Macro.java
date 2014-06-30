@@ -44,7 +44,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     boolean isFunction;
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
             Collections.EMPTY_LIST, 
-            freemarker.template.utility.Collections12.EMPTY_MAP,
+            Collections.EMPTY_MAP,
             TextBlock.EMPTY_BLOCK);
     
     Macro(String name, List argumentNames, Map args, 

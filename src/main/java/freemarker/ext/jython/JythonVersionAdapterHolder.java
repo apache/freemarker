@@ -65,9 +65,7 @@ class JythonVersionAdapterHolder {
     }
 
     private static RuntimeException adapterCreationException(Exception e) {
-        return new RuntimeException(
-                "Unexpected exception when creating JythonVersionAdapter: "
-                + e); // No cause exception argument available on Java 1.2.; fix this with Java 5
+        return new RuntimeException("Unexpected exception when creating JythonVersionAdapter", e);
     }
 
 }

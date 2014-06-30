@@ -17,6 +17,7 @@
 package freemarker.ext.beans;
 
 
+import java.util.Collections;
 import java.util.List;
 
 import freemarker.template.SimpleNumber;
@@ -24,7 +25,6 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.Collections12;
 
 /**
  * Wraps a set of same-name overloaded methods behind {@link freemarker.template.TemplateMethodModel} interface,
@@ -74,7 +74,7 @@ implements
 
     public TemplateModel get(int index) throws TemplateModelException
     {
-        return (TemplateModel) exec(Collections12.singletonList(
+        return (TemplateModel) exec(Collections.singletonList(
                 new SimpleNumber(new Integer(index))));
     }
 

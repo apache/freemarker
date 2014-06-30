@@ -29,7 +29,6 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.Collections12;
 
 final class ListLiteral extends Expression {
 
@@ -64,7 +63,7 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections12.singletonList(((Expression)items.get(0)).evalAndCoerceToString(env));
+                return Collections.singletonList(((Expression)items.get(0)).evalAndCoerceToString(env));
             }
             default: {
                 List result = new ArrayList(items.size());
@@ -87,7 +86,7 @@ final class ListLiteral extends Expression {
                 return Collections.EMPTY_LIST;
             }
             case 1: {
-                return Collections12.singletonList(((Expression)items.get(0)).eval(env));
+                return Collections.singletonList(((Expression)items.get(0)).eval(env));
             }
             default: {
                 List result = new ArrayList(items.size());

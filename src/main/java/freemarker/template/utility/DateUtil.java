@@ -31,27 +31,6 @@ public class DateUtil {
     
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     
-    private final static TimeZoneOffsetCalculator TIME_ZONE_OFFSET_CALCULATOR
-            = getTimeZoneOffsetCalculator();
-    
-    private static TimeZoneOffsetCalculator getTimeZoneOffsetCalculator() {
-        try {
-            Class cl = Class.forName(
-                    "freemarker.template.utility.J2SE14TimeZoneOffsetCalculator");
-            return (TimeZoneOffsetCalculator) cl.newInstance();
-        } catch (final Throwable e) {
-            return new TimeZoneOffsetCalculator() {
-                public int getOffset(TimeZone tz, Date date) {
-                    throw new RuntimeException(
-                            "Failed to create TimeZoneOffsetCalculator. " +
-                            "Note that this feature requires at least " +
-                            "Java 1.4.\nCause exception: " + e);  // Java 5: use cause exc.  
-                }
-                
-            };
-        }
-    }
-    
     private DateUtil() {
         // can't be instantiated
     }
@@ -275,7 +254,7 @@ public class DateUtil {
             if (timeZone == UTC) {
                 res[dstIdx++] = 'Z';
             } else {
-                int dt = TIME_ZONE_OFFSET_CALCULATOR.getOffset(timeZone, date);
+                int dt = timeZone.getOffset(date.getTime());
                 boolean positive;
                 if (dt < 0) {
                     positive = false;
@@ -352,10 +331,6 @@ public class DateUtil {
         }
         
         
-    }
-    
-    interface TimeZoneOffsetCalculator {
-        int getOffset(TimeZone tz, Date date);
     }
 
 }

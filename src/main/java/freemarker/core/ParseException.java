@@ -78,9 +78,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
     /** @deprecated Will be remove without replacement in 2.4. */
     protected boolean specialConstructor;  
 
-    // This was no part of Throwable on J2SE 1.2; remove in Java 5
-    private final Throwable cause;
-
     private String templateName;
 
     /**
@@ -99,7 +96,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
             )
     {
         super("");
-        cause = null;
         currentToken = currentTokenVal;
         specialConstructor = true;
         expectedTokenSequences = expectedTokenSequencesVal;
@@ -123,7 +119,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     protected ParseException() {
         super();
-        cause = null;
     }
 
     /**
@@ -217,7 +212,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
             int endLineNumber, int endColumnNumber,
             Throwable cause) {
         super(description);  // but we override getMessage, so it will be different
-        this.cause = cause;
         this.description = description; 
         this.templateName = templateName;
         this.lineNumber = lineNumber;
@@ -237,10 +231,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
             messageAndDescriptionRendered = false;
             message = null;
         }
-    }
-
-    public Throwable getCause() {
-        return cause;
     }
 
     /**

@@ -45,7 +45,7 @@ public class OptimizerUtil
             }
             case 1:
             {
-                return Collections12.singletonList(list.get(0));
+                return Collections.singletonList(list.get(0));
             }
             default:
             {

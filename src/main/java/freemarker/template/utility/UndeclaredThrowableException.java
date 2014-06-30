@@ -24,11 +24,10 @@ import java.io.PrintWriter;
  */
 public class UndeclaredThrowableException extends RuntimeException
 {
-    private final Throwable t;
     
     public UndeclaredThrowableException(Throwable t)
     {
-        this.t = t;
+        super(t);
     }
     
     public void printStackTrace()
@@ -41,7 +40,7 @@ public class UndeclaredThrowableException extends RuntimeException
         synchronized (ps)
         {
             ps.print("Undeclared throwable:");
-            t.printStackTrace(ps);
+            getCause().printStackTrace(ps);
         }
     }
 
@@ -50,16 +49,12 @@ public class UndeclaredThrowableException extends RuntimeException
         synchronized (pw)
         {
             pw.print("Undeclared throwable:");
-            t.printStackTrace(pw);
+            getCause().printStackTrace(pw);
         }
     }
     
     public Throwable getUndeclaredThrowable() {
-        return t;
-    }
-    
-    public Throwable getCause() {
-    	return t;
+        return getCause();
     }
     
 }
