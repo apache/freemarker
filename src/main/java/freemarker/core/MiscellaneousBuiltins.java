@@ -42,6 +42,8 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
+import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -95,7 +97,7 @@ class MiscellaneousBuiltins {
                 }
                 throw new _MiscTemplateException(this, new Object[] {
                             "Cannot convert ", TemplateDateModel.TYPE_NAMES.get(dtype),
-                            " into ", TemplateDateModel.TYPE_NAMES.get(dateType) });
+                            " to ", TemplateDateModel.TYPE_NAMES.get(dateType) });
             }
             // Otherwise, interpret as a string and attempt 
             // to parse it into a date.
@@ -136,7 +138,7 @@ class MiscellaneousBuiltins {
     
             public TemplateModel get(String pattern) throws TemplateModelException {
                 return new SimpleDate(
-                    parse(env.getDateFormatObject(dateType, pattern)),
+                    pattern.equals("xs") ? parseXS(dateType) : parse(env.getDateFormatObject(dateType, pattern)),
                     dateType);
             }
     
@@ -170,7 +172,26 @@ class MiscellaneousBuiltins {
                             (pattern != null ? ". " : "") });
                 }
             }
+            
+            public Date parseXS(int dateType) throws _TemplateModelException {
+                try {
+                    CalendarFieldsToDateConverter calToDateConverter = env.getCalendarFieldsToDateCalculator();
+                    if (dateType == TemplateDateModel.DATE) {
+                        return DateUtil.parseXSDate(text, env.getTimeZone(), calToDateConverter);
+                    } else if (dateType == TemplateDateModel.TIME) {
+                        return DateUtil.parseXSTime(text, env.getTimeZone(), calToDateConverter);
+                    } else if (dateType == TemplateDateModel.DATETIME) {
+                        return DateUtil.parseXSDateTime(text, env.getTimeZone(), calToDateConverter);
+                    } else {
+                        throw new BugException("Unexpected date type: " + dateType);
+                    }
+                } catch (DateUtil.DateParseException e) {
+                    throw new _TemplateModelException(e.getMessage());
+                }
+            }
+            
         }
+
     }
 
     static class stringBI extends BuiltIn {

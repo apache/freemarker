@@ -16,11 +16,14 @@
 
 package freemarker.template.utility;
 
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DateUtil {
 
@@ -30,6 +33,35 @@ public class DateUtil {
     public static final int ACCURACY_MILLISECONDS = 7;
     
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    
+    private static final String REGEX_XS_TIME_ZONE
+            = "Z|([-+][0-9]{2}:[0-9]{2})";
+    
+    private static final String REGEX_XS_OPTIONAL_TIME_ZONE
+            = "(" + REGEX_XS_TIME_ZONE + ")?";
+    
+    private static final String REGEX_XS_DATE_BASE
+            = "(-?[0-9]+)-([0-9]{2})-([0-9]{2})";
+    
+    private static final String REGEX_XS_TIME_BASE
+            = "([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\\.([0-9]+))?";
+        
+    private static final Pattern PATTERN_XS_DATE = Pattern.compile(
+            REGEX_XS_DATE_BASE + REGEX_XS_OPTIONAL_TIME_ZONE);
+    
+    private static final Pattern PATTERN_XS_TIME = Pattern.compile(
+            REGEX_XS_TIME_BASE + REGEX_XS_OPTIONAL_TIME_ZONE);
+    
+    private static final Pattern PATTERN_XS_DATE_TIME = Pattern.compile(
+            REGEX_XS_DATE_BASE
+            + "T" + REGEX_XS_TIME_BASE
+            + REGEX_XS_OPTIONAL_TIME_ZONE);
+    
+    private static final Pattern PATTERN_XS_TIME_ZONE = Pattern.compile(
+            REGEX_XS_TIME_ZONE);
+    
+    private static final String MSG_PART_SHOWN_QUOTED
+            = "The problematic text (shown quoted): ";    
     
     private DateUtil() {
         // can't be instantiated
@@ -106,14 +138,17 @@ public class DateUtil {
     }
     
     /**
-     * Format a date, time or date+time with one of the ISO 8601 extended
-     * formats. Examples of possible outputs:
+     * Format a date, time or dateTime with one of the ISO 8601 extended
+     * formats that is also compatible with the XML Schema format (as far as you
+     * don't have dates in the BC era). Examples of possible outputs:
      * {@code "2005-11-27T15:30:00+02:00"}, {@code "2005-11-27"},
      * {@code "15:30:00Z"}. Note the {@code ":00"} in the time zone offset;
      * this is not required by ISO 8601, but included for compatibility with
-     * the XML Schema date/time formats.
+     * the XML Schema format. Regarding the B.C. issue, those dates will be
+     * one year off when read back according the XML Schema format, because of a
+     * mismatch between that format and ISO 8601:2000 Second Edition.  
      * 
-     * This method is thread-safe.
+     * <p>This method is thread-safe.
      * 
      * @param date the date to convert to ISO 8601 string
      * @param datePart whether the date part (year, month, day) will be included
@@ -298,7 +333,454 @@ public class DateUtil {
     }
     
     /**
-     * Used internally by {@link DateUtil}; don't use it's implementations for
+     * Parses an W3C XML Schema date string (not time or date-time).
+     * Unlike in ISO 8601:2000 Second Edition, year -1 means B.C 1, and year 0 is invalid. 
+     * 
+     * @param dateStr the string to parse. 
+     * @param defaultTimeZone used if the date doesn't specify the
+     *     time zone offset explicitly. Can't be {@code null}.
+     * @param calToDateConverter Used internally to calculate the result from the calendar field values.
+     *     If you don't have a such object around, you can just use
+     *     {@code new }{@link TrivialCalendarFieldsToDateConverter}{@code ()}. 
+     * 
+     * @throws DateParseException if the date is malformed, or if the time
+     *     zone offset is unspecified and the {@code defaultTimeZone} is
+     *     {@code null}.
+     */
+    public static Date parseXSDate(
+            String dateStr, TimeZone defaultTimeZone,
+            CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        Matcher m = PATTERN_XS_DATE.matcher(dateStr);
+        if (!m.matches()) {
+            throw parseXSDate_newExc(dateStr, null); 
+        }
+        return parseXSDate_parseMatcher(
+                dateStr, m, defaultTimeZone, calToDateConverter);
+    }
+    
+    private static Date parseXSDate_parseMatcher(
+            String dateStr, Matcher m, TimeZone defaultTimeZone,
+            CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        try {
+            try {
+                int year = parseXS_groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
+                
+                int era;
+                if (year <= 0) {
+                    era = GregorianCalendar.BC;
+                    year = -year;
+                    // Starting from ISO 8601:2000 Second Edition, 0001 is AD 1, 0000 is BC 1, -0001 is BC 2.
+                    // However, according to http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/, XML schemas are based
+                    // on the earlier version where 0000 didn't exist, and year -1 is BC 1.
+                } else {
+                    era = GregorianCalendar.AD;
+                }
+                
+                int month = parseXS_groupToInt(m.group(2), "month", 1, 12) - 1;
+                int day = parseXS_groupToInt(m.group(3), "day-of-month", 1, 31);
+
+                TimeZone tz = parseXS_parseTimeZone(m.group(4), defaultTimeZone);
+                
+                return calToDateConverter.calculate(era, year, month, day, 0, 0, 0, 0, tz);
+            } catch (IllegalArgumentException e) {
+                // Calendar methods used to throw this for illegal dates.
+                throw new DatePartParseException(
+                        "Date calculation faliure. "
+                        + "Probably the date is formally correct, but refers "
+                        + "to an unexistent date (like February 30)."); 
+            }
+        } catch (DatePartParseException e) {
+            throw parseXSDate_newExc(dateStr, e.getMessage());
+        }
+    }
+    
+    private static DateParseException parseXSDate_newExc(
+            String dateStr, String details) {
+        StringBuffer msg = new StringBuffer();
+        msg.append("Malformed W3C XML Schema date");
+        if (details != null) {
+            msg.append(": ");
+            msg.append(details);
+            msg.append(' ');
+        } else {
+            msg.append(". ");
+        }
+        msg.append(MSG_PART_SHOWN_QUOTED);
+        msg.append(StringUtil.jQuote(dateStr));
+        msg.append(". (Date examples: "
+                + "\"1998-01-30\", \"1998-01-30+04:00\", \"1998-01-30Z\")");
+        return new DateParseException(msg.toString());
+    }
+
+    /**
+     * Parses an W3C XML Schema time string (not date or date-time).
+     * If the time string doesn't specify the time zone offset explicitly,
+     * +00:00 will be used. This is because in Java there is no real time
+     * class, so the result is mostly used to store the distance from the
+     * beginning of the day in milliseconds, and not a real time. 
+     */  
+    public static Date parseXSTime(
+            String timeStr, TimeZone defaultTZ, CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        Matcher m = PATTERN_XS_TIME.matcher(timeStr);
+        if (!m.matches()) {
+            throw parseXSTime_newExc(timeStr, null);
+        }
+        return parseXSTime_parseMatcher(timeStr, m, defaultTZ, calToDateConverter);
+    }
+    
+    private static Date parseXSTime_parseMatcher(
+            String timeStr, Matcher m, TimeZone defaultTZ, CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        try {
+            try {
+                // ISO 8601 allows both 00:00 and 24:00,
+                // but Calendar.set(...) doesn't if the Calendar is not lenient.
+                int hours = parseXS_groupToInt(m.group(1), "hour-of-day", 0, 24);
+                boolean hourWas24;
+                if (hours == 24) {
+                    hours = 0;
+                    hourWas24 = true;
+                    // And a day will be added later...
+                } else {
+                    hourWas24 = false;
+                }
+                
+                int minutes = parseXS_groupToInt(m.group(2), "minute", 0, 59);
+                
+                // Allow 60 because of leap seconds
+                int secs = parseXS_groupToInt(m.group(3), "second", 0, 60);
+                
+                int millisecs = parseXS_groupToMillisecond(m.group(4));
+                
+                // As a time is just the distance from the beginning of the day,
+                // the time-zone offest should be 0 usually.
+                TimeZone tz = parseXS_parseTimeZone(m.group(5), defaultTZ);
+                
+                // Continue handling the 24:00 specail case
+                int day;
+                if (hourWas24) {
+                    if (minutes == 0 && secs == 0) {
+                        day = 2;
+                    } else {
+                        throw new DatePartParseException(
+                                "Hour 24 is only allowed in the case of "
+                                + "midnight."); 
+                    }
+                } else {
+                    day = 1;
+                }
+                
+                return calToDateConverter.calculate(
+                        GregorianCalendar.AD, 1970, 0, day, hours, minutes, secs, millisecs, tz);
+            } catch (IllegalArgumentException e) {
+                // Calendar methods used to throw this for illegal dates.
+                throw new DatePartParseException(
+                        "Unexpected time calculation faliure."); 
+            }
+        } catch (DatePartParseException e) {
+            throw parseXSTime_newExc(timeStr, e.getMessage());
+        }
+    }
+    
+    private static DateParseException parseXSTime_newExc(
+            String timeStr, String detail) {
+            StringBuffer msg = new StringBuffer();
+            msg.append("Malformed W3C XML Schema time");
+            if (detail != null) {
+                msg.append(": ");
+                msg.append(detail);
+                msg.append(' ');
+            } else {
+                msg.append(". ");
+            }
+            msg.append(MSG_PART_SHOWN_QUOTED);
+            msg.append(StringUtil.jQuote(timeStr));
+            msg.append(". (Time examples: "
+                    + "\"17:30:00\", \"17:30:00.123\", \"17:30:00+04:00\")");
+            return new DateParseException(msg.toString());
+    }
+
+    
+    /**
+     * Parses an W3C XML Schema date-time string (not date or time).
+     * Unlike in ISO 8601:2000 Second Edition, year -1 means B.C 1, and year 0 is invalid. 
+     * 
+     * @param dateTimeStr the string to parse. 
+     * @param defaultTZ used if the dateTime doesn't specify the
+     *     time zone offset explicitly. Can't be {@code null}. 
+     * 
+     * @throws DateParseException if the dateTime is malformed.
+     */
+    public static Date parseXSDateTime(
+            String dateTimeStr, TimeZone defaultTZ, CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        Matcher m = PATTERN_XS_DATE_TIME.matcher(dateTimeStr);
+        if (!m.matches()) {
+            throw parseXSDateTime_newExc(dateTimeStr, null);
+        }
+        return parseXSDateTime_parseMatcher(
+                dateTimeStr, m, defaultTZ, calToDateConverter);
+    }
+
+    /**
+     * Same as {@link #parseXSDateTime(String, TimeZone, CalendarFieldsToDateConverter)},
+     * but the hint parameter is {@code null}.
+     */
+    public static Date parseXSDateTime(
+            String dateTimeStr, TimeZone defaultTimeZone) 
+            throws DateParseException {
+        return parseXSDateTime(
+            dateTimeStr, defaultTimeZone, null);
+    }
+    
+    private static Date parseXSDateTime_parseMatcher(
+            String dateTimeStr, Matcher m, TimeZone defaultTZ,
+            CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        try {
+            try {
+                int year = parseXS_groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
+                
+                int era;
+                if (year <= 0) {
+                    era = GregorianCalendar.BC;
+                    year = -year;
+                    // Starting from ISO 8601:2000 Second Edition, 0001 is AD 1, 0000 is BC 1, -0001 is BC 2.
+                    // However, according to http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/, XML schemas are based
+                    // on the earlier version where 0000 didn't exist, and year -1 is BC 1.
+                } else {
+                    era = GregorianCalendar.AD;
+                }
+                
+                int month = parseXS_groupToInt(m.group(2), "month", 1, 12) - 1;
+                int day = parseXS_groupToInt(m.group(3), "day-of-month", 1, 31);
+                
+                // ISO 8601 allows both 00:00 and 24:00,
+                // but cal.set(...) doesn't if the Calendar is not lenient.
+                int hours = parseXS_groupToInt(m.group(4), "hour-of-day", 0, 24);
+                boolean hourWas24;
+                if (hours == 24) {
+                    hours = 0;
+                    hourWas24 = true;
+                    // And a day will be added later...
+                } else {
+                    hourWas24 = false;
+                }
+                
+                int minutes = parseXS_groupToInt(m.group(5), "minute", 0, 59);
+                
+                // Allow 60 because of leap seconds
+                int secs = parseXS_groupToInt(m.group(6), "second", 0, 60);
+                
+                int millisecs = parseXS_groupToMillisecond(m.group(7));
+                
+                // As a time is just the distance from the beginning of the day,
+                // the time-zone offest should be 0 usually.
+                TimeZone tz = parseXS_parseTimeZone(m.group(8), defaultTZ);
+                
+                // Continue handling the 24:00 specail case
+                if (hourWas24) {
+                    if (minutes == 0 && secs == 0) {
+                        day++;
+                    } else {
+                        throw new DatePartParseException(
+                                "Hour 24 is only allowed in the case of "
+                                + "midnight."); 
+                    }
+                }
+                
+                return calToDateConverter.calculate(era, year, month, day, hours, minutes, secs, millisecs, tz);
+            } catch (IllegalArgumentException e) {
+                // Calendar methods used to throw this for illegal dates.
+                throw new DatePartParseException(
+                        "Date-time calculation faliure. "
+                        + "Probably the date-time is formally correct, but "
+                        + "refers to an unexistent date-time "
+                        + "(like February 30)."); 
+            }
+        } catch (DatePartParseException e) {
+            throw parseXSDateTime_newExc(dateTimeStr, e.getMessage());
+        }
+    }
+    
+    private static DateParseException parseXSDateTime_newExc(
+            String dateTimeStr, String detail) {
+            StringBuffer msg = new StringBuffer();
+            msg.append("Malformed W3C XML Schema date-time");
+            if (detail != null) {
+                msg.append(": ");
+                msg.append(detail);
+                msg.append(' ');
+            } else {
+                msg.append(". ");
+            }
+            msg.append(MSG_PART_SHOWN_QUOTED);
+            msg.append(StringUtil.jQuote(dateTimeStr));
+            msg.append(". (Date-time examples: "
+                    + "\"1998-01-30T15:30:00\", "
+                    + "\"1998-01-30T15:30:00.125\", "
+                    + "\"1998-01-30T15:30:00+04:00\", "
+                    + "\"1998-01-30T15:30:00Z\")");
+            return new DateParseException(msg.toString());
+    }
+
+    /**
+     * Parses an W3C XML Schema date or time or date-time string.
+     * It detects if the string is date or time or date-time, and then calls
+     * {@link #parseXSDate(String, TimeZone, CalendarFieldsToDateConverter)} or
+     * {@link #parseXSTime(String, TimeZone, CalendarFieldsToDateConverter)} or
+     * {@link #parseXSDateTime(String, TimeZone, CalendarFieldsToDateConverter)}, so
+     * see the documentation of those for more information.
+     */
+    public static Date parseXSDateOrTimeOrDateTime(
+            String s, TimeZone defaultTZ,
+            CalendarFieldsToDateConverter calToDateConverter) 
+            throws DateParseException {
+        Matcher m;
+        
+        m = PATTERN_XS_DATE_TIME.matcher(s);
+        if (m.matches()) {
+            return parseXSDateTime_parseMatcher(
+                    s, m, defaultTZ, calToDateConverter);
+        }
+        
+        m = PATTERN_XS_DATE.matcher(s);
+        if (m.matches()) {
+            return parseXSDate_parseMatcher(
+                    s, m, defaultTZ, calToDateConverter);
+        }
+        
+        m = PATTERN_XS_TIME.matcher(s);
+        if (m.matches()) {
+            return parseXSTime_parseMatcher(s, m, defaultTZ, calToDateConverter);
+        }
+        
+        throw new DateParseException("The string is not a well-formed "
+                + "W3C XML Schema date or time or date-time. "
+                + MSG_PART_SHOWN_QUOTED + StringUtil.jQuote(s)
+                + ". (Date example: \"1998-01-30\"; "
+                + "time examples: \"15:30:00\", \"15:30:00.75\"; "
+                + "date-time example: \"1998-01-30T15:30:00\". "
+                + "Time zone offsets like "
+                + "\"-01:30\", \"+04:00\" or \"Z\" can be appended after "
+                + "each, e.g. \"1998-01-30T15:30:00+04:00\")");
+    }
+
+    /**
+     * Parses the time zone part from a W3C XML Schema date/time/dateTime. 
+     * @throws DateParseException if the zone is malformed.
+     */
+    public static TimeZone parseXSTimeZone(String timeZoneStr)
+            throws DateParseException {
+        Matcher m = PATTERN_XS_TIME_ZONE.matcher(timeZoneStr);
+        if (!m.matches()) {
+            throw parseXSTimeZone_newExc(timeZoneStr, null);
+        }
+        try {
+            return parseXS_parseTimeZone(timeZoneStr, null);
+        } catch (DatePartParseException e) {
+            throw parseXSTimeZone_newExc(timeZoneStr, e.getMessage());
+        }
+    }
+
+    private static DateParseException parseXSTimeZone_newExc(
+            String timeZoneStr, String details) {
+        StringBuffer msg = new StringBuffer();
+        msg.append("The string is not a well-formed "
+                + "W3C XML Schema time zone. ");
+        if (details != null) {
+            msg.append(details);
+            msg.append(" ");
+        }
+        msg.append(MSG_PART_SHOWN_QUOTED);
+        msg.append(StringUtil.jQuote(timeZoneStr));
+        msg.append(". (Examples: \"+01:30\", \"-04:00\", \"Z\")");
+        return new DateParseException(msg.toString());
+    }
+    
+    private static int parseXS_groupToInt(String g, String gName,
+            int min, int max)
+            throws DatePartParseException {
+        if (g == null) {
+            throw new DatePartParseException("The " + gName + " part "
+                    + "is missing.");
+        }
+
+        int start;
+        
+        // Remove minus sign, so we can remove the 0-s later:
+        boolean negative;
+        if (g.startsWith("-")) {
+            negative = true;
+            start = 1;
+        } else {
+            negative = false;
+            start = 0;
+        }
+        
+        // Remove leading 0-s:
+        while (start < g.length() - 1 && g.charAt(start) == '0') {
+            start++;
+        }
+        if (start != 0) {
+            g = g.substring(start);
+        }
+        
+        try {
+            int r = Integer.parseInt(g);
+            if (negative) {
+                r = -r;
+            }
+            if (r < min) {
+                throw new DatePartParseException("The " + gName + " part "
+                    + "must be at least " + min + ".");
+            }
+            if (r > max) {
+                throw new DatePartParseException("The " + gName + " part "
+                    + "can't be more than " + max + ".");
+            }
+            return r;
+        } catch (NumberFormatException e) {
+            throw new DatePartParseException("The " + gName + " part "
+                    + "is a malformed integer.");
+        }
+    }
+
+    private static TimeZone parseXS_parseTimeZone(
+            String s, TimeZone defaultZone)
+            throws DatePartParseException {
+        if (s == null) {
+            return defaultZone;
+        }
+        if (s.equals("Z")) {
+            return DateUtil.UTC;
+        }
+        
+        String g = s.substring(1, 3);
+        parseXS_groupToInt(g.toString(), "offset-hours", 0, 23);
+        g = s.substring(4, 6);
+        parseXS_groupToInt(g.toString(), "offset-minutes", 0, 59);
+        
+        return TimeZone.getTimeZone("GMT" + s);
+    }
+
+    private static int parseXS_groupToMillisecond(String g)
+            throws DatePartParseException {
+        if (g == null) {
+            return 0;
+        }
+        
+        int v = parseXS_groupToInt(
+                g, "partial-seconds", 0, Integer.MAX_VALUE);
+        v = (int) Math.round(v * Math.pow(10, 3 - g.length()));
+        return v;
+    }
+    
+    /**
+     * Used internally by {@link DateUtil}; don't use its implementations for
      * anything else.
      */
     public interface DateToISO8601CalendarFactory {
@@ -306,12 +788,26 @@ public class DateUtil {
         /**
          * Returns a {@link GregorianCalendar} with the desired time zone and
          * time and US locale. The returned calendar is used as read-only.
-         * It's guaranteed that within a thread the instance returned last time
-         * is not in use anymore when this method is called again. 
+         * It must be guaranteed that within a thread the instance returned last time
+         * is not in use anymore when this method is called again.
          */
         GregorianCalendar get(TimeZone tz, Date date);
+        
     }
-    
+
+    /**
+     * Used internally by {@link DateUtil}; don't use its implementations for anything else.
+     */
+    public interface CalendarFieldsToDateConverter {
+
+        /**
+         * Calculates the {@link Date} from the specified calendar fields.
+         */
+        Date calculate(int era, int year, int month, int day, int hours, int minutes, int secs, int millisecs,
+                TimeZone tz);
+
+    }
+
     /**
      * Non-thread-safe factory that hard-references a calendar internally.
      */
@@ -319,7 +815,7 @@ public class DateUtil {
             implements DateToISO8601CalendarFactory {
         
         private GregorianCalendar calendar;
-
+    
         public GregorianCalendar get(TimeZone tz, Date date) {
             if (calendar == null) {
                 calendar = new GregorianCalendar(tz, Locale.US);
@@ -330,7 +826,52 @@ public class DateUtil {
             return calendar;
         }
         
-        
     }
 
+    /**
+     * Non-thread-safe implementation that hard-references a calendar internally.
+     */
+    public static final class TrivialCalendarFieldsToDateConverter
+            implements CalendarFieldsToDateConverter {
+
+        private GregorianCalendar calendar;
+
+        public Date calculate(int era, int year, int month, int day, int hours, int minutes, int secs, int millisecs,
+                TimeZone tz) {
+            if (calendar == null) {
+                calendar = new GregorianCalendar(tz, Locale.US);
+            } else {
+                calendar.setTimeZone(tz);
+            }
+
+            calendar.set(Calendar.ERA, era);
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, day);
+            calendar.set(Calendar.HOUR_OF_DAY, hours);
+            calendar.set(Calendar.MINUTE, minutes);
+            calendar.set(Calendar.SECOND, secs);
+            calendar.set(Calendar.MILLISECOND, millisecs);
+            
+            return calendar.getTime();
+        }
+
+    }
+    
+    private static final class DatePartParseException extends Exception {
+        
+        public DatePartParseException(String message) {
+            super(message);
+        }
+        
+    }
+    
+    public static final class DateParseException extends ParseException {
+        
+        public DateParseException(String message) {
+            super(message, 0);
+        }
+        
+    }
+        
 }

@@ -62,6 +62,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
 import freemarker.template.utility.DateUtil;
+import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
@@ -121,6 +122,12 @@ public final class Environment extends Configurable {
      * @see #getISOBuiltInCalendar() 
      */
     private DateToISO8601CalendarFactory isoBuiltInCalendarFactory;
+    
+    /**
+     * Used for accelerating XML Schema date/time parsing.
+     * @see #getCalendarFieldsToDateCalculator()
+     */
+    private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
 
     private Collator collator;
 
@@ -1104,6 +1111,17 @@ public final class Environment extends Configurable {
         return isoBuiltInCalendarFactory;
     }
 
+    /**
+     * Returns the {@link CalendarFieldsToDateConverter} used by the
+     * the "date.xs", "time.xs" and "datetime.xs" built-ins.
+     */
+    CalendarFieldsToDateConverter getCalendarFieldsToDateCalculator() {
+        if (calendarFieldsToDateConverter == null) {
+            calendarFieldsToDateConverter = new DateUtil.TrivialCalendarFieldsToDateConverter();
+        }
+        return calendarFieldsToDateConverter;
+    }
+    
     /**
      * Returns the {@link NumberFormat} used for the <tt>c</tt> built-in.
      * This is always US English <code>"0.################"</code>, without
