@@ -20490,6 +20490,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para>The
+              <literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
+              now now supports parsing XML Schema values with
+              <literal>?date.xs</literal>, <literal>?datetime.xs</literal> and
+              <literal>?time.xs</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: ISO 8601 dates (via
+              <literal>?iso_...</literal>) now use proleptic Gregorian
+              calendar for the years before 1582, rather than Julian calendar.
+              This is (indirectly) required by the standard, and it's also how
+              the standard Java XML Schema date/time/dateTime parser
+              works.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
