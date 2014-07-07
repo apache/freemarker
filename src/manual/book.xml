@@ -11606,51 +11606,73 @@ Green Mouse</programlisting>
             <primary>parsing string as time</primary>
           </indexterm>
 
-          <para>The string converted to a date value. It is recommended to
-          specify a parameter that specifies the format, using <link
+          <indexterm>
+            <primary>XML Schema date parsing</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>XML Schema time parsing</primary>
+          </indexterm>
+
+          <para>The string value converted to a date, time, or date-time
+          value. It will expect the format specified by the
+          <literal>date_format</literal>, <literal>time_format</literal> and
+          <literal>datetime_format</literal> <link
+          linkend="ref.directive.setting">settings</link>. If the string is
+          not in the appropriate format, an error will abort template
+          processing when you try to access this built-in.</para>
+
+          <programlisting role="template">&lt;#-- The date_format, time_format and datetime_format settings must match this format! --&gt;
+&lt;#assign someDate = "Oct 25, 1995"?date&gt;
+&lt;#assign someTime = "3:05:30 PM"?time&gt;
+&lt;#assign someDatetime = "Oct 25, 1995 03:05:00 PM"?datetime&gt;</programlisting>
+
+          <para>You can also specify the format explicitly with a parameter,
+          using <link
           xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
           date format syntax</link>. For example:</para>
 
-          <programlisting role="template">&lt;#assign test1 = "10/25/1995"?date("MM/dd/yyyy")&gt;
-&lt;#assign test2 = "15:05:30"?time("HH:mm:ss")&gt;
-&lt;#assign test3 = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
-${test1}
-${test2}
-${test3}</programlisting>
+          <programlisting role="template">&lt;#assign someDate = "10/25/1995"?date("MM/dd/yyyy")&gt;
+&lt;#assign someTime = "15:05:30"?time("HH:mm:ss")&gt;
+&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
+${someDate}
+${someTime}
+${someDatetime}</programlisting>
 
-          <para>will print something like (depends on the output locale
-          (language) and on other settings):</para>
+          <para>will print something like (depending on the output locale
+          (language) and <literal>date_format</literal>,
+          <literal>time_format</literal> and
+          <literal>datetime_format</literal> <link
+          linkend="ref.directive.setting">settings</link>):</para>
 
           <programlisting role="output">Oct 25, 1995
 3:05:30 PM
-Oct 25, 1995 3:05:00 PM
-</programlisting>
+Oct 25, 1995 3:05:00 PM</programlisting>
 
-          <para>Note that the dates were converted back to string according to
-          the <literal>date_format</literal>, <literal>time_format</literal>
-          and <literal>datetime_format</literal> <link
-          linkend="ref.directive.setting">settings</link> (for more
-          information about converting dates to strings read: <link
+          <para>Above, the dates/times/date-times were converted back to
+          string according to the <literal>date_format</literal>,
+          <literal>time_format</literal> and
+          <literal>datetime_format</literal> <link
+          linkend="ref.directive.setting">settings</link>, that's why they
+          look differently as the original strings. (For more information
+          about converting dates to strings read: <link
           linkend="ref_builtin_string_for_date">string built-in for
           dates</link>, <link
           linkend="dgui_template_valueinserion_universal_date">date
-          interpolations</link>). It does not mater what format did you use
-          when you have converted the strings to dates.</para>
+          interpolations</link>.)</para>
 
-          <para>You don't have to use the format parameter, if you know what
-          the default date/time/datetime format will be when the template is
-          processed:</para>
+          <para>Instead of specifying a concrete pattern, you can use one of
+          the predefined patterns, as the subvariables of the built-in. The
+          predefined formats are: <literal>short</literal>,
+          <literal>medium</literal> and <literal>long</literal>, which refer
+          to the standard Java locale dependent formats, and
+          <literal>xs</literal> that refers to the W3C XML Schema
+          format:</para>
 
-          <programlisting role="template">&lt;#assign test1 = "Oct 25, 1995"?date&gt;
-&lt;#assign test2 = "3:05:30 PM"?time&gt;
-&lt;#assign test3 = "Oct 25, 1995 03:05:00 PM"?datetime&gt;
-${test1}
-${test2}
-${test3}</programlisting>
-
-          <para>If the string is not in the appropriate format, an error will
-          abort template processing when you try to access this
-          built-in.</para>
+          <programlisting role="template">&lt;#-- Parsing xs:date, xs:time and xs:dateTime values: --&gt;
+&lt;#assign someDate = "1995-10-25"?date.xs&gt;
+&lt;#assign someTime = "15:05:30"?time.xs&gt;
+&lt;#assign someDatetime = "1995-10-25T15:05:00"?datetime.xs&gt;</programlisting>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
@@ -20496,7 +20518,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
               now now supports parsing XML Schema values with
               <literal>?date.xs</literal>, <literal>?datetime.xs</literal> and
-              <literal>?time.xs</literal>.</para>
+              <literal>?time.xs</literal>. <link
+              linkend="ref_builtin_string_date">More...</link></para>
             </listitem>
 
             <listitem>
