@@ -108,7 +108,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
             }
             return clone;
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e.getMessage());  // Java 5: use cause
+            throw new RuntimeException("Failed to clone BeansWrapperConfiguration", e);
         }
     }
     

@@ -71,10 +71,19 @@ final class DynamicKeyName extends Expression {
             String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
-        throw new UnexpectedTypeException(nameExpression, keyModel, "number, range, or string", env);
+        throw new UnexpectedTypeException(nameExpression, keyModel, "number, range, or string",
+                new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, Range.class }, env);
     }
 
-
+    static private Class[] NUMERICAL_KEY_LHO_EXPECTED_TYPES;
+    static {
+        NUMERICAL_KEY_LHO_EXPECTED_TYPES = new Class[1 + NonStringException.STRING_COERCABLE_TYPES.length];
+        NUMERICAL_KEY_LHO_EXPECTED_TYPES[0] = TemplateSequenceModel.class;
+        for (int i = 0; i < NonStringException.STRING_COERCABLE_TYPES.length; i++) {
+            NUMERICAL_KEY_LHO_EXPECTED_TYPES[i + 1] = NonStringException.STRING_COERCABLE_TYPES[i];
+        }
+    }
+    
     private TemplateModel dealWithNumericalKey(TemplateModel targetModel, 
                                                int index, 
                                                Environment env)
@@ -103,8 +112,9 @@ final class DynamicKeyName extends Expression {
         catch(NonStringException e)
         {
             throw new UnexpectedTypeException(
-                    target, targetModel, "sequence or string (or something that's implicitly convertible to string)",
-                    env);
+                    target, targetModel,
+                    "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
+                    NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
         }
     }
 
@@ -114,7 +124,7 @@ final class DynamicKeyName extends Expression {
         if(targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
-        throw new UnexpectedTypeException(target, targetModel, "hash", env);
+        throw new NonHashException(target, targetModel, env);
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
@@ -169,8 +179,10 @@ final class DynamicKeyName extends Expression {
         try {
             targetStr = target.evalAndCoerceToString(env);
         } catch(NonStringException e) {
-            throw new UnexpectedTypeException(target, target.eval(env),
-                    NonStringException.TYPES_USABLE_WHERE_STRING_IS_EXPECTED + " or sequence", env);
+            throw new UnexpectedTypeException(
+                    target, target.eval(env),
+                    "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
+                    NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
         }
         
         if (!hasRhs) end = targetStr.length() -1;

@@ -61,7 +61,7 @@ final class Assignment extends TemplateElement {
             try {
                 namespace = (Environment.Namespace) namespaceTM;
             } catch (ClassCastException e) {
-                throw new UnexpectedTypeException(namespaceExp, namespaceTM, "namespace", env);
+                throw new NonNamespaceException(namespaceExp, namespaceTM, env);
             }
             if (namespace == null) {
                 throw InvalidReferenceException.getInstance(namespaceExp, env);

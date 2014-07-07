@@ -52,6 +52,7 @@ import freemarker.core.SequenceBuiltins.seq_containsBI;
 import freemarker.core.SequenceBuiltins.seq_index_ofBI;
 import freemarker.core.SequenceBuiltins.sortBI;
 import freemarker.core.SequenceBuiltins.sort_byBI;
+import freemarker.core.StringBuiltins.booleanBI;
 import freemarker.core.StringBuiltins.cap_firstBI;
 import freemarker.core.StringBuiltins.capitalizeBI;
 import freemarker.core.StringBuiltins.chop_linebreakBI;
@@ -89,6 +90,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static {
         builtins.put("abs", new absBI());
         builtins.put("ancestors", new ancestorsBI());
+        builtins.put("boolean", new booleanBI());
         builtins.put("byte", new byteBI());
         builtins.put("c", new MiscellaneousBuiltins.cBI());
         builtins.put("cap_first", new cap_firstBI());
@@ -227,15 +229,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("word_list", new word_listBI());
         builtins.put("xhtml", new StringBuiltins.xhtmlBI());
         builtins.put("xml", new StringBuiltins.xmlBI());
-        try {
-            Class.forName("java.util.regex.Pattern");
-            builtins.put("matches", instantiateBI("freemarker.core._RegexBuiltins$matchesBI"));
-            builtins.put("groups", instantiateBI("freemarker.core._RegexBuiltins$groupsBI"));
-            builtins.put("replace", instantiateBI("freemarker.core._RegexBuiltins$replace_reBI"));
-            builtins.put("split", instantiateBI("freemarker.core._RegexBuiltins$split_reBI"));
-        } catch (Exception e) {
-            logger.debug("Regular expression built-ins won't be avilable", e);
-        }
+        builtins.put("matches", new RegexBuiltins.matchesBI());
+        builtins.put("groups", new RegexBuiltins.groupsBI());
+        builtins.put("replace", new RegexBuiltins.replace_reBI());
+        builtins.put("split", new RegexBuiltins.split_reBI());
     }
 
     private static Object instantiateBI(String className) throws Exception

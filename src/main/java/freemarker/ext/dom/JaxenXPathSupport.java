@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.utility.Collections12;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 
@@ -204,7 +204,7 @@ class JaxenXPathSupport implements XPathSupport {
     private static InputSource createInputSource(String publicId, Template raw) throws IOException, SAXException {
         StringWriter sw = new StringWriter();
         try {
-            raw.process(Collections12.EMPTY_MAP, sw);
+            raw.process(Collections.EMPTY_MAP, sw);
         }
         catch(TemplateException e) {
             throw new SAXException(e);

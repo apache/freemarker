@@ -42,7 +42,6 @@ import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.utility.Collections12;
 import freemarker.template.utility.DeepUnwrap;
 
 
@@ -151,7 +150,7 @@ public class IncludePage implements TemplateDirectiveModel
                 paramsMap = (Map)unwrapped;
             }
             else {
-                paramsMap = Collections12.EMPTY_MAP;
+                paramsMap = Collections.EMPTY_MAP;
             }
             wrappedRequest = new CustomParamsRequest(request, paramsMap, 
                     inheritParams);

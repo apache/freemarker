@@ -76,7 +76,10 @@ class Interpret extends BuiltIn
         }
         else
         {
-            throw new UnexpectedTypeException(target, model, "sequence or string", env);
+            throw new UnexpectedTypeException(
+                    target, model,
+                    "sequence or string", new Class[] { TemplateSequenceModel.class, TemplateScalarModel.class },
+                    env);
         }
         String templateSource = sourceExpr.evalAndCoerceToString(env);
         Template parentTemplate = env.getTemplate();

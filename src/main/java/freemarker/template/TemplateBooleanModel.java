@@ -16,6 +16,7 @@
 
 package freemarker.template;
 
+
 /**
  * "boolean" template language data type; same as in Java; either {@code true} or {@code false}.
  */
@@ -29,7 +30,7 @@ public interface TemplateBooleanModel extends TemplateModel {
     /**
      * A singleton object to represent boolean false
      */
-    TemplateBooleanModel FALSE = new TemplateBooleanModel() {
+    TemplateBooleanModel FALSE = new SerializableTemplateBooleanModel() {
         public boolean getAsBoolean() {
             return false;
         }
@@ -41,7 +42,7 @@ public interface TemplateBooleanModel extends TemplateModel {
     /**
      * A singleton object to represent boolean true
      */
-    TemplateBooleanModel TRUE = new TemplateBooleanModel() {
+    TemplateBooleanModel TRUE = new SerializableTemplateBooleanModel() {
         public boolean getAsBoolean() {
             return true;
         }

@@ -96,8 +96,8 @@ final class OverloadedMethods {
                 "\nThe matching overload was searched among these members:\n",
                 memberListToString()});
         if (!bugfixed) {
-            edb.tip("You seem to use BeansWrapper in 2.3.0-compatible mode. If you think this error is unfounded, "
-                    + "enabling 2.3.21 fixes may helps. See version history for more.");
+            edb.tip("You seem to use BeansWrapper with incompatibleImprovements set blow 2.3.21. If you think this "
+                    + "error is unfounded, enabling 2.3.21 fixes may helps. See version history for more.");
         }
         throw new _TemplateModelException(edb);
     }

@@ -52,7 +52,7 @@ ${d?time?iso_local_m_nz} = 22:38
 ${d?time?iso_local_h_nz} = 22
 
 <#assign dStrange = "600-01-01 23:59:59:123 +0000"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
-${dStrange?iso_utc_ms} = 0600-01-01T23:59:59.123Z
+${dStrange?iso_utc_ms} = 0600-01-03T23:59:59.123Z
 
 <#setting time_zone="GMT+03"> <#-- should not mater -->
 ${d?iso("UTC")} = 2010-05-15T20:38:05Z

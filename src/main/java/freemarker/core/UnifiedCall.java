@@ -107,7 +107,7 @@ final class UnifiedCall extends TemplateElement {
             else if (tm == null) {
                 throw InvalidReferenceException.getInstance(nameExp, env);
             } else {
-                throw new UnexpectedTypeException(nameExp, tm, "user-defined directive (macro, etc.)", env);
+                throw new NonUserDefinedDirectiveLikeException(nameExp, tm, env);
             }
         }
     }

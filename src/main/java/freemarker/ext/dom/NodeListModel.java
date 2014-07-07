@@ -24,17 +24,21 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import freemarker.core.Environment;
+import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.utility.StringUtil;
 
-class NodeListModel extends SimpleSequence implements TemplateHashModel {
+class NodeListModel extends SimpleSequence implements TemplateHashModel, _UnexpectedTypeErrorExplainerTemplateModel {
     
     NodeModel contextNode;
     XPathSupport xpathSupport;
@@ -47,7 +51,6 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel {
             return NodeModel.wrap((Node) obj);
         }
     };
-    
     
     NodeListModel(Node node) {
         this(NodeModel.wrap(node));
@@ -170,4 +173,25 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel {
         }
         return xpathSupport;
     }
+
+    public Object[] explainTypeError(Class[] expectedClasses) {
+        for (int i = 0; i < expectedClasses.length; i++) {
+            Class expectedClass = expectedClasses[i];
+            if (TemplateScalarModel.class.isAssignableFrom(expectedClass)
+                    || TemplateDateModel.class.isAssignableFrom(expectedClass)
+                    || TemplateNumberModel.class.isAssignableFrom(expectedClass)
+                    || TemplateBooleanModel.class.isAssignableFrom(expectedClass)) {
+                return new Object[] {
+                        "This XML query result can't be used as string because for that it had to contain exactly "
+                        + "1 XML node, but it contains ", new Integer(size()), " nodes. "
+                        + "That is, the constructing XML query has found ",
+                        isEmpty()
+                            ? "no matches."
+                            : "multiple matches."
+                        };
+            }
+        }
+        return null;
+    }
+    
 }

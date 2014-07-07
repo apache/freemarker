@@ -123,6 +123,8 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_IMPORT_KEY = "auto_import";
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
+    public static final String TEMPLATE_LOADER_KEY = "template_loader";
+    
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
@@ -172,8 +174,7 @@ public class Configuration extends Configurable implements Cloneable {
                 version = new Version(versionString, gaeCompliant, buildDate);
             }
         } catch (IOException e) {
-            // Java 5: use cause
-            throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH + ": " + e);
+            throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
     }
     
@@ -200,7 +201,7 @@ public class Configuration extends Configurable implements Cloneable {
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
     /**
-     * @deprecated Use {@link Configuration} instead.
+     * @deprecated Use {@link #Configuration(Version)} instead.
      */
     public Configuration() {
         this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
@@ -496,11 +497,13 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the template loader will re-create the template cache, so
      * all its content will be lost.
      */
-    public void setTemplateLoader(TemplateLoader loader) {
+    public void setTemplateLoader(TemplateLoader templateLoader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(loader, cache.getCacheStorage());
-            templateLoaderWasSet = true;
+            if (cache.getTemplateLoader() != templateLoader) {
+                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage());
+                templateLoaderWasSet = true;
+            }
         }
     }
 
@@ -596,8 +599,8 @@ public class Configuration extends Configurable implements Cloneable {
                     webappTemplateLoaderClass
                             .getConstructor(constructorParamTypes)
                                     .newInstance(constructorParams));
-        } catch (Exception exc) {
-            throw new BugException(exc.toString());  // Java 5: use cause exc.
+        } catch (Exception e) {
+            throw new BugException(e);
         }
     }
 
@@ -815,7 +818,9 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>See {@link Configuration} for an example of basic usage.
      *
-     * @param name The name of the template. Can't be {@code null}. The exact syntax of the name
+     * @param name The name or path of the template, which is not a real path,
+     *     but interpreted inside the current {@link TemplateLoader}.
+     *     Can't be {@code null}. The exact syntax of the name
      *     is interpreted by the underlying {@link TemplateLoader}, but the
      *     cache makes some assumptions. First, the name is expected to be
      *     a hierarchical path, with path components separated by a slash
@@ -862,16 +867,22 @@ public class Configuration extends Configurable implements Cloneable {
             TemplateLoader tl = getTemplateLoader();  
             String msg; 
             if (tl == null) {
-                msg = "Don't know from where to load template " + StringUtil.jQuote(name)
-                      + " because the \"template_loader\" FreeMarker setting wasn't set.";
+                msg = "Don't know where to load template " + StringUtil.jQuote(name)
+                      + " from because the \"template_loader\" FreeMarker setting wasn't set.";
             } else {
-                msg = "Template " + StringUtil.jQuote(name) + " not found.";
+                msg = "Template " + StringUtil.jQuote(name) + " not found. "
+                        + "The quoted name was interpreted by this template loader: ";
+                String tlDesc;
+                try {
+                    tlDesc = tl.toString();
+                } catch (Throwable e) {
+                    tlDesc = tl.getClass().getName() + " object (toString failed)";
+                }
+                msg += tlDesc + ".";
+                
                 if (!templateLoaderWasSet) {
                     msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
                             + "default value, which is most certainly not intended and the cause of this problem."; 
-                }
-                if (tl instanceof FileTemplateLoader) {            
-                    msg += " The template directory used was: " + ((FileTemplateLoader) tl).getBaseDirectory();
                 }
             }
             throw new FileNotFoundException(msg);
@@ -983,23 +994,24 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
-     * Adds shared variable to the configuration.
-     * It uses {@link Configurable#getObjectWrapper()} to wrap the 
-     * <code>obj</code>.
+     * Adds shared variable to the configuration; It uses {@link Configurable#getObjectWrapper()} to wrap the 
+     * {@code value}, so it's important that the object wrapper is set before this.
      * 
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
      * 
      * @see #setSharedVariable(String,TemplateModel)
      * @see #setAllSharedVariables
      */
-    public void setSharedVariable(String name, Object obj) throws TemplateModelException {
-        setSharedVariable(name, getObjectWrapper().wrap(obj));
+    public void setSharedVariable(String name, Object value) throws TemplateModelException {
+        setSharedVariable(name, getObjectWrapper().wrap(value));
     }
 
     /**
-     * Adds all object in the hash as shared variable to the configuration.
+     * Adds all object in the hash as shared variable to the configuration; it's like doing several
+     * {@link #setSharedVariable(String, Object)} calls, one for each hash entry. It doesn't remove the already added
+     * shared variable before doing this.
      *
-     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared sharedVariables,
+     * <p>Never use <tt>TemplateModel</tt> implementation that is not thread-safe for shared shared variable values,
      * if the configuration is used by multiple threads! It is the typical situation for Servlet based Web sites.
      *
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
@@ -1199,6 +1211,9 @@ public class Configuration extends Configurable implements Cloneable {
                 setIncompatibleImprovements(new Version(value));
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
                 setIncompatibleEnhancements(value);
+            } else if (TEMPLATE_LOADER_KEY.equals(name)) {
+                setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
+                        value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {
                 unknown = true;
             }
@@ -1366,10 +1381,24 @@ public class Configuration extends Configurable implements Cloneable {
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
      * to be future-proof, it's an instance method. 
      * 
-     * @return {@link Set} of {@link String}-s. 
+     * @return {@link Set} of {@link String}-s.
+     * 
+     * @since 2.3.20
      */
     public Set getSupportedBuiltInNames() {
         return _CoreAPI.getSupportedBuiltInNames();
+    }
+    
+    /**
+     * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
+     * <tt>&lt;#directiveName ...></tt>.
+     * 
+     * @return {@link Set} of {@link String}-s.
+     * 
+     * @since 2.3.21
+     */
+    public Set getSupportedCoreDirectiveNames() {
+        return _CoreAPI.CORE_DIRECTIVE_NAMES;
     }
 
     private static String getRequiredVersionProperty(Properties vp, String properyName) {

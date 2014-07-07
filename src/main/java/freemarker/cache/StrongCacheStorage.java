@@ -30,7 +30,7 @@ import freemarker.core._ConcurrentMapFactory;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public class StrongCacheStorage implements ConcurrentCacheStorage
+public class StrongCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize
 {
     private final Map map = _ConcurrentMapFactory.newMaybeConcurrentHashMap();
 
@@ -51,6 +51,15 @@ public class StrongCacheStorage implements ConcurrentCacheStorage
 
     public void remove(Object key) {
         map.remove(key);
+    }
+    
+    /**
+     * Returns a close approximation of the number of cache entries.
+     * 
+     * @since 2.3.21
+     */
+    public int getSize() {
+        return map.size();
     }
     
     public void clear() {

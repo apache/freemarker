@@ -16,14 +16,18 @@
 
 package freemarker.core;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Parsing-time exception in a template (as opposed to runtime: {@link TemplateException}). This usually signals
- * syntactical/lexical errors.
+ * Parsing-time exception in a template (as opposed to a runtime exception, a {@link TemplateException}). This usually
+ * signals syntactical/lexical errors.
  * 
  * Note that on JavaCC-level lexical errors throw {@link TokenMgrError} instead of this, however with the API-s that
  * most users use those will be wrapped into {@link ParseException}-s. 
@@ -74,9 +78,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
     /** @deprecated Will be remove without replacement in 2.4. */
     protected boolean specialConstructor;  
 
-    // This was no part of Throwable on J2SE 1.2; remove in Java 5
-    private final Throwable cause;
-
     private String templateName;
 
     /**
@@ -95,7 +96,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
             )
     {
         super("");
-        cause = null;
         currentToken = currentTokenVal;
         specialConstructor = true;
         expectedTokenSequences = expectedTokenSequencesVal;
@@ -119,7 +119,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     protected ParseException() {
         super();
-        cause = null;
     }
 
     /**
@@ -213,7 +212,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
             int endLineNumber, int endColumnNumber,
             Throwable cause) {
         super(description);  // but we override getMessage, so it will be different
-        this.cause = cause;
         this.description = description; 
         this.templateName = templateName;
         this.lineNumber = lineNumber;
@@ -233,10 +231,6 @@ public class ParseException extends java.io.IOException implements FMParserConst
             messageAndDescriptionRendered = false;
             message = null;
         }
-    }
-
-    public Throwable getCause() {
-        return cause;
     }
 
     /**
@@ -319,7 +313,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
 
         String prefix;
         if (!isInJBossToolsMode()) {
-            prefix = "Parsing error "
+            prefix = "Syntax error "
                     + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
                     + ":\n";  
         } else {
@@ -409,78 +403,87 @@ public class ParseException extends java.io.IOException implements FMParserConst
         final Token nextToken = currentToken.next;
         final int kind = nextToken.kind;
         if (kind == EOF) {
+            Set/*<String>*/ endNames = new HashSet();
             for (int i = 0; i < expectedTokenSequences.length; i++) {
                 int[] sequence = expectedTokenSequences[i];
-                String name;
-                switch (sequence[0]) {
-                case END_FOREACH :
-                    name = "#foreach";
-                    break;
-                case END_LIST :
-                    name = "#list";
-                    break;
-                case END_SWITCH :
-                    name = "#switch";
-                    break;
-                case END_IF :
-                    name = "#if";
-                    break;
-                case END_COMPRESS :
-                    name = "#compress";
-                    break;
-                case END_MACRO :
-                case END_FUNCTION :
-                    // It gives [..., [END_FUNCTION, ...], [END_MACRO, ...], ...] for both. 
-                    name = "#macro or #function";
-                    break;
-                case END_TRANSFORM :
-                    name = "#transform";
-                    break;
-                case END_ESCAPE :
-                    name = "#escape";
-                    break;
-                case END_NOESCAPE :
-                    name = "#noescape";
-                    break;
-                case END_ASSIGN:
-                    name = "#assign";
-                    break;
-                case END_LOCAL:
-                    name = "#local";
-                    break;
-                case END_GLOBAL:
-                    name = "#global";
-                    break;
-                case END_ATTEMPT:
-                    name = "#attempt";
-                    break;
-                case CLOSE_BRACE:
-                    name = "{";
-                    break;
-                case CLOSE_BRACKET:
-                    name = "[";
-                    break;
-                case CLOSE_PAREN:
-                    name = "(";
-                    break;
-                case UNIFIED_CALL_END:
-                    name = "@...";
-                    break;
-                default:
-                    name = null;
-                }
-                if (name != null) {
-                    if (!name.startsWith("#") && !name.startsWith("@")) name = StringUtil.jQuote(name);
-                    return "Unclosed " + name + " when the end of the file was reached.";
+                for (int j = 0; j < sequence.length; j++) {
+                    switch (sequence[j]) {
+                    case END_FOREACH:
+                        endNames.add( "#foreach");
+                        break;
+                    case END_LIST:
+                        endNames.add( "#list");
+                        break;
+                    case END_SWITCH:
+                        endNames.add( "#switch");
+                        break;
+                    case END_IF:
+                        endNames.add( "#if");
+                        break;
+                    case END_COMPRESS:
+                        endNames.add( "#compress");
+                        break;
+                    case END_MACRO:
+                        endNames.add( "#macro");
+                    case END_FUNCTION:
+                        endNames.add( "#function");
+                        break;
+                    case END_TRANSFORM:
+                        endNames.add( "#transform");
+                        break;
+                    case END_ESCAPE:
+                        endNames.add( "#escape");
+                        break;
+                    case END_NOESCAPE:
+                        endNames.add( "#noescape");
+                        break;
+                    case END_ASSIGN:
+                        endNames.add( "#assign");
+                        break;
+                    case END_LOCAL:
+                        endNames.add( "#local");
+                        break;
+                    case END_GLOBAL:
+                        endNames.add( "#global");
+                        break;
+                    case END_ATTEMPT:
+                        endNames.add( "#attempt");
+                        break;
+                    case CLOSE_BRACE:
+                        endNames.add( "\"{\"");
+                        break;
+                    case CLOSE_BRACKET:
+                        endNames.add( "\"[\"");
+                        break;
+                    case CLOSE_PAREN:
+                        endNames.add( "\"(\"");
+                        break;
+                    case UNIFIED_CALL_END:
+                        endNames.add( "@...");
+                        break;
+                    }
                 }
             }
-            return "Unexpected end of file reached.";
+            return "Unexpected end of file reached."
+                    + (endNames.size() == 0 ? "" : " You have an unclosed " + concatWithOrs(endNames) + ".");
         } else if (kind == END_IF || kind == ELSE_IF || kind == ELSE) {
             return "Unexpected directive, "
                     + StringUtil.jQuote(nextToken)
                     + ". Check whether you have a valid #if-#elseif-#else structure.";
         }
         return null;
+    }
+
+    private String concatWithOrs(Set/*<String>*/ endNames) {
+        StringBuffer sb = new StringBuffer(); 
+        for (Iterator/*<String>*/ it = endNames.iterator(); it.hasNext(); ) {
+            String endName = (String) it.next();
+            if (sb.length() != 0) {
+                sb.append(" or ");
+            }
+            sb.append(endName);
+        }
+        return sb.toString();
     }
 
     /**

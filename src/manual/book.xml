@@ -11069,6 +11069,10 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_boolean">boolean</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_numType">byte</link></para>
           </listitem>
 
@@ -11602,49 +11606,73 @@ Green Mouse</programlisting>
             <primary>parsing string as time</primary>
           </indexterm>
 
-          <para>The string converted to a date value. It is recommended to
-          specify a parameter that specifies the format. For example:</para>
+          <indexterm>
+            <primary>XML Schema date parsing</primary>
+          </indexterm>
 
-          <programlisting role="template">&lt;#assign test1 = "10/25/1995"?date("MM/dd/yyyy")&gt;
-&lt;#assign test2 = "15:05:30"?time("HH:mm:ss")&gt;
-&lt;#assign test3 = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
-${test1}
-${test2}
-${test3}</programlisting>
+          <indexterm>
+            <primary>XML Schema time parsing</primary>
+          </indexterm>
 
-          <para>will print something like (depends on the output locale
-          (language) and on other settings):</para>
+          <para>The string value converted to a date, time, or date-time
+          value. It will expect the format specified by the
+          <literal>date_format</literal>, <literal>time_format</literal> and
+          <literal>datetime_format</literal> <link
+          linkend="ref.directive.setting">settings</link>. If the string is
+          not in the appropriate format, an error will abort template
+          processing when you try to access this built-in.</para>
+
+          <programlisting role="template">&lt;#-- The date_format, time_format and datetime_format settings must match this format! --&gt;
+&lt;#assign someDate = "Oct 25, 1995"?date&gt;
+&lt;#assign someTime = "3:05:30 PM"?time&gt;
+&lt;#assign someDatetime = "Oct 25, 1995 03:05:00 PM"?datetime&gt;</programlisting>
+
+          <para>You can also specify the format explicitly with a parameter,
+          using <link
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
+          date format syntax</link>. For example:</para>
+
+          <programlisting role="template">&lt;#assign someDate = "10/25/1995"?date("MM/dd/yyyy")&gt;
+&lt;#assign someTime = "15:05:30"?time("HH:mm:ss")&gt;
+&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
+${someDate}
+${someTime}
+${someDatetime}</programlisting>
+
+          <para>will print something like (depending on the output locale
+          (language) and <literal>date_format</literal>,
+          <literal>time_format</literal> and
+          <literal>datetime_format</literal> <link
+          linkend="ref.directive.setting">settings</link>):</para>
 
           <programlisting role="output">Oct 25, 1995
 3:05:30 PM
-Oct 25, 1995 3:05:00 PM
-</programlisting>
+Oct 25, 1995 3:05:00 PM</programlisting>
 
-          <para>Note that the dates was converted back to string according to
-          the <literal>date_format</literal>, <literal>time_format</literal>
-          and <literal>datetime_format</literal> <link
-          linkend="ref.directive.setting">settings</link> (for more
-          information about converting dates to strings read: <link
+          <para>Above, the dates/times/date-times were converted back to
+          string according to the <literal>date_format</literal>,
+          <literal>time_format</literal> and
+          <literal>datetime_format</literal> <link
+          linkend="ref.directive.setting">settings</link>, that's why they
+          look differently as the original strings. (For more information
+          about converting dates to strings read: <link
           linkend="ref_builtin_string_for_date">string built-in for
           dates</link>, <link
           linkend="dgui_template_valueinserion_universal_date">date
-          interpolations</link>). It does not mater what format did you use
-          when you have converted the strings to dates.</para>
+          interpolations</link>.)</para>
 
-          <para>You don't have to use the format parameter, if you know what
-          the default date/time/datetime format will be when the template is
-          processed:</para>
+          <para>Instead of specifying a concrete pattern, you can use one of
+          the predefined patterns, as the subvariables of the built-in. The
+          predefined formats are: <literal>short</literal>,
+          <literal>medium</literal> and <literal>long</literal>, which refer
+          to the standard Java locale dependent formats, and
+          <literal>xs</literal> that refers to the W3C XML Schema
+          format:</para>
 
-          <programlisting role="template">&lt;#assign test1 = "Oct 25, 1995"?date&gt;
-&lt;#assign test2 = "3:05:30 PM"?time&gt;
-&lt;#assign test3 = "Oct 25, 1995 03:05:00 PM"?datetime&gt;
-${test1}
-${test2}
-${test3}</programlisting>
-
-          <para>If the string is not in the appropriate format, an error will
-          abort template processing when you try to access this
-          built-in.</para>
+          <programlisting role="template">&lt;#-- Parsing xs:date, xs:time and xs:dateTime values: --&gt;
+&lt;#assign someDate = "1995-10-25"?date.xs&gt;
+&lt;#assign someTime = "15:05:30"?time.xs&gt;
+&lt;#assign someDatetime = "1995-10-25T15:05:00"?datetime.xs&gt;</programlisting>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
@@ -12190,7 +12218,50 @@ Matching sub-strings:
 
           <para>Known problem: If you use earlier Java2 platform than v1.3,
           the built-ins will not recognize + prefix and scientific
-          notation.</para>
+          notation.<phrase role="forProgrammers"/></para>
+
+          <para><phrase role="forProgrammers">In fact, the string is parsed by
+          the <literal>toNumber</literal> method of the current
+          <literal>arithmetic_engine</literal>, which is configuration
+          setting. However, that method should behave similarly as described
+          above.</phrase></para>
+        </section>
+
+        <section xml:id="ref_builtin_boolean">
+          <title>boolean</title>
+
+          <indexterm>
+            <primary>type-casting</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting between types</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>boolean built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>string to boolean</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>converting string to boolean</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>parse string as boolean</primary>
+          </indexterm>
+
+          <para>The string converted to boolean value. The string must be
+          <literal>true</literal> or <literal>false</literal> (case
+          sensitive!), or must be in the format specified by the
+          <literal>boolean_format</literal> setting.</para>
+
+          <para>If the string is not in the appropriate format, an error will
+          abort template processing when you try to access this
+          built-in.</para>
         </section>
 
         <section xml:id="ref_builtin_replace">
@@ -13271,7 +13342,7 @@ Apr 8, 2003 9:24 PM</programlisting>
           formatting pattern explicitly with
           <literal>?string(<replaceable>pattern_string</replaceable>)</literal>.
           The pattern uses <link
-          xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/text/SimpleDateFormat.html">Java
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
           date format syntax</link>. Example:</para>
 
           <programlisting role="template">${lastUpdated?string("yyyy-MM-dd HH:mm:ss zzzz")}
@@ -17454,10 +17525,7 @@ or
 
 <literal>&lt;#lt&gt;</literal>
 
-<literal>&lt;#rt&gt;</literal>
-
-<literal>&lt;#nt&gt;</literal>
-</programlisting>
+<literal>&lt;#rt&gt;</literal></programlisting>
         </section>
 
         <section>
@@ -20357,12 +20425,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         Apache License, Version 2.0. See the <link linkend="app_license">new
         license here</link>.</para>
 
+        <para>Note that the required Java versions was raised from 1.2 to 1.4
+        with this release. This version will not work on Java 1.2 or
+        1.3.</para>
+
         <section>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
             <listitem>
-              <para>Error message quality improvements:</para>
+              <para>New built-in:
+              <literal><replaceable>someString</replaceable>?boolean</literal>.
+              This is for example useful for converting "true" and "false"
+              strings coming from XML to real boolean values. <link
+              linkend="ref_builtin_boolean">More...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Error message quality improvements (targeting frequent
+              support requests and some error message bugs):</para>
 
               <itemizedlist>
                 <listitem>
@@ -20373,7 +20454,81 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   wasn't hidden in the FTL stack trace when the error was
                   inside its nested block.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Some new context sensitive hints in undefined variable
+                  exception error messages.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Fixed unclosed directive error messages at end of file
+                  where the wrong unclosed directive name was reported</para>
+                </listitem>
+
+                <listitem>
+                  <para>Better type error messages when accessing XML data
+                  (applies when wrapped with
+                  <literal>freemarker.ext.dom</literal>):</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.noSuchChildNodes</literal> on a place
+                      where scalar value is expected will explain that the
+                      problem is that you had no matches in the constructing
+                      XML query.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.multipleSuchChildNodes</literal> on a
+                      place where scalar value is expected will explain that
+                      the problem is that you had multiple matches in the
+                      constructing XML query.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.exactlyOneChildNode</literal> as number,
+                      date/time/datetime or boolean will explain that values
+                      coming from XML are always strings (text), and must be
+                      converted explicitly.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
+                  <para>Trying to use <literal>obj.someMethod</literal>
+                  without <literal>()</literal> on a place where method value
+                  is not expected will recommend calling the method.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Trying to use methods like
+                  <literal>obj.getFoo</literal> or
+                  <literal>obj.isFoo</literal> without <literal>()</literal>on
+                  a place where method value is not expected will recommend
+                  using the <literal>obj.foo</literal> form.</para>
+                </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The
+              <literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
+              now now supports parsing XML Schema values with
+              <literal>?date.xs</literal>, <literal>?datetime.xs</literal> and
+              <literal>?time.xs</literal>. <link
+              linkend="ref_builtin_string_date">More...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: ISO 8601 dates (via
+              <literal>?iso_...</literal>) now use proleptic Gregorian
+              calendar for the years before 1582, rather than Julian calendar.
+              This is (indirectly) required by the standard, and it's also how
+              the standard Java XML Schema date/time/dateTime parser
+              works.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -20902,6 +21057,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Required Java version has changed from 1.2 to 1.4.</para>
+            </listitem>
+
+            <listitem>
+              <para>Template not found exceptions now explain that the
+              template path is relative to a virtual file system, and show the
+              <literal>toString</literal> of the
+              <literal>TemplateLoader</literal>. The out-of-the-box
+              <literal>TemplateLoader</literal> implementations now have an
+              overridden <literal>toString</literal> to show the actual base
+              directory and such details. Custom
+              <literal>TemplateLoader</literal> implementations are encouraged
+              to override <literal>toString</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para><literal>ParseException</literal>-s now also store the
               end-location of the error, not just its start-location. This is
               useful if you want to underline the error in the source code,
@@ -20914,17 +21085,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>template.cache.NullTemplateLoader</literal>, which is a
-              dummy <literal>TemplateLoader</literal> that doesn't find any
-              templates.</para>
-            </listitem>
-
-            <listitem>
               <para>Fixed various issues in <literal>Version</literal> class,
               such as wrong <literal>hashCode</literal>, possible concurrency
               glitches, and acceptance of some malformed version
               strings.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/373/">373</link>]:
+              These are three bugs actually, which can cause problems when
+              FreeMarker re-loads a template because of a charset override
+              with <literal>&lt;#ftl encoding="..."&gt;</literal>: First, if
+              the template loader was a <literal>URLTemplateLoader</literal>,
+              when <literal>TemplateLoader.getReader()</literal> was called
+              for the second time, and the <literal>Reader</literal> returned
+              for the first time was already used, it might returned an empty
+              or corrupted template, depending on the backing URL
+              implementation. Secondly, when FreeMarer has decided if a
+              template file has to be re-loaded because its encoding specified
+              with <literal>&lt;#ftl encoding="..."&gt;</literal> differs from
+              the encoding used for loading the template first, it has used
+              case-sensitive comparison, thus often re-loaded needlessly (like
+              "UTF-8" and "utf-8" mean the same). Now this comparison is
+              case-insensitive. Last not least, when retrying with the second
+              charset, the <literal>TemplateCache</literal> has forgotten to
+              close the first <literal>Reader</literal>, which can be a handle
+              leak.</para>
             </listitem>
 
             <listitem>
@@ -20941,10 +21128,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/411/">411</link>]:
-              Invalid execution environment names were fixed: J2SE-1.6 to
-              Java2SE-1.6, J2SE-1.7 to JavaSE-1.7. Also, J2SE-1.8 was removed
-              for now, as we don't utilize any features in it dynamically (to
-              prevent misunderstandings, Java 8 is still supported).</para>
+              Invalid execution environment names in the OSGi bundle manifest
+              were fixed: J2SE-1.6 to Java2SE-1.6, J2SE-1.7 to JavaSE-1.7.
+              Also, J2SE-1.8 was removed for now, as we don't utilize any
+              features in it dynamically (to prevent misunderstandings, Java 8
+              is still supported).</para>
             </listitem>
 
             <listitem>
@@ -20984,8 +21172,50 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">311</link>]:
+              <literal>TemplateBooleanModel.TRUE</literal> and
+              <literal>FALSE</literal> are now serializable</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">300</link>]:
+              Logger class availability check was incorrect in that it has
+              checked the availability of logger libraries with the thread
+              context class loader, then later it tried to link to them with
+              the defining class loader of the FreeMarker classes. With some
+              class loader setups (notably under Netbeans sometimes) this led
+              to <literal>ClassDefNotFoundError</literal>-s that made
+              FreeMarker unusable. (The check itself was also not very
+              durable, as it didn't expected <literal>LinakeError</literal>-s,
+              only <literal>ClassNotFoundException</literal>.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
+              Fixed misleading parser error message when a directive called
+              without its required parameters (like
+              <literal>&lt;#list&gt;</literal>) was reported as unknown
+              directive.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configuration.getCoreDirecticeNames()</literal> which
+              returns the names of all directives that are provided by
+              FreeMarker. This can useful for IDE-s.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>template_loader</literal> was added as possible
+              configuration setting <literal>Properties</literal> key.</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller improvements in configuration setting
-              errors messages</para>
+              errors messages.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -21483,9 +21713,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>With default arithmetic engine, performance optimizations
-              of comparison operations when some of the numbers is 0, and when
-              the sign of the numbers differ.</para>
+              <para>With the default arithmetic engine, performance
+              optimizations of comparison operations when some of the numbers
+              is 0, and when the sign of the numbers differ.</para>
             </listitem>
 
             <listitem>
@@ -21565,6 +21795,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fix [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/394/">394</link>]:
+              When trying to access the optional Jython (or W3C DOM) classes
+              has failed in <literal>DefaultObjectWrapper</literal> with an
+              <literal>Error</literal>, rather than with an
+              <literal>Exception</literal>, loading the
+              <literal>DefaultObjectWrapper</literal> class itself has failed,
+              instead of the Jython (or W3C DOM) support being disabled. From
+              now in, it will survive any kind of <literal>Throwable</literal>
+              there, and if the <literal>Throwable</literal> is not an
+              <literal>ClassNotFoundException</literal>, it will also log the
+              <literal>Throwable</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Improved the performance of
               <literal>(thisVarIsMissing.foo)!default</literal> and similar
               <emphasis>parenthetical</emphasis> existence operators and
@@ -21574,6 +21819,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               now, measured on Java 6. In other cases (when all variables
               exists, or the the last step is missing) the performance is
               about the same (relatively fast) as before.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added interface
+              <literal>freemarker.cache.CacheStorageWithGetSize</literal>
+              which allows querying the current number of cache entries in a
+              <literal>CacheStorage</literal> that implements it. It's
+              implemented by all out-of-the-box
+              <literal>CacheStorage</literal> implementations. Also added
+              <literal>getStrongSize()</literal> and
+              <literal>getSoftSize()</literal> to
+              <literal>MRUCacheStorage</literal>.</para>
             </listitem>
 
             <listitem>

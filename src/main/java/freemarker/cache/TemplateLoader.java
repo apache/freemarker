@@ -28,12 +28,17 @@ import freemarker.template.Configuration;
  * {@link TemplateLoader} implementations out-of-the-box, it's normal for embedding
  * frameworks to use their own implementations.
  * 
- * To set the {@link TemplateLoader} used by FreeMaker, use
+ * <p>To set the {@link TemplateLoader} used by FreeMaker, use
  * {@link Configuration#setTemplateLoader(TemplateLoader)}.
  * 
- * Implementations of this interface should be thread-safe.
+ * <p>Implementations of this interface should be thread-safe.
  * 
- * For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
+ * <p>Implementations should override {@link Object#toString()} to show information about from where the
+ * {@link TemplateLoader} loads the templates. For example, a template loader that loads template from database table
+ * could show something like {@code "MyDatabaseTemplateLoader(user=\"cms\", table=\"mail_templates\")"}.
+ * This string will be shown in template-not-found exception messages.
+ * 
+ * <p>For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
  * the {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly
  * by the {@link TemplateCache}, and templates are get via the {@link TemplateCache} API-s.
  */
@@ -91,17 +96,29 @@ public interface TemplateLoader {
     
     /**
      * Returns the character stream of a template represented by the specified
-     * template source. This method is called after <code>getLastModified()</code>
-     * if it's determined that a cached copy of the template is unavailable
-     * or stale.
+     * template source. This method is possibly called for multiple times for the
+     * same template source object, and it must always return a {@link Reader} that
+     * reads the template from its beginning. Before this method is called for the
+     * second time (or later), its caller must close the previously returned
+     * {@link Reader}, and it must not use it anymore. That is, this method is not
+     * required to support multiple concurrent readers for the same source
+     * {@code templateSource} object.
+     *  
+     * <p>Typically, this method is called if the template is missing from the cache,
+     * or if after calling {@link #findTemplateSource(String)} and {@link #getLastModified(Object)}
+     * it was determined that the cached copy of the template is stale. Then, if it turns out that the
+     * {@code encoding} parameter passed doesn't match the actual template content, this method will be called for a
+     * second time with the correct {@code encoding} parameter value.
+     *  
      * @param templateSource an object representing a template source, obtained
      * through a prior call to {@link #findTemplateSource(String)}.
      * @param encoding the character encoding used to translate source bytes
      * to characters. Some loaders may not have access to the byte
      * representation of the template stream, and instead directly obtain a 
-     * character stream. These loaders will should ignore the encoding parameter.
-     * @return a reader representing the template character stream. The
-     * framework will call <code>close()</code>.
+     * character stream. These loaders should ignore the encoding parameter.
+     * @return a reader representing the template character stream. It's
+     * the responsibility of the caller ({@link TemplateCache} usually) to
+     * {@code close()} it.
      * @throws IOException if an I/O error occurs while accessing the stream.
      */
     public Reader getReader(Object templateSource, String encoding)
@@ -110,7 +127,7 @@ public interface TemplateLoader {
     
     /**
      * Closes the template source. This is the last method that is called by
-     * the {@link TemplateCache} for a template source. The framework guarantees that
+     * the {@link TemplateCache} for a template source. {@link TemplateCache} ensures that
      * this method will be called on every object that is returned from
      * {@link #findTemplateSource(String)}.
      * @param templateSource the template source that should be closed.

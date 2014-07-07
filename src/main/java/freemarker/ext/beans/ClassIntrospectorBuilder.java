@@ -62,7 +62,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         try {
             return super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException();  // Java 5: use cause
+            throw new RuntimeException("Failed to clone ClassIntrospectorBuilder", e);
         }
     }
 

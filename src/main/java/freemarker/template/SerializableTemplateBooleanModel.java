@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package freemarker.template.utility;
+package freemarker.template;
 
-import java.util.Date;
-import java.util.TimeZone;
+import java.io.Serializable;
 
-import freemarker.template.utility.DateUtil.TimeZoneOffsetCalculator;
-
-class J2SE14TimeZoneOffsetCalculator implements
-        TimeZoneOffsetCalculator {
-
-    public int getOffset(TimeZone tz, Date date) {
-        return tz.getOffset(date.getTime());
-    }
-
-}
+interface SerializableTemplateBooleanModel extends TemplateBooleanModel, Serializable {};

@@ -26,10 +26,7 @@ pattern.
 Licensing
 ---------
 
-FreeMarker is licensed under a liberal BSD-style open source license. 
-
-This software is OSI Certified Open Source Software.
-OSI Certified is a certification mark of the Open Source Initiative.
+FreeMarker is licensed under the Apache License, Version 2.0.
 
 See LICENSE.txt for more details.
 

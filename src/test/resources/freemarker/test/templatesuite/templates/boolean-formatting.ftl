@@ -53,3 +53,13 @@ ${'str:' + x} ${'str:' + false}
 ${x?string('ja', 'nein')} ${true?string('ja', 'nein')}
 ${beansBoolean} ${beansBoolean?string}
 ${booleanAndString} ${booleanAndString?string}
+
+<#setting boolean_format = 'y,n'>
+<@assertEquals actual='true'?boolean expected=true />
+<@assertEquals actual='false'?boolean expected=false />
+<@assertEquals actual='y'?boolean expected=true />
+<@assertEquals actual='n'?boolean expected=false />
+<@assertFails message="can't convert">${'N'?boolean}</@>
+<@assertFails message="can't convert">${'True'?boolean}</@>
+<@assertFails message="can't convert">${0?boolean}</@>
+<@assertFails message="sequence">${[]?boolean}</@>

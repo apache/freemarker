@@ -18,14 +18,16 @@ package freemarker.cache;
 
 import java.net.URL;
 
+import freemarker.template.utility.StringUtil;
+
 /**
  * A {@link TemplateLoader} that uses streams reachable through 
  * {@link Class#getResourceAsStream(String)} as its source of templates.
  */
 public class ClassTemplateLoader extends URLTemplateLoader
 {
-    private Class loaderClass;
-    private String path;
+    private Class baseClass;
+    private String packagePath;
     
     /**
      * Creates a template loader that will use the {@link Class#getResource(String)}
@@ -56,15 +58,15 @@ public class ClassTemplateLoader extends URLTemplateLoader
      * path. This means that template paths will be resolved relatively to the class
      * location, that is, relatively to the directory (package) of the class.
      *
-     * @param loaderClass the class whose
+     * @param baseClass the class whose
      * {@link Class#getResource(String)} will be used to load the templates.
      *
      * @deprecated it's confusing that the base path is <code>""</code>;
      *     use {@link #ClassTemplateLoader(Class, String)} instead.
      */
-    public ClassTemplateLoader(Class loaderClass)
+    public ClassTemplateLoader(Class baseClass)
     {
-        setFields(loaderClass, "");
+        setFields(baseClass, "");
     }
 
     /**
@@ -84,10 +86,10 @@ public class ClassTemplateLoader extends URLTemplateLoader
      *       "/com/example/myapplication/templates")</code>
      * </ul>
      *
-     * @param loaderClass the class whose {@link Class#getResource(String)} method will be used
+     * @param baseClass the class whose {@link Class#getResource(String)} method will be used
      *     to load the templates. Be sure that you chose a class whose defining class-loader
      *     sees the templates. This parameter can't be <code>null</code>.
-     * @param path the base path to template resources.
+     * @param packagePath the path to the package that contains the templates.
      *     A path that doesn't start with a slash (/) is relative to the
      *     path (package) of the specified class. A path that starts with a slash
      *     is an absolute path starting from the root of the package hierarchy. Path
@@ -95,21 +97,21 @@ public class ClassTemplateLoader extends URLTemplateLoader
      *     separator character used by the underlying operating system.
      *     This parameter can't be <code>null</code>.
      */
-    public ClassTemplateLoader(Class loaderClass, String path)
+    public ClassTemplateLoader(Class baseClass, String packagePath)
     {
-        setFields(loaderClass, path);
+        setFields(baseClass, packagePath);
     }
 
     protected URL getURL(String name)
     {
-        String fullPath = path + name;
+        String fullPath = packagePath + name;
         
         // Block java.net.URLClassLoader exploits:
-        if (path.equals("/") && !isSchemeless(fullPath)) {
+        if (packagePath.equals("/") && !isSchemeless(fullPath)) {
             return null;
         }
         
-        return loaderClass.getResource(fullPath);
+        return baseClass.getResource(fullPath);
     }
     
     private static boolean isSchemeless(String fullPath) {
@@ -130,17 +132,27 @@ public class ClassTemplateLoader extends URLTemplateLoader
         return true;
     }
 
-    private void setFields(Class loaderClass, String path) {
-        if(loaderClass == null)
+    private void setFields(Class baseClass, String packagePath) {
+        if(baseClass == null)
         {
-            throw new IllegalArgumentException("loaderClass == null");
+            throw new IllegalArgumentException("baseClass == null");
         }
-        if(path == null)
+        if(packagePath == null)
         {
             throw new IllegalArgumentException("path == null");
         }
-        this.loaderClass = loaderClass;
-        this.path = canonicalizePrefix(path);
+        this.baseClass = baseClass;
+        this.packagePath = canonicalizePrefix(packagePath);
+    }
+
+    /**
+     * Show class name and some details that are useful in template-not-found errors.
+     * 
+     * @since 2.3.21
+     */
+   public String toString() {
+        return "ClassTemplateLoader(baseClass=" + baseClass.getName()
+                + ", packagePath=" + StringUtil.jQuote(packagePath) + ")";
     }
 
 }

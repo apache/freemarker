@@ -35,8 +35,9 @@ import java.util.Map;
  * in a soft-only mode, you might consider using {@link StrongCacheStorage} or
  * {@link SoftCacheStorage} instead, as they can be used by 
  * {@link TemplateCache} concurrently without any synchronization on a 5.0 or 
- * later JRE. 
- * This class is <em>NOT</em> thread-safe. If it's accessed from multiple
+ * later JRE.
+ *  
+ * <p>This class is <em>NOT</em> thread-safe. If it's accessed from multiple
  * threads concurrently, proper synchronization must be provided by the callers.
  * Note that {@link TemplateCache}, the natural user of this class provides the
  * necessary synchronizations when it uses the class.
@@ -50,7 +51,7 @@ import java.util.Map;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public class MruCacheStorage implements CacheStorage
+public class MruCacheStorage implements CacheStorageWithGetSize
 {
     private final MruEntry strongHead = new MruEntry();
     private final MruEntry softHead = new MruEntry();
@@ -202,6 +203,8 @@ public class MruCacheStorage implements CacheStorage
     }
     
     /**
+     * Returns the configured upper limit of the number of strong cache entries.
+     *  
      * @since 2.3.21
      */
     public int getMaxStrongSize() {
@@ -209,10 +212,44 @@ public class MruCacheStorage implements CacheStorage
     }
 
     /**
+     * Returns the configured upper limit of the number of soft cache entries.
+     * 
      * @since 2.3.21
      */
     public int getMaxSoftSize() {
         return maxSoftSize;
+    }
+
+    /**
+     * Returns the <em>current</em> number of strong cache entries.
+     *  
+     * @see #getMaxStrongSize()
+     * @since 2.3.21
+     */
+    public int getStrongSize() {
+        return strongSize;
+    }
+
+    /**
+     * Returns a close approximation of the <em>current</em> number of soft cache entries.
+     * 
+     * @see #getMaxSoftSize()
+     * @since 2.3.21
+     */
+    public int getSoftSize() {
+        removeClearedReferences();
+        return softSize;
+    }
+    
+    /**
+     * Returns a close approximation of the current number of cache entries.
+     * 
+     * @see #getStrongSize()
+     * @see #getSoftSize()
+     * @since 2.3.21
+     */
+    public int getSize() {
+        return getSoftSize() + getStrongSize();
     }
 
     private static final class MruEntry

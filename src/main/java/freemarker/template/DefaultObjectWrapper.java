@@ -22,9 +22,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.w3c.dom.Node;
+
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
+import freemarker.log.Logger;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Note that instances of this class generally should
@@ -39,7 +42,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /** @deprecated Use {@link DefaultObjectWrapperBuilder} instead, but mind its performance */
     static final DefaultObjectWrapper instance = new DefaultObjectWrapper();
     
-    static final private Class W3C_DOM_NODE_CLASS, JYTHON_OBJ_CLASS;
+    static final private Class JYTHON_OBJ_CLASS;
     
     static final private ObjectWrapper JYTHON_WRAPPER;
     
@@ -78,22 +81,23 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
 
     static {
         Class cl;
-        try {
-            cl = Class.forName("org.w3c.dom.Node");
-        } catch (Exception e) {
-            cl = null;
-        }
-        W3C_DOM_NODE_CLASS = cl;
-        
         ObjectWrapper ow;
         try {
             cl = Class.forName("org.python.core.PyObject");
             ow = (ObjectWrapper) Class.forName(
                     "freemarker.ext.jython.JythonWrapper")
                     .getField("INSTANCE").get(null);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             cl = null;
             ow = null;
+            if (!(e instanceof ClassNotFoundException)) {
+                try {
+                    Logger.getLogger("freemarker.template.DefaultObjectWrapper")
+                            .error("Failed to init Jython support, so it was disabled.", e);
+                } catch (Throwable e2) {
+                    // ignore
+                }
+            }
         }
         JYTHON_OBJ_CLASS = cl;
         JYTHON_WRAPPER = ow;
@@ -148,8 +152,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * Since 2.3, this falls back on XML wrapper and BeansWrapper functionality.
      */
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        if ((W3C_DOM_NODE_CLASS != null && W3C_DOM_NODE_CLASS.isInstance(obj)))
-        {
+        if (obj instanceof Node) {
             return wrapDomNode(obj);
         }
         if (JYTHON_WRAPPER != null  && JYTHON_OBJ_CLASS.isInstance(obj)) {
@@ -159,7 +162,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     public TemplateModel wrapDomNode(Object obj) {
-        return NodeModel.wrap((org.w3c.dom.Node) obj);
+        return NodeModel.wrap((Node) obj);
     }
 
     /**

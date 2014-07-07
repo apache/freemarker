@@ -37,7 +37,7 @@ import freemarker.template.utility.UndeclaredThrowableException;
  *
  * @see freemarker.template.Configuration#setCacheStorage(CacheStorage)
  */
-public class SoftCacheStorage implements ConcurrentCacheStorage
+public class SoftCacheStorage implements ConcurrentCacheStorage, CacheStorageWithGetSize
 {
     private static final Method atomicRemove = getAtomicRemoveMethod();
     
@@ -77,6 +77,16 @@ public class SoftCacheStorage implements ConcurrentCacheStorage
     public void clear() {
         map.clear();
         processQueue();
+    }
+    
+    /**
+     * Returns a close approximation of the number of cache entries.
+     * 
+     * @since 2.3.21
+     */
+    public int getSize() {
+        processQueue();
+        return map.size();
     }
 
     private void processQueue() {

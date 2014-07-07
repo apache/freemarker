@@ -24,16 +24,12 @@ import freemarker.template.utility.StringUtil;
  */
 public class _ObjectBuilderSettingEvaluationException extends Exception {
     
-    private final Throwable cause;
-
     public _ObjectBuilderSettingEvaluationException(String message, Throwable cause) {
-        super(message);
-        this.cause = cause;
+        super(message, cause);
     }
 
     public _ObjectBuilderSettingEvaluationException(String message) {
         super(message);
-        this.cause = null;
     }
 
     public _ObjectBuilderSettingEvaluationException(String expected, String src, int location) {
@@ -42,11 +38,6 @@ public class _ObjectBuilderSettingEvaluationException extends Exception {
                         ? "found character " + StringUtil.jQuote("" + src.charAt(location)) + " at position "
                             + (location + 1) + "."
                         : "the end of the parsed string was reached.") );
-        cause = null;
-    }
-    
-    public Throwable getCause() {
-        return cause;
     }
         
 }

@@ -19,8 +19,8 @@ package freemarker.core;
 import freemarker.template.TemplateException;
 
 /**
- * A subclass of TemplateException that says there
- * is no value associated with a given expression.
+ * A subclass of {@link TemplateException} that says that an FTL expression has evaluated to {@code null} or it refers
+ * to something that doesn't exist. At least in FreeMarker 2.3.x these two cases aren't distinguished.
  */
 public class InvalidReferenceException extends TemplateException {
 
@@ -30,15 +30,25 @@ public class InvalidReferenceException extends TemplateException {
             null);
     
     private static final String[] TIP = new String[] {
-        "If the failing expression is known to be legally null/missing, either specify a "
-        + "default value with myOptionalVar!myDefault, or use ",
+        "If the failing expression is known to be legally refer to something that's null or missing, either specify a "
+        + "default value like myOptionalVar!myDefault, or use ",
         "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
         ". (These only cover the last step of the expression; to cover the whole expression, "
         + "use parenthessis: (myOptionVar.foo)!myDefault, (myOptionVar.foo)??"
     };
+
+    private static final String TIP_NO_DOLAR =
+            "Variable references must not start with \"$\", unless the \"$\" is really part of the variable name.";
+
+    private static final String TIP_LAST_STEP_DOT =
+            "It's the step after the last dot that caused this error, not those before it.";
+
+    private static final String TIP_LAST_STEP_SQUARE_BRACKET =
+            "It's the final [] step that caused this error, not those before it.";
     
     public InvalidReferenceException(Environment env) {
-        super("Invalid reference", env);
+        super("Invalid reference: The expression has evaluated to null or refers to something that doesn't exist.",
+                env);
     }
 
     public InvalidReferenceException(String description, Environment env) {
@@ -50,23 +60,45 @@ public class InvalidReferenceException extends TemplateException {
     }
 
     /**
-     * Use this whenever possible, as it returns {@link #FAST_INSTANCE} instead of creatin a new instance when
+     * Use this whenever possible, as it returns {@link #FAST_INSTANCE} instead of creating a new instance, when
      * appropriate.
      */
-    static InvalidReferenceException getInstance(Expression blame, Environment env) {
+    static InvalidReferenceException getInstance(Expression blamed, Environment env) {
         if (env != null && env.getFastInvalidReferenceExceptions()) {
             return FAST_INSTANCE;
         } else {
-            if (blame != null) {
-                return new InvalidReferenceException(
-                        new _ErrorDescriptionBuilder("The following has evaluated to null or missing:")
-                                .blame(blame)
-                                .tip(InvalidReferenceException.TIP),
-                            env);
+            if (blamed != null) {
+                final _ErrorDescriptionBuilder errDescBuilder
+                        = new _ErrorDescriptionBuilder("The following has evaluated to null or missing:").blame(blamed);
+                if (endsWithDollarVariable(blamed)) {
+                    errDescBuilder.tips(new Object[] { TIP_NO_DOLAR, TIP });
+                } else if (blamed instanceof Dot) {
+                    final String rho = ((Dot) blamed).getRHO();
+                    String nameFixTip = null;
+                    if ("size".equals(rho)) {
+                        nameFixTip = "To query the size of a collection or map use ?size, like myList?size";
+                    } else if ("length".equals(rho)) {
+                        nameFixTip = "To query the length of a string use ?length, like myString?size";
+                    }
+                    errDescBuilder.tips(
+                            nameFixTip == null
+                                    ? new Object[] { TIP_LAST_STEP_DOT, TIP }
+                                    : new Object[] { TIP_LAST_STEP_DOT, nameFixTip, TIP });
+                } else if (blamed instanceof DynamicKeyName) {
+                    errDescBuilder.tips(new Object[] { TIP_LAST_STEP_SQUARE_BRACKET, TIP });
+                } else {
+                    errDescBuilder.tip(TIP);
+                }
+                return new InvalidReferenceException(errDescBuilder, env);
             } else {
                 return new InvalidReferenceException(env);
             }
         }
+    }
+
+    private static boolean endsWithDollarVariable(Expression blame) {
+        return blame instanceof Identifier && ((Identifier) blame).getName().startsWith("$")
+                || blame instanceof Dot && ((Dot) blame).getRHO().startsWith("$");
     }
     
 }

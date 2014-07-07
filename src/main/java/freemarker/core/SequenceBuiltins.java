@@ -57,7 +57,7 @@ class SequenceBuiltins {
         {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateSequenceModel)) {
-                throw new UnexpectedTypeException(target, model, "sequence", env);
+                throw new NonSequenceException(target, model, env);
             }
             return calculateResult((TemplateSequenceModel) model);
         }
@@ -454,7 +454,7 @@ class SequenceBuiltins {
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
-                throw new UnexpectedTypeException(target, model, "sequence or collection", env);
+                throw new NonSequenceOrCollectionException(target, model, env);
             }
         }
 
@@ -545,7 +545,7 @@ class SequenceBuiltins {
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
-                    throw new UnexpectedTypeException(target, model, "sequence or collection", env);
+                    throw new NonSequenceOrCollectionException(target, model, env);
                 }
                 
                 m_env = env;
@@ -783,7 +783,7 @@ class SequenceBuiltins {
             } else if (model instanceof TemplateSequenceModel) {
                 return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
             } else {
-                throw new UnexpectedTypeException(target, model, "sequence or collection", env);
+                throw new NonSequenceOrCollectionException(target, model, env);
             }
         }
 

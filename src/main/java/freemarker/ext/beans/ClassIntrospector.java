@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,7 +46,6 @@ import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
 import freemarker.log.Logger;
-import freemarker.template.utility.Collections12;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.SecurityUtilities;
 
@@ -251,10 +251,10 @@ class ClassIntrospector {
         if (introspData.size() > 1) {
             return introspData;
         } else if (introspData.size() == 0) {
-            return Collections12.EMPTY_MAP;
+            return Collections.EMPTY_MAP;
         } else { // map.size() == 1
             Map.Entry e = (Map.Entry) introspData.entrySet().iterator().next();
-            return Collections12.singletonMap(e.getKey(), e.getValue()); 
+            return Collections.singletonMap(e.getKey(), e.getValue()); 
         }
     }
 

@@ -175,7 +175,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     // Why volatile: In principle it need not be volatile, but we want to catch modification attempts even if the
     // object was published improperly to other threads. After all, the main goal of WriteProtectable is protecting
     // things from buggy user code.
-    private volatile boolean readOnly;
+    private volatile boolean writeProtected;
     
     private TemplateModel nullModel = null;
     private int defaultDateType; // initialized by PropertyAssignments.apply
@@ -354,14 +354,14 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     public void writeProtect() {
-        readOnly = true;
+        writeProtected = true;
     }
 
     /**
      * @since 2.3.21
      */
     public boolean isWriteProtected() {
-        return readOnly;
+        return writeProtected;
     }
     
     Object getSharedInrospectionLock() {
@@ -375,8 +375,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     protected void checkModifiable() {
-        if (readOnly) throw new IllegalStateException(
-                "Can't modify the " + this.getClass().getName() + " object, as it was set to read-only.");
+        if (writeProtected) throw new IllegalStateException(
+                "Can't modify the " + this.getClass().getName() + " object, as it was write protected.");
     }
 
     /**

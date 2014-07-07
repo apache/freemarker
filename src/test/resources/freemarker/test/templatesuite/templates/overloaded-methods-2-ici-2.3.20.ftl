@@ -260,3 +260,8 @@
 <@assertFails message="no compatible overloaded">${obj.mCharacterOrStringOverloaded('c', true)}</@>
 <@assertEquals actual=obj.mCharOrStringOverloaded2('c') expected="mCharOrStringOverloaded2(String c)" />
 <@assertEquals actual=obj.mCharacterOrStringOverloaded2('c') expected="mCharacterOrStringOverloaded2(String c)" />
+
+<#-- The exmple given in bug report 363 -->
+<#assign theMap = {'name':'Billy', 'lastName', 'Pilgrim'} />
+<@assertEquals actual=obj.bugReport363(theMap, []) expected="Executed: testMethod(Map fields, List listField) on input: fields={name=Billy, lastName=Pilgrim} and listField=[]" />
+<@assertEquals actual=obj.bugReport363(theMap, null) expected="Executed: testMethod(Object... fields) on input: fields=[{name=Billy, lastName=Pilgrim}, null]" />

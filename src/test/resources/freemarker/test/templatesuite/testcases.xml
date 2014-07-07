@@ -46,6 +46,7 @@
    <testcase name="comment" />
    <testcase name="comparisons" />
    <testcase name="dateformat" />
+   <testcase name="dateparsing" nooutput="true" />
    <testcase name="default"/>
    <testcase name="default-xmlns">
       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
@@ -87,7 +88,6 @@
    </testcase>
    <testcase name="output-encoding3">
        <config output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
-       
    </testcase>
    <testcase name="precedence"/>
    <testcase name="recover" />

@@ -41,7 +41,7 @@ final class VisitNode extends TemplateElement {
     void accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
-            throw new UnexpectedTypeException(targetNode, node, "node", env);
+            throw new NonNodeException(targetNode, node, env);
         }
         
         TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
@@ -59,7 +59,7 @@ final class VisitNode extends TemplateElement {
             }
             else if (!(nss instanceof TemplateSequenceModel)) {
                 if (namespaces != null) {
-                    throw new UnexpectedTypeException(namespaces, nss, "sequence", env);
+                    throw new NonSequenceException(namespaces, nss, env);
                 } else {
                     // Should not occur
                     throw new _MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");

@@ -38,7 +38,7 @@ class HashBuiltins {
             if (model instanceof TemplateHashModelEx) {
                 return calculateResult((TemplateHashModelEx) model, env);
             }
-            throw new UnexpectedTypeException(target, model, "extended hash", env);
+            throw new NonExtendedHashException(target, model, env);
         }
         
         abstract TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
