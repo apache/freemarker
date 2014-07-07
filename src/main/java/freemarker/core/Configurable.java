@@ -813,7 +813,8 @@ public class Configurable
      *        
      *   <li><p>{@code "time_zone"}:
      *       See {@link #setTimeZone(TimeZone)}.
-     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it.
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it, or since 2.3.21
+     *       {@code "default"} for the JVM default time zone.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
      *       
      *   <li><p>{@code "output_encoding"}:
@@ -1042,7 +1043,11 @@ public class Configurable
             } else if (DATETIME_FORMAT_KEY.equals(name)) {
                 setDateTimeFormat(value);
             } else if (TIME_ZONE_KEY.equals(name)) {
-                setTimeZone(TimeZone.getTimeZone(value));
+                if ("default".equals(value)) {
+                    setTimeZone(TimeZone.getDefault());
+                } else {
+                    setTimeZone(TimeZone.getTimeZone(value));
+                }
             } else if (CLASSIC_COMPATIBLE_KEY.equals(name)) {
                 char firstChar;
                 if (value != null && value.length() > 0) {

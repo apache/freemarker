@@ -18,3 +18,11 @@
 <@assertEquals expected="AD 1998-10-30 15:30:44.512 +0000" actual='1998-10-30T19:30:44.512+04:00'?datetime.xs?string />
 <@assertEquals expected="AD 1998-10-29 +0000" actual='1998-10-30+04:00'?date.xs?string />
 <@assertEquals expected="15:30:44.512 +0000" actual='19:30:44.512+04:00'?time.xs?string />
+
+<#assign gmtStr='1998-10-30T19:30:44.512'?datetime.xs?string />
+<#setting time_zone="GMT+01:00">
+<#assign gmt01Str='1998-10-30T19:30:44.512'?datetime.xs?string />
+<#setting time_zone="default">
+<#assign defStr='1998-10-30T19:30:44.512'?datetime.xs?string />
+<@assert test = gmtStr != gmt01Str />
+<@assert test = defStr != gmtStr || defStr != gmt01Str />
