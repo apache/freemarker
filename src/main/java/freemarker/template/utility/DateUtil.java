@@ -732,10 +732,11 @@ public class DateUtil {
             return 0;
         }
         
-        int v = parseXS_groupToInt(
-                g, "partial-seconds", 0, Integer.MAX_VALUE);
-        v = (int) Math.round(v * Math.pow(10, 3 - g.length()));
-        return v;
+        if (g.length() > 3) {
+            g = g.substring(0, 3);
+        }
+        int i = parseXS_groupToInt(g, "partial-seconds", 0, Integer.MAX_VALUE);
+        return g.length() == 1 ? i * 100 : (g.length() == 2 ? i * 10 : i);
     }
     
     /**

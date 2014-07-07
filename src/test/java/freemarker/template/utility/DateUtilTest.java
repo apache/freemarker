@@ -430,10 +430,16 @@ public class DateUtilTest extends TestCase {
                 df.format(DateUtil.parseXSTime("17:30:05", DateUtil.UTC, cf2dc)));
 
         assertEquals(
+                "AD 1970-01-01 07:30:00:100 +0000",
+                df.format(DateUtil.parseXSTime("07:30:00.1", DateUtil.UTC, cf2dc)));
+        assertEquals(
+                "AD 1970-01-01 07:30:00:120 +0000",
+                df.format(DateUtil.parseXSTime("07:30:00.12", DateUtil.UTC, cf2dc)));
+        assertEquals(
                 "AD 1970-01-01 07:30:00:123 +0000",
                 df.format(DateUtil.parseXSTime("07:30:00.123", DateUtil.UTC, cf2dc)));
         assertEquals(
-                "AD 1970-01-01 07:30:00:124 +0000",
+                "AD 1970-01-01 07:30:00:123 +0000",
                 df.format(DateUtil.parseXSTime("07:30:00.1235", DateUtil.UTC, cf2dc)));
         assertEquals(
                 "AD 1970-01-01 07:30:00:123 +0000",
@@ -595,7 +601,7 @@ public class DateUtilTest extends TestCase {
                 df.format(DateUtil.parseXSDateTime(
                         "1970-01-01T07:30:00.123", DateUtil.UTC, cf2dc)));
         assertEquals(
-                "AD 1970-01-01 07:30:00:124 +0000",
+                "AD 1970-01-01 07:30:00:123 +0000",
                 df.format(DateUtil.parseXSDateTime(
                         "1970-01-01T07:30:00.1235", DateUtil.UTC, cf2dc)));
         assertEquals(
@@ -788,7 +794,7 @@ public class DateUtilTest extends TestCase {
         
         // Under ms
         assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59.123456789");
-        // FIXME bug: assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59.1235");
+        assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59.1235");
     }
     
     private final DatatypeFactory datetypeFactory;
