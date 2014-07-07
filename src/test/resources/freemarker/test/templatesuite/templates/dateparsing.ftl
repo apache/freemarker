@@ -8,6 +8,13 @@
 <@assertEquals expected="AD 1998-10-29 +0000" actual='AD 1998-10-30 +0400'?date?string />
 <@assertEquals expected="15:30:44.512 +0000" actual='19:30:44.512 +0400'?time?string />
 
+<@assertEquals expected="AD 1998-10-30 15:30:44.512 +0000"
+               actual='10/30/1998 19:30:44:512 GMT+04:00'?datetime("MM/dd/yyyy HH:mm:ss:S z")?string />
+<@assertEquals expected="AD 1998-10-29 +0000"
+               actual='10/30/1998 GMT+04:00'?date("MM/dd/yyyy z")?string />
+<@assertEquals expected="15:30:44.512 +0000"
+               actual='19:30:44:512 GMT+04:00'?time("HH:mm:ss:S z")?string />
+
 <@assertEquals expected="AD 1998-10-30 15:30:44.512 +0000" actual='1998-10-30T19:30:44.512+04:00'?datetime.xs?string />
 <@assertEquals expected="AD 1998-10-29 +0000" actual='1998-10-30+04:00'?date.xs?string />
 <@assertEquals expected="15:30:44.512 +0000" actual='19:30:44.512+04:00'?time.xs?string />
