@@ -122,7 +122,7 @@ class MiscellaneousBuiltins {
             {
                 this.text = text;
                 this.env = env;
-                this.defaultFormat = env.getDateFormatObject(dateType);
+                this.defaultFormat = env.getJDateFormat(dateType, Date.class);
             }
             
             public Date getAsDate() throws TemplateModelException {
@@ -138,7 +138,7 @@ class MiscellaneousBuiltins {
     
             public TemplateModel get(String pattern) throws TemplateModelException {
                 return new SimpleDate(
-                    pattern.equals("xs") ? parseXS(dateType) : parse(env.getDateFormatObject(dateType, pattern)),
+                    pattern.equals("xs") ? parseXS(dateType) : parse(env.getJDateFormat(dateType, Date.class, pattern)),
                     dateType);
             }
     
@@ -285,7 +285,7 @@ class MiscellaneousBuiltins {
                 this.date = date;
                 this.dateType = dateType;
                 this.env = env;
-                defaultFormat = env.getDateFormatObject(dateType);
+                defaultFormat = env.getJDateFormat(dateType, date.getClass());
             }
     
             public String getAsString()
@@ -308,7 +308,7 @@ class MiscellaneousBuiltins {
             throws
                 TemplateModelException
             {
-                return new SimpleScalar(env.getDateFormatObject(dateType, key).format(date));
+                return new SimpleScalar(env.getJDateFormat(dateType, date.getClass(), key).format(date));
             }
             
             public Object exec(List args) throws TemplateModelException {
