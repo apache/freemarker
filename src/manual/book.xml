@@ -20709,6 +20709,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new configuration setting,
+              <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
+              (<literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>).
+              When this is set to <literal>true</literal>, the time zone used
+              when dealing with <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> values will be the system
+              default time zone (server default time zone) instead of the
+              value of the <literal>time_zone</literal> FreeMarker
+              configuration setting. This is useful because JDBC will, by
+              default, construct the Java <literal>Date</literal> objects so
+              that they will show the year-month-day and hour-minute-seconds
+              values from the database <quote>as is</quote> if you render them
+              using the system default time zone. As time zone conversions for
+              SQL date-only and SQL time-only values doesn't make much sense
+              (unlike for SQL timestamps), this is maybe what you want. For
+              more details see the JavaDoc of
+              <literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>When configuring FreeMarker with
               <literal>java.util.Properties</literal> (typically, when the
               configuration is stored in a <literal>.properties</literal>

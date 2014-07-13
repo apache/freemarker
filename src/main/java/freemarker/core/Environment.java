@@ -800,7 +800,7 @@ public final class Environment extends Configurable {
         return cachedSQLDateAndTimeTimeZoneSameAsNormal.booleanValue();
     }
     
-    private TimeZone getSystemDefaultTimeZone() {
+    TimeZone getSystemDefaultTimeZone() {
         if (cachedDefaultSystemTimeZone == null) {
             cachedDefaultSystemTimeZone = TimeZone.getDefault();
         }
@@ -1080,10 +1080,7 @@ public final class Environment extends Configurable {
     throws
         TemplateModelException
     {
-        boolean useSysDefTZ = dateClass != Date.class  // This pre-condition is only for speed
-                && !isSQLDateAndTimeTimeZoneSameAsNormal()
-                && isSQLDateOrTime(dateClass);
-        
+        boolean useSysDefTZ = useSystemDefaultTimeZone(dateClass);
         
         Map[] jDateFormatsForTZ = useSysDefTZ ? this.jDateFormatsWithSysDefTZ : this.jDateFormats;
         if(jDateFormatsForTZ == null) {
@@ -1158,6 +1155,13 @@ public final class Environment extends Configurable {
         jDateFormatsForDateType.put(pattern, jDateFormat);
         
         return jDateFormat;
+    }
+
+    boolean useSystemDefaultTimeZone(Class dateClass) {
+        boolean useSysDefTZ = dateClass != Date.class  // This pre-condition is only for speed
+                && !isSQLDateAndTimeTimeZoneSameAsNormal()
+                && isSQLDateOrTime(dateClass);
+        return useSysDefTZ;
     }
 
     private boolean isSQLDateOrTime(Class dateClass) {

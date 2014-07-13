@@ -106,7 +106,11 @@ class DateBuiltins {
                     dateType != TemplateDateModel.DATE,
                     showOffset && dateType != TemplateDateModel.DATE,
                     accuracy,
-                    useUTC ? DateUtil.UTC : env.getTimeZone(),
+                    useUTC
+                            ? DateUtil.UTC
+                            : env.useSystemDefaultTimeZone(date.getClass())
+                                    ? env.getSystemDefaultTimeZone()
+                                    : env.getTimeZone(),
                     env.getISOBuiltInCalendar()));
         }
 

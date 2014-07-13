@@ -227,7 +227,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATETIME));
             dataModel.put("unknownDate", new SimpleDate(cal.getTime(), TemplateDateModel.UNKNOWN));
         }
-    
+        
         else if (testName.equals("number-format")) {
             dataModel.put("int", new SimpleNumber(new Integer(1)));
             dataModel.put("double", new SimpleNumber(new Double(1.0)));

@@ -34,8 +34,12 @@ public abstract class TemplateOutputTest {
     protected void assertOutput(String ftl, String expectedOut, Configuration cfg) throws IOException, TemplateException {
         Template t = new Template(null, ftl, cfg);
         StringWriter out = new StringWriter();
-        t.process(Collections.emptyMap(), out);
+        t.process(createDataModel(), out);
         assertEquals(expectedOut, out.toString());
+    }
+
+    protected Object createDataModel() {
+        return Collections.emptyMap();
     }
     
 }
