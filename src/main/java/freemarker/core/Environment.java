@@ -1052,22 +1052,43 @@ public final class Environment extends Configurable {
                 return null;
             }
             case TemplateDateModel.TIME: {
-                if(timeJDateFormat == null) {
-                    timeJDateFormat = getJDateFormat(dateType, dateClass, getTimeFormat());
+                if (shouldUseSystemDefaultTimeZone(dateClass)) {
+                    if(timeJDateFormatWithSysDefTZ == null) {
+                        timeJDateFormatWithSysDefTZ = getJDateFormat(dateType, true, getTimeFormat());
+                    }
+                    return timeJDateFormatWithSysDefTZ;
+                } else {
+                    if(timeJDateFormat == null) {
+                        timeJDateFormat = getJDateFormat(dateType, false, getTimeFormat());
+                    }
+                    return timeJDateFormat;
                 }
-                return timeJDateFormat;
             }
             case TemplateDateModel.DATE: {
-                if(dateJDateFormat == null) {
-                    dateJDateFormat = getJDateFormat(dateType, dateClass, getDateFormat());
+                if (shouldUseSystemDefaultTimeZone(dateClass)) {
+                    if(dateJDateFormatWithSysDefTZ == null) {
+                        dateJDateFormatWithSysDefTZ = getJDateFormat(dateType, true, getDateFormat());
+                    }
+                    return dateJDateFormatWithSysDefTZ;
+                } else {
+                    if(dateJDateFormat == null) {
+                        dateJDateFormat = getJDateFormat(dateType, false, getDateFormat());
+                    }
+                    return dateJDateFormat;
                 }
-                return dateJDateFormat;
             }
             case TemplateDateModel.DATETIME: {
-                if(dateTimeJDateFormat == null) {
-                    dateTimeJDateFormat = getJDateFormat(dateType, dateClass, getDateTimeFormat());
+                if (shouldUseSystemDefaultTimeZone(dateClass)) {
+                    if(dateTimeJDateFormatWithSysDefTZ == null) {
+                        dateTimeJDateFormatWithSysDefTZ = getJDateFormat(dateType, true, getDateTimeFormat());
+                    }
+                    return dateTimeJDateFormatWithSysDefTZ;
+                } else {
+                    if(dateTimeJDateFormat == null) {
+                        dateTimeJDateFormat = getJDateFormat(dateType, false, getDateTimeFormat());
+                    }
+                    return dateTimeJDateFormat;
                 }
-                return dateTimeJDateFormat;
             }
             default: {
                 throw new _TemplateModelException(new Object[] {
@@ -1075,13 +1096,16 @@ public final class Environment extends Configurable {
             }
         }
     }
-    
+
     DateFormat getJDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, String pattern)
+            throws TemplateModelException {
+        return getJDateFormat(dateType, shouldUseSystemDefaultTimeZone(dateClass), pattern);
+    }
+    
+    private DateFormat getJDateFormat(int dateType, boolean useSysDefTZ, String pattern)
     throws
         TemplateModelException
     {
-        boolean useSysDefTZ = useSystemDefaultTimeZone(dateClass);
-        
         Map[] jDateFormatsForTZ = useSysDefTZ ? this.jDateFormatsWithSysDefTZ : this.jDateFormats;
         if(jDateFormatsForTZ == null) {
             jDateFormatsForTZ = new Map[4];
@@ -1157,7 +1181,7 @@ public final class Environment extends Configurable {
         return jDateFormat;
     }
 
-    boolean useSystemDefaultTimeZone(Class dateClass) {
+    boolean shouldUseSystemDefaultTimeZone(Class dateClass) {
         boolean useSysDefTZ = dateClass != Date.class  // This pre-condition is only for speed
                 && !isSQLDateAndTimeTimeZoneSameAsNormal()
                 && isSQLDateOrTime(dateClass);

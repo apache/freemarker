@@ -108,7 +108,7 @@ class DateBuiltins {
                     accuracy,
                     useUTC
                             ? DateUtil.UTC
-                            : env.useSystemDefaultTimeZone(date.getClass())
+                            : env.shouldUseSystemDefaultTimeZone(date.getClass())
                                     ? env.getSystemDefaultTimeZone()
                                     : env.getTimeZone(),
                     env.getISOBuiltInCalendar()));
