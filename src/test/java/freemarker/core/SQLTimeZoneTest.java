@@ -34,6 +34,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     private final Time sqlTime = new Time(utcToLong("1970-01-01T10:30:05")); // 12:30:05
     private final Timestamp sqlTimestamp = new Timestamp(utcToLong("2014-07-12T10:30:05")); // 2014-07-12T12:30:05
     private final Date javaDate = new Date(utcToLong("2014-07-12T10:30:05")); // 2014-07-12T12:30:05
+    private final Date javaDayErrorDate = new Date(utcToLong("2014-07-11T22:00:00")); // 2014-07-12T12:30:05
     
     public TimeZone getLastDefaultTimeZone() {
         return lastDefaultTimeZone;
@@ -57,6 +58,10 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
 
     public Date getJavaDate() {
         return javaDate;
+    }
+    
+    public Date getJavaDayErrorDate() {
+        return javaDayErrorDate;
     }
 
     @Before
@@ -210,6 +215,49 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n",
+                cfg);
+    }
+
+    @Test
+    public void testDateAndTimeBuiltInsHasNoEffect() throws Exception {
+        Configuration cfg = createConfiguration();
+        cfg.setTimeZone(DateUtil.UTC);
+        cfg.setUseSystemDefaultTimeZoneForSQLDateAndTime(true);
+        assertOutput(
+                "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
+                + "${sqlDate?date} ${sqlTime?time}\n"
+                + "<#setting time_zone='GMT+02'>\n"
+                + "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
+                + "${sqlDate?date} ${sqlTime?time}\n"
+                + "<#setting time_zone='GMT-11'>\n"
+                + "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
+                + "${sqlDate?date} ${sqlTime?time}\n",
+                "2014-07-11 22:00:00 2014-07-12 10:30:05 2014-07-12 12:30:05\n"
+                + "2014-07-12 00:00:00 2014-07-12 12:30:05 2014-07-12 12:30:05\n"
+                + "2014-07-11 11:00:00 2014-07-11 23:30:05 2014-07-12 12:30:05\n",
+                cfg);
+    }
+
+    @Test
+    public void testChangeSettingInTemplate() throws Exception {
+        Configuration cfg = createConfiguration();
+        cfg.setTimeZone(DateUtil.UTC);
+
+        assertOutput(
+                "${sqlDate}, ${sqlTime}\n"
+                + "<#setting use_system_default_time_zone_for_sql_date_and_time=true>\n"
+                + "${sqlDate}, ${sqlTime}\n"
+                + "<#setting use_system_default_time_zone_for_sql_date_and_time=false>\n"
+                + "${sqlDate}, ${sqlTime}\n"
+                + "<#setting time_zone='GMT+03'>\n"
+                + "${sqlDate}, ${sqlTime}\n"
+                + "<#setting use_system_default_time_zone_for_sql_date_and_time=true>\n"
+                + "${sqlDate}, ${sqlTime}\n",
+                "2014-07-11, 10:30:05\n"
+                + "2014-07-12, 12:30:05\n"
+                + "2014-07-11, 10:30:05\n"
+                + "2014-07-12, 13:30:05\n"
+                + "2014-07-12, 12:30:05\n",
                 cfg);
     }
     

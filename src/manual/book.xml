@@ -13527,7 +13527,15 @@ Last updated time: 08:00:54 PM</programlisting>
               setting and is normally configured by the programmers outside
               the templates (but it can also be set in a template, like
               <literal>&lt;#setting time_zone="America/New_York"&gt;</literal>
-              for example).</para>
+              for example). Note that if the
+              <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
+              FreeMarker setting is set to <literal>true</literal>, then for
+              <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> values (i.e., for date-only and
+              time-only values that are coming from database via SQL)
+              <literal>local</literal> will mean the system (server) default
+              time zone instead of the value of the
+              <literal>time_zone</literal> setting.</para>
             </listitem>
 
             <listitem>
@@ -16505,6 +16513,25 @@ or
               <literal>"GMT-1:30"</literal>, <literal>"CET"</literal>,
               <literal>"PST"</literal>,
               <literal>"America/Los_Angeles"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><indexterm>
+                  <primary>time_zone</primary>
+                </indexterm><indexterm>
+                  <primary>JDBC time zone</primary>
+                </indexterm><literal>use_system_default_time_zone_for_sql_date_and_time</literal>:
+              This handles a highly technical issue, so it should usually be
+              set from the Java code by the programmers. <phrase
+              role="forProgrammers">For programmers: If this is
+              <literal>true</literal>, for date-only and time-only values
+              coming from SQL database (more precisely, for
+              <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> objects) FreeMarker will use
+              the system default time zone instead of the time zone specified
+              by the <literal>time_zone</literal> FreeMarker setting. See more
+              in the Java API documentation of
+              <literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>.</phrase></para>
             </listitem>
 
             <listitem>
