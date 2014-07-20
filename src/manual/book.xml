@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.20</subtitle>
+  <subtitle>For FreeMarker 2.3.21</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -16506,7 +16506,7 @@ or
               zone used to format times for display. By default, the default
               time zone of the JVM is used. Can be any value that is accepted
               by <link
-              xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/TimeZone.html">Java
+              xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html">Java
               TimeZone API</link>, or <literal>default</literal> (since
               FreeMarker 2.3.21) to use the JVM default time zone. Examples:
               <literal>"GMT"</literal>, <literal>"GMT+2"</literal>,
