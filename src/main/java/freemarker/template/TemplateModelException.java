@@ -101,7 +101,7 @@ public class TemplateModelException extends TemplateException {
     protected TemplateModelException(
             Throwable cause, Environment env, _ErrorDescriptionBuilder descriptionBuilder,
             boolean preventAmbiguity) {
-        super(cause, env, descriptionBuilder, true);
+        super(cause, env, null, descriptionBuilder);
     }
     
 }

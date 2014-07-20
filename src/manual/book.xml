@@ -21137,10 +21137,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>ParseException</literal>-s now also store the
-              end-location of the error, not just its start-location. This is
-              useful if you want to underline the error in the source code,
-              not just point at it.</para>
+              <para>Mostly concerning tool (like IDE plugin) authors:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>ParseException</literal>-s now also store the
+                  end-location of the error, not just its start-location. This
+                  is useful if you want to underline the error in the source
+                  code, not just point at it.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>Configuration.getSupportedCoreDirectiveNames()</literal>
+                  can be used to return the names of directives supported by
+                  FreeMarker.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>TemplateExceptions</literal> now expose the
+                  position of the error (template name, line, column, end
+                  line, end column) similarly to
+                  <literal>ParseException</literal>-s. Where applicable, they
+                  also expose the blamed expression in its canonical FTL
+                  source form; this is mostly useful for
+                  <literal>InvalidReferenceException</literal>-s.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>

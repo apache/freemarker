@@ -295,14 +295,17 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
-     * 1-based line number of the failing section, or 0 is the information is not available.
+     * 1-based line number of the last line that contains the failing section, or 0 if the information is not available.
+     * @since 2.3.21
      */
     public int getEndLineNumber() {
         return endLineNumber;
     }
 
     /**
-     * 1-based column number of the failing section, or 0 is the information is not available.
+     * 1-based column number of the last character of the failing section, or 0 if the information is not available.
+     * Note that unlike with Java string API-s, this column number is inclusive.
+     * @since 2.3.21
      */
     public int getEndColumnNumber() {
         return endColumnNumber;

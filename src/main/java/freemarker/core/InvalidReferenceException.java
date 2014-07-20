@@ -46,17 +46,33 @@ public class InvalidReferenceException extends TemplateException {
     private static final String TIP_LAST_STEP_SQUARE_BRACKET =
             "It's the final [] step that caused this error, not those before it.";
     
+    /**
+     * Creates and invalid reference exception that contains no information about what was missing or null.
+     * As such, try to avoid this constructor.
+     */
     public InvalidReferenceException(Environment env) {
         super("Invalid reference: The expression has evaluated to null or refers to something that doesn't exist.",
                 env);
     }
 
+    /**
+     * Creates and invalid reference exception that contains no programmatically extractable information about the
+     * blamed expression. As such, try to avoid this constructor, unless need to raise this expression from outside
+     * the FreeMarker core.
+     */
     public InvalidReferenceException(String description, Environment env) {
         super(description, env);
     }
 
-    InvalidReferenceException(_ErrorDescriptionBuilder description, Environment env) {
-        super(null, env, description, true);
+    /**
+     * This is the recommended constructor, but it's only used internally, and has no backward compatibility guarantees.
+     * 
+     * @param expression The expression that evaluates to missing or null. The last step of the expression should be
+     *     the failing one, like in {@code goodStep.failingStep.furtherStep} it should only contain
+     *     {@code goodStep.failingStep}.
+     */
+    InvalidReferenceException(_ErrorDescriptionBuilder description, Environment env, Expression expression) {
+        super(null, env, expression, description);
     }
 
     /**
@@ -89,7 +105,7 @@ public class InvalidReferenceException extends TemplateException {
                 } else {
                     errDescBuilder.tip(TIP);
                 }
-                return new InvalidReferenceException(errDescBuilder, env);
+                return new InvalidReferenceException(errDescBuilder, env, blamed);
             } else {
                 return new InvalidReferenceException(env);
             }
