@@ -71,7 +71,7 @@ public class _MiscTemplateException extends TemplateException {
     }
 
     public _MiscTemplateException(Throwable cause, Environment env, _ErrorDescriptionBuilder description) {
-        super(cause, env, description, true);
+        super(cause, env, null, description);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ public class _MiscTemplateException extends TemplateException {
     }
 
     public _MiscTemplateException(Throwable cause, Environment env, Object[] descriptionParts) {
-        super(cause, env, new _ErrorDescriptionBuilder(descriptionParts), true);
+        super(cause, env, null, new _ErrorDescriptionBuilder(descriptionParts));
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ public class _MiscTemplateException extends TemplateException {
     }
 
     public _MiscTemplateException(Expression blamed, Throwable cause, Environment env, Object[] descriptionParts) {
-        super(cause, env, new _ErrorDescriptionBuilder(descriptionParts).blame(blamed), true);
+        super(cause, env, blamed, new _ErrorDescriptionBuilder(descriptionParts).blame(blamed));
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ public class _MiscTemplateException extends TemplateException {
     }
 
     public _MiscTemplateException(Expression blamed, Throwable cause, Environment env, String description) {
-        super(cause, env, new _ErrorDescriptionBuilder(description).blame(blamed), true);
+        super(cause, env, blamed, new _ErrorDescriptionBuilder(description).blame(blamed));
     }
     
 }

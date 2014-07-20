@@ -30,15 +30,12 @@ import freemarker.template.utility.StringUtil;
 class MessageUtil {
 
     static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
-            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used.",
-            "For programmers: Use java.sql.Date/Time/Timestamp instead of java.util.Date in the "
-            + "data-model to avoid this ambiguity."
+            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used."
     };
     
     static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
             "Use ?string(format) to specify which parts to display.",
-            UNKNOWN_DATE_TYPE_ERROR_TIPS[0],
-            UNKNOWN_DATE_TYPE_ERROR_TIPS[1]
+            UNKNOWN_DATE_TYPE_ERROR_TIPS[0]
     };
 
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";

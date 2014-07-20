@@ -55,7 +55,7 @@ class HashBuiltins {
                             propertyName,
                             "\" property. This is maybe a bug. The extended hash was returned by this expression:" })
                         .blame(target),
-                        env);
+                        env, this);
             }
         }
         

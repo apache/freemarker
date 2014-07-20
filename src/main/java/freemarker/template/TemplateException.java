@@ -25,8 +25,11 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 
 import freemarker.core.Environment;
+import freemarker.core.Expression;
+import freemarker.core.InvalidReferenceException;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
+import freemarker.core.TemplateObject;
 import freemarker.core._CoreAPI;
 import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.template.utility.CollectionUtils;
@@ -44,6 +47,7 @@ public class TemplateException extends Exception {
     // Set in constructor:
     private transient _ErrorDescriptionBuilder descriptionBuilder;
     private final transient Environment env;
+    private final transient Expression blamedExpression;
     private transient TemplateElement[] ftlInstructionStackSnapshot;
     
     // Calculated on demand:
@@ -51,7 +55,15 @@ public class TemplateException extends Exception {
     private String renderedFtlInstructionStackSnapshotTop; // clalc. from ftlInstructionStackSnapshot
     private String description;  // calc. from descriptionBuilder, or set by the construcor
     private transient String messageWithoutStackTop;
-    private transient String message; 
+    private transient String message;
+    private boolean blamedExpressionStringCalculated;
+    private String blamedExpressionString;
+    private boolean positionsCalculated;
+    private String templateName;
+    private Integer lineNumber; 
+    private Integer columnNumber; 
+    private Integer endLineNumber; 
+    private Integer endColumnNumber; 
 
     // Concurrency:
     private transient Object lock = new Object();
@@ -101,7 +113,7 @@ public class TemplateException extends Exception {
      * backward-compatibility.
      */
     public TemplateException(String description, Exception cause, Environment env) {
-        this(description, cause, env, null);
+        this(description, cause, env, null, null);
     }
 
     /**
@@ -115,29 +127,34 @@ public class TemplateException extends Exception {
      * @since 2.3.20
      */
     public TemplateException(String description, Throwable cause, Environment env) {
-        this(description, cause, env, null);
+        this(description, cause, env, null, null);
     }
     
     /**
-     * Don't use this; this is to be used internally by FreeMarker.
-     * @param preventAmbiguity its value is ignored; it's only to prevent constructor selection ambiguities for
-     *     backward-compatibility
+     * Don't use this; this is to be used internally by FreeMarker. No backward compatibility guarantees.
+     * 
+     * @param blamedExpr Maybe {@code null}. The FTL stack in the {@link Environment} only specifies the error location
+     *          with "template element" granularity, and this can be used to point to the expression inside the
+     *          template element.    
      */
-    protected TemplateException(Throwable cause, Environment env, _ErrorDescriptionBuilder descriptionBuilder,
-            boolean preventAmbiguity) {
-        this(null, cause, env, descriptionBuilder);
+    protected TemplateException(Throwable cause, Environment env, Expression blamedExpr,
+            _ErrorDescriptionBuilder descriptionBuilder) {
+        this(null, cause, env, blamedExpr, descriptionBuilder);
     }
     
     private TemplateException(
             String renderedDescription,
-            Throwable cause,
-            Environment env, _ErrorDescriptionBuilder descriptionBuilder) {
+            Throwable cause,            
+            Environment env, Expression expression,
+            _ErrorDescriptionBuilder descriptionBuilder) {
         // Note: Keep this constructor lightweight.
         
         super(cause);  // Message managed locally.
         
         if (env == null) env = Environment.getCurrentEnvironment();
         this.env = env;
+        
+        this.blamedExpression = expression;
         
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;
@@ -163,6 +180,30 @@ public class TemplateException extends Exception {
             messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse the backing char[]
         } else {
             message = messageWithoutStackTop;
+        }
+    }
+    
+    private void calculatePosition() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                // The expressions is the argument of the template element, so we prefer it as it's more specific. 
+                TemplateObject templateObject = blamedExpression != null
+                        ? (TemplateObject) blamedExpression
+                        : (
+                                ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length != 0
+                                ? ftlInstructionStackSnapshot[0] : null);
+                // Line number blow 0 means no info, negative means position in ?eval-ed value that we won't use here.
+                if (templateObject != null && templateObject.getBeginLine() > 0) {
+                    final Template template = templateObject.getTemplate();
+                    templateName = template != null ? template.getName() : null;
+                    lineNumber = new Integer(templateObject.getBeginLine());
+                    columnNumber = new Integer(templateObject.getBeginColumn());
+                    endLineNumber = new Integer(templateObject.getEndLine());
+                    endColumnNumber = new Integer(templateObject.getEndColumn());
+                }
+                positionsCalculated = true;
+                deleteFTLInstructionStackSnapshotIfNotNeeded();
+            }
         }
     }
     
@@ -234,7 +275,8 @@ public class TemplateException extends Exception {
     }
     
     private void deleteFTLInstructionStackSnapshotIfNotNeeded() {
-        if (renderedFtlInstructionStackSnapshot != null && renderedFtlInstructionStackSnapshotTop != null) {
+        if (renderedFtlInstructionStackSnapshot != null && renderedFtlInstructionStackSnapshotTop != null
+                && (positionsCalculated || blamedExpression != null)) {
             ftlInstructionStackSnapshot = null;
         }
         
@@ -408,11 +450,106 @@ public class TemplateException extends Exception {
         }
     }
     
+    /**
+     * 1-based line number of the failing section, or {@code null} if the information is not available.
+     * 
+     * @since 2.3.21
+     */
+    public Integer getLineNumber() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+            }
+            return lineNumber;
+        }
+    }
+
+    /**
+     * Returns the name of the template where the error has occurred, or {@code null} if the information isn't
+     * available. This will be the full template name, regardless of how the template was invoked.
+     * 
+     * @since 2.3.21
+     */
+    public String getTemplateName() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+                }
+            return templateName;
+        }
+    }
+    
+    /**
+     * 1-based column number of the failing section, or {@code null} if the information is not available.
+     * 
+     * @since 2.3.21
+     */
+    public Integer getColumnNumber() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+            }
+            return columnNumber;
+        }
+    }
+
+    /**
+     * 1-based line number of the last line that contains the failing section, or {@code null} if the information is not
+     * available.
+     * 
+     * @since 2.3.21
+     */
+    public Integer getEndLineNumber() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+            }
+            return endLineNumber;
+        }
+    }
+
+    /**
+     * 1-based column number of the last character of the failing template section, or {@code null} if the information
+     * is not available. Note that unlike with Java string API-s, this column number is inclusive.
+     * 
+     * @since 2.3.21
+     */
+    public Integer getEndColumnNumber() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+            }
+            return endColumnNumber;
+        }
+    }
+    
+    /**
+     * If there was a blamed expression attached to this exception, it returns its canonical form, otherwise it returns
+     * {@code null}. This expression should always be inside the failing FTL instruction.
+     *  
+     * <p>The typical application of this is getting the undefined expression from {@link InvalidReferenceException}-s.
+     * 
+     * @since 2.3.21
+     */
+    public String getBlamedExpressionString() {
+        synchronized (lock) {
+            if (!blamedExpressionStringCalculated) {
+                if (blamedExpression != null) {
+                    blamedExpressionString = blamedExpression.getCanonicalForm();
+                }
+                blamedExpressionStringCalculated = true;
+            }
+            return blamedExpressionString;
+        }
+    }
+
     private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
         // These are calculated from transient fields, so this is the last chance to calculate them: 
         getFTLInstructionStack();
         getFTLInstructionStackTop();
         getDescription();
+        calculatePosition();
+        getBlamedExpressionString();
         
         out.defaultWriteObject();
     }

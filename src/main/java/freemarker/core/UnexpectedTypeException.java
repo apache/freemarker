@@ -31,27 +31,27 @@ public class UnexpectedTypeException extends TemplateException {
     }
 
     UnexpectedTypeException(Environment env, _ErrorDescriptionBuilder description) {
-        super(null, env, description, true);
+        super(null, env, null, description);
     }
 
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
-        super(null, env, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env), true);
+        super(null, env, blamed, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env));
     }
 
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tip(tip), true);
+        super(null, env, blamed, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tip(tip));
     }
 
     UnexpectedTypeException(
             Expression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String[] tips,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tips(tips), true);
+        super(null, env, blamed, newDesciptionBuilder(blamed, model, expectedTypesDesc, expectedTypes, env).tips(tips));
     }
     
     private static _ErrorDescriptionBuilder newDesciptionBuilder(

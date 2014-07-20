@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.20</subtitle>
+  <subtitle>For FreeMarker 2.3.21</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -13527,7 +13527,15 @@ Last updated time: 08:00:54 PM</programlisting>
               setting and is normally configured by the programmers outside
               the templates (but it can also be set in a template, like
               <literal>&lt;#setting time_zone="America/New_York"&gt;</literal>
-              for example).</para>
+              for example). Note that if the
+              <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
+              FreeMarker setting is set to <literal>true</literal>, then for
+              <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> values (i.e., for date-only and
+              time-only values that are coming from database via SQL)
+              <literal>local</literal> will mean the system (server) default
+              time zone instead of the value of the
+              <literal>time_zone</literal> setting.</para>
             </listitem>
 
             <listitem>
@@ -16495,13 +16503,35 @@ or
               <para><indexterm>
                   <primary>time_zone</primary>
                 </indexterm><literal>time_zone</literal>: The name of the time
-              zone used to format times for display. By default, the system
-              time zone is used. Can be any value that is accepted by <link
-              xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/TimeZone.html">Java
-              TimeZone API</link>. Examples: <literal>"GMT"</literal>,
-              <literal>"GMT+2"</literal>, <literal>"GMT-1:30"</literal>,
-              <literal>"CET"</literal>, <literal>"PST"</literal>,
+              zone used to format times for display. By default, the default
+              time zone of the JVM is used. Can be any value that is accepted
+              by <link
+              xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html">Java
+              TimeZone API</link>, or <literal>default</literal> (since
+              FreeMarker 2.3.21) to use the JVM default time zone. Examples:
+              <literal>"GMT"</literal>, <literal>"GMT+2"</literal>,
+              <literal>"GMT-1:30"</literal>, <literal>"CET"</literal>,
+              <literal>"PST"</literal>,
               <literal>"America/Los_Angeles"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><indexterm>
+                  <primary>time_zone</primary>
+                </indexterm><indexterm>
+                  <primary>JDBC time zone</primary>
+                </indexterm><literal>use_system_default_time_zone_for_sql_date_and_time</literal>:
+              This handles a highly technical issue, so it should usually be
+              set from the Java code by the programmers. <phrase
+              role="forProgrammers">For programmers: If this is
+              <literal>true</literal>, for date-only and time-only values
+              coming from SQL database (more precisely, for
+              <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> objects) FreeMarker will use
+              the system default time zone instead of the time zone specified
+              by the <literal>time_zone</literal> FreeMarker setting. See more
+              in the Java API documentation of
+              <literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>.</phrase></para>
             </listitem>
 
             <listitem>
@@ -20514,21 +20544,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>The
-              <literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
-              now now supports parsing XML Schema values with
-              <literal>?date.xs</literal>, <literal>?datetime.xs</literal> and
-              <literal>?time.xs</literal>. <link
-              linkend="ref_builtin_string_date">More...</link></para>
-            </listitem>
+              <para>Date/time/datetime related changes:</para>
 
-            <listitem>
-              <para>Bug fixed: ISO 8601 dates (via
-              <literal>?iso_...</literal>) now use proleptic Gregorian
-              calendar for the years before 1582, rather than Julian calendar.
-              This is (indirectly) required by the standard, and it's also how
-              the standard Java XML Schema date/time/dateTime parser
-              works.</para>
+              <itemizedlist>
+                <listitem>
+                  <para>The
+                  <literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
+                  now now supports parsing XML Schema values with
+                  <literal>?date.xs</literal>, <literal>?datetime.xs</literal>
+                  and <literal>?time.xs</literal>. <link
+                  linkend="ref_builtin_string_date">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: ISO 8601 dates (via
+                  <literal>?iso_...</literal>) now use proleptic Gregorian
+                  calendar for the years before 1582, rather than Julian
+                  calendar. This is (indirectly) required by the standard, and
+                  it's also how the standard Java XML Schema
+                  date/time/dateTime parser works.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The value of the <literal>time_zone</literal> setting
+                  can now be <literal>"default"</literal> to use the JVM
+                  default time zone (which is the default value of the setting
+                  too, but now it can be restored if the setting value was
+                  overwritten earlier)</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
@@ -20689,6 +20733,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   earlier).</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added new configuration setting,
+              <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
+              (<literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>).
+              When this is set to <literal>true</literal>, the time zone used
+              when dealing with <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> values will be the system
+              default time zone (server default time zone) instead of the
+              value of the <literal>time_zone</literal> FreeMarker
+              configuration setting. This is useful because JDBC will, by
+              default, construct the Java <literal>Date</literal> objects so
+              that they will show the year-month-day and hour-minute-seconds
+              values from the database <quote>as is</quote> if you render them
+              using the system default time zone. As time zone conversions for
+              SQL date-only and SQL time-only values doesn't make much sense
+              (unlike for SQL timestamps), this is maybe what you want. For
+              more details see the JavaDoc of
+              <literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>.</para>
             </listitem>
 
             <listitem>
@@ -21073,10 +21137,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>ParseException</literal>-s now also store the
-              end-location of the error, not just its start-location. This is
-              useful if you want to underline the error in the source code,
-              not just point at it.</para>
+              <para>Mostly concerning tool (like IDE plugin) authors:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>ParseException</literal>-s now also store the
+                  end-location of the error, not just its start-location. This
+                  is useful if you want to underline the error in the source
+                  code, not just point at it.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>Configuration.getSupportedCoreDirectiveNames()</literal>
+                  can be used to return the names of directives supported by
+                  FreeMarker.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>TemplateExceptions</literal> now expose the
+                  position of the error (template name, line, column, end
+                  line, end column) similarly to
+                  <literal>ParseException</literal>-s. Where applicable, they
+                  also expose the blamed expression in its canonical FTL
+                  source form; this is mostly useful for
+                  <literal>InvalidReferenceException</literal>-s.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
