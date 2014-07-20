@@ -18,12 +18,14 @@ package freemarker.template;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
+import freemarker.core.Configurable;
 import freemarker.template.utility.NullWriter;
 
 public class ConfigurationTest extends TestCase{
@@ -191,6 +193,31 @@ public class ConfigurationTest extends TestCase{
         assertEquals(1, cache.getSize());
         cfg.setTemplateLoader(cfg.getTemplateLoader());
         assertEquals(1, cache.getSize());
+    }
+    
+    public void testSetTimeZone() throws TemplateException {
+        TimeZone origSysDefTZ = TimeZone.getDefault();
+        try {
+            TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
+            TimeZone.setDefault(sysDefTZ);
+            
+            Configuration cfg = new Configuration(new Version(2, 3, 0));
+            assertEquals(sysDefTZ, cfg.getTimeZone());
+            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
+            cfg.setSetting(Configurable.TIME_ZONE_KEY, "default");
+            assertEquals(sysDefTZ, cfg.getTimeZone());
+            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
+            
+            TimeZone newSysDefTZ = TimeZone.getTimeZone("GMT+09");
+            TimeZone.setDefault(newSysDefTZ);
+            assertEquals(sysDefTZ, cfg.getTimeZone());
+            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
+            cfg.setSetting(Configurable.TIME_ZONE_KEY, "default");
+            assertEquals(newSysDefTZ, cfg.getTimeZone());
+            assertEquals(newSysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
+        } finally {
+            TimeZone.setDefault(origSysDefTZ);
+        }
     }
     
 }
