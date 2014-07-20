@@ -275,7 +275,6 @@ class MiscellaneousBuiltins {
             private final Date date;
             private final int dateType;
             private final Environment env;
-            private final DateFormat defaultFormat;
             private String cachedValue;
     
             DateFormatter(Date date, int dateType, Environment env)
@@ -285,7 +284,6 @@ class MiscellaneousBuiltins {
                 this.date = date;
                 this.dateType = dateType;
                 this.env = env;
-                defaultFormat = env.getJDateFormat(dateType, date.getClass());
             }
     
             public String getAsString()
@@ -299,7 +297,7 @@ class MiscellaneousBuiltins {
                             .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                 }
                 if(cachedValue == null) {
-                    cachedValue = defaultFormat.format(date);
+                    cachedValue = env.getJDateFormat(dateType, date.getClass()).format(date);
                 }
                 return cachedValue;
             }
