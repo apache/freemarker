@@ -256,10 +256,16 @@ public class Configuration extends Configurable implements Cloneable {
      *         won't remain hidden now. As the old default is a singleton too, potentially shared by independently
      *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
      *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
-     *         cache) because the singleton is modified after publishing.)
+     *         cache) because the singleton is modified after publishing to other threads.)
      *         Furthermore the new default object wrapper shares class introspection cache with other
      *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
      *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
+     *       </li>
+     *       <li><p>
+     *          The {@code ?iso_...} built-ins won't show the time zone offset for {@link java.sql.Time} values anymore,
+     *          because most databases store time values that aren't in any time zone, but just store hour, minute,
+     *          second, and decimal second field values. If you still need to show the offset, you can force showing the
+     *          time zone offset by using the {@code ?iso_..._z} variants, like {@code anSQLTime?iso_local_z}.
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
@@ -267,7 +273,7 @@ public class Configuration extends Configurable implements Cloneable {
      *         the default was a {@link FileTemplateLoader} that used the current directory as the root. This was
      *         dangerous and fragile as you usually don't have good control over what the current directory will be.
      *         Luckily, the old default almost never looked for the templates at the right place
-     *         anyway, so pretty much all applications had to set a {@code template_loader} setting, so it's unlikely
+     *         anyway, so pretty much all applications had to set the {@code template_loader} setting, so it's unlikely
      *         that changing the default breaks your application.
      *       </li>
      *     </ul>
