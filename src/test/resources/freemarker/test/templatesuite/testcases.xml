@@ -161,6 +161,7 @@
    <testcase name="iso8601-ici-2.3.21" template="iso8601.ftl" expected="iso8601-ici-2.3.21.txt">
       <config incompatible_improvements="2.3.21" /> 
    </testcase>   
+   <testcase name="string-xs" />
    <testcase name="number-to-date" />
    <testcase name="varargs" />
    <testcase name="overloaded-methods-23bc" nooutput="true" />

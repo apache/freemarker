@@ -841,6 +841,21 @@ public class DateUtil {
         }
 
     }
+
+    /**
+     * Tells if the given class is a {@link java.sql.Date} or {@link java.sql.Time}.
+     *  
+     * @since 2.3.21
+     */
+    public static boolean isSQLDateOrTimeClass(Class dateClass) {
+        // We do shortcuts for the most common cases.
+        return dateClass != java.util.Date.class
+                && (dateClass == java.sql.Date.class || dateClass == java.sql.Time.class
+                        || (dateClass != java.sql.Timestamp.class
+                                    && ( 
+                                            java.sql.Date.class.isAssignableFrom(dateClass)
+                                            || java.sql.Time.class.isAssignableFrom(dateClass))));
+    }
     
     private static final class DatePartParseException extends Exception {
         

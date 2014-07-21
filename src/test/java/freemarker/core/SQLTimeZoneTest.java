@@ -74,30 +74,39 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
             "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
             + "${sqlDate?iso_local_z} ${sqlTime?iso_local_z} "
             + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n"
+            + "${sqlDate?string.xs_z} ${sqlTime?string.xs_z} "
+            + "${sqlTimestamp?string.xs_z} ${javaDate?datetime?string.xs_z}\n"
             + "<#setting time_zone='GMT'>\n"
             + "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
             + "${sqlDate?iso_local_z} ${sqlTime?iso_local_z} "
-            + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n";
+            + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n"
+            + "${sqlDate?string.xs_z} ${sqlTime?string.xs_z} "
+            + "${sqlTimestamp?string.xs_z} ${javaDate?datetime?string.xs_z}\n";
 
     private static final String OUTPUT_BEFORE_SETTZ_GMT2
             = "2014-07-12 12:30:05 2014-07-12T12:30:05 2014-07-12T12:30:05\n"
-            + "2014-07-12 12:30:05+02:00 2014-07-12T12:30:05+02:00 2014-07-12T12:30:05+02:00\n";
+            + "2014-07-12 12:30:05+02:00 2014-07-12T12:30:05+02:00 2014-07-12T12:30:05+02:00\n"
+            + "2014-07-12+02:00 12:30:05+02:00 2014-07-12T12:30:05+02:00 2014-07-12T12:30:05+02:00\n";
 
     private static final String OUTPUT_BEFORE_SETTZ_GMT1_SQL_DIFFERENT
             = "2014-07-12 12:30:05 2014-07-12T11:30:05 2014-07-12T11:30:05\n"
-            + "2014-07-12 12:30:05+02:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n";
+            + "2014-07-12 12:30:05+02:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n"
+            + "2014-07-12+02:00 12:30:05+02:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n";
 
     private static final String OUTPUT_BEFORE_SETTZ_GMT1_SQL_SAME
             = "2014-07-11 11:30:05 2014-07-12T11:30:05 2014-07-12T11:30:05\n"
-            + "2014-07-11 11:30:05+01:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n";
+            + "2014-07-11 11:30:05+01:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n"
+            + "2014-07-11+01:00 11:30:05+01:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n";
     
     private static final String OUTPUT_AFTER_SETTZ_SQL_SAME
             = "2014-07-11 10:30:05 2014-07-12T10:30:05 2014-07-12T10:30:05\n"
-            + "2014-07-11 10:30:05Z 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n";
+            + "2014-07-11 10:30:05Z 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n"
+            + "2014-07-11Z 10:30:05Z 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n";
     
     private static final String OUTPUT_AFTER_SETTZ_SQL_DIFFERENT
             = "2014-07-12 12:30:05 2014-07-12T10:30:05 2014-07-12T10:30:05\n"
-            + "2014-07-12 12:30:05+02:00 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n";
+            + "2014-07-12 12:30:05+02:00 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n"
+            + "2014-07-12+02:00 12:30:05+02:00 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n";
     
     @Test
     public void testWithDefaultTZAndNoUseDefSysForSQL() throws Exception {

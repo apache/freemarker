@@ -791,7 +791,7 @@ public final class Environment extends Configurable {
      * Tells if the same concrete time zone is used for SQL date-only and time-only values as for other
      * date/time/dateTime values.
      */
-    private boolean isSQLDateAndTimeTimeZoneSameAsNormal() {
+    boolean isSQLDateAndTimeTimeZoneSameAsNormal() {
         if (cachedSQLDateAndTimeTimeZoneSameAsNormal == null) {
             cachedSQLDateAndTimeTimeZoneSameAsNormal = Boolean.valueOf(
                     !getUseSystemDefaultTimeZoneForSQLDateAndTime()
@@ -1182,16 +1182,9 @@ public final class Environment extends Configurable {
     }
 
     boolean shouldUseSystemDefaultTimeZone(Class dateClass) {
-        boolean useSysDefTZ = dateClass != Date.class  // This pre-condition is only for speed
+        return dateClass != Date.class  // This pre-condition is only for speed
                 && !isSQLDateAndTimeTimeZoneSameAsNormal()
-                && isSQLDateOrTime(dateClass);
-        return useSysDefTZ;
-    }
-
-    private boolean isSQLDateOrTime(Class dateClass) {
-        return dateClass == java.sql.Date.class || dateClass == java.sql.Time.class
-                || java.sql.Date.class.isAssignableFrom(dateClass)
-                || java.sql.Time.class.isAssignableFrom(dateClass);
+                && DateUtil.isSQLDateOrTimeClass(dateClass);
     }
 
     int parseDateStyleToken(String token) {
@@ -1209,13 +1202,13 @@ public final class Environment extends Configurable {
         }
         return -1;
     }
-    
 
     /**
      * Returns the {@link DateToISO8601CalendarFactory} used by the
      * the "iso_" built-ins. Be careful when using this; it should only by used
-     * with {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean,
-     * int, TimeZone, DateToISO8601CalendarFactory)}.
+     * with {@link DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone,
+     * DateToISO8601CalendarFactory)} and
+     * {@link DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}.
      */
     DateToISO8601CalendarFactory getISOBuiltInCalendar() {
         if (isoBuiltInCalendarFactory == null) {

@@ -306,7 +306,59 @@ class MiscellaneousBuiltins {
             throws
                 TemplateModelException
             {
-                return new SimpleScalar(env.getJDateFormat(dateType, date.getClass(), key).format(date));
+                return new SimpleScalar(getFormattedDate(key));
+            }
+
+            protected String getFormattedDate(String key) throws TemplateModelException {
+                final int keyLen = key.length();
+                // As of Java 8, 'x' (in lower case) is illegal date format letter, so this is backward-compatible.
+                if (keyLen > 1 && key.charAt(0) == 'x' && key.charAt(1) == 's') {
+                    final boolean showDatePart = dateType != TemplateDateModel.TIME;
+                    final boolean showTimePart = dateType != TemplateDateModel.DATE;
+                    if (keyLen == 2) {  // key is "xs" => automatically decide if zone will be shown
+                        boolean isSQLDateOrTime = DateUtil.isSQLDateOrTimeClass(date.getClass());
+                        return DateUtil.dateToXSString(
+                                date,
+                                showDatePart,
+                                showTimePart,
+                                !isSQLDateOrTime,
+                                DateUtil.ACCURACY_MILLISECONDS,
+                                !isSQLDateOrTime || env.isSQLDateAndTimeTimeZoneSameAsNormal()
+                                        ? env.getTimeZone()
+                                        : env.getSystemDefaultTimeZone(),
+                                env.getISOBuiltInCalendar());                    
+                    } else if (keyLen > 3 && key.charAt(2) == '_') {  // key is "xs_<something>"
+                        final boolean showZoneOffset;
+                        if (keyLen == 4 && key.charAt(3) == 'z') {  // key is "xs_z"
+                            showZoneOffset = true;
+                        } else if (keyLen == 5 && key.charAt(3) == 'n' && key.charAt(4) == 'z') {  // key is "xs_nz"
+                            showZoneOffset = false;
+                        } else {
+                            throw newIllegalXSDateFormatKey(key);
+                        }
+                        return DateUtil.dateToXSString(
+                                date,
+                                showDatePart,
+                                showTimePart,
+                                showZoneOffset,
+                                DateUtil.ACCURACY_MILLISECONDS,
+                                env.shouldUseSystemDefaultTimeZone(date.getClass())
+                                        ? env.getSystemDefaultTimeZone()
+                                        : env.getTimeZone(),
+                                env.getISOBuiltInCalendar());
+                    } else {
+                        throw newIllegalXSDateFormatKey(key);
+                    }
+                } else {
+                    return env.getJDateFormat(dateType, date.getClass(), key).format(date);
+                }
+            }
+
+            private _TemplateModelException newIllegalXSDateFormatKey(String key) {
+                return new _TemplateModelException(new Object[] {
+                        "Illegal date format, ", new _DelayedJQuote(key),
+                        ". A format that starts with \"xs\" must be one of "
+                        + "\"xs\", \"xs_z\", and \"xs_nz\"." });
             }
             
             public Object exec(List args) throws TemplateModelException {

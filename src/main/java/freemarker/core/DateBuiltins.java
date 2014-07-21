@@ -100,11 +100,11 @@ class DateBuiltins {
      * Implements {@code ?iso_utc} and {@code ?iso_local} variants, but not
      * {@code ?iso(timeZone)}.
      */
-    static class iso_tz_BI extends AbstractISOBI {
+    static class iso_utc_or_local_BI extends AbstractISOBI {
         
         private final boolean useUTC;
         
-        iso_tz_BI(Boolean showOffset, int accuracy, boolean useUTC) {
+        iso_utc_or_local_BI(Boolean showOffset, int accuracy, boolean useUTC) {
             super(showOffset, accuracy);
             this.useUTC = useUTC;
         }

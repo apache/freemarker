@@ -13248,6 +13248,14 @@ Hungarian people write: 12 345 678,00</programlisting>
             <primary>date to string</primary>
           </indexterm>
 
+          <indexterm>
+            <primary>XML Schema date rendering</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>XML Schema time rendering</primary>
+          </indexterm>
+
           <para>This built-in converts a date to a string, with the specified
           formatting. (when the default format dictated by the
           <literal>date_format</literal>, <literal>time_format</literal> and
@@ -13258,49 +13266,81 @@ Hungarian people write: 12 345 678,00</programlisting>
           <para>The format can be one of the predefined formats, or you can
           specify the formatting pattern explicitly.</para>
 
-          <para>The predefined formats are <literal>short</literal>,
-          <literal>medium</literal>, <literal>long</literal>, and
-          <literal>full</literal> which define how verbose the resulting text
-          will be. For example, if the locale of the output is U.S. English,
-          and the time zone is the U.S. Pacific Time zone, then this:</para>
+          <para>The predefined formats are:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Formats predefined by the Java platform:
+              <literal>short</literal>, <literal>medium</literal>,
+              <literal>long</literal>, and <literal>full</literal> which
+              define how verbose the resulting text will be. The exact meaning
+              of this depends on the current locale (language). Furthermore,
+              it's specified not by FreeMarker, but Java.</para>
+            </listitem>
+
+            <listitem>
+              <para>XML Schema formats (since FreeMarker 2.3.21):
+              <literal>xs</literal>, <literal>xs_z</literal>,
+              <literal>xs_nz</literal>. These will format the value to conform
+              to the <literal>xs:date</literal>, <literal>xs:time</literal> or
+              <literal>xs:dateTime</literal> XML Schema types, depending on
+              the type of the value. The difference between the 3 variations
+              is in when they show the time zone offset: <literal>xs</literal>
+              will show the time zone offset unless the Java type of the value
+              is <literal>java.sql.Date</literal> or
+              <literal>java.sql.Time</literal> (as those are assumed to come
+              from a time zone unaware source), <literal>xs_z</literal> will
+              always show the time zone offset, and <literal>xs_nz</literal>
+              will never show it.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>For example, if the locale of the output is U.S. English, and
+          the time zone is the U.S. Pacific Time zone, and
+          <literal>openingTime</literal> is a
+          <literal>java.sql.Time</literal>, <literal>nextDiscountDay</literal>
+          is <literal>java.sql.Date</literal> and
+          <literal>lastUpdated</literal> is
+          <literal>java.sql.Timestamp</literal> or
+          <literal>java.util.Date</literal> then this:</para>
 
           <programlisting role="template">${openingTime?string.short}
 ${openingTime?string.medium}
 ${openingTime?string.long}
 ${openingTime?string.full}
+${openingTime?string.xs}
 
 ${nextDiscountDay?string.short}
 ${nextDiscountDay?string.medium}
 ${nextDiscountDay?string.long}
 ${nextDiscountDay?string.full}
+${nextDiscountDay?string.xs}
 
 ${lastUpdated?string.short}
 ${lastUpdated?string.medium}
 ${lastUpdated?string.long}
-${lastUpdated?string.full}</programlisting>
+${lastUpdated?string.full}
+${lastUpdated?string.xs}</programlisting>
 
           <para>will prints something like this:</para>
 
-          <programlisting role="output">12:45 PM
-12:45:09 PM
-12:45:09 PM CEST
-12:45:09 PM CEST
+          <programlisting role="output">01:45 PM
+01:45:09 PM
+01:45:09 PM PST
+01:45:09 PM PST
+13:45:09
 
-4/20/07
+2/20/07
 Apr 20, 2007
 April 20, 2007
 Friday, April 20, 2007
+2007-02-20
 
-4/20/07 12:45 PM
-Apr 20, 2007 12:45:09 PM
-April 20, 2007 12:45:09 PM CEST
-Friday, April 20, 2007 12:45:09 PM CEST</programlisting>
-
-          <para>The exact meaning of <literal>short</literal>,
-          <literal>medium</literal>, <literal>long</literal>, and
-          <literal>full</literal> depends on the current locale (language).
-          Furthermore, it is specified not by FreeMarker, but the Java
-          platform implementation you run FreeMarker on.</para>
+2/20/07 01:45 PM
+Feb 20, 2007 01:45:09 PM
+February 20, 2007 01:45:09 PM PST
+Friday, February 20, 2007 01:45:09 PM PST
+2007-02-20T13:45:09-08:00</programlisting>
 
           <para>For dates that contains both date and time part, you can
           specify the length of the date and time part independently:</para>
@@ -13310,8 +13350,8 @@ ${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;</progr
 
           <para>will output:</para>
 
-          <programlisting role="output">4/8/03 9:24:44 PM PDT
-Apr 8, 2003 9:24 PM</programlisting>
+          <programlisting role="output">2/8/03 9:24:44 PM PST
+Feb 8, 2003 9:24 PM</programlisting>
 
           <para>Note that <literal>?string.short</literal> is the same as
           <literal>?string.short_short</literal>,
@@ -20593,12 +20633,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>The
-                  <literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
+                  <para><literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
                   now now supports parsing XML Schema values with
                   <literal>?date.xs</literal>, <literal>?datetime.xs</literal>
                   and <literal>?time.xs</literal>. <link
                   linkend="ref_builtin_string_date">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>?string</literal> now supports formatting
+                  date/time/datetime values with XML Schema format with
+                  <literal>?string.xs</literal>,
+                  <literal>?string.xs_z</literal> (forces showing time zone
+                  offset), <literal>?string.xs_nz</literal> (forces hiding
+                  time zone offset). <link
+                  linkend="ref_builtin_string_for_date">More...</link></para>
                 </listitem>
 
                 <listitem>

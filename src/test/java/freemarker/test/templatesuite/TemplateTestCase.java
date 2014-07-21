@@ -345,7 +345,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
         }
         
-        else if (testName.startsWith("iso8601")) {
+        else if (testName.startsWith("iso8601") || testName.equals("string-xs")) {
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
             dataModel.put("adaptedToStringScalar", new Object() {
