@@ -64,10 +64,10 @@ class DateBuiltins {
     }
 
     static abstract class AbstractISOBI extends DateBuiltin {
-        protected final boolean showOffset;
+        protected final Boolean showOffset;
         protected final int accuracy;
 
-        protected AbstractISOBI(boolean showOffset, int accuracy) {
+        protected AbstractISOBI(Boolean showOffset, int accuracy) {
             this.showOffset = showOffset;
             this.accuracy = accuracy;
         }
@@ -81,6 +81,19 @@ class DateBuiltins {
                         }).blame(target).tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
             }
         }
+
+        protected boolean shouldShowOffset(Date date, int dateType, Environment env) {
+            if (dateType == TemplateDateModel.DATE) {
+                return false;  // ISO 8061 doesn't allow zone for date-only values
+            } else if (this.showOffset != null) {
+                return this.showOffset.booleanValue();
+            } else {
+                // java.sql.Time values meant to carry calendar field values only, so we don't show offset for them.
+                return !(date instanceof java.sql.Time
+                        && env.getConfiguration().getIncompatibleImprovements().intValue() >= 2003021);
+            }
+        }
+        
     }
     
     /**
@@ -91,7 +104,7 @@ class DateBuiltins {
         
         private final boolean useUTC;
         
-        iso_tz_BI(boolean showOffset, int accuracy, boolean useUTC) {
+        iso_tz_BI(Boolean showOffset, int accuracy, boolean useUTC) {
             super(showOffset, accuracy);
             this.useUTC = useUTC;
         }
@@ -104,7 +117,7 @@ class DateBuiltins {
                     date,
                     dateType != TemplateDateModel.TIME,
                     dateType != TemplateDateModel.DATE,
-                    showOffset && dateType != TemplateDateModel.DATE,
+                    shouldShowOffset(date, dateType, env),
                     accuracy,
                     useUTC
                             ? DateUtil.UTC
@@ -121,7 +134,7 @@ class DateBuiltins {
      */
     static class iso_BI extends AbstractISOBI {
         
-        iso_BI(boolean showOffset, int accuracy) {
+        iso_BI(Boolean showOffset, int accuracy) {
             super(showOffset, accuracy);
         }
 
@@ -165,7 +178,6 @@ class DateBuiltins {
                                 "(...) is not recognized as a valid time zone name: ",
                                 new _DelayedJQuote(tzName) });
                     }
- 
                 } else {
                     throw MessageUtil.newMethodArgUnexpectedTypeException(
                             "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
@@ -175,7 +187,7 @@ class DateBuiltins {
                         date,
                         dateType != TemplateDateModel.TIME,
                         dateType != TemplateDateModel.DATE,
-                        showOffset && dateType != TemplateDateModel.DATE,
+                        shouldShowOffset(date, dateType, env),
                         accuracy,
                         tzArg, 
                         env.getISOBuiltInCalendar()));

@@ -66,7 +66,6 @@ import freemarker.core.StringBuiltins.substringBI;
 import freemarker.core.StringBuiltins.uncap_firstBI;
 import freemarker.core.StringBuiltins.upper_caseBI;
 import freemarker.core.StringBuiltins.word_listBI;
-import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
@@ -80,8 +79,6 @@ import freemarker.template.utility.StringUtil;
  * The {@code ?} operator used for things like {@code foo?upper_case}.
  */
 abstract class BuiltIn extends Expression implements Cloneable {
-    
-    private static final Logger logger = Logger.getLogger("freemarker.runtime");
     
     protected Expression target;
     protected String key;
@@ -133,54 +130,91 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_sequence", new MiscellaneousBuiltins.is_sequenceBI());
         builtins.put("is_string", new MiscellaneousBuiltins.is_stringBI());
         builtins.put("is_transform", new MiscellaneousBuiltins.is_transformBI());
+        
         builtins.put("iso_utc", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ null, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+        builtins.put("iso_utc_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         builtins.put("iso_utc_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+        
         builtins.put("iso_utc_ms", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+                /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+        builtins.put("iso_utc_ms_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         builtins.put("iso_utc_ms_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+        
         builtins.put("iso_utc_m", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+                /* showOffset = */ null, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+        builtins.put("iso_utc_m_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
         builtins.put("iso_utc_m_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+        
         builtins.put("iso_utc_h", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+                /* showOffset = */ null, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+        builtins.put("iso_utc_h_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
         builtins.put("iso_utc_h_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+        
         builtins.put("iso_local", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+                /* showOffset = */ null, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+        builtins.put("iso_local_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
         builtins.put("iso_local_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+        
         builtins.put("iso_local_ms", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+                /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+        builtins.put("iso_local_ms_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         builtins.put("iso_local_ms_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+        
         builtins.put("iso_local_m", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+                /* showOffset = */ null, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+        builtins.put("iso_local_m_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
         builtins.put("iso_local_m_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+        
         builtins.put("iso_local_h", new iso_tz_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+                /* showOffset = */ null, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+        builtins.put("iso_local_h_z", new iso_tz_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
         builtins.put("iso_local_h_nz", new iso_tz_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+        
         builtins.put("iso", new iso_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_SECONDS));
+                /* showOffset = */ null, DateUtil.ACCURACY_SECONDS));
+        builtins.put("iso_z", new iso_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_SECONDS));
         builtins.put("iso_nz", new iso_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_SECONDS));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_SECONDS));
+        
         builtins.put("iso_ms", new iso_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_MILLISECONDS));
+                /* showOffset = */ null, DateUtil.ACCURACY_MILLISECONDS));
+        builtins.put("iso_ms_z", new iso_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_MILLISECONDS));
         builtins.put("iso_ms_nz", new iso_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_MILLISECONDS));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MILLISECONDS));
+        
         builtins.put("iso_m", new iso_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_MINUTES));
+                /* showOffset = */ null, DateUtil.ACCURACY_MINUTES));
+        builtins.put("iso_m_z", new iso_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_MINUTES));
         builtins.put("iso_m_nz", new iso_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_MINUTES));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_MINUTES));
+        
         builtins.put("iso_h", new iso_BI(
-                /* showOffset = */ true, DateUtil.ACCURACY_HOURS));
+                /* showOffset = */ null, DateUtil.ACCURACY_HOURS));
+        builtins.put("iso_h_z", new iso_BI(
+                /* showOffset = */ Boolean.TRUE, DateUtil.ACCURACY_HOURS));
         builtins.put("iso_h_nz", new iso_BI(
-                /* showOffset = */ false, DateUtil.ACCURACY_HOURS));
+                /* showOffset = */ Boolean.FALSE, DateUtil.ACCURACY_HOURS));
+        
         builtins.put("j_string", new j_stringBI());
         builtins.put("join", new SequenceBuiltins.joinBI());
         builtins.put("js_string", new js_stringBI());
@@ -235,11 +269,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("split", new RegexBuiltins.split_reBI());
     }
 
-    private static Object instantiateBI(String className) throws Exception
-    {
-        return Class.forName(className).newInstance();
-    }
-    
     static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {

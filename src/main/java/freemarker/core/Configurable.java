@@ -360,7 +360,7 @@ public class Configurable
      * 
      * <p>To decide what value you need, a few things has to be understood:
      * <ul>
-     *   <li>Date-only and time-only values in SQL-oriented databases are usually store calendar and "wall clock" field
+     *   <li>Date-only and time-only values in SQL-oriented databases are usually store calendar and clock field
      *   values directly (year, month, day, or hour, minute, seconds (with decimals)), as opposed to a set of points
      *   on the physical time line. Thus, unlike SQL timestamps, these values aren't meant to be shown differently
      *   depending on the time zone of the audience.
@@ -885,7 +885,8 @@ public class Configurable
      *   <li><p>{@code "time_zone"}:
      *       See {@link #setTimeZone(TimeZone)}.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
-     *       {@code "default"} can be used for the system default time zone.
+     *       {@code "default"} can be used that will be replaced by the actual system default time zone when
+     *       {@link #setSetting(String, String)} is called.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
      *       <br>If you set this setting, consider setting {@code use_system_default_time_zone_for_sql_date_and_time}
      *       too (see below)! 

@@ -13505,8 +13505,8 @@ Last updated time: 08:00:54 PM</programlisting>
           </indexterm>
 
           <para>These built-ins convert a date, time or date-time value to
-          string that follows ISO 8601 "extended" format. This built-in has
-          several variations: <literal>iso_utc</literal>,
+          string that follows ISO 8601:2004 "extended" format. This built-in
+          has several variations: <literal>iso_utc</literal>,
           <literal>iso_local</literal>, <literal>iso_utc_nz</literal>,
           <literal>iso_local_nz</literal>, <literal>iso_utc_m</literal>,
           <literal>iso_utc_m_nz</literal>, etc. The name is constructed from
@@ -13558,13 +13558,39 @@ Last updated time: 08:00:54 PM</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>nz</literal> (optional): When present, the time
-              zone offset (like <literal>+02:00</literal> or or
-              <literal>-04:30</literal> or <literal>Z</literal>) will not be
-              displayed. Otherwise it will be displayed, except for date-only
-              values (as dates with zone offset doesn't appear in ISO
-              8601:2004). Since FreeMarker 2.3.19, the offset always contains
-              the minutes for XML Schema date/time format compliance.</para>
+              <para><literal>nz</literal> or <literal>z</literal> (optional):
+              When <literal>nz</literal> (like in
+              <literal>${foo?utc_local_nz}</literal>) , the time zone offset
+              (like <literal>+02:00</literal> or or <literal>-04:30</literal>
+              or <literal>Z</literal>) will not be displayed. When this is
+              <literal>z</literal> (like in
+              <literal>${foo?utc_local_z}</literal>), the zone offset will be
+              displayed, except for date-only values, because ISO 8601 doesn't
+              allow showing the offset in that case (unlike the XML Schema
+              <literal>xs:date</literal> format). If this part is omitted
+              (like in <literal>${foo?utc_local}</literal>) the zone will be
+              displayed, except in two cases:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>If the value is a date-only value (again, ISO 8901
+                  doesn't allow it then)</para>
+                </listitem>
+
+                <listitem>
+                  <para>If the value is a <literal>java.sql.Time</literal> and
+                  the <literal>incompatible_improvements</literal> (often set
+                  via the Java <literal>Configuration</literal> constructor
+                  parameter) FreeMarker configuration setting is at least
+                  2.3.21. This is because <literal>java.sql.Time</literal>
+                  meant to store time fields (hours, minutes, seconds, decimal
+                  seconds) that is not in any particular time zone.</para>
+                </listitem>
+              </itemizedlist>
+
+              <para>Note that since FreeMarker 2.3.19, the offset always
+              contains the minutes for XML Schema date/time format
+              compliance.</para>
             </listitem>
           </orderedlist>
 
@@ -20582,6 +20608,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   calendar. This is (indirectly) required by the standard, and
                   it's also how the standard Java XML Schema
                   date/time/dateTime parser works.</para>
+                </listitem>
+
+                <listitem>
+                  <para>If the <quote>incompatible improvements</quote>
+                  configuration setting is at least 2.3.21, the
+                  <literal>?iso_...</literal> built-ins won't show time zone
+                  offset for <literal>java.sql.Time</literal> values anymore,
+                  except those that look like <literal>?iso_..._z</literal>.
+                  The variations ending with <literal>_z</literal> are new in
+                  this release, and they force showing time zone offset,
+                  except for date-only values, where ISO 8601 doesn't allow
+                  that.</para>
                 </listitem>
 
                 <listitem>

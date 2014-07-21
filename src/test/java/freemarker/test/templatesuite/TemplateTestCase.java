@@ -345,7 +345,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
         }
         
-        else if (testName.equals("iso8601")) {
+        else if (testName.startsWith("iso8601")) {
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
             dataModel.put("adaptedToStringScalar", new Object() {
@@ -353,6 +353,8 @@ public class TemplateTestCase extends FileTestCase {
                     return "GMT+02";
                 }
             });
+            dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
+            dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
         
         else if (testName.equals("number-to-date")) {

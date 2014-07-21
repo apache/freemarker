@@ -72,10 +72,12 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     
     private static final String FTL =
             "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
-            + "${sqlDate?iso_local} ${sqlTime?iso_local} ${sqlTimestamp?iso_local} ${javaDate?datetime?iso_local}\n"
+            + "${sqlDate?iso_local_z} ${sqlTime?iso_local_z} "
+            + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n"
             + "<#setting time_zone='GMT'>\n"
             + "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
-            + "${sqlDate?iso_local} ${sqlTime?iso_local} ${sqlTimestamp?iso_local} ${javaDate?datetime?iso_local}\n";
+            + "${sqlDate?iso_local_z} ${sqlTime?iso_local_z} "
+            + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n";
 
     private static final String OUTPUT_BEFORE_SETTZ_GMT2
             = "2014-07-12 12:30:05 2014-07-12T12:30:05 2014-07-12T12:30:05\n"
