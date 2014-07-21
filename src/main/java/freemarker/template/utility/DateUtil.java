@@ -141,7 +141,7 @@ public class DateUtil {
             || offset.equals("-00:00");
         }
     }
-    
+
     /**
      * Format a date, time or dateTime with one of the ISO 8601 extended
      * formats that is also compatible with the XML Schema format (as far as you
@@ -193,7 +193,28 @@ public class DateUtil {
             int accuracy,
             TimeZone timeZone,
             DateToISO8601CalendarFactory calendarFactory) {
-        if (!timePart && offsetPart) {
+        return dateToString(date, datePart, timePart, offsetPart, accuracy, timeZone, false, calendarFactory);
+    }
+
+    /**
+     * Same as {@link #dateToISO8601String}, but gives XML Schema compliant format.
+     */
+    public static String dateToXSString(
+            Date date,
+            boolean datePart, boolean timePart, boolean offsetPart,
+            int accuracy,
+            TimeZone timeZone,
+            DateToISO8601CalendarFactory calendarFactory) {
+        return dateToString(date, datePart, timePart, offsetPart, accuracy, timeZone, true, calendarFactory);
+    }
+    
+    private static String dateToString(
+            Date date,
+            boolean datePart, boolean timePart, boolean offsetPart,
+            int accuracy,
+            TimeZone timeZone, boolean xsMode,
+            DateToISO8601CalendarFactory calendarFactory) {
+        if (!xsMode && !timePart && offsetPart) {
             throw new IllegalArgumentException(
                     "ISO 8601:2004 doesn't specify any formats where the "
                     + "offset is shown but the time isn't.");
@@ -207,12 +228,12 @@ public class DateUtil {
 
         int maxLength;
         if (!timePart) {
-            maxLength = 10;  // YYYY-MM-DD
+            maxLength = 10 + (xsMode ? 6 : 0);  // YYYY-MM-DD+00:00
         } else {
             if (!datePart) {
-                maxLength = 18;  // HH:MM:SS.mmm+00:00
+                maxLength = 12 + 6;  // HH:MM:SS.mmm+00:00
             } else {
-                maxLength = 10 + 1 + 18;
+                maxLength = 10 + 1 + 12 + 6;
             }
         }
         char[] res = new char[maxLength];
@@ -221,7 +242,7 @@ public class DateUtil {
         if (datePart) {
             int x = cal.get(Calendar.YEAR);
             if (x > 0 && cal.get(Calendar.ERA) == GregorianCalendar.BC) {
-                x = -x + 1;
+                x = -x + (xsMode ? 0 : 1);
             }
             if (x >= 0 && x < 9999) {
                 res[dstIdx++] = (char) ('0' + x / 1000);

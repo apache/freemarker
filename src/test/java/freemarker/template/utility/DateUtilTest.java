@@ -251,6 +251,43 @@ public class DateUtilTest extends TestCase {
                         DateUtil.ACCURACY_HOURS, null));
     }
 
+    public void testXSFormatISODeviations() throws ParseException, UnrecognizedTimeZoneException {
+        Date dsum = df.parse("AD 2010-05-09 20:00:00:0 UTC");
+        Date dwin = df.parse("AD 2010-01-01 20:00:00:0 UTC");
+        
+        TimeZone tzRome = DateUtil.getTimeZone("Europe/Rome");
+        
+        assertEquals(
+                "2010-01-01T21:00:00+01:00",
+                DateUtil.dateToXSString(dwin, true, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "2010-05-09T22:00:00+02:00",
+                DateUtil.dateToXSString(dsum, true, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "2010-01-01+01:00",  // ISO doesn't allow date-only with TZ
+                DateUtil.dateToXSString(dwin, true, false, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "2010-05-09+02:00",  // ISO doesn't allow date-only with TZ
+                DateUtil.dateToXSString(dsum, true, false, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "21:00:00+01:00",
+                DateUtil.dateToXSString(dwin, false, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "22:00:00+02:00",
+                DateUtil.dateToXSString(dsum, false, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        
+        assertEquals(
+                "-1-02-29T06:15:24Z",  // ISO uses 0 for BC 1
+                DateUtil.dateToXSString(
+                        df.parse("BC 0001-03-02 09:15:24:0 +0300"),
+                        true, true, true, DateUtil.ACCURACY_SECONDS, DateUtil.UTC, calendarFactory));
+        assertEquals(
+                "-2-02-28T06:15:24Z",  // ISO uses -1 for BC 2
+                DateUtil.dateToXSString(
+                        df.parse("BC 2-03-02 09:15:24:0 +0300"),
+                        true, true, true, DateUtil.ACCURACY_SECONDS, DateUtil.UTC, calendarFactory));
+    }
+    
     private String dateToISO8601DateTimeString(
             Date date, TimeZone tz) {
         return dateToISO8601String(date, true, true, true,
