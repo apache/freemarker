@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.SimpleDate;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
@@ -48,11 +49,7 @@ class DateBuiltins {
                 TemplateDateModel tdm = (TemplateDateModel) model;
                 return calculateResult(EvalUtil.modelToDate(tdm, target), tdm.getDateType(), env);
             } else {
-                if(model == null) {
-                    throw InvalidReferenceException.getInstance(target, env);
-                } else {
-                    throw new NonDateException(target, model, "date", env);
-                }
+                throw newNonDateException(env, model, target);
             }
         }
 
@@ -195,6 +192,48 @@ class DateBuiltins {
             
         }
         
+    }
+    
+    static class dateType_if_unknownBI extends BuiltIn {
+        
+        private final int dateType;
+
+        public dateType_if_unknownBI(int dateType) {
+            this.dateType = dateType;
+        }
+
+        TemplateModel _eval(Environment env)
+                throws TemplateException
+        {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateDateModel) {
+                TemplateDateModel tdm = (TemplateDateModel) model;
+                int tdmDateType = tdm.getDateType();
+                if (tdmDateType != TemplateDateModel.UNKNOWN) {
+                    return tdm;
+                }
+                return new SimpleDate(EvalUtil.modelToDate(tdm, target), dateType);
+            } else {
+                throw newNonDateException(env, model, target);
+            }
+        }
+
+        protected TemplateModel calculateResult(Date date, int dateType, Environment env) throws TemplateException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+    }
+
+    private static TemplateException newNonDateException(Environment env, TemplateModel model, Expression target)
+            throws InvalidReferenceException {
+        TemplateException e;
+        if(model == null) {
+            e = InvalidReferenceException.getInstance(target, env);
+        } else {
+            e = new NonDateException(target, model, "date", env);
+        }
+        return e;
     }
     
 }

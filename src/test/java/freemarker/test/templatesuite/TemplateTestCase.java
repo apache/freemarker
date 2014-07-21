@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -284,6 +285,16 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
+        }
+
+        else if (testName.equals("date-type-builtins")) {
+            GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
+            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date d = cal.getTime();
+            dataModel.put("unknown", d);
+            dataModel.put("timeOnly", new java.sql.Time(d.getTime()));
+            dataModel.put("dateOnly", new java.sql.Date(d.getTime()));
+            dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
         }
         
         else if (testName.equals("var-layers")) {

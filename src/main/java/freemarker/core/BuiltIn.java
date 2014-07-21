@@ -97,7 +97,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("chop_linebreak", new chop_linebreakBI());
         builtins.put("contains", new StringBuiltins.containsBI());        
         builtins.put("date", new MiscellaneousBuiltins.dateBI(TemplateDateModel.DATE));
+        builtins.put("date_if_unknown", new DateBuiltins.dateType_if_unknownBI(TemplateDateModel.DATE));
         builtins.put("datetime", new MiscellaneousBuiltins.dateBI(TemplateDateModel.DATETIME));
+        builtins.put("datetime_if_unknown", new DateBuiltins.dateType_if_unknownBI(TemplateDateModel.DATETIME));
         builtins.put("default", new ExistenceBuiltins.defaultBI());
         builtins.put("double", new doubleBI());
         builtins.put("ends_with", new StringBuiltins.ends_withBI());
@@ -116,6 +118,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_boolean", new MiscellaneousBuiltins.is_booleanBI());
         builtins.put("is_collection", new MiscellaneousBuiltins.is_collectionBI());
         builtins.put("is_date", new MiscellaneousBuiltins.is_dateBI());
+        builtins.put("is_date_only", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.DATE));
+        builtins.put("is_date_with_unknown_type", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
+        builtins.put("is_datetime", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.DATETIME));
         builtins.put("is_directive", new MiscellaneousBuiltins.is_directiveBI());
         builtins.put("is_enumerable", new MiscellaneousBuiltins.is_enumerableBI());
         builtins.put("is_hash_ex", new MiscellaneousBuiltins.is_hash_exBI());
@@ -129,6 +134,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_number", new MiscellaneousBuiltins.is_numberBI());
         builtins.put("is_sequence", new MiscellaneousBuiltins.is_sequenceBI());
         builtins.put("is_string", new MiscellaneousBuiltins.is_stringBI());
+        builtins.put("is_time_only", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.TIME));
         builtins.put("is_transform", new MiscellaneousBuiltins.is_transformBI());
         
         builtins.put("iso_utc", new iso_utc_or_local_BI(
@@ -254,6 +260,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("string", new MiscellaneousBuiltins.stringBI());
         builtins.put("substring", new substringBI());
         builtins.put("time", new MiscellaneousBuiltins.dateBI(TemplateDateModel.TIME));
+        builtins.put("time_if_unknown", new DateBuiltins.dateType_if_unknownBI(TemplateDateModel.TIME));
         builtins.put("trim", new StringBuiltins.trimBI());
         builtins.put("uncap_first", new uncap_firstBI());
         builtins.put("upper_case", new upper_caseBI());

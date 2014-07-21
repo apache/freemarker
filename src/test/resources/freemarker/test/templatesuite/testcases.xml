@@ -27,6 +27,7 @@
             new_builtin_class_resolver CDATA #IMPLIED
             url_escaping_charset CDATA #IMPLIED
             incompatible_improvements CDATA #IMPLIED
+            time_zone CDATA #IMPLIED
       >
 ]>
 
@@ -115,6 +116,7 @@
    <testcase name="switch" />
    <testcase name="transforms"/>
    <testcase name="type-builtins"/>
+   <testcase name="date-type-builtins" nooutput="true" />
    <testcase name="var-layers"/>
    <testcase name="variables"/>
    <testcase name="whitespace-trim"/>

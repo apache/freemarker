@@ -290,16 +290,21 @@ class MiscellaneousBuiltins {
             throws
                 TemplateModelException
             {
-                if(dateType == TemplateDateModel.UNKNOWN) {
-                    throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                            "Can't convert the date to string, because it isn't known if it's a "
-                            + "date-only, time-only, or date-time value.")
-                            .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
-                }
+                checkDateTypeNotUnknown();
                 if(cachedValue == null) {
                     cachedValue = env.getJDateFormat(dateType, date.getClass()).format(date);
                 }
                 return cachedValue;
+            }
+
+            private void checkDateTypeNotUnknown() throws _TemplateModelException {
+                if(dateType == TemplateDateModel.UNKNOWN) {
+                    throw new _TemplateModelException(new _ErrorDescriptionBuilder(
+                            "Can't convert the date to string, because it isn't known if it's a "
+                            + "date-only, time-only, or date-time value.")
+                            .blame(target)
+                            .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
+                }
             }
     
             public TemplateModel get(String key)
@@ -316,6 +321,7 @@ class MiscellaneousBuiltins {
                     final boolean showDatePart = dateType != TemplateDateModel.TIME;
                     final boolean showTimePart = dateType != TemplateDateModel.DATE;
                     if (keyLen == 2) {  // key is "xs" => automatically decide if zone will be shown
+                        checkDateTypeNotUnknown();
                         boolean isSQLDateOrTime = DateUtil.isSQLDateOrTimeClass(date.getClass());
                         return DateUtil.dateToXSString(
                                 date,
@@ -336,6 +342,7 @@ class MiscellaneousBuiltins {
                         } else {
                             throw newIllegalXSDateFormatKey(key);
                         }
+                        checkDateTypeNotUnknown();
                         return DateUtil.dateToXSString(
                                 date,
                                 showDatePart,
@@ -447,6 +454,22 @@ class MiscellaneousBuiltins {
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateDateModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
+    static class is_dateOfTypeBI extends BuiltIn {
+        
+        private final int dateType;
+        
+        is_dateOfTypeBI(int dateType) {
+            this.dateType = dateType;
+        }
+
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateDateModel) && ((TemplateDateModel) tm).getDateType() == dateType
+                ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
