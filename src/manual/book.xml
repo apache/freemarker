@@ -20442,22 +20442,41 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: [FIXME]</para>
 
-        <para>2.3.21 is designed to be backward compatible with the previous
-        2.3.x releases, just like any other release in the 2.3 series. Hence
-        some of the improvements and fixes described below are only activated
-        when you specifically ask for 2.3.21 <quote>incompatible
-        improvements</quote>, because they can, with small chance, break
-        existing applications. But if the dependent project is still actively
-        developed, allowing 2.3.21 "incompatible improvements" is highly
-        recommended.</para>
+        <para>Note that since 2.3.21 is designed to be backward compatible
+        with the previous 2.3.x releases, <emphasis>some of the improvements
+        and fixes described below are only activated when you specifically ask
+        for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
+        because they can, with small chance, break existing applications. But
+        if the dependent project is still actively developed, allowing 2.3.21
+        "incompatible improvements" is highly recommended. That can be done
+        like this:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>create the
+            <literal>freemarker.template.Configuration</literal> object like
+            <literal>new Configuration(new Version(2, 3, 21))</literal></para>
+          </listitem>
+
+          <listitem>
+            <para>or alter the <literal>Configuration</literal> where you
+            initialize its other settings like
+            <literal>cfg.setIncompatibleImprovements(new Version(2, 3,
+            21))</literal></para>
+          </listitem>
+
+          <listitem>
+            <para>or if you are configuring FreeMarker with properties
+            (<literal>*.properties</literal> file or
+            <literal>java.util.Properties</literal> object), add
+            <literal>incompatible_improvements=2.3.21</literal> to
+            them.</para>
+          </listitem>
+        </itemizedlist>
 
         <para>Note that we have changed our proprietary BSD-style license to
         Apache License, Version 2.0. See the <link linkend="app_license">new
         license here</link>.</para>
-
-        <para>Note that the required Java versions was raised from 1.2 to 1.4
-        with this release. This version will not work on Java 1.2 or
-        1.3.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -21312,11 +21331,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>The license has changed from our proprietary BSD-Style
-              license to the well know "Apache License, Version 2.0", and the
-              copyright owner has changed from "Visigoth Software Society"
-              (founded by Jonathan Revusky) to the three main FreeMarker 2
-              developers/contributors, "Attila Szegedi, Daniel Dekany, and
-              Jonathan Revusky".</para>
+              license to the well know "Apache License, Version 2.0".
+              Furthermore, the copyright owner has changed from "Visigoth
+              Software Society" (which was founded by Jonathan Revusky) to the
+              three main FreeMarker 2 developers/contributors, "Attila
+              Szegedi, Daniel Dekany, and Jonathan Revusky". See the <link
+              linkend="app_license">new license here</link>.</para>
+            </listitem>
+
+            <listitem>
+              <para>The required minimum Java version was raised from 1.2 to
+              1.4. FreeMarker will not work on Java 1.2 or 1.3.</para>
             </listitem>
 
             <listitem>
