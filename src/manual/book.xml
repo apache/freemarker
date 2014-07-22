@@ -13622,9 +13622,13 @@ Last updated time: 08:00:54 PM</programlisting>
                   the <literal>incompatible_improvements</literal> (often set
                   via the Java <literal>Configuration</literal> constructor
                   parameter) FreeMarker configuration setting is at least
-                  2.3.21. This is because <literal>java.sql.Time</literal>
-                  meant to store time fields (hours, minutes, seconds, decimal
-                  seconds) that is not in any particular time zone.</para>
+                  2.3.21. This is because most databases store time values
+                  that aren't in any time zone, but just store hour, minute,
+                  second, and decimal second field values, so showing the time
+                  zone doesn't make sense. Notable exceptions are PostgreSQL
+                  "time with time zone" columns, where the
+                  <literal>?iso_..._z</literal> variations should be
+                  used.</para>
                 </listitem>
               </itemizedlist>
 
@@ -20668,7 +20672,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   The variations ending with <literal>_z</literal> are new in
                   this release, and they force showing time zone offset,
                   except for date-only values, where ISO 8601 doesn't allow
-                  that.</para>
+                  that. Most databases store time values that aren't in any
+                  time zone, but just store hour, minute, second, and decimal
+                  second field values, so showing the time zone doesn't make
+                  sense. Notable exceptions are PostgreSQL "time with time
+                  zone" columns, where the <literal>?iso_..._z</literal>
+                  variations should be used.</para>
                 </listitem>
 
                 <listitem>
