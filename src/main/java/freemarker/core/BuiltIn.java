@@ -85,6 +85,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final HashMap builtins = new HashMap();
     static {
+        BuiltIn bi;
+        
         builtins.put("abs", new absBI());
         builtins.put("ancestors", new ancestorsBI());
         builtins.put("boolean", new booleanBI());
@@ -117,9 +119,11 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("interpret", new Interpret());
         builtins.put("is_boolean", new MiscellaneousBuiltins.is_booleanBI());
         builtins.put("is_collection", new MiscellaneousBuiltins.is_collectionBI());
-        builtins.put("is_date", new MiscellaneousBuiltins.is_dateBI());
+        bi = new MiscellaneousBuiltins.is_dateLikeBI();
+        builtins.put("is_date", bi);  // misnomer
+        builtins.put("is_date_like", bi);
         builtins.put("is_date_only", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.DATE));
-        builtins.put("is_date_with_unknown_type", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
+        builtins.put("is_unknown_date_like", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
         builtins.put("is_datetime", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.DATETIME));
         builtins.put("is_directive", new MiscellaneousBuiltins.is_directiveBI());
         builtins.put("is_enumerable", new MiscellaneousBuiltins.is_enumerableBI());
@@ -134,7 +138,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("is_number", new MiscellaneousBuiltins.is_numberBI());
         builtins.put("is_sequence", new MiscellaneousBuiltins.is_sequenceBI());
         builtins.put("is_string", new MiscellaneousBuiltins.is_stringBI());
-        builtins.put("is_time_only", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.TIME));
+        builtins.put("is_time", new MiscellaneousBuiltins.is_dateOfTypeBI(TemplateDateModel.TIME));
         builtins.put("is_transform", new MiscellaneousBuiltins.is_transformBI());
         
         builtins.put("iso_utc", new iso_utc_or_local_BI(

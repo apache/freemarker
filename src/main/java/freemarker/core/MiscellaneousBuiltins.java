@@ -448,7 +448,7 @@ class MiscellaneousBuiltins {
         }
     }
 
-    static class is_dateBI extends BuiltIn {
+    static class is_dateLikeBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);

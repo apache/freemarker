@@ -1,19 +1,19 @@
 <#setting time_zone = "UTC">
 
-<@assert test=unknown?is_date_with_unknown_type />
-<@assert test=!timeOnly?is_date_with_unknown_type />
-<@assert test=!dateOnly?is_date_with_unknown_type />
-<@assert test=!dateTime?is_date_with_unknown_type />
+<@assert test=unknown?is_unknown_date_like />
+<@assert test=!timeOnly?is_unknown_date_like />
+<@assert test=!dateOnly?is_unknown_date_like />
+<@assert test=!dateTime?is_unknown_date_like />
 
 <@assert test=!unknown?is_date_only />
 <@assert test=!timeOnly?is_date_only />
 <@assert test=dateOnly?is_date_only />
 <@assert test=!dateTime?is_date_only />
 
-<@assert test=!unknown?is_time_only />
-<@assert test=timeOnly?is_time_only />
-<@assert test=!dateOnly?is_time_only />
-<@assert test=!dateTime?is_time_only />
+<@assert test=!unknown?is_time />
+<@assert test=timeOnly?is_time />
+<@assert test=!dateOnly?is_time />
+<@assert test=!dateTime?is_time />
 
 <@assert test=!unknown?is_datetime />
 <@assert test=!timeOnly?is_datetime />

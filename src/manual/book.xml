@@ -11119,9 +11119,19 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_date_if_unknown">date_if_unknown</link></para>
+          </listitem>
+
+          <listitem>
             <para>datetime <link linkend="ref_builtin_date_datetype">for
             dates</link>, <link linkend="ref_builtin_string_date">for
             strings</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_date_if_unknown">datetime_if_unknown</link></para>
           </listitem>
 
           <listitem>
@@ -11360,6 +11370,11 @@ End book</programlisting>
             <para>time <link linkend="ref_builtin_date_datetype">for
             dates</link>, <link linkend="ref_builtin_string_date">for
             strings</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_date_if_unknown">time_if_unknown</link></para>
           </listitem>
 
           <listitem>
@@ -13448,7 +13463,7 @@ Tuesday, April 08, 2003, 09:24:44 PM (PDT)</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><literal>date</literal>: Only the year, month and day
+              <para><literal>date_only</literal>: Only the year, month and day
               parts are used.</para>
             </listitem>
 
@@ -13705,6 +13720,19 @@ The usual variations are supported:
           <literal>java.util.TimeZone</literal> object too (which is possibly
           the return value of a Java method, or it's in the data-model), not
           just a string.</para>
+        </section>
+
+        <section xml:id="ref_builtin_date_if_unknown">
+          <title>..._if_unknown</title>
+
+          <para>The <literal>date_if_unknown</literal>,
+          <literal>time_if_unknown</literal>,
+          <literal>datetime_if_unknown</literal> built-ins mark a date-like
+          value with some of the sub-types: date without time, time, or
+          date-time, respectively. However, if the value already holds this
+          information, the built-in has no effect. That is, it will never
+          convert the sub-type of a value, it only adds the sub-type if it was
+          unknown.</para>
         </section>
       </section>
 
@@ -14774,7 +14802,42 @@ May 16, 2011
               <tr>
                 <td><literal>is_date</literal></td>
 
-                <td>date (all types: date-only, time-only and date-time)</td>
+                <td>Don't use it! Same as <literal>is_date_like</literal>
+                instead. Later may changes meaning to
+                <literal>date_only</literal>.</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_date_like</literal></td>
+
+                <td>date-like, means either date, time or date-time, or
+                date-like with unknown precise type</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_date_only</literal></td>
+
+                <td>date (no time of the day part)</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_time</literal></td>
+
+                <td>time (no year-month-day part)</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_datetime</literal></td>
+
+                <td>date-time (contains both year-month-day and time of the
+                day)</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_unknown_date_like</literal></td>
+
+                <td>date-like where we don't know if it's a date or a time or
+                a date-time</td>
               </tr>
 
               <tr>
@@ -20633,7 +20696,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Date/time/datetime related changes:</para>
+              <para>Date/time/date-time related changes:</para>
 
               <itemizedlist>
                 <listitem>
@@ -20686,6 +20749,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   default time zone (which is the default value of the setting
                   too, but now it can be restored if the setting value was
                   overwritten earlier)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <literal>?is_time</literal>,
+                  <literal>?is_datetime</literal>,
+                  <literal>?is_date_only</literal> (should be called
+                  <literal>?is_date</literal>, but that was already taken) and
+                  <literal>?is_unknown_date_like</literal> to check the exact
+                  type of a date-like value.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>?is_date</literal> is now a deprecated name,
+                  use <literal>?is_date_like</literal> instead. This is
+                  because <literal>?is_date</literal> sounds like it checks if
+                  the value is a date without time part, but actually it also
+                  returns <literal>true</literal> for time, date-time, and
+                  unknown date-like values.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <literal>?date_if_unknown</literal>,
+                  <literal>?time_if_unknown</literal> and
+                  <literal>?datetime_if_unknown</literal> built-ins, which
+                  mark a date-like value with some of the sub-types: date
+                  without time, time, or date-time, respectively. However, if
+                  the value already holds this information, the built-in has
+                  no effect. That is, it will never convert the sub-type of a
+                  value, it only adds the sub-type if it was unknown.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
