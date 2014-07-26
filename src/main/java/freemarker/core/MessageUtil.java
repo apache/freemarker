@@ -29,13 +29,16 @@ import freemarker.template.utility.StringUtil;
  */
 class MessageUtil {
 
-    static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
-            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used."
-    };
+    static final String UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE
+            = "Can't convert the date-like value to string because it isn't "
+              + "known if it's a date (no time part), time or date-time value.";
+    
+    static final String UNKNOWN_DATE_TYPE_ERROR_TIP = 
+            "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
     
     static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
-            "Use ?string(format) to specify which parts to display.",
-            UNKNOWN_DATE_TYPE_ERROR_TIPS[0]
+            UNKNOWN_DATE_TYPE_ERROR_TIP,
+            "Use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), to specify which fields to display."
     };
 
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";

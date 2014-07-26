@@ -157,8 +157,9 @@ class EvalUtil
                 env);
     }
     
-    private static final String DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN
-            = "date of the comparison is of UNKNOWN type (it's not known if it's date-only, time-only, or date-time), "
+    private static final String VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE
+            = "value of the comparison is a date-like value where "
+              + "it's not known if it's a date (no time part), time, or date-time, "
               + "and thus can't be used in a comparison.";
     
     /**
@@ -252,7 +253,7 @@ class EvalUtil
                 }
                 
                 throw new _MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env, new Object[] {
-                        "The ", sideName, " ", DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN });
+                        "The ", sideName, " ", VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE });
             }
             
             if (leftDateType != rightDateType) {

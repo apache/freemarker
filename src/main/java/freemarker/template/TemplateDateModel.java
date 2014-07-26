@@ -22,30 +22,29 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * "date" template language data type: similar to {@link java.util.Date}; a time-zone-independent date-only, time-only
- * or date-time value. Contrary to Java, FreeMarker distinguishes values that represent only a time, only a date, or a
- * combined date and time.
+ * "date", "time" and "date-time" template language data types: corresponds to {@link java.util.Date}. Contrary to Java,
+ * FreeMarker distinguishes date (no time part), time and date-time values.
  */
 public interface TemplateDateModel extends TemplateModel {
     
     /**
-     * It is not known whether the date represents a time-only, a date-only, or a date-time value.
+     * It is not known whether the date represents a date, a time, or a date-time value.
      * This often leads to exceptions in templates due to ambiguities it causes, so avoid it if possible.
      */
     public static final int UNKNOWN = 0;
 
     /**
-     * The date model represents a time-only value.
+     * The date model represents a time value (no date part).
      */
     public static final int TIME = 1;
 
     /**
-     * The date model represents a date-only value.
+     * The date model represents a date value (no time part).
      */
     public static final int DATE = 2;
 
     /**
-     * The date model represents a date-time value.
+     * The date model represents a date-time value (also known as timestamp).
      */
     public static final int DATETIME = 3;
     
@@ -61,8 +60,8 @@ public interface TemplateDateModel extends TemplateModel {
     public Date getAsDate() throws TemplateModelException;
 
     /**
-     * Returns the type of the date. It can be any of <tt>TIME</tt>, 
-     * <tt>DATE</tt>, or <tt>DATETIME</tt>.
+     * Returns the type of the date. It can be any of {@link #TIME}, 
+     * {@link #DATE}, or {@link #DATETIME}.
      */
     public int getDateType();
     

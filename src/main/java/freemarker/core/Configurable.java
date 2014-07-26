@@ -19,7 +19,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -545,10 +545,10 @@ public class Configurable
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time-only (not date part) values.
-     * Possible values are patterns accepted by Java's {@link DateFormat}, also {@code "short"},
-     * {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning also defined by
-     * {@link DateFormat}.
+     * Possible values are patterns accepted by Java's {@link SimpleDateFormat},
+     * {@code "xs"}/{@code "xs_z"}/{@code "xs_nz"} for XML Schema format with with/without time zone,
+     * also {@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
+     * defined by the Java platform.
      *   
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
@@ -567,9 +567,10 @@ public class Configurable
 
     /**
      * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-only (no time part) values.
-     * Possible values are patterns accepted by Java's {@link DateFormat}, also {@code "short"},
-     * {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning also defined by
-     * {@link DateFormat}.
+     * Possible values are patterns accepted by Java's {@link SimpleDateFormat},
+     * {@code "xs"}/{@code "xs_z"}/{@code "xs_nz"} for XML Schema format with with/without time zone,
+     * also {@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
+     * defined by the Java platform.
      *   
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
@@ -588,9 +589,10 @@ public class Configurable
 
     /**
      * Sets the format used to convert {@link java.util.Date}-s to string-s that are date+time values.
-     * Possible values are patterns accepted by Java's {@link DateFormat}, also {@code "short"},
-     * {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning also defined by
-     * {@link DateFormat}.
+     * Possible values are patterns accepted by Java's {@link SimpleDateFormat},
+     * {@code "xs"}/{@code "xs_z"}/{@code "xs_nz"} for XML Schema format with with/without time zone,
+     * also {@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} (also combinations of them like
+     * {@code "medium_short"}) that has locale-dependent meaning defined by the Java platform.
      * It's also possible to give values like {@code "short_long"} (in any combinations), which will
      * use {@code "short"} for the date part, and {@code "long"} for the time part.
      *   

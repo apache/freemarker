@@ -300,8 +300,7 @@ class MiscellaneousBuiltins {
             private void checkDateTypeNotUnknown() throws _TemplateModelException {
                 if(dateType == TemplateDateModel.UNKNOWN) {
                     throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                            "Can't convert the date to string, because it isn't known if it's a "
-                            + "date-only, time-only, or date-time value.")
+                            MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
                             .blame(target)
                             .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                 }

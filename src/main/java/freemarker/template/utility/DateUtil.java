@@ -180,7 +180,7 @@ public class DateUtil {
      *        may find {@link DateUtil#UTC} handy here.) Note
      *        that although date-only formats has no time zone offset part,
      *        the result still depends on the time zone, as days start and end
-     *        at different points in time in different zones.      
+     *        at different points on the time line in different zones.      
      * @param calendarFactory the factory that will create the calendar used
      *        internally for calculations. The point of this parameter is that
      *        creating a new calendar is relatively expensive, so it's desirable

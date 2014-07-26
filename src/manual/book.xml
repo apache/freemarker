@@ -435,8 +435,9 @@
           </listitem>
 
           <listitem>
-            <para>Date/time: A date or time. Like the date an animal were
-            captured, or the time the shop opens.</para>
+            <para>Date-like: Either a date-time (stores a date with time of
+            the day), or a date (no time of day), or a time (time of day, no
+            date).</para>
           </listitem>
 
           <listitem>
@@ -455,7 +456,7 @@
 
           <listitem>
             <para>Scalars store a single value. The value can be a string or a
-            number or a date/time or a boolean.</para>
+            number or a date-time/date/time or a boolean.</para>
           </listitem>
 
           <listitem>
@@ -1012,7 +1013,7 @@ brown</programlisting>
               </listitem>
 
               <listitem>
-                <para>Date</para>
+                <para>Date-like (date, time, or date-time)</para>
               </listitem>
             </itemizedlist>
           </listitem>
@@ -1142,45 +1143,46 @@ brown</programlisting>
                   <primary>date-time</primary>
 
                   <secondary>the FTL value type</secondary>
-                </indexterm>Date: A date variable stores date/time related
+                </indexterm>Date: A date-like value stores date/time related
               data. It has three variations:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>A date with day precision (often referred simply as
-                  "date") as April 4, 2003</para>
+                  <para>Date: Like April 4, 2003. Day precision, no time of
+                  day part.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Time of day (without the date part), as 10:19:18 PM.
-                  Time is stored with millisecond precision.</para>
+                  <para>Time: Like 10:19:18 PM. Millisecond precision, no date
+                  part.</para>
                 </listitem>
 
                 <listitem>
                   <para>Date-time (sometimes called "time stamp") as April 4,
-                  2003 10:19:18 PM. The time part is stored with millisecond
+                  2003 10:19:18 PM. Both date and time, with millisecond
                   precision.</para>
                 </listitem>
               </itemizedlist>
 
               <para>Unfortunately, because of the limitations of the Java
               platform, FreeMarker sometimes can't decide which parts of the
-              date are in use (i.e., if it is date-time, or a time of day,
-              etc.). The solution for this problem is an advanced topic that
-              will be discussed <link
+              date are in use (i.e., if it is date-time, a date or a time).
+              The solution for this problem is an advanced topic that will be
+              discussed <link
               linkend="ref_builtin_date_datetype">later</link>.</para>
 
-              <para>It is possible to define date values directly in
+              <para>It is possible to define date-like values directly in
               templates, but this is an advanced topic that will be explained
               <link linkend="ref_builtin_string_date">later</link>.</para>
             </listitem>
           </itemizedlist>
 
           <para>Bear in mind that FreeMarker distinguishes strings from
-          numbers and booleans, so the string <literal>"150"</literal> and the
-          number <literal>150</literal> are totally different. A number holds
-          a numerical value. A boolean holds a logical true or false. A string
-          holds an arbitrary sequence of characters.</para>
+          numbers, booleans and date-like values. For example, while the
+          string <literal>"150"</literal> looks like the number
+          <literal>150</literal>, a string is still just arbitrary sequence of
+          characters, and you can't do arithmetic with it, can't compare it
+          with another number, etc.</para>
         </section>
 
         <section xml:id="dgui_datamodel_container">
@@ -2882,8 +2884,8 @@ ${-1.999?int}</programlisting>
           <literal>"x "</literal> and <literal>"X"</literal> are not equal
           values.</para>
 
-          <para>For numerical and date values you can also use
-          <literal>&lt;</literal>, <literal>&lt;=</literal>,
+          <para>For numerical and date, time and date-time values you can also
+          use <literal>&lt;</literal>, <literal>&lt;=</literal>,
           <literal>&gt;=</literal> and <literal>&gt;</literal>. You can't use
           them for strings! Example:</para>
 
@@ -3576,12 +3578,12 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           value, so it will cause a runtime error.</para>
         </warning>
 
-        <para>The result of the expression must be a string, number or date
-        value. This is because only numbers and dates will be converted to
-        string by the interpolation automatically, other types of values (such
-        as booleans, sequences) must be converted to string "manually" somehow
-        (see some advices later), or an error will stop the template
-        processing.</para>
+        <para>The result of the expression must be a string, number or
+        date/time/date-time value. This is because only numbers and
+        date/time/date-time values are converted to string by interpolation
+        automatically, values of other types (such as booleans, sequences)
+        must be converted to string "manually" somehow (see some advices
+        later), or an error will stop the template processing.</para>
 
         <simplesect>
           <title>Guide for inserting strings; don't forget escaping!</title>
@@ -3701,11 +3703,11 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         </simplesect>
 
         <simplesect xml:id="dgui_template_valueinserion_universal_date">
-          <title>Guide for inserting date/time values</title>
+          <title>Guide for inserting date/time/date-time values</title>
 
-          <para>If the expression evaluates to a date then the date value will
-          be transformed to a text according to a default format. Usually the
-          programmer should set the default format; you don't have to deal
+          <para>If the expression evaluates to a date-like value then that
+          will be transformed to a text according to a default format. Usually
+          the programmer should set the default format; you don't have to deal
           with it (but if you care, see the <literal>date_format</literal>,
           <literal>time_format</literal> and
           <literal>datetime_format</literal> settings in the <link
@@ -3718,34 +3720,47 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           built-in</link>.</para>
 
           <warning>
-            <para>To display a date as text, FreeMarker must know which parts
-            of the date are in use, that is, if only the date part (year,
-            month, day), or only the time part (hour, minute, second,
+            <para>To display a date-like value as text, FreeMarker must know
+            which parts of it are in use, that is, if only the date part
+            (year, month, day), or only the time part (hour, minute, second,
             millisecond), or both. Unfortunately, because of the technical
             limitations of Java platform, for some variables it is not
             possible to detect this automatically; ask the programmer if the
-            data-model contains such problematic variables. If it is not
+            data-model contains such problematic variables. When it's not
             possible to find out which parts of the date are in use, then you
             must help FreeMarker with the <link
             linkend="ref_builtin_date_datetype"><literal>date</literal>,
             <literal>time</literal> and <literal>datetime</literal></link>
-            built-ins, or it will stop with error.</para>
+            built-ins (like <literal>${lastUpdated?datetime}</literal>), or it
+            will stop with error.</para>
           </warning>
         </simplesect>
 
         <simplesect>
           <title>Guide for inserting boolean values</title>
 
-          <para>An attempt to print boolean values with interpolation causes
-          an error and aborts template processing. For example this will cause
-          an error: <literal>${a == 2}</literal> and will not print ''true''
-          or something like that.</para>
+          <para>By default an attempt to print boolean values with
+          interpolation causes an error and aborts template processing. For
+          example this will cause an error: <literal>${a == 2}</literal> and
+          will not print ''true'' or something like that. That's because
+          there's no universally useful way of representing booleans
+          (sometimes you want to print yes/no, sometimes enabled/disabled,
+          on/off, etc.).</para>
 
           <para>However, you can convert booleans to strings with the <link
           linkend="ref_builtin_string_for_boolean"><literal>?string</literal>
           built-in</link>. For example, to print the value of the "married"
           variable (assuming it's a boolean), you could write
           <literal>${married?string("yes", "no")}</literal>.</para>
+
+          <note>
+            <para>FreeMarker can be configured with a default boolean format
+            with the <literal>boolean_format</literal> setting, then
+            <literal>${married}</literal> and such will work. Also, when you
+            want to generate JavaScript or other computer language parts, then
+            <literal>${someBoolean?c}</literal> (<quote>c</quote> stands for
+            computer audience) can be used to print true/false.</para>
+          </note>
         </simplesect>
 
         <simplesect>
@@ -3765,14 +3780,12 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
             </listitem>
 
             <listitem>
-              <para>Else if the value is whatever kind of date, time or
-              date-time, then it is converted to string in the format
-              specified with the <literal>time_format</literal>,
-              <literal>date_format</literal>, or
-              <literal>datetime_format</literal> setting, depending on whether
-              the date information is time-only, date-only, or a date-time. If
-              it can't be detected what kind of date it is (date vs time vs
-              date-time), an error will occur.</para>
+              <para>Else if the value is date, time or date-time, then it is
+              converted to string in the format specified with the
+              <literal>date_format</literal>, <literal>time_format</literal>
+              or <literal>datetime_format</literal> setting, respectively. If
+              it can't be detected what kind of date-like value it is (date vs
+              time vs date-time), an error will occur.</para>
             </listitem>
 
             <listitem>
@@ -5521,7 +5534,8 @@ public class Test {
           </listitem>
 
           <listitem>
-            <para>Date</para>
+            <para>Date-like (subtypes: date (no time part), time or
+            date-time)</para>
           </listitem>
         </itemizedlist>
 
@@ -5562,7 +5576,7 @@ public class Test {
         the original instance.</para>
 
         <section>
-          <title>Difficulties with the date type</title>
+          <title>Difficulties with the <quote>date-like</quote> type</title>
 
           <indexterm>
             <primary>date</primary>
@@ -5576,47 +5590,47 @@ public class Test {
             <secondary>Java API related difficulties</secondary>
           </indexterm>
 
-          <para>There is a complication around date types, because Java API
-          usually does not differentiate <literal>java.util.Date</literal>-s
-          that store only the date part (April 4, 2003), only the time part
-          (10:19:18 PM), or both (April 4, 2003 10:19:18 PM). To display a
-          date variable as text correctly, FreeMarker must know what parts of
-          the <literal>java.util.Date</literal> stores meaningful information,
-          and what parts are unused. Unfortunately, the only place where the
-          Java API cleanly tells this, is with database handling (SQL),
-          because databases typically has separated date, time and timestamp
-          (aka date-time) types, and <literal>java.sql</literal> has 3
-          corresponding <literal>java.util.Date</literal> subclasses for
+          <para>There is a complication around date-like types, because Java
+          API usually does not differentiate
+          <literal>java.util.Date</literal>-s that store only the date part
+          (April 4, 2003), only the time part (10:19:18 PM), or both (April 4,
+          2003 10:19:18 PM). To display the value as text correctly (or to do
+          certain other operations), FreeMarker must know what parts of the
+          <literal>java.util.Date</literal> stores meaningful information, and
+          what parts are unused (usually 0-ed out). Unfortunately, this
+          information is usually only available when the value comes from a
+          database, because most databases have separate date, time and
+          date-time (aka. timestap) types, and <literal>java.sql</literal> has
+          3 corresponding <literal>java.util.Date</literal> subclasses for
           them.</para>
 
           <para><literal>TemplateDateModel</literal> interface has two
           methods: <literal>java.util.Date getAsDate()</literal> and
           <literal>int getDateType()</literal>. A typical implementation of
           this interface, stores a <literal>java.util.Date</literal> object,
-          plus an integer that tells the "database style type". The value of
-          this integer must be a constant from the
-          <literal>TemplateDateModel</literal> interface:
-          <literal>DATE</literal>, <literal>TIME</literal>,
+          plus an integer that tells the subtype. The value of this integer
+          must be a constant from the <literal>TemplateDateModel</literal>
+          interface: <literal>DATE</literal>, <literal>TIME</literal>,
           <literal>DATETIME</literal> and <literal>UNKNOWN</literal>.</para>
 
-          <para>What is <literal>UNKNOWN</literal>? As we told earlier,
-          <literal>java.lang</literal> and <literal>java.util</literal>
-          classes are usually converted automatically into
-          <literal>TemplateModel</literal> implementations, be so called
-          object wrappers. If the object wrapper faces a
+          <para>About <literal>UNKNOWN</literal>: <literal>java.lang</literal>
+          and <literal>java.util</literal> classes are usually converted
+          automatically into <literal>TemplateModel</literal> implementations
+          be the <literal>ObjectWrapper</literal> (see object wrapping
+          earlier). If the object wrapper has to wrap a
           <literal>java.util.Date</literal>, that is not an instance of a
           <literal>java.sql</literal> date class, it can't decide what the
-          "database style type" is, so it uses <literal>UNKNOWN</literal>.
-          Later, if the template has to use this variable, and the "database
-          style type" is needed for the operation, it will stop with error. To
-          prevent this, for the problematic variables the template author must
-          help FreeMarker to decide the "database style type", by using the
-          <link linkend="ref_builtin_date_datetype"><literal>date</literal>,
+          subtype is, so it uses <literal>UNKNOWN</literal>. Later, if the
+          template has to use this variable, and the subtype is needed for the
+          operation, it will stop with error. To prevent this, for the
+          problematic variables the template author must specify the subtype
+          explicitly using the <link
+          linkend="ref_builtin_date_datetype"><literal>date</literal>,
           <literal>time</literal> or <literal>datetime</literal>
-          built-ins</link>. Note that if you use <literal>string</literal>
-          built-in with format parameter, as
-          <literal>foo?string("MM/dd/yyyy")</literal>, then FreeMarker don't
-          need to know the "database style type".</para>
+          built-ins</link> (like <literal>lastUpdated?datetime</literal>).
+          Note that if you use <literal>string</literal> built-in with format
+          parameter, as <literal>foo?string("MM/dd/yyyy")</literal>, then
+          FreeMarker doesn't need to know the subtype.</para>
         </section>
       </section>
 
@@ -11358,7 +11372,7 @@ End book</programlisting>
             strings</link>, <link linkend="ref_builtin_string_for_number">for
             numbers</link>, <link linkend="ref_builtin_string_for_boolean">for
             booleans</link>, <link linkend="ref_builtin_string_for_date">for
-            date/times</link></para>
+            date/time/date-time</link></para>
           </listitem>
 
           <listitem>
@@ -11368,8 +11382,8 @@ End book</programlisting>
 
           <listitem>
             <para>time <link linkend="ref_builtin_date_datetype">for
-            dates</link>, <link linkend="ref_builtin_string_date">for
-            strings</link></para>
+            date/time/date-time</link>, <link
+            linkend="ref_builtin_string_date">for strings</link></para>
           </listitem>
 
           <listitem>
@@ -11431,10 +11445,10 @@ End book</programlisting>
         </indexterm>
 
         <para>These built-ins act on a string left-value. However, if the
-        left-value is number or date or, since 2.3.20, boolean, it will
-        automatically converted to string according the current number-, date-
-        and boolean-format settings (which are the same formatters that are
-        applied when inserting such values with
+        left-value is number or date/time/date-time or boolean (since 2.3.20),
+        it will automatically converted to string according the current
+        number-, date/time/date-time- and boolean-format settings (which are
+        the same formatters that are applied when inserting such values with
         <literal>${<replaceable>...</replaceable>}</literal>).</para>
 
         <section xml:id="ref_builtin_substring">
@@ -11670,10 +11684,10 @@ Oct 25, 1995 3:05:00 PM</programlisting>
           <literal>datetime_format</literal> <link
           linkend="ref.directive.setting">settings</link>, that's why they
           look differently as the original strings. (For more information
-          about converting dates to strings read: <link
+          about converting dates/times/date-times to strings read: <link
           linkend="ref_builtin_string_for_date">string built-in for
-          dates</link>, <link
-          linkend="dgui_template_valueinserion_universal_date">date
+          date/time/date-time</link>, <link
+          linkend="dgui_template_valueinserion_universal_date">date/rime/date-time
           interpolations</link>.)</para>
 
           <para>Instead of specifying a concrete pattern, you can use one of
@@ -13212,7 +13226,7 @@ Hungarian people write: 12 345 678,00</programlisting>
       </section>
 
       <section xml:id="ref_builtins_date">
-        <title>Built-ins for dates</title>
+        <title>Built-ins for date/time/date-time values</title>
 
         <indexterm>
           <primary>date</primary>
@@ -13226,8 +13240,20 @@ Hungarian people write: 12 345 678,00</programlisting>
           <secondary>built-ins</secondary>
         </indexterm>
 
+        <indexterm>
+          <primary>datetime</primary>
+
+          <secondary>built-ins</secondary>
+        </indexterm>
+
+        <indexterm>
+          <primary>timestamp</primary>
+
+          <secondary>built-ins</secondary>
+        </indexterm>
+
         <section xml:id="ref_builtin_string_for_date">
-          <title>string (when used with a date value)</title>
+          <title>string (when used with a date/time/date-time value)</title>
 
           <indexterm>
             <primary>type-casting</primary>
@@ -13245,6 +13271,24 @@ Hungarian people write: 12 345 678,00</programlisting>
             <primary>format</primary>
 
             <secondary>date</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>time</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>date-time</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>timestamp</secondary>
           </indexterm>
 
           <indexterm>
@@ -13272,16 +13316,28 @@ Hungarian people write: 12 345 678,00</programlisting>
           </indexterm>
 
           <para>This built-in converts a date to a string, with the specified
-          formatting. (when the default format dictated by the
-          <literal>date_format</literal>, <literal>time_format</literal> and
-          <literal>datetime_format</literal> <link
-          linkend="ref.directive.setting">settings</link> of FreeMarker are
-          good for you, then you do not need this built-in.)</para>
+          formatting.</para>
 
-          <para>The format can be one of the predefined formats, or you can
-          specify the formatting pattern explicitly.</para>
+          <important>
+            <para>You should need this built-in rarely, as the default format
+            of date/time/date-time values can be specified globally with the
+            <literal>date_format</literal>, <literal>time_format</literal> and
+            <literal>datetime_format</literal> <link
+            linkend="ref.directive.setting">settings</link> of FreeMarker. Use
+            this built-in only at the places where the desired format differs
+            from the one normally used. For the other places the default
+            format should be set properly by the programmers, outside the
+            templates. (Any formatting that you can specify with the
+            <literal>string</literal> built-in, like
+            <literal>"short"</literal>, <literal>"xs"</literal>,
+            <literal>"dd.MM.yyyy HH:mm:ss"</literal> etc., can also be used as
+            the value of said settings.)</para>
+          </important>
 
-          <para>The predefined formats are:</para>
+          <para>The format can be one of the predefined named formats, or you
+          can specify a formatting pattern directly with <link
+          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
+          date format syntax</link>.The predefined formats are:</para>
 
           <itemizedlist>
             <listitem>
@@ -13357,8 +13413,8 @@ February 20, 2007 01:45:09 PM PST
 Friday, February 20, 2007 01:45:09 PM PST
 2007-02-20T13:45:09-08:00</programlisting>
 
-          <para>For dates that contains both date and time part, you can
-          specify the length of the date and time part independently:</para>
+          <para>For date-time values, you can specify the length of the date
+          and time part independently:</para>
 
           <programlisting role="template">${lastUpdated?string.short_long} &lt;#-- short date, long time --&gt;
 ${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;</programlisting>
@@ -13375,10 +13431,10 @@ Feb 8, 2003 9:24 PM</programlisting>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
-            platform, it can happen that you have date variables in the
-            data-model, where FreeMarker can't decide if the variable stores
-            only date part (year, month, day), only time part (hour, minute,
-            second, millisecond) or both. In this case, FreeMarker don't know
+            platform, it can happen that you have date-like variables in the
+            data-model, where FreeMarker can't decide if the variable is a
+            date (year, month, day), or a time (hour, minute, second,
+            millisecond) or a date-time. In this case, FreeMarker doesn't know
             how to display the date when you write something like
             <literal>${lastUpdated?string.short}</literal> or simply
             <literal>${lastUpdated}</literal>, and thus it will stop with
@@ -13387,7 +13443,7 @@ Feb 8, 2003 9:24 PM</programlisting>
             <literal>?time</literal> and <literal>?datetime</literal>
             built-ins</link>. For example:
             <literal>${lastUpdated?datetime?string.short}</literal>. Ask the
-            programmer if certain variables of the data-model has this
+            programmer if certain variables of the data-model have this
             problem, or always use <literal>?date</literal>,
             <literal>?time</literal> and <literal>?datetime</literal>
             built-ins.</para>
@@ -13400,15 +13456,15 @@ Feb 8, 2003 9:24 PM</programlisting>
           xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
           date format syntax</link>. Example:</para>
 
-          <programlisting role="template">${lastUpdated?string("yyyy-MM-dd HH:mm:ss zzzz")}
+          <programlisting role="template">${lastUpdated?string("dd.MM.yyyy HH:mm:ss zzzz")}
 ${lastUpdated?string("EEE, MMM d, ''yy")}
-${lastUpdated?string("EEEE, MMMM dd, yyyy, hh:mm:ss a '('zzz')'")}</programlisting>
+${lastUpdated?string("EEEE, MMMM dd, yyyy, hh:mm a '('zzz')'")}</programlisting>
 
           <para>will output:</para>
 
-          <programlisting role="output">2003-04-08 21:24:44 Pacific Daylight Time
+          <programlisting role="output">08.04.2003 21:24:44 Pacific Daylight Time
 Tue, Apr 8, '03
-Tuesday, April 08, 2003, 09:24:44 PM (PDT)</programlisting>
+Tuesday, April 08, 2003, 09:24 PM (PDT)</programlisting>
 
           <note>
             <para>Unlike with the predefined formats, you never need to use
@@ -13436,7 +13492,8 @@ Tuesday, April 08, 2003, 09:24:44 PM (PDT)</programlisting>
         </section>
 
         <section xml:id="ref_builtin_date_datetype">
-          <title>date, time, datetime (when used with a date value)</title>
+          <title>date, time, datetime (when used with a date/time/date-time
+          value)</title>
 
           <indexterm>
             <primary>type-casting</primary>
@@ -13458,37 +13515,35 @@ Tuesday, April 08, 2003, 09:24:44 PM (PDT)</programlisting>
             <primary>datetime built-in</primary>
           </indexterm>
 
-          <para>These built-ins can be used to specify which parts of the date
-          variable are in use:</para>
+          <para>These built-ins can be used to specify which parts of the
+          date-like variable are in use:</para>
 
           <itemizedlist>
             <listitem>
-              <para><literal>date_only</literal>: Only the year, month and day
-              parts are used.</para>
+              <para><literal>date</literal>: Date only, no time of the
+              day.</para>
             </listitem>
 
             <listitem>
-              <para><literal>time</literal>: Only the hour, minute, second and
-              millisecond parts are used.</para>
+              <para><literal>time</literal>: Only the time of the day, no date
+              part</para>
             </listitem>
 
             <listitem>
-              <para><literal>datetime</literal>: Both the date and the time
-              parts are used.</para>
+              <para><literal>datetime</literal>: Both date and time</para>
             </listitem>
           </itemizedlist>
 
-          <para>In optimal case, you do not need to use these built-ins.
+          <para>Ideally, you do not need to use these built-ins.
           Unfortunately, because of the technical limitations of the Java
-          platform, FreeMarker sometimes can't find out which parts of the
-          date are in use (i.e. only the year+month+day, or only
-          hour+minute+second+millisecond, or both); ask the programmers which
-          variables has this problem. If FreeMarker has to execute an
-          operation where this information is needed -- such as displaying the
-          date as text -- but it does not know which parts are in use, it will
-          stop with error. This is when you have to use these built-ins. For
-          example, assume <literal>openingTime</literal> is a such problematic
-          variable:</para>
+          platform, FreeMarker sometimes can't find out which parts of a
+          date-like value is a date, a time or a date-time; ask the
+          programmers which variables has this problem. If FreeMarker has to
+          execute an operation where this information is needed -- such as
+          displaying the value as text -- but it does not know which parts are
+          in use, it will stop with error. This is when you have to use these
+          built-ins. For example, assume <literal>openingTime</literal> is a
+          such problematic variable:</para>
 
           <programlisting role="template">&lt;#assign x = openingTime&gt; &lt;#-- no problem can occur here --&gt;
 ${openingTime?time} &lt;#-- without ?time it would fail --&gt;
@@ -13496,8 +13551,8 @@ ${openingTime?time} &lt;#-- without ?time it would fail --&gt;
 &lt;#assign openingTime = openingTime?time&gt;
 ${openingTime} &lt;#-- this will work now --&gt;</programlisting>
 
-          <para>There is another usage of these built-ins: to truncate dates.
-          For example:</para>
+          <para>These built-ins can also be used to convert date-time values
+          to date or time. For example:</para>
 
           <programlisting role="template">Last updated: ${lastUpdated} &lt;#-- assume that lastUpdated is a date-time value --&gt;
 Last updated date: ${lastUpdated?date}
@@ -13511,7 +13566,7 @@ Last updated time: 08:00:54 PM</programlisting>
 
           <para>If the left side of the <literal>?</literal> is string, then
           these built-ins <link linkend="ref_builtin_string_date">convert
-          strings to date variable</link>.</para>
+          strings to date/time/date-time</link>.</para>
         </section>
 
         <section xml:id="ref_builtin_date_iso">
@@ -13540,6 +13595,18 @@ Last updated time: 08:00:54 PM</programlisting>
           </indexterm>
 
           <indexterm>
+            <primary>format</primary>
+
+            <secondary>time</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>format</primary>
+
+            <secondary>date-time</secondary>
+          </indexterm>
+
+          <indexterm>
             <primary>converting date to string</primary>
           </indexterm>
 
@@ -13548,11 +13615,19 @@ Last updated time: 08:00:54 PM</programlisting>
           </indexterm>
 
           <indexterm>
+            <primary>converting date-time to string</primary>
+          </indexterm>
+
+          <indexterm>
             <primary>time to string</primary>
           </indexterm>
 
           <indexterm>
             <primary>date to string</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>date-time to string</primary>
           </indexterm>
 
           <indexterm>
@@ -13576,13 +13651,14 @@ Last updated time: 08:00:54 PM</programlisting>
             <listitem>
               <para>Either <literal>utc</literal> or <literal>local</literal>
               (required (except when it's given with a parameter, but see that
-              later)): Specifies whether you want to print the date according
-              to UTC or according the current time zone. The current time zone
-              is decided by the <literal>time_zone</literal> FreeMarker
-              setting and is normally configured by the programmers outside
-              the templates (but it can also be set in a template, like
-              <literal>&lt;#setting time_zone="America/New_York"&gt;</literal>
-              for example). Note that if the
+              later)): Specifies whether you want to print the
+              date/time/date-time according to UTC or according the current
+              time zone. The current time zone is decided by the
+              <literal>time_zone</literal> FreeMarker setting and is normally
+              configured by the programmers outside the templates (but it can
+              also be set in a template, like <literal>&lt;#setting
+              time_zone="America/New_York"&gt;</literal> for example). Note
+              that if the
               <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
               FreeMarker setting is set to <literal>true</literal>, then for
               <literal>java.sql.Date</literal> and
@@ -13608,8 +13684,8 @@ Last updated time: 08:00:54 PM</programlisting>
               millisecond part happens to be <literal>0</literal>, the whole
               fraction second part will be omitted. Also note that the
               fraction seconds are always separated with a dot , not with
-              comma (to follow the Web conventions and the XML Schema
-              date/time format).</para>
+              comma (to follow the Web conventions and XML Schema
+              time/dateTime canonical format).</para>
             </listitem>
 
             <listitem>
@@ -13620,16 +13696,16 @@ Last updated time: 08:00:54 PM</programlisting>
               or <literal>Z</literal>) will not be displayed. When this is
               <literal>z</literal> (like in
               <literal>${foo?utc_local_z}</literal>), the zone offset will be
-              displayed, except for date-only values, because ISO 8601 doesn't
-              allow showing the offset in that case (unlike the XML Schema
-              <literal>xs:date</literal> format). If this part is omitted
-              (like in <literal>${foo?utc_local}</literal>) the zone will be
-              displayed, except in two cases:</para>
+              displayed, except for date values, because ISO 8601 doesn't
+              allow showing the offset if there's no time shown (unlike the
+              XML Schema <literal>xs:date</literal> format). If this part is
+              omitted (like in <literal>${foo?utc_local}</literal>) the zone
+              will be displayed, except in two cases:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para>If the value is a date-only value (again, ISO 8901
-                  doesn't allow it then)</para>
+                  <para>If the value is a date (no time part) value (again,
+                  ISO 8901 doesn't allow it then)</para>
                 </listitem>
 
                 <listitem>
@@ -13648,7 +13724,7 @@ Last updated time: 08:00:54 PM</programlisting>
               </itemizedlist>
 
               <para>Note that since FreeMarker 2.3.19, the offset always
-              contains the minutes for XML Schema date/time format
+              contains the minutes for XML Schema date/time/dateTime format
               compliance.</para>
             </listitem>
           </orderedlist>
@@ -16615,21 +16691,22 @@ or
                   <secondary>date</secondary>
                 </indexterm> <literal>date_format</literal>,
               <literal>time_format</literal>,
-              <literal>datetime_format</literal>: The date/time format used to
-              convert dates to strings when no explicit format is specified,
-              as in the case of <literal>${someDate}</literal>.
-              <literal>date_format</literal> affects only the formatting of
-              date-only dates (year, month, day),
-              <literal>time_format</literal> affects only the formatting of
-              time-only dates (hour,minute, second, millisecond),
-              <literal>datetime_format</literal> affects only the formatting
-              of date-time dates (year, month, day, hour, minute, second,
-              millisecond). The possible values of the settings are similar to
-              the parameters of <link
+              <literal>datetime_format</literal>: The format used to convert
+              date/time/date-time to strings when no explicit format is
+              specified, as in the case of <literal>${someDate}</literal>. The
+              <literal>date_format</literal> setting only effects the
+              formatting of date values that store no time part,
+              <literal>time_format</literal> only effects the formatting of
+              times that store no date part, and
+              <literal>datetime_format</literal> only effects formatting of
+              date-time values. The possible values of the settings are
+              similar to the parameters of <link
               linkend="ref_builtin_string_for_date"><literal>string</literal>
-              built-in</link> of dates; see more explanation there. Examples:
+              built-in</link>; see more explanation there. Examples:
               <literal>"short"</literal>, <literal>"long_medium"</literal>,
-              <literal>"MM/dd/yyyy"</literal>.</para>
+              <literal>"dd.MM.yyyy HH:mm:ss"</literal>,
+              <literal>"xs"</literal>/<literal>"xs_z"</literal>/<literal>"xs_nz"</literal>
+              (for XML Schema format with/without time zone).</para>
             </listitem>
 
             <listitem>
@@ -18443,10 +18520,9 @@ There was no specific handler for node y
           version number as string, for example <literal>2.2.8</literal>. This
           can be used to check which FreeMarker version does your application
           use, but note that this special variable does not exist prior to the
-          2.3-final or 2.2.8 versions. The version number of non-final
-          releases contain abbreviation ``pre'' for ``preview'' (e.g.
-          <literal>2.3pre6</literal>), or abbrevation ``rc'' for ``release
-          candidate''.</para>
+          2.3.0 or 2.2.8 versions. The version number of non-final releases
+          contains dash and further info after the numbers, like in
+          2.3.21-nightly_20140726T151800Z.</para>
         </listitem>
       </itemizedlist>
     </chapter>
@@ -20131,8 +20207,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <para>Data-model and wrapping
                 (<literal>Configuration.setObjectWrapper</literal>): By
                 default the data-model gives access to the full public API of
-                the Java objects that you have put into the it (with some
-                exceptions). To avoid that, you have to construct the
+                the Java objects that you have put into the data-model (with
+                some exceptions). To avoid that, you have to construct the
                 data-model so that it only exposes the things that are
                 necessary for the template. For that, use
                 <literal>SimpleObjectWrapper</literal> and create the
@@ -20157,7 +20233,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 root directory regardless of template loader, but depending on
                 the underlying storage mechanism, exploits may exist that
                 FreeMarker can't consider (like, just as an example,
-                <literal>~</literal> jumps to the user directory). Note that
+                <literal>~</literal> jumps to the current user's home
+                directory). Note that
                 <literal>freemarker.cache.FileTemplateLoader</literal> checks
                 the canonical paths, so that's maybe a good candidate for this
                 task, yet, adding a file extension check (file must be
@@ -20672,7 +20749,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     <listitem>
                       <para>Trying to use
                       <literal>node.exactlyOneChildNode</literal> as number,
-                      date/time/datetime or boolean will explain that values
+                      date/time/date-time or boolean will explain that values
                       coming from XML are always strings (text), and must be
                       converted explicitly.</para>
                     </listitem>
@@ -20715,6 +20792,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   offset), <literal>?string.xs_nz</literal> (forces hiding
                   time zone offset). <link
                   linkend="ref_builtin_string_for_date">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Naturally, <literal>"xs"</literal>,
+                  <literal>"xs_z"</literal> and <literal>"xs_nz"</literal> can
+                  also be used as the value of the
+                  <literal>date_format</literal>,
+                  <literal>time_format</literal> and
+                  <literal>datetime_format</literal> settings.</para>
                 </listitem>
 
                 <listitem>

@@ -789,7 +789,7 @@ public final class Environment extends Configurable {
 
     /**
      * Tells if the same concrete time zone is used for SQL date-only and time-only values as for other
-     * date/time/dateTime values.
+     * date/time/date-time values.
      */
     boolean isSQLDateAndTimeTimeZoneSameAsNormal() {
         if (cachedSQLDateAndTimeTimeZoneSameAsNormal == null) {
@@ -933,9 +933,8 @@ public final class Environment extends Configurable {
         DateFormat df = getJDateFormat(type, date.getClass());
         if(df == null) {
             throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                    "Can't convert the date to string, because it's not known which parts of the date variable are "
-                    + "in use.")
-                    .tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
+                    MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
+                    .tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
         }
         return df.format(date);
     }
@@ -1139,8 +1138,7 @@ public final class Environment extends Configurable {
                     switch (dateType) {
                         case TemplateDateModel.UNKNOWN: {
                             throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                                    "Can't convert the date to string using a built-in format because it's not known "
-                                    + "which parts of the date are in use.")
+                                    MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
                                     .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
                         }
                         case TemplateDateModel.TIME: {

@@ -74,8 +74,8 @@ class DateBuiltins {
             if (dateType == TemplateDateModel.UNKNOWN) {
                 throw new _MiscTemplateException(new _ErrorDescriptionBuilder(new Object[] {
                             "The value of the following has unknown date type, but ?", key,
-                            " needs a date value where it's known if it's a date-only, time-only, or date+time value:"                        
-                        }).blame(target).tips(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIPS));
+                            " needs a value where it's known if it's a date (no time part), time, or date-time value:"                        
+                        }).blame(target).tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
             }
         }
 
