@@ -365,6 +365,10 @@ public class DateUtilTest extends TestCase {
                 df.format(DateUtil.parseXSDate("1998-10-30+04:00",
                         DateUtil.UTC, cf2dc)));
         assertEquals(
+                "AD 1998-10-30 04:00:00:0 +0000",
+                df.format(DateUtil.parseXSDate("1998-10-30-04:00",
+                        DateUtil.UTC, cf2dc)));
+        assertEquals(
                 "AD 1998-10-30 00:00:00:0 +0000",
                 df.format(DateUtil.parseXSDate("1998-10-30Z",
                         DateUtil.UTC, cf2dc)));

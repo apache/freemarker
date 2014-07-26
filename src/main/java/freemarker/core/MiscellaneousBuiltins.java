@@ -16,9 +16,7 @@
 
 package freemarker.core;
 
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -42,8 +40,6 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
-import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -113,7 +109,6 @@ class MiscellaneousBuiltins {
         {
             private final String text;
             private final Environment env;
-            private final DateFormat defaultFormat;
             private Date cachedValue;
             
             DateParser(String text, Environment env)
@@ -122,12 +117,11 @@ class MiscellaneousBuiltins {
             {
                 this.text = text;
                 this.env = env;
-                this.defaultFormat = env.getJDateFormat(dateType, Date.class);
             }
             
             public Date getAsDate() throws TemplateModelException {
                 if(cachedValue == null) {
-                    cachedValue = parse(defaultFormat);
+                    cachedValue = parse(env.getTemplateDateFormat(dateType, Date.class, target));
                 }
                 return cachedValue;
             }
@@ -138,7 +132,7 @@ class MiscellaneousBuiltins {
     
             public TemplateModel get(String pattern) throws TemplateModelException {
                 return new SimpleDate(
-                    pattern.equals("xs") ? parseXS(dateType) : parse(env.getJDateFormat(dateType, Date.class, pattern)),
+                    parse(env.getTemplateDateFormat(dateType, Date.class, pattern, target)),
                     dateType);
             }
     
@@ -152,7 +146,7 @@ class MiscellaneousBuiltins {
                 return false;
             }
     
-            private Date parse(DateFormat df)
+            private Date parse(TemplateDateFormat df)
             throws
                 TemplateModelException
             {
@@ -160,33 +154,10 @@ class MiscellaneousBuiltins {
                     return df.parse(text);
                 }
                 catch(java.text.ParseException e) {
-                    String pattern = null;
-                    if (df instanceof SimpleDateFormat) {
-                        pattern = ((SimpleDateFormat) df).toPattern();
-                    }
                     throw new _TemplateModelException(new Object[] {
-                            "The string doesn't match the expected date/time format. The string to parse was: ",
-                            new _DelayedJQuote(text), ". ",
-                            (pattern != null ? "The expected format was: " : ""),
-                            (pattern != null ? (Object) new _DelayedJQuote(pattern) : (Object) ""),
-                            (pattern != null ? ". " : "") });
-                }
-            }
-            
-            public Date parseXS(int dateType) throws _TemplateModelException {
-                try {
-                    CalendarFieldsToDateConverter calToDateConverter = env.getCalendarFieldsToDateCalculator();
-                    if (dateType == TemplateDateModel.DATE) {
-                        return DateUtil.parseXSDate(text, env.getTimeZone(), calToDateConverter);
-                    } else if (dateType == TemplateDateModel.TIME) {
-                        return DateUtil.parseXSTime(text, env.getTimeZone(), calToDateConverter);
-                    } else if (dateType == TemplateDateModel.DATETIME) {
-                        return DateUtil.parseXSDateTime(text, env.getTimeZone(), calToDateConverter);
-                    } else {
-                        throw new BugException("Unexpected date type: " + dateType);
-                    }
-                } catch (DateUtil.DateParseException e) {
-                    throw new _TemplateModelException(e.getMessage());
+                            "The string doesn't match the expected date/time/date-time format. "
+                            + "The string to parse was: ", new _DelayedJQuote(text), ". ",
+                            "The expected format was: ", new _DelayedJQuote(df.getDescription()), ". " });
                 }
             }
             
@@ -290,81 +261,17 @@ class MiscellaneousBuiltins {
             throws
                 TemplateModelException
             {
-                checkDateTypeNotUnknown();
                 if(cachedValue == null) {
-                    cachedValue = env.getJDateFormat(dateType, date.getClass()).format(date);
+                    cachedValue = env.getTemplateDateFormat(dateType, date.getClass(), target).format(date);
                 }
                 return cachedValue;
             }
 
-            private void checkDateTypeNotUnknown() throws _TemplateModelException {
-                if(dateType == TemplateDateModel.UNKNOWN) {
-                    throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                            MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
-                            .blame(target)
-                            .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
-                }
-            }
-    
             public TemplateModel get(String key)
             throws
                 TemplateModelException
             {
-                return new SimpleScalar(getFormattedDate(key));
-            }
-
-            protected String getFormattedDate(String key) throws TemplateModelException {
-                final int keyLen = key.length();
-                // As of Java 8, 'x' (in lower case) is illegal date format letter, so this is backward-compatible.
-                if (keyLen > 1 && key.charAt(0) == 'x' && key.charAt(1) == 's') {
-                    final boolean showDatePart = dateType != TemplateDateModel.TIME;
-                    final boolean showTimePart = dateType != TemplateDateModel.DATE;
-                    if (keyLen == 2) {  // key is "xs" => automatically decide if zone will be shown
-                        checkDateTypeNotUnknown();
-                        boolean isSQLDateOrTime = DateUtil.isSQLDateOrTimeClass(date.getClass());
-                        return DateUtil.dateToXSString(
-                                date,
-                                showDatePart,
-                                showTimePart,
-                                !isSQLDateOrTime,
-                                DateUtil.ACCURACY_MILLISECONDS,
-                                !isSQLDateOrTime || env.isSQLDateAndTimeTimeZoneSameAsNormal()
-                                        ? env.getTimeZone()
-                                        : env.getSystemDefaultTimeZone(),
-                                env.getISOBuiltInCalendar());                    
-                    } else if (keyLen > 3 && key.charAt(2) == '_') {  // key is "xs_<something>"
-                        final boolean showZoneOffset;
-                        if (keyLen == 4 && key.charAt(3) == 'z') {  // key is "xs_z"
-                            showZoneOffset = true;
-                        } else if (keyLen == 5 && key.charAt(3) == 'n' && key.charAt(4) == 'z') {  // key is "xs_nz"
-                            showZoneOffset = false;
-                        } else {
-                            throw newIllegalXSDateFormatKey(key);
-                        }
-                        checkDateTypeNotUnknown();
-                        return DateUtil.dateToXSString(
-                                date,
-                                showDatePart,
-                                showTimePart,
-                                showZoneOffset,
-                                DateUtil.ACCURACY_MILLISECONDS,
-                                env.shouldUseSystemDefaultTimeZone(date.getClass())
-                                        ? env.getSystemDefaultTimeZone()
-                                        : env.getTimeZone(),
-                                env.getISOBuiltInCalendar());
-                    } else {
-                        throw newIllegalXSDateFormatKey(key);
-                    }
-                } else {
-                    return env.getJDateFormat(dateType, date.getClass(), key).format(date);
-                }
-            }
-
-            private _TemplateModelException newIllegalXSDateFormatKey(String key) {
-                return new _TemplateModelException(new Object[] {
-                        "Illegal date format, ", new _DelayedJQuote(key),
-                        ". A format that starts with \"xs\" must be one of "
-                        + "\"xs\", \"xs_z\", and \"xs_nz\"." });
+                return new SimpleScalar(env.getTemplateDateFormat(dateType, date.getClass(), key, target).format(date));
             }
             
             public Object exec(List args) throws TemplateModelException {

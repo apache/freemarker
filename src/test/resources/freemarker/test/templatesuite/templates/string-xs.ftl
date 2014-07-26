@@ -1,6 +1,7 @@
 <#assign d = "2010-05-15 22:38:05:23 +0200"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
 <#setting time_zone="GMT+02">
 ${d?string.xs} = 2010-05-15T22:38:05.023+02:00
+${d?string('xs')} = 2010-05-15T22:38:05.023+02:00
 ${d?string.xs_nz} = 2010-05-15T22:38:05.023
 ${d?string.xs_z} = 2010-05-15T22:38:05.023+02:00
 
@@ -44,3 +45,25 @@ ${d?string.xs} = 2010-05-15T00:00:00+02:30
 <#assign d = "BC 0001-05-15"?date("G yyyy-MM-dd")>
 <#-- Tests that: (a) BC 1 isn't 0 like in ISO 8601; (b) No Julian calendar is used.  -->
 ${d?string.xs} = -1-05-13-05:00
+
+<#assign dt = "2010-05-15T01:02:03"?datetime.xs>
+<#setting datetime_format="xs">
+${dt} = 2010-05-15T01:02:03-05:00
+<#setting datetime_format="xs_z">
+${dt} = 2010-05-15T01:02:03-05:00
+<#setting datetime_format="xs_nz">
+${dt} = 2010-05-15T01:02:03
+<#assign d = dt?date>
+<#setting date_format="xs">
+${d} = 2010-05-15-05:00
+<#setting date_format="xs_z">
+${d} = 2010-05-15-05:00
+<#setting date_format="xs_nz">
+<#assign t = dt?time>
+${d} = 2010-05-15
+<#setting time_format="xs">
+${t} = 01:02:03-05:00
+<#setting time_format="xs_z">
+${t} = 01:02:03-05:00
+<#setting time_format="xs_nz">
+${t} = 01:02:03

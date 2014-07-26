@@ -336,7 +336,8 @@ class EvalUtil
             return env.formatNumber(modelToNumber((TemplateNumberModel) tm, exp));
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(modelToDate(dm, exp), dm.getDateType());
+            Date date = modelToDate(dm, exp);
+            return env.getTemplateDateFormat(dm.getDateType(), date.getClass(), exp).format(date);
         } else if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {
