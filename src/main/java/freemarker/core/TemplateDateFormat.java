@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import freemarker.template.TemplateDateModel;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 
 /**
@@ -24,16 +23,12 @@ abstract class TemplateDateFormat {
      *          {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *          a custom {@link TemplateDateModel} implementation.
      *          
-     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). This can also be {@code null},
-     *         in which case FreeMarker will fall back to an underlying format, if there's any, or else if will
-     *         throw a {@link TemplateException}.
+     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
      */
     public abstract String format(TemplateDateModel dateModel) throws TemplateModelException;
 
     /**
-     * @return The date/time/dateTime interpretation of the text. This can also be {@code null},
-     *         in which case FreeMarker will fall back to an underlying format, if there's any, or else if will
-     *         throw a {@link TemplateException}.
+     * @return The interpretation of the text as {@link Date}. Can't be {@code null}.
      */
     public abstract Date parse(String s) throws java.text.ParseException;
 
@@ -45,12 +40,13 @@ abstract class TemplateDateFormat {
     // This isn't used yet, as we don't have markup formatting in the template language.
     ///**
     // * Formats the date to markup instead of to plain text, or return {@code false} that will make FreeMarker call
-    // * {@link #format(Date)} and escape its result. It must not write into {@code out} when it returns {@code false}!
+    // * {@link #format(TemplateDateModel)} and escape its result. It must not write into {@code out} when it returns
+    // * {@code false}!
     // * It should only write to {@code out} and return {@code true} if the markup format is not the same as the
-    // * {@link #format(Date)} escaped.
+    // * {@link #format(TemplateDateModel)} escaped.
     // */
-    //public boolean formatAsMarkup(Writer out) {
-    //    return null;
+    //public boolean formatAsMarkup(TemplateDateModel dateModel, Writer out) {
+    //    return false;
     //}
     
     /**

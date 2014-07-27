@@ -154,10 +154,12 @@ class MiscellaneousBuiltins {
                     return df.parse(text);
                 }
                 catch(java.text.ParseException e) {
-                    throw new _TemplateModelException(new Object[] {
+                    throw new _TemplateModelException(e, new Object[] {
                             "The string doesn't match the expected date/time/date-time format. "
                             + "The string to parse was: ", new _DelayedJQuote(text), ". ",
-                            "The expected format was: ", new _DelayedJQuote(df.getDescription()), ". " });
+                            "The expected format was: ", new _DelayedJQuote(df.getDescription()), ".",
+                            e.getMessage() != null ? "\nThe nested reason given follows:\n" : "",
+                            e.getMessage() != null ? e.getMessage() : "" });
                 }
             }
             
@@ -173,8 +175,7 @@ class MiscellaneousBuiltins {
                 return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel)model, target), env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
-                int dateType = dm.getDateType();
-                return new DateFormatter(dm, dateType, env);
+                return new DateFormatter(dm, env);
             } else if (model instanceof SimpleScalar) {
                 return model;
             } else if (model instanceof TemplateBooleanModel) {
@@ -247,7 +248,7 @@ class MiscellaneousBuiltins {
             private final Environment env;
             private String cachedValue;
     
-            DateFormatter(TemplateDateModel dateModel, int dateType, Environment env)
+            DateFormatter(TemplateDateModel dateModel, Environment env)
             throws
                 TemplateModelException
             {

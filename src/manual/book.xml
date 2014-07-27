@@ -13315,6 +13315,10 @@ Hungarian people write: 12 345 678,00</programlisting>
             <primary>XML Schema time rendering</primary>
           </indexterm>
 
+          <indexterm>
+            <primary>ISO 8601</primary>
+          </indexterm>
+
           <para>This built-in converts a date to a string, with the specified
           formatting.</para>
 
@@ -13322,8 +13326,7 @@ Hungarian people write: 12 345 678,00</programlisting>
             <para>You should need this built-in rarely, as the default format
             of date/time/date-time values can be specified globally with the
             <literal>date_format</literal>, <literal>time_format</literal> and
-            <literal>datetime_format</literal> <link
-            linkend="ref.directive.setting">settings</link> of FreeMarker. Use
+            <literal>datetime_format</literal> settings of FreeMarker. Use
             this built-in only at the places where the desired format differs
             from the one normally used. For the other places the default
             format should be set properly by the programmers, outside the
@@ -13363,6 +13366,17 @@ Hungarian people write: 12 345 678,00</programlisting>
               from a time zone unaware source), <literal>xs_z</literal> will
               always show the time zone offset, and <literal>xs_nz</literal>
               will never show it.</para>
+            </listitem>
+
+            <listitem>
+              <para>ISO 8601 formats (since FreeMarker 2.3.21):
+              <literal>iso</literal>, <literal>iso_z</literal>,
+              <literal>iso_nz</literal>. These will format the value to
+              conform to ISO 8601:2004. On the same time the format will
+              conform to the XML Schema formats, where the two specifications
+              don't conflict. Regarding the zone offset and
+              <literal>_z</literal> and <literal>_nz</literal> see XML Schema
+              formats above.</para>
             </listitem>
           </itemizedlist>
 
@@ -13635,13 +13649,24 @@ Last updated time: 08:00:54 PM</programlisting>
           </indexterm>
 
           <para>These built-ins convert a date, time or date-time value to
-          string that follows ISO 8601:2004 "extended" format. This built-in
-          has several variations: <literal>iso_utc</literal>,
-          <literal>iso_local</literal>, <literal>iso_utc_nz</literal>,
-          <literal>iso_local_nz</literal>, <literal>iso_utc_m</literal>,
-          <literal>iso_utc_m_nz</literal>, etc. The name is constructed from
-          the following words in this order, each separated with a
-          <literal>_</literal> from the next:</para>
+          string that follows ISO 8601:2004 "extended" format.</para>
+
+          <note>
+            <para>Since FreeMarker 2.3.21, you can also require this format as
+            the default with the <literal>date_format</literal>,
+            <literal>time_format</literal> and
+            <literal>datetime_format</literal> settings, using the
+            <literal>"iso"</literal>, <literal>"iso_z"</literal> and
+            <literal>"iso_nz"</literal> values. <link
+            linkend="ref_builtin_string_for_date">See more...</link></para>
+          </note>
+
+          <para>This built-in has several variations:
+          <literal>iso_utc</literal>, <literal>iso_local</literal>,
+          <literal>iso_utc_nz</literal>, <literal>iso_local_nz</literal>,
+          <literal>iso_utc_m</literal>, <literal>iso_utc_m_nz</literal>, etc.
+          The name is constructed from the following words in this order, each
+          separated with a <literal>_</literal> from the next:</para>
 
           <orderedlist>
             <listitem>
@@ -16679,7 +16704,7 @@ or
             </listitem>
 
             <listitem>
-              <para><indexterm>
+              <para xml:id="topic_date_format_settings"><indexterm>
                   <primary>date_format</primary>
                 </indexterm><indexterm>
                   <primary>time_format</primary>
@@ -16706,7 +16731,9 @@ or
               <literal>"short"</literal>, <literal>"long_medium"</literal>,
               <literal>"dd.MM.yyyy HH:mm:ss"</literal>,
               <literal>"xs"</literal>/<literal>"xs_z"</literal>/<literal>"xs_nz"</literal>
-              (for XML Schema format with/without time zone).</para>
+              (for XML Schema format with/without time zone),
+              <literal>iso</literal>, <literal>iso_z</literal>,
+              <literal>iso_nz</literal> (for ISO 8601 formats).</para>
             </listitem>
 
             <listitem>
@@ -20785,30 +20812,45 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para><literal>?string</literal> now supports formatting
-                  date/time/datetime values with XML Schema format with
-                  <literal>?string.xs</literal>,
-                  <literal>?string.xs_z</literal> (forces showing time zone
-                  offset), <literal>?string.xs_nz</literal> (forces hiding
-                  time zone offset). <link
-                  linkend="ref_builtin_string_for_date">More...</link></para>
-                </listitem>
+                  <para>Added new
+                  <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
+                  setting values:</para>
 
-                <listitem>
-                  <para><literal>"xs"</literal>, <literal>"xs_z"</literal> and
-                  <literal>"xs_nz"</literal> can also be used as the value of
-                  the <literal>date_format</literal>,
-                  <literal>time_format</literal> and
-                  <literal>datetime_format</literal> settings.</para>
+                  <itemizedlist>
+                    <listitem>
+                      <para>XML Schema formats: <literal>"xs"</literal>,
+                      <literal>"xs_z"</literal> and
+                      <literal>"xs_nz"</literal>. The <literal>_z</literal>
+                      and <literal>_nz</literal> forces and disabled showing
+                      time zone offset, respectively. <literal>"xs"</literal>
+                      will show zone offset show except for
+                      <literal>java.sql.Date</literal> and
+                      <literal>java.sql.Time</literal>.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>ISO 8601 formats: <literal>"iso"</literal>,
+                      <literal>"iso_z"</literal>,
+                      <literal>"iso_nz"</literal></para>
+                    </listitem>
+                  </itemizedlist>
+
+                  <para>All these can also be used with the
+                  <literal>?string</literal> and
+                  <literal>?date</literal>/<literal>?time</literal>/<literal>?datetime</literal>,
+                  like <literal>someDate?string.xs</literal> and
+                  <literal>someString?date.xs</literal>. <link
+                  linkend="topic_date_format_settings">More...</link></para>
                 </listitem>
 
                 <listitem>
                   <para>Bug fixed: ISO 8601 dates (via
-                  <literal>?iso_...</literal>) now use proleptic Gregorian
-                  calendar for the years before 1582, rather than Julian
-                  calendar. This is (indirectly) required by the standard, and
-                  it's also how the standard Java XML Schema
-                  date/time/dateTime parser works.</para>
+                  <literal>?iso_...</literal> and <literal>iso</literal>
+                  format settings) now use proleptic Gregorian calendar for
+                  the years before 1582, rather than Julian calendar. This is
+                  (indirectly) required by the standard, and it's also how the
+                  standard Java XML Schema date/time/dateTime parser
+                  works.</para>
                 </listitem>
 
                 <listitem>

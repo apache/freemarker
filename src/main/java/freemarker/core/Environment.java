@@ -1054,7 +1054,7 @@ public final class Environment extends Configurable {
      *          the time zone is part of the returned {@link DateFormat}, and if
      *          {@link #getUseSystemDefaultTimeZoneForSQLDateAndTime()} is {@core true} then the exact class influences
      *          the time zone. 
-     * @param forDateExpr
+     * @param forDateExpr Used for better error messages only; may be {@code null}
      */
     TemplateDateFormat getTemplateDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, Expression forDateExpr)
     throws
@@ -1130,13 +1130,13 @@ public final class Environment extends Configurable {
             final TimeZone timeZone = shouldUseSystemDefaultTimeZone(dateClass)
                     ? getSystemDefaultTimeZone()
                     : getTimeZone();
-                    final Boolean showZoneOffset;
-            if (keyLen == 2) {  // key is "xs" => automatically decide if zone will be shown
+            final Boolean showZoneOffset;
+            if (keyLen == 2) {  // "xs" => automatically decide if zone will be shown
                 showZoneOffset = null;
-            } else if (keyLen > 3 && nameOrPattern.charAt(2) == '_') {  // key is "xs_<something>"
-                if (keyLen == 4 && nameOrPattern.charAt(3) == 'z') {  // key is "xs_z"
+            } else if (keyLen > 3 && nameOrPattern.charAt(2) == '_') {  // "xs_<something>"
+                if (keyLen == 4 && nameOrPattern.charAt(3) == 'z') {  // "xs_z"
                     showZoneOffset = Boolean.TRUE;
-                } else if (keyLen == 5 && nameOrPattern.charAt(3) == 'n' && nameOrPattern.charAt(4) == 'z') {  // key is "xs_nz"
+                } else if (keyLen == 5 && nameOrPattern.charAt(3) == 'n' && nameOrPattern.charAt(4) == 'z') { // "xs_nz"
                     showZoneOffset = Boolean.FALSE;
                 } else {
                     throw newIllegalXSDateFormatKey(nameOrPattern);
@@ -1145,6 +1145,26 @@ public final class Environment extends Configurable {
                 throw newIllegalXSDateFormatKey(nameOrPattern);
             }
             return new XSTemplateDateFormat(dateType, timeZone, showZoneOffset, this);
+        } else if (keyLen > 2
+                && nameOrPattern.charAt(0) == 'i' && nameOrPattern.charAt(1) == 's' && nameOrPattern.charAt(2) == 'o') {
+            final TimeZone timeZone = shouldUseSystemDefaultTimeZone(dateClass)
+                    ? getSystemDefaultTimeZone()
+                    : getTimeZone();
+            final Boolean showZoneOffset;
+            if (keyLen == 3) {  // "iso" => automatically decide if zone will be shown
+                showZoneOffset = null;
+            } else if (keyLen > 4 && nameOrPattern.charAt(3) == '_') {  // "iso_<something>"
+                if (keyLen == 5 && nameOrPattern.charAt(4) == 'z') {  // "xs_z"
+                    showZoneOffset = Boolean.TRUE;
+                } else if (keyLen == 6 && nameOrPattern.charAt(4) == 'n' && nameOrPattern.charAt(5) == 'z') { // "xs_nz"
+                    showZoneOffset = Boolean.FALSE;
+                } else {
+                    throw newIllegalISODateFormatKey(nameOrPattern);
+                }
+            } else {
+                throw newIllegalISODateFormatKey(nameOrPattern);
+            }
+            return new ISOTemplateDateFormat(dateType, timeZone, showZoneOffset, this);
         } else {
             return new JavaTemplateDateFormat(getJavaDateFormat(dateType, dateClass, nameOrPattern));
         }
@@ -1155,6 +1175,13 @@ public final class Environment extends Configurable {
                 "Illegal date format, ", new _DelayedJQuote(key),
                 ". A format that starts with \"xs\" must be one of "
                 + "\"xs\", \"xs_z\", and \"xs_nz\"." });
+    }
+
+    private _TemplateModelException newIllegalISODateFormatKey(String key) {
+        return new _TemplateModelException(new Object[] {
+                "Illegal date format, ", new _DelayedJQuote(key),
+                ". A format that starts with \"iso\" must be one of "
+                + "\"iso\", \"iso_z\", and \"iso_nz\"." });
     }
     
     private void checkDateTypeNotUnknown(int dateType, Expression blame) throws _TemplateModelException {

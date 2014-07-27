@@ -352,11 +352,12 @@ public class Configurable
     }
 
     /**
-     * Sets if the time zone used when dealing with {@link java.sql.Date} and {@link java.sql.Time} values will be
+     * Sets if the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
+     * {@link java.sql.Time java.sql.Time} values will be
      * the system default time zone (server default time zone) instead of the value of the {@code time_zone}
      * FreeMarker configuration setting ({@link #getTimeZone()}). Defaults to {@code false}, but in most applications
      * you probably want it to be {@code true}. It doesn't influence the formatting of other kind of values (like of
-     * {@link java.sql.Timestamp} or plain {@link java.util.Date} values).
+     * {@link java.sql.Timestamp java.sql.Timestamp} or plain {@link java.util.Date java.util.Date} values).
      * 
      * <p>To decide what value you need, a few things has to be understood:
      * <ul>
@@ -379,11 +380,13 @@ public class Configurable
      *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
      *   template output. For example, when a web page visitor has a preferred time zone, the web application framework
      *   may calls {@link Environment#setTimeZone(TimeZone)} with that time zone. Thus, the visitor will
-     *   see {@link java.sql.Timestamp} and plain {@link java.util.Date} values as they look in his own time zone. While
+     *   see {@link java.sql.Timestamp java.sql.Timestamp} and plain {@link java.util.Date java.util.Date} values as
+     *   they look in his own time zone. While
      *   this is desirable for those types, as they meant to represent physical points on the time line, this is not
      *   necessarily desirable for date-only and time-only values. When {@code sql_date_and_time_time_zone} is
      *   {@code null}, {@code time_zone} is used for rendering all kind of date/time/dateTime values, including
-     *   {@link java.sql.Date} and {@link java.sql.Time}, and then if, for example, {@code time_zone} is GMT+00:00, the
+     *   {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}, and then if, for example,
+     *   {@code time_zone} is GMT+00:00, the
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
      *   those are the time zone correct renderings, those values probably was meant to shown "as is".
      * </ul>
@@ -398,9 +401,9 @@ public class Configurable
     /**
      * The getter pair of {@link #setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)}.
      * 
-     * @returns {@code null} if the value of {@link #getTimeZone()} should be used for formatting
-     *     {@link java.sql.Date} and {@link java.sql.Time} values, otherwise the time zone that should be used
-     *     to format the values of those two types.  
+     * @return {@code null} if the value of {@link #getTimeZone()} should be used for formatting
+     *     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values, otherwise the time zone
+     *     that should be used to format the values of those two types.  
      */
     public boolean getUseSystemDefaultTimeZoneForSQLDateAndTime() {
         return useSystemDefaultTimeZoneForSQLDateAndTime != null
@@ -545,10 +548,9 @@ public class Configurable
     }
 
     /**
-     * Possible values are patterns accepted by Java's {@link SimpleDateFormat},
-     * {@code "xs"}/{@code "xs_z"}/{@code "xs_nz"} for XML Schema format with with/without time zone,
-     * also {@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
-     * defined by the Java platform.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time (no date part) values.
+     * 
+     * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
@@ -566,11 +568,9 @@ public class Configurable
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-only (no time part) values.
-     * Possible values are patterns accepted by Java's {@link SimpleDateFormat},
-     * {@code "xs"}/{@code "xs_z"}/{@code "xs_nz"} for XML Schema format with with/without time zone,
-     * also {@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
-     * defined by the Java platform.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values.
+     * 
+     * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */
@@ -588,13 +588,24 @@ public class Configurable
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date+time values.
-     * Possible values are patterns accepted by Java's {@link SimpleDateFormat},
-     * {@code "xs"}/{@code "xs_z"}/{@code "xs_nz"} for XML Schema format with with/without time zone,
-     * also {@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} (also combinations of them like
-     * {@code "medium_short"}) that has locale-dependent meaning defined by the Java platform.
-     * It's also possible to give values like {@code "short_long"} (in any combinations), which will
-     * use {@code "short"} for the date part, and {@code "long"} for the time part.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values.
+     * 
+     * <p>Possible values are:
+     * 
+     * <ul>
+     *   <li><p>Patterns accepted by Java's {@link SimpleDateFormat}, for example {@code "dd.MM.yyyy HH:mm:ss"}
+     *   
+     *   <li><p>{@code "xs"} or {@code "xs_z"} or {@code "xs_nz"} for XML Schema format,
+     *       and {@code "iso"} or {@code "iso_z"} or {@code "iso_nz"} for ISO 8601 format.
+     *       <p>The meaning of the postfixes:
+     *       {@code ..._z} = always show time zone offset;
+     *       {@code ..._nz} = never show time zone offset;
+     *       no postfix = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
+     *       and {@link java.sql.Time java.sql.Time}
+     *       
+     *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
+     *       defined by the Java platform (see in the documentation of {@link java.text.DateFormat}):
+     * </ul> 
      *   
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
      */

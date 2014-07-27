@@ -8,46 +8,43 @@ import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateParseException;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 
-/**
- * XML Schema format.
- */
-final class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
-
-    public XSTemplateDateFormat(int dateType, TimeZone timeZone, Boolean showZoneOffset, Environment env) {
+final class ISOTemplateDateFormat extends ISOLikeTemplateDateFormat {
+    
+    public ISOTemplateDateFormat(int dateType, TimeZone timeZone, Boolean showZoneOffset, Environment env) {
         super(dateType, timeZone, showZoneOffset, env);
     }
 
     protected String format(Date date, boolean datePart, boolean timePart, boolean offsetPart, int accuracy,
             TimeZone timeZone, DateToISO8601CalendarFactory calendarFactory) {
-        return DateUtil.dateToXSString(
-                date, datePart, timePart, offsetPart, accuracy, timeZone, calendarFactory);
+        return DateUtil.dateToISO8601String(
+                date, datePart, timePart, timePart && offsetPart, accuracy, timeZone, calendarFactory);
     }
 
     protected Date parseDate(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return DateUtil.parseXSDate(s, tz, calToDateConverter);
+        return DateUtil.parseISO8601Date(s, tz, calToDateConverter);
     }
 
     protected Date parseTime(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return DateUtil.parseXSTime(s, tz, calToDateConverter);
+        return DateUtil.parseISO8601Time(s, tz, calToDateConverter);
     }
 
     protected Date parseDateTime(String s, TimeZone tz,
             CalendarFieldsToDateConverter calToDateConverter) throws DateParseException {
-        return DateUtil.parseXSDateTime(s, tz, calToDateConverter);
+        return DateUtil.parseISO8601DateTime(s, tz, calToDateConverter);
     }
-
+    
     protected String getDateDescription() {
-        return "W3C XML Schema date";
+        return "ISO 8601 (subset) date";
     }
 
     protected String getTimeDescription() {
-        return "W3C XML Schema time";
+        return "ISO 8601 (subset) time";
     }
 
     protected String getDateTimeDescription() {
-        return "W3C XML Schema dateTime";
+        return "ISO 8601 (subset) date-time";
     }
 
 }
