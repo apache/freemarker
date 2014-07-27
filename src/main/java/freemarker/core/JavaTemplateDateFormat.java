@@ -5,7 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class JavaTemplateDateFormat implements TemplateDateFormat {
+/**
+ * Java {@link DateFormat}-based format.
+ */
+class JavaTemplateDateFormat extends TemplateDateFormat {
 
     private final DateFormat javaDateFormat;
 
@@ -25,6 +28,14 @@ class JavaTemplateDateFormat implements TemplateDateFormat {
         return javaDateFormat instanceof SimpleDateFormat
                 ? ((SimpleDateFormat) javaDateFormat).toPattern()
                 : javaDateFormat.toString();
+    }
+
+    public boolean isLocaleBound() {
+        return true;
+    }
+
+    public boolean isTimeZoneBound() {
+        return true;
     }
 
 }

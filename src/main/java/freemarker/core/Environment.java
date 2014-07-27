@@ -139,7 +139,7 @@ public final class Environment extends Configurable {
      */
     private CalendarFieldsToDateConverter calendarFieldsToDateConverter;
 
-    private Collator collator;
+    private Collator cachedCollator;
 
     private Writer out;
     private Macro.Context currentMacroContext;
@@ -205,7 +205,7 @@ public final class Environment extends Configurable {
         cachedTimeFormat = cachedDateFormat = cachedDateTimeFormat = null;
         cachedJavaDateFormatsSysDefTZ = null;
         cachedTimeFormatSysDefTZ = cachedDateFormatSysDefTZ = cachedDateTimeFormatSysDefTZ = null;
-        collator = null;
+        cachedCollator = null;
         cachedURLEscapingCharset = null;
         urlEscapingCharsetCached = false;
     }
@@ -756,18 +756,32 @@ public final class Environment extends Configurable {
         Locale prevLocale = getLocale();
         super.setLocale(locale);
         if (!locale.equals(prevLocale)) {
-            // Clear local format cache
-            
             cachedNumberFormats = null;
             cachedNumberFormat = null;
     
             cachedJavaDateFormats = null;
-            cachedTimeFormat = cachedDateFormat = cachedDateTimeFormat = null;
+            if (cachedTimeFormat != null && cachedTimeFormat.isLocaleBound()) {
+                cachedTimeFormat = null;
+            }
+            if (cachedDateFormat != null && cachedDateFormat.isLocaleBound()) {
+                cachedDateFormat = null;
+            }
+            if (cachedDateTimeFormat != null && cachedDateTimeFormat.isLocaleBound()) {
+                cachedDateTimeFormat = null;
+            }
     
             cachedJavaDateFormatsSysDefTZ = null;
-            cachedTimeFormatSysDefTZ = cachedDateFormatSysDefTZ = cachedDateTimeFormatSysDefTZ = null;
+            if (cachedTimeFormatSysDefTZ != null && cachedTimeFormatSysDefTZ.isLocaleBound()) {
+                cachedTimeFormatSysDefTZ = null;
+            }
+            if (cachedDateFormatSysDefTZ != null && cachedDateFormatSysDefTZ.isLocaleBound()) {
+                cachedDateFormatSysDefTZ = null;
+            }
+            if (cachedDateTimeFormatSysDefTZ != null && cachedDateTimeFormatSysDefTZ.isLocaleBound()) {
+                cachedDateTimeFormatSysDefTZ = null;
+            }
             
-            collator = null;
+            cachedCollator = null;
         }
     }
 
@@ -776,10 +790,16 @@ public final class Environment extends Configurable {
         super.setTimeZone(timeZone);
         
         if (!timeZone.equals(prevTimeZone)) {
-            // Clear local date format cache
-                
             cachedJavaDateFormats = null;
-            cachedTimeFormat = cachedDateFormat = cachedDateTimeFormat = null;
+            if (cachedTimeFormat != null && cachedTimeFormat.isTimeZoneBound()) {
+                cachedTimeFormat = null;
+            }
+            if (cachedDateFormat != null && cachedDateFormat.isTimeZoneBound()) {
+                cachedDateFormat = null;
+            }
+            if (cachedDateTimeFormat != null && cachedDateTimeFormat.isTimeZoneBound()) {
+                cachedDateTimeFormat = null;
+            }
             
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
@@ -844,10 +864,10 @@ public final class Environment extends Configurable {
     }
 
     Collator getCollator() {
-        if(collator == null) {
-            collator = Collator.getInstance(getLocale());
+        if(cachedCollator == null) {
+            cachedCollator = Collator.getInstance(getLocale());
         }
-        return collator;
+        return cachedCollator;
     }
     
     /**

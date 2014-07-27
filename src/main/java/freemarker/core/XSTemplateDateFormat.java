@@ -10,7 +10,7 @@ import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 /**
  * XML Schema format.
  */
-class XSTemplateDateFormat implements TemplateDateFormat {
+class XSTemplateDateFormat extends TemplateDateFormat {
 
     private final int dateType;
     private final TimeZone timeZone;
@@ -60,6 +60,14 @@ class XSTemplateDateFormat implements TemplateDateFormat {
         } else {
             return "W3C XML Schema <unknown>";
         }
+    }
+    
+    public boolean isLocaleBound() {
+        return false;
+    }
+
+    public boolean isTimeZoneBound() {
+        return true;
     }
 
 }

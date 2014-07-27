@@ -20795,10 +20795,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Naturally, <literal>"xs"</literal>,
-                  <literal>"xs_z"</literal> and <literal>"xs_nz"</literal> can
-                  also be used as the value of the
-                  <literal>date_format</literal>,
+                  <para><literal>"xs"</literal>, <literal>"xs_z"</literal> and
+                  <literal>"xs_nz"</literal> can also be used as the value of
+                  the <literal>date_format</literal>,
                   <literal>time_format</literal> and
                   <literal>datetime_format</literal> settings.</para>
                 </listitem>
