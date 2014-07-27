@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 
@@ -24,7 +25,8 @@ class XSTemplateDateFormat extends TemplateDateFormat {
         this.env = env;
     }
 
-    public String format(Date date) {
+    public String format(TemplateDateModel dateModel) throws TemplateModelException {
+        final Date date = dateModel.getAsDate();
         return DateUtil.dateToXSString(
                 date,
                 dateType != TemplateDateModel.TIME,

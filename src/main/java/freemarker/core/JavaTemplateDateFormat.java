@@ -5,6 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateModelException;
+
 /**
  * Java {@link DateFormat}-based format.
  */
@@ -16,8 +19,8 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
         this.javaDateFormat = javaDateFormat;
     }
 
-    public String format(Date date) {
-        return javaDateFormat.format(date);
+    public String format(TemplateDateModel dateModel) throws TemplateModelException {
+        return javaDateFormat.format(dateModel.getAsDate());
     }
 
     public Date parse(String s) throws ParseException {

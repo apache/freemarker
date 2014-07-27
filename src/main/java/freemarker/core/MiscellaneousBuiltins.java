@@ -174,7 +174,7 @@ class MiscellaneousBuiltins {
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
                 int dateType = dm.getDateType();
-                return new DateFormatter(EvalUtil.modelToDate(dm, target), dateType, env);
+                return new DateFormatter(dm, dateType, env);
             } else if (model instanceof SimpleScalar) {
                 return model;
             } else if (model instanceof TemplateBooleanModel) {
@@ -243,17 +243,15 @@ class MiscellaneousBuiltins {
             TemplateHashModel,
             TemplateMethodModel
         {
-            private final Date date;
-            private final int dateType;
+            private final TemplateDateModel dateModel;
             private final Environment env;
             private String cachedValue;
     
-            DateFormatter(Date date, int dateType, Environment env)
+            DateFormatter(TemplateDateModel dateModel, int dateType, Environment env)
             throws
                 TemplateModelException
             {
-                this.date = date;
-                this.dateType = dateType;
+                this.dateModel = dateModel;
                 this.env = env;
             }
     
@@ -262,7 +260,11 @@ class MiscellaneousBuiltins {
                 TemplateModelException
             {
                 if(cachedValue == null) {
-                    cachedValue = env.getTemplateDateFormat(dateType, date.getClass(), target).format(date);
+                    cachedValue = env.getTemplateDateFormat(
+                            dateModel.getDateType(),
+                            EvalUtil.modelToDate(dateModel, target).getClass(),
+                            target)
+                            .format(dateModel);
                 }
                 return cachedValue;
             }
@@ -271,7 +273,12 @@ class MiscellaneousBuiltins {
             throws
                 TemplateModelException
             {
-                return new SimpleScalar(env.getTemplateDateFormat(dateType, date.getClass(), key, target).format(date));
+                return new SimpleScalar(
+                        env.getTemplateDateFormat(
+                                dateModel.getDateType(),
+                                EvalUtil.modelToDate(dateModel, target).getClass(),
+                                key,
+                                target).format(dateModel));
             }
             
             public Object exec(List args) throws TemplateModelException {

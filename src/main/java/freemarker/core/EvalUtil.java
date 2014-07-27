@@ -79,7 +79,7 @@ class EvalUtil
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     static Date modelToDate(TemplateDateModel model, Expression expr)
-        throws TemplateModelException, TemplateException
+        throws TemplateModelException
     {
         Date value = model.getAsDate();
         if(value == null) throw newModelHasStoredNullException(Date.class, model, expr);
@@ -337,7 +337,7 @@ class EvalUtil
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel dm = (TemplateDateModel) tm;
             Date date = modelToDate(dm, exp);
-            return env.getTemplateDateFormat(dm.getDateType(), date.getClass(), exp).format(date);
+            return env.getTemplateDateFormat(dm.getDateType(), date.getClass(), exp).format(dm);
         } else if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {

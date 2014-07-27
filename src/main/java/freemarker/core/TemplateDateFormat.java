@@ -3,6 +3,10 @@ package freemarker.core;
 import java.text.DateFormat;
 import java.util.Date;
 
+import freemarker.template.TemplateDateModel;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
+
 /**
  * Represents a date/time/dateTime format; used in templates for formatting and parsing with that format.
  * This is similar to Java's {@link DateFormat}, but made to fit the requirements of FreeMarker. Also, it makes
@@ -15,8 +19,22 @@ import java.util.Date;
 // This class meant to become public one day, for allowing user-defined formats
 abstract class TemplateDateFormat {
     
-    public abstract String format(Date date);
-    
+    /**
+     * @param dateModel The date/time/dateTime to format. Most implementations will just work with the return value of
+     *          {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
+     *          a custom {@link TemplateDateModel} implementation.
+     *          
+     * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). This can also be {@code null},
+     *         in which case FreeMarker will fall back to an underlying format, if there's any, or else if will
+     *         throw a {@link TemplateException}.
+     */
+    public abstract String format(TemplateDateModel dateModel) throws TemplateModelException;
+
+    /**
+     * @return The date/time/dateTime interpretation of the text. This can also be {@code null},
+     *         in which case FreeMarker will fall back to an underlying format, if there's any, or else if will
+     *         throw a {@link TemplateException}.
+     */
     public abstract Date parse(String s) throws java.text.ParseException;
 
     /**
