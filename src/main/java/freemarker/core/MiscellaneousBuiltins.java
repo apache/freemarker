@@ -109,6 +109,7 @@ class MiscellaneousBuiltins {
         {
             private final String text;
             private final Environment env;
+            private final TemplateDateFormat defaultFormat;
             private Date cachedValue;
             
             DateParser(String text, Environment env)
@@ -117,11 +118,13 @@ class MiscellaneousBuiltins {
             {
                 this.text = text;
                 this.env = env;
+                // Deliberately creating a snapshot here:
+                this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target);
             }
             
             public Date getAsDate() throws TemplateModelException {
                 if(cachedValue == null) {
-                    cachedValue = parse(env.getTemplateDateFormat(dateType, Date.class, target));
+                    cachedValue = parse(defaultFormat);
                 }
                 return cachedValue;
             }
