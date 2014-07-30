@@ -31,7 +31,7 @@
 <#assign refTime = "15:30:44.512 +0000"?time>
 <#assign refDateTime = "AD 1998-10-30 15:30:44.512 +0000"?datetime>
 <#setting time_zone="UTC">
-<#list ['xs', 'xs_nz', 'xs_z'] as format>
+<#list ['xs', 'xs_nz', 'xs_fz'] as format>
   <#setting date_format=format>
   <#setting time_format=format>
   <#setting datetime_format=format>
@@ -39,7 +39,7 @@
   <@assertEquals expected=refTime actual="15:30:44.512Z"?time />
   <@assertEquals expected=refDateTime actual="1998-10-30T15:30:44.512Z"?datetime />
 </#list>
-<#list ['iso', 'iso_nz', 'iso_z'] as format>
+<#list ['iso', 'iso_nz', 'iso_fz'] as format>
   <#setting date_format=format>
   <#setting time_format=format>
   <#setting datetime_format=format>

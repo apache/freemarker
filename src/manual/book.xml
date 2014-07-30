@@ -13365,7 +13365,7 @@ Hungarian people write: 12 345 678,00</programlisting>
 
             <listitem>
               <para>XML Schema formats (since FreeMarker 2.3.21):
-              <literal>xs</literal>, <literal>xs_z</literal>,
+              <literal>xs</literal>, <literal>xs_fz</literal>,
               <literal>xs_nz</literal>. These will format the value to conform
               to the <literal>xs:date</literal>, <literal>xs:time</literal> or
               <literal>xs:dateTime</literal> XML Schema types, depending on
@@ -13374,19 +13374,20 @@ Hungarian people write: 12 345 678,00</programlisting>
               will show the time zone offset unless the Java type of the value
               is <literal>java.sql.Date</literal> or
               <literal>java.sql.Time</literal> (as those are assumed to come
-              from a time zone unaware source), <literal>xs_z</literal> will
-              always show the time zone offset, and <literal>xs_nz</literal>
+              from a time zone unaware source), <literal>xs_fz</literal>
+              (<quote>force zone</quote>) will always show the time zone
+              offset, and <literal>xs_nz</literal> (<quote>no zone</quote>)
               will never show it.</para>
             </listitem>
 
             <listitem>
               <para>ISO 8601 formats (since FreeMarker 2.3.21):
-              <literal>iso</literal>, <literal>iso_z</literal>,
+              <literal>iso</literal>, <literal>iso_fz</literal>,
               <literal>iso_nz</literal>. These will format the value to
-              conform to ISO 8601:2004. On the same time the format will
+              conform to ISO 8601:2004 extended format. The format will also
               conform to the XML Schema formats, where the two specifications
               don't conflict. Regarding the zone offset and
-              <literal>_z</literal> and <literal>_nz</literal> see XML Schema
+              <literal>_fz</literal> and <literal>_nz</literal> see XML Schema
               formats above.</para>
             </listitem>
           </itemizedlist>
@@ -13662,15 +13663,17 @@ Last updated time: 08:00:54 PM</programlisting>
           <para>These built-ins convert a date, time or date-time value to
           string that follows ISO 8601:2004 "extended" format.</para>
 
-          <note>
+          <important>
             <para>Since FreeMarker 2.3.21, you can also require this format as
             the default with the <literal>date_format</literal>,
             <literal>time_format</literal> and
             <literal>datetime_format</literal> settings, using the
-            <literal>"iso"</literal>, <literal>"iso_z"</literal> and
+            <literal>"iso"</literal>, <literal>"iso_fz"</literal> and
             <literal>"iso_nz"</literal> values. <link
-            linkend="ref_builtin_string_for_date">See more...</link></para>
-          </note>
+            linkend="ref_builtin_string_for_date">See more here.</link> Use
+            the date format setting instead of this built-in whenever
+            possible.</para>
+          </important>
 
           <para>This built-in has several variations:
           <literal>iso_utc</literal>, <literal>iso_local</literal>,
@@ -13725,13 +13728,15 @@ Last updated time: 08:00:54 PM</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>nz</literal> or <literal>z</literal> (optional):
-              When <literal>nz</literal> (like in
-              <literal>${foo?utc_local_nz}</literal>) , the time zone offset
-              (like <literal>+02:00</literal> or or <literal>-04:30</literal>
-              or <literal>Z</literal>) will not be displayed. When this is
-              <literal>z</literal> (like in
-              <literal>${foo?utc_local_z}</literal>), the zone offset will be
+              <para><literal>nz</literal> or <literal>fz</literal> (optional):
+              <literal>nz</literal> (like in
+              <literal>${foo?utc_local_nz}</literal>) stands for <quote>no
+              zone</quote>, which means that the time zone offset (like
+              <literal>+02:00</literal> or or <literal>-04:30</literal> or
+              <literal>Z</literal>) will not be displayed.
+              <literal>fz</literal> (like in
+              <literal>${foo?utc_local_fz}</literal>) stands for <quote>force
+              zone</quote>, which means that the zone offset will be
               displayed, except for date values, because ISO 8601 doesn't
               allow showing the offset if there's no time shown (unlike the
               XML Schema <literal>xs:date</literal> format). If this part is
@@ -13754,14 +13759,15 @@ Last updated time: 08:00:54 PM</programlisting>
                   second, and decimal second field values, so showing the time
                   zone doesn't make sense. Notable exceptions are PostgreSQL
                   "time with time zone" columns, where the
-                  <literal>?iso_..._z</literal> variations should be
+                  <literal>?iso_..._fz</literal> variations should be
                   used.</para>
                 </listitem>
               </itemizedlist>
 
               <para>Note that since FreeMarker 2.3.19, the offset always
               contains the minutes for XML Schema date/time/dateTime format
-              compliance.</para>
+              compliance. (However, if you primarily generate for the XML
+              Schema format, use the xs format.)</para>
             </listitem>
           </orderedlist>
 
@@ -16741,9 +16747,9 @@ or
               built-in</link>; see more explanation there. Examples:
               <literal>"short"</literal>, <literal>"long_medium"</literal>,
               <literal>"dd.MM.yyyy HH:mm:ss"</literal>,
-              <literal>"xs"</literal>/<literal>"xs_z"</literal>/<literal>"xs_nz"</literal>
-              (for XML Schema format with/without time zone),
-              <literal>iso</literal>, <literal>iso_z</literal>,
+              <literal>"xs"</literal>/<literal>"xs_fz"</literal>/<literal>"xs_nz"</literal>
+              (for XML Schema format, with forced and no time zone offset),
+              <literal>iso</literal>, <literal>iso_fz</literal>,
               <literal>iso_nz</literal> (for ISO 8601 formats).</para>
             </listitem>
 
@@ -20830,18 +20836,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <itemizedlist>
                     <listitem>
                       <para>XML Schema formats: <literal>"xs"</literal>,
-                      <literal>"xs_z"</literal> and
-                      <literal>"xs_nz"</literal>. The <literal>_z</literal>
-                      and <literal>_nz</literal> forces and disabled showing
+                      <literal>"xs_fz"</literal> and
+                      <literal>"xs_nz"</literal>. The <literal>_fz</literal>
+                      and <literal>_nz</literal> forces and disables showing
                       time zone offset, respectively. <literal>"xs"</literal>
-                      will show zone offset show except for
+                      will show zone offset, except for
                       <literal>java.sql.Date</literal> and
                       <literal>java.sql.Time</literal>.</para>
                     </listitem>
 
                     <listitem>
                       <para>ISO 8601 formats: <literal>"iso"</literal>,
-                      <literal>"iso_z"</literal>,
+                      <literal>"iso_fz"</literal>,
                       <literal>"iso_nz"</literal></para>
                     </listitem>
                   </itemizedlist>
@@ -20869,15 +20875,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   configuration setting is at least 2.3.21, the
                   <literal>?iso_...</literal> built-ins won't show time zone
                   offset for <literal>java.sql.Time</literal> values anymore,
-                  except those that look like <literal>?iso_..._z</literal>.
-                  The variations ending with <literal>_z</literal> are new in
+                  except those that look like <literal>?iso_..._fz</literal>.
+                  The variations ending with <literal>_fz</literal> are new in
                   this release, and they force showing time zone offset,
                   except for date-only values, where ISO 8601 doesn't allow
                   that. Most databases store time values that aren't in any
                   time zone, but just store hour, minute, second, and decimal
                   second field values, so showing the time zone doesn't make
                   sense. Notable exceptions are PostgreSQL "time with time
-                  zone" columns, where the <literal>?iso_..._z</literal>
+                  zone" columns, where the <literal>?iso_..._fz</literal>
                   variations should be used.</para>
                 </listitem>
 

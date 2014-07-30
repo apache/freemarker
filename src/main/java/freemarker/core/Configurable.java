@@ -595,11 +595,11 @@ public class Configurable
      * <ul>
      *   <li><p>Patterns accepted by Java's {@link SimpleDateFormat}, for example {@code "dd.MM.yyyy HH:mm:ss"}
      *   
-     *   <li><p>{@code "xs"} or {@code "xs_z"} or {@code "xs_nz"} for XML Schema format,
-     *       and {@code "iso"} or {@code "iso_z"} or {@code "iso_nz"} for ISO 8601 format.
+     *   <li><p>{@code "xs"} or {@code "xs_fz"} or {@code "xs_nz"} for XML Schema format,
+     *       and {@code "iso"} or {@code "iso_fz"} or {@code "iso_nz"} for ISO 8601 format.
      *       <p>The meaning of the postfixes:
-     *       {@code ..._z} = always show time zone offset;
-     *       {@code ..._nz} = never show time zone offset;
+     *       {@code ..._fz} = "Force Zone", always show time zone offset;
+     *       {@code ..._nz} = "No Zone", never show time zone offset;
      *       no postfix = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
      *       and {@link java.sql.Time java.sql.Time}.
      *       None of these postfixes influence parsing, that is, even if you use "iso_nz", "2012-01-01T15:30+01" will

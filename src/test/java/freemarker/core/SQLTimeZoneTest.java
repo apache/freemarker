@@ -72,18 +72,18 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     
     private static final String FTL =
             "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
-            + "${sqlDate?iso_local_z} ${sqlTime?iso_local_z} "
-            + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n"
-            + "${sqlDate?string.xs_z} ${sqlTime?string.xs_z} "
-            + "${sqlTimestamp?string.xs_z} ${javaDate?datetime?string.xs_z}\n"
+            + "${sqlDate?iso_local_fz} ${sqlTime?iso_local_fz} "
+            + "${sqlTimestamp?iso_local_fz} ${javaDate?datetime?iso_local_fz}\n"
+            + "${sqlDate?string.xs_fz} ${sqlTime?string.xs_fz} "
+            + "${sqlTimestamp?string.xs_fz} ${javaDate?datetime?string.xs_fz}\n"
             + "${sqlDate?string.xs} ${sqlTime?string.xs} "
             + "${sqlTimestamp?string.xs} ${javaDate?datetime?string.xs}\n"
             + "<#setting time_zone='GMT'>\n"
             + "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
-            + "${sqlDate?iso_local_z} ${sqlTime?iso_local_z} "
-            + "${sqlTimestamp?iso_local_z} ${javaDate?datetime?iso_local_z}\n"
-            + "${sqlDate?string.xs_z} ${sqlTime?string.xs_z} "
-            + "${sqlTimestamp?string.xs_z} ${javaDate?datetime?string.xs_z}\n"
+            + "${sqlDate?iso_local_fz} ${sqlTime?iso_local_fz} "
+            + "${sqlTimestamp?iso_local_fz} ${javaDate?datetime?iso_local_fz}\n"
+            + "${sqlDate?string.xs_fz} ${sqlTime?string.xs_fz} "
+            + "${sqlTimestamp?string.xs_fz} ${javaDate?datetime?string.xs_fz}\n"
             + "${sqlDate?string.xs} ${sqlTime?string.xs} "
             + "${sqlTimestamp?string.xs} ${javaDate?datetime?string.xs}\n";
 

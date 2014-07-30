@@ -1133,10 +1133,11 @@ public final class Environment extends Configurable {
             final Boolean showZoneOffset;
             if (keyLen == 2) {  // "xs" => automatically decide if zone will be shown
                 showZoneOffset = null;
-            } else if (keyLen > 3 && nameOrPattern.charAt(2) == '_') {  // "xs_<something>"
-                if (keyLen == 4 && nameOrPattern.charAt(3) == 'z') {  // "xs_z"
+            } else if (keyLen == 5 && nameOrPattern.charAt(2) == '_' && nameOrPattern.charAt(4) == 'z') {  // "xs_XX"
+                final char c3 = nameOrPattern.charAt(3);
+                if (c3 == 'f') {  // "xs_fz"
                     showZoneOffset = Boolean.TRUE;
-                } else if (keyLen == 5 && nameOrPattern.charAt(3) == 'n' && nameOrPattern.charAt(4) == 'z') { // "xs_nz"
+                } else if (c3 == 'n') { // "xs_nz"
                     showZoneOffset = Boolean.FALSE;
                 } else {
                     throw newIllegalXSDateFormatKey(nameOrPattern);
@@ -1153,10 +1154,11 @@ public final class Environment extends Configurable {
             final Boolean showZoneOffset;
             if (keyLen == 3) {  // "iso" => automatically decide if zone will be shown
                 showZoneOffset = null;
-            } else if (keyLen > 4 && nameOrPattern.charAt(3) == '_') {  // "iso_<something>"
-                if (keyLen == 5 && nameOrPattern.charAt(4) == 'z') {  // "xs_z"
+            } else if (keyLen == 6 && nameOrPattern.charAt(3) == '_' && nameOrPattern.charAt(5) == 'z') {  // "iso_XX"
+                final char c4 = nameOrPattern.charAt(4);
+                if (c4 == 'f') {  // "iso_fz"
                     showZoneOffset = Boolean.TRUE;
-                } else if (keyLen == 6 && nameOrPattern.charAt(4) == 'n' && nameOrPattern.charAt(5) == 'z') { // "xs_nz"
+                } else if (c4 == 'n') { // "iso_nz"
                     showZoneOffset = Boolean.FALSE;
                 } else {
                     throw newIllegalISODateFormatKey(nameOrPattern);
@@ -1174,14 +1176,14 @@ public final class Environment extends Configurable {
         return new _TemplateModelException(new Object[] {
                 "Illegal date format, ", new _DelayedJQuote(key),
                 ". A format that starts with \"xs\" must be one of "
-                + "\"xs\", \"xs_z\", and \"xs_nz\"." });
+                + "\"xs\", \"xs_fz\", and \"xs_nz\"." });
     }
 
     private _TemplateModelException newIllegalISODateFormatKey(String key) {
         return new _TemplateModelException(new Object[] {
                 "Illegal date format, ", new _DelayedJQuote(key),
                 ". A format that starts with \"iso\" must be one of "
-                + "\"iso\", \"iso_z\", and \"iso_nz\"." });
+                + "\"iso\", \"iso_fz\", and \"iso_nz\"." });
     }
     
     private void checkDateTypeNotUnknown(int dateType, Expression blame) throws _TemplateModelException {
