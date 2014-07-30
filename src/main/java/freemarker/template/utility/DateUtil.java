@@ -38,43 +38,59 @@ public class DateUtil {
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     
     private static final String REGEX_XS_TIME_ZONE
-            = "Z|([-+][0-9]{2}:[0-9]{2})";
-    private static final String REGEX_ISO8601_TIME_ZONE
-            = "Z|([-+][0-9]{2}(?::?[0-9]{2})?)";
+            = "Z|(?:[-+][0-9]{2}:[0-9]{2})";
+    private static final String REGEX_ISO8601_BASIC_TIME_ZONE
+            = "Z|(?:[-+][0-9]{2}(?:[0-9]{2})?)";
+    private static final String REGEX_ISO8601_EXTENDED_TIME_ZONE
+            = "Z|(?:[-+][0-9]{2}(?::[0-9]{2})?)";
     
     private static final String REGEX_XS_OPTIONAL_TIME_ZONE
             = "(" + REGEX_XS_TIME_ZONE + ")?";
-    private static final String REGEX_ISO8601_OPTIONAL_TIME_ZONE
-    = "(" + REGEX_ISO8601_TIME_ZONE + ")?";
+    private static final String REGEX_ISO8601_BASIC_OPTIONAL_TIME_ZONE
+            = "(" + REGEX_ISO8601_BASIC_TIME_ZONE + ")?";
+    private static final String REGEX_ISO8601_EXTENDED_OPTIONAL_TIME_ZONE
+            = "(" + REGEX_ISO8601_EXTENDED_TIME_ZONE + ")?";
     
     private static final String REGEX_XS_DATE_BASE
             = "(-?[0-9]+)-([0-9]{2})-([0-9]{2})";
-    private static final String REGEX_ISO8601_DATE_BASE
-            = "(-?[0-9]{1,4})-?([0-9]{2})-?([0-9]{2})";
+    private static final String REGEX_ISO8601_BASIC_DATE_BASE
+            = "(-?[0-9]{4,}?)([0-9]{2})([0-9]{2})";
+    private static final String REGEX_ISO8601_EXTENDED_DATE_BASE
+            = "(-?[0-9]{4,})-([0-9]{2})-([0-9]{2})";
     
     private static final String REGEX_XS_TIME_BASE
             = "([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\\.([0-9]+))?";
-    private static final String REGEX_ISO8601_TIME_BASE
-            = "([0-9]{2})(?::?([0-9]{2})(?::?([0-9]{2})(?:[\\.,]([0-9]+))?)?)?";
+    private static final String REGEX_ISO8601_BASIC_TIME_BASE
+            = "([0-9]{2})(?:([0-9]{2})(?:([0-9]{2})(?:[\\.,]([0-9]+))?)?)?";
+    private static final String REGEX_ISO8601_EXTENDED_TIME_BASE
+            = "([0-9]{2})(?::([0-9]{2})(?::([0-9]{2})(?:[\\.,]([0-9]+))?)?)?";
         
     private static final Pattern PATTERN_XS_DATE = Pattern.compile(
             REGEX_XS_DATE_BASE + REGEX_XS_OPTIONAL_TIME_ZONE);
-    private static final Pattern PATTERN_ISO8601_DATE = Pattern.compile(
-            REGEX_ISO8601_DATE_BASE); // No time zone allowed here
+    private static final Pattern PATTERN_ISO8601_BASIC_DATE = Pattern.compile(
+            REGEX_ISO8601_BASIC_DATE_BASE); // No time zone allowed here
+    private static final Pattern PATTERN_ISO8601_EXTENDED_DATE = Pattern.compile(
+            REGEX_ISO8601_EXTENDED_DATE_BASE); // No time zone allowed here
 
     private static final Pattern PATTERN_XS_TIME = Pattern.compile(
             REGEX_XS_TIME_BASE + REGEX_XS_OPTIONAL_TIME_ZONE);
-    private static final Pattern PATTERN_ISO8601_TIME = Pattern.compile(
-            REGEX_ISO8601_TIME_BASE + REGEX_ISO8601_OPTIONAL_TIME_ZONE);
+    private static final Pattern PATTERN_ISO8601_BASIC_TIME = Pattern.compile(
+            REGEX_ISO8601_BASIC_TIME_BASE + REGEX_ISO8601_BASIC_OPTIONAL_TIME_ZONE);
+    private static final Pattern PATTERN_ISO8601_EXTENDED_TIME = Pattern.compile(
+            REGEX_ISO8601_EXTENDED_TIME_BASE + REGEX_ISO8601_EXTENDED_OPTIONAL_TIME_ZONE);
     
     private static final Pattern PATTERN_XS_DATE_TIME = Pattern.compile(
             REGEX_XS_DATE_BASE
             + "T" + REGEX_XS_TIME_BASE
             + REGEX_XS_OPTIONAL_TIME_ZONE);
-    private static final Pattern PATTERN_ISO8601_DATE_TIME = Pattern.compile(
-            REGEX_ISO8601_DATE_BASE
-            + "T" + REGEX_ISO8601_TIME_BASE
-            + REGEX_ISO8601_OPTIONAL_TIME_ZONE);
+    private static final Pattern PATTERN_ISO8601_BASIC_DATE_TIME = Pattern.compile(
+            REGEX_ISO8601_BASIC_DATE_BASE
+            + "T" + REGEX_ISO8601_BASIC_TIME_BASE
+            + REGEX_ISO8601_BASIC_OPTIONAL_TIME_ZONE);
+    private static final Pattern PATTERN_ISO8601_EXTENDED_DATE_TIME = Pattern.compile(
+            REGEX_ISO8601_EXTENDED_DATE_BASE
+            + "T" + REGEX_ISO8601_EXTENDED_TIME_BASE
+            + REGEX_ISO8601_EXTENDED_OPTIONAL_TIME_ZONE);
     
     private static final Pattern PATTERN_XS_TIME_ZONE = Pattern.compile(
             REGEX_XS_TIME_ZONE);
@@ -406,9 +422,14 @@ public class DateUtil {
             String dateStr, TimeZone defaultTimeZone,
             CalendarFieldsToDateConverter calToDateConverter) 
             throws DateParseException {
-        Matcher m = PATTERN_ISO8601_DATE.matcher(dateStr);
+        Matcher m = PATTERN_ISO8601_EXTENDED_DATE.matcher(dateStr);
         if (!m.matches()) {
-            throw new DateParseException("The value didn't match the expected pattern: " + PATTERN_ISO8601_DATE); 
+            m = PATTERN_ISO8601_BASIC_DATE.matcher(dateStr);
+            if (!m.matches()) {
+                throw new DateParseException("The value didn't match the expected pattern: "
+                            + PATTERN_ISO8601_EXTENDED_DATE + " or "
+                            + PATTERN_ISO8601_BASIC_DATE);
+            }
         }
         return parseDate_parseMatcher(
                 m, defaultTimeZone, false, calToDateConverter);
@@ -421,7 +442,7 @@ public class DateUtil {
             throws DateParseException {
         NullArgumentException.check("defaultTZ", defaultTZ);
         try {
-            int year = parseXS_groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int year = groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
             
             int era;
             // Starting from ISO 8601:2000 Second Edition, 0001 is AD 1, 0000 is BC 1, -0001 is BC 2.
@@ -437,10 +458,10 @@ public class DateUtil {
                 era = GregorianCalendar.AD;
             }
             
-            int month = parseXS_groupToInt(m.group(2), "month", 1, 12) - 1;
-            int day = parseXS_groupToInt(m.group(3), "day-of-month", 1, 31);
+            int month = groupToInt(m.group(2), "month", 1, 12) - 1;
+            int day = groupToInt(m.group(3), "day-of-month", 1, 31);
 
-            TimeZone tz = xsMode ? parseXS_parseTimeZone(m.group(4), defaultTZ) : defaultTZ;
+            TimeZone tz = xsMode ? parseMatchingTimeZone(m.group(4), defaultTZ) : defaultTZ;
             
             return calToDateConverter.calculate(era, year, month, day, 0, 0, 0, 0, false, tz);
         } catch (IllegalArgumentException e) {
@@ -473,9 +494,14 @@ public class DateUtil {
     public static Date parseISO8601Time(
             String timeStr, TimeZone defaultTZ, CalendarFieldsToDateConverter calToDateConverter) 
             throws DateParseException {
-        Matcher m = PATTERN_ISO8601_TIME.matcher(timeStr);
+        Matcher m = PATTERN_ISO8601_EXTENDED_TIME.matcher(timeStr);
         if (!m.matches()) {
-            throw new DateParseException("The value didn't match the expected pattern: " + PATTERN_ISO8601_TIME);
+            m = PATTERN_ISO8601_BASIC_TIME.matcher(timeStr);
+            if (!m.matches()) {
+                throw new DateParseException("The value didn't match the expected pattern: "
+                            + PATTERN_ISO8601_EXTENDED_TIME + " or "
+                            + PATTERN_ISO8601_BASIC_TIME);
+            }
         }
         return parseTime_parseMatcher(m, defaultTZ, calToDateConverter);
     }
@@ -488,7 +514,7 @@ public class DateUtil {
         try {
             // ISO 8601 allows both 00:00 and 24:00,
             // but Calendar.set(...) doesn't if the Calendar is not lenient.
-            int hours = parseXS_groupToInt(m.group(1), "hour-of-day", 0, 24);
+            int hours = groupToInt(m.group(1), "hour-of-day", 0, 24);
             boolean hourWas24;
             if (hours == 24) {
                 hours = 0;
@@ -499,17 +525,17 @@ public class DateUtil {
             }
             
             final String minutesStr = m.group(2);
-            int minutes = minutesStr != null ? parseXS_groupToInt(minutesStr, "minute", 0, 59) : 0;
+            int minutes = minutesStr != null ? groupToInt(minutesStr, "minute", 0, 59) : 0;
             
             final String secsStr = m.group(3);
             // Allow 60 because of leap seconds
-            int secs = secsStr != null ? parseXS_groupToInt(secsStr, "second", 0, 60) : 0;
+            int secs = secsStr != null ? groupToInt(secsStr, "second", 0, 60) : 0;
             
-            int millisecs = parseXS_groupToMillisecond(m.group(4));
+            int millisecs = groupToMillisecond(m.group(4));
             
             // As a time is just the distance from the beginning of the day,
             // the time-zone offest should be 0 usually.
-            TimeZone tz = parseXS_parseTimeZone(m.group(5), defaultTZ);
+            TimeZone tz = parseMatchingTimeZone(m.group(5), defaultTZ);
             
             // Continue handling the 24:00 special case
             int day;
@@ -562,10 +588,14 @@ public class DateUtil {
     public static Date parseISO8601DateTime(
             String dateTimeStr, TimeZone defaultTZ, CalendarFieldsToDateConverter calToDateConverter) 
             throws DateParseException {
-        Matcher m = PATTERN_ISO8601_DATE_TIME.matcher(dateTimeStr);
+        Matcher m = PATTERN_ISO8601_EXTENDED_DATE_TIME.matcher(dateTimeStr);
         if (!m.matches()) {
-            throw new DateParseException(
-                    "The value didn't match the expected pattern: " + PATTERN_ISO8601_DATE_TIME);
+            m = PATTERN_ISO8601_BASIC_DATE_TIME.matcher(dateTimeStr);
+            if (!m.matches()) {
+                throw new DateParseException("The value (" + dateTimeStr + ") didn't match the expected pattern: "
+                            + PATTERN_ISO8601_EXTENDED_DATE_TIME + " or "
+                            + PATTERN_ISO8601_BASIC_DATE_TIME);
+            }
         }
         return parseDateTime_parseMatcher(
                 m, defaultTZ, false, calToDateConverter);
@@ -578,7 +608,7 @@ public class DateUtil {
             throws DateParseException {
         NullArgumentException.check("defaultTZ", defaultTZ);
         try {
-            int year = parseXS_groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int year = groupToInt(m.group(1), "year", Integer.MIN_VALUE, Integer.MAX_VALUE);
             
             int era;
             // Starting from ISO 8601:2000 Second Edition, 0001 is AD 1, 0000 is BC 1, -0001 is BC 2.
@@ -594,12 +624,12 @@ public class DateUtil {
                 era = GregorianCalendar.AD;
             }
             
-            int month = parseXS_groupToInt(m.group(2), "month", 1, 12) - 1;
-            int day = parseXS_groupToInt(m.group(3), "day-of-month", 1, 31);
+            int month = groupToInt(m.group(2), "month", 1, 12) - 1;
+            int day = groupToInt(m.group(3), "day-of-month", 1, 31);
             
             // ISO 8601 allows both 00:00 and 24:00,
             // but cal.set(...) doesn't if the Calendar is not lenient.
-            int hours = parseXS_groupToInt(m.group(4), "hour-of-day", 0, 24);
+            int hours = groupToInt(m.group(4), "hour-of-day", 0, 24);
             boolean hourWas24;
             if (hours == 24) {
                 hours = 0;
@@ -610,17 +640,17 @@ public class DateUtil {
             }
             
             final String minutesStr = m.group(5);
-            int minutes = minutesStr != null ? parseXS_groupToInt(minutesStr, "minute", 0, 59) : 0;
+            int minutes = minutesStr != null ? groupToInt(minutesStr, "minute", 0, 59) : 0;
             
             final String secsStr = m.group(6);
             // Allow 60 because of leap seconds
-            int secs = secsStr != null ? parseXS_groupToInt(secsStr, "second", 0, 60) : 0;
+            int secs = secsStr != null ? groupToInt(secsStr, "second", 0, 60) : 0;
             
-            int millisecs = parseXS_groupToMillisecond(m.group(7));
+            int millisecs = groupToMillisecond(m.group(7));
             
             // As a time is just the distance from the beginning of the day,
             // the time-zone offest should be 0 usually.
-            TimeZone tz = parseXS_parseTimeZone(m.group(8), defaultTZ);
+            TimeZone tz = parseMatchingTimeZone(m.group(8), defaultTZ);
             
             // Continue handling the 24:00 specail case
             if (hourWas24) {
@@ -654,10 +684,10 @@ public class DateUtil {
             throw new DateParseException(
                     "The time zone offset didn't match the expected pattern: " + PATTERN_XS_TIME_ZONE);
         }
-        return parseXS_parseTimeZone(timeZoneStr, null);
+        return parseMatchingTimeZone(timeZoneStr, null);
     }
 
-    private static int parseXS_groupToInt(String g, String gName,
+    private static int groupToInt(String g, String gName,
             int min, int max)
             throws DateParseException {
         if (g == null) {
@@ -705,7 +735,7 @@ public class DateUtil {
         }
     }
 
-    private static TimeZone parseXS_parseTimeZone(
+    private static TimeZone parseMatchingTimeZone(
             String s, TimeZone defaultZone)
             throws DateParseException {
         if (s == null) {
@@ -720,7 +750,7 @@ public class DateUtil {
         sb.append(s.charAt(0));
         
         String h = s.substring(1, 3);
-        parseXS_groupToInt(h, "offset-hours", 0, 23);
+        groupToInt(h, "offset-hours", 0, 23);
         sb.append(h);
         
         String m;
@@ -728,7 +758,7 @@ public class DateUtil {
         if (ln > 3) {
             int startIdx = s.charAt(3) == ':' ? 4 : 3;
             m = s.substring(startIdx, startIdx + 2);
-            parseXS_groupToInt(m, "offset-minutes", 0, 59);
+            groupToInt(m, "offset-minutes", 0, 59);
             sb.append(':');
             sb.append(m);
         }
@@ -736,7 +766,7 @@ public class DateUtil {
         return TimeZone.getTimeZone(sb.toString());
     }
 
-    private static int parseXS_groupToMillisecond(String g)
+    private static int groupToMillisecond(String g)
             throws DateParseException {
         if (g == null) {
             return 0;
@@ -745,7 +775,7 @@ public class DateUtil {
         if (g.length() > 3) {
             g = g.substring(0, 3);
         }
-        int i = parseXS_groupToInt(g, "partial-seconds", 0, Integer.MAX_VALUE);
+        int i = groupToInt(g, "partial-seconds", 0, Integer.MAX_VALUE);
         return g.length() == 1 ? i * 100 : (g.length() == 2 ? i * 10 : i);
     }
     

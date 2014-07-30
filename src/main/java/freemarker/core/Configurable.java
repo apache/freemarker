@@ -601,7 +601,9 @@ public class Configurable
      *       {@code ..._z} = always show time zone offset;
      *       {@code ..._nz} = never show time zone offset;
      *       no postfix = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
-     *       and {@link java.sql.Time java.sql.Time}
+     *       and {@link java.sql.Time java.sql.Time}.
+     *       None of these postfixes influence parsing, that is, even if you use "iso_nz", "2012-01-01T15:30+01" will
+     *       be parsed successfully.
      *       
      *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
      *       defined by the Java platform (see in the documentation of {@link java.text.DateFormat}):

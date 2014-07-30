@@ -11654,7 +11654,12 @@ Green Mouse</programlisting>
           <programlisting role="template">&lt;#-- The date_format, time_format and datetime_format settings must match this format! --&gt;
 &lt;#assign someDate = "Oct 25, 1995"?date&gt;
 &lt;#assign someTime = "3:05:30 PM"?time&gt;
-&lt;#assign someDatetime = "Oct 25, 1995 03:05:00 PM"?datetime&gt;</programlisting>
+&lt;#assign someDatetime = "Oct 25, 1995 03:05:00 PM"?datetime&gt;
+
+&lt;#-- Changing the setting value changes the expected format: --&gt;
+&lt;#setting datetime_format="iso"&gt;
+&lt;#assign someDatetime = "1995-10-25T15:05"?datetime&gt;
+</programlisting>
 
           <para>You can also specify the format explicitly with a parameter,
           using <link
@@ -11694,14 +11699,20 @@ Oct 25, 1995 3:05:00 PM</programlisting>
           the predefined patterns, as the subvariables of the built-in. The
           predefined formats are: <literal>short</literal>,
           <literal>medium</literal> and <literal>long</literal>, which refer
-          to the standard Java locale dependent formats, and
-          <literal>xs</literal> that refers to the W3C XML Schema
-          format:</para>
+          to the standard Java locale dependent formats, <literal>xs</literal>
+          that refers to the W3C XML Schema format, and <literal>iso</literal>
+          that refers to ISO 8601:2004 format (a subset of it, actually: if
+          there's a date part, it must use year, month and <quote>day of the
+          month</quote> values, where the day can't be omitted, etc):</para>
 
           <programlisting role="template">&lt;#-- Parsing xs:date, xs:time and xs:dateTime values: --&gt;
 &lt;#assign someDate = "1995-10-25"?date.xs&gt;
 &lt;#assign someTime = "15:05:30"?time.xs&gt;
-&lt;#assign someDatetime = "1995-10-25T15:05:00"?datetime.xs&gt;</programlisting>
+&lt;#assign someDatetime = "1995-10-25T15:05:00"?datetime.xs&gt;
+
+&lt;#-- Parsing ISO 8601 (both extended and basic formats): --&gt;
+&lt;#assign someDatetime = "1995-10-25T15:05"?datetime.iso&gt;
+&lt;#assign someDatetime = "19951025T1505"?datetime.iso&gt;</programlisting>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
