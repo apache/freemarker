@@ -38,7 +38,8 @@ class MessageUtil {
     
     static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
             UNKNOWN_DATE_TYPE_ERROR_TIP,
-            "Use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), to specify which fields to display."
+            "If you need a particular format only once, use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), "
+            + "to specify which fields to display. "
     };
 
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";
@@ -256,6 +257,21 @@ class MessageUtil {
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
         return new _MiscTemplateException(env, new Object[] {
                 "Instantiating ", className, " is not allowed in the template for security reasons." });
+    }
+    
+    static _TemplateModelException newCantFormatUnknownTypeDateException(
+            Expression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
+        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
+                MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
+                .blame(dateSourceExpr)
+                .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
+    }
+
+    static TemplateModelException newCantFormatDateException(
+            Expression dateSourceExpr, UnformattableDateException cause) {
+        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
+                cause.getMessage())
+                .blame(dateSourceExpr));
     }
 
     /**

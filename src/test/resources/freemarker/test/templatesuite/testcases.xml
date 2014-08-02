@@ -46,7 +46,13 @@
    </testcase>
    <testcase name="comment" />
    <testcase name="comparisons" />
-   <testcase name="dateformat" />
+   <testcase name="dateformat-java" />
+   <testcase name="dateformat-xs" />
+   <!-- testcase name="dateformat-iso" / -->
+   <testcase name="dateformat-iso-bi" />
+   <testcase name="dateformat-iso-bi-ici-2.3.21" template="dateformat-iso-bi.ftl" expected="dateformat-iso-bi-ici-2.3.21.txt">
+      <config incompatible_improvements="2.3.21" /> 
+   </testcase>   
    <testcase name="dateparsing" nooutput="true" />
    <testcase name="default"/>
    <testcase name="default-xmlns">
@@ -159,11 +165,6 @@
       <config output_encoding="utf-8"/>
       <config url_escaping_charset="iso-8859-1"/>
    </testcase>   
-   <testcase name="iso8601" />
-   <testcase name="iso8601-ici-2.3.21" template="iso8601.ftl" expected="iso8601-ici-2.3.21.txt">
-      <config incompatible_improvements="2.3.21" /> 
-   </testcase>   
-   <testcase name="string-xs" />
    <testcase name="number-to-date" />
    <testcase name="varargs" />
    <testcase name="overloaded-methods-23bc" nooutput="true" />

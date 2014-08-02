@@ -1,5 +1,6 @@
 package freemarker.core;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -13,10 +14,14 @@ import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
  */
 final class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
 
-    public XSTemplateDateFormat(int dateType, TimeZone timeZone, Boolean showZoneOffset, Environment env) {
-        super(dateType, timeZone, showZoneOffset, env);
+    XSTemplateDateFormat(
+            String settingValue, int parsingStart,
+            int dateType, TimeZone timeZone,
+            ISOLikeTemplateDateFormatFactory factory)
+            throws ParseException, UnknownDateTypeFormattingUnsupportedException {
+        super(settingValue, parsingStart, dateType, timeZone, factory);
     }
-
+    
     protected String format(Date date, boolean datePart, boolean timePart, boolean offsetPart, int accuracy,
             TimeZone timeZone, DateToISO8601CalendarFactory calendarFactory) {
         return DateUtil.dateToXSString(
@@ -48,6 +53,10 @@ final class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
 
     protected String getDateTimeDescription() {
         return "W3C XML Schema dateTime";
+    }
+
+    protected boolean isXSMode() {
+        return true;
     }
 
 }

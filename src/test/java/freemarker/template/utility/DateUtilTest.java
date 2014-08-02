@@ -249,6 +249,62 @@ public class DateUtilTest extends TestCase {
         assertEquals("2000-02-08T09Z",
                 dateToISO8601String(d, true, true, true,
                         DateUtil.ACCURACY_HOURS, null));
+        
+        d = df.parse("AD 1998-10-30 19:30:00:000 +0400");
+        assertEquals(
+                "15:30:00Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.000Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.000Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
+                
+        d = df.parse("AD 1998-10-30 19:30:00:100 +0400");
+        assertEquals(
+                "15:30:00.1Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.100Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.1Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.100Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
+        
+        d = df.parse("AD 1998-10-30 19:30:00:010 +0400");
+        assertEquals(
+                "15:30:00.01Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.010Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.01Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.010Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
+        
+        d = df.parse("AD 1998-10-30 19:30:00:001 +0400");
+        assertEquals(
+                "15:30:00.001Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.001Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.001Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.001Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
     }
 
     public void testXSFormatISODeviations() throws ParseException, UnrecognizedTimeZoneException {
@@ -305,7 +361,13 @@ public class DateUtilTest extends TestCase {
         return dateToISO8601String(date, true, true, offsetPart,
                 DateUtil.ACCURACY_MILLISECONDS, DateUtil.UTC);
     }
-    
+
+    private String dateToISO8601UTCDateTimeMSFString(
+            Date date, boolean offsetPart) {
+        return dateToISO8601String(date, true, true, offsetPart,
+                DateUtil.ACCURACY_MILLISECONDS_FORCED, DateUtil.UTC);
+    }
+        
     private String dateToISO8601DateString(Date date, TimeZone tz) {
         return dateToISO8601String(date, true, false, false,
                 DateUtil.ACCURACY_SECONDS, tz);
@@ -332,6 +394,12 @@ public class DateUtilTest extends TestCase {
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, false, true, offsetPart,
                 DateUtil.ACCURACY_MILLISECONDS, DateUtil.UTC);
+    }
+
+    private String dateToISO8601UTCTimeMSFString(
+            Date date, boolean offsetPart) {
+        return dateToISO8601String(date, false, true, offsetPart,
+                DateUtil.ACCURACY_MILLISECONDS_FORCED, DateUtil.UTC);
     }
     
     private String dateToISO8601String(

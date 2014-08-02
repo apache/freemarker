@@ -474,7 +474,7 @@ public class TemplateException extends Exception {
         synchronized (lock) {
             if (!positionsCalculated) {
                 calculatePosition();
-                }
+            }
             return templateName;
         }
     }

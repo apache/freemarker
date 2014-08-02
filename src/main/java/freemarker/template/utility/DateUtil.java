@@ -30,10 +30,30 @@ import java.util.regex.Pattern;
  */
 public class DateUtil {
 
+    /**
+     * Show hours (24h); always 2 digits, like {@code 00}, {@code 05}, etc.
+     */
     public static final int ACCURACY_HOURS = 4;
+    
+    /**
+     * Show hours and minutes (even if minutes is 00).
+     */
     public static final int ACCURACY_MINUTES = 5;
+    
+    /**
+     * Show hours, minutes and seconds (even if seconds is 00).
+     */
     public static final int ACCURACY_SECONDS = 6;
+    
+    /**
+     * Show hours, minutes and seconds and up to 3 fraction second digits, without trailing 0-s in the fraction part. 
+     */
     public static final int ACCURACY_MILLISECONDS = 7;
+    
+    /**
+     * Show hours, minutes and seconds and exactly 3 fraction second digits (even if it's 000)
+     */
+    public static final int ACCURACY_MILLISECONDS_FORCED = 8;
     
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     
@@ -324,7 +344,8 @@ public class DateUtil {
             
                     if (accuracy >= ACCURACY_MILLISECONDS) {
                         x = cal.get(Calendar.MILLISECOND);
-                        if (x != 0) {
+                        int forcedDigits = accuracy == ACCURACY_MILLISECONDS_FORCED ? 3 : 0;
+                        if (x != 0 || forcedDigits != 0) {
                             if (x > 999) {
                                 // Shouldn't ever happen...
                                 throw new RuntimeException(
@@ -333,8 +354,9 @@ public class DateUtil {
                             res[dstIdx++] = '.';
                             do {
                                 res[dstIdx++] = (char) ('0' + (x / 100));
+                                forcedDigits--;
                                 x = x % 100 * 10;
-                            } while (x != 0);
+                            } while (x != 0 || forcedDigits > 0);
                         }
                     }
                 }
@@ -816,13 +838,18 @@ public class DateUtil {
             implements DateToISO8601CalendarFactory {
         
         private GregorianCalendar calendar;
+        private TimeZone lastlySetTimeZone;
     
         public GregorianCalendar get(TimeZone tz, Date date) {
             if (calendar == null) {
                 calendar = new GregorianCalendar(tz, Locale.US);
                 calendar.setGregorianChange(new Date(Long.MIN_VALUE));  // never use Julian calendar
             } else {
-                calendar.setTimeZone(tz);
+                // At least on Java 6, calendar.getTimeZone is slow due to a bug, so we need lastlySetTimeZone.
+                if (lastlySetTimeZone != tz) {  // Deliberately `!=` instead of `!<...>.equals()`  
+                    calendar.setTimeZone(tz);
+                    lastlySetTimeZone = tz;
+                }
             }
             calendar.setTime(date);
             return calendar;
@@ -837,6 +864,7 @@ public class DateUtil {
             implements CalendarFieldsToDateConverter {
 
         private GregorianCalendar calendar;
+        private TimeZone lastlySetTimeZone;
 
         public Date calculate(int era, int year, int month, int day, int hours, int minutes, int secs, int millisecs,
                 boolean addOneDay, TimeZone tz) {
@@ -845,7 +873,11 @@ public class DateUtil {
                 calendar.setLenient(false);
                 calendar.setGregorianChange(new Date(Long.MIN_VALUE));  // never use Julian calendar
             } else {
-                calendar.setTimeZone(tz);
+                // At least on Java 6, calendar.getTimeZone is slow due to a bug, so we need lastlySetTimeZone.
+                if (lastlySetTimeZone != tz) {  // Deliberately `!=` instead of `!<...>.equals()`  
+                    calendar.setTimeZone(tz);
+                    lastlySetTimeZone = tz;
+                }
             }
 
             calendar.set(Calendar.ERA, era);
@@ -863,21 +895,6 @@ public class DateUtil {
             return calendar.getTime();
         }
 
-    }
-
-    /**
-     * Tells if the given class is a {@link java.sql.Date} or {@link java.sql.Time}.
-     *  
-     * @since 2.3.21
-     */
-    public static boolean isSQLDateOrTimeClass(Class dateClass) {
-        // We do shortcuts for the most common cases.
-        return dateClass != java.util.Date.class
-                && (dateClass == java.sql.Date.class || dateClass == java.sql.Time.class
-                        || (dateClass != java.sql.Timestamp.class
-                                    && ( 
-                                            java.sql.Date.class.isAssignableFrom(dateClass)
-                                            || java.sql.Time.class.isAssignableFrom(dateClass))));
     }
     
     public static final class DateParseException extends ParseException {

@@ -222,11 +222,20 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put( "hash2", new BooleanHash2() );
         }
         
-        else if (testName.equals("dateformat")) {
+        else if (testName.startsWith("dateformat")) {
             GregorianCalendar cal = new GregorianCalendar(2002, 10, 15, 14, 54, 13);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
             dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATETIME));
             dataModel.put("unknownDate", new SimpleDate(cal.getTime(), TemplateDateModel.UNKNOWN));
+            dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
+            dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
+            dataModel.put("adaptedToStringScalar", new Object() {
+                public String toString() {
+                    return "GMT+02";
+                }
+            });
+            dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
+            dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
         
         else if (testName.equals("number-format")) {
@@ -354,18 +363,6 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("listWithNullsOnly", listWithNullsOnly);
             
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
-        }
-        
-        else if (testName.startsWith("iso8601") || testName.equals("string-xs")) {
-            dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
-            dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
-            dataModel.put("adaptedToStringScalar", new Object() {
-                public String toString() {
-                    return "GMT+02";
-                }
-            });
-            dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
-            dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
         
         else if (testName.equals("number-to-date")) {

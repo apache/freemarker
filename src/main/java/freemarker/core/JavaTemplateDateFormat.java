@@ -12,14 +12,14 @@ import freemarker.template.TemplateModelException;
  * Java {@link DateFormat}-based format.
  */
 class JavaTemplateDateFormat extends TemplateDateFormat {
-
+    
     private final DateFormat javaDateFormat;
 
     public JavaTemplateDateFormat(DateFormat javaDateFormat) {
         this.javaDateFormat = javaDateFormat;
     }
-
-    public String format(TemplateDateModel dateModel) throws TemplateModelException {
+    
+    public String format(TemplateDateModel dateModel, boolean zonelessInput) throws TemplateModelException {
         return javaDateFormat.format(dateModel.getAsDate());
     }
 
@@ -34,10 +34,6 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
     }
 
     public boolean isLocaleBound() {
-        return true;
-    }
-
-    public boolean isTimeZoneBound() {
         return true;
     }
 

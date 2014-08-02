@@ -264,11 +264,7 @@ class MiscellaneousBuiltins {
                 TemplateModelException
             {
                 if(cachedValue == null) {
-                    cachedValue = env.getTemplateDateFormat(
-                            dateModel.getDateType(),
-                            EvalUtil.modelToDate(dateModel, target).getClass(),
-                            target)
-                            .format(dateModel);
+                    cachedValue = env.formatDate(dateModel, target);
                 }
                 return cachedValue;
             }
@@ -277,12 +273,7 @@ class MiscellaneousBuiltins {
             throws
                 TemplateModelException
             {
-                return new SimpleScalar(
-                        env.getTemplateDateFormat(
-                                dateModel.getDateType(),
-                                EvalUtil.modelToDate(dateModel, target).getClass(),
-                                key,
-                                target).format(dateModel));
+                return new SimpleScalar(env.formatDate(dateModel, key, target));
             }
             
             public Object exec(List args) throws TemplateModelException {

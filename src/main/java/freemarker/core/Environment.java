@@ -25,7 +25,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -93,7 +92,6 @@ public final class Environment extends Configurable {
     private static final Logger ATTEMPT_LOGGER = Logger.getLogger("freemarker.runtime.attempt");
 
     private static final Map JAVA_NUMBER_FORMATS = new HashMap();
-    private static final Map JAVA_DATE_FORMATS = new HashMap();
 
     // Do not use this object directly; clone it first! DecimalFormat isn't
     // thread-safe.
@@ -114,10 +112,13 @@ public final class Environment extends Configurable {
     private Map cachedNumberFormats;
 
     private TemplateDateFormat cachedTimeFormat, cachedDateFormat, cachedDateTimeFormat;
-    private Map[] cachedJavaDateFormats;
-    
     private TemplateDateFormat cachedTimeFormatSysDefTZ, cachedDateFormatSysDefTZ, cachedDateTimeFormatSysDefTZ;
-    private Map[] cachedJavaDateFormatsSysDefTZ;
+    private XSTemplateDateFormatFactory cachedXSTemplateDateFormatFactory;
+    private XSTemplateDateFormatFactory cachedXSTemplateDateFormatFactorySysDefTZ;
+    private ISOTemplateDateFormatFactory cachedISOTemplateDateFormatFactory;
+    private ISOTemplateDateFormatFactory cachedISOTemplateDateFormatFactorySysDefTZ;
+    private JavaTemplateDateFormatFactory cachedJavaTemplateDateFormatFactory;
+    private JavaTemplateDateFormatFactory cachedJavaTemplateDateFormatFactorySysDefTZ;
     
     /** Caches the result of {@link #isSQLDateAndTimeTimeZoneSameAsNormal()}. */
     private Boolean cachedSQLDateAndTimeTimeZoneSameAsNormal;
@@ -160,7 +161,7 @@ public final class Environment extends Configurable {
     private String currentNodeName, currentNodeNS;
     
     private String cachedURLEscapingCharset;
-    private boolean urlEscapingCharsetCached;
+    private boolean cachedURLEscapingCharsetSet;
 
     private boolean fastInvalidReferenceExceptions;
     
@@ -201,13 +202,17 @@ public final class Environment extends Configurable {
     private void clearCachedValues() {
         cachedNumberFormats = null;
         cachedNumberFormat = null;
-        cachedJavaDateFormats = null;
-        cachedTimeFormat = cachedDateFormat = cachedDateTimeFormat = null;
-        cachedJavaDateFormatsSysDefTZ = null;
-        cachedTimeFormatSysDefTZ = cachedDateFormatSysDefTZ = cachedDateTimeFormatSysDefTZ = null;
+        
+        cachedTimeFormat = cachedTimeFormatSysDefTZ = null;
+        cachedDateFormat = cachedDateFormatSysDefTZ = null;
+        cachedDateTimeFormat = cachedDateTimeFormatSysDefTZ = null;
+        cachedXSTemplateDateFormatFactory = cachedXSTemplateDateFormatFactorySysDefTZ = null;
+        cachedISOTemplateDateFormatFactory = cachedISOTemplateDateFormatFactorySysDefTZ = null;
+        cachedJavaTemplateDateFormatFactory = cachedJavaTemplateDateFormatFactorySysDefTZ = null;
+        
         cachedCollator = null;
         cachedURLEscapingCharset = null;
-        urlEscapingCharsetCached = false;
+        cachedURLEscapingCharsetSet = false;
     }
     
     /**
@@ -759,26 +764,46 @@ public final class Environment extends Configurable {
             cachedNumberFormats = null;
             cachedNumberFormat = null;
     
-            cachedJavaDateFormats = null;
             if (cachedTimeFormat != null && cachedTimeFormat.isLocaleBound()) {
                 cachedTimeFormat = null;
             }
-            if (cachedDateFormat != null && cachedDateFormat.isLocaleBound()) {
-                cachedDateFormat = null;
-            }
-            if (cachedDateTimeFormat != null && cachedDateTimeFormat.isLocaleBound()) {
-                cachedDateTimeFormat = null;
-            }
-    
-            cachedJavaDateFormatsSysDefTZ = null;
             if (cachedTimeFormatSysDefTZ != null && cachedTimeFormatSysDefTZ.isLocaleBound()) {
                 cachedTimeFormatSysDefTZ = null;
+            }
+            
+            if (cachedDateFormat != null && cachedDateFormat.isLocaleBound()) {
+                cachedDateFormat = null;
             }
             if (cachedDateFormatSysDefTZ != null && cachedDateFormatSysDefTZ.isLocaleBound()) {
                 cachedDateFormatSysDefTZ = null;
             }
+            
+            if (cachedDateTimeFormat != null && cachedDateTimeFormat.isLocaleBound()) {
+                cachedDateTimeFormat = null;
+            }
             if (cachedDateTimeFormatSysDefTZ != null && cachedDateTimeFormatSysDefTZ.isLocaleBound()) {
                 cachedDateTimeFormatSysDefTZ = null;
+            }
+
+            if (cachedXSTemplateDateFormatFactory != null && cachedXSTemplateDateFormatFactory.isLocaleBound()) {
+                cachedXSTemplateDateFormatFactory = null;
+            }
+            if (cachedXSTemplateDateFormatFactorySysDefTZ != null && cachedXSTemplateDateFormatFactorySysDefTZ.isLocaleBound()) {
+                cachedXSTemplateDateFormatFactorySysDefTZ = null;
+            }
+
+            if (cachedISOTemplateDateFormatFactory != null && cachedISOTemplateDateFormatFactory.isLocaleBound()) {
+                cachedISOTemplateDateFormatFactory = null;
+            }
+            if (cachedISOTemplateDateFormatFactorySysDefTZ != null && cachedISOTemplateDateFormatFactorySysDefTZ.isLocaleBound()) {
+                cachedISOTemplateDateFormatFactorySysDefTZ = null;
+            }
+
+            if (cachedJavaTemplateDateFormatFactory != null && cachedJavaTemplateDateFormatFactory.isLocaleBound()) {
+                cachedJavaTemplateDateFormatFactory = null;
+            }
+            if (cachedJavaTemplateDateFormatFactorySysDefTZ != null && cachedJavaTemplateDateFormatFactorySysDefTZ.isLocaleBound()) {
+                cachedJavaTemplateDateFormatFactorySysDefTZ = null;
             }
             
             cachedCollator = null;
@@ -790,16 +815,12 @@ public final class Environment extends Configurable {
         super.setTimeZone(timeZone);
         
         if (!timeZone.equals(prevTimeZone)) {
-            cachedJavaDateFormats = null;
-            if (cachedTimeFormat != null && cachedTimeFormat.isTimeZoneBound()) {
-                cachedTimeFormat = null;
-            }
-            if (cachedDateFormat != null && cachedDateFormat.isTimeZoneBound()) {
-                cachedDateFormat = null;
-            }
-            if (cachedDateTimeFormat != null && cachedDateTimeFormat.isTimeZoneBound()) {
-                cachedDateTimeFormat = null;
-            }
+            cachedXSTemplateDateFormatFactory = null;
+            cachedISOTemplateDateFormatFactory = null;
+            cachedJavaTemplateDateFormatFactory = null;
+            cachedTimeFormat = null;
+            cachedDateFormat = null;
+            cachedDateTimeFormat = null;
             
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
@@ -831,7 +852,7 @@ public final class Environment extends Configurable {
     }
     
     public void setURLEscapingCharset(String urlEscapingCharset) {
-        urlEscapingCharsetCached = false;
+        cachedURLEscapingCharsetSet = false;
         super.setURLEscapingCharset(urlEscapingCharset);
     }
     
@@ -842,7 +863,7 @@ public final class Environment extends Configurable {
      * to actually change the output encoding on-the-fly.
      */
     public void setOutputEncoding(String outputEncoding) {
-        urlEscapingCharsetCached = false;
+        cachedURLEscapingCharsetSet = false;
         super.setOutputEncoding(outputEncoding);
     }
     
@@ -853,12 +874,12 @@ public final class Environment extends Configurable {
      * repeately. 
      */
     String getEffectiveURLEscapingCharset() {
-        if (!urlEscapingCharsetCached) {
+        if (!cachedURLEscapingCharsetSet) {
             cachedURLEscapingCharset = getURLEscapingCharset();
             if (cachedURLEscapingCharset == null) {
                 cachedURLEscapingCharset = getOutputEncoding();
             }
-            urlEscapingCharsetCached = true;
+            cachedURLEscapingCharsetSet = true;
         }
         return cachedURLEscapingCharset;
     }
@@ -956,8 +977,7 @@ public final class Environment extends Configurable {
         String prevTimeFormat = getTimeFormat();
         super.setTimeFormat(timeFormat);
         if (!timeFormat.equals(prevTimeFormat)) {
-            this.cachedTimeFormat = null;
-            cachedTimeFormatSysDefTZ = null;
+            cachedTimeFormat = cachedTimeFormatSysDefTZ = null;
         }
     }
 
@@ -965,8 +985,7 @@ public final class Environment extends Configurable {
         String prevDateFormat = getDateFormat();
         super.setDateFormat(dateFormat);
         if (!dateFormat.equals(prevDateFormat)) {
-            this.cachedDateFormat = null;
-            cachedDateFormatSysDefTZ = null;
+            cachedDateFormat = cachedDateFormatSysDefTZ = null;
         }
     }
 
@@ -974,8 +993,7 @@ public final class Environment extends Configurable {
         String prevDateTimeFormat = getDateTimeFormat();
         super.setDateTimeFormat(dateTimeFormat);
         if (!dateTimeFormat.equals(prevDateTimeFormat)) {
-            this.cachedDateTimeFormat = null;
-            cachedDateTimeFormatSysDefTZ = null;
+            cachedDateTimeFormat = cachedDateTimeFormatSysDefTZ = null;
         }
     }
 
@@ -1047,6 +1065,33 @@ public final class Environment extends Configurable {
         return format;
     }
 
+    String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr) throws TemplateModelException {
+        Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
+        boolean sqlDateOrTime = isSQLDateOrTimeClass(date.getClass());
+        try {
+            return getTemplateDateFormat(tdm.getDateType(), shouldUseSysDefTZ(sqlDateOrTime), tdmSourceExpr)
+                    .format(tdm, sqlDateOrTime);
+        } catch (UnknownDateTypeFormattingUnsupportedException e) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
+        } catch (UnformattableDateException e) {
+            throw MessageUtil.newCantFormatDateException(tdmSourceExpr, e);
+        }
+    }
+
+    String formatDate(TemplateDateModel tdm, String formatDescriptor, Expression tdmSourceExpr)
+            throws TemplateModelException {
+        Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
+        boolean sqlDateOrTime = isSQLDateOrTimeClass(date.getClass());
+        try {
+            return getTemplateDateFormat(tdm.getDateType(), shouldUseSysDefTZ(sqlDateOrTime), formatDescriptor)
+                    .format(tdm, sqlDateOrTime);
+        } catch (UnknownDateTypeFormattingUnsupportedException e) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
+        } catch (UnformattableDateException e) {
+            throw MessageUtil.newCantFormatDateException(tdmSourceExpr, e);
+        }
+    }
+    
     /**
      * @param dateType The FTL date type, one of {@link TemplateDateModel#DATETIME}, {@link TemplateDateModel#TIME}
      *          and {@link TemplateDateModel#DATE}. 
@@ -1054,247 +1099,169 @@ public final class Environment extends Configurable {
      *          the time zone is part of the returned {@link DateFormat}, and if
      *          {@link #getUseSystemDefaultTimeZoneForSQLDateAndTime()} is {@core true} then the exact class influences
      *          the time zone. 
-     * @param forDateExpr Used for better error messages only; may be {@code null}
+     * @param dateSourceExpr Used for better error messages only; may be {@code null}
      */
-    TemplateDateFormat getTemplateDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, Expression forDateExpr)
-    throws
-        TemplateModelException
-    {
-        switch(dateType) {
-            case TemplateDateModel.UNKNOWN: {
-                throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                        MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
-                        .blame(forDateExpr)
-                        .tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
-            }
-            case TemplateDateModel.TIME: {
-                if (shouldUseSystemDefaultTimeZone(dateClass)) {
-                    if(cachedTimeFormatSysDefTZ == null) {
-                        cachedTimeFormatSysDefTZ = getTemplateDateFormat(dateType, dateClass, getTimeFormat(), forDateExpr);
+    TemplateDateFormat getTemplateDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, Expression dateSourceExpr)
+            throws TemplateModelException {
+        try {
+            return getTemplateDateFormat(dateType, shouldUseSysDefTZ(dateClass), dateSourceExpr);
+        } catch (UnknownDateTypeFormattingUnsupportedException e) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
+        }
+    }
+    
+    private TemplateDateFormat getTemplateDateFormat(int dateType, boolean useSysDefTZ, Expression dateSourceExpr)
+            throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+        switch (dateType) {
+            case TemplateDateModel.UNKNOWN:
+                throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, null);
+            case TemplateDateModel.TIME:
+                if (useSysDefTZ) {
+                    if (cachedTimeFormatSysDefTZ == null) {
+                        cachedTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat());
                     }
                     return cachedTimeFormatSysDefTZ;
                 } else {
-                    if(cachedTimeFormat == null) {
-                        cachedTimeFormat = getTemplateDateFormat(dateType, dateClass, getTimeFormat(), forDateExpr);
+                    if (cachedTimeFormat == null) {
+                        cachedTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat());
                     }
                     return cachedTimeFormat;
                 }
-            }
-            case TemplateDateModel.DATE: {
-                if (shouldUseSystemDefaultTimeZone(dateClass)) {
-                    if(cachedDateFormatSysDefTZ == null) {
-                        cachedDateFormatSysDefTZ = getTemplateDateFormat(dateType, dateClass, getDateFormat(), forDateExpr);
+            case TemplateDateModel.DATE:
+                if (useSysDefTZ) {
+                    if (cachedDateFormatSysDefTZ == null) {
+                        cachedDateFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat());
                     }
                     return cachedDateFormatSysDefTZ;
                 } else {
-                    if(cachedDateFormat == null) {
-                        cachedDateFormat = getTemplateDateFormat(dateType, dateClass, getDateFormat(), forDateExpr);
+                    if (cachedDateFormat == null) {
+                        cachedDateFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat());
                     }
                     return cachedDateFormat;
                 }
-            }
-            case TemplateDateModel.DATETIME: {
-                if (shouldUseSystemDefaultTimeZone(dateClass)) {
-                    if(cachedDateTimeFormatSysDefTZ == null) {
-                        cachedDateTimeFormatSysDefTZ = getTemplateDateFormat(dateType, dateClass, getDateTimeFormat(), forDateExpr);
+            case TemplateDateModel.DATETIME:
+                if (useSysDefTZ) {
+                    if (cachedDateTimeFormatSysDefTZ == null) {
+                        cachedDateTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat());
                     }
                     return cachedDateTimeFormatSysDefTZ;
                 } else {
-                    if(cachedDateTimeFormat == null) {
-                        cachedDateTimeFormat = getTemplateDateFormat(dateType, dateClass, getDateTimeFormat(), forDateExpr);
+                    if (cachedDateTimeFormat == null) {
+                        cachedDateTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat());
                     }
                     return cachedDateTimeFormat;
                 }
-            }
-            default: {
+            default:
                 throw new _TemplateModelException(new Object[] {
                         "Invalid date type enum: ", new Integer(dateType) });
-            }
         }
     }
-
+    
     /**
-     * @param dateType {@link TemplateDateModel#UNKNOWN} is accepted or not depending on the {@code nameOrPattern}
+     * @param dateType {@link TemplateDateModel#UNKNOWN} is accepted or not depending on the {@code formatDescriptor}
      *     value. When it isn't, a {@link TemplateModelException} will be thrown.
      * @param dateClass
-     * @param nameOrPattern
-     * @param forDateExpr Maybe {@code null}, used for better error messages
+     * @param formatDescriptor Like "iso m" or "dd.MM.yyyy HH:mm" 
      */
     TemplateDateFormat getTemplateDateFormat(
-            int dateType, Class/*<? extends Date>*/ dateClass, String nameOrPattern, Expression forDateExpr)
+            int dateType, Class/*<? extends Date>*/ dateClass, String formatDescriptor, Expression dateSourceExpr)
             throws TemplateModelException {
-        final int keyLen = nameOrPattern.length();
-        // As of Java 8, 'x' (in lower case) is illegal date format letter, so this is backward-compatible.
-        if (keyLen > 1 && nameOrPattern.charAt(0) == 'x' && nameOrPattern.charAt(1) == 's') {
-            checkDateTypeNotUnknown(dateType, forDateExpr);
-            final TimeZone timeZone = shouldUseSystemDefaultTimeZone(dateClass)
-                    ? getSystemDefaultTimeZone()
-                    : getTimeZone();
-            final Boolean showZoneOffset;
-            if (keyLen == 2) {  // "xs" => automatically decide if zone will be shown
-                showZoneOffset = null;
-            } else if (keyLen == 5 && nameOrPattern.charAt(2) == '_' && nameOrPattern.charAt(4) == 'z') {  // "xs_XX"
-                final char c3 = nameOrPattern.charAt(3);
-                if (c3 == 'f') {  // "xs_fz"
-                    showZoneOffset = Boolean.TRUE;
-                } else if (c3 == 'n') { // "xs_nz"
-                    showZoneOffset = Boolean.FALSE;
-                } else {
-                    throw newIllegalXSDateFormatKey(nameOrPattern);
-                }
-            } else {
-                throw newIllegalXSDateFormatKey(nameOrPattern);
-            }
-            return new XSTemplateDateFormat(dateType, timeZone, showZoneOffset, this);
-        } else if (keyLen > 2
-                && nameOrPattern.charAt(0) == 'i' && nameOrPattern.charAt(1) == 's' && nameOrPattern.charAt(2) == 'o') {
-            final TimeZone timeZone = shouldUseSystemDefaultTimeZone(dateClass)
-                    ? getSystemDefaultTimeZone()
-                    : getTimeZone();
-            final Boolean showZoneOffset;
-            if (keyLen == 3) {  // "iso" => automatically decide if zone will be shown
-                showZoneOffset = null;
-            } else if (keyLen == 6 && nameOrPattern.charAt(3) == '_' && nameOrPattern.charAt(5) == 'z') {  // "iso_XX"
-                final char c4 = nameOrPattern.charAt(4);
-                if (c4 == 'f') {  // "iso_fz"
-                    showZoneOffset = Boolean.TRUE;
-                } else if (c4 == 'n') { // "iso_nz"
-                    showZoneOffset = Boolean.FALSE;
-                } else {
-                    throw newIllegalISODateFormatKey(nameOrPattern);
-                }
-            } else {
-                throw newIllegalISODateFormatKey(nameOrPattern);
-            }
-            return new ISOTemplateDateFormat(dateType, timeZone, showZoneOffset, this);
-        } else {
-            return new JavaTemplateDateFormat(getJavaDateFormat(dateType, dateClass, nameOrPattern));
+        try {
+            return getTemplateDateFormat(
+                    dateType, shouldUseSysDefTZ(dateClass), formatDescriptor);
+        } catch (UnknownDateTypeFormattingUnsupportedException e) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
         }
     }
     
-    private _TemplateModelException newIllegalXSDateFormatKey(String key) {
-        return new _TemplateModelException(new Object[] {
-                "Illegal date format, ", new _DelayedJQuote(key),
-                ". A format that starts with \"xs\" must be one of "
-                + "\"xs\", \"xs_fz\", and \"xs_nz\"." });
-    }
-
-    private _TemplateModelException newIllegalISODateFormatKey(String key) {
-        return new _TemplateModelException(new Object[] {
-                "Illegal date format, ", new _DelayedJQuote(key),
-                ". A format that starts with \"iso\" must be one of "
-                + "\"iso\", \"iso_fz\", and \"iso_nz\"." });
-    }
-    
-    private void checkDateTypeNotUnknown(int dateType, Expression blame) throws _TemplateModelException {
-        if(dateType == TemplateDateModel.UNKNOWN) {
-            throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                    MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
-                    .blame(blame)
-                    .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
-        }
-    }
-    
-    private DateFormat getJavaDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, String nameOrPattern)
-            throws TemplateModelException {
-        final boolean useSysDefTZ = shouldUseSystemDefaultTimeZone(dateClass);
+    private TemplateDateFormat getTemplateDateFormat(
+            int dateType, boolean useSysDefTZ, String formatDescriptor)
+            throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+        final int formatDescriptionLen = formatDescriptor.length();
         
-        Map[] jDateFormatsForTZ = useSysDefTZ ? this.cachedJavaDateFormatsSysDefTZ : this.cachedJavaDateFormats;
-        if(jDateFormatsForTZ == null) {
-            jDateFormatsForTZ = new Map[4];
-            jDateFormatsForTZ[TemplateDateModel.UNKNOWN] = new HashMap();
-            jDateFormatsForTZ[TemplateDateModel.TIME] = new HashMap();
-            jDateFormatsForTZ[TemplateDateModel.DATE] = new HashMap();
-            jDateFormatsForTZ[TemplateDateModel.DATETIME] = new HashMap();
-            if (useSysDefTZ) {
-                this.cachedJavaDateFormatsSysDefTZ = jDateFormatsForTZ; 
-            } else {
-                this.cachedJavaDateFormats = jDateFormatsForTZ; 
-            }
-        }
-        Map jDateFormatsForDateType = jDateFormatsForTZ[dateType];
-
-        DateFormat jDateFormat = (DateFormat) jDateFormatsForDateType.get(nameOrPattern);
-        if(jDateFormat != null) {
-            return jDateFormat;
-        }
-
-        // Get DateFormat from global cache:
-        DateFormatKey cacheKey = new DateFormatKey(
-                dateType, nameOrPattern, getLocale(), useSysDefTZ ? getSystemDefaultTimeZone() : getTimeZone());
-        synchronized (JAVA_DATE_FORMATS) {
-            jDateFormat = (DateFormat) JAVA_DATE_FORMATS.get(cacheKey);
-            if (jDateFormat == null) {
-                // Add format to global format cache.
-                StringTokenizer tok = new StringTokenizer(nameOrPattern, "_");
-                int tok1Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : DateFormat.DEFAULT;
-                if (tok1Style != -1) {
-                    switch (dateType) {
-                        case TemplateDateModel.UNKNOWN: {
-                            throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                                    MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
-                                    .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
-                        }
-                        case TemplateDateModel.TIME: {
-                            jDateFormat = DateFormat.getTimeInstance(tok1Style, cacheKey.locale);
-                            break;
-                        }
-                        case TemplateDateModel.DATE: {
-                            jDateFormat = DateFormat.getDateInstance(tok1Style, cacheKey.locale);
-                            break;
-                        }
-                        case TemplateDateModel.DATETIME: {
-                            int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
-                            if(tok2Style != -1) {
-                                jDateFormat = DateFormat.getDateTimeInstance(tok1Style, tok2Style, cacheKey.locale);
-                            }
-                            break;
-                        }
-                    }
-                }
-                if (jDateFormat == null) {
-                    try {
-                        jDateFormat = new SimpleDateFormat(nameOrPattern, cacheKey.locale);
-                    } catch(IllegalArgumentException e) {
-                        throw new _TemplateModelException(e, new Object[] {
-                                "Can't parse ", new _DelayedJQuote(nameOrPattern), " to a date format, because:\n", e });
-                    }
-                }
-                jDateFormat.setTimeZone(cacheKey.timeZone);
+        final TimeZone timeZone = useSysDefTZ ? getSystemDefaultTimeZone() : getTimeZone();
                 
-                JAVA_DATE_FORMATS.put(cacheKey, jDateFormat);
-            }  // if cache miss
-        }  // sync
-        
-        // Store the value from the global cache in to the local cache:
-        jDateFormat = (DateFormat) jDateFormat.clone();  // For thread safety
-        jDateFormatsForDateType.put(nameOrPattern, jDateFormat);
-        
-        return jDateFormat;
-    }
+        // As of Java 8, 'x' and 'i' (in lower case) are illegal date format letters, so this is backward-compatible.
+        TemplateDateFormatFactory templateDateFormatFactory;  
+        if (formatDescriptionLen > 1
+                && formatDescriptor.charAt(0) == 'x'
+                && formatDescriptor.charAt(1) == 's') {
+            templateDateFormatFactory = useSysDefTZ
+                    ? cachedXSTemplateDateFormatFactorySysDefTZ : cachedXSTemplateDateFormatFactory;
+            if (templateDateFormatFactory == null) {
+                templateDateFormatFactory = new XSTemplateDateFormatFactory(timeZone);
+                if (useSysDefTZ) {
+                    cachedXSTemplateDateFormatFactorySysDefTZ
+                            = (XSTemplateDateFormatFactory) templateDateFormatFactory;
+                } else {
+                    cachedXSTemplateDateFormatFactory = (XSTemplateDateFormatFactory) templateDateFormatFactory;
+                }
+            }
+        } else if (formatDescriptionLen > 2
+                && formatDescriptor.charAt(0) == 'i'
+                && formatDescriptor.charAt(1) == 's'
+                && formatDescriptor.charAt(2) == 'o') {
+            templateDateFormatFactory = useSysDefTZ
+                    ? cachedISOTemplateDateFormatFactorySysDefTZ : cachedISOTemplateDateFormatFactory;
+            if (templateDateFormatFactory == null) {
+                templateDateFormatFactory = new ISOTemplateDateFormatFactory(timeZone);
+                if (useSysDefTZ) {
+                    cachedISOTemplateDateFormatFactorySysDefTZ
+                            = (ISOTemplateDateFormatFactory) templateDateFormatFactory;
+                } else {
+                    cachedISOTemplateDateFormatFactory = (ISOTemplateDateFormatFactory) templateDateFormatFactory;
+                }
+            }
+        } else {
+            templateDateFormatFactory = useSysDefTZ
+                    ? cachedJavaTemplateDateFormatFactorySysDefTZ : cachedJavaTemplateDateFormatFactory;
+            if (templateDateFormatFactory == null) {
+                templateDateFormatFactory = new JavaTemplateDateFormatFactory(timeZone, getLocale());
+                if (useSysDefTZ) {
+                    cachedJavaTemplateDateFormatFactorySysDefTZ
+                            = (JavaTemplateDateFormatFactory) templateDateFormatFactory;
+                } else {
+                    cachedJavaTemplateDateFormatFactory = (JavaTemplateDateFormatFactory) templateDateFormatFactory;
+                }
+            }
+        }
 
-    boolean shouldUseSystemDefaultTimeZone(Class dateClass) {
+        try {
+            return templateDateFormatFactory.get(dateType, formatDescriptor);
+        } catch (ParseException e) {
+            throw new _TemplateModelException(e.getCause(), new Object[] {
+                    "Malformed date format, ", new _DelayedJQuote(formatDescriptor), ": ",
+                    e.getMessage() });
+        }
+        // TODO should catch and decorate TemplateModelException-s too?
+    }
+    
+    boolean shouldUseSysDefTZ(Class dateClass) {
+        // Attention! If you update this method, update all overloads of it!
         return dateClass != Date.class  // This pre-condition is only for speed
                 && !isSQLDateAndTimeTimeZoneSameAsNormal()
-                && DateUtil.isSQLDateOrTimeClass(dateClass);
+                && isSQLDateOrTimeClass(dateClass);
     }
 
-    int parseDateStyleToken(String token) {
-        if("short".equals(token)) {
-            return DateFormat.SHORT;
-        }
-        if("medium".equals(token)) {
-            return DateFormat.MEDIUM;
-        }
-        if("long".equals(token)) {
-            return DateFormat.LONG;
-        }
-        if("full".equals(token)) {
-            return DateFormat.FULL;
-        }
-        return -1;
+    private boolean shouldUseSysDefTZ(boolean sqlDateOrTime) {
+        // Attention! If you update this method, update all overloads of it!
+        return sqlDateOrTime  // This pre-condition is only for speed
+                && !isSQLDateAndTimeTimeZoneSameAsNormal();
     }
-
+    
+    /**
+     * Tells if the given class is or is subclass of {@link java.sql.Date} or {@link java.sql.Time}.
+     */
+    private static boolean isSQLDateOrTimeClass(Class dateClass) {
+        // We do shortcuts for the most common cases.
+        return dateClass != java.util.Date.class
+                && (dateClass == java.sql.Date.class || dateClass == java.sql.Time.class
+                        || (dateClass != java.sql.Timestamp.class
+                                    && ( 
+                                            java.sql.Date.class.isAssignableFrom(dateClass)
+                                            || java.sql.Time.class.isAssignableFrom(dateClass))));
+    }    
+    
     /**
      * Returns the {@link DateToISO8601CalendarFactory} used by the
      * the "iso_" built-ins. Be careful when using this; it should only by used
@@ -2043,37 +2010,6 @@ public final class Environment extends Configurable {
         public int hashCode()
         {
             return pattern.hashCode() ^ locale.hashCode();
-        }
-    }
-
-    private static final class DateFormatKey
-    {
-        private final int dateType;
-        private final String pattern;
-        private final Locale locale;
-        private final TimeZone timeZone;
-
-        DateFormatKey(int dateType, String pattern, Locale locale, TimeZone timeZone)
-        {
-            this.dateType = dateType;
-            this.pattern = pattern;
-            this.locale = locale;
-            this.timeZone = timeZone;
-        }
-
-        public boolean equals(Object o)
-        {
-            if(o instanceof DateFormatKey)
-            {
-                DateFormatKey fk = (DateFormatKey)o;
-                return dateType == fk.dateType && fk.pattern.equals(pattern) && fk.locale.equals(locale) && fk.timeZone.equals(timeZone);
-            }
-            return false;
-        }
-
-        public int hashCode()
-        {
-            return dateType ^ pattern.hashCode() ^ locale.hashCode() ^ timeZone.hashCode();
         }
     }
     

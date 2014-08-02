@@ -20829,35 +20829,38 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new
+                  <para>Added new kind of
                   <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
-                  setting values:</para>
+                  setting values: XML Schema formats, starting with
+                  <literal>"xs"</literal> and ISO 8601:2004 formats, starting
+                  with ISO <literal>"iso"</literal>. The format string can be
+                  optionally continued with various flags, like
+                  <literal>h</literal>, <literal>m</literal>,
+                  <literal>s</literal> and <literal>ms</literal> for setting
+                  shown accuracy, and <literal>nz</literal>,
+                  <literal>fz</literal>, <literal>u</literal> for time zone
+                  related behavior. For example, to use ISO 8601 format
+                  without zone offset shown and with minute precision, you
+                  could set the <literal>datetime_format</literal> setting to
+                  <literal>"iso m nz"</literal>, so then the output will be
+                  like <literal>2014-09-03T20:56</literal>. [TODO: link
+                  chapter about formatting descriptors]</para>
+                </listitem>
 
-                  <itemizedlist>
-                    <listitem>
-                      <para>XML Schema formats: <literal>"xs"</literal>,
-                      <literal>"xs_fz"</literal> and
-                      <literal>"xs_nz"</literal>. The <literal>_fz</literal>
-                      and <literal>_nz</literal> forces and disables showing
-                      time zone offset, respectively. <literal>"xs"</literal>
-                      will show zone offset, except for
-                      <literal>java.sql.Date</literal> and
-                      <literal>java.sql.Time</literal>.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>ISO 8601 formats: <literal>"iso"</literal>,
-                      <literal>"iso_fz"</literal>,
-                      <literal>"iso_nz"</literal></para>
-                    </listitem>
-                  </itemizedlist>
-
-                  <para>All these can also be used with the
+                <listitem>
+                  <para>Because anything that's accepted as
+                  <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
+                  setting value can also be used with the
                   <literal>?string</literal> and
-                  <literal>?date</literal>/<literal>?time</literal>/<literal>?datetime</literal>,
-                  like <literal>someDate?string.xs</literal> and
-                  <literal>someString?date.xs</literal>. <link
-                  linkend="topic_date_format_settings">More...</link></para>
+                  <literal>?date</literal>/<literal>?time</literal>/<literal>?datetime</literal>
+                  build-ins, you can use the new formats like
+                  <literal>someDate?string.xs</literal> and
+                  <literal>someString?date.xs</literal> too. (For the
+                  <literal>"xs"</literal> and <literal>"iso"</literal>
+                  formats, <literal>_</literal> can be used instead of space,
+                  which means that, for example, you can write
+                  <literal>lastModified?string.iso_m_u</literal> instead of
+                  <literal>lastModified?string("iso m u")</literal>.)</para>
                 </listitem>
 
                 <listitem>
