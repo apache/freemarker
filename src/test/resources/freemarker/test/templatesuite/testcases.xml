@@ -47,10 +47,9 @@
    <testcase name="comment" />
    <testcase name="comparisons" />
    <testcase name="dateformat-java" />
-   <testcase name="dateformat-xs" />
-   <!-- testcase name="dateformat-iso" / -->
-   <testcase name="dateformat-iso-bi" />
-   <testcase name="dateformat-iso-bi-ici-2.3.21" template="dateformat-iso-bi.ftl" expected="dateformat-iso-bi-ici-2.3.21.txt">
+   <testcase name="dateformat-iso-like" nooutput="true" />
+   <testcase name="dateformat-iso-bi" nooutput="true" />
+   <testcase name="dateformat-iso-bi-ici-2.3.21" nooutput="true">
       <config incompatible_improvements="2.3.21" /> 
    </testcase>   
    <testcase name="dateparsing" nooutput="true" />
