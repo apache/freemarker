@@ -29,7 +29,8 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
         return true;
     }
 
-    public TemplateDateFormat get(int dateType, String formatDescriptor) throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+    public TemplateDateFormat get(int dateType, String formatDescriptor)
+            throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         Map[] formatCache = this.formatCache;
         if(formatCache == null) {
             formatCache = new Map[4];
@@ -53,7 +54,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     }
 
     private DateFormat getJavaDateFormat(int dateType, String nameOrPattern)
-            throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
+            throws UnknownDateTypeFormattingUnsupportedException, ParseException {
 
         // Get DateFormat from global cache:
         DateFormatKey cacheKey = new DateFormatKey(
@@ -91,9 +92,8 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
                     try {
                         jDateFormat = new SimpleDateFormat(nameOrPattern, cacheKey.locale);
                     } catch(IllegalArgumentException e) {
-                        throw new _TemplateModelException(e, new Object[] {
-                                "Can't parse ", new _DelayedJQuote(nameOrPattern),
-                                " to a date format, because:\n", e });
+                        final String msg = e.getMessage();
+                        throw new ParseException(msg != null ? msg : "Illegal SimpleDateFormat pattern", 0);
                     }
                 }
                 jDateFormat.setTimeZone(cacheKey.timeZone);

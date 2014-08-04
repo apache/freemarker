@@ -1233,7 +1233,6 @@ public final class Environment extends Configurable {
                     "Malformed date format, ", new _DelayedJQuote(formatDescriptor), ": ",
                     e.getMessage() });
         }
-        // TODO should catch and decorate TemplateModelException-s too?
     }
     
     boolean shouldUseSysDefTZ(Class dateClass) {
