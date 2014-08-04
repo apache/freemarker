@@ -64,12 +64,6 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         return javaDayErrorDate;
     }
 
-    @Before
-    public void setup() {
-        lastDefaultTimeZone = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT+02:00"));
-    }
-    
     private static final String FTL =
             "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
             + "${sqlDate?iso_local_fz} ${sqlTime?iso_local_fz} "
@@ -281,6 +275,30 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 cfg);
     }
     
+    @Test
+    public void testFormatUTCFlagHasNoEffect() throws Exception {
+        Configuration cfg = createConfiguration();
+        cfg.setUseSystemDefaultTimeZoneForSQLDateAndTime(true);
+        cfg.setTimeZone(TimeZone.getTimeZone("GMT-01"));
+
+        assertOutput(
+                "<#setting date_format='iso'><#setting time_format='iso'>\n"
+                + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
+                + "<#setting date_format='iso u'><#setting time_format='iso u'>\n"
+                + "<#setting use_system_default_time_zone_for_sql_date_and_time=true>\n"
+                + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
+                + "<#setting use_system_default_time_zone_for_sql_date_and_time=false>\n"
+                + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
+                + "<#setting date_format='iso'><#setting time_format='iso'>\n"
+                + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
+                ,
+                "2014-07-12, 12:30:05, 09:30:05-01:00\n"
+                + "2014-07-12, 12:30:05, 10:30:05Z\n"
+                + "2014-07-11, 09:30:05, 10:30:05Z\n"  // for sql still ignores "u"
+                + "2014-07-11, 09:30:05, 09:30:05-01:00\n",
+                cfg);
+    }
+    
     private Configuration createConfiguration() {
         Configuration cfg = new Configuration(new Version(2, 3, 21));
         cfg.setLocale(Locale.US);
@@ -290,6 +308,12 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         return cfg;
     }
     
+    @Before
+    public void setup() {
+        lastDefaultTimeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT+02:00"));
+    }
+
     @After
     public void teardown() {
         TimeZone.setDefault(lastDefaultTimeZone);

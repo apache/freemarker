@@ -127,3 +127,6 @@
 <@assertEquals actual=t?string expected="01:02:03" />
 <#setting time_format="iso nz ms">
 <@assertEquals actual=t?string expected="01:02:03.000" />
+
+<@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.xs}</@>
+<@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.iso}</@>
