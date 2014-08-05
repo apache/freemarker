@@ -201,20 +201,27 @@ public class Configuration extends Configurable implements Cloneable {
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
     /**
-     * @deprecated Use {@link #Configuration(Version)} instead.
+     * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
+     *     {@link Configuration#setIncompatibleImprovements(Version)} (or
+     *     {@link Configuration#setSettings(Properties)}).  
      */
     public Configuration() {
         this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
 
     /**
-     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
-     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
-     * active by default, as that would break backward-compatibility).
+     * Creates a new instance and sets which of the non-backward-compatible bugfixes/improvements should be enabled.
+     * Note that the specified versions corresponds to the {@code incompatible_improvements} configuration setting, and
+     * can be changed later, with {@link #setIncompatibleImprovements(Version)} for example. 
+     *
+     * <p><b>About the "incompatible improvements" setting</b>
+     *
+     * <p>The setting value is the FreeMarker version number where the bugfixes/improvements to enable were already
+     * implemented (but possibly wasn't active by default, as that would break backward-compatibility).
      * 
      * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
-     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
-     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
+     * existing application. But if you develop a new application with, say, 2.3.21, it's probably a good idea to set
+     * this from 2.3.0 to 2.3.21. As far as the 1st and 2nd version number remains, these changes are always very
      * low-risk changes, so usually they don't break anything in older applications either.
      * 
      * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
@@ -227,7 +234,7 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Currently the effects of this setting are:
      * <ul>
      *   <li><p>
-     *     2.3.0: This is just the starting point, the version used in older projects.
+     *     2.3.0: This is the lowest supported value, the version used in older projects.
      *   </li>
      *   <li><p>
      *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
