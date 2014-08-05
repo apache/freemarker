@@ -1083,7 +1083,7 @@ public final class Environment extends Configurable {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
         boolean sqlDateOrTime = isSQLDateOrTimeClass(date.getClass());
         try {
-            return getTemplateDateFormat(tdm.getDateType(), shouldUseSysDefTZ(sqlDateOrTime), formatDescriptor)
+            return getTemplateDateFormat(tdm.getDateType(), shouldUseSysDefTZ(sqlDateOrTime), formatDescriptor, null)
                     .format(tdm, sqlDateOrTime);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
@@ -1118,36 +1118,42 @@ public final class Environment extends Configurable {
             case TemplateDateModel.TIME:
                 if (useSysDefTZ) {
                     if (cachedTimeFormatSysDefTZ == null) {
-                        cachedTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat());
+                        cachedTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat(),
+                                Configuration.TIME_FORMAT_KEY);
                     }
                     return cachedTimeFormatSysDefTZ;
                 } else {
                     if (cachedTimeFormat == null) {
-                        cachedTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat());
+                        cachedTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat(),
+                                Configuration.TIME_FORMAT_KEY);
                     }
                     return cachedTimeFormat;
                 }
             case TemplateDateModel.DATE:
                 if (useSysDefTZ) {
                     if (cachedDateFormatSysDefTZ == null) {
-                        cachedDateFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat());
+                        cachedDateFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat(),
+                                Configuration.DATE_FORMAT_KEY);
                     }
                     return cachedDateFormatSysDefTZ;
                 } else {
                     if (cachedDateFormat == null) {
-                        cachedDateFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat());
+                        cachedDateFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat(),
+                                Configuration.DATE_FORMAT_KEY);
                     }
                     return cachedDateFormat;
                 }
             case TemplateDateModel.DATETIME:
                 if (useSysDefTZ) {
                     if (cachedDateTimeFormatSysDefTZ == null) {
-                        cachedDateTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat());
+                        cachedDateTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat(),
+                                Configuration.DATETIME_FORMAT_KEY);
                     }
                     return cachedDateTimeFormatSysDefTZ;
                 } else {
                     if (cachedDateTimeFormat == null) {
-                        cachedDateTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat());
+                        cachedDateTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat(),
+                                Configuration.DATETIME_FORMAT_KEY);
                     }
                     return cachedDateTimeFormat;
                 }
@@ -1168,14 +1174,14 @@ public final class Environment extends Configurable {
             throws TemplateModelException {
         try {
             return getTemplateDateFormat(
-                    dateType, shouldUseSysDefTZ(dateClass), formatDescriptor);
+                    dateType, shouldUseSysDefTZ(dateClass), formatDescriptor, null);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
         }
     }
     
     private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean useSysDefTZ, String formatDescriptor)
+            int dateType, boolean useSysDefTZ, String formatDescriptor, String sourceCfgSetting)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         final int formatDescriptionLen = formatDescriptor.length();
         
@@ -1230,7 +1236,13 @@ public final class Environment extends Configurable {
             return templateDateFormatFactory.get(dateType, formatDescriptor);
         } catch (ParseException e) {
             throw new _TemplateModelException(e.getCause(), new Object[] {
-                    "Malformed date format, ", new _DelayedJQuote(formatDescriptor), ": ",
+                    (sourceCfgSetting == null
+                            ? (Object) "Malformed date/time format descriptor: "
+                            : new Object[] {
+                                    "The value of the \"", sourceCfgSetting,
+                                    "\" FreeMarker configuration setting is a malformed date/time format descriptor: "
+                            }),
+                    new _DelayedJQuote(formatDescriptor), ". Reason given: ",
                     e.getMessage() });
         }
     }
