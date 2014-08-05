@@ -1,7 +1,6 @@
 package freemarker.core;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import freemarker.template.TemplateDateModel;
@@ -24,17 +23,6 @@ abstract class TemplateDateFormat {
      *          {@link TemplateDateModel#getAsDate()}, but some may format differently depending on the properties of
      *          a custom {@link TemplateDateModel} implementation.
      *          
-     * @param zonelessInput Indicates that the input Java {@link Date} is not from a time zone aware source.
-     *          When this is {@code true}, the formatters shouldn't override the time zone provided to its
-     *          constructor or factory method (most formatters don't do that anyway), and it shouldn't show the time
-     *          zone, if it can hide it (like a {@link SimpleDateFormat} pattern-based formatter may can't do that, as
-     *          the pattern prescribes what to show).
-     *          
-     *          <p>As of FreeMarker 2.3.21, this is {@code true} exactly when the date is an SQL "date
-     *          without time of the day" (i.e., a {@link java.sql.Date java.sql.Date}) or an SQL "time of the day" value
-     *          (i.e., a {@link java.sql.Time java.sql.Time}, although this rule can change in future, depending on
-     *          configuration settings and such, so you should rely on this rule, just accept what this parameter says.
-     *          
      * @return The date/time/dateTime as text, with no escaping (like no HTML escaping). Can't be {@code null}.
      * 
      * @throws UnformattableDateException When a {@link TemplateDateModel} can't be formatted because of the
@@ -42,7 +30,7 @@ abstract class TemplateDateFormat {
      *           {@link UnknownDateTypeFormattingUnsupportedException}. 
      * @throws TemplateModelException Exception thrown by the {@code dateModel} object when calling its methods.  
      */
-    public abstract String format(TemplateDateModel dateModel, boolean zonelessInput)
+    public abstract String format(TemplateDateModel dateModel)
             throws UnformattableDateException, TemplateModelException;
 
     /**

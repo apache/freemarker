@@ -36,3 +36,18 @@ ${date}
 ${unknownDate?string["EEE, dd MMM yyyy HH:mm:ss z"]}
 ${unknownDate?string("EEE, dd MMM yyyy HH:mm:ss z")}
 ${unknownDate?string.yyyy}
+
+<#setting datetime_format="yyyy">
+<#assign s = date?string>
+${s}
+<#setting datetime_format="MM">
+${s}
+
+<#-- Check ?string lazy evaluation bug was fixed: -->
+<#setting datetime_format="yyyy">
+<#assign s = date?string>
+<#-- no ${s} -->
+<#setting datetime_format="MM">
+${s}
+<#assign s = date?string>
+${s}

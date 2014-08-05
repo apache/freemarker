@@ -18,6 +18,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
             = "Less than seconds accuracy isn't allowed by the XML Schema format";
     private final ISOLikeTemplateDateFormatFactory factory; 
     protected final int dateType;
+    protected final boolean zonelessInput;
     protected final TimeZone timeZone;
     protected final boolean useUTC;
     protected final Boolean showZoneOffset;
@@ -31,14 +32,17 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
      */
     public ISOLikeTemplateDateFormat(
             String settingValue, int parsingStart,
-            int dateType, TimeZone timeZone,
+            int dateType, boolean zonelessInput,
+            TimeZone timeZone,
             ISOLikeTemplateDateFormatFactory factory)
             throws ParseException, UnknownDateTypeFormattingUnsupportedException {
         this.factory = factory;
         if (dateType == TemplateDateModel.UNKNOWN) {
             throw new UnknownDateTypeFormattingUnsupportedException();
         }
+        
         this.dateType = dateType;
+        this.zonelessInput = zonelessInput;
         
         final int ln = settingValue.length();
         boolean afterSeparator = false;
@@ -136,7 +140,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         this.timeZone = timeZone;
     }
     
-    public final String format(TemplateDateModel dateModel, boolean zonelessInput) throws TemplateModelException {
+    public final String format(TemplateDateModel dateModel) throws TemplateModelException {
         final Date date = dateModel.getAsDate();
         return format(
                 date,

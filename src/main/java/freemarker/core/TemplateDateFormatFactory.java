@@ -1,6 +1,8 @@
 package freemarker.core;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -42,7 +44,19 @@ abstract class TemplateDateFormatFactory {
      * @param dateType {@line TemplateDateModel#DATE}, {@line TemplateDateModel#TIME},
      *         {@line TemplateDateModel#DATETIME} or {@line TemplateDateModel#UNKNOWN}. Supporting
      *         {@line TemplateDateModel#UNKNOWN} is not necessary, in which case the method should throw an 
-     *         {@link UnknownDateTypeFormattingUnsupportedException} exception.  
+     *         {@link UnknownDateTypeFormattingUnsupportedException} exception.
+     *         
+     * @param zonelessInput Indicates that the input Java {@link Date} is not from a time zone aware source.
+     *         When this is {@code true}, the formatters shouldn't override the time zone provided to its
+     *         constructor or factory method (most formatters don't do that anyway), and it shouldn't show the time
+     *         zone, if it can hide it (like a {@link SimpleDateFormat} pattern-based formatter may can't do that, as
+     *         the pattern prescribes what to show).
+     *          
+     *         <p>As of FreeMarker 2.3.21, this is {@code true} exactly when the date is an SQL "date
+     *         without time of the day" (i.e., a {@link java.sql.Date java.sql.Date}) or an SQL "time of the day" value
+     *         (i.e., a {@link java.sql.Time java.sql.Time}, although this rule can change in future, depending on
+     *         configuration settings and such, so you should rely on this rule, just accept what this parameter says.
+     *         
      * @param formatDescriptor The string used as {@code ..._format} the configuration setting value (among others),
      *         like {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"}. The implementation is only supposed to
      *         understand a particular kind of format descriptor, for which FreeMarker routes to this factory.
@@ -52,9 +66,9 @@ abstract class TemplateDateFormatFactory {
      * @throws ParseException if the {@code formatDescriptor} is malformed
      * @throws TemplateModelException if the {@code dateType} is unsupported by the formatter
      * @throws UnknownDateTypeFormattingUnsupportedException if {@code dateType} is {@line TemplateDateModel#UNKNOWN},
-     *           and that's unsupported by the formatter implementation.
+     *         and that's unsupported by the formatter implementation.
      */
-    public abstract TemplateDateFormat get(int dateType, String formatDescriptor)
+    public abstract TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
             throws java.text.ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException;
     
 }

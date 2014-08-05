@@ -19,7 +19,7 @@ class JavaTemplateDateFormat extends TemplateDateFormat {
         this.javaDateFormat = javaDateFormat;
     }
     
-    public String format(TemplateDateModel dateModel, boolean zonelessInput) throws TemplateModelException {
+    public String format(TemplateDateModel dateModel) throws TemplateModelException {
         return javaDateFormat.format(dateModel.getAsDate());
     }
 

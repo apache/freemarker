@@ -111,8 +111,28 @@ public final class Environment extends Configurable {
     private NumberFormat cachedNumberFormat;
     private Map cachedNumberFormats;
 
-    private TemplateDateFormat cachedTimeFormat, cachedDateFormat, cachedDateTimeFormat;
-    private TemplateDateFormat cachedTimeFormatSysDefTZ, cachedDateFormatSysDefTZ, cachedDateTimeFormatSysDefTZ;
+    /**
+     * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
+     * formatting. That is, in situations like ${lastModified} or even ${lastModified?date}, but not in situations
+     * like ${lastModified?string.iso}.
+     * 
+     * <p>The index of the array is calculated from what kind of formatter we want
+     * (see {@link #getCachedTemplateDateFormatIndex(int, boolean, boolean)}):<br>
+     * Zoned input:                  0: U,  1: T,  2: D,  3: DT<br>
+     * Zoneless input:               4: U,  5: T,  6: D,  7: DT<br>
+     * Sys def TZ + Zoned input:     8: U,  9: T, 10: D, 11: DT<br>
+     * Sys def TZ + Zoneless input: 12: U, 13: T, 14: D, 15: DT
+     * 
+     * <p>This is a lazily filled cache. It starts out as {@code null}, then
+     * when first needed the array will be created. The array elements also start out as {@code null}-s, and they
+     * are filled as the particular kind of formatter is first needed.
+     */
+    private TemplateDateFormat[] cachedTemplateDateFormats;
+    private static final int CACHED_TDFS_ZONELESS_INPUT_OFFS = 4;
+    private static final int CACHED_TDFS_DEF_SYS_TZ_OFFS = CACHED_TDFS_ZONELESS_INPUT_OFFS * 2;
+    private static final int CACHED_TDFS_LENGTH = CACHED_TDFS_DEF_SYS_TZ_OFFS * 2;
+    private static final int CACHED_TDFS_LOCAL_TZ_LENGTH = CACHED_TDFS_DEF_SYS_TZ_OFFS;
+    
     private XSTemplateDateFormatFactory cachedXSTemplateDateFormatFactory;
     private XSTemplateDateFormatFactory cachedXSTemplateDateFormatFactorySysDefTZ;
     private ISOTemplateDateFormatFactory cachedISOTemplateDateFormatFactory;
@@ -203,9 +223,7 @@ public final class Environment extends Configurable {
         cachedNumberFormats = null;
         cachedNumberFormat = null;
         
-        cachedTimeFormat = cachedTimeFormatSysDefTZ = null;
-        cachedDateFormat = cachedDateFormatSysDefTZ = null;
-        cachedDateTimeFormat = cachedDateTimeFormatSysDefTZ = null;
+        cachedTemplateDateFormats = null;
         cachedXSTemplateDateFormatFactory = cachedXSTemplateDateFormatFactorySysDefTZ = null;
         cachedISOTemplateDateFormatFactory = cachedISOTemplateDateFormatFactorySysDefTZ = null;
         cachedJavaTemplateDateFormatFactory = cachedJavaTemplateDateFormatFactorySysDefTZ = null;
@@ -764,25 +782,13 @@ public final class Environment extends Configurable {
             cachedNumberFormats = null;
             cachedNumberFormat = null;
     
-            if (cachedTimeFormat != null && cachedTimeFormat.isLocaleBound()) {
-                cachedTimeFormat = null;
-            }
-            if (cachedTimeFormatSysDefTZ != null && cachedTimeFormatSysDefTZ.isLocaleBound()) {
-                cachedTimeFormatSysDefTZ = null;
-            }
-            
-            if (cachedDateFormat != null && cachedDateFormat.isLocaleBound()) {
-                cachedDateFormat = null;
-            }
-            if (cachedDateFormatSysDefTZ != null && cachedDateFormatSysDefTZ.isLocaleBound()) {
-                cachedDateFormatSysDefTZ = null;
-            }
-            
-            if (cachedDateTimeFormat != null && cachedDateTimeFormat.isLocaleBound()) {
-                cachedDateTimeFormat = null;
-            }
-            if (cachedDateTimeFormatSysDefTZ != null && cachedDateTimeFormatSysDefTZ.isLocaleBound()) {
-                cachedDateTimeFormatSysDefTZ = null;
+            if (cachedTemplateDateFormats != null) {
+                for (int i = 0; i < CACHED_TDFS_LENGTH; i++) {
+                    final TemplateDateFormat f = cachedTemplateDateFormats[i];
+                    if (f != null && f.isLocaleBound()) {
+                        cachedTemplateDateFormats[i] = null;
+                    }
+                }
             }
 
             if (cachedXSTemplateDateFormatFactory != null && cachedXSTemplateDateFormatFactory.isLocaleBound()) {
@@ -815,12 +821,15 @@ public final class Environment extends Configurable {
         super.setTimeZone(timeZone);
         
         if (!timeZone.equals(prevTimeZone)) {
+            if (cachedTemplateDateFormats != null) {
+                for (int i = 0; i < CACHED_TDFS_LOCAL_TZ_LENGTH; i++) {
+                    cachedTemplateDateFormats[i] = null;
+                }
+            }
+            
             cachedXSTemplateDateFormatFactory = null;
             cachedISOTemplateDateFormatFactory = null;
             cachedJavaTemplateDateFormatFactory = null;
-            cachedTimeFormat = null;
-            cachedDateFormat = null;
-            cachedDateTimeFormat = null;
             
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
@@ -977,7 +986,11 @@ public final class Environment extends Configurable {
         String prevTimeFormat = getTimeFormat();
         super.setTimeFormat(timeFormat);
         if (!timeFormat.equals(prevTimeFormat)) {
-            cachedTimeFormat = cachedTimeFormatSysDefTZ = null;
+            if (cachedTemplateDateFormats != null) {
+                for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
+                    cachedTemplateDateFormats[i + TemplateDateModel.TIME] = null;
+                }
+            }
         }
     }
 
@@ -985,7 +998,11 @@ public final class Environment extends Configurable {
         String prevDateFormat = getDateFormat();
         super.setDateFormat(dateFormat);
         if (!dateFormat.equals(prevDateFormat)) {
-            cachedDateFormat = cachedDateFormatSysDefTZ = null;
+            if (cachedTemplateDateFormats != null) {
+                for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
+                    cachedTemplateDateFormats[i + TemplateDateModel.DATE] = null;
+                }
+            }
         }
     }
 
@@ -993,7 +1010,11 @@ public final class Environment extends Configurable {
         String prevDateTimeFormat = getDateTimeFormat();
         super.setDateTimeFormat(dateTimeFormat);
         if (!dateTimeFormat.equals(prevDateTimeFormat)) {
-            cachedDateTimeFormat = cachedDateTimeFormatSysDefTZ = null;
+            if (cachedTemplateDateFormats != null) {
+                for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
+                    cachedTemplateDateFormats[i + TemplateDateModel.DATETIME] = null;
+                }
+            }
         }
     }
 
@@ -1067,10 +1088,11 @@ public final class Environment extends Configurable {
 
     String formatDate(TemplateDateModel tdm, Expression tdmSourceExpr) throws TemplateModelException {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
-        boolean sqlDateOrTime = isSQLDateOrTimeClass(date.getClass());
         try {
-            return getTemplateDateFormat(tdm.getDateType(), shouldUseSysDefTZ(sqlDateOrTime), tdmSourceExpr)
-                    .format(tdm, sqlDateOrTime);
+            boolean isSQLDateOrTime = isSQLDateOrTimeClass(date.getClass());
+            return getTemplateDateFormat(
+                    tdm.getDateType(), isSQLDateOrTime, shouldUseSysDefTZ(isSQLDateOrTime), tdmSourceExpr)
+                    .format(tdm);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
         } catch (UnformattableDateException e) {
@@ -1081,10 +1103,11 @@ public final class Environment extends Configurable {
     String formatDate(TemplateDateModel tdm, String formatDescriptor, Expression tdmSourceExpr)
             throws TemplateModelException {
         Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
-        boolean sqlDateOrTime = isSQLDateOrTimeClass(date.getClass());
+        boolean isSQLDateOrTime = isSQLDateOrTimeClass(date.getClass());
         try {
-            return getTemplateDateFormat(tdm.getDateType(), shouldUseSysDefTZ(sqlDateOrTime), formatDescriptor, null)
-                    .format(tdm, sqlDateOrTime);
+            return getTemplateDateFormat(
+                    tdm.getDateType(), isSQLDateOrTime, shouldUseSysDefTZ(isSQLDateOrTime), formatDescriptor, null)
+                    .format(tdm);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(tdmSourceExpr, e);
         } catch (UnformattableDateException e) {
@@ -1104,63 +1127,56 @@ public final class Environment extends Configurable {
     TemplateDateFormat getTemplateDateFormat(int dateType, Class/*<? extends Date>*/ dateClass, Expression dateSourceExpr)
             throws TemplateModelException {
         try {
-            return getTemplateDateFormat(dateType, shouldUseSysDefTZ(dateClass), dateSourceExpr);
+            boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
+            return getTemplateDateFormat(dateType, isSQLDateOrTime, shouldUseSysDefTZ(isSQLDateOrTime), dateSourceExpr);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
         }
     }
     
-    private TemplateDateFormat getTemplateDateFormat(int dateType, boolean useSysDefTZ, Expression dateSourceExpr)
+    private TemplateDateFormat getTemplateDateFormat(
+            int dateType, boolean isSQLDateOrTime,
+            boolean useSysDefTZ, Expression dateSourceExpr)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
-        switch (dateType) {
-            case TemplateDateModel.UNKNOWN:
-                throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, null);
+        if (dateType == TemplateDateModel.UNKNOWN) {
+            throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, null);
+        }
+        int cacheIdx = getCachedTemplateDateFormatIndex(dateType, isSQLDateOrTime, useSysDefTZ);
+        TemplateDateFormat[] cachedTemplateDateFormats = this.cachedTemplateDateFormats;
+        if (cachedTemplateDateFormats == null) {
+            cachedTemplateDateFormats = new TemplateDateFormat[CACHED_TDFS_LENGTH];
+            this.cachedTemplateDateFormats = cachedTemplateDateFormats; 
+        }
+        TemplateDateFormat f = cachedTemplateDateFormats[cacheIdx];
+        if (f == null) {
+            final String settingName;
+            final String settingValue;
+            switch (dateType) {
             case TemplateDateModel.TIME:
-                if (useSysDefTZ) {
-                    if (cachedTimeFormatSysDefTZ == null) {
-                        cachedTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat(),
-                                Configuration.TIME_FORMAT_KEY);
-                    }
-                    return cachedTimeFormatSysDefTZ;
-                } else {
-                    if (cachedTimeFormat == null) {
-                        cachedTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getTimeFormat(),
-                                Configuration.TIME_FORMAT_KEY);
-                    }
-                    return cachedTimeFormat;
-                }
+                settingName = Configuration.TIME_FORMAT_KEY;
+                settingValue = getTimeFormat();
+                break;
             case TemplateDateModel.DATE:
-                if (useSysDefTZ) {
-                    if (cachedDateFormatSysDefTZ == null) {
-                        cachedDateFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat(),
-                                Configuration.DATE_FORMAT_KEY);
-                    }
-                    return cachedDateFormatSysDefTZ;
-                } else {
-                    if (cachedDateFormat == null) {
-                        cachedDateFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateFormat(),
-                                Configuration.DATE_FORMAT_KEY);
-                    }
-                    return cachedDateFormat;
-                }
+                settingName = Configuration.DATE_FORMAT_KEY;
+                settingValue = getDateFormat();
+                break;
             case TemplateDateModel.DATETIME:
-                if (useSysDefTZ) {
-                    if (cachedDateTimeFormatSysDefTZ == null) {
-                        cachedDateTimeFormatSysDefTZ = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat(),
-                                Configuration.DATETIME_FORMAT_KEY);
-                    }
-                    return cachedDateTimeFormatSysDefTZ;
-                } else {
-                    if (cachedDateTimeFormat == null) {
-                        cachedDateTimeFormat = getTemplateDateFormat(dateType, useSysDefTZ, getDateTimeFormat(),
-                                Configuration.DATETIME_FORMAT_KEY);
-                    }
-                    return cachedDateTimeFormat;
-                }
+                settingName = Configuration.DATETIME_FORMAT_KEY;
+                settingValue = getDateTimeFormat();
+                break;
             default:
                 throw new _TemplateModelException(new Object[] {
                         "Invalid date type enum: ", new Integer(dateType) });
+            } // switch
+
+            f = getTemplateDateFormat(
+                    dateType, isSQLDateOrTime,
+                    useSysDefTZ, settingValue, settingName);
+            
+            cachedTemplateDateFormats[cacheIdx] = f;
         }
+        return f;
+        
     }
     
     /**
@@ -1173,15 +1189,18 @@ public final class Environment extends Configurable {
             int dateType, Class/*<? extends Date>*/ dateClass, String formatDescriptor, Expression dateSourceExpr)
             throws TemplateModelException {
         try {
+            boolean isSQLDateOrTime = isSQLDateOrTimeClass(dateClass);
             return getTemplateDateFormat(
-                    dateType, shouldUseSysDefTZ(dateClass), formatDescriptor, null);
+                    dateType, isSQLDateOrTime,
+                    shouldUseSysDefTZ(isSQLDateOrTime), formatDescriptor, null);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
             throw MessageUtil.newCantFormatUnknownTypeDateException(dateSourceExpr, e);
         }
     }
     
     private TemplateDateFormat getTemplateDateFormat(
-            int dateType, boolean useSysDefTZ, String formatDescriptor, String sourceCfgSetting)
+            int dateType, boolean zonelessInput,
+            boolean useSysDefTZ, String formatDescriptor, String sourceCfgSetting)
             throws TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
         final int formatDescriptionLen = formatDescriptor.length();
         
@@ -1233,7 +1252,7 @@ public final class Environment extends Configurable {
         }
 
         try {
-            return templateDateFormatFactory.get(dateType, formatDescriptor);
+            return templateDateFormatFactory.get(dateType, zonelessInput, formatDescriptor);
         } catch (ParseException e) {
             throw new _TemplateModelException(e.getCause(), new Object[] {
                     (sourceCfgSetting == null
@@ -1256,7 +1275,7 @@ public final class Environment extends Configurable {
 
     private boolean shouldUseSysDefTZ(boolean sqlDateOrTime) {
         // Attention! If you update this method, update all overloads of it!
-        return sqlDateOrTime  // This pre-condition is only for speed
+        return sqlDateOrTime
                 && !isSQLDateAndTimeTimeZoneSameAsNormal();
     }
     
@@ -1271,7 +1290,11 @@ public final class Environment extends Configurable {
                                     && ( 
                                             java.sql.Date.class.isAssignableFrom(dateClass)
                                             || java.sql.Time.class.isAssignableFrom(dateClass))));
-    }    
+    }
+    
+    private int getCachedTemplateDateFormatIndex(int dateType, boolean zonelessInput, boolean sysDefTZ) {
+        return dateType + (zonelessInput ? 4 : 0) + (sysDefTZ ? 8 : 0);
+    }
     
     /**
      * Returns the {@link DateToISO8601CalendarFactory} used by the

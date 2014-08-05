@@ -18,7 +18,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
     private final Locale locale; 
     
-    private Map[] formatCache;
+    private Map/*<TemplateDateFormat>*/[] formatCache;
 
     public JavaTemplateDateFormatFactory(TimeZone timeZone, Locale locale) {
         super(timeZone);
@@ -29,28 +29,29 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
         return true;
     }
 
-    public TemplateDateFormat get(int dateType, String formatDescriptor)
+    /**
+     * @param zonelessInput Has no effect in this implementation.
+     */
+    public TemplateDateFormat get(int dateType, boolean zonelessInput, String formatDescriptor)
             throws ParseException, TemplateModelException, UnknownDateTypeFormattingUnsupportedException {
-        Map[] formatCache = this.formatCache;
+        Map/*<TemplateDateFormat>*/[] formatCache = this.formatCache;
         if(formatCache == null) {
-            formatCache = new Map[4];
-            formatCache[TemplateDateModel.UNKNOWN] = new HashMap();
-            formatCache[TemplateDateModel.TIME] = new HashMap();
-            formatCache[TemplateDateModel.DATE] = new HashMap();
-            formatCache[TemplateDateModel.DATETIME] = new HashMap();
+            formatCache = new Map[4]; // Index 0..3: values of TemplateDateModel's date type constants
             this.formatCache = formatCache; 
         }
-        Map jDateFormatsForDateType = formatCache[dateType];
-
-        TemplateDateFormat jDateFormat = (TemplateDateFormat) jDateFormatsForDateType.get(formatDescriptor);
-        if(jDateFormat != null) {
-            return jDateFormat;
+        
+        Map/*<TemplateDateFormat>*/ formatsForDateType = formatCache[dateType];
+        if (formatsForDateType == null) {
+            formatsForDateType = new HashMap/*<TemplateDateFormat>*/();
+            formatCache[dateType] = formatsForDateType; 
         }
-        
-        jDateFormat = new JavaTemplateDateFormat(getJavaDateFormat(dateType, formatDescriptor));
-        jDateFormatsForDateType.put(formatDescriptor, jDateFormat);
-        
-        return jDateFormat;
+
+        TemplateDateFormat format = (TemplateDateFormat) formatsForDateType.get(formatDescriptor);
+        if(format == null) {
+            format = new JavaTemplateDateFormat(getJavaDateFormat(dateType, formatDescriptor));
+            formatsForDateType.put(formatDescriptor, format);
+        }
+        return format;
     }
 
     private DateFormat getJavaDateFormat(int dateType, String nameOrPattern)

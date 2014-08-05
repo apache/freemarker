@@ -249,6 +249,7 @@ class MiscellaneousBuiltins {
         {
             private final TemplateDateModel dateModel;
             private final Environment env;
+            private final TemplateDateFormat defaultFormat;
             private String cachedValue;
     
             DateFormatter(TemplateDateModel dateModel, Environment env)
@@ -257,6 +258,12 @@ class MiscellaneousBuiltins {
             {
                 this.dateModel = dateModel;
                 this.env = env;
+                
+                final int dateType = dateModel.getDateType();
+                this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
+                        ? null  // Lazy unknown type error in getAsString()
+                        : env.getTemplateDateFormat(
+                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target);
             }
     
             public String getAsString()
@@ -264,7 +271,18 @@ class MiscellaneousBuiltins {
                 TemplateModelException
             {
                 if(cachedValue == null) {
-                    cachedValue = env.formatDate(dateModel, target);
+                    try {
+                        if (defaultFormat == null) {
+                            if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
+                                throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
+                            } else {
+                                throw new BugException();
+                            }
+                        }
+                        cachedValue = defaultFormat.format(dateModel);
+                    } catch (UnformattableDateException e) {
+                        throw MessageUtil.newCantFormatDateException(target, e);
+                    }
                 }
                 return cachedValue;
             }
