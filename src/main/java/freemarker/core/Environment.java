@@ -1293,7 +1293,9 @@ public final class Environment extends Configurable {
     }
     
     private int getCachedTemplateDateFormatIndex(int dateType, boolean zonelessInput, boolean sysDefTZ) {
-        return dateType + (zonelessInput ? 4 : 0) + (sysDefTZ ? 8 : 0);
+        return dateType
+                + (zonelessInput ? CACHED_TDFS_ZONELESS_INPUT_OFFS : 0)
+                + (sysDefTZ ? CACHED_TDFS_LOCAL_TZ_LENGTH : 0);
     }
     
     /**
