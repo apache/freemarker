@@ -354,7 +354,7 @@ public class Configurable
     /**
      * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
-     * application this should be set to the system default time zone (server default time zone), because that's what
+     * application this should be set to the JVM default time zone (server default time zone), because that's what
      * most JDBC drivers will use when constructing the {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. If this setting is {@code null}, FreeMarker will use the value of
      * ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values,
@@ -373,14 +373,14 @@ public class Configurable
      *   <li>When a JDBC query has to return a date-only or time-only value, it has to convert it to a point on the
      *   physical time line, because that's what {@link java.util.Date} and its subclasses store (milliseconds since
      *   the epoch). Obviously, this is impossible to do. So JDBC just chooses a physical time which, when rendered
-     *   <em>with the default system time zone</em>, will give the same field values as those stored
+     *   <em>with the JVM default time zone</em>, will give the same field values as those stored
      *   in the database. (Actually, you can give JDBC a calendar, and so it can use other time zones too, but most
      *   application won't care using those overloads.) For example, assume that the system time zone is GMT+02:00.
      *   Then, 2014-07-12 in the database will be translated to physical time 2014-07-11 22:00:00 UTC, because that
      *   rendered in GMT+02:00 gives 2014-07-12 00:00:00. Similarly, 11:57:00 in the database will be translated to
      *   physical time 1970-01-01 09:57:00 UTC. Thus, the physical time stored in the returned value depends on the
-     *   default system time zone of the JDBC client, not just on the content in the database. (This used to be default
-     *   behavior of ORM-s, like Hibernate, too.)
+     *   default system time zone of the JDBC client, not just on the content in the database. (This used to be the
+     *   default behavior of ORM-s, like Hibernate, too.)
      *   
      *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
      *   template output. For example, when a web page visitor has a preferred time zone, the web application framework
@@ -415,7 +415,7 @@ public class Configurable
     public void setSQLDateAndTimeTimeZone(TimeZone tz) {
         sqlDataAndTimeTimeZone = tz;
         sqlDataAndTimeTimeZoneSet = true;
-        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(tz));
+        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, tz != null ? tz.getID() : "null");
     }
     
     /**

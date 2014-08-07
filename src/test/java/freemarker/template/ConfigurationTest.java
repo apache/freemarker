@@ -18,6 +18,7 @@ package freemarker.template;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
@@ -26,6 +27,8 @@ import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.core.Configurable;
+import freemarker.core.Environment;
+import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
 
 public class ConfigurationTest extends TestCase{
@@ -218,6 +221,108 @@ public class ConfigurationTest extends TestCase{
         } finally {
             TimeZone.setDefault(origSysDefTZ);
         }
+    }
+    
+    public void testSetSQLDateAndTimeTimeZone() throws TemplateException {
+        TimeZone origSysDefTZ = TimeZone.getDefault();
+        try {
+            TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
+            TimeZone.setDefault(sysDefTZ);
+            
+            Configuration cfg = new Configuration(new Version(2, 3, 0));
+            assertNull(cfg.getSQLDateAndTimeTimeZone());
+            assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+            
+            cfg.setSQLDateAndTimeTimeZone(null);
+            assertNull(cfg.getSQLDateAndTimeTimeZone());
+            assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+            
+            cfg.setSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "JVM default");
+            assertEquals(sysDefTZ, cfg.getSQLDateAndTimeTimeZone());
+            assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+            
+            cfg.setSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
+            assertNull(cfg.getSQLDateAndTimeTimeZone());
+            assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        } finally {
+            TimeZone.setDefault(origSysDefTZ);
+        }
+    }
+
+    public void testTimeZoneLayers() throws TemplateException, IOException {
+        Configuration cfg = new Configuration(new Version(2, 3, 0));
+        Template t = new Template(null, "", cfg);
+        Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
+        Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
+        
+        // cfg:
+        assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+        assertNull(cfg.getSQLDateAndTimeTimeZone());
+        assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env:
+        assertEquals(TimeZone.getDefault(), env1.getTimeZone());
+        assertNull(env1.getSQLDateAndTimeTimeZone());
+        assertEquals("null", env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env 2:
+        assertEquals(TimeZone.getDefault(), env2.getTimeZone());
+        assertNull(env2.getSQLDateAndTimeTimeZone());
+        assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        
+        env1.setSQLDateAndTimeTimeZone(DateUtil.UTC);
+        // cfg:
+        assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+        assertNull(cfg.getSQLDateAndTimeTimeZone());
+        assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env:
+        assertEquals(TimeZone.getDefault(), env1.getTimeZone());
+        assertEquals(DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+        assertEquals(DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        
+        TimeZone localTZ = TimeZone.getTimeZone("Europe/Brussels");
+        env1.setTimeZone(localTZ);
+        // cfg:
+        assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+        assertNull(cfg.getSQLDateAndTimeTimeZone());
+        assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env:
+        assertEquals(localTZ, env1.getTimeZone());
+        assertEquals(DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+        assertEquals(DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env 2:
+        assertEquals(TimeZone.getDefault(), env2.getTimeZone());
+        assertNull(env2.getSQLDateAndTimeTimeZone());
+        assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        
+        TimeZone otherTZ1 = TimeZone.getTimeZone("GMT+05");
+        TimeZone otherTZ2 = TimeZone.getTimeZone("GMT+06");
+        cfg.setTimeZone(otherTZ1);
+        cfg.setSQLDateAndTimeTimeZone(otherTZ2);
+        // cfg:
+        assertEquals(otherTZ1, cfg.getTimeZone());
+        assertEquals(otherTZ2, cfg.getSQLDateAndTimeTimeZone());
+        assertEquals(otherTZ1.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
+        assertEquals(otherTZ2.getID(), cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env:
+        assertEquals(localTZ, env1.getTimeZone());
+        assertEquals(DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+        assertEquals(DateUtil.UTC.getID(), env1.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        // env 2:
+        assertEquals(otherTZ1, env2.getTimeZone());
+        assertEquals(otherTZ2, env2.getSQLDateAndTimeTimeZone());
+        assertEquals(otherTZ1.getID(), env2.getSetting(Configurable.TIME_ZONE_KEY));
+        assertEquals(otherTZ2.getID(), env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+        
+        try {
+            env2.setTimeZone(null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        env2.setSQLDateAndTimeTimeZone(null);
+        assertEquals(otherTZ1, env2.getTimeZone());
+        assertNull(env2.getSQLDateAndTimeTimeZone());
+        assertEquals(otherTZ1.getID(), env2.getSetting(Configurable.TIME_ZONE_KEY));
+        assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
     }
     
 }

@@ -121,7 +121,7 @@ class DateBuiltins {
                             : env.shouldUseSQLDTTZ(date.getClass())
                                     ? env.getSQLDateAndTimeTimeZone()
                                     : env.getTimeZone(),
-                    env.getISOBuiltInCalendar()));
+                    env.getISOBuiltInCalendarFactory()));
         }
 
     }
@@ -187,7 +187,7 @@ class DateBuiltins {
                         shouldShowOffset(date, dateType, env),
                         accuracy,
                         tzArg, 
-                        env.getISOBuiltInCalendar()));
+                        env.getISOBuiltInCalendarFactory()));
             }
             
         }
