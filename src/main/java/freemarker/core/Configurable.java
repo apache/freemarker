@@ -70,7 +70,7 @@ public class Configurable
     /** The incompatible improvements version where the default of tempateLoader and objectWrapper was changed. */
     static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = 2003021;
 
-    private static final String DEFAULT = "default";
+    private static final String JVM_DEFAULT = "JVM default";
     
     public static final String LOCALE_KEY = "locale";
     public static final String NUMBER_FORMAT_KEY = "number_format";
@@ -78,8 +78,8 @@ public class Configurable
     public static final String DATE_FORMAT_KEY = "date_format";
     public static final String DATETIME_FORMAT_KEY = "datetime_format";
     public static final String TIME_ZONE_KEY = "time_zone";
-    public static final String USE_SYSTEM_DEFAULT_TIME_ZONE_FOR_SQL_DATE_AND_TIME
-            = "use_system_default_time_zone_for_sql_date_and_time";
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY
+            = "sql_date_and_time_time_zone";
     public static final String CLASSIC_COMPATIBLE_KEY = "classic_compatible";
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = "template_exception_handler";
     public static final String ARITHMETIC_ENGINE_KEY = "arithmetic_engine";
@@ -105,7 +105,8 @@ public class Configurable
     private String dateFormat;
     private String dateTimeFormat;
     private TimeZone timeZone;
-    private Boolean useSystemDefaultTimeZoneForSQLDateAndTime;
+    private TimeZone sqlDataAndTimeTimeZone;
+    private boolean sqlDataAndTimeTimeZoneSet;
     private String booleanFormat;
     private String trueStringValue;  // deduced from booleanFormat
     private String falseStringValue;  // deduced from booleanFormat
@@ -142,7 +143,7 @@ public class Configurable
         parent = null;
         locale = Locale.getDefault();
         timeZone = TimeZone.getDefault();
-        useSystemDefaultTimeZoneForSQLDateAndTime = Boolean.FALSE;
+        sqlDataAndTimeTimeZone = null;
         numberFormat = "number";
         timeFormat = "";
         dateFormat = "";
@@ -163,8 +164,7 @@ public class Configurable
         properties.setProperty(DATE_FORMAT_KEY, dateFormat);
         properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
-        properties.setProperty(USE_SYSTEM_DEFAULT_TIME_ZONE_FOR_SQL_DATE_AND_TIME,
-                useSystemDefaultTimeZoneForSQLDateAndTime.toString());
+        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(sqlDataAndTimeTimeZone));
         properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
@@ -341,9 +341,9 @@ public class Configurable
      * preferred time zone of target audience (like the Web page visitor).
      * 
      * <p>If you or the templates set the time zone, you should probably also set
-     * {@link #setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)}!
+     * {@link #setSQLDateAndTimeTimeZone(TimeZone)}!
      * 
-     * @see #setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)
+     * @see #setSQLDateAndTimeTimeZone(TimeZone)
      */
     public void setTimeZone(TimeZone timeZone) {
         NullArgumentException.check("timeZone", timeZone);
@@ -352,19 +352,23 @@ public class Configurable
     }
 
     /**
-     * Sets if the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
-     * {@link java.sql.Time java.sql.Time} values will be
-     * the system default time zone (server default time zone) instead of the value of the {@code time_zone}
-     * FreeMarker configuration setting ({@link #getTimeZone()}). Defaults to {@code false}, but in most applications
-     * you probably want it to be {@code true}. It doesn't influence the formatting of other kind of values (like of
+     * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
+     * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
+     * application this should be set to the system default time zone (server default time zone), because that's what
+     * most JDBC drivers will use when constructing the {@link java.sql.Date java.sql.Date} and
+     * {@link java.sql.Time java.sql.Time} values. If this setting is {@code null}, FreeMarker will use the value of
+     * ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values,
+     * which often gives bad results.
+     * 
+     * <p>This setting doesn't influence the formatting of other kind of values (like of
      * {@link java.sql.Timestamp java.sql.Timestamp} or plain {@link java.util.Date java.util.Date} values).
      * 
      * <p>To decide what value you need, a few things has to be understood:
      * <ul>
      *   <li>Date-only and time-only values in SQL-oriented databases are usually store calendar and clock field
      *   values directly (year, month, day, or hour, minute, seconds (with decimals)), as opposed to a set of points
-     *   on the physical time line. Thus, unlike SQL timestamps, these values aren't meant to be shown differently
-     *   depending on the time zone of the audience.
+     *   on the physical time line. Thus, unlike SQL timestamps, these values usually aren't meant to be shown
+     *   differently depending on the time zone of the audience.
      *   
      *   <li>When a JDBC query has to return a date-only or time-only value, it has to convert it to a point on the
      *   physical time line, because that's what {@link java.util.Date} and its subclasses store (milliseconds since
@@ -375,7 +379,8 @@ public class Configurable
      *   Then, 2014-07-12 in the database will be translated to physical time 2014-07-11 22:00:00 UTC, because that
      *   rendered in GMT+02:00 gives 2014-07-12 00:00:00. Similarly, 11:57:00 in the database will be translated to
      *   physical time 1970-01-01 09:57:00 UTC. Thus, the physical time stored in the returned value depends on the
-     *   default system time zone of the JDBC client.
+     *   default system time zone of the JDBC client, not just on the content in the database. (This used to be default
+     *   behavior of ORM-s, like Hibernate, too.)
      *   
      *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
      *   template output. For example, when a web page visitor has a preferred time zone, the web application framework
@@ -389,26 +394,43 @@ public class Configurable
      *   {@code time_zone} is GMT+00:00, the
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
      *   those are the time zone correct renderings, those values probably was meant to shown "as is".
+     *   
+     *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
+     *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
+     *   application so that time stamps coming from the database go through the necessary conversion to store the
+     *   correct distance from the epoch (1970-01-01 00:00:00 UTC), as requested by {@link java.util.Date}. In that case
+     *   the time stamp can be safely rendered in different time zones, and thus it needs no special treatment.
      * </ul>
      * 
+     * @param tz Maybe {@code null}, in which case {@link java.sql.Date java.sql.Date} and
+     *          {@link java.sql.Time java.sql.Time} values will be formatted in the time zone returned by
+     *          {@link #getTimeZone()}.
+     *          (Note that since {@code null} is an allowed value for this setting, it will not cause
+     *          {@link #getSQLDateAndTimeTimeZone()} to fall back to the parent configuration.)
+     * 
      * @see #setTimeZone(TimeZone)
+     * 
+     * @since 2.3.21
      */
-    public void setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean value) {
-        this.useSystemDefaultTimeZoneForSQLDateAndTime = Boolean.valueOf(value);
-        properties.setProperty(USE_SYSTEM_DEFAULT_TIME_ZONE_FOR_SQL_DATE_AND_TIME, String.valueOf(value));
+    public void setSQLDateAndTimeTimeZone(TimeZone tz) {
+        sqlDataAndTimeTimeZone = tz;
+        sqlDataAndTimeTimeZoneSet = true;
+        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(tz));
     }
     
     /**
-     * The getter pair of {@link #setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)}.
+     * The getter pair of {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
      * 
      * @return {@code null} if the value of {@link #getTimeZone()} should be used for formatting
      *     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values, otherwise the time zone
      *     that should be used to format the values of those two types.  
+     * 
+     * @since 2.3.21
      */
-    public boolean getUseSystemDefaultTimeZoneForSQLDateAndTime() {
-        return useSystemDefaultTimeZoneForSQLDateAndTime != null
-                ? useSystemDefaultTimeZoneForSQLDateAndTime.booleanValue()
-                : parent.getUseSystemDefaultTimeZoneForSQLDateAndTime();
+    public TimeZone getSQLDateAndTimeTimeZone() {
+        return sqlDataAndTimeTimeZoneSet
+                ? sqlDataAndTimeTimeZone
+                : (parent != null ? parent.getSQLDateAndTimeTimeZone() : null);
     }
 
     /**
@@ -900,16 +922,19 @@ public class Configurable
      *   <li><p>{@code "time_zone"}:
      *       See {@link #setTimeZone(TimeZone)}.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
-     *       {@code "default"} can be used that will be replaced by the actual system default time zone when
+     *       {@code "JVM default"} can be used that will be replaced by the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
-     *       <br>If you set this setting, consider setting {@code use_system_default_time_zone_for_sql_date_and_time}
+     *       <br>If you set this setting, consider setting {@code sql_date_and_time_time_zone}
      *       too (see below)! 
-     *       
-     *   <li><p>{@code use_system_default_time_zone_for_sql_date_and_time}:
-     *       See {@link #setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)}.
+     * TODO       
+     *   <li><p>{@code sql_date_and_time_time_zone}:
+     *       See {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
      *       Since 2.3.21.
-     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, {@code "JVM default"}
+     *       can be used that will be replaced by the actual JVM default time zone when
+     *       {@link #setSetting(String, String)} is called. Also {@code "null"} can be used, which has the same effect
+     *       as {@link #setSQLDateAndTimeTimeZone(TimeZone) setSQLDateAndTimeTimeZone(null)}.
      *       
      *   <li><p>{@code "output_encoding"}:
      *       See {@link #setOutputEncoding(String)}.
@@ -1137,13 +1162,9 @@ public class Configurable
             } else if (DATETIME_FORMAT_KEY.equals(name)) {
                 setDateTimeFormat(value);
             } else if (TIME_ZONE_KEY.equals(name)) {
-                if (DEFAULT.equals(value)) {
-                    setTimeZone(TimeZone.getDefault());
-                } else {
-                    setTimeZone(TimeZone.getTimeZone(value));
-                }
-            } else if (USE_SYSTEM_DEFAULT_TIME_ZONE_FOR_SQL_DATE_AND_TIME.equals(name)) {
-                setUseSystemDefaultTimeZoneForSQLDateAndTime(StringUtil.getYesNo(value));
+                setTimeZone(parseTimeZoneSettingValue(value));
+            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY.equals(name)) {
+                setSQLDateAndTimeTimeZone(value.equals("null") ? null : parseTimeZoneSettingValue(value));
             } else if (CLASSIC_COMPATIBLE_KEY.equals(name)) {
                 char firstChar;
                 if (value != null && value.length() > 0) {
@@ -1191,7 +1212,7 @@ public class Configurable
                             value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
-                if (DEFAULT.equalsIgnoreCase(value)) {
+                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
                 } else if ("simple".equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
@@ -1263,6 +1284,16 @@ public class Configurable
         }
     }
 
+    private TimeZone parseTimeZoneSettingValue(String value) {
+        TimeZone tz;
+        if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+            tz = TimeZone.getDefault();
+        } else {
+            tz = TimeZone.getTimeZone(value);
+        }
+        return tz;
+    }
+
     public void setStrictBeanModels(boolean strict) {
 	if (!(objectWrapper instanceof BeansWrapper)) {
 	    throw new IllegalStateException("The value of the " + OBJECT_WRAPPER_KEY +
@@ -1270,17 +1301,15 @@ public class Configurable
 	}
 	((BeansWrapper) objectWrapper).setStrict(strict);
     }
-
     
     /**
      * Returns the textual representation of a setting.
      * @param key the setting key. Can be any of standard <tt>XXX_KEY</tt>
      * constants, or a custom key.
      *
-     * @deprecated This method was always defective, and certainly it always
-     *     will be. Don't use it. (Simply, it's hardly possible in general to
-     *     convert setting values to text in a way that ensures that
-     *     {@link #setSetting(String, String)} will work with them correctly.)
+     * @deprecated It's not possible in general to convert setting values to string,
+     *     and thus it's impossible to ensure that {@link #setSetting(String, String)} will work with
+     *     the returned value correctly.
      */
     public String getSetting(String key) {
         return properties.getProperty(key);

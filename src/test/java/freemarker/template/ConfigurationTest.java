@@ -204,7 +204,7 @@ public class ConfigurationTest extends TestCase{
             Configuration cfg = new Configuration(new Version(2, 3, 0));
             assertEquals(sysDefTZ, cfg.getTimeZone());
             assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
-            cfg.setSetting(Configurable.TIME_ZONE_KEY, "default");
+            cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
             assertEquals(sysDefTZ, cfg.getTimeZone());
             assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
             
@@ -212,7 +212,7 @@ public class ConfigurationTest extends TestCase{
             TimeZone.setDefault(newSysDefTZ);
             assertEquals(sysDefTZ, cfg.getTimeZone());
             assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
-            cfg.setSetting(Configurable.TIME_ZONE_KEY, "default");
+            cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
             assertEquals(newSysDefTZ, cfg.getTimeZone());
             assertEquals(newSysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
         } finally {

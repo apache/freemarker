@@ -118,8 +118,8 @@ class DateBuiltins {
                     accuracy,
                     useUTC
                             ? DateUtil.UTC
-                            : env.shouldUseSysDefTZ(date.getClass())
-                                    ? env.getSystemDefaultTimeZone()
+                            : env.shouldUseSQLDTTZ(date.getClass())
+                                    ? env.getSQLDateAndTimeTimeZone()
                                     : env.getTimeZone(),
                     env.getISOBuiltInCalendar()));
         }

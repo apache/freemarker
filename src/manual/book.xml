@@ -5157,9 +5157,9 @@ cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templ
 // a good choice in most applications:
 cfg.setDefaultEncoding("UTF-8");
 
-// Sets how errors will appear. Here we assume we are developing HTML pages.
-// For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
-cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);</programlisting>
+// Sets how errors will appear.
+// During development TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
+cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -13333,7 +13333,7 @@ Hungarian people write: 12 345 678,00</programlisting>
           <para>This built-in converts a date to a string, with the specified
           formatting.</para>
 
-          <important>
+          <note>
             <para>You should need this built-in rarely, as the default format
             of date/time/date-time values can be specified globally with the
             <literal>date_format</literal>, <literal>time_format</literal> and
@@ -13346,7 +13346,7 @@ Hungarian people write: 12 345 678,00</programlisting>
             <literal>"short"</literal>, <literal>"xs"</literal>,
             <literal>"dd.MM.yyyy HH:mm:ss"</literal> etc., can also be used as
             the value of said settings.)</para>
-          </important>
+          </note>
 
           <para>The format can be one of the predefined named formats, or you
           can specify a formatting pattern directly with <link
@@ -13663,7 +13663,7 @@ Last updated time: 08:00:54 PM</programlisting>
           <para>These built-ins convert a date, time or date-time value to
           string that follows ISO 8601:2004 "extended" format.</para>
 
-          <important>
+          <note>
             <para>Since FreeMarker 2.3.21, you can also require this format as
             the default with the <literal>date_format</literal>,
             <literal>time_format</literal> and
@@ -13673,7 +13673,7 @@ Last updated time: 08:00:54 PM</programlisting>
             linkend="ref_builtin_string_for_date">See more here.</link> Use
             the date format setting instead of this built-in whenever
             possible.</para>
-          </important>
+          </note>
 
           <para>This built-in has several variations:
           <literal>iso_utc</literal>, <literal>iso_local</literal>,
@@ -13697,15 +13697,13 @@ Last updated time: 08:00:54 PM</programlisting>
               configured by the programmers outside the templates (but it can
               also be set in a template, like <literal>&lt;#setting
               time_zone="America/New_York"&gt;</literal> for example). Note
-              that if the
-              <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
-              FreeMarker setting is set to <literal>true</literal>, then for
-              <literal>java.sql.Date</literal> and
+              that if the <literal>sql_date_and_time_time_zone</literal>
+              FreeMarker setting is set and non-<literal>null</literal>, then
+              for <literal>java.sql.Date</literal> and
               <literal>java.sql.Time</literal> values (i.e., for date-only and
               time-only values that are coming from database via SQL)
-              <literal>local</literal> will mean the system (server) default
-              time zone instead of the value of the
-              <literal>time_zone</literal> setting.</para>
+              <literal>local</literal> will mean that time zone instead of the
+              value of the <literal>time_zone</literal> setting.</para>
             </listitem>
 
             <listitem>
@@ -16774,18 +16772,18 @@ or
                   <primary>time_zone</primary>
                 </indexterm><indexterm>
                   <primary>JDBC time zone</primary>
-                </indexterm><literal>use_system_default_time_zone_for_sql_date_and_time</literal>:
+                </indexterm><literal>sql_date_and_time_time_zone</literal>:
               This handles a highly technical issue, so it should usually be
               set from the Java code by the programmers. <phrase
-              role="forProgrammers">For programmers: If this is
-              <literal>true</literal>, for date-only and time-only values
+              role="forProgrammers">For programmers: If this is set to
+              non-<literal>null</literal>, for date-only and time-only values
               coming from SQL database (more precisely, for
               <literal>java.sql.Date</literal> and
               <literal>java.sql.Time</literal> objects) FreeMarker will use
-              the system default time zone instead of the time zone specified
-              by the <literal>time_zone</literal> FreeMarker setting. See more
-              in the Java API documentation of
-              <literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>.</phrase></para>
+              this time zone instead of the time zone specified by the
+              <literal>time_zone</literal> FreeMarker setting. See more in the
+              Java API documentation of
+              <literal>Configurable.setSQLDateAndTimeTimeZone(TimeZone)</literal>.</phrase></para>
             </listitem>
 
             <listitem>
@@ -20821,11 +20819,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>?date</literal>/<literal>?datetime</literal>/<literal>?time</literal>
-                  now now supports parsing XML Schema values with
-                  <literal>?date.xs</literal>, <literal>?datetime.xs</literal>
-                  and <literal>?time.xs</literal>. <link
-                  linkend="ref_builtin_string_date">More...</link></para>
+                  <para>Because anything that's accepted as
+                  <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
+                  setting value can also be used with the
+                  <literal>?string</literal> and
+                  <literal>?date</literal>/<literal>?time</literal>/<literal>?datetime</literal>
+                  build-ins, you can use the new formats like
+                  <literal>someDate?string.xs</literal> and
+                  <literal>someString?date.xs</literal>. (For the
+                  <literal>"xs"</literal> and <literal>"iso"</literal>
+                  formats, <literal>_</literal> can be used instead of space,
+                  which means that, for example, you can write
+                  <literal>lastModified?string.iso_m_u</literal> instead of
+                  <literal>lastModified?string("iso m u")</literal>.)</para>
                 </listitem>
 
                 <listitem>
@@ -20845,22 +20851,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>"iso m nz"</literal>, so then the output will be
                   like <literal>2014-09-03T20:56</literal>. [TODO: link
                   chapter about formatting descriptors]</para>
-                </listitem>
-
-                <listitem>
-                  <para>Because anything that's accepted as
-                  <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
-                  setting value can also be used with the
-                  <literal>?string</literal> and
-                  <literal>?date</literal>/<literal>?time</literal>/<literal>?datetime</literal>
-                  build-ins, you can use the new formats like
-                  <literal>someDate?string.xs</literal> and
-                  <literal>someString?date.xs</literal> too. (For the
-                  <literal>"xs"</literal> and <literal>"iso"</literal>
-                  formats, <literal>_</literal> can be used instead of space,
-                  which means that, for example, you can write
-                  <literal>lastModified?string.iso_m_u</literal> instead of
-                  <literal>lastModified?string("iso m u")</literal>.)</para>
                 </listitem>
 
                 <listitem>
@@ -20888,14 +20878,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   sense. Notable exceptions are PostgreSQL "time with time
                   zone" columns, where the <literal>?iso_..._fz</literal>
                   variations should be used.</para>
-                </listitem>
-
-                <listitem>
-                  <para>The value of the <literal>time_zone</literal> setting
-                  can now be <literal>"default"</literal> to use the JVM
-                  default time zone (which is the default value of the setting
-                  too, but now it can be restored if the setting value was
-                  overwritten earlier)</para>
                 </listitem>
 
                 <listitem>
@@ -21090,23 +21072,39 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>The value of the <literal>time_zone</literal> setting,
+              when you specify it with a <literal>String</literal> (in a
+              <literal>java.util.Properties</literal> object, or via
+              <literal>&lt;#setting
+              <replaceable>...</replaceable>&gt;</literal>) can now be
+              <literal>"JVM default"</literal> to use the JVM default time
+              zone. The JVM default is the default value of that setting
+              anyway, but now you can state this explicitly, or restore this
+              value if it was overridden earlier.</para>
+            </listitem>
+
+            <listitem>
               <para>Added new configuration setting,
-              <literal>use_system_default_time_zone_for_sql_date_and_time</literal>
-              (<literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>).
-              When this is set to <literal>true</literal>, the time zone used
-              when dealing with <literal>java.sql.Date</literal> and
-              <literal>java.sql.Time</literal> values will be the system
-              default time zone (server default time zone) instead of the
-              value of the <literal>time_zone</literal> FreeMarker
-              configuration setting. This is useful because JDBC will, by
-              default, construct the Java <literal>Date</literal> objects so
-              that they will show the year-month-day and hour-minute-seconds
-              values from the database <quote>as is</quote> if you render them
-              using the system default time zone. As time zone conversions for
-              SQL date-only and SQL time-only values doesn't make much sense
-              (unlike for SQL timestamps), this is maybe what you want. For
-              more details see the JavaDoc of
-              <literal>Configurable.setUseSystemDefaultTimeZoneForSQLDateAndTime(boolean)</literal>.</para>
+              <literal>sql_date_and_time_time_zone</literal>
+              (<literal>Configurable.setSQLDateAndTimeTimeZone(TimeZone)</literal>).
+              When this is set to non-<literal>null</literal>, the time zone
+              used when dealing with <literal>java.sql.Date</literal> and
+              <literal>java.sql.Time</literal> values will be this time zone
+              instead of the value of the <literal>time_zone</literal>
+              FreeMarker configuration setting. This is useful because JDBC
+              will, usually, construct the Java <literal>Date</literal>
+              objects so that they will show the year-month-day and
+              hour-minute-seconds values from the database <quote>as
+              is</quote> if you render them using the JVM default time zone.
+              As time zone conversions for SQL date-only and SQL time-only
+              values doesn't make much sense (unlike for SQL timestamps), you
+              should certainly set this setting to the JVM default time zone
+              (<literal>TimeZone.getDefault()</literal>, or if you configure
+              FreeMarker via <literal>java.util.Properties</literal>, as
+              property value "JVM default"). The default value is
+              <literal>null</literal> for backward compatibility. For more
+              details see the JavaDoc of
+              <literal>Configurable.setSQLDateAndTimeTimeZone(TimeZone)</literal>.</para>
             </listitem>
 
             <listitem>
