@@ -20840,16 +20840,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   setting values: XML Schema formats, starting with
                   <literal>"xs"</literal> and ISO 8601:2004 formats, starting
                   with ISO <literal>"iso"</literal>. The format string can be
-                  optionally continued with various flags, like
-                  <literal>h</literal>, <literal>m</literal>,
-                  <literal>s</literal> and <literal>ms</literal> for setting
-                  shown accuracy, and <literal>nz</literal>,
-                  <literal>fz</literal>, <literal>u</literal> for time zone
-                  related behavior. For example, to use ISO 8601 format
-                  without zone offset shown and with minute precision, you
-                  could set the <literal>datetime_format</literal> setting to
-                  <literal>"iso m nz"</literal>, so then the output will be
-                  like <literal>2014-09-03T20:56</literal>. [TODO: link
+                  continued with various space (or <literal>_</literal>)
+                  separated options, like <literal>h</literal> or
+                  <literal>m</literal> or <literal>s</literal> or
+                  <literal>ms</literal> for setting shown accuracy,
+                  <literal>nz</literal> or <literal>fz</literal> for setting
+                  time zone offset visibility, and <literal>u</literal> or,
+                  <literal>fu</literal> for using UTC time zone . For example,
+                  to use ISO 8601 with minute precision and without the zone
+                  offset being shown, set the
+                  <literal>datetime_format</literal> setting to <literal>"iso
+                  m nz"</literal>, so then the output will be like
+                  <literal>2014-09-03T20:56</literal>. [TODO: write and link a
                   chapter about formatting descriptors]</para>
                 </listitem>
 

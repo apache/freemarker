@@ -20,7 +20,7 @@ import freemarker.template.utility.DateUtil;
 
 public class SQLTimeZoneTest extends TemplateOutputTest {
 
-    private final static TimeZone SQL_TZ = TimeZone.getTimeZone("GMT+02");
+    private final static TimeZone GMT_P02 = TimeZone.getTimeZone("GMT+02");
     
     private TimeZone lastDefaultTimeZone;
 
@@ -114,7 +114,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     @Test
     public void testWithDefaultTZAndNoUseDefSysForSQL() throws Exception {
         TimeZone prevSysDefTz = TimeZone.getDefault();
-        TimeZone.setDefault(SQL_TZ);
+        TimeZone.setDefault(GMT_P02);
         try {
             Configuration cfg = createConfiguration();
             assertNull(cfg.getSQLDateAndTimeTimeZone());
@@ -129,7 +129,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     @Test
     public void testWithDefaultTZAndUseDefSysForSQL() throws Exception {
         Configuration cfg = createConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(SQL_TZ);
+        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         
         assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT2 + OUTPUT_AFTER_SETTZ_SQL_DIFFERENT, cfg);
     }
@@ -146,7 +146,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     @Test
     public void testWithGMT1AndUseDefSysForSQL() throws Exception {
         Configuration cfg = createConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(SQL_TZ);
+        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
         
         assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTZ_SQL_DIFFERENT, cfg);
@@ -164,7 +164,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     @Test
     public void testWithGMT2AndUseDefSysForSQL() throws Exception {
         Configuration cfg = createConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(SQL_TZ);
+        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
         
         assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT2 + OUTPUT_AFTER_SETTZ_SQL_DIFFERENT, cfg);
@@ -207,7 +207,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
                 + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n",
                 cfg);
         
-        cfg.setSQLDateAndTimeTimeZone(SQL_TZ);
+        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='de'>\n"
@@ -242,7 +242,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     public void testDateAndTimeBuiltInsHasNoEffect() throws Exception {
         Configuration cfg = createConfiguration();
         cfg.setTimeZone(DateUtil.UTC);
-        cfg.setSQLDateAndTimeTimeZone(SQL_TZ);
+        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         assertOutput(
                 "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
                 + "${sqlDate?date} ${sqlTime?time}\n"
@@ -265,44 +265,60 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
         assertNull(cfg.getSQLDateAndTimeTimeZone());
 
         assertOutput(
-                "${sqlDate}, ${sqlTime}\n"
+                "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
                 + "<#setting sql_date_and_time_time_zone='GMT+02'>\n"
-                + "${sqlDate}, ${sqlTime}\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
                 + "<#setting sql_date_and_time_time_zone='null'>\n"
-                + "${sqlDate}, ${sqlTime}\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
                 + "<#setting time_zone='GMT+03'>\n"
-                + "${sqlDate}, ${sqlTime}\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
                 + "<#setting sql_date_and_time_time_zone='GMT+02'>\n"
-                + "${sqlDate}, ${sqlTime}\n",
-                "2014-07-11, 10:30:05\n"
-                + "2014-07-12, 12:30:05\n"
-                + "2014-07-11, 10:30:05\n"
-                + "2014-07-12, 13:30:05\n"
-                + "2014-07-12, 12:30:05\n",
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
+                + "<#setting sql_date_and_time_time_zone='GMT-11'>\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
+                + "<#setting date_format='xs fz'>\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
+                + "<#setting time_format='xs fz'>\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
+                + "<#setting datetime_format='iso m'>\n"
+                + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n",
+                "2014-07-11, 10:30:05, 2014-07-12T10:30:05, 2014-07-12T10:30:05\n"
+                + "2014-07-12, 12:30:05, 2014-07-12T10:30:05, 2014-07-12T10:30:05\n"
+                + "2014-07-11, 10:30:05, 2014-07-12T10:30:05, 2014-07-12T10:30:05\n"
+                + "2014-07-12, 13:30:05, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
+                + "2014-07-12, 12:30:05, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
+                + "2014-07-11, 23:30:05, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
+                + "2014-07-11-11:00, 23:30:05, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
+                + "2014-07-11-11:00, 23:30:05-11:00, 2014-07-12T13:30:05, 2014-07-12T13:30:05\n"
+                + "2014-07-11-11:00, 23:30:05-11:00, 2014-07-12T13:30+03:00, 2014-07-12T13:30+03:00\n",
                 cfg);
     }
     
     @Test
     public void testFormatUTCFlagHasNoEffect() throws Exception {
         Configuration cfg = createConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(SQL_TZ);
+        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT-01"));
-
+        
         assertOutput(
-                "<#setting date_format='iso'><#setting time_format='iso'>\n"
+                "<#setting date_format='xs fz'><#setting time_format='xs fz'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting date_format='iso u'><#setting time_format='iso u'>\n"
-                + "<#setting sql_date_and_time_time_zone='GMT+02'>\n"
+                + "<#setting date_format='xs fz u'><#setting time_format='xs fz u'>\n"
+                + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
+                + "<#setting sql_date_and_time_time_zone='GMT+03'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
                 + "<#setting sql_date_and_time_time_zone='null'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting date_format='iso'><#setting time_format='iso'>\n"
+                + "<#setting date_format='xs fz'><#setting time_format='xs fz'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                ,
-                "2014-07-12, 12:30:05, 09:30:05-01:00\n"
-                + "2014-07-12, 12:30:05, 10:30:05Z\n"
-                + "2014-07-11, 09:30:05, 10:30:05Z\n"  // for sql still ignores "u"
-                + "2014-07-11, 09:30:05, 09:30:05-01:00\n",
+                + "<#setting date_format='xs fz fu'><#setting time_format='xs fz fu'>\n"
+                + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n",
+                "2014-07-12+02:00, 12:30:05+02:00, 09:30:05-01:00\n"
+                + "2014-07-12+02:00, 12:30:05+02:00, 10:30:05Z\n"
+                + "2014-07-12+03:00, 13:30:05+03:00, 10:30:05Z\n"
+                + "2014-07-11-01:00, 09:30:05-01:00, 10:30:05Z\n"
+                + "2014-07-11-01:00, 09:30:05-01:00, 09:30:05-01:00\n"
+                + "2014-07-11Z, 10:30:05Z, 10:30:05Z\n",
                 cfg);
     }
     

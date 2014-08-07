@@ -13,14 +13,14 @@ import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.StringUtil;
 
 abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
-
+    
     private static final String XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE
             = "Less than seconds accuracy isn't allowed by the XML Schema format";
     private final ISOLikeTemplateDateFormatFactory factory; 
     protected final int dateType;
     protected final boolean zonelessInput;
     protected final TimeZone timeZone;
-    protected final boolean useUTC;
+    protected final Boolean forceUTC;
     protected final Boolean showZoneOffset;
     protected final int accuracy;
 
@@ -49,7 +49,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         int i = parsingStart;
         int accuracy = DateUtil.ACCURACY_MILLISECONDS;
         Boolean showZoneOffset = null;
-        boolean useUTC = false;
+        Boolean forceUTC = Boolean.FALSE;
         while (i < ln) {
             final char c = settingValue.charAt(i++);
             if (c == '_' || c == ' ') {
@@ -91,8 +91,15 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                         break;
                     }
                     break;
-                case 'n':
                 case 'f':
+                    if (i < ln && settingValue.charAt(i) == 'u') {
+                        checkForceUTCNotSet(forceUTC, i);
+                        i++;
+                        forceUTC = Boolean.TRUE;
+                        break;
+                    }
+                    // Falls through
+                case 'n':
                     if (showZoneOffset != null) {
                         throw new java.text.ParseException(
                                 "Character \"" + c + "\" is unexpected as zone offset visibility was already "
@@ -118,11 +125,8 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                     }
                     break;
                 case 'u':
-                    if (useUTC) {
-                        throw new java.text.ParseException(
-                                "Character \"" + c + "\" was already used earlier." , i);
-                    }
-                    useUTC = true;
+                    checkForceUTCNotSet(forceUTC, i);
+                    forceUTC = null;  // means UTC will be used except for zonelessInput
                     break;
                 default:
                     throw new java.text.ParseException(
@@ -136,8 +140,15 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         
         this.accuracy = accuracy;
         this.showZoneOffset = showZoneOffset;
-        this.useUTC = useUTC;
+        this.forceUTC = forceUTC;
         this.timeZone = timeZone;
+    }
+
+    private void checkForceUTCNotSet(Boolean fourceUTC, int i) throws ParseException {
+        if (fourceUTC != Boolean.FALSE) {
+            throw new java.text.ParseException(
+                    "The UTC usage option was already set earlier." , i);
+        }
     }
     
     public final String format(TemplateDateModel dateModel) throws TemplateModelException {
@@ -150,7 +161,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                         ? !zonelessInput
                         : showZoneOffset.booleanValue(),
                 accuracy,
-                zonelessInput || !useUTC ? timeZone : DateUtil.UTC,
+                (forceUTC == null ? !zonelessInput : forceUTC.booleanValue()) ? DateUtil.UTC : timeZone,
                 factory.getISOBuiltInCalendar());
     }
     
@@ -162,7 +173,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
 
     public final Date parse(String s) throws java.text.ParseException {
         CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator();
-        TimeZone tz = useUTC ? DateUtil.UTC : timeZone;
+        TimeZone tz = forceUTC != Boolean.FALSE ? DateUtil.UTC : timeZone;
         if (dateType == TemplateDateModel.DATE) {
             return parseDate(s, tz, calToDateConverter);
         } else if (dateType == TemplateDateModel.TIME) {

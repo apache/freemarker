@@ -130,3 +130,8 @@
 
 <@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.xs}</@>
 <@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.iso}</@>
+<@assertFails message="malformed">${.now?string.xs_fz_nz}</@>
+<@assertFails message="malformed">${.now?string.xs_u_fu}</@>
+<@assertFails message="malformed">${.now?string.xs_s_ms}</@>
+<@assertFails message="malformed">${.now?string.xs_q}</@>
+<@assertFails message="malformed">${.now?string.xss}</@>

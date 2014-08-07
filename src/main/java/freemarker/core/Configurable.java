@@ -617,15 +617,46 @@ public class Configurable
      * <ul>
      *   <li><p>Patterns accepted by Java's {@link SimpleDateFormat}, for example {@code "dd.MM.yyyy HH:mm:ss"}
      *   
-     *   <li><p>{@code "xs"} or {@code "xs_fz"} or {@code "xs_nz"} for XML Schema format,
-     *       and {@code "iso"} or {@code "iso_fz"} or {@code "iso_nz"} for ISO 8601 format.
-     *       <p>The meaning of the postfixes:
-     *       {@code ..._fz} = "Force Zone", always show time zone offset;
-     *       {@code ..._nz} = "No Zone", never show time zone offset;
-     *       no postfix = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
-     *       and {@link java.sql.Time java.sql.Time}.
-     *       None of these postfixes influence parsing, that is, even if you use "iso_nz", "2012-01-01T15:30+01" will
-     *       be parsed successfully.
+     *   <li><p>{@code "xs"} for XML Schema format, {@code "iso"} for ISO 8601:2004 format.
+     *   
+     *       <p>These formats allow various additional options, separated with space or {@code _} (like in
+     *       {@code "iso m nz"} or {@code "iso_m_nz"}). The options and their meanings:
+     *       
+     *       <ul>
+     *         <li><p>Accuracy options:<br/>
+     *             {@code ms} = Milliseconds, always shown with all 3 digits, even if it's 0 like in 13:45:05.000;<br/>
+     *             {@code s} = Seconds (fraction seconds are dropt even if non-0), like 13:45:05;<br/>
+     *             {@code m} = Minutes, like 13:45, not allowed for "xs";<br/>
+     *             {@code h} = Hours, like 13, not allowed for "xs";<br/>
+     *             Neither = Up to millisecond accuracy, but trailing milliseconds 0-s are removed, also the whole
+     *                     milliseconds part if it would be 0 otherwise.
+     *                     
+     *         <li><p>Time zone offset visibility options:<br/>
+     *             {@code fz} = "Force Zone", always show time zone offset;<br/>
+     *             {@code nz} = "No Zone", never show time zone offset;<br/>
+     *             Neither = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
+     *                     and {@link java.sql.Time java.sql.Time}.
+     *                     
+     *         <li><p>Time zone options:<br/>
+     *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't effected
+     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why);<br/>
+     *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
+     *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values;<br/>
+     *             Neither = Use the time zone suggested by the {@code time_zone} or the
+     *                     {@code sql_date_and_time_time_zone} configuration setting ({@link #setTimeZone(TimeZone)} and
+     *                     {@link #setSQLDateAndTimeTimeZone(TimeZone)}).
+     *       </ul>
+     *       
+     *       <p>The options can be specified in any order. It's not allowed to use multiple options from the same
+     *       category, like using "m" and "s" together is an error.
+     *       
+     *       <p>The accuracy and time zone offset visibility options doesn't influence parsing, only formatting.
+     *       For example, even if you use "iso m nz", "2012-01-01T15:30:05.125+01" will be parsed successfully and with
+     *       milliseconds accuracy.
+     *       The time zone options (like "u") influence what time zone is chosen when parsing a string that doesn't
+     *       contain time zone offset.
      *       
      *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
      *       defined by the Java platform (see in the documentation of {@link java.text.DateFormat}):
@@ -922,17 +953,17 @@ public class Configurable
      *   <li><p>{@code "time_zone"}:
      *       See {@link #setTimeZone(TimeZone)}.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
-     *       {@code "JVM default"} can be used that will be replaced by the actual JVM default time zone when
+     *       {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
      *       <br>If you set this setting, consider setting {@code sql_date_and_time_time_zone}
      *       too (see below)! 
-     * TODO       
+     *       
      *   <li><p>{@code sql_date_and_time_time_zone}:
      *       See {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
      *       Since 2.3.21.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, {@code "JVM default"}
-     *       can be used that will be replaced by the actual JVM default time zone when
+     *       can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called. Also {@code "null"} can be used, which has the same effect
      *       as {@link #setSQLDateAndTimeTimeZone(TimeZone) setSQLDateAndTimeTimeZone(null)}.
      *       
