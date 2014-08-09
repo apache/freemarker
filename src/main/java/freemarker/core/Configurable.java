@@ -570,7 +570,8 @@ public class Configurable
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time (no date part) values.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time (no date part) values,
+     * also the format that {@code someString?time} will use to parse strings.
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
@@ -590,7 +591,8 @@ public class Configurable
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values,
+     * also the format that {@code someString?date} will use to parse strings.
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
@@ -610,56 +612,79 @@ public class Configurable
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values.
+     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values,
+     * also the format that {@code someString?datetime} will use to parse strings.
      * 
-     * <p>Possible values are:
+     * <p>The possible setting values are (the quotation marks aren't part of the value itself):
      * 
      * <ul>
-     *   <li><p>Patterns accepted by Java's {@link SimpleDateFormat}, for example {@code "dd.MM.yyyy HH:mm:ss"}
+     *   <li><p>Patterns accepted by Java's {@link SimpleDateFormat}, for example {@code "dd.MM.yyyy HH:mm:ss"} (where
+     *       {@code HH} means 24 hours format) or {@code "MM/dd/yyyy hh:mm:ss a"} (where {@code a} prints AM or PM, if
+     *       the current language is English).
      *   
-     *   <li><p>{@code "xs"} for XML Schema format, {@code "iso"} for ISO 8601:2004 format.
-     *   
-     *       <p>These formats allow various additional options, separated with space or {@code _} (like in
-     *       {@code "iso m nz"} or {@code "iso_m_nz"}). The options and their meanings:
+     *   <li><p>{@code "xs"} for XML Schema format, or {@code "iso"} for ISO 8601:2004 format.
+     *       These formats allow various additional options, separated with space, like in
+     *       {@code "iso m nz"} (or with {@code _}, like in {@code "iso_m_nz"}; this is useful in a case like
+     *       {@code lastModified?string.iso_m_nz}). The options and their meanings are:
      *       
      *       <ul>
      *         <li><p>Accuracy options:<br/>
-     *             {@code ms} = Milliseconds, always shown with all 3 digits, even if it's 0 like in 13:45:05.000;<br/>
-     *             {@code s} = Seconds (fraction seconds are dropt even if non-0), like 13:45:05;<br/>
-     *             {@code m} = Minutes, like 13:45, not allowed for "xs";<br/>
-     *             {@code h} = Hours, like 13, not allowed for "xs";<br/>
-     *             Neither = Up to millisecond accuracy, but trailing milliseconds 0-s are removed, also the whole
-     *                     milliseconds part if it would be 0 otherwise.
+     *             {@code ms} = Milliseconds, always shown with all 3 digits, even if it's all 0-s.
+     *                     Example: {@code 13:45:05.800}<br/>
+     *             {@code s} = Seconds (fraction seconds are dropped even if non-0), like {@code 13:45:05}<br/>
+     *             {@code m} = Minutes, like {@code 13:45}. This isn't allowed for "xs".<br/>
+     *             {@code h} = Hours, like {@code 13}. This isn't allowed for "xs".<br/>
+     *             Neither = Up to millisecond accuracy, but trailing millisecond 0-s are removed, also the whole
+     *                     milliseconds part if it would be 0 otherwise. Example: {@code 13:45:05.8}
      *                     
      *         <li><p>Time zone offset visibility options:<br/>
-     *             {@code fz} = "Force Zone", always show time zone offset;<br/>
-     *             {@code nz} = "No Zone", never show time zone offset;<br/>
+     *             {@code fz} = "Force Zone", always show time zone offset (even for for
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values).
+     *                     But, because ISO 8601 doesn't allow for dates (means date without time of the day) to
+     *                     show the zone offset, this option will have no effect in the case of {@code "iso"} with
+     *                     dates.<br/>
+     *             {@code nz} = "No Zone", never show time zone offset<br/>
      *             Neither = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
-     *                     and {@link java.sql.Time java.sql.Time}.
+     *                     and {@link java.sql.Time java.sql.Time}, and for {@code "iso"} date values.
      *                     
      *         <li><p>Time zone options:<br/>
      *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't effected
-     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why);<br/>
+     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br/>
      *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values;<br/>
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br/>
      *             Neither = Use the time zone suggested by the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} configuration setting ({@link #setTimeZone(TimeZone)} and
      *                     {@link #setSQLDateAndTimeTimeZone(TimeZone)}).
      *       </ul>
      *       
-     *       <p>The options can be specified in any order. It's not allowed to use multiple options from the same
-     *       category, like using "m" and "s" together is an error.
+     *       <p>The options can be specified in any order.</p>
      *       
-     *       <p>The accuracy and time zone offset visibility options doesn't influence parsing, only formatting.
+     *       <p>Options from the same category are mutually exclusive, like using {@code m} and {@code s}
+     *       together is an error.
+     *       
+     *       <p>The accuracy and time zone offset visibility options don't influence parsing, only formatting.
      *       For example, even if you use "iso m nz", "2012-01-01T15:30:05.125+01" will be parsed successfully and with
      *       milliseconds accuracy.
-     *       The time zone options (like "u") influence what time zone is chosen when parsing a string that doesn't
+     *       The time zone options (like "u") influence what time zone is chosen only when parsing a string that doesn't
      *       contain time zone offset.
      *       
-     *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"} and {@code "full"} that has locale-dependent meaning
-     *       defined by the Java platform (see in the documentation of {@link java.text.DateFormat}):
+     *       <p>Parsing with {@code "iso"} understands both extend format and basic format, like
+     *       {@code 20141225T235018}. It doesn't, however, support the parsing of all kind of ISO 8601 strings: if
+     *       there's a date part, it must use year, month and day of the month values (not week of the year), and the
+     *       day can't be omitted.
+     *       
+     *       <p>The output of {@code "iso"} is deliberately so that it's also a good representation of the value with
+     *       XML Schema format, except for 0 and negative years, where it's impossible. Also note that the time zone
+     *       offset is omitted for date values in the {@code "iso"} format, while it's preserved for the {@code "xs"}
+     *       format.
+     *       
+     *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"}, or {@code "full"}, which that has locale-dependent
+     *       meaning defined by the Java platform (see in the documentation of {@link java.text.DateFormat}).
+     *       For date-time values, you can specify the length of the date and time part independently, be separating
+     *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
+     *       {@code "medium_medium"} for date-time values.)
      * </ul> 
      *   
      * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.

@@ -2042,6 +2042,12 @@ this is a backslash: \</programlisting>
                 </tr>
 
                 <tr>
+                  <td><literal>\{</literal></td>
+
+                  <td>Opening curly brace: <literal>{</literal></td>
+                </tr>
+
+                <tr>
                   <td><literal>\\</literal></td>
 
                   <td>Back slash (u005C)</td>
@@ -2112,16 +2118,18 @@ this is a backslash: \</programlisting>
             <literal>"\x0A9 1999-2001"</literal>,
             <literal>"\x00A9 1999-2001"</literal>. When the character directly
             after the last hexadecimal digit can be interpreted as hexadecimal
-            digit, you must use all 4 digits or else FreeMarker will be
-            confused.</para>
+            digit, you must use all 4 digits or else FreeMarker will
+            misunderstand you.</para>
 
             <para>Note that the character sequence <literal>${</literal> (and
             <literal>#{</literal>) has special meaning. It's used to insert
             the value of expressions (typically: the value of variables, as in
             <literal>"Hello ${user}!"</literal>). This will be explained <link
             linkend="dgui_template_exp_stringop_interpolation">later</link>.
-            If you want to print <literal>${</literal>, you should use raw
-            string literals as explained below.</para>
+            If you want to print <literal>${</literal> or
+            <literal>#{</literal>, you should either use raw string literals
+            as explained below, or escape the <literal>{</literal> like in
+            <literal>"foo $\{bar}"</literal>.</para>
 
             <indexterm>
               <primary>raw string literal</primary>
@@ -2456,46 +2464,71 @@ autumn
 
             <para>If you want to insert the value of an expression into a
             string, you can use
-            <literal>${<replaceable>...</replaceable>}</literal> (and
-            <literal>#{<replaceable>...</replaceable>}</literal>) in string
-            literals. <literal>${<replaceable>...</replaceable>}</literal>
-            behaves similarly as in <phrase role="markedText">text</phrase>
-            sections. For example (assume that user is ``Big Joe''):</para>
+            <literal>${<replaceable>...</replaceable>}</literal> (and the
+            deprecated <literal>#{<replaceable>...</replaceable>}</literal>)
+            in string literals.
+            <literal>${<replaceable>...</replaceable>}</literal> in string
+            literals <link linkend="dgui_template_valueinsertion">behaves as
+            in <phrase role="markedText">text</phrase> sections</link> (so it
+            goes through the same <emphasis>locale sensitive</emphasis> number
+            and date/time formatting), except that it never go through <link
+            linkend="ref.directive.escape">automatic escaping</link>.</para>
 
-            <programlisting role="template">${"Hello ${user}!"}
-${"${user}${user}${user}${user}"}</programlisting>
+            <para>Example (assume that user is ``Big Joe''):</para>
 
-            <para>will print:</para>
+            <programlisting role="template">&lt;#assign s = "Hello ${user}!"&gt;
+${s} &lt;#-- Just to see what the value of s is --&gt;
+</programlisting>
 
-            <programlisting role="output">Hello Big Joe!
-Big JoeBig JoeBig JoeBig Joe</programlisting>
+            <para>This will print:</para>
 
-            <para>Alternatively, you can use the <literal>+</literal> operator
-            to achieve similar result. This is the old method, and it is
-            called string concatenation. Example:</para>
-
-            <programlisting role="template">${"Hello " + user + "!"}
-${user + user + user + user}</programlisting>
-
-            <para>This will print the same as the example with the
-            <literal>${<replaceable>...</replaceable>}</literal>-s.</para>
+            <programlisting role="output">Hello Big Joe!</programlisting>
 
             <warning>
               <para>A frequent mistake of users is the usage of interpolations
-              in places where it shouldn't/can't be used. Interpolations work
-              <emphasis>only</emphasis> in <link
+              in places where they needn't/shouldn't/can't be used.
+              Interpolations work <emphasis>only</emphasis> in <link
               linkend="dgui_template_overallstructure"><phrase
               role="markedText">text</phrase> sections</link> (e.g.
               <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and in
               string literals (e.g. <literal>&lt;#include
-              "/footer/${company}.html"&gt;</literal>). A typical bad usage is
-              <literal>&lt;#if ${isBig}&gt;Wow!&lt;/#if&gt;</literal>, which
-              is syntactically <emphasis>WRONG</emphasis>. You should simply
-              write <literal>&lt;#if isBig&gt;Wow!&lt;/#if&gt;</literal>.
-              Also, <literal>&lt;#if "${isBig}"&gt;Wow!&lt;/#if&gt;</literal>
-              is <emphasis>WRONG</emphasis> too, since the parameter value
-              will be a string, and the <literal>if</literal> directive wants
-              a boolean value, so it will cause a runtime error.</para>
+              "/footer/${company}.html"&gt;</literal>). A typical
+              <emphasis>WRONG</emphasis> usage is <literal>&lt;#if
+              ${big}&gt;...&lt;/#if&gt;</literal>, which will cause a
+              syntactical error. You should simply write <literal>&lt;#if
+              big&gt;...&lt;/#if&gt;</literal>. Also, <literal>&lt;#if
+              "${big}"&gt;...&lt;/#if&gt;</literal> is
+              <emphasis>WRONG</emphasis>, since it converts the parameter
+              value to string and the <literal>if</literal> directive wants a
+              boolean value, so it will cause a runtime error.</para>
+            </warning>
+
+            <para>Alternatively, you can use the <literal>+</literal> operator
+            to achieve similar result:</para>
+
+            <programlisting role="template">&lt;#assign s = "Hello " + user + "!"&gt;</programlisting>
+
+            <para>This gives the same result as the example with the
+            <literal>${<replaceable>...</replaceable>}</literal>.</para>
+
+            <warning>
+              <para>Because <literal>+</literal> follows the same rules as
+              <literal>${<replaceable>...</replaceable>}</literal>, the
+              appended string is influenced by the <literal>locale</literal>,
+              <literal>number_format</literal>,
+              <literal>date_format</literal>, <literal>time_format</literal>,
+              <literal>datetime_format</literal> and
+              <literal>boolean_format</literal>, etc. settings, and thus the
+              result targets humans and isn't in general machine parsable.
+              This mostly leads to problems with numbers, as many locales use
+              grouping (thousands separators) by default, and so
+              <literal>"someUrl?id=" + id</literal> becomes to something like
+              <literal>"someUrl?id=1 234"</literal>. To prevent this, use the
+              <literal>?c</literal> (for Computer audience) built-in, like in
+              <literal>"someUrl?id=" + id?c</literal> or
+              <literal>"someUrl?id=${id?c}"</literal>, which will evaluate to
+              something like <literal>"someUrl?id=1234"</literal>, regardless
+              of locale and format settings.</para>
             </warning>
           </section>
 
@@ -3567,15 +3600,23 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         "/footer/${company}.html"&gt;</literal>).</para>
 
         <warning>
-          <para>A frequent mistake is the usage of interpolations in places
-          where it shouldn't/can't be used. A typical bad usage is
-          <literal>&lt;#if ${isBig}&gt;Wow!&lt;/#if&gt;</literal>, which is
-          syntactically <emphasis>WRONG</emphasis>. You should simply write
-          <literal>&lt;#if isBig&gt;Wow!&lt;/#if&gt;</literal>. Also,
-          <literal>&lt;#if "${isBig}"&gt;Wow!&lt;/#if&gt;</literal> is
-          <emphasis>WRONG</emphasis>, since the parameter value will be a
-          string, and the <literal>if</literal> directive wants a boolean
-          value, so it will cause a runtime error.</para>
+          <para>A frequent mistake of users is the usage of interpolations in
+          places where they needn't/shouldn't/can't be used. Interpolations
+          work <emphasis>only</emphasis> in <link
+          linkend="dgui_template_overallstructure"><phrase
+          role="markedText">text</phrase> sections</link> (e.g.
+          <literal>&lt;h1&gt;Hello ${name}!&lt;/h1&gt;</literal>) and in <link
+          linkend="dgui_template_exp_direct_string">string literals</link>
+          (e.g. <literal>&lt;#include
+          "/footer/${company}.html"&gt;</literal>). A typical
+          <emphasis>WRONG</emphasis> usage is <literal>&lt;#if
+          ${big}&gt;...&lt;/#if&gt;</literal>, which will give syntactical
+          error. You should simply write <literal>&lt;#if
+          big&gt;...&lt;/#if&gt;</literal>. Also, <literal>&lt;#if
+          "${big}"&gt;...&lt;/#if&gt;</literal> is <emphasis>WRONG</emphasis>,
+          since it converts the parameter value to string and the
+          <literal>if</literal> directive wants a boolean value, so it will
+          cause a runtime error.</para>
         </warning>
 
         <para>The result of the expression must be a string, number or
@@ -3656,8 +3697,8 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           format; the template author don't have to deal with it (but he can
           with the <literal>number_format</literal> setting; see in the <link
           linkend="ref_directive_setting">documentation of
-          <literal>setting</literal> directive</link>). You can override the
-          default number format for a single interpolation with the <link
+          <literal>setting</literal> directive</link>). Also, you can override
+          the default number format for a single interpolation with the <link
           linkend="ref_builtin_string_for_number"><literal>string</literal>
           built-in</link>.</para>
 
@@ -3673,22 +3714,17 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
 
           <programlisting role="output">1.5</programlisting>
 
-          <para>but if the current locale is Hungarian then it will print
+          <para>but if the current locale is German then it will print
           something like:</para>
 
           <programlisting role="output">1,5</programlisting>
 
-          <para>since Hungarian people use comma as decimal separator.</para>
-
-          <para>You can modify the formatting for a single interpolation with
-          the <link
-          linkend="ref_builtin_string_for_number"><literal>string</literal>
-          built-in</link>.</para>
+          <para>since German people use comma as decimal separator.</para>
 
           <warning>
             <para>As you can see, interpolations print for human audience (by
             default at least), as opposed to ''computer audience''. In some
-            cases this is not good, like when you print a database record ID-s
+            cases this is not good, like when you print a database record ID
             as the part of an URL or as an invisible field value in a HTML
             form, or when you print CSS/JavaScript numerical literals, because
             these printed values will be read by computer programs and not by
@@ -3708,14 +3744,14 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           <para>If the expression evaluates to a date-like value then that
           will be transformed to a text according to a default format. Usually
           the programmer should set the default format; you don't have to deal
-          with it (but if you care, see the <literal>date_format</literal>,
-          <literal>time_format</literal> and
-          <literal>datetime_format</literal> settings in the <link
-          linkend="ref_directive_setting">documentation of the
-          <literal>setting</literal> directive</link>).</para>
-
-          <para>You can override the default formatting for a single
-          interpolation with the <link
+          with it (but if you care, <link
+          linkend="topic.dateTimeFormatSettings">see the
+          <literal>date_format</literal>, <literal>time_format</literal> and
+          <literal>datetime_format</literal> settings</link> in the
+          documentation of the <link
+          linkend="ref.directive.setting"><literal>setting</literal>
+          directive</link>). Also, you can override the default formatting for
+          a single interpolation with the <link
           linkend="ref_builtin_string_for_date"><literal>string</literal>
           built-in</link>.</para>
 
@@ -3753,14 +3789,19 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
           variable (assuming it's a boolean), you could write
           <literal>${married?string("yes", "no")}</literal>.</para>
 
-          <note>
-            <para>FreeMarker can be configured with a default boolean format
-            with the <literal>boolean_format</literal> setting, then
-            <literal>${married}</literal> and such will work. Also, when you
-            want to generate JavaScript or other computer language parts, then
-            <literal>${someBoolean?c}</literal> (<quote>c</quote> stands for
-            computer audience) can be used to print true/false.</para>
-          </note>
+          <para>FreeMarker can be configured with a default boolean format
+          with the <literal>boolean_format</literal> setting, then
+          <literal>${married}</literal> and such will work. However, in most
+          applications it's not recommended, as boolean should be rendered
+          differently on different places, and leaving the formatting on the
+          default is possibly just an oversight and thus should generate
+          error.</para>
+
+          <para>When you want to generate JavaScript or other computer
+          language parts, then <literal>${someBoolean?c}</literal>
+          (<quote>c</quote> stands for computer audience) should be used to
+          print true/false. (Remember that <literal>?c</literal> was also used
+          to print numbers for computer audience.)</para>
         </simplesect>
 
         <simplesect>
@@ -5629,7 +5670,7 @@ public class Test {
           <literal>time</literal> or <literal>datetime</literal>
           built-ins</link> (like <literal>lastUpdated?datetime</literal>).
           Note that if you use <literal>string</literal> built-in with format
-          parameter, as <literal>foo?string("MM/dd/yyyy")</literal>, then
+          parameter, as <literal>foo?string["MM/dd/yyyy"]</literal>, then
           FreeMarker doesn't need to know the subtype.</para>
         </section>
       </section>
@@ -6766,9 +6807,11 @@ myCfg.setNumberFormat("0.####");</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>Template</literal> layer: You shouldn't set
-            settings here, unless you manage the <literal>Template</literal>
-            objects instead of a
+            <para><literal>Template</literal> layer: The
+            <literal>locale</literal> setting of the template is set by
+            <literal>Configuration.getTemplate(...)</literal> to the requested
+            locale. Otherwise you shouldn't set settings here, unless you
+            manage the <literal>Template</literal> objects instead of a
             <literal>freemarker.cache.TemplateCache</literal>, in which case
             you should set the setting before the <literal>Template</literal>
             object is first used, and then treat the
@@ -6798,7 +6841,8 @@ env.process();  // process the template</programlisting>
               </listitem>
 
               <listitem>
-                <para>Directly in the Template: Use the <link
+                <para>Directly in the Template (considered as bad style,
+                usually): Use the <link
                 linkend="ref.directive.setting"><literal>setting</literal>
                 directive</link>, for example:</para>
 
@@ -6812,8 +6856,9 @@ env.process();  // process the template</programlisting>
           </listitem>
         </itemizedlist>
 
-        <para>To see the list of supported settings, please read the following
-        parts of the FreeMarker Java API documentation:</para>
+        <para>To see the list of supported settings and their meaning, please
+        read the following parts of the FreeMarker Java API
+        documentation:</para>
 
         <itemizedlist>
           <listitem>
@@ -11643,11 +11688,15 @@ Green Mouse</programlisting>
             <primary>XML Schema time parsing</primary>
           </indexterm>
 
+          <indexterm>
+            <primary>ISO 8601 parsing</primary>
+          </indexterm>
+
           <para>The string value converted to a date, time, or date-time
-          value. It will expect the format specified by the
-          <literal>date_format</literal>, <literal>time_format</literal> and
-          <literal>datetime_format</literal> <link
-          linkend="ref.directive.setting">settings</link>. If the string is
+          value. It will expect the format specified by the <link
+          linkend="topic.dateTimeFormatSettings"><literal>date_format</literal>,
+          <literal>time_format</literal> and
+          <literal>datetime_format</literal> settings</link>. If the string is
           not in the appropriate format, an error will abort template
           processing when you try to access this built-in.</para>
 
@@ -11661,58 +11710,40 @@ Green Mouse</programlisting>
 &lt;#assign someDatetime = "1995-10-25T15:05"?datetime&gt;
 </programlisting>
 
-          <para>You can also specify the format explicitly with a parameter,
-          using <link
-          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
-          date format syntax</link>. For example:</para>
-
-          <programlisting role="template">&lt;#assign someDate = "10/25/1995"?date("MM/dd/yyyy")&gt;
-&lt;#assign someTime = "15:05:30"?time("HH:mm:ss")&gt;
-&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;
-${someDate}
-${someTime}
-${someDatetime}</programlisting>
-
-          <para>will print something like (depending on the output locale
-          (language) and <literal>date_format</literal>,
+          <para>You can also specify the format explicitly like
+          <literal>?datetime.<replaceable>format</replaceable></literal> or
+          <literal>?datetime["<replaceable>format</replaceable>"]</literal>
+          (or
+          <literal>?datetime("<replaceable>format</replaceable>")</literal>
+          for historical reasons), and the same with <literal>?date</literal>
+          and <literal>?time</literal>. For the syntax and meaning of format
+          values see the possible values of the <link
+          linkend="topic.dateTimeFormatSettings"><literal>date_format</literal>,
           <literal>time_format</literal> and
-          <literal>datetime_format</literal> <link
-          linkend="ref.directive.setting">settings</link>):</para>
+          <literal>datetime_format</literal> settings</link>. Example:</para>
 
-          <programlisting role="output">Oct 25, 1995
-3:05:30 PM
-Oct 25, 1995 3:05:00 PM</programlisting>
-
-          <para>Above, the dates/times/date-times were converted back to
-          string according to the <literal>date_format</literal>,
-          <literal>time_format</literal> and
-          <literal>datetime_format</literal> <link
-          linkend="ref.directive.setting">settings</link>, that's why they
-          look differently as the original strings. (For more information
-          about converting dates/times/date-times to strings read: <link
-          linkend="ref_builtin_string_for_date">string built-in for
-          date/time/date-time</link>, <link
-          linkend="dgui_template_valueinserion_universal_date">date/rime/date-time
-          interpolations</link>.)</para>
-
-          <para>Instead of specifying a concrete pattern, you can use one of
-          the predefined patterns, as the subvariables of the built-in. The
-          predefined formats are: <literal>short</literal>,
-          <literal>medium</literal> and <literal>long</literal>, which refer
-          to the standard Java locale dependent formats, <literal>xs</literal>
-          that refers to the W3C XML Schema format, and <literal>iso</literal>
-          that refers to ISO 8601:2004 format (a subset of it, actually: if
-          there's a date part, it must use year, month and <quote>day of the
-          month</quote> values, where the day can't be omitted, etc):</para>
-
-          <programlisting role="template">&lt;#-- Parsing xs:date, xs:time and xs:dateTime values: --&gt;
+          <programlisting role="template">&lt;#-- Parsing XML Schema xs:date, xs:time and xs:dateTime values: --&gt;
 &lt;#assign someDate = "1995-10-25"?date.xs&gt;
 &lt;#assign someTime = "15:05:30"?time.xs&gt;
 &lt;#assign someDatetime = "1995-10-25T15:05:00"?datetime.xs&gt;
 
 &lt;#-- Parsing ISO 8601 (both extended and basic formats): --&gt;
 &lt;#assign someDatetime = "1995-10-25T15:05"?datetime.iso&gt;
-&lt;#assign someDatetime = "19951025T1505"?datetime.iso&gt;</programlisting>
+&lt;#assign someDatetime = "19951025T1505"?datetime.iso&gt;
+
+&lt;#-- Parsing with SimpleDateFormat patterns: --&gt;
+&lt;#assign someDate = "10/25/1995"?date("MM/dd/yyyy")&gt;
+&lt;#assign someTime = "15:05:30"?time("HH:mm:ss")&gt;
+&lt;#assign someDatetime = "1995-10-25 03:05 PM"?datetime("yyyy-MM-dd hh:mm a")&gt;</programlisting>
+
+          <para>To prevent misunderstandings, the left-hand value need not be
+          a string literal. For example, when you read data from XML DOM (from
+          where all values come as unparsed strings), you may do things like
+          <literal>order.confirmDate?date.xs</literal> to convert the string
+          value to a real date.</para>
+
+          <para>Of course, the format also can be a variable, like in
+          <literal>"<replaceable>...</replaceable>"?datetime[myFormat]</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_ends_with">
@@ -12980,8 +13011,10 @@ rif: foo XYr baar</programlisting>
           </indexterm>
 
           <para>Converts a number to a string. It uses the default format that
-          the programmer has specified. You can also specify a number format
-          explicitly with this built-in, as it will be shown later.</para>
+          the programmer has specified via the
+          <literal>number_format</literal> and the <literal>locale</literal>
+          settings. You can also specify a number format explicitly with this
+          built-in, as it will be shown later.</para>
 
           <para>There are four predefined number formats:
           <literal>computer</literal>, <literal>currency</literal>,
@@ -13001,8 +13034,7 @@ ${x?string.currency}
 ${x?string.percent}
 ${x?string.computer}</programlisting>
 
-          <para>If your locale is US English, this will certainly
-          produce:</para>
+          <para>If your locale is US English, this will print:</para>
 
           <programlisting role="output">42
 42
@@ -13039,22 +13071,22 @@ $42.00
           decimal number format syntax</link>:</para>
 
           <programlisting role="template">&lt;#assign x = 1.234&gt;
-${x?string("0")}
-${x?string("0.#")}
-${x?string("0.##")}
-${x?string("0.###")}
-${x?string("0.####")}
+${x?string["0"]}
+${x?string["0.#"]}
+${x?string["0.##"]}
+${x?string["0.###"]}
+${x?string["0.####"]}
 
-${1?string("000.00")}
-${12.1?string("000.00")}
-${123.456?string("000.00")}
+${1?string["000.00"]}
+${12.1?string["000.00"]}
+${123.456?string["000.00"]}
 
-${1.2?string("0")}
-${1.8?string("0")}
-${1.5?string("0")} &lt;-- 1.5, rounded towards even neighbor
-${2.5?string("0")} &lt;-- 2.5, rounded towards even neighbor
+${1.2?string["0"]}
+${1.8?string["0"]}
+${1.5?string["0"]} &lt;-- 1.5, rounded towards even neighbor
+${2.5?string["0"]} &lt;-- 2.5, rounded towards even neighbor
 
-${12345?string("0.##E0")}</programlisting>
+${12345?string["0.##E0"]}</programlisting>
 
           <para>outputs this:</para>
 
@@ -13075,6 +13107,19 @@ ${12345?string("0.##E0")}</programlisting>
 
 1.23E4</programlisting>
 
+          <para>Note that as in FreeMarker <literal>foo.bar</literal> is
+          equivalent with <literal>foo["bar"]</literal>, you could also write
+          <literal>x?string.currency</literal> as
+          <literal>x?string["currency"]</literal>, but of course that wouldn't
+          be practical. But in the above examples we have to use the square
+          bracket syntax, because the characters involved (numbers, dot,
+          <literal>#</literal>) aren't allowed syntactically after the dot
+          operator.</para>
+
+          <para>For historical reasons, you could also write things like
+          <literal>x?string("0.#")</literal>, which does exactly the same as
+          <literal>x?string["0.#"]</literal>.</para>
+
           <para>Following the financial and statistics practice, the rounding
           goes according the so called half-even rule, which means rounding
           towards the nearest ``neighbor'', unless both neighbors are
@@ -13083,33 +13128,29 @@ ${12345?string("0.##E0")}</programlisting>
           1.5 and of 2.5, as both were rounded to 2, since 2 is even, but 1
           and 3 are odds.</para>
 
-          <para>Apart from the Java decimal syntax patterns, you can also
-          write <literal>${aNumber?string("currency")}</literal> and like,
-          that will do the same as
-          <literal>${aNumber?string.currency}</literal> and like.</para>
-
           <para>As it was shown for the predefined formats earlier, the
           default formatting of the numbers can be set in the template:</para>
 
           <programlisting role="template">&lt;#setting number_format="0.##"&gt;
-${1.234}
-</programlisting>
+${1.234}</programlisting>
 
           <para>outputs this:</para>
 
           <programlisting role="output">1.23</programlisting>
 
-          <para>Note that the number formatting is locale sensitive:</para>
+          <para>Note that as number formatting is locale sensitive, the locale
+          setting also plays role in the formatting:</para>
 
-          <programlisting role="template">&lt;#setting locale="en_US"&gt;
-US people write:        ${12345678?string(",##0.00")}
+          <programlisting role="template">&lt;#setting number_format=",##0.00"&gt;
+&lt;#setting locale="en_US"&gt;
+US people write:     ${12345678}
 &lt;#setting locale="hu"&gt;
-Hungarian people write: ${12345678?string(",##0.00")}</programlisting>
+German people write: ${12345678}</programlisting>
 
           <para>outputs this:</para>
 
-          <programlisting role="output">US people write:        12,345,678.00
-Hungarian people write: 12 345 678,00</programlisting>
+          <programlisting role="output">US people write:     12,345,678.00
+German people write: 12.345.678,00</programlisting>
         </section>
 
         <section xml:id="ref_builtin_is_infinite">
@@ -13318,82 +13359,38 @@ Hungarian people write: 12 345 678,00</programlisting>
             <primary>date to string</primary>
           </indexterm>
 
-          <indexterm>
-            <primary>XML Schema date rendering</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>XML Schema time rendering</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>ISO 8601</primary>
-          </indexterm>
-
           <para>This built-in converts a date to a string, with the specified
           formatting.</para>
 
           <note>
             <para>You should need this built-in rarely, as the default format
-            of date/time/date-time values can be specified globally with the
+            of date/time/date-time values can be specified globally <link
+            linkend="topic.dateTimeFormatSettings">with the
             <literal>date_format</literal>, <literal>time_format</literal> and
-            <literal>datetime_format</literal> settings of FreeMarker. Use
-            this built-in only at the places where the desired format differs
-            from the one normally used. For the other places the default
-            format should be set properly by the programmers, outside the
-            templates. (Any formatting that you can specify with the
-            <literal>string</literal> built-in, like
-            <literal>"short"</literal>, <literal>"xs"</literal>,
-            <literal>"dd.MM.yyyy HH:mm:ss"</literal> etc., can also be used as
-            the value of said settings.)</para>
+            <literal>datetime_format</literal> settings</link> of FreeMarker.
+            Use this built-in only at the places where the desired format
+            differs from the one normally used. For the other places the
+            default format should be set properly by the programmers, outside
+            the templates.</para>
           </note>
 
-          <para>The format can be one of the predefined named formats, or you
-          can specify a formatting pattern directly with <link
-          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
-          date format syntax</link>.The predefined formats are:</para>
+          <para>The desired format can be specified like
+          <literal>?string.<replaceable>format</replaceable></literal> or
+          <literal>?string["<replaceable>format</replaceable>"]</literal>(or
+          the historical equivalent,
+          <literal>?string("<replaceable>format</replaceable>")</literal>).
+          These are equivalent, except that with the quoted formats you can
+          include any characters in the
+          <literal><replaceable>format</replaceable></literal>, like spaces.
+          The syntax of <literal><replaceable>format</replaceable></literal>
+          is exactly the same as of the <literal>date_format</literal>,
+          <literal>time_format</literal> and
+          <literal>datetime_format</literal> configuration settings; <link
+          linkend="topic.dateTimeFormatSettings">see the documentation of the
+          possible values there</link>.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Formats predefined by the Java platform:
-              <literal>short</literal>, <literal>medium</literal>,
-              <literal>long</literal>, and <literal>full</literal> which
-              define how verbose the resulting text will be. The exact meaning
-              of this depends on the current locale (language). Furthermore,
-              it's specified not by FreeMarker, but Java.</para>
-            </listitem>
-
-            <listitem>
-              <para>XML Schema formats (since FreeMarker 2.3.21):
-              <literal>xs</literal>, <literal>xs_fz</literal>,
-              <literal>xs_nz</literal>. These will format the value to conform
-              to the <literal>xs:date</literal>, <literal>xs:time</literal> or
-              <literal>xs:dateTime</literal> XML Schema types, depending on
-              the type of the value. The difference between the 3 variations
-              is in when they show the time zone offset: <literal>xs</literal>
-              will show the time zone offset unless the Java type of the value
-              is <literal>java.sql.Date</literal> or
-              <literal>java.sql.Time</literal> (as those are assumed to come
-              from a time zone unaware source), <literal>xs_fz</literal>
-              (<quote>force zone</quote>) will always show the time zone
-              offset, and <literal>xs_nz</literal> (<quote>no zone</quote>)
-              will never show it.</para>
-            </listitem>
-
-            <listitem>
-              <para>ISO 8601 formats (since FreeMarker 2.3.21):
-              <literal>iso</literal>, <literal>iso_fz</literal>,
-              <literal>iso_nz</literal>. These will format the value to
-              conform to ISO 8601:2004 extended format. The format will also
-              conform to the XML Schema formats, where the two specifications
-              don't conflict. Regarding the zone offset and
-              <literal>_fz</literal> and <literal>_nz</literal> see XML Schema
-              formats above.</para>
-            </listitem>
-          </itemizedlist>
-
-          <para>For example, if the locale of the output is U.S. English, and
-          the time zone is the U.S. Pacific Time zone, and
+          <para>Example: If the locale of the output is U.S. English, and the
+          time zone is the U.S. Pacific Time zone, and
           <literal>openingTime</literal> is a
           <literal>java.sql.Time</literal>, <literal>nextDiscountDay</literal>
           is <literal>java.sql.Date</literal> and
@@ -13406,54 +13403,64 @@ ${openingTime?string.medium}
 ${openingTime?string.long}
 ${openingTime?string.full}
 ${openingTime?string.xs}
+${openingTime?string.iso}
 
 ${nextDiscountDay?string.short}
 ${nextDiscountDay?string.medium}
 ${nextDiscountDay?string.long}
 ${nextDiscountDay?string.full}
 ${nextDiscountDay?string.xs}
+${nextDiscountDay?string.iso}
 
 ${lastUpdated?string.short}
 ${lastUpdated?string.medium}
 ${lastUpdated?string.long}
 ${lastUpdated?string.full}
-${lastUpdated?string.xs}</programlisting>
+${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;
+${lastUpdated?string.xs}
+${lastUpdated?string.iso}
 
-          <para>will prints something like this:</para>
+&lt;#-- SimpleDateFormat patterns: --&gt;
+${lastUpdated?string["dd.MM.yyyy, HH:mm"]}
+${lastUpdated?string["EEEE, MMMM dd, yyyy, hh:mm a '('zzz')'"]}
+${lastUpdated?string["EEE, MMM d, ''yy"]}
+${lastUpdated?string.yyyy} &lt;#-- Same as ${lastUpdated?string["yyyy"]} --&gt;
+
+&lt;#-- Advanced ISO 8601-related formats: --&gt;
+${lastUpdated?string.iso_m_u}
+${lastUpdated?string.xs_ms_nz}</programlisting>
+
+          <para>will print something like this:</para>
 
           <programlisting role="output">01:45 PM
 01:45:09 PM
 01:45:09 PM PST
 01:45:09 PM PST
-13:45:09
+13:45:09-08:00
+13:45:09-08:00
 
 2/20/07
 Apr 20, 2007
 April 20, 2007
 Friday, April 20, 2007
+2007-02-20-08:00
 2007-02-20
 
 2/20/07 01:45 PM
 Feb 20, 2007 01:45:09 PM
 February 20, 2007 01:45:09 PM PST
 Friday, February 20, 2007 01:45:09 PM PST
-2007-02-20T13:45:09-08:00</programlisting>
+Feb 8, 2003 9:24 PM
+2007-02-20T13:45:09-08:00
+2007-02-20T13:45:09-08:00
 
-          <para>For date-time values, you can specify the length of the date
-          and time part independently:</para>
+08.04.2003 21:24
+Tuesday, April 08, 2003, 09:24 PM (PDT)
+Tue, Apr 8, '03
+2003
 
-          <programlisting role="template">${lastUpdated?string.short_long} &lt;#-- short date, long time --&gt;
-${lastUpdated?string.medium_short} &lt;#-- medium date, short time --&gt;</programlisting>
-
-          <para>will output:</para>
-
-          <programlisting role="output">2/8/03 9:24:44 PM PST
-Feb 8, 2003 9:24 PM</programlisting>
-
-          <para>Note that <literal>?string.short</literal> is the same as
-          <literal>?string.short_short</literal>,
-          <literal>?string.medium</literal> is the same as
-          <literal>?string.medium_medium</literal>, etc.</para>
+2007-02-20T21:45Z
+2007-02-20T13:45:09.000</programlisting>
 
           <warning>
             <para>Unfortunately, because of the limitations of the Java
@@ -13461,56 +13468,38 @@ Feb 8, 2003 9:24 PM</programlisting>
             data-model, where FreeMarker can't decide if the variable is a
             date (year, month, day), or a time (hour, minute, second,
             millisecond) or a date-time. In this case, FreeMarker doesn't know
-            how to display the date when you write something like
-            <literal>${lastUpdated?string.short}</literal> or simply
-            <literal>${lastUpdated}</literal>, and thus it will stop with
+            how to display the value when you write something like
+            <literal>${lastUpdated?string.short}</literal> or
+            <literal>${lastUpdated?string.xs}</literal>, i.e., a format that
+            doesn't specify the exact fields to display, or if you simply use
+            <literal>${lastUpdated}</literal>. Then it will have to stop with
             error. To prevent this, you can help FreeMarker with the <link
             linkend="ref_builtin_date_datetype"><literal>?date</literal>,
             <literal>?time</literal> and <literal>?datetime</literal>
             built-ins</link>. For example:
             <literal>${lastUpdated?datetime?string.short}</literal>. Ask the
-            programmer if certain variables of the data-model have this
+            programmers if certain variables of the data-model have this
             problem, or always use <literal>?date</literal>,
             <literal>?time</literal> and <literal>?datetime</literal>
-            built-ins.</para>
+            built-ins to be on the safe side.</para>
           </warning>
 
-          <para>Instead of using the predefined formats, you can specify the
-          formatting pattern explicitly with
-          <literal>?string(<replaceable>pattern_string</replaceable>)</literal>.
-          The pattern uses <link
-          xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">Java
-          date format syntax</link>. Example:</para>
-
-          <programlisting role="template">${lastUpdated?string("dd.MM.yyyy HH:mm:ss zzzz")}
-${lastUpdated?string("EEE, MMM d, ''yy")}
-${lastUpdated?string("EEEE, MMMM dd, yyyy, hh:mm a '('zzz')'")}</programlisting>
-
-          <para>will output:</para>
-
-          <programlisting role="output">08.04.2003 21:24:44 Pacific Daylight Time
-Tue, Apr 8, '03
-Tuesday, April 08, 2003, 09:24 PM (PDT)</programlisting>
-
           <note>
-            <para>Unlike with the predefined formats, you never need to use
-            <literal>?date</literal>, <literal>?time</literal> and
-            <literal>?datetime</literal> with explicitly given patterns, since
+            <para>You never need to use <literal>?date</literal>,
+            <literal>?time</literal> or <literal>?datetime</literal> with
+            format patterns like <literal>"yyyy.MM.dd HH:mm"</literal>, since
             with the pattern you tell FreeMarker what parts of the date to
             show. However, FreeMarker will trust you blindly, so you can show
             "noise" if you display parts that are actually not stored in the
-            variable. For example, <literal>${openingTime?string("yyyy-MM-dd
-            hh:mm:ss a")}</literal>, where <literal>openingTime</literal>
+            variable. For example, <literal>${openingTime?string["yyyy-MM-dd
+            hh:mm:ss a"]}</literal>, where <literal>openingTime</literal>
             stores only time, will display <literal>1970-01-01 09:24:44
             PM</literal>.</para>
           </note>
 
-          <para>The pattern string also can be <literal>"short"</literal>,
-          <literal>"medium"</literal>, ..., <literal>"short_medium"</literal>,
-          ...etc. These are the same as if you would use the predefined
-          formats with the dot syntax:
-          <literal>someDate?string("short")</literal> and
-          <literal>someDate?string.short</literal> are equivalent.</para>
+          <para>To prevent misunderstandings, the format need not be a string
+          literal, it can be a variable or any other expression, like in
+          <literal>"<replaceable>...</replaceable>"?string[myFormat]</literal>.</para>
 
           <para>See also: <link
           linkend="dgui_template_valueinserion_universal_date">the
@@ -16718,7 +16707,7 @@ or
               built-in</link>.</para>
             </listitem>
 
-            <listitem>
+            <listitem xml:id="topic.dateTimeFormatSettings">
               <para xml:id="topic_date_format_settings"><indexterm>
                   <primary>date_format</primary>
                 </indexterm><indexterm>
@@ -16729,26 +16718,211 @@ or
                   <primary>format</primary>
 
                   <secondary>date</secondary>
+                </indexterm><indexterm>
+                  <primary>XML Schema date rendering</primary>
+                </indexterm><indexterm>
+                  <primary>XML Schema time rendering</primary>
+                </indexterm><indexterm>
+                  <primary>XML Schema dateTime rendering</primary>
+                </indexterm><indexterm>
+                  <primary>ISO 8601</primary>
                 </indexterm> <literal>date_format</literal>,
               <literal>time_format</literal>,
               <literal>datetime_format</literal>: The format used to convert
-              date/time/date-time to strings when no explicit format is
-              specified, as in the case of <literal>${someDate}</literal>. The
+              date/time/date-time values (Java
+              <literal>java.util.Date</literal>-s and its subclasses) to
+              strings when no explicit format is specified via the <link
+              linkend="ref_builtin_string_for_date"><literal>string</literal>
+              built-in</link> (or otherwise), as in the case of
+              <literal>${someDate}</literal>. The
               <literal>date_format</literal> setting only effects the
               formatting of date values that store no time part,
               <literal>time_format</literal> only effects the formatting of
               times that store no date part, and
               <literal>datetime_format</literal> only effects formatting of
-              date-time values. The possible values of the settings are
-              similar to the parameters of <link
-              linkend="ref_builtin_string_for_date"><literal>string</literal>
-              built-in</link>; see more explanation there. Examples:
-              <literal>"short"</literal>, <literal>"long_medium"</literal>,
-              <literal>"dd.MM.yyyy HH:mm:ss"</literal>,
-              <literal>"xs"</literal>/<literal>"xs_fz"</literal>/<literal>"xs_nz"</literal>
-              (for XML Schema format, with forced and no time zone offset),
-              <literal>iso</literal>, <literal>iso_fz</literal>,
-              <literal>iso_nz</literal> (for ISO 8601 formats).</para>
+              date-time values. These settings also effects what format do
+              <link
+              linkend="ref_builtin_string_date"><literal>?time</literal>,
+              <literal>?date</literal>, and
+              <literal>?datetime</literal></link> expect when it's applied on
+              a string value.</para>
+
+              <para><remark>The following part is copy-pasted from the JavaDoc
+              of Configurable.setDateTimeFormat(String); keep them in sync.
+              </remark>The possible setting values are (the quotation marks
+              aren't part of the value itself):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Patterns <link
+                  xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html">accepted
+                  by Java's <literal>SimpleDateFormat</literal></link>, for
+                  example <literal>"dd.MM.yyyy HH:mm:ss"</literal> (where
+                  <literal>"HH"</literal> means 0-23 hours) or
+                  <literal>"MM/dd/yyyy hh:mm:ss a"</literal> (where
+                  <literal>"a"</literal> prints AM or PM, if the current
+                  language is English).</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>"xs"</literal> for XML Schema format, or
+                  <literal>"iso"</literal> for ISO 8601:2004 format. These
+                  formats allow various additional options, separated with
+                  space, like in <literal>"iso m nz"</literal> (or with
+                  <literal>_</literal>, like in <literal>"iso_m_nz"</literal>;
+                  this is useful in a case like
+                  <literal>lastModified?string.iso_m_nz</literal>). The
+                  options and their meanings are:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Accuracy options:</para>
+
+                      <itemizedlist spacing="compact">
+                        <listitem>
+                          <para><literal>ms</literal>: Milliseconds, always
+                          shown with all 3 digits, even if it's all 0-s.
+                          Example: <literal>13:45:05.800</literal></para>
+                        </listitem>
+
+                        <listitem>
+                          <para><literal>s</literal>: Seconds (fraction
+                          seconds are dropped even if non-0), like
+                          <literal>13:45:05</literal></para>
+                        </listitem>
+
+                        <listitem>
+                          <para><literal>m</literal>: Minutes, like
+                          <literal>13:45</literal>. This isn't allowed for
+                          <literal>"xs"</literal>.</para>
+                        </listitem>
+
+                        <listitem>
+                          <para><literal>h</literal>: Hours, like
+                          <literal>13</literal>. This isn't allowed for
+                          <literal>"xs"</literal>.</para>
+                        </listitem>
+
+                        <listitem>
+                          <para>Neither: Up to millisecond accuracy, but
+                          trailing millisecond 0-s are removed, also the whole
+                          milliseconds part if it would be 0 otherwise.
+                          Example: <literal>13:45:05.8</literal></para>
+                        </listitem>
+                      </itemizedlist>
+                    </listitem>
+
+                    <listitem>
+                      <para>Time zone offset visibility options:</para>
+
+                      <itemizedlist spacing="compact">
+                        <listitem>
+                          <para><literal>fz</literal>: <quote>Force
+                          Zone</quote>, always show time zone offset (even for
+                          for <literal>java.sql.Date</literal> and
+                          <literal>java.sql.Time</literal> values). But,
+                          because ISO 8601 doesn't allow for dates (means date
+                          without time of the day) to show the zone offset,
+                          this option will have no effect in the case of
+                          <literal>"iso"</literal> with dates.</para>
+                        </listitem>
+
+                        <listitem>
+                          <para><literal>nz</literal>: <quote>No Zone</quote>,
+                          never show time zone offset</para>
+                        </listitem>
+
+                        <listitem>
+                          <para>Neither: Always show time zone offset, except
+                          for <literal>java.sql.Date</literal> and
+                          <literal>java.sql.Time</literal>, and for
+                          <literal>"iso"</literal> date values.</para>
+                        </listitem>
+                      </itemizedlist>
+                    </listitem>
+
+                    <listitem>
+                      <para>Time zone options:</para>
+
+                      <itemizedlist spacing="compact">
+                        <listitem>
+                          <para><literal>u</literal>: Use UTC instead of what
+                          the <literal>time_zone</literal> setting suggests.
+                          However, <literal>java.sql.Date</literal> and
+                          <literal>java.sql.Time</literal> aren't effected by
+                          this (see
+                          <literal>sql_date_and_time_time_zone</literal> to
+                          understand why)</para>
+                        </listitem>
+
+                        <listitem>
+                          <para><literal>fu</literal>: <quote>Force
+                          UTC</quote>, that is, use UTC instead of what the
+                          <literal>time_zone</literal> or the
+                          <literal>sql_date_and_time_time_zone</literal>
+                          setting suggests. This also effects
+                          <literal>java.sql.Date</literal> and
+                          <literal>java.sql.Time</literal> values</para>
+                        </listitem>
+
+                        <listitem>
+                          <para>Neither: Use the time zone suggested by the
+                          <literal>time_zone</literal> or the
+                          <literal>sql_date_and_time_time_zone</literal>
+                          configuration setting</para>
+                        </listitem>
+                      </itemizedlist>
+                    </listitem>
+                  </itemizedlist>
+
+                  <para>Options from the same category are mutually exclusive,
+                  like using <literal>m</literal> and <literal>s</literal>
+                  together is an error.</para>
+
+                  <para>The options can be specified in any order.</para>
+
+                  <para>The accuracy and time zone offset visibility options
+                  don't influence parsing, only formatting. For example, even
+                  if you use <literal>"iso m nz"</literal>,
+                  <literal>"2012-01-01T15:30:05.125+01"</literal> will be
+                  parsed successfully and with milliseconds accuracy. The time
+                  zone options (like <literal>"u"</literal>) influence what
+                  time zone is chosen only when parsing a string that doesn't
+                  contain time zone offset.</para>
+
+                  <para>Parsing with <literal>"iso"</literal> understands both
+                  <quote>extend format</quote> and <quote>basic
+                  format</quote>, like <literal>20141225T235018</literal>. It
+                  doesn't, however, support the parsing of all kind of ISO
+                  8601 strings: if there's a date part, it must use year,
+                  month and day of the month values (not week of the year),
+                  and the day can't be omitted.</para>
+
+                  <para>The output of <literal>"iso"</literal> is deliberately
+                  so that it's also a good representation of the value with
+                  XML Schema format, except for 0 and negative years, where
+                  it's impossible. Also note that the time zone offset is
+                  omitted for date values in the <literal>"iso"</literal>
+                  format, while it's preserved for the <literal>"xs"</literal>
+                  format.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>"short"</literal>,
+                  <literal>"medium"</literal>, <literal>"long"</literal>, or
+                  <literal>"full"</literal>, which has locale-dependent
+                  meaning defined by the Java platform (see in the <link
+                  xlink:href="http://docs.oracle.com/javase/7/docs/api/java/text/DateFormat.html">documentation
+                  of <literal>java.text.DateFormat</literal></link>). For
+                  date-time values, you can specify the length of the date and
+                  time part independently, be separating them with
+                  <literal>_</literal>, like
+                  <literal>"short_medium"</literal>.
+                  (<literal>"medium"</literal> means
+                  <literal>"medium_medium"</literal> for date-time
+                  values.)</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -16759,12 +16933,21 @@ or
               time zone of the JVM is used. Can be any value that is accepted
               by <link
               xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html">Java
-              TimeZone API</link>, or <literal>default</literal> (since
+              TimeZone API</link>, or <literal>"JVM default"</literal> (since
               FreeMarker 2.3.21) to use the JVM default time zone. Examples:
               <literal>"GMT"</literal>, <literal>"GMT+2"</literal>,
               <literal>"GMT-1:30"</literal>, <literal>"CET"</literal>,
               <literal>"PST"</literal>,
-              <literal>"America/Los_Angeles"</literal></para>
+              <literal>"America/Los_Angeles"</literal>.</para>
+
+              <warning>
+                <para>If you change this setting from its default value, you
+                should certainly also set
+                <literal>sql_date_and_time_time_zone</literal> to "JVM
+                default". <phrase role="forProgrammers">See more in the Java
+                API documentation of
+                <literal>Configurable.setSQLDateAndTimeTimeZone(TimeZone)</literal>.</phrase></para>
+              </warning>
             </listitem>
 
             <listitem>
@@ -16772,12 +16955,12 @@ or
                   <primary>time_zone</primary>
                 </indexterm><indexterm>
                   <primary>JDBC time zone</primary>
-                </indexterm><literal>sql_date_and_time_time_zone</literal>:
-              This handles a highly technical issue, so it should usually be
-              set from the Java code by the programmers. <phrase
-              role="forProgrammers">For programmers: If this is set to
-              non-<literal>null</literal>, for date-only and time-only values
-              coming from SQL database (more precisely, for
+                </indexterm><literal>sql_date_and_time_time_zone</literal>
+              (since FreeMarker 2.3.21): This handles a highly technical
+              issue, so it should usually be set from the Java code by the
+              programmers. <phrase role="forProgrammers">For programmers: If
+              this is set to non-<literal>null</literal>, for date-only and
+              time-only values coming from SQL database (more precisely, for
               <literal>java.sql.Date</literal> and
               <literal>java.sql.Time</literal> objects) FreeMarker will use
               this time zone instead of the time zone specified by the
@@ -16810,8 +16993,8 @@ or
             </listitem>
           </itemizedlist>
 
-          <para>Example: Assume that the initial locale of template is hu
-          (Hungarian). Then this:</para>
+          <para>Example: Assume that the initial locale of template is de_DE
+          (German). Then this:</para>
 
           <programlisting role="template">${1.2}
 &lt;#setting locale="en_US"&gt;
@@ -16822,7 +17005,7 @@ ${1.2}</programlisting>
           <programlisting role="output">1,2
 1.2</programlisting>
 
-          <para>because Hungarian people use the comma as their decimal
+          <para>because German people use the comma as their decimal
           separator, while US people use the dot.</para>
         </section>
       </section>
@@ -20819,6 +21002,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
+                  <para>Added new kind of
+                  <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
+                  setting values: XML Schema formats, starting with
+                  <literal>"xs"</literal> and ISO 8601:2004 formats, starting
+                  with <literal>"iso"</literal>. The format string can be
+                  continued with various space (or <literal>_</literal>)
+                  separated options, like <literal>h</literal> or
+                  <literal>m</literal> or <literal>s</literal> or
+                  <literal>ms</literal> for setting shown accuracy,
+                  <literal>nz</literal> or <literal>fz</literal> for setting
+                  time zone offset visibility, and <literal>u</literal> or,
+                  <literal>fu</literal> for using UTC time zone . For example,
+                  to use ISO 8601 with minute precision and without the zone
+                  offset being shown, set the
+                  <literal>datetime_format</literal> setting to <literal>"iso
+                  m nz"</literal>, so then the output will be like
+                  <literal>2014-09-03T20:56</literal>. <link
+                  linkend="topic.dateTimeFormatSettings">More...</link></para>
+                </listitem>
+
+                <listitem>
                   <para>Because anything that's accepted as
                   <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
                   setting value can also be used with the
@@ -20831,28 +21035,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   formats, <literal>_</literal> can be used instead of space,
                   which means that, for example, you can write
                   <literal>lastModified?string.iso_m_u</literal> instead of
-                  <literal>lastModified?string("iso m u")</literal>.)</para>
+                  <literal>lastModified?string["iso m u"]</literal>.)</para>
                 </listitem>
 
                 <listitem>
-                  <para>Added new kind of
+                  <para>That <literal>"iso"</literal> and
+                  <literal>"xs"</literal> are now possible
                   <literal>date_format</literal>/<literal>datetime_format</literal>/<literal>time_format</literal>
-                  setting values: XML Schema formats, starting with
-                  <literal>"xs"</literal> and ISO 8601:2004 formats, starting
-                  with ISO <literal>"iso"</literal>. The format string can be
-                  continued with various space (or <literal>_</literal>)
-                  separated options, like <literal>h</literal> or
-                  <literal>m</literal> or <literal>s</literal> or
-                  <literal>ms</literal> for setting shown accuracy,
-                  <literal>nz</literal> or <literal>fz</literal> for setting
-                  time zone offset visibility, and <literal>u</literal> or,
-                  <literal>fu</literal> for using UTC time zone . For example,
-                  to use ISO 8601 with minute precision and without the zone
-                  offset being shown, set the
-                  <literal>datetime_format</literal> setting to <literal>"iso
-                  m nz"</literal>, so then the output will be like
-                  <literal>2014-09-03T20:56</literal>. [TODO: write and link a
-                  chapter about formatting descriptors]</para>
+                  setting values also means that such values can now be parsed
+                  too via
+                  <literal>?date</literal>/<literal>?time</literal>/<literal>?datetime</literal>.
+                  The main application is with processing XML DOM-s, as there
+                  values are coming in as strings, and now you can do
+                  something like <literal>order.confirmDate?date.xs</literal>
+                  to convert them to real dates.</para>
                 </listitem>
 
                 <listitem>
