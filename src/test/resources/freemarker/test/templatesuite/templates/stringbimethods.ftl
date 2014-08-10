@@ -2,6 +2,8 @@
 <#assign x = 3>
 ${x?string["0.00"]}
 ${x?string("0.00")}
+${'01:02:03'?time.iso?string["iso ms nz"]}
+${'01:02:03'?time.iso?string("iso ms nz")}
 ---
 ${multi}
 <#assign a = true>
