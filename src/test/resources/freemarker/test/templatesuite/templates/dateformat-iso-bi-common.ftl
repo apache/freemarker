@@ -8,10 +8,6 @@
 <@assertEquals actual=d?iso_utc_ms_nz expected="2010-05-15T20:38:05.023" />
 <@assertEquals actual=d?iso_utc_m_nz expected="2010-05-15T20:38" />
 <@assertEquals actual=d?iso_utc_h_nz expected="2010-05-15T20" />
-<@assertEquals actual=d?iso_utc_fz expected="2010-05-15T20:38:05Z" />
-<@assertEquals actual=d?iso_utc_ms_fz expected="2010-05-15T20:38:05.023Z" />
-<@assertEquals actual=d?iso_utc_m_fz expected="2010-05-15T20:38Z" />
-<@assertEquals actual=d?iso_utc_h_fz expected="2010-05-15T20Z" />
 <@assertEquals actual=d?iso_local expected="2010-05-15T22:38:05+02:00" />
 <@assertEquals actual=d?iso_local_ms expected="2010-05-15T22:38:05.023+02:00" />
 <@assertEquals actual=d?iso_local_m expected="2010-05-15T22:38+02:00" />
@@ -20,10 +16,6 @@
 <@assertEquals actual=d?iso_local_ms_nz expected="2010-05-15T22:38:05.023" />
 <@assertEquals actual=d?iso_local_m_nz expected="2010-05-15T22:38" />
 <@assertEquals actual=d?iso_local_h_nz expected="2010-05-15T22" />
-<@assertEquals actual=d?iso_local_fz expected="2010-05-15T22:38:05+02:00" />
-<@assertEquals actual=d?iso_local_ms_fz expected="2010-05-15T22:38:05.023+02:00" />
-<@assertEquals actual=d?iso_local_m_fz expected="2010-05-15T22:38+02:00" />
-<@assertEquals actual=d?iso_local_h_fz expected="2010-05-15T22+02:00" />
 
 <@assertEquals actual=d?date?iso_utc expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_utc_ms expected="2010-05-15" />
@@ -33,10 +25,6 @@
 <@assertEquals actual=d?date?iso_utc_ms_nz expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_utc_m_nz expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_utc_h_nz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_utc_fz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_utc_ms_fz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_utc_m_fz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_utc_h_fz expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_local expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_local_ms expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_local_m expected="2010-05-15" />
@@ -45,10 +33,6 @@
 <@assertEquals actual=d?date?iso_local_ms_nz expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_local_m_nz expected="2010-05-15" />
 <@assertEquals actual=d?date?iso_local_h_nz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_local_fz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_local_ms_fz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_local_m_fz expected="2010-05-15" />
-<@assertEquals actual=d?date?iso_local_h_fz expected="2010-05-15" />
 
 <@assertEquals actual=d?time?iso_utc expected="20:38:05Z" />
 <@assertEquals actual=d?time?iso_utc_ms expected="20:38:05.023Z" />
@@ -58,10 +42,6 @@
 <@assertEquals actual=d?time?iso_utc_ms_nz expected="20:38:05.023" />
 <@assertEquals actual=d?time?iso_utc_m_nz expected="20:38" />
 <@assertEquals actual=d?time?iso_utc_h_nz expected="20" />
-<@assertEquals actual=d?time?iso_utc_fz expected="20:38:05Z" />
-<@assertEquals actual=d?time?iso_utc_ms_fz expected="20:38:05.023Z" />
-<@assertEquals actual=d?time?iso_utc_m_fz expected="20:38Z" />
-<@assertEquals actual=d?time?iso_utc_h_fz expected="20Z" />
 <@assertEquals actual=d?time?iso_local expected="22:38:05+02:00" />
 <@assertEquals actual=d?time?iso_local_ms expected="22:38:05.023+02:00" />
 <@assertEquals actual=d?time?iso_local_m expected="22:38+02:00" />
@@ -70,21 +50,14 @@
 <@assertEquals actual=d?time?iso_local_ms_nz expected="22:38:05.023" />
 <@assertEquals actual=d?time?iso_local_m_nz expected="22:38" />
 <@assertEquals actual=d?time?iso_local_h_nz expected="22" />
-<@assertEquals actual=d?time?iso_local_fz expected="22:38:05+02:00" />
-<@assertEquals actual=d?time?iso_local_ms_fz expected="22:38:05.023+02:00" />
-<@assertEquals actual=d?time?iso_local_m_fz expected="22:38+02:00" />
-<@assertEquals actual=d?time?iso_local_h_fz expected="22+02:00" />
 
 <#assign dStrange = "600-01-01 23:59:59:123 +0000"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
 <@assertEquals actual=dStrange?iso_utc_ms expected="0600-01-03T23:59:59.123Z" />
 
 <#-- java.sql treatment -->
 <@assertEquals actual=sqlDate?iso_local expected="2010-05-15" />
-<@assertEquals actual=sqlDate?iso_local_fz expected="2010-05-15" />
 <@assertEquals actual=sqlDate?iso_local_nz expected="2010-05-15" />
-<@assertEquals actual=sqlTime?iso_local_fz expected="22:38:05+02:00" />
 <@assertEquals actual=sqlTime?iso_local_nz expected="22:38:05" />
-<@assertEquals actual=sqlTime?iso_utc_fz expected="20:38:05Z" />
 <@assertEquals actual=sqlTime?iso_utc_nz expected="20:38:05" />
 
 <#setting time_zone="GMT+03"> <#-- should not mater -->

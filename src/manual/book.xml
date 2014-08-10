@@ -13588,14 +13588,6 @@ Last updated time: 08:00:54 PM</programlisting>
           <title>iso_...</title>
 
           <indexterm>
-            <primary>type-casting</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>converting between types</primary>
-          </indexterm>
-
-          <indexterm>
             <primary>iso built-in</primary>
           </indexterm>
 
@@ -13603,66 +13595,22 @@ Last updated time: 08:00:54 PM</programlisting>
             <primary>iso_... built-ins</primary>
           </indexterm>
 
-          <indexterm>
-            <primary>format</primary>
-
-            <secondary>date</secondary>
-          </indexterm>
-
-          <indexterm>
-            <primary>format</primary>
-
-            <secondary>time</secondary>
-          </indexterm>
-
-          <indexterm>
-            <primary>format</primary>
-
-            <secondary>date-time</secondary>
-          </indexterm>
-
-          <indexterm>
-            <primary>converting date to string</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>converting time to string</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>converting date-time to string</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>time to string</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>date to string</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>date-time to string</primary>
-          </indexterm>
-
-          <indexterm>
-            <primary>ISO 8601</primary>
-          </indexterm>
+          <note>
+            <para><emphasis>These built-ins are deprecated</emphasis> since
+            FreeMarker 2.3.21, where the <literal>date_format</literal>,
+            <literal>time_format</literal> and
+            <literal>datetime_format</literal> settings understand
+            <literal>"iso"</literal> (for ISO 8601:2004 format) and
+            <literal>"xs"</literal> (for XML Schema format) in additionally to
+            the Java <literal>SimpleDateFormat</literal> patterns. Thus the
+            default format can be set to ISO 8601, or for one time ISO
+            formatting you can use <literal>myDate?string.iso</literal>. <link
+            linkend="topic.dateTimeFormatSettings">See more
+            here...</link></para>
+          </note>
 
           <para>These built-ins convert a date, time or date-time value to
           string that follows ISO 8601:2004 "extended" format.</para>
-
-          <note>
-            <para>Since FreeMarker 2.3.21, you can also require this format as
-            the default with the <literal>date_format</literal>,
-            <literal>time_format</literal> and
-            <literal>datetime_format</literal> settings, using the
-            <literal>"iso"</literal>, <literal>"iso_fz"</literal> and
-            <literal>"iso_nz"</literal> values. <link
-            linkend="ref_builtin_string_for_date">See more here.</link> Use
-            the date format setting instead of this built-in whenever
-            possible.</para>
-          </note>
 
           <para>This built-in has several variations:
           <literal>iso_utc</literal>, <literal>iso_local</literal>,
@@ -13715,18 +13663,11 @@ Last updated time: 08:00:54 PM</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>nz</literal> or <literal>fz</literal> (optional):
-              <literal>nz</literal> (like in
-              <literal>${foo?utc_local_nz}</literal>) stands for <quote>no
-              zone</quote>, which means that the time zone offset (like
-              <literal>+02:00</literal> or or <literal>-04:30</literal> or
-              <literal>Z</literal>) will not be displayed.
-              <literal>fz</literal> (like in
-              <literal>${foo?utc_local_fz}</literal>) stands for <quote>force
-              zone</quote>, which means that the zone offset will be
-              displayed, except for date values, because ISO 8601 doesn't
-              allow showing the offset if there's no time shown (unlike the
-              XML Schema <literal>xs:date</literal> format). If this part is
+              <para><literal>nz</literal> (optional): <literal>nz</literal>
+              (like in <literal>${foo?utc_local_nz}</literal>) stands for
+              <quote>no zone</quote>, which means that the time zone offset
+              (like <literal>+02:00</literal> or or <literal>-04:30</literal>
+              or <literal>Z</literal>) will not be displayed. If this part is
               omitted (like in <literal>${foo?utc_local}</literal>) the zone
               will be displayed, except in two cases:</para>
 
@@ -13744,10 +13685,7 @@ Last updated time: 08:00:54 PM</programlisting>
                   2.3.21. This is because most databases store time values
                   that aren't in any time zone, but just store hour, minute,
                   second, and decimal second field values, so showing the time
-                  zone doesn't make sense. Notable exceptions are PostgreSQL
-                  "time with time zone" columns, where the
-                  <literal>?iso_..._fz</literal> variations should be
-                  used.</para>
+                  zone doesn't make sense.</para>
                 </listitem>
               </itemizedlist>
 
@@ -21035,7 +20973,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   formats, <literal>_</literal> can be used instead of space,
                   which means that, for example, you can write
                   <literal>lastModified?string.iso_m_u</literal> instead of
-                  <literal>lastModified?string["iso m u"]</literal>.)</para>
+                  the more verbose <literal>lastModified?string["iso m
+                  u"]</literal>.)</para>
                 </listitem>
 
                 <listitem>
@@ -21052,12 +20991,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>The <link
+                  linkend="ref_builtin_date_iso"><literal>?iso_...</literal>
+                  built-ins</link> are now deprecated in favor of the new
+                  setting values described above. They can be set as the
+                  default date/time/date-time format, seamlessly fit into the
+                  formatting architecture (and thus can parse strings too),
+                  and has more/better options (<literal>ms</literal> always
+                  shows 3 millisecond digits, <literal>fz</literal> for
+                  forcing showing time zone offset).</para>
+                </listitem>
+
+                <listitem>
                   <para>Bug fixed: ISO 8601 dates (via
-                  <literal>?iso_...</literal> and <literal>iso</literal>
+                  <literal>?iso_...</literal> and <literal>"iso"</literal>
                   format settings) now use proleptic Gregorian calendar for
                   the years before 1582, rather than Julian calendar. This is
                   (indirectly) required by the standard, and it's also how the
-                  standard Java XML Schema date/time/dateTime parser
+                  default Sun/Oracle Java XML Schema date/time/dateTime parser
                   works.</para>
                 </listitem>
 
@@ -21065,17 +21016,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>If the <quote>incompatible improvements</quote>
                   configuration setting is at least 2.3.21, the
                   <literal>?iso_...</literal> built-ins won't show time zone
-                  offset for <literal>java.sql.Time</literal> values anymore,
-                  except those that look like <literal>?iso_..._fz</literal>.
-                  The variations ending with <literal>_fz</literal> are new in
-                  this release, and they force showing time zone offset,
-                  except for date-only values, where ISO 8601 doesn't allow
-                  that. Most databases store time values that aren't in any
-                  time zone, but just store hour, minute, second, and decimal
+                  offset for <literal>java.sql.Time</literal> values anymore.
+                  Most databases store time values that aren't in any time
+                  zone, but just store hour, minute, second, and decimal
                   second field values, so showing the time zone doesn't make
-                  sense. Notable exceptions are PostgreSQL "time with time
-                  zone" columns, where the <literal>?iso_..._fz</literal>
-                  variations should be used.</para>
+                  sense. (Notable exceptions are PostgreSQL "time with time
+                  zone" columns, where
+                  <literal><replaceable>mzTime</replaceable>?string.iso_fz</literal>
+                  could be used.)</para>
                 </listitem>
 
                 <listitem>
