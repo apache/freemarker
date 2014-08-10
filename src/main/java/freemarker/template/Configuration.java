@@ -275,6 +275,11 @@ public class Configuration extends Configurable implements Cloneable {
      *          "time with time zone" columns you should), you can force showing the time zone offset by using
      *          {@code myTime?string.iso_fz} (and its other variants).
      *       </li>
+     *       <li><p>{@code ?is_enumerable} correctly returns {@code false} for Java methods get from Java objects that
+     *         are wrapped with {@link BeansWrapper} and its subclasses, like {@link DefaultObjectWrapper}. Although
+     *         method values implement {@link TemplateSequenceModel} (because of a historical design quirk in
+     *         {@link BeansWrapper}), trying to {@code #list} them will cause error, hence they aren't enumerable.
+     *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
      *         to {@code null}, which means that FreeMarker will not find any templates. Earlier

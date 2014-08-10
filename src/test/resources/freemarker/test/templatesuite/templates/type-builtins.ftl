@@ -1,9 +1,24 @@
-StNuBoMeTaMaHaHxSeCoLiInDiNo
+<#setting boolean_format="1,0">
+StNuBoMeTaMaHaHxSeCoEnInDiNo
 <#foreach x in [
   "a", 1, false,
   testmethod, testmacro, html_escape,
-  {"a":1}, [1], testcollection, testnode
+  {"a":1}, [1], testcollection, testnode,
+  bean, bean.m, bean.mOverloaded
 ]>
-<#if x?is_string>1<#else>0</#if> <#if x?is_number>1<#else>0</#if> <#if x?is_boolean>1<#else>0</#if> <#if x?is_method>1<#else>0</#if> <#if x?is_macro>1<#else>0</#if> <#if x?is_transform>1<#else>0</#if> <#if x?is_hash>1<#else>0</#if> <#if x?is_hash_ex>1<#else>0</#if> <#if x?is_sequence>1<#else>0</#if> <#if x?is_collection>1<#else>0</#if> <#if x?is_enumerable>1<#else>0</#if> <#if x?is_indexable>1<#else>0</#if> <#if x?is_directive>1<#else>0</#if> <#if x?is_node>1<#else>0</#if>
+  ${x?is_string} <#t>
+  ${x?is_number} <#t>
+  ${x?is_boolean} <#t>
+  ${x?is_method} <#t>
+  ${x?is_macro} <#t>
+  ${x?is_transform} <#t>
+  ${x?is_hash} <#t>
+  ${x?is_hash_ex} <#t>
+  ${x?is_sequence} <#t>
+  ${x?is_collection} <#t>
+  ${x?is_enumerable} <#t>
+  ${x?is_indexable} <#t>
+  ${x?is_directive} <#t>
+  ${x?is_node}<#lt>
 </#foreach>
 <#macro testmacro></#macro>

@@ -21141,6 +21141,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               string. <link
               linkend="ref_builtin_safe_substring">More...</link></para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed: <literal>?is_enumerable</literal> has returned
+              <literal>true</literal> for Java methods get from Java objects,
+              despite that those values aren't <literal>&lt;#list
+              ...&gt;</literal>-able. (This is actually a historical quirk of
+              <literal>BeansWrapper</literal>, not a bug in
+              <literal>?is_enumerable</literal>, but now
+              <literal>?is_enumerable</literal> is aware of this exceptional
+              case.)</para>
+            </listitem>
           </itemizedlist>
         </section>
 
