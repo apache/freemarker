@@ -21080,16 +21080,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Bug fixed: ISO 8601 dates (via
-                  <literal>?iso_...</literal> and <literal>"iso"</literal>
-                  format settings) now use proleptic Gregorian calendar for
-                  the years before 1582, rather than Julian calendar. This is
-                  (indirectly) required by the standard, and it's also how the
-                  default Sun/Oracle Java XML Schema date/time/dateTime parser
-                  works.</para>
-                </listitem>
-
-                <listitem>
                   <para>If the <quote>incompatible improvements</quote>
                   configuration setting is at least 2.3.21, the
                   <literal>?iso_...</literal> built-ins won't show time zone
@@ -21130,6 +21120,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   the value already holds this information, the built-in has
                   no effect. That is, it will never convert the sub-type of a
                   value, it only adds the sub-type if it was unknown.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: ISO 8601 dates (via
+                  <literal>?iso_...</literal> and <literal>"iso"</literal>
+                  format settings) now use proleptic Gregorian calendar for
+                  the years before 1582, rather than Julian calendar. This is
+                  (indirectly) required by the standard, and it's also how the
+                  default Sun/Oracle Java XML Schema date/time/dateTime parser
+                  works.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
