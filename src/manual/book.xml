@@ -21646,7 +21646,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para><literal>Configuration.getSupportedCoreDirectiveNames()</literal>
+                  <para><literal>Configuration.getSupportedBuiltInDirectiveNames()</literal>
                   can be used to return the names of directives supported by
                   FreeMarker.</para>
                 </listitem>

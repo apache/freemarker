@@ -1411,8 +1411,8 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @since 2.3.21
      */
-    public Set getSupportedCoreDirectiveNames() {
-        return _CoreAPI.CORE_DIRECTIVE_NAMES;
+    public Set getSupportedBuiltInDirectiveNames() {
+        return _CoreAPI.BUILT_IN_DIRECTIVE_NAMES;
     }
 
     private static String getRequiredVersionProperty(Properties vp, String properyName) {

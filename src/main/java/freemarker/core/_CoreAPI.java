@@ -39,7 +39,7 @@ public class _CoreAPI {
     
     public static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = Configurable.DEFAULT_TL_AND_OW_CHANGE_VERSION;
     
-    public static final Set/*<String>*/ CORE_DIRECTIVE_NAMES;
+    public static final Set/*<String>*/ BUILT_IN_DIRECTIVE_NAMES;
     static {
         Set/*<String>*/ names = new TreeSet();
         names.add("assign");
@@ -80,7 +80,7 @@ public class _CoreAPI {
         names.add("t");
         names.add("transform");
         names.add("visit");
-        CORE_DIRECTIVE_NAMES = Collections.unmodifiableSet(names);
+        BUILT_IN_DIRECTIVE_NAMES = Collections.unmodifiableSet(names);
     }
     
     /**
