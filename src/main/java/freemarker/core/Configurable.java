@@ -70,6 +70,7 @@ public class Configurable
     /** The incompatible improvements version where the default of tempateLoader and objectWrapper was changed. */
     static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = 2003021;
 
+    private static final String DEFAULT = "default";
     private static final String JVM_DEFAULT = "JVM default";
     
     public static final String LOCALE_KEY = "locale";
@@ -1268,7 +1269,7 @@ public class Configurable
                             value, ArithmeticEngine.class, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
-                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+                if (DEFAULT.equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
                 } else if ("simple".equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
