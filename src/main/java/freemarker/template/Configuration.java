@@ -272,8 +272,8 @@ public class Configuration extends Configurable implements Cloneable {
      *          The {@code ?iso_...} built-ins won't show the time zone offset for {@link java.sql.Time} values anymore,
      *          because most databases store time values that aren't in any time zone, but just store hour, minute,
      *          second, and decimal second field values. If you still want to show the offset (like for PostgreSQL
-     *          "time with time zone" columns you should), you can force showing the time zone offset by using the
-     *          {@code ?iso_..._fz} variants, like {@code anSQLTime?iso_local_fz}.
+     *          "time with time zone" columns you should), you can force showing the time zone offset by using
+     *          {@code myTime?string.iso_fz} (and its other variants).
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
