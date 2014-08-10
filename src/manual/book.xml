@@ -11373,6 +11373,11 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_safe_substring">safe_substring</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_numType">short</link></para>
           </listitem>
 
@@ -11503,6 +11508,10 @@ End book</programlisting>
             <primary>substring built-in</primary>
           </indexterm>
 
+          <indexterm>
+            <primary>substring</primary>
+          </indexterm>
+
           <note>
             <para>This built-in exists since FreeMarker 2.3.7.</para>
           </note>
@@ -11560,6 +11569,58 @@ End book</programlisting>
 - a
 - b
 - c</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_safe_substring">
+          <title>safe_substring</title>
+
+          <indexterm>
+            <primary>safe_substring built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>substring</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.21.</para>
+          </note>
+
+          <para>This is the same as <link linkend="ref_builtin_substring">the
+          <literal>substring</literal> built-in</link>, but it doesn't give an
+          error if the begin index (the 1st argument) or the end index (the
+          2nd argument) is outside the bounds of the string. Instead, it
+          silently fixes the argument values so that values less than 0 will
+          become to 0, and values greater than the length of the string will
+          become to the length of the string.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">- ${'abc'?safe_substring(-10)}
+- ${'abc'?safe_substring(10)}
+- ${'abc'?safe_substring(-10, 10)}
+- ${'abc'?safe_substring(10, 20)}
+
+&lt;#list ['abc', 'ABCDEF'] as s&gt;
+  First 5 character: ${s?safe_substring(0, 5)}
+  Last 5 characters: ${s?safe_substring(s?length - 5)}
+&lt;/#list&gt;</programlisting>
+
+          <para>The output:</para>
+
+          <programlisting role="output">- abc
+- abc
+- abc
+- 
+
+  First 5 character: abc
+  Last 5 characters: abc
+  First 5 character: ABCDE
+  Last 5 characters: BCDEF</programlisting>
+
+          <para>Note that if, after fixing the argument values as told
+          earlier, the begin index is greater than the end index, you will
+          still get an error.</para>
         </section>
 
         <section xml:id="ref_builtin_cap_first">
@@ -13768,6 +13829,10 @@ The usual variations are supported:
         <section xml:id="ref_builtin_date_if_unknown">
           <title>..._if_unknown</title>
 
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.21.</para>
+          </note>
+
           <para>The <literal>date_if_unknown</literal>,
           <literal>time_if_unknown</literal>,
           <literal>datetime_if_unknown</literal> built-ins mark a date-like
@@ -14854,19 +14919,22 @@ May 16, 2011
                 <td><literal>is_date_like</literal></td>
 
                 <td>date-like, means either date, time or date-time, or
-                date-like with unknown precise type</td>
+                date-like with unknown precise type (since FreeMarker
+                2.3.21)</td>
               </tr>
 
               <tr>
                 <td><literal>is_date_only</literal></td>
 
-                <td>date (no time of the day part)</td>
+                <td>date (no time of the day part) (since FreeMarker
+                2.3.21)</td>
               </tr>
 
               <tr>
                 <td><literal>is_time</literal></td>
 
-                <td>time (no year-month-day part)</td>
+                <td>time (no year-month-day part) (since FreeMarker
+                2.3.21)</td>
               </tr>
 
               <tr>
@@ -20932,6 +21000,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   a place where method value is not expected will recommend
                   using the <literal>obj.foo</literal> form.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Bug fixed: <literal>?substring</literal> has thrown
+                  low level
+                  <literal>java.lang.IndexOutOfBoundsException</literal>-s
+                  instead of more descriptive
+                  <literal>TemplateModelException</literal>-s with FTL stack
+                  trace.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -21055,6 +21132,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   value, it only adds the sub-type if it was unknown.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>New built-in: <literal>?safe_substring</literal>. This is
+              the same as <literal>?substring</literal>, but it allows the
+              begin index and/or the end index to be outside the bounds of the
+              string. <link
+              linkend="ref_builtin_safe_substring">More...</link></para>
             </listitem>
           </itemizedlist>
         </section>

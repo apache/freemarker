@@ -253,7 +253,26 @@ class MessageUtil {
                 methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", new Integer(argIdx + 1),
                 ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), "." });
     }
+    
+    /**
+     * The type of the argument was good, but it's value wasn't.
+     */
+    static TemplateModelException newMethodArgInvalidValueException(
+            String methodName, int argIdx, Object[] details) {
+        return new _TemplateModelException(new Object[] {
+                methodName, "(...) argument #", new Integer(argIdx + 1),
+                " had invalid value: ", details });
+    }
 
+    /**
+     * The type of the argument was good, but the values of two or more arguments are inconsistent with each other.
+     */
+    static TemplateModelException newMethodArgsInvalidValueException(
+            String methodName, Object[] details) {
+        return new _TemplateModelException(new Object[] {
+                methodName, "(...) arguments have invalid value: ", details });
+    }
+    
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
         return new _MiscTemplateException(env, new Object[] {
                 "Instantiating ", className, " is not allowed in the template for security reasons." });
