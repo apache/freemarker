@@ -26,10 +26,12 @@ final class Range extends Expression {
 
     final Expression lho;
     final Expression rho;
+    final boolean exclusiveEnd;
 
-    Range(Expression lho, Expression rho) {
+    Range(Expression lho, Expression rho, boolean exclusiveEnd) {
         this.lho = lho;
         this.rho = rho;
+        this.exclusiveEnd = exclusiveEnd;
     }
     
     boolean hasRho() {
@@ -39,27 +41,27 @@ final class Range extends Expression {
     TemplateModel _eval(Environment env) 
         throws TemplateException
     {
-        int min = lho.evalToNumber(env).intValue();
-        int max = 0;
+        int begin = lho.evalToNumber(env).intValue();
         if (rho != null) {
-            max = rho.evalToNumber(env).intValue();
-            return new NumericalRange(min, max);
+            int end = rho.evalToNumber(env).intValue();
+            return new NumericalRange(begin, end, exclusiveEnd);
+        } else {
+            return new NumericalRange(begin);
         }
-        return new NumericalRange(min);
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean evalToBoolean(Environment env) throws TemplateException {
-        throw new NonBooleanException(this, new NumericalRange(0, 0), env);
+        throw new NonBooleanException(this, new NumericalRange(0, 0, exclusiveEnd), env);
     }
 
     public String getCanonicalForm() {
         String rhs = rho != null ? rho.getCanonicalForm() : "";
-        return lho.getCanonicalForm() + ".." + rhs;
+        return lho.getCanonicalForm() + getNodeTypeSymbol() + rhs;
     }
     
     String getNodeTypeSymbol() {
-        return "..";
+        return exclusiveEnd ? "..<" : "..";
     }
     
     boolean isLiteral() {
@@ -71,7 +73,8 @@ final class Range extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new Range(
                 lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+                rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                exclusiveEnd);
     }
     
     int getParameterCount() {

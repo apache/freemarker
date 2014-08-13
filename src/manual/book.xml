@@ -1797,7 +1797,8 @@ The average of the price of a python and an elephant is:
                   <para><link
                   linkend="dgui_template_exp_direct_seuqence">Sequences</link>:
                   <literal>["foo", "bar", 123.45]</literal>,
-                  <literal>1..100</literal></para>
+                  <literal>1..100</literal>, <literal>1..&lt;100</literal> (or
+                  <literal>1..!100</literal>)</para>
                 </listitem>
 
                 <listitem>
@@ -2247,18 +2248,46 @@ autumn
             "whatnot".</para>
 
             <para>You can define sequences that store a numerical range with
-            <literal><replaceable>start</replaceable>..<replaceable>end</replaceable></literal>,
+            <literal><replaceable>start</replaceable>..<replaceable>end</replaceable></literal>
+            (inclusive end) or
+            <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
+            (exclusive end, also can be written as
+            <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>),
             where <literal><replaceable>start</replaceable></literal> and
             <literal><replaceable>end</replaceable></literal> are expressions
-            that resolve to numerical values. For example
-            <literal>2..5</literal> is the same as <literal>[2, 3, 4,
-            5]</literal>, but the former is much more efficient (occupies less
-            memory and faster). Note that the square brackets are missing. You
-            can define decreasing numerical ranges too, e.g.:
-            <literal>5..2</literal>. (Furthermore, you can omit the
-            <literal><replaceable>end</replaceable></literal>, for example
+            that must resolve to numerical values. For example
+            <literal>2..5</literal> or <literal>2..&lt;6</literal> is the same
+            as <literal>[2, 3, 4, 5]</literal>, but the former is more
+            convenient and efficient, also it allows dynamic boundaries like
+            <literal>0..&lt;length</literal>.</para>
+
+            <para>You can define decreasing numerical ranges too, e.g.:
+            <literal>5..2</literal> or <literal>5..&lt;1</literal> (or
+            <literal>5..!1</literal>), both gives <literal>[5, 4, 3,
+            2]</literal>.</para>
+
+            <para>Furthermore, you can omit the
+            <literal><replaceable>end</replaceable></literal>, like in
             <literal>5..</literal>, in which case the sequence will contain 5,
-            6, 7, 8, ...etc up to the infinity.)</para>
+            6, 7, 8, ...etc., up to infinity<phrase role="forProgrammers">
+            (for programmers: up to <literal>Integer.MAX_VALUE</literal>,
+            actually)</phrase>.</para>
+
+            <warning>
+              <para>Ranges with inclusive end never produce 0 length sequence,
+              instead they start to go backwards. Like <literal>0..1</literal>
+              is <literal>[0, 1]</literal>, <literal>0..0</literal> is
+              <literal>[0]</literal> and <literal>0..-1</literal> is
+              <literal>[0, -1]</literal>. Thus, <literal>0..length</literal>
+              is WRONG, use <literal>0..&lt;length</literal> instead.</para>
+            </warning>
+
+            <note>
+              <para>There are no square brackets around range expression, that
+              is, you write <literal>0..&lt;x</literal>, NOT
+              <literal>[0..&lt;x]</literal>, which would be a 1 long sequence
+              of ranges.</para>
+            </note>
           </section>
 
           <section xml:id="dgui_template_exp_direct_hash">
@@ -20924,11 +20953,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>New operator for creating ranges with exclusive end:
+              <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
+              (also can be written as
+              <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
+              <link
+              linkend="dgui_template_exp_direct_seuqence">More...</link></para>
+            </listitem>
+
+            <listitem>
               <para>New built-in:
               <literal><replaceable>someString</replaceable>?boolean</literal>.
               This is for example useful for converting "true" and "false"
               strings coming from XML to real boolean values. <link
               linkend="ref_builtin_boolean">More...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in: <literal>?safe_substring</literal>. This is
+              the same as <literal>?substring</literal>, but it allows the
+              begin index and/or the end index to be outside the bounds of the
+              string. <link
+              linkend="ref_builtin_safe_substring">More...</link></para>
             </listitem>
 
             <listitem>
@@ -21135,11 +21181,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>New built-in: <literal>?safe_substring</literal>. This is
-              the same as <literal>?substring</literal>, but it allows the
-              begin index and/or the end index to be outside the bounds of the
-              string. <link
-              linkend="ref_builtin_safe_substring">More...</link></para>
+              <para>Bugs fixed relating ranges (like
+              <literal>0..3</literal>):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para/>
+                </listitem>
+
+                <listitem>
+                  <para/>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>

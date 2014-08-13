@@ -96,6 +96,7 @@
        <config output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
    </testcase>
    <testcase name="precedence"/>
+   <testcase name="range" nooutput="true" />
    <testcase name="recover" />
    <testcase name="root" />
    <testcase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">

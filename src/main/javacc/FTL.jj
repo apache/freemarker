@@ -717,6 +717,8 @@ TOKEN:
   |
   <DOT_DOT : "..">
   |
+  <DOT_DOT_LESS : "..<" | "..!" >
+  |
   <BUILT_IN : "?">
   |
   <EXISTS : "??">
@@ -1232,27 +1234,30 @@ Expression RelationalExpression() :
 Expression RangeExpression() :
 {
    Expression lhs, rhs=null, result;
+   boolean exclusiveEnd;
 }
 {
     lhs=AdditiveExpression() {result = lhs;}
     [
-      LOOKAHEAD(<DOT_DOT>)
-      <DOT_DOT>
-       [
-        LOOKAHEAD(Expression())
-        rhs=AdditiveExpression()
-       ]
+       (         (
+           <DOT_DOT_LESS> { exclusiveEnd = true; }
+           rhs = AdditiveExpression()
+         )
+         | 
+         (           <DOT_DOT> { exclusiveEnd = false; }
+           [
+             LOOKAHEAD(Expression())
+             rhs = AdditiveExpression()
+           ]
+         )
+       )
        {
            numberLiteralOnly(lhs);
            if (rhs != null) {
                numberLiteralOnly(rhs);
            }
-           Range range = new Range(lhs, rhs);
-           if (rhs != null) {
-               range.setLocation(template, lhs, rhs);
-           } else {
-              range.setLocation(template, lhs, lhs);
-           }
+           Range range = new Range(lhs, rhs, exclusiveEnd);
+           range.setLocation(template, lhs, rhs != null ? rhs : lhs);
            result = range;
         }
     ]
