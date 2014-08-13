@@ -671,7 +671,8 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
                 return new Object[] {
                         "XML node values are always strings (text), that is, they can't be used as number, "
                         + "date/time/datetime or boolean without explicit conversion (such as "
-                        + "someNode?number, someNode?datetime.xs, someNode?boolean).",
+                        + "someNode?number, someNode?datetime.xs, someNode?date.xs, someNode?time.xs, "
+                        + "someNode?boolean).",
                         };
             }
         }

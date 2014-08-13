@@ -176,7 +176,7 @@ public class TemplateTestCase extends FileTestCase {
     
             w7.setSimpleMapWrapper(true);
     
-            Object test = getTestBean();
+            Object test = getTestMapBean();
     
             dataModel.put("m1", w1.wrap(test));
             dataModel.put("m2", w2.wrap(test));
@@ -290,10 +290,11 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("multi", new TestBoolean());
         }
         
-        else if (testName.equals("type-builtins")) {
+        else if (testName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
+            dataModel.put("bean", new TestBean());
         }
 
         else if (testName.equals("date-type-builtins")) {
@@ -499,22 +500,38 @@ public class TemplateTestCase extends FileTestCase {
       }
     }
 
-   public Object getTestBean()
+   public Object getTestMapBean()
     {
-        Map testBean = new TestBean();
+        Map testBean = new TestMapBean();
         testBean.put("name", "Chris");
         testBean.put("location", "San Francisco");
         testBean.put("age", new Integer(27));
         return testBean;
     }
 
-    public static class TestBean extends HashMap {
+    public static class TestMapBean extends HashMap {
         public String getName() {
             return "Christopher";
         }
         public int getLuckyNumber() {
             return 7;
         }
+    }
+
+    public static class TestBean {
+
+        public int m(int n) {
+            return n * 10;
+        }
+
+        public int mOverloaded(int n) {
+            return n * 10;
+        }
+
+        public String mOverloaded(String s) {
+            return s.toUpperCase();
+        }
+        
     }
     
 }

@@ -96,6 +96,7 @@
        <config output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
    </testcase>
    <testcase name="precedence"/>
+   <testcase name="range" nooutput="true" />
    <testcase name="recover" />
    <testcase name="root" />
    <testcase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
@@ -121,6 +122,9 @@
    <testcase name="switch" />
    <testcase name="transforms"/>
    <testcase name="type-builtins"/>
+   <testcase name="type-builtins-ici-2.3.21" template="type-builtins.ftl" expected="type-builtins-ici-2.3.21.txt">
+   	  <config incompatible_improvements="2.3.21"/>
+   </testcase>
    <testcase name="date-type-builtins" nooutput="true" />
    <testcase name="var-layers"/>
    <testcase name="variables"/>

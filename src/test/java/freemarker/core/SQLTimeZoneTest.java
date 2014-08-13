@@ -66,53 +66,53 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
 
     private static final String FTL =
             "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
-            + "${sqlDate?iso_local_fz} ${sqlTime?iso_local_fz} "
-            + "${sqlTimestamp?iso_local_fz} ${javaDate?datetime?iso_local_fz}\n"
+            + "${sqlDate?string.iso_fz} ${sqlTime?string.iso_fz} "
+            + "${sqlTimestamp?string.iso_fz} ${javaDate?datetime?string.iso_fz}\n"
             + "${sqlDate?string.xs_fz} ${sqlTime?string.xs_fz} "
             + "${sqlTimestamp?string.xs_fz} ${javaDate?datetime?string.xs_fz}\n"
             + "${sqlDate?string.xs} ${sqlTime?string.xs} "
             + "${sqlTimestamp?string.xs} ${javaDate?datetime?string.xs}\n"
             + "<#setting time_zone='GMT'>\n"
             + "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
-            + "${sqlDate?iso_local_fz} ${sqlTime?iso_local_fz} "
-            + "${sqlTimestamp?iso_local_fz} ${javaDate?datetime?iso_local_fz}\n"
+            + "${sqlDate?string.iso_fz} ${sqlTime?string.iso_fz} "
+            + "${sqlTimestamp?string.iso_fz} ${javaDate?datetime?string.iso_fz}\n"
             + "${sqlDate?string.xs_fz} ${sqlTime?string.xs_fz} "
             + "${sqlTimestamp?string.xs_fz} ${javaDate?datetime?string.xs_fz}\n"
             + "${sqlDate?string.xs} ${sqlTime?string.xs} "
             + "${sqlTimestamp?string.xs} ${javaDate?datetime?string.xs}\n";
 
-    private static final String OUTPUT_BEFORE_SETTZ_GMT2
+    private static final String OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2
             = "2014-07-12 12:30:05 2014-07-12T12:30:05 2014-07-12T12:30:05\n"
             + "2014-07-12 12:30:05+02:00 2014-07-12T12:30:05+02:00 2014-07-12T12:30:05+02:00\n"
             + "2014-07-12+02:00 12:30:05+02:00 2014-07-12T12:30:05+02:00 2014-07-12T12:30:05+02:00\n"
             + "2014-07-12 12:30:05 2014-07-12T12:30:05+02:00 2014-07-12T12:30:05+02:00\n";
 
-    private static final String OUTPUT_BEFORE_SETTZ_GMT1_SQL_DIFFERENT
+    private static final String OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_DIFFERENT
             = "2014-07-12 12:30:05 2014-07-12T11:30:05 2014-07-12T11:30:05\n"
             + "2014-07-12 12:30:05+02:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n"
             + "2014-07-12+02:00 12:30:05+02:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n"
             + "2014-07-12 12:30:05 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n";
 
-    private static final String OUTPUT_BEFORE_SETTZ_GMT1_SQL_SAME
+    private static final String OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_SAME
             = "2014-07-11 11:30:05 2014-07-12T11:30:05 2014-07-12T11:30:05\n"
             + "2014-07-11 11:30:05+01:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n"
             + "2014-07-11+01:00 11:30:05+01:00 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n"
             + "2014-07-11 11:30:05 2014-07-12T11:30:05+01:00 2014-07-12T11:30:05+01:00\n";
     
-    private static final String OUTPUT_AFTER_SETTZ_SQL_SAME
+    private static final String OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME
             = "2014-07-11 10:30:05 2014-07-12T10:30:05 2014-07-12T10:30:05\n"
             + "2014-07-11 10:30:05Z 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n"
             + "2014-07-11Z 10:30:05Z 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n"
             + "2014-07-11 10:30:05 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n";
     
-    private static final String OUTPUT_AFTER_SETTZ_SQL_DIFFERENT
+    private static final String OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT
             = "2014-07-12 12:30:05 2014-07-12T10:30:05 2014-07-12T10:30:05\n"
             + "2014-07-12 12:30:05+02:00 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n"
             + "2014-07-12+02:00 12:30:05+02:00 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n"
             + "2014-07-12 12:30:05 2014-07-12T10:30:05Z 2014-07-12T10:30:05Z\n";
     
     @Test
-    public void testWithDefaultTZAndNoUseDefSysForSQL() throws Exception {
+    public void testWithDefaultTZAndNullSQL() throws Exception {
         TimeZone prevSysDefTz = TimeZone.getDefault();
         TimeZone.setDefault(GMT_P02);
         try {
@@ -120,54 +120,60 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
             
-            assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT2 + OUTPUT_AFTER_SETTZ_SQL_SAME, cfg);
+            assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME, cfg);
         } finally {
             TimeZone.setDefault(prevSysDefTz);
         }
     }
 
     @Test
-    public void testWithDefaultTZAndUseDefSysForSQL() throws Exception {
-        Configuration cfg = createConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
-        
-        assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT2 + OUTPUT_AFTER_SETTZ_SQL_DIFFERENT, cfg);
+    public void testWithDefaultTZAndGMT2SQL() throws Exception {
+        TimeZone prevSysDefTz = TimeZone.getDefault();
+        TimeZone.setDefault(GMT_P02);
+        try {
+            Configuration cfg = createConfiguration();
+            cfg.setSQLDateAndTimeTimeZone(GMT_P02);
+            
+            assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT, cfg);
+        } finally {
+            TimeZone.setDefault(prevSysDefTz);
+        }
     }
     
     @Test
-    public void testWithGMT1AndNoUseDefSysForSQL() throws Exception {
+    public void testWithGMT1AndNullSQL() throws Exception {
         Configuration cfg = createConfiguration();
         assertNull(cfg.getSQLDateAndTimeTimeZone());
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT1_SQL_SAME + OUTPUT_AFTER_SETTZ_SQL_SAME, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_SAME + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME, cfg);
     }
 
     @Test
-    public void testWithGMT1AndUseDefSysForSQL() throws Exception {
+    public void testWithGMT1AndGMT2SQL() throws Exception {
         Configuration cfg = createConfiguration();
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTZ_SQL_DIFFERENT, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT, cfg);
     }
 
     @Test
-    public void testWithGMT2AndNoUseDefSysForSQL() throws Exception {
+    public void testWithGMT2AndNullSQL() throws Exception {
         Configuration cfg = createConfiguration();
         assertNull(cfg.getSQLDateAndTimeTimeZone());
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT2 + OUTPUT_AFTER_SETTZ_SQL_SAME, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME, cfg);
     }
 
     @Test
-    public void testWithGMT2AndUseDefSysForSQL() throws Exception {
+    public void testWithGMT2AndGMT2SQL() throws Exception {
         Configuration cfg = createConfiguration();
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
         
-        assertOutput(FTL, OUTPUT_BEFORE_SETTZ_GMT2 + OUTPUT_AFTER_SETTZ_SQL_DIFFERENT, cfg);
+        assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT, cfg);
     }
     
     @Test

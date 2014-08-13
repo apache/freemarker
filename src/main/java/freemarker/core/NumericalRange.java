@@ -22,45 +22,45 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * A class that represents a Range between two integers.
- * inclusive of the end-points. It can be ascending or
- * descending. 
+ * A class that represents a range between two integers, or an integer and infinity.
+ * Inclusive or exclusive end. Can be ascending or descending. 
  */
 class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
 
-    private int lower, upper;
-    private boolean descending, norhs; // if norhs is true, then we have a half-range, like n..
-    
+    private static final int INFINITE = -1;
+    private final int begin, step, size;
     
     /**
-     * Constructor for half-range, i.e. n..
+     * Constructor for half-range.
      */
-    public NumericalRange(int lower) {
-        this.norhs = true;
-        this.lower = lower;
+    public NumericalRange(int begin) {
+        this.begin = begin;
+        this.step = 1;
+        this.size = INFINITE;
     }
 
-    public NumericalRange(int left, int right) {
-        lower = Math.min(left, right);
-        upper = Math.max(left, right);
-        descending = (left != lower);
+    public NumericalRange(int begin, int end, boolean exclusiveEnd) {
+        this.begin = begin;
+        step = begin <= end ? 1 : -1;
+        size = Math.abs(end - begin) + (exclusiveEnd ? 0 : 1);
     }
 
-    public TemplateModel get(int i) throws TemplateModelException {
-        int index = descending ? (upper -i) : (lower + i);
-        if ((norhs && index > upper) || index <lower) {
+    public TemplateModel get(int index) throws TemplateModelException {
+        if (index < 0 || index >= size) {
             throw new _TemplateModelException(new Object[] {
-                    "Range item index ", new Integer(i), " is out of bounds." });
+                    "Range item index ", new Integer(index), " is out of bounds." });
         }
-        return new SimpleNumber(index);
+        return new SimpleNumber(begin + step * index);
     }
 
     public int size() {
-        return 1 + upper - lower;
+        // 0 bug emulated backward compatibility
+        return size != INFINITE ? size : 0;
     }
     
     boolean hasRhs() {
-        return !norhs;
+        return size != INFINITE;
     }
+    
 }
 

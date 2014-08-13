@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 
 import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.OverloadedMethodsModel;
+import freemarker.ext.beans.SimpleMethodModel;
 import freemarker.ext.beans._BeansAPI;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
@@ -471,8 +473,11 @@ class MiscellaneousBuiltins {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)  ?
-                TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
+                    && (env.getConfiguration().getIncompatibleImprovements().intValue() < 2003021
+                        // These implement TemplateSequenceModel, yet they can't be #list-ed:
+                        || !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel))
+                    ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 

@@ -18,6 +18,7 @@ package freemarker.test.utility;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -35,6 +36,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     public static AssertFailsDirective INSTANCE = new AssertFailsDirective();
 
     private static final String MESSAGE_PARAM = "message";
+    private static final String MESSAGE_REGEXP_PARAM = "messageRegexp";
     private static final String EXCEPTION_PARAM = "exception";
     private static final String CAUSE_NESTING_LEVEL_PARAM = "causeNestingLevel";
     
@@ -43,6 +45,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
             throws TemplateException, IOException {
         String message = null;
+        Pattern messageRegexp = null;
         String exception = null;
         int causeNestingLevel = 0;
         for (Object paramEnt  : params.entrySet()) {
@@ -50,6 +53,10 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
             String paramName = param.getKey();
             if (paramName.equals(MESSAGE_PARAM)) {
                 message = getAsString(param.getValue(), MESSAGE_PARAM, env);
+            } else if (paramName.equals(MESSAGE_REGEXP_PARAM)) {
+                messageRegexp = Pattern.compile(
+                        getAsString(param.getValue(), MESSAGE_REGEXP_PARAM, env),
+                        Pattern.CASE_INSENSITIVE);
             } else if (paramName.equals(EXCEPTION_PARAM)) {
                 exception = getAsString(param.getValue(), EXCEPTION_PARAM, env);
             } else if (paramName.equals(CAUSE_NESTING_LEVEL_PARAM)) {
@@ -79,18 +86,29 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                     causeNestingLevelCountDown--;
                 }
                 
-                if (message != null) {
+                if (message != null || messageRegexp != null) {
                     if (e.getMessage() == null) {
                         throw new AssertationFailedInTemplateException(
                                 "Failure is not like expected. The exception message was null, "
                                 + "and thus it doesn't contain:\n" + StringUtil.jQuote(message) + ".",
                                 env);
                     }
-                    if (e.getMessage().toLowerCase().indexOf(message.toLowerCase()) == -1) {
-                        throw new AssertationFailedInTemplateException(
-                                "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(e.getMessage())
-                                + "\ndoesn't contain:\n" + StringUtil.jQuote(message) + ".",
-                                env);
+                    if (message != null) {
+                        if (e.getMessage().toLowerCase().indexOf(message.toLowerCase()) == -1) {
+                            throw new AssertationFailedInTemplateException(
+                                    "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(e.getMessage())
+                                    + "\ndoesn't contain:\n" + StringUtil.jQuote(message) + ".",
+                                    env);
+                        }
+                    }
+                    if (messageRegexp != null) {
+                        if (!messageRegexp.matcher(e.getMessage()).find()) {
+                            throw new AssertationFailedInTemplateException(
+                                    "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(e.getMessage())
+                                    + "\ndoesn't match this regexp:\n" + StringUtil.jQuote(messageRegexp.toString())
+                                    + ".",
+                                    env);
+                        }
                     }
                 }
                 if (exception != null && e.getClass().getName().indexOf(exception) == -1) {

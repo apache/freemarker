@@ -33,12 +33,12 @@ import freemarker.template.TemplateSequenceModel;
  */
 final class DynamicKeyName extends Expression {
 
-    private final Expression nameExpression;
+    private final Expression keyExpression;
     private final Expression target;
 
-    DynamicKeyName(Expression target, Expression nameExpression) {
+    DynamicKeyName(Expression target, Expression keyExpression) {
         this.target = target; 
-        this.nameExpression = nameExpression;
+        this.keyExpression = keyExpression;
     }
 
     TemplateModel _eval(Environment env) throws TemplateException
@@ -51,27 +51,27 @@ final class DynamicKeyName extends Expression {
                 throw InvalidReferenceException.getInstance(target, env);
             }
         }
-        if (nameExpression instanceof Range) {
-            return dealWithRangeKey(targetModel, (Range) nameExpression, env);
+        if (keyExpression instanceof Range) {
+            return dealWithRangeKey(targetModel, (Range) keyExpression, env);
         }
-        TemplateModel keyModel = nameExpression.eval(env);
+        TemplateModel keyModel = keyExpression.eval(env);
         if(keyModel == null) {
             if(env.isClassicCompatible()) {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                nameExpression.assertNonNull(keyModel, env);
+                keyExpression.assertNonNull(keyModel, env);
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
-            int index = nameExpression.modelToNumber(keyModel, env).intValue();
+            int index = keyExpression.modelToNumber(keyModel, env).intValue();
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
+            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, keyExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
-        throw new UnexpectedTypeException(nameExpression, keyModel, "number, range, or string",
+        throw new UnexpectedTypeException(keyExpression, keyModel, "number, range, or string",
                 new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, Range.class }, env);
     }
 
@@ -133,10 +133,15 @@ final class DynamicKeyName extends Expression {
         throws TemplateException
     {
         int start = range.lho.evalToNumber(env).intValue();
-        int end = 0;
         boolean hasRhs = range.hasRho();
+        int end;
         if (hasRhs) {
             end = range.rho.evalToNumber(env).intValue();
+            if (range.exclusiveEnd) {
+                
+            }            
+        } else {
+            end = 0;
         }
         if (targetModel instanceof TemplateSequenceModel) {
             TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
@@ -197,7 +202,7 @@ final class DynamicKeyName extends Expression {
         if (start > targetStr.length()) {
             throw new _MiscTemplateException(range.lho, new Object[] {
                     "Left side of range out of bounds, is: ", new Integer(start),
-                    "\nbut the string has ", new Integer(targetStr.length()), " elements." });
+                    "\nbut the string has ", new Integer(targetStr.length()), " characters." });
         }
         if (end >= targetStr.length()) {
             throw new _MiscTemplateException(range.rho, new Object[] {
@@ -214,7 +219,7 @@ final class DynamicKeyName extends Expression {
     public String getCanonicalForm() {
         return target.getCanonicalForm() 
                + "[" 
-               + nameExpression.getCanonicalForm() 
+               + keyExpression.getCanonicalForm() 
                + "]";
     }
     
@@ -223,7 +228,7 @@ final class DynamicKeyName extends Expression {
     }
     
     boolean isLiteral() {
-        return constantValue != null || (target.isLiteral() && nameExpression.isLiteral());
+        return constantValue != null || (target.isLiteral() && keyExpression.isLiteral());
     }
     
     int getParameterCount() {
@@ -231,7 +236,7 @@ final class DynamicKeyName extends Expression {
     }
 
     Object getParameterValue(int idx) {
-        return idx == 0 ? target : nameExpression;
+        return idx == 0 ? target : keyExpression;
     }
 
     ParameterRole getParameterRole(int idx) {
@@ -242,6 +247,6 @@ final class DynamicKeyName extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new DynamicKeyName(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-    	        nameExpression.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    	        keyExpression.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

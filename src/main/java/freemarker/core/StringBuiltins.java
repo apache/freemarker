@@ -209,20 +209,84 @@ class StringBuiltins {
     }
     
     static class substringBI extends StringBuiltIn {
-    	TemplateModel calculateResult(final String s, final Environment env) throws TemplateException {
-    		return new TemplateMethodModelEx() {
-    			public Object exec(java.util.List args) throws TemplateModelException {
-    				int argCount = args.size();
-    				checkMethodArgCount(argCount, 1, 2);
-    				int left = getNumberMethodArg(args, 0).intValue();
-                    if (argCount > 1) {
-                        return new SimpleScalar(s.substring(left, getNumberMethodArg(args, 1).intValue()));  
-                    } else {
-                        return new SimpleScalar(s.substring(left));  
+        
+        private final boolean safe;
+        
+    	public substringBI(boolean safe) {
+            this.safe = safe;
+        }
+
+        TemplateModel calculateResult(final String s, final Environment env) throws TemplateException {
+            return new TemplateMethodModelEx() {
+                
+                public Object exec(java.util.List args) throws TemplateModelException {
+                    int argCount = args.size();
+                    checkMethodArgCount(argCount, 1, 2);
+                    
+                    int beginIdx = getNumberMethodArg(args, 0).intValue();
+                    
+                    final int len = s.length();
+                    
+                    if (beginIdx < 0) {
+                        if (safe) {
+                            beginIdx = 0;
+                        } else {
+                            throw newIndexLessThan0Exception(0, beginIdx);
+                        }
+                    } else if (beginIdx > len) {
+                        if (safe) {
+                            beginIdx = len;
+                        } else {
+                            throw newIndexGreaterThanLengthException(0, beginIdx, len);
+                        }
                     }
-    			}
-    		};
-    	}
+                    
+                    if (argCount > 1) {
+                        int endIdx = getNumberMethodArg(args, 1).intValue();
+                        if (endIdx < 0) {
+                            if (safe) {
+                                endIdx = 0;
+                            } else {
+                                throw newIndexLessThan0Exception(1, endIdx);
+                            }
+                        } else if (endIdx > len) {
+                            if (safe) {
+                                endIdx = len;
+                            } else {
+                                throw newIndexGreaterThanLengthException(1, endIdx, len);
+                            }
+                        }
+                        if (beginIdx > endIdx) {
+                            throw MessageUtil.newMethodArgsInvalidValueException(
+                                    "?" + key, new Object[] {
+                                            "The begin index argument, ", new Integer(beginIdx),
+                                            ", shouldn't be greater than the end index argument, ",
+                                            new Integer(endIdx), "." });                        }
+                        return new SimpleScalar(s.substring(beginIdx, endIdx));
+                    } else {
+                        return new SimpleScalar(s.substring(beginIdx));
+                    }
+                }
+
+                private TemplateModelException newIndexGreaterThanLengthException(
+                        int argIdx, int idx, final int len) throws TemplateModelException {
+                    return MessageUtil.newMethodArgInvalidValueException(
+                            "?" + key, argIdx, new Object[] {
+                                    "The index mustn't be greater than the length of the string, ",
+                                    new Integer(len),
+                                    ", but it was ", new Integer(idx), "." });
+                }
+
+                private TemplateModelException newIndexLessThan0Exception(
+                        int argIdx, int idx) throws TemplateModelException {
+                    return MessageUtil.newMethodArgInvalidValueException(
+                            "?" + key, argIdx, new Object[] {
+                                    "The index must be at least 0, but was ",
+                                    new Integer(idx), "." });
+                }
+                
+            };
+        }
     }
 
     static class lengthBI extends StringBuiltIn {
