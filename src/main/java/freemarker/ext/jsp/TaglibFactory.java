@@ -20,12 +20,15 @@ import java.beans.IntrospectionException;
 import java.io.ByteArrayInputStream;
 import java.io.FilterInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,6 +47,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import freemarker.core.BugException;
 import freemarker.core.Environment;
+import freemarker.ext.beans._MethodUtil;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.log.Logger;
@@ -455,18 +459,18 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     private static final class Taglib implements TemplateHashModel {
-        private final Map tags;
+        private final Map tagsAndFunctions;
 
         Taglib(ServletContext ctx, TldPath tldPath, String uri) throws Exception {
-            tags = loadTaglib(ctx, tldPath, uri);
+            tagsAndFunctions = loadTaglib(ctx, tldPath, uri);
         }
 
         public TemplateModel get(String key) {
-            return (TemplateModel)tags.get(key);
+            return (TemplateModel)tagsAndFunctions.get(key);
         }
 
         public boolean isEmpty() {
-            return tags.isEmpty();
+            return tagsAndFunctions.isEmpty();
         }
 
         private static final Map loadTaglib(ServletContext ctx, TldPath tldPath, String uri)
@@ -520,7 +524,7 @@ public class TaglibFactory implements TemplateHashModel {
                     "|   <listener-class>" + EventForwarding.class.getName() + "</listener-class>\n" +
                     "| </listener>");
             }
-            return tldParser.getTags();
+            return tldParser.getTagsAndFunctions();
         }
     }
 
@@ -554,24 +558,33 @@ public class TaglibFactory implements TemplateHashModel {
             "Can't resolve relative URI " + uri + 
             " as request URL information is unavailable.");
     }
-    
-    private static final class TldParser extends DefaultHandler {
-        private final Map tags = new HashMap();
+
+    static final class TldParser extends DefaultHandler {
+        private final Map tagsAndFunctions = new HashMap();
         private final List listeners = new ArrayList();
-        
+
         private Locator locator;
         private StringBuffer buf;
+
+        private Stack stack = new Stack();
+
         private String tagName;
         private String tagClassName;
 
-        Map getTags() {
-            return tags;
+        private String listenerClassName;
+
+        private String functionName;
+        private String functionClassName;
+        private String functionSignature;
+
+        Map getTagsAndFunctions() {
+            return tagsAndFunctions;
         }
 
         List getListeners() {
             return listeners;
         }
-                
+
         public void setDocumentLocator(Locator locator) {
             this.locator = locator;
         }
@@ -581,8 +594,13 @@ public class TaglibFactory implements TemplateHashModel {
             String localName,
             String qName,
             Attributes atts) {
-            if ("name".equals(qName) || "tagclass".equals(qName) || "tag-class".equals(qName) || "listener-class".equals(qName)) {
-                buf = new StringBuffer();
+            stack.push(qName);
+            if (stack.size() == 3) {
+                if ("name".equals(qName) || "tagclass".equals(qName) || "tag-class".equals(qName)
+                        || "listener-class".equals(qName) || "function-class".equals(qName)
+                        || "function-signature".equals(qName)) {
+                    buf = new StringBuffer();
+                }
             }
         }
 
@@ -594,56 +612,98 @@ public class TaglibFactory implements TemplateHashModel {
 
         public void endElement(String nsuri, String localName, String qName)
             throws SAXParseException {
-            if ("name".equals(qName)) {
-                if(tagName == null) {
-                    tagName = buf.toString().trim();
-                }
-                buf = null;
+            if(!stack.peek().equals(qName)) {
+                throw new SAXParseException("Invalid element nesting.", locator);
             }
-            else if ("tagclass".equals(qName) || "tag-class".equals(qName)) {
-                tagClassName = buf.toString().trim();
-                buf = null;
-            }
-            else if ("tag".equals(qName)) {
-                try {
-                    Class tagClass = ClassUtil.forName(tagClassName);
-                    TemplateModel impl;
-                    if(Tag.class.isAssignableFrom(tagClass)) {
-                        impl = new TagTransformModel(tagClass); 
+
+            if (stack.size() == 3) {
+                if ("name".equals(qName)) {
+                    if ("tag".equals(stack.get(1))) {
+                        tagName = buf.toString();
+                        buf = null;
                     }
-                    else {
-                        impl = new SimpleTagDirectiveModel(tagClass); 
+                    else if ("function".equals(stack.get(1))) {
+                        functionName = buf.toString();
+                        buf = null;
                     }
-                    tags.put(tagName, impl);
-                    tagName = null;
-                    tagClassName = null;
                 }
-                catch (IntrospectionException e) {
-                    throw new SAXParseException(
-                        "Can't introspect tag class " + tagClassName,
-                        locator,
-                        e);
+                else if ("tagclass".equals(qName) || "tag-class".equals(qName)) {
+                    tagClassName = buf.toString();
+                    buf = null;
                 }
-                catch (ClassNotFoundException e) {
-                    throw new SAXParseException(
-                        "Can't find tag class " + tagClassName,
-                        locator,
-                        e);
+                else if ("listener-class".equals(qName)) {
+                    listenerClassName = buf.toString();
+                    buf = null;
                 }
-            }
-            else if ("listener-class".equals(qName)) {
-                String listenerClass = buf.toString().trim();
-                buf = null;
-                try {
-                    listeners.add(ClassUtil.forName(listenerClass).newInstance());
+                else if ("function-class".equals(qName)) {
+                    functionClassName = buf.toString();
+                    buf = null;
                 }
-                catch(Exception e) {
-                    throw new SAXParseException(
-                        "Can't instantiate listener class " + listenerClass,
-                        locator,
-                        e);
+                else if ("function-signature".equals(qName)) {
+                    functionSignature = buf.toString();
+                    buf = null;
                 }
             }
+            else if (stack.size() == 2) {
+                if ("tag".equals(qName)) {
+                    try {
+                        Class tagClass = ClassUtil.forName(tagClassName);
+                        TemplateModel impl;
+                        if (Tag.class.isAssignableFrom(tagClass)) {
+                            impl = new TagTransformModel(tagClass); 
+                        }
+                        else {
+                            impl = new SimpleTagDirectiveModel(tagClass); 
+                        }
+                        tagsAndFunctions.put(tagName, impl);
+                        tagName = null;
+                        tagClassName = null;
+                    }
+                    catch (IntrospectionException e) {
+                        throw new SAXParseException(
+                            "Can't introspect tag class " + tagClassName,
+                            locator,
+                            e);
+                    }
+                    catch (ClassNotFoundException e) {
+                        throw new SAXParseException(
+                            "Can't find tag class " + tagClassName,
+                            locator,
+                            e);
+                    }
+                }
+                else if ("listener".equals(qName)) {
+                    try {
+                        listeners.add(ClassUtil.forName(listenerClassName).newInstance());
+                    }
+                    catch(Exception e) {
+                        throw new SAXParseException(
+                            "Can't instantiate listener class " + listenerClassName,
+                            locator,
+                            e);
+                    }
+                }
+                else if ("function".equals(qName)) {
+                    try {
+                        Class functionClass = ClassUtil.forName(functionClassName);
+                        Method functionMethod = _MethodUtil.getMethodByFunctionSignature(functionClass, functionSignature);
+                        int modifiers =  functionMethod.getModifiers ();
+                        if (!Modifier.isPublic (modifiers) || !Modifier.isStatic (modifiers)) {
+                            throw new IllegalArgumentException("The function method is non-public or non-static.");
+                        }
+                        TemplateModel impl = new JstlFunctionModel(functionClass, functionMethod);
+                        tagsAndFunctions.put(functionName, impl);
+                    }
+                    catch(Exception e) {
+                        throw new SAXParseException(
+                            "Can't find function method " + functionSignature + " from " + functionClassName,
+                            locator,
+                            e);
+                    }
+                }
+            }
+
+            stack.pop();
         }
     }
 
