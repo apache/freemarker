@@ -54,12 +54,20 @@ class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
     }
 
     public int size() {
-        // 0 bug emulated backward compatibility
+        // 0 bug emulated for backward compatibility
         return size != INFINITE ? size : 0;
     }
     
-    boolean hasRhs() {
-        return size != INFINITE;
+    boolean isRightUnbounded() {
+        return size == INFINITE;
+    }
+    
+    int getBegining() {
+        return begin;
+    }
+
+    int getStep() {
+        return step;
     }
     
 }

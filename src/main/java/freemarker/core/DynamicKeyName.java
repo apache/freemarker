@@ -17,6 +17,7 @@
 package freemarker.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -28,8 +29,8 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * A unary operator that uses the string value of an expression as a hash key.
- * It associates with the <tt>Identifier</tt> or <tt>Dot</tt> to its left.
+ * {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number or a range,
+ * and {@code target} can be a hash or a sequence.
  */
 final class DynamicKeyName extends Expression {
 
@@ -51,11 +52,9 @@ final class DynamicKeyName extends Expression {
                 throw InvalidReferenceException.getInstance(target, env);
             }
         }
-        if (keyExpression instanceof Range) {
-            return dealWithRangeKey(targetModel, (Range) keyExpression, env);
-        }
+        
         TemplateModel keyModel = keyExpression.eval(env);
-        if(keyModel == null) {
+        if (keyModel == null) {
             if(env.isClassicCompatible()) {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
@@ -70,6 +69,9 @@ final class DynamicKeyName extends Expression {
         if (keyModel instanceof TemplateScalarModel) {
             String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, keyExpression, env);
             return dealWithStringKey(targetModel, key, env);
+        }
+        if (keyModel instanceof NumericalRange) {
+            return dealWithRangeKey(targetModel, (NumericalRange) keyModel, env);
         }
         throw new UnexpectedTypeException(keyExpression, keyModel, "number, range, or string",
                 new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, Range.class }, env);
@@ -127,92 +129,104 @@ final class DynamicKeyName extends Expression {
         throw new NonHashException(target, targetModel, env);
     }
 
-    private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
-                                           Range range, 
-                                           Environment env)
-        throws TemplateException
-    {
-        int start = range.lho.evalToNumber(env).intValue();
-        boolean hasRhs = range.hasRho();
-        int end;
-        if (hasRhs) {
-            end = range.rho.evalToNumber(env).intValue();
-            if (range.exclusiveEnd) {
-                
-            }            
-        } else {
-            end = 0;
-        }
+    private TemplateModel dealWithRangeKey(TemplateModel targetModel, NumericalRange range, Environment env) throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
+        final TemplateSequenceModel targetSeq;
+        final String targetStr;
         if (targetModel instanceof TemplateSequenceModel) {
-            TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
-            if (!hasRhs) end = sequence.size() -1;
-            if (start < 0) {
-                throw new _MiscTemplateException(range.lho, new Object[] {
-                        "Negative starting index ", new Integer(start), " for slicing range." });
+            targetSeq = (TemplateSequenceModel) targetModel;
+            targetStr = null;
+        } else {
+            targetSeq = null;
+            try {
+                targetStr = target.evalAndCoerceToString(env);
+            } catch(NonStringException e) {
+                throw new UnexpectedTypeException(
+                        target, target.eval(env),
+                        "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
+                        NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
             }
-            if (end < 0) {
-                throw new _MiscTemplateException(range.rho, new Object[] {
-                        "Negative ending index ", new Integer(end), " for slicing range." });
+        }
+        
+        final int size = range.size();
+        final boolean rightUnbounded = range.isRightUnbounded();
+        
+        // Non-half empty ranges are accepted even if the begin index is out of bounds. That's because a such range
+        // produces an empty sequence, which thus doesn't contain any illegal indexes.
+        if (!rightUnbounded && size == 0) {
+            return targetSeq != null ? new SimpleSequence(Collections.EMPTY_LIST)
+                    : TemplateScalarModel.EMPTY_STRING;
+        }
+
+        final int firstIdx = range.getBegining();
+        if (firstIdx < 0) {
+            throw new _MiscTemplateException(keyExpression, new Object[] {
+                    "Negative range start index (", new Integer(firstIdx),
+                    ") isn't allowed for a range used for slicing." });
+        }
+        
+        final int targetSize = targetStr != null ? targetStr.length() : targetSeq.size();
+        
+        // Right-unbounded ranges can start 1 after the last element of the target, because they are like ranges with
+        // exclusive end index of targetSize. Thence a such range is just an empty list of indexes, and thus isn't OOB.
+        // Right-bounded ranges at this point aren't empty, so the right index can't reach targetSize. 
+        if (rightUnbounded ? firstIdx > targetSize : firstIdx >= targetSize) {
+            throw new _MiscTemplateException(keyExpression, new Object[] {
+                    "Range start index ", new Integer(firstIdx), " is out of bounds, because the sliced ",
+                    (targetStr != null ? "string" : "sequence"),
+                    " has only ", new Integer(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
+                    ". ", "(Note that indices are 0-based)." });
+        }
+        
+        final int lastIdx;
+        final int copiedSize;
+        if (!rightUnbounded) {
+            lastIdx = firstIdx + (size - 1) * range.getStep();
+            if (lastIdx < 0) {
+                throw new _MiscTemplateException(keyExpression, new Object[] {
+                        "Negative range end index (", new Integer(lastIdx),
+                        ") isn't allowed for a range used for slicing." });
             }
-            if (start >= sequence.size()) {
-                throw new _MiscTemplateException(range.lho, new Object[] {
-                        "Left side index of range out of bounds, is ", new Integer(start),
-                        ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
-                        "(Note that indices are 0 based, and ranges are inclusive)." });
+            if (lastIdx >= targetSize) {
+                throw new _MiscTemplateException(keyExpression, new Object[] {
+                        "Range end index ", new Integer(lastIdx), " is out of bounds, because the sliced ",
+                        (targetStr != null ? "string" : "sequence"),
+                        " has only ", new Integer(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
+                        ". (Note that indices are 0-based)." });
             }
-            if (end >= sequence.size()) {
-                throw new _MiscTemplateException(range.rho, new Object[] {
-                        "Right side index of range out of bounds, is ", new Integer(end),
-                        ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
-                        "(Note that indices are 0 based, and ranges are inclusive)." });
+            
+            copiedSize = size;
+        } else {
+            // Note: Here we assume that abs(step) is 1.
+            lastIdx = targetSize - 1;
+            copiedSize = targetSize - firstIdx;
+        }
+        
+        if (targetSeq != null) {
+            if (copiedSize == 0) {
+                return new SimpleSequence(Collections.EMPTY_LIST); 
             }
-            ArrayList list = new ArrayList(1+Math.abs(start-end));
-            if (start>end) {
-                for (int i = start; i>=end; i--) {
-                    list.add(sequence.get(i));
-                }
-            }
-            else {
-                for (int i = start; i<=end; i++) {
-                    list.add(sequence.get(i));
-                }
+            
+            ArrayList/*<TemplateModel>*/ list = new ArrayList(copiedSize);
+            int srcIdx = firstIdx;
+            while (true) {
+                list.add(targetSeq.get(srcIdx));
+                if (srcIdx == lastIdx) break;
+                srcIdx += range.getStep();
             }
             return new SimpleSequence(list);
-        }
-        
-        final String targetStr;
-        try {
-            targetStr = target.evalAndCoerceToString(env);
-        } catch(NonStringException e) {
-            throw new UnexpectedTypeException(
-                    target, target.eval(env),
-                    "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
-                    NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
-        }
-        
-        if (!hasRhs) end = targetStr.length() -1;
-        if (start < 0) {
-            throw new _MiscTemplateException(range.lho, new Object[] {
-                    "Negative starting index ", new Integer(start), " for slicing range." });
-        }
-        if (end < 0) {
-            throw new _MiscTemplateException(range.rho, new Object[] {
-                    "Negative ending index ", new Integer(end), " for slicing range." });
-        }
-        if (start > targetStr.length()) {
-            throw new _MiscTemplateException(range.lho, new Object[] {
-                    "Left side of range out of bounds, is: ", new Integer(start),
-                    "\nbut the string has ", new Integer(targetStr.length()), " characters." });
-        }
-        if (end >= targetStr.length()) {
-            throw new _MiscTemplateException(range.rho, new Object[] {
-                    "Right side of range out of bounds, is: ", new Integer(end),
-                    "\nbut the string is only ", new Integer(targetStr.length()), " characters long." });
-        }
-        try {
-            return new SimpleScalar(targetStr.substring(start, end+1));
-        } catch (RuntimeException re) {
-            throw new _MiscTemplateException(re, new Object[] { "Unexpected exception: ", re });
+        } else {
+            if (copiedSize == 0) {
+                return TemplateScalarModel.EMPTY_STRING;
+            }
+            
+            // The "+ 1" is for emulating the legacy bug, where "foo"[1, 0] gives "".  
+            // [2.4] Fix this in FTL 2.4 non-tr: string reversing should work, like "foo"[1, 0] should give "of".
+            if (lastIdx + 1 < firstIdx) {
+                throw new _MiscTemplateException(
+                        keyExpression, "Decreasing ranges aren't allowed for slicing strings.");
+            }
+            
+            return new SimpleScalar(targetStr.substring(firstIdx, lastIdx + 1));
         }
     }
 

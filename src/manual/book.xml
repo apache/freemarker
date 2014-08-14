@@ -20953,12 +20953,36 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>New operator for creating ranges with exclusive end:
-              <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
-              (also can be written as
-              <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
-              <link
-              linkend="dgui_template_exp_direct_seuqence">More...</link></para>
+              <para>Improved ranges:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>New operator for creating ranges with exclusive end:
+                  <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
+                  (also can be written as
+                  <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
+                  <link
+                  linkend="dgui_template_exp_direct_seuqence">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Square bracket now accepts range values from any
+                  source, like <literal>&lt;#assign
+                  r=1..3&gt;${'foobar'[r]}</literal> will print
+                  <literal>"oob"</literal>. Earlier it has only supported
+                  ranges that were specified inside the square brackets, like
+                  <literal>'foobar'[1..3]</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When slicing a sequence with a right-unbounded range,
+                  it's now allowed to have a range start index that's one
+                  higher than the last index of the sliced sequence. For
+                  example, <literal>['x', 'y'][2..]</literal> is not an error
+                  anymore, but an empty sequence. (Of course, <literal>['x',
+                  'y'][3..]</literal> is still an error.)</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -21050,6 +21074,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Bug fixed: <literal>?substring</literal> has thrown
                   low level
+                  <literal>java.lang.IndexOutOfBoundsException</literal>-s
+                  instead of more descriptive
+                  <literal>TemplateModelException</literal>-s with FTL stack
+                  trace.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Slicing with ranges sometimes thrown low
+                  level
                   <literal>java.lang.IndexOutOfBoundsException</literal>-s
                   instead of more descriptive
                   <literal>TemplateModelException</literal>-s with FTL stack
@@ -21176,21 +21209,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (indirectly) required by the standard, and it's also how the
                   default Sun/Oracle Java XML Schema date/time/dateTime parser
                   works.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Bugs fixed relating ranges (like
-              <literal>0..3</literal>):</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para/>
-                </listitem>
-
-                <listitem>
-                  <para/>
                 </listitem>
               </itemizedlist>
             </listitem>
