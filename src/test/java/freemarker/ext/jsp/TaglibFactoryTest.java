@@ -19,8 +19,6 @@ package freemarker.ext.jsp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import freemarker.template.SimpleScalar;
-import freemarker.template.TemplateModel;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -29,19 +27,36 @@ import java.util.Map;
 
 import javax.xml.parsers.SAXParserFactory;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.Version;
+
 @RunWith(JUnit4.class)
 public class TaglibFactoryTest {
+
+    private BeansWrapper wrapper;
+
+    @Before
+    public void before() throws Exception {
+        BeansWrapperBuilder builder = new BeansWrapperBuilder(new Version("2.3"));
+        wrapper = builder.getResult();
+    }
 
     @Test
     public void testTldParser() throws Exception {
         URL url = getClass().getResource("test.tld");
-        TaglibFactory.TldParser tldParser = new TaglibFactory.TldParser();
+        TaglibFactory.TldParser tldParser = new TaglibFactory.TldParser(wrapper);
         InputSource is = new InputSource();
         InputStream input = url.openStream();
         is.setByteStream(input);
@@ -66,12 +81,14 @@ public class TaglibFactoryTest {
         tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag2");
         assertNotNull(tag);
 
-        JstlFunctionModel function = (JstlFunctionModel) tagsAndFunctions.get("toUpperCase");
+        TemplateMethodModelEx function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase");
         assertNotNull(function);
-        assertEquals("ABC", function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") })));
-        function = (JstlFunctionModel) tagsAndFunctions.get("toUpperCase2");
+        TemplateScalarModel result = (TemplateScalarModel) function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") }));
+        assertEquals("ABC", result.getAsString());
+        function = (TemplateMethodModelEx) tagsAndFunctions.get("toUpperCase2");
         assertNotNull(function);
-        assertEquals("ABC", function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") })));
+        result = (TemplateScalarModel) function.exec(Arrays.asList(new TemplateModel [] { new SimpleScalar("abc") }));
+        assertEquals("ABC", result.getAsString());
     }
 
 }

@@ -47,10 +47,13 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import freemarker.core.BugException;
 import freemarker.core.Environment;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.SimpleMethodModel;
 import freemarker.ext.beans._MethodUtil;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.log.Logger;
+import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -81,6 +84,7 @@ public class TaglibFactory implements TemplateHashModel {
     private static final int NOROOT_REL_URI = 2;
 
     private final ServletContext ctx;
+    private final ObjectWrapper wrapper;
     private final Map taglibs = new HashMap();
     private final Map locations = new HashMap();
     private int lookupPhase = LOOKUP_NONE;
@@ -90,9 +94,26 @@ public class TaglibFactory implements TemplateHashModel {
      * for the web application represented by the passed servlet context.
      * @param ctx the servlet context whose JSP tag libraries will this factory
      * load.
+     * @deprecated Use {@link TaglibFactory#TaglibFactory(ServletContext, ObjectWrapper)}
+     * instead.
      */
     public TaglibFactory(ServletContext ctx) {
+        this(ctx, null);
+    }
+
+    /**
+     * Creates a new JSP taglib factory that will be used to load JSP tag libaries
+     * and functions for the web application represented by the passed servlet
+     * context, using the object wrapper when invoking JSTL functions.
+     * @param ctx the servlet context whose JSP tag libraries will this factory
+     * load.
+     * @param wrapper the object wrapper which can be used to unwrap template
+     * models to Java objects (if it supports unwrapping). For example, when
+     * invoking a JSTL function, Template models should be unwrapped.
+     */
+    public TaglibFactory(ServletContext ctx, ObjectWrapper wrapper) {
         this.ctx = ctx;
+        this.wrapper = wrapper;
     }
 
     /**
@@ -202,7 +223,7 @@ public class TaglibFactory implements TemplateHashModel {
             logger.debug("Loading taglib " + StringUtil.jQuoteNoXSS(uri) + 
                 " from location " + StringUtil.jQuoteNoXSS(tldPath));
         }
-        final Taglib taglib = new Taglib(ctx, tldPath, uri);
+        final Taglib taglib = new Taglib(ctx, tldPath, uri, wrapper);
         taglibs.put(uri, taglib);
         locations.remove(uri);
         return taglib;
@@ -461,8 +482,8 @@ public class TaglibFactory implements TemplateHashModel {
     private static final class Taglib implements TemplateHashModel {
         private final Map tagsAndFunctions;
 
-        Taglib(ServletContext ctx, TldPath tldPath, String uri) throws Exception {
-            tagsAndFunctions = loadTaglib(ctx, tldPath, uri);
+        Taglib(ServletContext ctx, TldPath tldPath, String uri, ObjectWrapper wrapper) throws Exception {
+            tagsAndFunctions = loadTaglib(ctx, tldPath, uri, wrapper);
         }
 
         public TemplateModel get(String key) {
@@ -473,10 +494,10 @@ public class TaglibFactory implements TemplateHashModel {
             return tagsAndFunctions.isEmpty();
         }
 
-        private static final Map loadTaglib(ServletContext ctx, TldPath tldPath, String uri)
+        private static final Map loadTaglib(ServletContext ctx, TldPath tldPath, String uri, ObjectWrapper wrapper)
         throws Exception
         {
-            final TldParser tldParser = new TldParser();
+            final TldParser tldParser = new TldParser(wrapper);
             final String filePath = tldPath.filePath;
             final InputStream in = ctx.getResourceAsStream(filePath);
             if(in == null) {
@@ -560,6 +581,8 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     static final class TldParser extends DefaultHandler {
+        private final BeansWrapper beansWrapper;
+
         private final Map tagsAndFunctions = new HashMap();
         private final List listeners = new ArrayList();
 
@@ -576,6 +599,18 @@ public class TaglibFactory implements TemplateHashModel {
         private String functionName;
         private String functionClassName;
         private String functionSignature;
+
+        TldParser(ObjectWrapper wrapper) {
+            if (wrapper instanceof BeansWrapper) {
+                beansWrapper = (BeansWrapper) wrapper;
+            }
+            else {
+                beansWrapper = null;
+                if (logger.isWarnEnabled()) {
+                    logger.warn("JSTL functions can't be loaded because the wrapper doesn't support unwrapping.");
+                }
+            }
+        }
 
         Map getTagsAndFunctions() {
             return tagsAndFunctions;
@@ -691,7 +726,7 @@ public class TaglibFactory implements TemplateHashModel {
                         if (!Modifier.isPublic (modifiers) || !Modifier.isStatic (modifiers)) {
                             throw new IllegalArgumentException("The function method is non-public or non-static.");
                         }
-                        TemplateModel impl = new JstlFunctionModel(functionClass, functionMethod);
+                        TemplateModel impl = new SimpleMethodModel(functionClass, functionMethod, functionMethod.getParameterTypes(), beansWrapper);
                         tagsAndFunctions.put(functionName, impl);
                     }
                     catch(Exception e) {
