@@ -32,8 +32,33 @@
 <@assertEquals actual=join(1..!-1, ' ') expected="1 0" />
 <@assertEquals actual=join(1..!-2, ' ') expected="1 0 -1" />
 
-<@assertEquals actual='abc'[0..1] expected="ab" />
+<@assertEquals actual=1 expected=(0..0)?size />
+<@assertEquals actual=1 expected=(1..1)?size />
+<@assertEquals actual=1 expected=(2..2)?size />
+<@assertEquals actual=2 expected=(0..1)?size />
+<@assertEquals actual=2 expected=(1..2)?size />
+<@assertEquals actual=2 expected=(2..3)?size />
+<@assertEquals actual=3 expected=(2..4)?size />
+<@assertEquals actual=2 expected=(1..0)?size />
+<@assertEquals actual=2 expected=(2..1)?size />
+<@assertEquals actual=2 expected=(3..2)?size />
+<@assertEquals actual=3 expected=(4..2)?size />
 
+<@assertEquals actual=0 expected=(0..<0)?size />
+<@assertEquals actual=0 expected=(1..<1)?size />
+<@assertEquals actual=0 expected=(2..<2)?size />
+<@assertEquals actual=1 expected=(0..<1)?size />
+<@assertEquals actual=1 expected=(1..<2)?size />
+<@assertEquals actual=1 expected=(2..<3)?size />
+<@assertEquals actual=2 expected=(2..<4)?size />
+<@assertEquals actual=1 expected=(1..<0)?size />
+<@assertEquals actual=1 expected=(2..<1)?size />
+<@assertEquals actual=1 expected=(3..<2)?size />
+<@assertEquals actual=2 expected=(4..<2)?size />
+
+<#-- Legacy quirk: right-unbounded ranges are apparently empty: -->
+<@assertEquals actual=0 expected=(4..)?size />
+<@assertEquals actual=join(1.., ' ') expected="" />
 
 <#--------------------->
 <#-- String slicing: -->
@@ -83,6 +108,14 @@
 
 <#assign r = 1..2>
 <@assertEquals actual=s[r] expected="bc" />
+<#assign r = 2..1>
+<@assertEquals actual=s[r] expected="" />
+<#assign r = 1..<2>
+<@assertEquals actual=s[r] expected="b" />
+<#assign r = 2..<4>
+<@assertEquals actual=s[r] expected="cd" />
+<#assign r = 2..>
+<@assertEquals actual=s[r] expected="cd" />
 
 <#----------------------->
 <#-- Sequence slicing: -->
@@ -112,6 +145,17 @@
 <@assertEquals actual=join(s[2..0]) expected="cba" />
 <@assertEquals actual=join(s[5..<5]) expected="" />
 <@assertEquals actual=join(s[-5..<-5]) expected="" />
+
+<#assign r = 1..2>
+<@assertEquals actual=join(s[r]) expected="bc" />
+<#assign r = 2..0>
+<@assertEquals actual=join(s[r]) expected="cba" />
+<#assign r = 1..<2>
+<@assertEquals actual=join(s[r]) expected="b" />
+<#assign r = 2..<0>
+<@assertEquals actual=join(s[r]) expected="cb" />
+<#assign r = 2..>
+<@assertEquals actual=join(s[r]) expected="cd" />
 
 <@assertFails message="5 is out of bounds">
   <#assign _ = s[5..] />
