@@ -46,6 +46,7 @@
    </testcase>
    <testcase name="comment" />
    <testcase name="comparisons" />
+   <testcase name="compress" />
    <testcase name="dateformat-java" />
    <testcase name="dateformat-iso-like" nooutput="true" />
    <testcase name="dateformat-iso-bi" nooutput="true" />

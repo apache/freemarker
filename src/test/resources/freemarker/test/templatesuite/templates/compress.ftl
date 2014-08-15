@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<#assign utility= {utility : "freemarker.template.utility.StandardCompress"?new()>
+<#assign utility={'standardCompress': "freemarker.template.utility.StandardCompress"?new()}>
 <p>A simple test follows:</p>
 
 <p>${message}</p>
