@@ -27,6 +27,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.Constants;
 
 /**
  * {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number or a range,
@@ -70,8 +71,8 @@ final class DynamicKeyName extends Expression {
             String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, keyExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
-        if (keyModel instanceof NumericalRange) {
-            return dealWithRangeKey(targetModel, (NumericalRange) keyModel, env);
+        if (keyModel instanceof RangeModel) {
+            return dealWithRangeKey(targetModel, (RangeModel) keyModel, env);
         }
         throw new UnexpectedTypeException(keyExpression, keyModel, "number, range, or string",
                 new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, Range.class }, env);
@@ -129,7 +130,7 @@ final class DynamicKeyName extends Expression {
         throw new NonHashException(target, targetModel, env);
     }
 
-    private TemplateModel dealWithRangeKey(TemplateModel targetModel, NumericalRange range, Environment env) throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
+    private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env) throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
         final TemplateSequenceModel targetSeq;
         final String targetStr;
         if (targetModel instanceof TemplateSequenceModel) {
@@ -153,8 +154,7 @@ final class DynamicKeyName extends Expression {
         // Non-half empty ranges are accepted even if the begin index is out of bounds. That's because a such range
         // produces an empty sequence, which thus doesn't contain any illegal indexes.
         if (!rightUnbounded && size == 0) {
-            return targetSeq != null ? new SimpleSequence(Collections.EMPTY_LIST)
-                    : TemplateScalarModel.EMPTY_STRING;
+            return emptySequence(targetSeq);
         }
 
         final int firstIdx = range.getBegining();
@@ -177,10 +177,12 @@ final class DynamicKeyName extends Expression {
                     ". ", "(Note that indices are 0-based)." });
         }
         
+        final int step = range.getStep();
+        
         final int lastIdx;
-        final int copiedSize;
+        final int resultSize;
         if (!rightUnbounded) {
-            lastIdx = firstIdx + (size - 1) * range.getStep();
+            lastIdx = firstIdx + (size - 1) * step;
             if (lastIdx < 0) {
                 throw new _MiscTemplateException(keyExpression, new Object[] {
                         "Negative range end index (", new Integer(lastIdx),
@@ -194,40 +196,52 @@ final class DynamicKeyName extends Expression {
                         ". (Note that indices are 0-based)." });
             }
             
-            copiedSize = size;
+            resultSize = size;
         } else {
             // Note: Here we assume that abs(step) is 1.
             lastIdx = targetSize - 1;
-            copiedSize = targetSize - firstIdx;
+            resultSize = targetSize - firstIdx;
         }
         
         if (targetSeq != null) {
-            if (copiedSize == 0) {
-                return new SimpleSequence(Collections.EMPTY_LIST); 
+            if (resultSize == 0) {
+                return emptySequence(targetSeq);
             }
             
-            ArrayList/*<TemplateModel>*/ list = new ArrayList(copiedSize);
+            ArrayList/*<TemplateModel>*/ list = new ArrayList(resultSize);
             int srcIdx = firstIdx;
             while (true) {
                 list.add(targetSeq.get(srcIdx));
                 if (srcIdx == lastIdx) break;
-                srcIdx += range.getStep();
+                srcIdx += step;
             }
             return new SimpleSequence(list);
         } else {
-            if (copiedSize == 0) {
+            if (resultSize == 0) {
                 return TemplateScalarModel.EMPTY_STRING;
             }
             
-            // The "+ 1" is for emulating the legacy bug, where "foo"[1, 0] gives "".  
-            // [2.4] Fix this in FTL 2.4 non-tr: string reversing should work, like "foo"[1, 0] should give "of".
+            // The "+ 1" is for emulating the legacy bug, where "foo"[1, 0] gives "" instead of an error.  
+            // Fix this in FTL [2.4]
             if (lastIdx + 1 < firstIdx) {
                 throw new _MiscTemplateException(
-                        keyExpression, "Decreasing ranges aren't allowed for slicing strings.");
+                        keyExpression, new Object[] {
+                            "Decreasing ranges aren't allowed for slicing strings (as it would give reversed "
+                            + "text). The indexes range was: first = ",
+                            new Integer(firstIdx), ", last = ", new Integer(lastIdx)
+                        });
             }
             
             return new SimpleScalar(targetStr.substring(firstIdx, lastIdx + 1));
         }
+    }
+
+    private TemplateModel emptySequence(final TemplateSequenceModel targetSeq) {
+        return targetSeq != null
+                ? (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() < 2003021
+                        ? new SimpleSequence(Collections.EMPTY_LIST)
+                        : Constants.EMPTY_SEQUENCE)
+                : TemplateScalarModel.EMPTY_STRING;
     }
 
     public String getCanonicalForm() {

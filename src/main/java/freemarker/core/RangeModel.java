@@ -22,10 +22,10 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * A class that represents a range between two integers, or an integer and infinity.
+ * A range between two integers, or an integer and infinity.
  * Inclusive or exclusive end. Can be ascending or descending. 
  */
-class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
+class RangeModel implements TemplateSequenceModel, java.io.Serializable {
 
     private static final int INFINITE = -1;
     private final int begin, step, size;
@@ -33,13 +33,13 @@ class NumericalRange implements TemplateSequenceModel, java.io.Serializable {
     /**
      * Constructor for half-range.
      */
-    public NumericalRange(int begin) {
+    public RangeModel(int begin) {
         this.begin = begin;
         this.step = 1;
         this.size = INFINITE;
     }
 
-    public NumericalRange(int begin, int end, boolean exclusiveEnd) {
+    public RangeModel(int begin, int end, boolean exclusiveEnd) {
         this.begin = begin;
         step = begin <= end ? 1 : -1;
         size = Math.abs(end - begin) + (exclusiveEnd ? 0 : 1);

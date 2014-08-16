@@ -58,6 +58,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.Constants;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.NormalizeNewlines;
 import freemarker.template.utility.NullArgumentException;
@@ -288,6 +289,11 @@ public class Configuration extends Configurable implements Cloneable {
      *         Luckily, the old default almost never looked for the templates at the right place
      *         anyway, so pretty much all applications had to set the {@code template_loader} setting, so it's unlikely
      *         that changing the default breaks your application.
+     *       </li>
+     *       <li><p>
+     *          Empty ranges return {@link Constants#EMPTY_SEQUENCE} instead of an empty {@link SimpleSequence}. This
+     *          is in theory backward compatible, as the API only promises to give something that implements
+     *          {@link TemplateSequenceModel}.
      *       </li>
      *     </ul>
      *   </li>

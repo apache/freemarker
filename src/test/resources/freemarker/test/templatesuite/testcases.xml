@@ -98,6 +98,9 @@
    </testcase>
    <testcase name="precedence"/>
    <testcase name="range" nooutput="true" />
+   <testcase name="range-ici-2.3.21" template="range.ftl" nooutput="true">
+   	  <config incompatible_improvements="2.3.21"/>
+   </testcase>
    <testcase name="recover" />
    <testcase name="root" />
    <testcase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">

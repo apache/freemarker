@@ -21968,6 +21968,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Various smaller improvements in configuration setting
               errors messages.</para>
             </listitem>
+
+            <listitem>
+              <para>With incompatible improvements 2.3.21 only: Empty ranges
+              return <literal>Constants.EMPTY_SEQUENCE</literal> instead of an
+              empty <literal>SimpleSequence</literal>. This is in theory
+              backward compatible, as the API only promises to give something
+              that implements <literal>TemplateSequenceModel</literal>.</para>
+            </listitem>
           </itemizedlist>
         </section>
 

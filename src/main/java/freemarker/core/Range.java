@@ -44,15 +44,15 @@ final class Range extends Expression {
         int begin = lho.evalToNumber(env).intValue();
         if (rho != null) {
             int end = rho.evalToNumber(env).intValue();
-            return new NumericalRange(begin, end, exclusiveEnd);
+            return new RangeModel(begin, end, exclusiveEnd);
         } else {
-            return new NumericalRange(begin);
+            return new RangeModel(begin);
         }
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean evalToBoolean(Environment env) throws TemplateException {
-        throw new NonBooleanException(this, new NumericalRange(0, 0, exclusiveEnd), env);
+        throw new NonBooleanException(this, new RangeModel(0, 0, exclusiveEnd), env);
     }
 
     public String getCanonicalForm() {

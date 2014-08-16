@@ -143,6 +143,14 @@
 <@assertEquals actual=join(s[1..0]) expected="ba" />
 <@assertEquals actual=join(s[2..1]) expected="cb" />
 <@assertEquals actual=join(s[2..0]) expected="cba" />
+<@assertEquals actual=join(s[2..<0]) expected="cb" />
+<@assertEquals actual=join(s[1..<0]) expected="b" />
+<@assertEquals actual=join(s[0..<0]) expected="" />
+<@assertEquals actual=join(s[3..<1]) expected="dc" />
+<@assertEquals actual=join(s[2..<1]) expected="c" />
+<@assertEquals actual=join(s[1..<1]) expected="" />
+<@assertEquals actual=join(s[0..<1]) expected="a" />
+<@assertEquals actual=join(s[0..<0]) expected="" />
 <@assertEquals actual=join(s[5..<5]) expected="" />
 <@assertEquals actual=join(s[-5..<-5]) expected="" />
 
