@@ -87,7 +87,7 @@ class DateBuiltins {
             } else {
                 // java.sql.Time values meant to carry calendar field values only, so we don't show offset for them.
                 return !(date instanceof java.sql.Time
-                        && env.getConfiguration().getIncompatibleImprovements().intValue() >= 2003021);
+                        && getTemplate().getConfiguration().getIncompatibleImprovements().intValue() >= 2003021);
             }
         }
         

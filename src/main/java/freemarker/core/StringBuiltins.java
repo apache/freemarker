@@ -146,7 +146,8 @@ class StringBuiltins {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            token_source.incompatibleImprovements = env.getConfiguration().getIncompatibleImprovements().intValue();
+            token_source.incompatibleImprovements = getTemplate().getConfiguration().getIncompatibleImprovements()
+                    .intValue();
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getTemplate());

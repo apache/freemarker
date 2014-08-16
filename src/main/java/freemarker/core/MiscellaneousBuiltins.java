@@ -474,7 +474,7 @@ class MiscellaneousBuiltins {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
-                    && (env.getConfiguration().getIncompatibleImprovements().intValue() < 2003021
+                    && (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() < 2003021
                         // These implement TemplateSequenceModel, yet they can't be #list-ed:
                         || !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel))
                     ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
