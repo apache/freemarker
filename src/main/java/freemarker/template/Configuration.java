@@ -291,6 +291,10 @@ public class Configuration extends Configurable implements Cloneable {
      *         that changing the default breaks your application.
      *       </li>
      *       <li><p>
+     *          Right-unlimited ranges become readable (like listable), so {@code <#list 1.. as i>...</#list>} works.
+     *          Earlier they were only usable for slicing (like {@code hits[10..]}).
+     *       </li>
+     *       <li><p>
      *          Empty ranges return {@link Constants#EMPTY_SEQUENCE} instead of an empty {@link SimpleSequence}. This
      *          is in theory backward compatible, as the API only promises to give something that implements
      *          {@link TemplateSequenceModel}.
