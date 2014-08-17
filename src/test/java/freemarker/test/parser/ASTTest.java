@@ -32,6 +32,10 @@ public class ASTTest extends FileTestCase {
         testAST("ast-1");
     }
 
+    public void testRange() throws Exception {
+        testAST("range");
+    }
+    
     private void testAST(String testName) throws FileNotFoundException, IOException {
         final String templateName = testName + ".ftl";
         assertExpectedFileEqualsString(

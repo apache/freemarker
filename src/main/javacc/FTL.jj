@@ -1233,8 +1233,9 @@ Expression RelationalExpression() :
 
 Expression RangeExpression() :
 {
-   Expression lhs, rhs=null, result;
+   Expression lhs, rhs = null, result;
    boolean exclusiveEnd;
+   Token dotDot = null;
 }
 {
     lhs=AdditiveExpression() {result = lhs;}
@@ -1244,9 +1245,9 @@ Expression RangeExpression() :
            rhs = AdditiveExpression()
          )
          | 
-         (           <DOT_DOT> { exclusiveEnd = false; }
+         (           dotDot=<DOT_DOT> { exclusiveEnd = false; }
            [
-             LOOKAHEAD(Expression())
+             LOOKAHEAD(AdditiveExpression())
              rhs = AdditiveExpression()
            ]
          )
@@ -1257,7 +1258,9 @@ Expression RangeExpression() :
                numberLiteralOnly(rhs);
            }
            Range range = new Range(lhs, rhs, exclusiveEnd);
-           range.setLocation(template, lhs, rhs != null ? rhs : lhs);
+           if (rhs != null) {
+               range.setLocation(template, lhs, rhs);           } else {               range.setLocation(template, lhs, dotDot);
+           }
            result = range;
         }
     ]
