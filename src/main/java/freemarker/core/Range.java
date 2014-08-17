@@ -38,21 +38,18 @@ final class Range extends Expression {
         return rho != null;
     }
 
-    TemplateModel _eval(Environment env) 
-        throws TemplateException
-    {
+    TemplateModel _eval(Environment env) throws TemplateException {
         int begin = lho.evalToNumber(env).intValue();
-        if (rho != null) {
-            int end = rho.evalToNumber(env).intValue();
-            return new RangeModel(begin, end, exclusiveEnd);
-        } else {
-            return new RangeModel(begin);
-        }
+        return rho != null
+            ? (RangeModel)new BoundedRangeModel(begin, rho.evalToNumber(env).intValue(), exclusiveEnd)
+            : (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() >= 2003021
+                    ? (RangeModel) new ListableRightUnboundedRangeModel(begin)
+                    : (RangeModel) new NonListableRightUnboundedRangeModel(begin));
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean evalToBoolean(Environment env) throws TemplateException {
-        throw new NonBooleanException(this, new RangeModel(0, 0, exclusiveEnd), env);
+        throw new NonBooleanException(this, new BoundedRangeModel(0, 0, exclusiveEnd), env);
     }
 
     public String getCanonicalForm() {

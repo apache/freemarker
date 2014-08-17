@@ -56,9 +56,6 @@
 <@assertEquals actual=1 expected=(3..<2)?size />
 <@assertEquals actual=2 expected=(4..<2)?size />
 
-<#-- Legacy quirk: right-unbounded ranges are apparently empty: -->
-<@assertEquals actual=0 expected=(4..)?size />
-<@assertEquals actual=join(1.., ' ') expected="" />
 
 <#--------------------->
 <#-- String slicing: -->

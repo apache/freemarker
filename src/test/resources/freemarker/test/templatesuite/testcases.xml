@@ -97,8 +97,10 @@
        <config output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
    </testcase>
    <testcase name="precedence"/>
-   <testcase name="range" nooutput="true" />
-   <testcase name="range-ici-2.3.21" template="range.ftl" nooutput="true">
+   <testcase name="range-ici-2.3.20" nooutput="true">
+   	  <config incompatible_improvements="2.3.20"/>
+   </testcase>
+   <testcase name="range-ici-2.3.21" nooutput="true">
    	  <config incompatible_improvements="2.3.21"/>
    </testcase>
    <testcase name="recover" />

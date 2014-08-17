@@ -20982,6 +20982,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   anymore, but an empty sequence. (Of course, <literal>['x',
                   'y'][3..]</literal> is still an error.)</para>
                 </listitem>
+
+                <listitem>
+                  <para>If the incompatible_improvements in the FreeMarker
+                  configuration is set to at least 2.3.21, right-unbounded
+                  ranges become readable (like listable). Earlier they could
+                  only be used for slicing.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
