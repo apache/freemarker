@@ -1796,9 +1796,9 @@ The average of the price of a python and an elephant is:
                 <listitem>
                   <para><link
                   linkend="dgui_template_exp_direct_seuqence">Sequences</link>:
-                  <literal>["foo", "bar", 123.45]</literal>,
-                  <literal>1..100</literal>, <literal>1..&lt;100</literal> (or
-                  <literal>1..!100</literal>)</para>
+                  <literal>["foo", "bar", 123.45]</literal>; Ranges:
+                  <literal>0..9</literal>, <literal>0..&lt;10</literal> (or
+                  <literal>0..!10</literal>), <literal>0..</literal></para>
                 </listitem>
 
                 <listitem>
@@ -1859,6 +1859,14 @@ The average of the price of a python and an elephant is:
                   linkend="dgui_template_exp_get_character">Getting a
                   character</link>: <literal>name[0]</literal></para>
                 </listitem>
+
+                <listitem>
+                  <para><link
+                  linkend="dgui_template_exp_stringop_slice">String slice:
+                  </link><literal>name[0..4]</literal>,
+                  <literal>name[0..&lt;5]</literal>,
+                  <literal>name[1..]</literal></para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -1877,7 +1885,8 @@ The average of the price of a python and an elephant is:
                   <para><link
                   linkend="dgui_template_exp_seqenceop_slice">Sequence
                   slice</link>: <literal>products[10..19]</literal> or
-                  <literal>products[5..]</literal></para>
+                  <literal>products[10..&lt;20]</literal> or
+                  <literal>products[10..]</literal></para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -2246,48 +2255,116 @@ autumn
             Here the first subvariable will be the number 4, the second will
             be another sequence, and the third subvariable will be the string
             "whatnot".</para>
+          </section>
 
-            <para>You can define sequences that store a numerical range with
-            <literal><replaceable>start</replaceable>..<replaceable>end</replaceable></literal>
-            (inclusive end) or
-            <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
-            (exclusive end, also can be written as
-            <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>),
-            where <literal><replaceable>start</replaceable></literal> and
-            <literal><replaceable>end</replaceable></literal> are expressions
-            that must resolve to numerical values. For example
-            <literal>2..5</literal> or <literal>2..&lt;6</literal> is the same
-            as <literal>[2, 3, 4, 5]</literal>, but the former is more
-            convenient and efficient, also it allows dynamic boundaries like
-            <literal>0..&lt;length</literal>.</para>
+          <section xml:id="dgui_template_exp_direct_ranges">
+            <title>Ranges</title>
 
-            <para>You can define decreasing numerical ranges too, e.g.:
-            <literal>5..2</literal> or <literal>5..&lt;1</literal> (or
-            <literal>5..!1</literal>), both gives <literal>[5, 4, 3,
-            2]</literal>.</para>
+            <para>Ranges are just sequences, but they are created by
+            specifying what range of whole numbers they contain, instead of
+            specifying their items one by one. For example,
+            <literal>0..&lt;m</literal>, assuming the <literal>m</literal>
+            variable stores 5, will give a sequence that contains <literal>[0,
+            1, 2, 3, 4]</literal>. Ranges are primarily used for for iterating
+            over a range of number with <literal>&lt;#list
+            <replaceable>...</replaceable>&gt;</literal>, and for slicing
+            sequences and strings.</para>
 
-            <para>Furthermore, you can omit the
-            <literal><replaceable>end</replaceable></literal>, like in
-            <literal>5..</literal>, in which case the sequence will contain 5,
-            6, 7, 8, ...etc., up to infinity<phrase role="forProgrammers">
-            (for programmers: up to <literal>Integer.MAX_VALUE</literal>,
-            actually)</phrase>.</para>
+            <para>The generic forms of range expressions are (where
+            <literal><replaceable>start</replaceable></literal> and
+            <literal><replaceable>end</replaceable></literal> can be any
+            expression that evaluates to a number):</para>
 
-            <warning>
-              <para>Ranges with inclusive end never produce 0 length sequence,
-              instead they start to go backwards. Like <literal>0..1</literal>
-              is <literal>[0, 1]</literal>, <literal>0..0</literal> is
-              <literal>[0]</literal> and <literal>0..-1</literal> is
-              <literal>[0, -1]</literal>. Thus, <literal>0..length</literal>
-              is WRONG, use <literal>0..&lt;length</literal> instead.</para>
-            </warning>
+            <itemizedlist>
+              <listitem>
+                <para><literal><replaceable>start</replaceable>..<replaceable>end</replaceable></literal>:
+                Range with inclusive end. For example, <literal>1..4</literal>
+                gives <literal>[1, 2, 3, 4]</literal>, and
+                <literal>4..1</literal> gives <literal>[4, 3, 2, 1]</literal>.
+                Beware, ranges with inclusive end never give an empty
+                sequence, so <literal>0..length-1</literal> is
+                <emphasis>WRONG</emphasis>, because when length is
+                <literal>0</literal> it gives <literal>[0,
+                -1]</literal>.</para>
+              </listitem>
 
-            <note>
-              <para>There are no square brackets around range expression, that
-              is, you write <literal>0..&lt;x</literal>, NOT
-              <literal>[0..&lt;x]</literal>, which would be a 1 long sequence
-              of ranges.</para>
-            </note>
+              <listitem>
+                <para><literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
+                or
+                <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>:
+                Range with exclusive end. For example,
+                <literal>1..&lt;4</literal> gives <literal>[1, 2,
+                3]</literal>, and <literal>4..&lt;1</literal> gives
+                <literal>[4, 3, 2]</literal>. A typical application of
+                exclusive ended ranges is <literal>0..&lt;length</literal>,
+                which will correctly give <literal>[]</literal> when
+                <literal>length</literal> is 0. There's no difference between
+                <literal>..&lt;</literal> and <literal>..!</literal>; the last
+                form is used in application where using the
+                <literal>&gt;</literal> character causes problems (for editors
+                and such).</para>
+              </listitem>
+
+              <listitem>
+                <para><literal><replaceable>start</replaceable>..</literal>:
+                Right-unbounded range. For example <literal>1..</literal>
+                gives <literal>[1, 2, 3, 4, 5, 6, ... ]</literal>, up to
+                infinity. Be careful when processing (like listing) such
+                ranges, as it will take forever or until the application runs
+                out of memory and crashes. As such, these ranges are mostly
+                only used for slicing (see later), and rarely in a listing
+                that exists with <literal>&lt;#break&gt;</literal> on a
+                condition.</para>
+
+                <warning>
+                  <para>Right-unbounded ranges before FreeMarker 2.3.21 were
+                  only used for slicing, and behaved like an empty sequence
+                  for other purposes. To activate the new behavior, it's not
+                  enough to use FreeMarker 2.3.21, the programmer also have to
+                  set the <literal>incompatible_improvements</literal>
+                  configuration setting to at least 2.3.21.</para>
+                </warning>
+              </listitem>
+            </itemizedlist>
+
+            <para>Further notes on ranges:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>There are no square brackets around range expression,
+                that is, you write <literal>0..&lt;x</literal>, NOT
+                <literal>[0..&lt;x]</literal>, which would be a 1 long
+                sequence of ranges.</para>
+              </listitem>
+
+              <listitem>
+                <para>You can write arithmetical expression on the sides of
+                the <literal>..</literal> without parenthesis, like <literal>n
+                + 1 .. m / 2 - 1</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>..&lt;</literal> and <literal>..!</literal> are
+                operators, so you can't have space inside them. Like
+                <literal>n .. &lt;m</literal> is WRONG, but <literal>n ..&lt;
+                m</literal> is good.</para>
+              </listitem>
+
+              <listitem>
+                <para>The reported size of right-unbounded ranges is
+                2147483647 (or 0 if
+                <literal>incompatible_improvements</literal> is less than
+                2.3.21) due to a technical limitation (32 bits). However, when
+                listing them, their actual size is infinite.</para>
+              </listitem>
+
+              <listitem>
+                <para>Ranges doesn't actually store the numbers they consist
+                of, thus for example <literal>0..1</literal> and
+                <literal>0..100000000</literal> is equally fast to create and
+                takes the same amount of memory. </para>
+              </listitem>
+            </itemizedlist>
           </section>
 
           <section xml:id="dgui_template_exp_direct_hash">
@@ -2602,16 +2679,46 @@ ${user[4]}</programlisting>
             <programlisting role="output">B
 J
 </programlisting>
+          </section>
 
-            <note>
-              <para>You can get a range of characters in the same way as you
-              <link linkend="dgui_template_exp_seqenceop_slice">get a sequence
-              slice</link>, e.g <literal>${user[1..4]}</literal> and
-              <literal>${user[4..]}</literal>. However, it's now depreacted to
-              utilize this, and instead you should use <link
-              linkend="ref_builtin_substring">the <literal>substring</literal>
-              built-in</link>; built-ins will be discussed later.</para>
-            </note>
+          <section xml:id="dgui_template_exp_stringop_slice">
+            <title>String slicing</title>
+
+            <para>You can get a range of characters in the same way as you
+            <link linkend="dgui_template_exp_seqenceop_slice">get a sequence
+            slice</link> (see there), e.g <literal>user[1..4]</literal>,
+            <literal>user[4..]</literal>, <literal>user[0..&lt;5]</literal>.
+            However, there are few important differences:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Decreasing ranges aren't allowed for string slicing.
+                (That's because unlike sequence, you seldom if ever want to
+                show a string reversed, so if that happens, that's almost
+                always the result of an oversight.)</para>
+              </listitem>
+
+              <listitem>
+                <para>As an exception from the above rule, a range with
+                <emphasis>inclusive</emphasis> end where the end index is one
+                less than the start index (like
+                <literal>"abc"[0..-1]</literal>,
+                <literal>"abc"[1..0]</literal>, etc.) will give an empty
+                string instead of an error. (That's because it's pretty much
+                always because someone has written
+                <literal>s[<replaceable>start</replaceable>..<replaceable>end</replaceable>]</literal>
+                and the desired string length was 0.)</para>
+              </listitem>
+
+              <listitem>
+                <para>If a value is both a string and a sequence (a
+                multi-typed value), then slicing will slice the sequence
+                instead of the string. When you are processing XML via
+                FreeMarker's standard wrapper, such values are common. In such
+                case you can use
+                <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>.</para>
+              </listitem>
+            </itemizedlist>
           </section>
         </section>
 
@@ -2689,39 +2796,49 @@ J
             </indexterm>
 
             <para>With
-            <literal>[<replaceable>firstindex</replaceable>..<replaceable>lastindex</replaceable>]</literal>
-            you can get a slice of a sequence, where
-            <literal><replaceable>firstindex</replaceable></literal> and
-            <literal><replaceable>lastindex</replaceable></literal> are
-            expressions evaluate to number. For example, if
-            <literal>seq</literal> stores the sequence <literal>"a"</literal>,
-            <literal>"b"</literal>, <literal>"c"</literal>,
-            <literal>"d"</literal>, <literal>"e"</literal>,
-            <literal>"f"</literal> then the expression
-            <literal>seq[1..4]</literal> will evaluate to a sequence that
-            contains <literal>"b"</literal>, <literal>"c"</literal>,
-            <literal>"d"</literal>, <literal>"e"</literal> (since the item at
-            index 1 is <literal>"b"</literal>, and the item at index 4 is
-            <literal>"e"</literal>).</para>
+            <literal><replaceable>seq</replaceable>[<replaceable>range</replaceable>]</literal>,
+            were <literal><replaceable>range</replaceable></literal> is a
+            range value <link linkend="dgui_template_exp_direct_ranges">as
+            described here</link>, you can take a slice of the sequence. The
+            resulting sequence will contain those items from the original
+            sequence (<literal><replaceable>seq</replaceable></literal>) whose
+            indexes are in the range. For example:</para>
 
-            <para>The <literal><replaceable>lastindex</replaceable></literal>
-            can be omitted, in which case it defaults to the index of the last
-            item of the sequence. For example, if <literal>seq</literal>
-            stores the sequence <literal>"a"</literal>,
-            <literal>"b"</literal>, <literal>"c"</literal>,
-            <literal>"d"</literal>, <literal>"e"</literal>,
-            <literal>"f"</literal> again, then <literal>seq[3..]</literal>
-            will evaluate to a sequence that contains <literal>"d"</literal>,
-            <literal>"e"</literal>, <literal>"f"</literal>.</para>
+            <programlisting role="template">&lt;#list ["A", "B", "C", "D", "E"][1..3] as i&gt;${i}&lt;/#list&gt;</programlisting>
 
-            <note>
-              <para><literal><replaceable>lastindex</replaceable></literal>
-              can be omitted only since FreeMarker 2.3.3.</para>
-            </note>
+            <para>will print</para>
+
+            <programlisting role="output">BCD </programlisting>
+
+            <para>Furthermore the items in the slice will be in the same order
+            as in the range. Thus for example the above example with the
+            <literal>3..1</literal> range would print
+            <literal>DCB</literal>.</para>
 
             <para>An attempt to access a subvariable past the last subvariable
             or before the first subvariable of the sequence will cause an
-            error and abort the processing of the template.</para>
+            error and abort the processing of the template, so be careful with
+            what index you specify.</para>
+
+            <para>Right-unbounded ranges will slice out all items starting
+            from the given index, until the last item in the sequence:</para>
+
+            <programlisting role="template">&lt;#assign seq = ["A", "B", "C"]&gt;
+- &lt;#list seq[0..] as i&gt;${i}&lt;/#list&gt;
+- &lt;#list seq[1..] as i&gt;${i}&lt;/#list&gt;
+- &lt;#list seq[2..] as i&gt;${i}&lt;/#list&gt;
+- &lt;#list seq[3..] as i&gt;${i}&lt;/#list&gt;</programlisting>
+
+            <para>will print</para>
+
+            <programlisting role="output">- ABC
+- BC
+- C
+-</programlisting>
+
+            <para>Note in the last line that slicing with right-unbounded
+            range allows the starting index to be past the last item
+            <emphasis>by one</emphasis> (but no more).</para>
           </section>
         </section>
 
@@ -20962,7 +21079,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (also can be written as
                   <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
                   <link
-                  linkend="dgui_template_exp_direct_seuqence">More...</link></para>
+                  linkend="dgui_template_exp_direct_ranges">More...</link></para>
                 </listitem>
 
                 <listitem>
@@ -20984,10 +21101,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>If the incompatible_improvements in the FreeMarker
-                  configuration is set to at least 2.3.21, right-unbounded
-                  ranges become readable (like listable). Earlier they could
-                  only be used for slicing.</para>
+                  <para>If the <literal>incompatible_improvements</literal> in
+                  the FreeMarker configuration is set to at least 2.3.21,
+                  right-unbounded ranges become readable (like listable).
+                  Earlier they could only be used for slicing.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
