@@ -15,7 +15,7 @@ import freemarker.template.TemplateModelIterator;
  */
 final class ListableRightUnboundedRangeModel extends RightUnboundedRangeModel implements TemplateCollectionModel {
 
-    public ListableRightUnboundedRangeModel(int begin) {
+    ListableRightUnboundedRangeModel(int begin) {
         super(begin);
     }
 

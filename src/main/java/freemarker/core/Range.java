@@ -24,32 +24,42 @@ import freemarker.template.TemplateModel;
  */
 final class Range extends Expression {
 
+    static final int END_INCLUSIVE = 0; 
+    static final int END_EXCLUSIVE = 1; 
+    static final int END_UNBOUND = 2; 
+    static final int END_SIZE_LIMITED = 3; 
+    
     final Expression lho;
     final Expression rho;
-    final boolean exclusiveEnd;
+    final int endType;
 
-    Range(Expression lho, Expression rho, boolean exclusiveEnd) {
+    Range(Expression lho, Expression rho, int endType) {
         this.lho = lho;
         this.rho = rho;
-        this.exclusiveEnd = exclusiveEnd;
+        this.endType = endType;
     }
     
-    boolean hasRho() {
-        return rho != null;
+    int getEndType() {
+        return endType;
     }
 
     TemplateModel _eval(Environment env) throws TemplateException {
-        int begin = lho.evalToNumber(env).intValue();
-        return rho != null
-            ? (RangeModel)new BoundedRangeModel(begin, rho.evalToNumber(env).intValue(), exclusiveEnd)
-            : (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() >= 2003021
+        final int begin = lho.evalToNumber(env).intValue();
+        if (endType != END_UNBOUND) {
+            final int lhoValue = rho.evalToNumber(env).intValue();
+            return new BoundedRangeModel(
+                    begin, endType != END_SIZE_LIMITED ? lhoValue : begin + lhoValue,
+                    endType == END_INCLUSIVE, endType == END_SIZE_LIMITED); 
+        } else {
+            return getTemplate().getConfiguration().getIncompatibleImprovements().intValue() >= 2003021
                     ? (RangeModel) new ListableRightUnboundedRangeModel(begin)
-                    : (RangeModel) new NonListableRightUnboundedRangeModel(begin));
+                    : (RangeModel) new NonListableRightUnboundedRangeModel(begin);
+        }
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean evalToBoolean(Environment env) throws TemplateException {
-        throw new NonBooleanException(this, new BoundedRangeModel(0, 0, exclusiveEnd), env);
+        throw new NonBooleanException(this, new BoundedRangeModel(0, 0, false, false), env);
     }
 
     public String getCanonicalForm() {
@@ -58,7 +68,13 @@ final class Range extends Expression {
     }
     
     String getNodeTypeSymbol() {
-        return exclusiveEnd ? "..<" : "..";
+        switch (endType) {
+        case END_EXCLUSIVE: return "..<";
+        case END_INCLUSIVE: return "..";
+        case END_UNBOUND: return "..";
+        case END_SIZE_LIMITED: return "..*";
+        default: throw new BugException(endType);
+        }
     }
     
     boolean isLiteral() {
@@ -71,7 +87,7 @@ final class Range extends Expression {
         return new Range(
                 lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
                 rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                exclusiveEnd);
+                endType);
     }
     
     int getParameterCount() {

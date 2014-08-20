@@ -719,6 +719,8 @@ TOKEN:
   |
   <DOT_DOT_LESS : "..<" | "..!" >
   |
+  <DOT_DOT_ASTERISK : "..*" >
+  |
   <BUILT_IN : "?">
   |
   <EXISTS : "??">
@@ -1234,21 +1236,25 @@ Expression RelationalExpression() :
 Expression RangeExpression() :
 {
    Expression lhs, rhs = null, result;
-   boolean exclusiveEnd;
+   int endType;
    Token dotDot = null;
 }
 {
     lhs=AdditiveExpression() {result = lhs;}
     [
        (         (
-           <DOT_DOT_LESS> { exclusiveEnd = true; }
+           (             <DOT_DOT_LESS> { endType = Range.END_EXCLUSIVE; }
+             |
+             <DOT_DOT_ASTERISK> { endType = Range.END_SIZE_LIMITED; }
+           )
            rhs = AdditiveExpression()
          )
          | 
-         (           dotDot=<DOT_DOT> { exclusiveEnd = false; }
+         (           dotDot=<DOT_DOT> { endType = Range.END_UNBOUND; }
            [
              LOOKAHEAD(AdditiveExpression())
-             rhs = AdditiveExpression()
+             rhs = AdditiveExpression()             {
+               endType = Range.END_INCLUSIVE;             }
            ]
          )
        )
@@ -1257,7 +1263,8 @@ Expression RangeExpression() :
            if (rhs != null) {
                numberLiteralOnly(rhs);
            }
-           Range range = new Range(lhs, rhs, exclusiveEnd);
+           
+           Range range = new Range(lhs, rhs, endType);
            if (rhs != null) {
                range.setLocation(template, lhs, rhs);           } else {               range.setLocation(template, lhs, dotDot);
            }

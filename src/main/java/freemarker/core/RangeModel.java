@@ -5,7 +5,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
 
-abstract class RangeModel  implements TemplateSequenceModel, java.io.Serializable {
+abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable {
     
     private final int begin;
 
@@ -32,5 +32,7 @@ abstract class RangeModel  implements TemplateSequenceModel, java.io.Serializabl
     abstract int getStep();
     
     abstract boolean isRightUnbounded();
+    
+    abstract boolean isRightAdaptive();
     
 }

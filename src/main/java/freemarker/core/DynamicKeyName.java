@@ -150,11 +150,12 @@ final class DynamicKeyName extends Expression {
         
         final int size = range.size();
         final boolean rightUnbounded = range.isRightUnbounded();
+        final boolean rightAdaptive = range.isRightAdaptive();
         
-        // Non-half empty ranges are accepted even if the begin index is out of bounds. That's because a such range
+        // Right bounded empty ranges are accepted even if the begin index is out of bounds. That's because a such range
         // produces an empty sequence, which thus doesn't contain any illegal indexes.
         if (!rightUnbounded && size == 0) {
-            return emptySequence(targetSeq);
+            return emptyResult(targetSeq != null);
         }
 
         final int firstIdx = range.getBegining();
@@ -165,11 +166,14 @@ final class DynamicKeyName extends Expression {
         }
         
         final int targetSize = targetStr != null ? targetStr.length() : targetSeq.size();
+        final int step = range.getStep();
         
-        // Right-unbounded ranges can start 1 after the last element of the target, because they are like ranges with
-        // exclusive end index of targetSize. Thence a such range is just an empty list of indexes, and thus isn't OOB.
-        // Right-bounded ranges at this point aren't empty, so the right index can't reach targetSize. 
-        if (rightUnbounded ? firstIdx > targetSize : firstIdx >= targetSize) {
+        // Right-adaptive increasing ranges can start 1 after the last element of the target, because they are like
+        // ranges with exclusive end index of at most targetSize. Thence a such range is just an empty list of indexes,
+        // and thus it isn't out-of-bounds.
+        // Right-adaptive decreasing ranges has exclusive end -1, so it can't help on a  to high firstIndex. 
+        // Right-bounded ranges at this point aren't empty, so the right index surely can't reach targetSize. 
+        if (rightAdaptive && step == 1 ? firstIdx > targetSize : firstIdx >= targetSize) {
             throw new _MiscTemplateException(keyExpression, new Object[] {
                     "Range start index ", new Integer(firstIdx), " is out of bounds, because the sliced ",
                     (targetStr != null ? "string" : "sequence"),
@@ -177,69 +181,73 @@ final class DynamicKeyName extends Expression {
                     ". ", "(Note that indices are 0-based)." });
         }
         
-        final int step = range.getStep();
-        
-        final int lastIdx;
         final int resultSize;
         if (!rightUnbounded) {
-            lastIdx = firstIdx + (size - 1) * step;
+            final int lastIdx = firstIdx + (size - 1) * step;
             if (lastIdx < 0) {
-                throw new _MiscTemplateException(keyExpression, new Object[] {
-                        "Negative range end index (", new Integer(lastIdx),
-                        ") isn't allowed for a range used for slicing." });
+                if (!rightAdaptive) {
+                    throw new _MiscTemplateException(keyExpression, new Object[] {
+                            "Negative range end index (", new Integer(lastIdx),
+                            ") isn't allowed for a range used for slicing." });
+                } else {
+                    resultSize = firstIdx + 1;
+                }
+            } else if (lastIdx >= targetSize) {
+                if (!rightAdaptive) {
+                    throw new _MiscTemplateException(keyExpression, new Object[] {
+                            "Range end index ", new Integer(lastIdx), " is out of bounds, because the sliced ",
+                            (targetStr != null ? "string" : "sequence"),
+                            " has only ", new Integer(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
+                            ". (Note that indices are 0-based)." });
+                } else {
+                    resultSize = Math.abs(targetSize - firstIdx);
+                }
+            } else {
+                resultSize = size;
             }
-            if (lastIdx >= targetSize) {
-                throw new _MiscTemplateException(keyExpression, new Object[] {
-                        "Range end index ", new Integer(lastIdx), " is out of bounds, because the sliced ",
-                        (targetStr != null ? "string" : "sequence"),
-                        " has only ", new Integer(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
-                        ". (Note that indices are 0-based)." });
-            }
-            
-            resultSize = size;
         } else {
-            // Note: Here we assume that abs(step) is 1.
-            lastIdx = targetSize - 1;
             resultSize = targetSize - firstIdx;
         }
         
+        if (resultSize == 0) {
+            return emptyResult(targetSeq != null);
+        }
         if (targetSeq != null) {
-            if (resultSize == 0) {
-                return emptySequence(targetSeq);
-            }
-            
             ArrayList/*<TemplateModel>*/ list = new ArrayList(resultSize);
             int srcIdx = firstIdx;
-            while (true) {
+            for (int i = 0; i < resultSize; i++) {
                 list.add(targetSeq.get(srcIdx));
-                if (srcIdx == lastIdx) break;
                 srcIdx += step;
             }
-            return new SimpleSequence(list);
+            // List items are already wrapped, so the wrapper will be null:
+            return new SimpleSequence(list, null);
         } else {
-            if (resultSize == 0) {
-                return TemplateScalarModel.EMPTY_STRING;
+            final int exclEndIdx;
+            if (step < 0 && resultSize > 1) {
+                if (resultSize != 2) {
+                    throw new _MiscTemplateException(
+                            keyExpression, new Object[] {
+                                "Decreasing ranges aren't allowed for slicing strings (as it would give reversed "
+                                + "text). The index range was: first = ",
+                                new Integer(firstIdx), ", last = ", new Integer(firstIdx + (resultSize - 1) * step)
+                            });
+                } else {
+                    // Emulate the legacy bug, where "foo"[n .. n-1] gives "" instead of an error.  
+                    // Fix this in FTL [2.4]
+                    exclEndIdx = firstIdx;
+                }
+            } else {
+                exclEndIdx = firstIdx + resultSize;
             }
             
-            // The "+ 1" is for emulating the legacy bug, where "foo"[1, 0] gives "" instead of an error.  
-            // Fix this in FTL [2.4]
-            if (lastIdx + 1 < firstIdx) {
-                throw new _MiscTemplateException(
-                        keyExpression, new Object[] {
-                            "Decreasing ranges aren't allowed for slicing strings (as it would give reversed "
-                            + "text). The indexes range was: first = ",
-                            new Integer(firstIdx), ", last = ", new Integer(lastIdx)
-                        });
-            }
-            
-            return new SimpleScalar(targetStr.substring(firstIdx, lastIdx + 1));
+            return new SimpleScalar(targetStr.substring(firstIdx, exclEndIdx));
         }
     }
 
-    private TemplateModel emptySequence(final TemplateSequenceModel targetSeq) {
-        return targetSeq != null
+    private TemplateModel emptyResult(boolean seq) {
+        return seq
                 ? (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() < 2003021
-                        ? new SimpleSequence(Collections.EMPTY_LIST)
+                        ? new SimpleSequence(Collections.EMPTY_LIST, null)
                         : Constants.EMPTY_SEQUENCE)
                 : TemplateScalarModel.EMPTY_STRING;
     }

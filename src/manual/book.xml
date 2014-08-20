@@ -2267,8 +2267,11 @@ autumn
             variable stores 5, will give a sequence that contains <literal>[0,
             1, 2, 3, 4]</literal>. Ranges are primarily used for for iterating
             over a range of number with <literal>&lt;#list
-            <replaceable>...</replaceable>&gt;</literal>, and for slicing
-            sequences and strings.</para>
+            <replaceable>...</replaceable>&gt;</literal>, and for <link
+            linkend="dgui_template_exp_seqenceop_slice">slicing
+            sequences</link> and <link
+            linkend="dgui_template_exp_stringop_slice">slicing
+            strings</link>.</para>
 
             <para>The generic forms of range expressions are (where
             <literal><replaceable>start</replaceable></literal> and
@@ -2294,11 +2297,10 @@ autumn
                 <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>:
                 Range with exclusive end. For example,
                 <literal>1..&lt;4</literal> gives <literal>[1, 2,
-                3]</literal>, and <literal>4..&lt;1</literal> gives
-                <literal>[4, 3, 2]</literal>. A typical application of
-                exclusive ended ranges is <literal>0..&lt;length</literal>,
-                which will correctly give <literal>[]</literal> when
-                <literal>length</literal> is 0. There's no difference between
+                3]</literal>, <literal>4..&lt;1</literal> gives <literal>[4,
+                3, 2]</literal>, and <literal>1..&lt;1</literal> gives
+                <literal>[]</literal>. Note the last example; the result can
+                be an empty sequence. There's no difference between
                 <literal>..&lt;</literal> and <literal>..!</literal>; the last
                 form is used in application where using the
                 <literal>&gt;</literal> character causes problems (for editors
@@ -2306,15 +2308,32 @@ autumn
               </listitem>
 
               <listitem>
+                <para><literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>:
+                Length limited range. For example, <literal>10..*4</literal>
+                gives <literal>[10, 11, 12, 13]</literal>,
+                <literal>10..*-4</literal> gives <literal>[10, 9, 8,
+                7]</literal>, and <literal>10..*0</literal> gives
+                <literal>[]</literal>. When these kind of ranges are used for
+                slicing, the slice will end without error if the end of the
+                sliced sequence or string is reached before the specified
+                range length was reached.</para>
+
+                <note>
+                  <para>Length limited ranges were introduced in FreeMarker
+                  2.3.21.</para>
+                </note>
+              </listitem>
+
+              <listitem>
                 <para><literal><replaceable>start</replaceable>..</literal>:
-                Right-unbounded range. For example <literal>1..</literal>
-                gives <literal>[1, 2, 3, 4, 5, 6, ... ]</literal>, up to
-                infinity. Be careful when processing (like listing) such
-                ranges, as it will take forever or until the application runs
-                out of memory and crashes. As such, these ranges are mostly
-                only used for slicing (see later), and rarely in a listing
-                that exists with <literal>&lt;#break&gt;</literal> on a
-                condition.</para>
+                Right-unbounded range. This are like length limited ranges
+                with infinite length. For example <literal>1..</literal> gives
+                <literal>[1, 2, 3, 4, 5, 6, ... ]</literal>, up to infinity.
+                Be careful when processing (like listing) such ranges, as
+                processing all items of it it would take forever or until the
+                application runs out of memory and crashes. When these kind of
+                ranges are used for slicing, the slice will end when the end
+                of the sliced sequence or string is reached.</para>
 
                 <warning>
                   <para>Right-unbounded ranges before FreeMarker 2.3.21 were
@@ -2677,8 +2696,7 @@ ${user[4]}</programlisting>
             0):</para>
 
             <programlisting role="output">B
-J
-</programlisting>
+J</programlisting>
           </section>
 
           <section xml:id="dgui_template_exp_stringop_slice">
@@ -2699,24 +2717,23 @@ J
               </listitem>
 
               <listitem>
-                <para>As an exception from the above rule, a range with
-                <emphasis>inclusive</emphasis> end where the end index is one
-                less than the start index (like
-                <literal>"abc"[0..-1]</literal>,
-                <literal>"abc"[1..0]</literal>, etc.) will give an empty
-                string instead of an error. (That's because it's pretty much
-                always because someone has written
-                <literal>s[<replaceable>start</replaceable>..<replaceable>end</replaceable>]</literal>
-                and the desired string length was 0.)</para>
-              </listitem>
-
-              <listitem>
                 <para>If a value is both a string and a sequence (a
                 multi-typed value), then slicing will slice the sequence
                 instead of the string. When you are processing XML via
                 FreeMarker's standard wrapper, such values are common. In such
                 case you can use
                 <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>There's a legacy bug where a range with
+                <emphasis>inclusive</emphasis> end where the end index is not
+                negative and one less than the start index (like in
+                <literal>"abc"[1..0]</literal>, etc.) will give an empty
+                string instead of an error. (It should be an error as it's a
+                decreasing range.) While currently this bug is kept for
+                backward compatibility, you shouldn't utilize this, as in the
+                future it will be certainly fixed.</para>
               </listitem>
             </itemizedlist>
           </section>
@@ -2779,7 +2796,7 @@ J
           </section>
 
           <section xml:id="dgui_template_exp_seqenceop_slice">
-            <title>Sequence slice</title>
+            <title>Sequence slicing</title>
 
             <indexterm>
               <primary>sequence slice</primary>
@@ -2820,7 +2837,28 @@ J
             error and abort the processing of the template, so be careful with
             what index you specify.</para>
 
-            <para>Right-unbounded ranges will slice out all items starting
+            <para>Length limited ranges will slice at most as many items as
+            the range length specifies: </para>
+
+            <programlisting role="template">&lt;#assign seq = ["A", "B", "C"]&gt;
+- &lt;#list seq[0..*2] as i&gt;${i}&lt;/#list&gt;
+- &lt;#list seq[1..*2] as i&gt;${i}&lt;/#list&gt;
+- &lt;#list seq[2..*2] as i&gt;${i}&lt;/#list&gt;
+- &lt;#list seq[3..*2] as i&gt;${i}&lt;/#list&gt;</programlisting>
+
+            <para>will print</para>
+
+            <programlisting role="output">- AB
+- BC
+- C
+-</programlisting>
+
+            <para>Note in the last line that slicing with length limited range
+            allows the starting index to be past the last item <emphasis>by
+            one</emphasis> (but no more).</para>
+
+            <para>Right-unbounded ranges are like length-limited ranges with
+            an infinite length. That is, they slice out all items starting
             from the given index, until the last item in the sequence:</para>
 
             <programlisting role="template">&lt;#assign seq = ["A", "B", "C"]&gt;
@@ -21074,12 +21112,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <itemizedlist>
                 <listitem>
-                  <para>New operator for creating ranges with exclusive end:
+                  <para>Ranges with exclusive end:
                   <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
                   (also can be written as
                   <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
                   <link
                   linkend="dgui_template_exp_direct_ranges">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para>Length limited ranges:
+                  <literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>:
+                  For example, <literal>10..*4</literal> gives <literal>[10,
+                  11, 12, 13]</literal>, <literal>10..*-4</literal> gives
+                  <literal>[10, 9, 8, 7]</literal>, and
+                  <literal>10..*0</literal> gives <literal>[]</literal>. When
+                  these kind of ranges are used for slicing, the slice will
+                  end without error if the end of the sliced sequence or
+                  string is reached before the specified range length was
+                  reached. <link
+                  linkend="dgui_template_exp_seqenceop_slice">More...</link></para>
                 </listitem>
 
                 <listitem>

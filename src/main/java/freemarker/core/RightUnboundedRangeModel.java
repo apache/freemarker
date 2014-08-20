@@ -14,4 +14,8 @@ abstract class RightUnboundedRangeModel extends RangeModel {
         return true;
     }
     
+    final boolean isRightAdaptive() {
+        return true;
+    }
+    
 }

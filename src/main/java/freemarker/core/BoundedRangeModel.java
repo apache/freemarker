@@ -18,17 +18,23 @@ package freemarker.core;
 
 
 /**
- * A range between two integers, or an integer and infinity.
- * Inclusive or exclusive end. Can be ascending or descending. 
+ * A range between two integers (maybe 0 long).
  */
 final class BoundedRangeModel extends RangeModel {
 
     private final int step, size;
+    private final boolean rightAdaptive;
     
-    public BoundedRangeModel(int begin, int end, boolean exclusiveEnd) {
+    /**
+     * @param inclusiveEnd Tells if the {@code end} index is part of the range. 
+     * @param rightAdaptive Tells if the right end of the range adapts to the size of the sliced value, if otherwise
+     *     it would be bigger than that. 
+     */
+    BoundedRangeModel(int begin, int end, boolean inclusiveEnd, boolean rightAdaptive) {
         super(begin);
         step = begin <= end ? 1 : -1;
-        size = Math.abs(end - begin) + (exclusiveEnd ? 0 : 1);
+        size = Math.abs(end - begin) + (inclusiveEnd ? 1 : 0);
+        this.rightAdaptive = rightAdaptive;
     }
 
     public int size() {
@@ -41,6 +47,10 @@ final class BoundedRangeModel extends RangeModel {
 
     boolean isRightUnbounded() {
         return false;
+    }
+
+    boolean isRightAdaptive() {
+        return rightAdaptive;
     }
     
 }
