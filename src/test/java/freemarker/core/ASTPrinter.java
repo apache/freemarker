@@ -23,11 +23,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CodingErrorAction;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -129,13 +132,7 @@ public class ASTPrinter {
                     File dstFile = new File(dstDir, file.getName());
                     String res;
                     try {
-                        Template t;
-                        Reader r = new InputStreamReader(new FileInputStream(file), "ISO-8859-1");
-                        try {
-                                t = new Template(file.getPath().replace('\\', '/'), r, cfg);
-                        } finally {
-                            r.close();
-                        }
+                        Template t = new Template(file.getPath().replace('\\', '/'), loadIntoString(file), cfg);
                         res = getASTAsString(t);
                         successfulCounter++;
                     } catch (ParseException e) {
@@ -151,6 +148,40 @@ public class ASTPrinter {
                 }
             }
         }
+    }
+
+    private String loadIntoString(File file) throws IOException {
+        long ln = file.length();
+        if (ln < 0) {
+            throw new IOException("Failed to get the length of " + file);
+        }
+        byte[] buffer = new byte[(int) ln];
+        InputStream in = new FileInputStream(file);
+        try {
+            int offset = 0;
+            int bytesRead;
+            while (offset < buffer.length) {
+                bytesRead = in.read(buffer, offset, buffer.length - offset);
+                if (bytesRead == -1) {
+                    throw new IOException("Unexpected end of file: " + file);
+                }
+                offset += bytesRead;
+            }
+        } finally {
+            in.close();
+        }
+        
+        try {
+            return decode(buffer, Charset.forName("UTF-8"));
+        } catch (CharacterCodingException e) {
+            return decode(buffer, Charset.forName("ISO-8859-1"));
+        }
+    }
+
+    private String decode(byte[] buffer, Charset charset) throws CharacterCodingException {
+        return charset.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(buffer)).toString();
     }
 
     private void save(String astStr, File file) throws IOException {
