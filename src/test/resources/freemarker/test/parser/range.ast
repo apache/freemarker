@@ -166,8 +166,16 @@
                 - AST-node subtype: "0"  // Integer
         - variable scope: "1"  // Integer
         - namespace: null  // Null
-    #--...--  // f.c.Comment
-        - content: " TODO\n<#assign x = 1*a..*2> \n"  // String
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..*  // f.c.Range
+            - left-hand operand: *  // f.c.ArithmeticExpression
+                - left-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: a  // f.c.Identifier
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: 2  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
         - assignment source: ||  // f.c.OrExpression

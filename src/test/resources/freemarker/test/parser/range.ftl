@@ -20,9 +20,7 @@
 
 <#assign x = 1+a..+2>
 <#assign x = 1-a..-2>
-<#-- TODO
 <#assign x = 1*a..*2> 
--->
 <#assign x = a && b..c || d> 
 <#assign x = a.. && b.. || d> 
 
