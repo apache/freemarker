@@ -17,5 +17,9 @@ abstract class RightUnboundedRangeModel extends RangeModel {
     final boolean isRightAdaptive() {
         return true;
     }
+
+    final boolean isAffactedByStringSlicingBug() {
+        return false;
+    }
     
 }

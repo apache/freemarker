@@ -86,11 +86,18 @@
 <#-- Legacy string backward-range bug kept for compatibility: -->
 <@assertEquals actual=s[1..0] expected="" />
 <@assertEquals actual=s[2..1] expected="" />
-<@assertFails messageRegexp="StringIndexOutOfBounds|negative">
+<@assertFails message="negative">
   <@assertEquals actual=s[0..-1] expected="" />
 </@assertFails>
-<@assertFails messageRegexp="StringIndexOutOfBounds|decreasing">
+<@assertFails message="decreasing">
   <@assertEquals actual=s[3..1] expected="" />
+</@assertFails>
+<#-- But it isn't emulated for operators introduced after 2.3.20: -->
+<@assertFails message="decreasing">
+  <@assertEquals actual=s[3..<1] expected="" />
+</@assertFails>
+<@assertFails message="decreasing">
+  <@assertEquals actual=s[3..*-2] expected="" />
 </@assertFails>
 
 <@assertFails message="5 is out of bounds">

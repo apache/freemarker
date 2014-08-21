@@ -24,6 +24,7 @@ final class BoundedRangeModel extends RangeModel {
 
     private final int step, size;
     private final boolean rightAdaptive;
+    private final boolean affectedByStringSlicingBug;
     
     /**
      * @param inclusiveEnd Tells if the {@code end} index is part of the range. 
@@ -35,6 +36,7 @@ final class BoundedRangeModel extends RangeModel {
         step = begin <= end ? 1 : -1;
         size = Math.abs(end - begin) + (inclusiveEnd ? 1 : 0);
         this.rightAdaptive = rightAdaptive;
+        this.affectedByStringSlicingBug = inclusiveEnd;
     }
 
     public int size() {
@@ -51,6 +53,10 @@ final class BoundedRangeModel extends RangeModel {
 
     boolean isRightAdaptive() {
         return rightAdaptive;
+    }
+
+    boolean isAffactedByStringSlicingBug() {
+        return affectedByStringSlicingBug;
     }
     
 }

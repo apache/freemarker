@@ -130,7 +130,8 @@ final class DynamicKeyName extends Expression {
         throw new NonHashException(target, targetModel, env);
     }
 
-    private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env) throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
+    private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env)
+    throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
         final TemplateSequenceModel targetSeq;
         final String targetStr;
         if (targetModel instanceof TemplateSequenceModel) {
@@ -224,7 +225,7 @@ final class DynamicKeyName extends Expression {
         } else {
             final int exclEndIdx;
             if (step < 0 && resultSize > 1) {
-                if (resultSize != 2) {
+                if (!(range.isAffactedByStringSlicingBug() && resultSize == 2)) {
                     throw new _MiscTemplateException(
                             keyExpression, new Object[] {
                                 "Decreasing ranges aren't allowed for slicing strings (as it would give reversed "
@@ -232,7 +233,7 @@ final class DynamicKeyName extends Expression {
                                 new Integer(firstIdx), ", last = ", new Integer(firstIdx + (resultSize - 1) * step)
                             });
                 } else {
-                    // Emulate the legacy bug, where "foo"[n .. n-1] gives "" instead of an error.  
+                    // Emulate the legacy bug, where "foo"[n .. n-1] gives "" instead of an error (if n >= 1).  
                     // Fix this in FTL [2.4]
                     exclEndIdx = firstIdx;
                 }
