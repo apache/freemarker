@@ -1777,7 +1777,8 @@ The average of the price of a python and an elephant is:
                   <para><link
                   linkend="dgui_template_exp_direct_string">Strings</link>:
                   <literal>"Foo"</literal> or <literal>'Foo'</literal> or
-                  <literal>"It's \"quoted\""</literal> or
+                  <literal>"It's \"quoted\""</literal> or <literal>'It\'s
+                  "quoted"'</literal> or
                   <literal>r"C:\raw\string"</literal></para>
                 </listitem>
 
@@ -1862,10 +1863,11 @@ The average of the price of a python and an elephant is:
 
                 <listitem>
                   <para><link
-                  linkend="dgui_template_exp_stringop_slice">String slice:
-                  </link><literal>name[0..4]</literal>,
-                  <literal>name[0..&lt;5]</literal>,
-                  <literal>name[1..]</literal></para>
+                  linkend="dgui_template_exp_stringop_slice">String
+                  slice:</link> Inclusive end: <literal>name[0..4]</literal>,
+                  Exclusive end: <literal>name[0..&lt;5]</literal>,
+                  Length-based (lenient): <literal>name[0..*5]</literal>,
+                  Remove starting: <literal>name[5..]</literal></para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -1884,9 +1886,11 @@ The average of the price of a python and an elephant is:
                 <listitem>
                   <para><link
                   linkend="dgui_template_exp_seqenceop_slice">Sequence
-                  slice</link>: <literal>products[10..19]</literal> or
-                  <literal>products[10..&lt;20]</literal> or
-                  <literal>products[10..]</literal></para>
+                  slice</link>: Inclusive end:
+                  <literal>products[20..29]</literal>, Exclusive end:
+                  <literal>products[20..&lt;30]</literal>, Length-based
+                  (lenient): <literal>products[20..*10]</literal>, Remove
+                  starting: <literal>products[20..]</literal></para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -1899,7 +1903,7 @@ The average of the price of a python and an elephant is:
                 <listitem>
                   <para><link
                   linkend="dgui_template_exp_hashop_cat">Concatenation</link>:
-                  <literal>passwords + {"joe":"secret42"}</literal></para>
+                  <literal>passwords + { "joe": "secret42" }</literal></para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -2383,7 +2387,7 @@ autumn
                 <para>Ranges doesn't actually store the numbers they consist
                 of, thus for example <literal>0..1</literal> and
                 <literal>0..100000000</literal> is equally fast to create and
-                takes the same amount of memory. </para>
+                takes the same amount of memory.</para>
               </listitem>
             </itemizedlist>
           </section>
@@ -2840,7 +2844,7 @@ J</programlisting>
             what index you specify.</para>
 
             <para>Length limited ranges will slice at most as many items as
-            the range length specifies: </para>
+            the range length specifies:</para>
 
             <programlisting role="template">&lt;#assign seq = ["A", "B", "C"]&gt;
 - &lt;#list seq[0..*2] as i&gt;${i}&lt;/#list&gt;
@@ -8096,7 +8100,10 @@ env.process();</programlisting>
           interface described above, the models that wrap
           <literal>String</literal>s also provide access to all
           <literal>String</literal> methods (<literal>indexOf</literal>,
-          <literal>substring</literal>, etc.).</para>
+          <literal>substring</literal>, etc.), though most of them has native
+          FreeMarker equivalent which are better to use
+          (<literal>s?index_of(n)</literal>,
+          <literal>s[start..&lt;end]</literal>, etc).</para>
         </section>
 
         <section>
@@ -21106,7 +21113,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   these kind of ranges are used for slicing, the slice will
                   end without error if the end of the sliced sequence or
                   string is reached before the specified range length was
-                  reached. <link
+                  reached. Thus, for example, to take the first 10 characters
+                  from the string <literal>s</literal>, or less if
+                  <literal>s</literal> is shorter than 10 characters, you can
+                  use <literal>s[0..*10]</literal>. <link
                   linkend="dgui_template_exp_seqenceop_slice">More...</link></para>
                 </listitem>
 
