@@ -240,8 +240,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("split", new StringBuiltins.splitBI());
         builtins.put("starts_with", new StringBuiltins.starts_withBI());
         builtins.put("string", new MiscellaneousBuiltins.stringBI());
-        builtins.put("substring", new substringBI(false));
-        builtins.put("safe_substring", new substringBI(true));
+        builtins.put("substring", new substringBI());
         builtins.put("time", new MiscellaneousBuiltins.dateBI(TemplateDateModel.TIME));
         builtins.put("time_if_unknown", new DateBuiltins.dateType_if_unknownBI(TemplateDateModel.TIME));
         builtins.put("trim", new StringBuiltins.trimBI());

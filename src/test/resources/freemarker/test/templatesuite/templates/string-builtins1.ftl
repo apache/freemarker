@@ -36,31 +36,6 @@ xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
 <@assertFails message="at least 0">${"ab"?substring(1, -1)}</@><#t>
 <@assertFails message="greater than the length of the string">${"ab"?substring(1, 3)}</@><#t>
 <@assertFails message="shouldn't be greater than the end index">${"ab"?substring(1, 0)}</@><#t>
-<#-- ?safe_substring: -->
-<@assertEquals actual="ab"?safe_substring(0) expected="ab" />
-<@assertEquals actual="ab"?safe_substring(1) expected="b" />
-<@assertEquals actual="ab"?safe_substring(2) expected="" />
-<@assertEquals actual="ab"?safe_substring(-1) expected="ab" />
-<@assertEquals actual="ab"?safe_substring(3) expected="" />
-<@assertEquals actual="ab"?safe_substring(0, 0) expected="" />
-<@assertEquals actual="ab"?safe_substring(0, 1) expected="a" />
-<@assertEquals actual="ab"?safe_substring(0, 2) expected="ab" />
-<@assertEquals actual="ab"?safe_substring(0, -1) expected="" />
-<@assertEquals actual="ab"?safe_substring(0, 3) expected="ab" />
-<@assertEquals actual="ab"?safe_substring(1, 1) expected="" />
-<@assertEquals actual="ab"?safe_substring(1, 2) expected="b" />
-<@assertFails message="shouldn't be greater than the end index">${"ab"?safe_substring(1, -1)}</@><#t>
-<@assertEquals actual="ab"?safe_substring(1, 3) expected="b" />
-<@assertFails message="shouldn't be greater than the end index">${"ab"?safe_substring(1, 0)}</@><#t>
-<@assertEquals actual="ab"?safe_substring(-1, 3) expected="ab" />
-<@assertEquals actual="ab"?safe_substring(-2, 4) expected="ab" />
-<@assertEquals actual="ab"?safe_substring(0, 3) expected="ab" />
-<@assertEquals actual="abcd"?safe_substring(0, 3) expected="abc" />
-<@assertEquals actual="ab"?safe_substring("ab"?length - 2) expected="ab" />
-<@assertEquals actual="abcd"?safe_substring("abcd"?length - 2) expected="cd" />
-<@assertEquals actual=""?safe_substring(0, 1) expected="" />
-<@assertEquals actual=""?safe_substring(-1, 0) expected="" />
-<@assertEquals actual=""?safe_substring(-1, 1) expected="" />
 
 word_list:
 <#global words = x?word_list>
