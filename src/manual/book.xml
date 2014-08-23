@@ -3712,54 +3712,55 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
               </tr>
 
               <tr>
-                <td>multiplicative</td>
+                <td>multiplicative operators</td>
 
                 <td><literal>* / %</literal></td>
               </tr>
 
               <tr>
-                <td>additive</td>
+                <td>additive operators</td>
 
                 <td><literal>+ -</literal></td>
               </tr>
 
               <tr>
-                <td>relational</td>
+                <td>numerical ranges</td>
 
-                <td><literal>&lt; &gt; &lt;= &gt;=</literal> (and quivalents:
+                <td><literal>..</literal> <literal>..&lt;</literal>
+                <literal>..!</literal> <literal>..*</literal></td>
+              </tr>
+
+              <tr>
+                <td>relational operators</td>
+
+                <td><literal>&lt; &gt; &lt;= &gt;=</literal> (and equivalents:
                 <literal>gt</literal>, <literal>lt</literal>, etc.)</td>
               </tr>
 
               <tr>
-                <td>equality</td>
+                <td>equality operators</td>
 
                 <td><literal>== !=</literal> (and equivalents:
                 <literal>=</literal>)</td>
               </tr>
 
               <tr>
-                <td>logical AND</td>
+                <td>logical <quote>and</quote> operator</td>
 
                 <td><literal>&amp;&amp;</literal></td>
               </tr>
 
               <tr>
-                <td>logical OR</td>
+                <td>logical <quote>or</quote> operator</td>
 
                 <td><literal>||</literal></td>
-              </tr>
-
-              <tr>
-                <td>numerical range</td>
-
-                <td><literal>..</literal></td>
               </tr>
             </tbody>
           </informaltable>
 
-          <para>For those of you who master C, Java language or JavaScript,
-          note that the precedence rules are the same as in those languages,
-          except that FTL has some operators that do not exist in those
+          <para>For those of you who know C, Java language or JavaScript, note
+          that the precedence rules are the same as in those languages, except
+          that FTL has some operators that do not exist in those
           languages.</para>
 
           <para>The default value operator
