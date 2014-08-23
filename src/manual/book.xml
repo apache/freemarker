@@ -1916,7 +1916,9 @@ The average of the price of a python and an elephant is:
               <literal>x == y</literal>, <literal>x != y</literal>,
               <literal>x &lt; y</literal>, <literal>x &gt; y</literal>,
               <literal>x &gt;= y</literal>, <literal>x &lt;= y</literal>,
-              <literal>x &amp;lt; y</literal>, ...etc.</para>
+              <literal>x lt y</literal>, <literal>x lte y</literal>,
+              <literal>x gt y</literal>, <literal>x gte y</literal>,
+              ...etc.</para>
             </listitem>
 
             <listitem>
@@ -3110,27 +3112,43 @@ ${-1.999?int}</programlisting>
   x is less or equivalent with 12
 &lt;/#if&gt;</programlisting>
 
-          <para>There is a little problem with <literal>&gt;=</literal> and
+          <para>There's a problem with <literal>&gt;=</literal> and
           <literal>&gt;</literal>. FreeMarker interprets the
-          <literal>&gt;</literal> as the closing character of the FTL tag. To
-          prevent this, you have to put the expression into <link
-          linkend="dgui_template_exp_parentheses">parentheses</link>:
-          <literal>&lt;#if (x &gt; y)&gt;</literal>. Or, you can use
-          <literal>&amp;gt;</literal> and <literal>&amp;lt;</literal> on the
-          place of the problematic relation marks: <literal>&lt;#if x &amp;gt;
-          y&gt;</literal>. (Note that in general FTL does not support entity
-          references (those
-          <literal>&amp;<replaceable>...</replaceable>;</literal> things) in
-          FTL tags; it is just an exception with the arithmetical
-          comparisons.). Also, as an alternative you can use
-          <literal>lt</literal> instead of <literal>&lt;</literal>,
-          <literal>lte</literal> instead of <literal>&lt;=</literal>,
-          <literal>gt</literal> instead of <literal>&gt;</literal> and
-          <literal>gte</literal> instead of <literal>&gt;=</literal>. And, for
-          historical reasons FTL also understands <literal>\lt</literal>,
-          <literal>\lte</literal>, <literal>\gt</literal> and
-          <literal>\gte</literal> which are the same as the ones without the
-          backslash.</para>
+          <literal>&gt;</literal> character as the closing character of the
+          FTL tag. To prevent this, you can use <literal>lt</literal> instead
+          of <literal>&lt;</literal>, <literal>lte</literal> instead of
+          <literal>&lt;=</literal>, <literal>gt</literal> instead of
+          <literal>&gt;</literal> and <literal>gte</literal> instead of
+          <literal>&gt;=</literal>, like in <literal>&lt;#if x gt
+          y&gt;</literal>. Another trick it to put the expression into <link
+          linkend="dgui_template_exp_parentheses">parentheses</link> like in
+          <literal>&lt;#if (x &gt; y)&gt;</literal>, although it's considered
+          to be less elegant.</para>
+
+          <note>
+            <para>FreeMarker supports some other alternatives too, but these
+            are deprecated:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Writing <literal>&amp;gt;</literal> and
+                <literal>&amp;lt;</literal> on the place of the problematic
+                relation marks, like in: <literal>&lt;#if x &amp;gt;
+                y&gt;</literal> or <literal>&lt;#if x &amp;gt;=
+                y&gt;</literal> . Note that in general FTL does not support
+                entity references (the
+                <literal>&amp;<replaceable>...</replaceable>;</literal>
+                things) in FTL tags; it's just an exception with the
+                arithmetical comparisons.</para>
+              </listitem>
+
+              <listitem>
+                <para><literal>\lt</literal>, <literal>\lte</literal>,
+                <literal>\gt</literal> and <literal>\gte</literal> which are
+                the same as the ones without the backslash</para>
+              </listitem>
+            </itemizedlist>
+          </note>
         </section>
 
         <section xml:id="dgui_template_exp_logicalop">
