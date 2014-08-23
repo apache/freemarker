@@ -22233,6 +22233,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               backward compatible, as the API only promises to give something
               that implements <literal>TemplateSequenceModel</literal>.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed: Constants used for empty sequence, empty hash,
+              empty collection and empty iterator weren't
+              <literal>Serializable</literal>.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -22256,8 +22262,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Many smaller additions and clarifications in the Manual
-              and API JavaDocs.</para>
+              <para>Many smaller improvements and fixes in the Manual and API
+              JavaDocs.</para>
             </listitem>
           </itemizedlist>
         </section>
