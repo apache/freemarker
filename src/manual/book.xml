@@ -4634,9 +4634,13 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
             are accessible from everywhere in the template, or from the
             templates inserted with <literal>include</literal> directive. You
             can create and replace these variables with the <link
-            linkend="ref.directive.assign"><literal>assign</literal></link> or
-            <link linkend="ref.directive.macro"><literal>macro</literal>
-            directives</link>.</para>
+            linkend="ref.directive.assign"><literal>assign</literal></link>.
+            Also, because macros and functions are just variable, the <link
+            linkend="ref.directive.macro"><literal>macro</literal>
+            directives</link> and <link
+            linkend="ref.directive.function"><literal>function</literal>
+            directives</link> also set variables like
+            <literal>assign</literal> does.</para>
           </listitem>
 
           <listitem>
@@ -4657,6 +4661,18 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
             they only exist between the start-tag and end-tag of the
             directive. <link linkend="ref.directive.macro">Macro</link>
             parameters are local variables, not loop variables.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis role="term">Global variables</emphasis>: This is
+            an advanced topic, and this kind of variables should be seldom
+            used. Global variables are shared by all templates, even if they
+            belong to different name spaces because they were <link
+            linkend="ref.directive.import"><literal>import</literal>-ed</link>
+            as opposed to <literal>include</literal>-d. Thus, their visibility
+            is like that of data-model variables.They are set via the <link
+            linkend="ref.directive.global"><literal>global</literal>
+            directive</link>.</para>
           </listitem>
         </itemizedlist>
 
@@ -4752,6 +4768,13 @@ ${x}</programlisting>
         <programlisting role="template">&lt;#assign user = "Joe Hider"&gt;
 ${user}          &lt;#-- prints: Joe Hider --&gt;
 ${.globals.user} &lt;#-- prints: Big Joe --&gt;</programlisting>
+
+        <para>Variables set via the <link
+        linkend="ref.directive.global"><literal>global</literal>
+        directive</link> hide data-model variables with the same name. Often,
+        global variables are set exactly for this purpose. But when not, you
+        can still access the data-model variable like
+        <literal>.data_model.user</literal>.</para>
 
         <para>For information about syntax of variables please read: <xref
         linkend="dgui_template_exp"/></para>
@@ -7722,10 +7745,18 @@ c</programlisting>
       details.</para>
 
       <section xml:id="pgui_misc_var">
-        <title>Variables</title>
+        <title>Variables, scopes</title>
 
         <indexterm>
           <primary>variables</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>variable scopes</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>scopes</primary>
         </indexterm>
 
         <para>This chapter explains what happens when a template tries to
