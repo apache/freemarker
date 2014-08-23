@@ -16501,11 +16501,15 @@ or
 &lt;/#if&gt;</programlisting>
 
           <note>
-            <para>How to test if x is greater than 1? <literal>&lt;#if x &gt;
-            1&gt;</literal> will be <emphasis>wrong</emphasis>, as FreeMarker
-            will interpret the first <literal>&gt;</literal> as the end of the
-            tag. Thus, either write <literal>&lt;#if (x &gt; 1)&gt;</literal>
-            or <literal>&lt;#if x &amp;gt; 1&gt;</literal>.</para>
+            <para>When you want to test if <literal>x &gt; 0</literal> or
+            <literal>x &gt;= 0</literal>, writing <literal>&lt;#if x &gt;
+            0&gt;</literal> and <literal>&lt;#if x &gt;= 0&gt;</literal> is
+            WRONG, as the first <literal>&gt;</literal> will close the
+            <literal>#if</literal> tag. To work that around, write
+            <literal>&lt;#if x gt 0&gt;</literal> or <literal>&lt;#if gte
+            0&gt;</literal>. Also note that if the comparison occurs inside
+            parentheses, you will have no such problem, like <literal>&lt;#if
+            foo.bar(x &gt; 0)&gt;</literal> works as expected.</para>
           </note>
         </section>
       </section>
