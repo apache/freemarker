@@ -17866,7 +17866,7 @@ or
                           <para><literal>u</literal>: Use UTC instead of what
                           the <literal>time_zone</literal> setting suggests.
                           However, <literal>java.sql.Date</literal> and
-                          <literal>java.sql.Time</literal> aren't effected by
+                          <literal>java.sql.Time</literal> aren't affected by
                           this (see
                           <literal>sql_date_and_time_time_zone</literal> to
                           understand why)</para>
@@ -23260,7 +23260,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>&lt;#import
               <replaceable>...</replaceable>&gt;</literal>).</para>
 
-              <para>You are not effected if you don't allow users to upload
+              <para>You are not affected if you don't allow users to upload
               templates and also at least one of these stands:</para>
 
               <itemizedlist>

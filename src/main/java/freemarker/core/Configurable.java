@@ -650,7 +650,7 @@ public class Configurable
      *                     
      *         <li><p>Time zone options:<br/>
      *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't effected
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't affected
      *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br/>
      *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
