@@ -2272,8 +2272,8 @@ autumn
             <literal>0..&lt;m</literal>, assuming the <literal>m</literal>
             variable stores 5, will give a sequence that contains <literal>[0,
             1, 2, 3, 4]</literal>. Ranges are primarily used for for iterating
-            over a range of number with <literal>&lt;#list
-            <replaceable>...</replaceable>&gt;</literal>, and for <link
+            over a range of numbers with <literal>&lt;#list
+            <replaceable>...</replaceable>&gt;</literal> and for <link
             linkend="dgui_template_exp_seqenceop_slice">slicing
             sequences</link> and <link
             linkend="dgui_template_exp_stringop_slice">slicing
@@ -2308,9 +2308,9 @@ autumn
                 <literal>[]</literal>. Note the last example; the result can
                 be an empty sequence. There's no difference between
                 <literal>..&lt;</literal> and <literal>..!</literal>; the last
-                form is used in application where using the
-                <literal>&gt;</literal> character causes problems (for editors
-                and such).</para>
+                form is used in applications where using the
+                <literal>&lt;</literal> character causes problems (for HTML
+                editors and such).</para>
               </listitem>
 
               <listitem>
@@ -2322,7 +2322,9 @@ autumn
                 <literal>[]</literal>. When these kind of ranges are used for
                 slicing, the slice will end without error if the end of the
                 sliced sequence or string is reached before the specified
-                range length was reached.</para>
+                range length was reached; see <link
+                linkend="dgui_template_exp_seqenceop_slice">slicing
+                sequences</link> for more..</para>
 
                 <note>
                   <para>Length limited ranges were introduced in FreeMarker
@@ -2337,9 +2339,10 @@ autumn
                 <literal>[1, 2, 3, 4, 5, 6, ... ]</literal>, up to infinity.
                 Be careful when processing (like listing) such ranges, as
                 processing all items of it it would take forever or until the
-                application runs out of memory and crashes. When these kind of
-                ranges are used for slicing, the slice will end when the end
-                of the sliced sequence or string is reached.</para>
+                application runs out of memory and crashes. Just like with
+                length limited ranges, when these kind of ranges are used for
+                slicing, the slice will end when the end of the sliced
+                sequence or string is reached.</para>
 
                 <warning>
                   <para>Right-unbounded ranges before FreeMarker 2.3.21 were
@@ -2356,20 +2359,24 @@ autumn
 
             <itemizedlist>
               <listitem>
-                <para>There are no square brackets around range expression,
-                that is, you write <literal>0..&lt;x</literal>, NOT
-                <literal>[0..&lt;x]</literal>, which would be a 1 long
-                sequence of ranges.</para>
+                <para>Range expressions themselves don't have square brackets,
+                for example, you write <literal>&lt;#assign myRange =
+                0..&lt;x&gt;</literal>, NOT <literal>&lt;#assign myRange =
+                [0..&lt;x]&gt;</literal>. The last would create a sequence
+                that contains an item that's a range. The square brackets are
+                part of the slicing syntax, like
+                <literal><replaceable>seq</replaceable>[<replaceable>myRange</replaceable>]</literal>.</para>
               </listitem>
 
               <listitem>
                 <para>You can write arithmetical expression on the sides of
                 the <literal>..</literal> without parenthesis, like <literal>n
-                + 1 .. m / 2 - 1</literal>.</para>
+                + 1 ..&lt; m / 2 - 1</literal>.</para>
               </listitem>
 
               <listitem>
-                <para><literal>..&lt;</literal> and <literal>..!</literal> are
+                <para><literal>..</literal>, <literal>..&lt;</literal>,
+                <literal>..!</literal> and <literal>..*</literal> are
                 operators, so you can't have space inside them. Like
                 <literal>n .. &lt;m</literal> is WRONG, but <literal>n ..&lt;
                 m</literal> is good.</para>
@@ -2384,8 +2391,8 @@ autumn
               </listitem>
 
               <listitem>
-                <para>Ranges doesn't actually store the numbers they consist
-                of, thus for example <literal>0..1</literal> and
+                <para>Ranges doesn't really store the numbers they consist of,
+                thus for example <literal>0..1</literal> and
                 <literal>0..100000000</literal> is equally fast to create and
                 takes the same amount of memory.</para>
               </listitem>
@@ -2410,9 +2417,10 @@ autumn
             <para>To specify a hash in a template, you list the key/value
             pairs separated by commas, and put the list into curly brackets.
             The key and value within a key/value pair are separated with a
-            colon. Here is an example: <literal>{"name":"green mouse",
-            "price":150}</literal>. Note that both the names and the values
-            are expressions. However, the lookup names must be strings.</para>
+            colon. Here is an example: <literal>{ "name": "green mouse",
+            "price": 150 }</literal>. Note that both the names and the values
+            are expressions. The keys must be strings. The values can be if
+            any type.</para>
           </section>
         </section>
 
@@ -2430,8 +2438,9 @@ autumn
 
             <para>To access a top-level variable, you simply use the variable
             name. For example, the expression <literal>user</literal> will
-            evaluate to the value of variable stored with name ``user'' in the
-            root. So this will print what you store there:</para>
+            evaluate to the value of variable stored with name
+            <quote>user</quote> in the root. So this will print what you store
+            there:</para>
 
             <programlisting role="template">${user}</programlisting>
 
@@ -2443,7 +2452,7 @@ autumn
             <para>In this expression the variable name can contain only
             letters (including non-Latin letters), digits (including non-Latin
             digits), underline (_), dollar ($), at sign (@) and hash (#).
-            Furthermore, the name must not start with digit.</para>
+            Furthermore, the name must not start with a digit.</para>
           </section>
 
           <section xml:id="dgui_template_exp_var_hash">
@@ -2650,7 +2659,7 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
               <literal>date_format</literal>, <literal>time_format</literal>,
               <literal>datetime_format</literal> and
               <literal>boolean_format</literal>, etc. settings, and thus the
-              result targets humans and isn't in general machine parsable.
+              result targets humans and isn't in generally machine parsable.
               This mostly leads to problems with numbers, as many locales use
               grouping (thousands separators) by default, and so
               <literal>"someUrl?id=" + id</literal> becomes to something like
@@ -2693,7 +2702,7 @@ ${s} &lt;#-- Just to see what the value of s is --&gt;
             <literal>user?string[0]</literal>. Don't worry if you don't
             understand this yet; built-ins will be discussed later.)</para>
 
-            <para>Example (assume that user is ``Big Joe''):</para>
+            <para>Example (assume that user is <quote>Big Joe</quote>):</para>
 
             <programlisting role="template">${user[0]}
 ${user[4]}</programlisting>
@@ -2706,18 +2715,37 @@ J</programlisting>
           </section>
 
           <section xml:id="dgui_template_exp_stringop_slice">
-            <title>String slicing</title>
+            <title>String slicing (substrings)</title>
 
-            <para>You can get a range of characters in the same way as you
-            <link linkend="dgui_template_exp_seqenceop_slice">get a sequence
-            slice</link> (see there), e.g <literal>user[1..4]</literal>,
-            <literal>user[4..]</literal>, <literal>user[0..&lt;5]</literal>.
-            However, there are few important differences:</para>
+            <indexterm>
+              <primary>string slicing</primary>
+            </indexterm>
+
+            <indexterm>
+              <primary>substring</primary>
+            </indexterm>
+
+            <indexterm>
+              <primary>string</primary>
+
+              <secondary>slice</secondary>
+            </indexterm>
+
+            <indexterm>
+              <primary>string</primary>
+
+              <secondary>substring</secondary>
+            </indexterm>
+
+            <para>You can a slice a string in the same way as you <link
+            linkend="dgui_template_exp_seqenceop_slice">slice a
+            sequence</link> (see there), only here instead of sequence items
+            you work with characters.</para>
 
             <itemizedlist>
               <listitem>
                 <para>Decreasing ranges aren't allowed for string slicing.
-                (That's because unlike sequence, you seldom if ever want to
+                (That's because unlike sequences, you seldom if ever want to
                 show a string reversed, so if that happens, that's almost
                 always the result of an oversight.)</para>
               </listitem>
@@ -2725,23 +2753,39 @@ J</programlisting>
               <listitem>
                 <para>If a value is both a string and a sequence (a
                 multi-typed value), then slicing will slice the sequence
-                instead of the string. When you are processing XML via
-                FreeMarker's standard wrapper, such values are common. In such
-                case you can use
+                instead of the string. When you are processing XML, such
+                values are common. In such cases you can use
                 <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>.</para>
               </listitem>
 
               <listitem>
                 <para>There's a legacy bug where a range with
-                <emphasis>inclusive</emphasis> end where the end index is not
-                negative and one less than the start index (like in
-                <literal>"abc"[1..0]</literal>, etc.) will give an empty
-                string instead of an error. (It should be an error as it's a
-                decreasing range.) While currently this bug is kept for
-                backward compatibility, you shouldn't utilize this, as in the
-                future it will be certainly fixed.</para>
+                <emphasis>inclusive</emphasis> end that's one less than the
+                starting index and is non-negative (like in
+                <literal>"abc"[1..0]</literal>) will give an empty string
+                instead of an error. (It should be an error as it's a
+                decreasing range.) Currently this bug is emulated for backward
+                compatibility, but you shouldn't utilize it, as in the future
+                it will be certainly disabled.</para>
               </listitem>
             </itemizedlist>
+
+            <para>Example:</para>
+
+            <programlisting role="template">&lt;#assign s = "ABCDEF"&gt;
+${s[2..3]}
+${s[2..&lt;4]}
+${s[2..*3]}
+${s[2..*100]}
+${s[2..]}</programlisting>
+
+            <para>will print:</para>
+
+            <programlisting role="output">CD
+CD
+CDE
+CDEF
+CDEF</programlisting>
           </section>
         </section>
 
@@ -2823,65 +2867,70 @@ J</programlisting>
             were <literal><replaceable>range</replaceable></literal> is a
             range value <link linkend="dgui_template_exp_direct_ranges">as
             described here</link>, you can take a slice of the sequence. The
-            resulting sequence will contain those items from the original
+            resulting sequence will contain the items from the original
             sequence (<literal><replaceable>seq</replaceable></literal>) whose
             indexes are in the range. For example:</para>
 
-            <programlisting role="template">&lt;#list ["A", "B", "C", "D", "E"][1..3] as i&gt;${i}&lt;/#list&gt;</programlisting>
+            <programlisting role="template">&lt;#assert seq = ["A", "B", "C", "D", "E"]&gt;
+&lt;#list seq[1..3] as i&gt;${i}&lt;/#list&gt;</programlisting>
 
             <para>will print</para>
 
             <programlisting role="output">BCD </programlisting>
 
-            <para>Furthermore the items in the slice will be in the same order
-            as in the range. Thus for example the above example with the
+            <para>Furthermore, the items in the slice will be in the same
+            order as in the range. Thus for example the above example with the
             <literal>3..1</literal> range would print
             <literal>DCB</literal>.</para>
 
-            <para>An attempt to access a subvariable past the last subvariable
-            or before the first subvariable of the sequence will cause an
-            error and abort the processing of the template, so be careful with
-            what index you specify.</para>
+            <para>The numbers in the range must be valid indexes in the
+            sequence, or else the processing of the template will be aborted
+            with error. Like in the last example,
+            <literal>seq[-1..0]</literal> would be an error as
+            <literal>seq[-1]</literal> is invalid, also
+            <literal>seq[1..5]</literal> would be because
+            <literal>seq[5]</literal> is invalid. (Note that
+            <literal>seq[100..&lt;100]</literal> or
+            <literal>seq[100..*0]</literal> would be valid despite that 100 is
+            out of bounds, because those ranges are empty.)</para>
 
-            <para>Length limited ranges will slice at most as many items as
-            the range length specifies:</para>
+            <para>Length limited ranges
+            (<literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>)
+            and right-unbounded ranges
+            (<literal><replaceable>start</replaceable>..</literal>) adapt to
+            the length of the sliced sequence. They will slice out at most as
+            many items as there is available:</para>
 
             <programlisting role="template">&lt;#assign seq = ["A", "B", "C"]&gt;
+
+Slicing with length limited ranges:
 - &lt;#list seq[0..*2] as i&gt;${i}&lt;/#list&gt;
 - &lt;#list seq[1..*2] as i&gt;${i}&lt;/#list&gt;
-- &lt;#list seq[2..*2] as i&gt;${i}&lt;/#list&gt;
-- &lt;#list seq[3..*2] as i&gt;${i}&lt;/#list&gt;</programlisting>
+- &lt;#list seq[2..*2] as i&gt;${i}&lt;/#list&gt; &lt;#-- Not an error --&gt;
+- &lt;#list seq[3..*2] as i&gt;${i}&lt;/#list&gt; &lt;#-- Not an error --&gt;
 
-            <para>will print</para>
-
-            <programlisting role="output">- AB
-- BC
-- C
--</programlisting>
-
-            <para>Note in the last line that slicing with length limited range
-            allows the starting index to be past the last item <emphasis>by
-            one</emphasis> (but no more).</para>
-
-            <para>Right-unbounded ranges are like length-limited ranges with
-            an infinite length. That is, they slice out all items starting
-            from the given index, until the last item in the sequence:</para>
-
-            <programlisting role="template">&lt;#assign seq = ["A", "B", "C"]&gt;
+Slicing with right-unlimited ranges:
 - &lt;#list seq[0..] as i&gt;${i}&lt;/#list&gt;
 - &lt;#list seq[1..] as i&gt;${i}&lt;/#list&gt;
 - &lt;#list seq[2..] as i&gt;${i}&lt;/#list&gt;
 - &lt;#list seq[3..] as i&gt;${i}&lt;/#list&gt;</programlisting>
 
-            <para>will print</para>
+            <para>This will print:</para>
 
-            <programlisting role="output">- ABC
+            <programlisting role="output">Slicing with length limited ranges:
+- AB
+- BC
+- C
+-
+
+Slicing with right-unlimited ranges:
+- ABC
 - BC
 - C
 -</programlisting>
 
-            <para>Note in the last line that slicing with right-unbounded
-            range allows the starting index to be past the last item
+            <para>Note above that slicing with length limited and right
+            unbounded ranges allow the starting index to be past the last item
             <emphasis>by one</emphasis> (but no more).</para>
           </section>
         </section>
