@@ -22088,14 +22088,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>If <literal>incompatible_improvements</literal> is set
                   to 2.3.21 (or higher) and templates are loaded through
-                  <literal>Configuraiton.getTemplate</literal>, and the
+                  <literal>Configuration.getTemplate</literal>, and the
                   <literal>TemplateLoader</literal> in use has
                   <literal>URLConnectionUsesCaches</literal> left on
                   <literal>null</literal>, it will behave as if it was set to
                   <literal>false</literal>. Note that this
                   <literal>incompatible_improvements</literal> trick only
                   works if the template is loaded through
-                  <literal>Configuraiton.getTemplate</literal> (or
+                  <literal>Configuration.getTemplate</literal> (or
                   <literal>TemplateCache</literal>).</para>
                 </listitem>
               </itemizedlist>

@@ -115,7 +115,7 @@ public abstract class URLTemplateLoader implements TemplateLoader
      * and so the default of the {@link URLConnection} subclass will be in effect (usually {@code true}). That's the
      * 2.3.0-compatible mode. However, if {@link Configuration#getIncompatibleImprovements()} is at least 2.3.21, then
      * when {@code Configuration.getTemplate} is used, {@code null} will mean {@code false}. Note that this 2.3.21 trick
-     * only works if the template is loaded through {@code Configuraiton.getTemplate} (or {@link TemplateCache}). 
+     * only works if the template is loaded through {@code Configuration.getTemplate} (or {@link TemplateCache}). 
      * 
      * @since 2.3.21
      */

@@ -708,7 +708,7 @@ public class Configurable
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:
      * 
      * <ul>
-     *   <li>In productions systems: {@link TemplateExceptionHandler#RETHROW_HANDLER}
+     *   <li>In production systems: {@link TemplateExceptionHandler#RETHROW_HANDLER}
      *   <li>During development of HTML templates: {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}
      *   <li>During development of non-HTML templates: {@link TemplateExceptionHandler#DEBUG_HANDLER}
      * </ul>
