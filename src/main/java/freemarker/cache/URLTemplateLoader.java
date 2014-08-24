@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.net.URLConnection;
+
+import freemarker.template.Configuration;
 
 /**
  * This is an abstract template loader that can load templates whose
@@ -30,12 +33,15 @@ import java.net.URL;
  */
 public abstract class URLTemplateLoader implements TemplateLoader
 {
+    
+    private Boolean urlConnectionUsesCaches;
+    
     public Object findTemplateSource(String name)
     throws
     	IOException
     {
         URL url = getURL(name);
-        return url == null ? null : new URLTemplateSource(url);
+        return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
     
     /**
@@ -87,4 +93,34 @@ public abstract class URLTemplateLoader implements TemplateLoader
         }
         return prefix;
     }
+
+    /**
+     * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
+     * 
+     * @since 2.3.21
+     */
+    public Boolean getURLConnectionUsesCaches() {
+        return urlConnectionUsesCaches;
+    }
+
+    /**
+     * Sets if {@link URLConnection#setUseCaches(boolean)} will be called, and with what value. By default this is
+     * {@code null}; see the behavior then below. The recommended value is {@code false}, so that FreeMarker can always
+     * reliably detect when a template was changed. The default is {@code null} only for backward compatibility,
+     * and certainly will be changed to {@code false} in 2.4.0. As FreeMarker has its own template cache with its
+     * own update delay setting ({@link Configuration#setTemplateUpdateDelay(int)}), setting this to {@code false}
+     * shouldn't cause performance problems.
+     * 
+     * <p>Regarding {@code null} value: By default then {@link URLConnection#setUseCaches(boolean)} won't be called,
+     * and so the default of the {@link URLConnection} subclass will be in effect (usually {@code true}). That's the
+     * 2.3.0-compatible mode. However, if {@link Configuration#getIncompatibleImprovements()} is at least 2.3.21, then
+     * when {@code Configuration.getTemplate} is used, {@code null} will mean {@code false}. Note that this 2.3.21 trick
+     * only works if the template is loaded through {@code Configuraiton.getTemplate} (or {@link TemplateCache}). 
+     * 
+     * @since 2.3.21
+     */
+    public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
+        this.urlConnectionUsesCaches = urlConnectionUsesCaches;
+    }
+    
 }

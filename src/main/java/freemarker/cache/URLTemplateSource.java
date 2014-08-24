@@ -30,10 +30,18 @@ class URLTemplateSource {
     private final URL url;
     private URLConnection conn;
     private InputStream inputStream;
+    private Boolean useCaches;
 
-    URLTemplateSource(URL url) throws IOException {
+    /**
+     * @param useCaches {@code null} if this aspect wasn't set in the parent {@link TemplateLoader}.
+     */
+    URLTemplateSource(URL url, Boolean useCaches) throws IOException {
         this.url = url;
         this.conn = url.openConnection();
+        this.useCaches = useCaches;
+        if (useCaches != null) {
+            conn.setUseCaches(useCaches.booleanValue());
+        }
     }
 
     public boolean equals(Object o) {
@@ -115,4 +123,16 @@ class URLTemplateSource {
           conn = null;
         }
     }
+
+    Boolean getUseCaches() {
+        return useCaches;
+    }
+
+    void setUseCaches(boolean useCaches) {
+        if (this.conn != null) {
+            conn.setUseCaches(useCaches);
+            this.useCaches = Boolean.valueOf(useCaches);
+        }
+    }
+    
 }

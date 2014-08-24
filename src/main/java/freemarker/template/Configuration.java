@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +45,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.cache._CacheAPI;
 import freemarker.core.BugException;
@@ -280,6 +282,11 @@ public class Configuration extends Configurable implements Cloneable {
      *         are wrapped with {@link BeansWrapper} and its subclasses, like {@link DefaultObjectWrapper}. Although
      *         method values implement {@link TemplateSequenceModel} (because of a historical design quirk in
      *         {@link BeansWrapper}), trying to {@code #list} them will cause error, hence they aren't enumerable.
+     *       </li>
+     *       <li><p>In most cases (where FreeMarker is able to do that), for {@link TemplateLoader}-s that use
+     *         {@link URLConnection}, {@code URLConnection#setUseCaches(boolean)} will called with {@code false},
+     *         so that only FreeMarker will do caching, not the URL scheme's handler.
+     *         See {@link URLTemplateLoader#setURLConnectionUsesCaches(Boolean)} for more details.
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
