@@ -30,10 +30,10 @@ import java.util.StringTokenizer;
 import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
-import freemarker.core._CoreAPI;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
@@ -667,7 +667,7 @@ public class TemplateCache
     private Object modifyForConfIcI(Object templateSource) {
         if (templateSource == null) return null;
         
-        if (config.getIncompatibleImprovements().intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+        if (config.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             return templateSource;
         }
         

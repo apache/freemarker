@@ -37,8 +37,6 @@ public class _CoreAPI {
 
     public static final String STACK_SECTION_SEPARATOR = Environment.STACK_SECTION_SEPARATOR;
     
-    public static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = Configurable.DEFAULT_TL_AND_OW_CHANGE_VERSION;
-    
     public static final Set/*<String>*/ BUILT_IN_DIRECTIVE_NAMES;
     static {
         Set/*<String>*/ names = new TreeSet();

@@ -27,6 +27,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.Constants;
 
 /**
@@ -247,7 +248,7 @@ final class DynamicKeyName extends Expression {
 
     private TemplateModel emptyResult(boolean seq) {
         return seq
-                ? (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() < 2003021
+                ? (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
                         ? new SimpleSequence(Collections.EMPTY_LIST, null)
                         : Constants.EMPTY_SEQUENCE)
                 : TemplateScalarModel.EMPTY_STRING;

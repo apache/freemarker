@@ -31,7 +31,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
 
@@ -146,8 +146,7 @@ class StringBuiltins {
             SimpleCharStream scs = new SimpleCharStream(
                     new StringReader("(" + s + ")"), RUNTIME_EVAL_LINE_DISPLACEMENT, 1, s.length() + 2);
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
-            token_source.incompatibleImprovements = getTemplate().getConfiguration().getIncompatibleImprovements()
-                    .intValue();
+            token_source.incompatibleImprovements = _TemplateAPI.getTemplateLanguageVersionAsInt(this);
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
             FMParser parser = new FMParser(token_source);
             parser.setTemplate(getTemplate());
@@ -285,7 +284,6 @@ class StringBuiltins {
 
     static class htmlBI extends StringBuiltIn implements ICIChainMember {
         
-        private static final int MIN_ICE = Version.intValueFor(2, 3, 20); 
         private final BIBeforeICE2d3d20 prevICEObj = new BIBeforeICE2d3d20();
         
         TemplateModel calculateResult(String s, Environment env) {
@@ -299,7 +297,7 @@ class StringBuiltins {
         }
     
         public int getMinimumICIVersion() {
-            return MIN_ICE;
+            return _TemplateAPI.VERSION_INT_2_3_20;
         }
     
         public Object getPreviousICIChainMember() {

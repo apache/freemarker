@@ -340,7 +340,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     private TemplateLoader getDefaultTemplateLoader() {
-        return incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION
+        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21
                 ? _CacheAPI.createLegacyDefaultTemplateLoader()
                 : null;
     }
@@ -705,9 +705,9 @@ public class Configuration extends Configurable implements Cloneable {
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionSupported(incompatibleImprovements);
         boolean hadLegacyTLOWDefaults
-                = this.incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION; 
+                = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
         this.incompatibleImprovements = incompatibleImprovements;
-        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             if (!templateLoaderWasSet) {
                 recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
             }

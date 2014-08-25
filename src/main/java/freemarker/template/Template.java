@@ -77,6 +77,7 @@ public class Template extends Configurable {
     private final ArrayList lines = new ArrayList();
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
+    private Version templateLanguageVersion;
 
     /**
      * A prime constructor to which all other constructors should
@@ -86,6 +87,7 @@ public class Template extends Configurable {
     {
         super(cfg != null ? cfg : Configuration.getDefaultConfiguration());
         this.name = name;
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
     }
     
 
@@ -185,18 +187,21 @@ public class Template extends Configurable {
      * See more {@link Configuration#getDefaultConfiguration() here...}.
      */
     public Template(String name, Reader reader) throws IOException {
-        this(name, reader, null);
+        this(name, reader, (Configuration) null);
     }
 
     /**
-     * Only used internally.
+     * Only meant to be used internally.
+     * 
+     * @deprecated Has problems setting actualTagSyntax and templateLanguageVersion; will be removed in 2.4.
      */
+    // [2.4] remove this
     Template(String name, TemplateElement root, Configuration config) {
         this(name, config);
         this.rootElement = root;
         DebuggerService.registerTemplate(this);
     }
-
+    
     /**
      * Returns a trivial template, one that is just a single block of
      * plain text, no dynamic content. (Used by the cache module to create
@@ -208,10 +213,23 @@ public class Template extends Configurable {
      */
     static public Template getPlainTextTemplate(String name, String content, Configuration config) {
         Template template = new Template(name, config);
-        TextBlock block = new TextBlock(content);
-        template.rootElement = block;
+        template.rootElement = new TextBlock(content);
+        template.actualTagSyntax = config.getTagSyntax();
         DebuggerService.registerTemplate(template);
         return template;
+    }
+
+    private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
+        int v = incompatibleImprovements.intValue();
+        if (v < _TemplateAPI.VERSION_INT_2_3_19) {
+            _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+            return _TemplateAPI.VERSION_2_3_0;
+        } else if (v > _TemplateAPI.VERSION_INT_2_3_21) {
+            _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+            return _TemplateAPI.VERSION_2_3_21;
+        } else { // if 2.3.19 or 2.3.20 or 2.3.21
+            return incompatibleImprovements;
+        }
     }
 
     /**
@@ -405,6 +423,15 @@ public class Template extends Configurable {
     public Configuration getConfiguration() {
         return (Configuration) getParent();
     }
+    
+    /**
+     * Return the template language (FTL) version used by this template.
+     * For now (2.3.21) this is the same as {@link Configuration#getIncompatibleImprovements()}, except
+     * that it's normalized to the lowest version where the template language was changed.
+     */
+    Version getTemplateLanguageVersion() {
+        return templateLanguageVersion;
+    }
 
     /**
      * Sets the character encoding to use for
@@ -424,9 +451,11 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the tag syntax the parser has chosen for this template: {@link Configuration#SQUARE_BRACKET_TAG_SYNTAX}
-     * or {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax couldn't be determined (like because there was
-     * no tags in the template), this returns whatever the default is in the current configuration.
+     * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
+     * {@link Configuration#SQUARE_BRACKET_TAG_SYNTAX} or {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax
+     * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
+     * returns whatever the default is in the current configuration, so it's maybe
+     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
      */
     public int getActualTagSyntax() {
         return actualTagSyntax;

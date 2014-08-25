@@ -140,7 +140,7 @@ public class ConfigurationTest extends TestCase{
     
     public void testVersion() {
         Version v = Configuration.getVersion();
-        assertTrue(v.intValue() > 2003020);
+        assertTrue(v.intValue() > _TemplateAPI.VERSION_INT_2_3_20);
         assertNotNull(v.getExtraInfo());
         assertSame(v.toString(), Configuration.getVersionNumber());
         

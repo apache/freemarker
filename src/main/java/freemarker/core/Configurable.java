@@ -67,9 +67,6 @@ public class Configurable
 {
     static final String C_TRUE_FALSE = "true,false";
     
-    /** The incompatible improvements version where the default of tempateLoader and objectWrapper was changed. */
-    static final int DEFAULT_TL_AND_OW_CHANGE_VERSION = 2003021;
-
     private static final String DEFAULT = "default";
     private static final String JVM_DEFAULT = "JVM default";
     
@@ -775,7 +772,7 @@ public class Configurable
     
     static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
         if (incompatibleImprovements == null
-                || incompatibleImprovements.intValue() < DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+                || incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
             return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();

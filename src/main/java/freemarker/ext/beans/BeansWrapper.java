@@ -761,7 +761,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
 
     static boolean is2321Bugfixed(Version version) {
-        return version.intValue() >= 2003021;
+        return version.intValue() >= _TemplateAPI.VERSION_INT_2_3_21;
     }
     
     /** 
@@ -770,7 +770,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         NullArgumentException.check("version", incompatibleImprovements);
-        if (incompatibleImprovements.intValue() < 2003000) {
+        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
         return is2321Bugfixed(incompatibleImprovements) ? _TemplateAPI.VERSION_2_3_21 : _TemplateAPI.VERSION_2_3_0;

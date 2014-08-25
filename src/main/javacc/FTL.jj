@@ -584,7 +584,7 @@ TOKEN:
      */
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
-        if (!directiveSyntaxEstablished && incompatibleImprovements < 2003019) {
+        if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
             matchedToken.kind = PRINTABLE_CHARS;
         } else {			char firstChar = matchedToken.image.charAt(0);
 			

@@ -163,7 +163,7 @@ public abstract class TemplateObject {
     {
         return template;
     }
-
+    
     TemplateObject copyLocationFrom(TemplateObject from)
     {
         template = from.template;

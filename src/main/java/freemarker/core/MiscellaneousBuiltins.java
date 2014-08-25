@@ -42,6 +42,7 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
+import freemarker.template._TemplateAPI;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -474,7 +475,7 @@ class MiscellaneousBuiltins {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
-                    && (getTemplate().getConfiguration().getIncompatibleImprovements().intValue() < 2003021
+                    && (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
                         // These implement TemplateSequenceModel, yet they can't be #list-ed:
                         || !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel))
                     ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
