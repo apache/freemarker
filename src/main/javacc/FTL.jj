@@ -1242,6 +1242,7 @@ Expression RangeExpression() :
 {
     lhs=AdditiveExpression() {result = lhs;}
     [
+       LOOKAHEAD(1)  // To suppress warning
        (         (
            (             <DOT_DOT_LESS> { endType = Range.END_EXCLUSIVE; }
              |
