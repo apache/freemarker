@@ -61,6 +61,12 @@
    <testcase name="encoding-builtins" />
    <testcase name="escapes" />
    <testcase name="hashliteral" />
+   <testcase name="hashliteral-ici-2.3.20" template="hashliteral.ftl" expected="hashliteral.txt">
+      <config incompatible_improvements="2.3.20"/>
+   </testcase>
+   <testcase name="hashliteral-ici-2.3.21"  template="hashliteral.ftl" expected="hashliteral.txt">
+      <config incompatible_improvements="2.3.21" />
+   </testcase>
    <testcase name="identifier" >
       <config strict_syntax="N" />
    </testcase>

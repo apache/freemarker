@@ -21223,13 +21223,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>If the <literal>incompatible_improvements</literal> in
-                  the FreeMarker configuration is set to at least 2.3.21,
-                  right-unbounded ranges become readable (like listable).
-                  Earlier they could only be used for slicing.</para>
-                </listitem>
-
-                <listitem>
                   <para><literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>,
                   <replaceable>toExclusive</replaceable>)</literal> and
                   <literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>)</literal>
@@ -21246,6 +21239,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
                   as without <literal>?string</literal> it would slice the
                   node sequence instead of the text value of the node.</para>
+                </listitem>
+
+                <listitem>
+                  <para>If the <literal>incompatible_improvements</literal> in
+                  the FreeMarker configuration is set to at least 2.3.21,
+                  right-unbounded ranges become readable (like listable).
+                  Earlier they could only be used for slicing.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -21468,6 +21468,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   works.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>If the <literal>incompatible_improvements</literal> in the
+              FreeMarker configuration is set to at least 2.3.21, hash
+              <emphasis>literals</emphasis> that repeat keys now only have the
+              key once with <literal>?keys</literal>, and only has the last
+              value associated to that key with <literal>?values</literal>.
+              This is consistent with the behavior of
+              <literal><replaceable>hash</replaceable>[<replaceable>key</replaceable>]</literal>
+              and how maps work in Java.</para>
             </listitem>
 
             <listitem>

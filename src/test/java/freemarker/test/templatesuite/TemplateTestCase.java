@@ -76,6 +76,7 @@ import freemarker.test.utility.AssertDirective;
 import freemarker.test.utility.AssertEqualsDirective;
 import freemarker.test.utility.AssertFailsDirective;
 import freemarker.test.utility.FileTestCase;
+import freemarker.test.utility.NoOutputDirective;
 
 /**
  * Instances of this are created and called by {@link TemplateTestSuite}. (It's on "Ignore" so that Eclipse doesn't try
@@ -147,6 +148,9 @@ public class TemplateTestCase extends FileTestCase {
         dataModel.put("assert", AssertDirective.INSTANCE);
         dataModel.put("assertEquals", AssertEqualsDirective.INSTANCE);
         dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
+        dataModel.put("noOutput", NoOutputDirective.INSTANCE);
+
+        dataModel.put("testName", getName());
         
         dataModel.put("message", "Hello, world!");
         
