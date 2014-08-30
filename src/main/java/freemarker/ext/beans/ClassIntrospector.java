@@ -66,8 +66,8 @@ class ClassIntrospector {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 
     private static final String JREBEL_SDK_CLASS_NAME = "org.zeroturnaround.javarebel.ClassEventListener";
-    private static final String JREBEL_INTEGRATION_DISABLED_MSG = "JRebel integration disabled.";
-    private static final String ERROR_INITIALIZING_JREBEL_INTEGR_MSG = "Error initializing JRebel integration. ";
+    private static final String JREBEL_INTEGRATION_ERROR_MSG
+            = "Error initializing JRebel integration. JRebel integration disabled.";
 
     /**
      * When this property is true, some things are stricter. This is mostly to catch suspicious things in development
@@ -86,10 +86,7 @@ class ClassIntrospector {
             jRebelAvailable = false;
             try {
                 if (!(e instanceof ClassNotFoundException)) {
-                    LOG.error(ERROR_INITIALIZING_JREBEL_INTEGR_MSG + JREBEL_INTEGRATION_DISABLED_MSG, e);
-                } else {
-                    LOG.debug("JRebel SDK class " + JREBEL_SDK_CLASS_NAME + " not present; "
-                            + JREBEL_INTEGRATION_DISABLED_MSG);
+                    LOG.error(JREBEL_INTEGRATION_ERROR_MSG, e);
                 }
             } catch (Throwable loggingE) {
                 // ignore
@@ -101,15 +98,10 @@ class ClassIntrospector {
             try {
                 classChangeNotifier = (ClassChangeNotifier)
                         Class.forName("freemarker.ext.beans.JRebelClassChangeNotifier").newInstance();
-                try {
-                    LOG.debug("JRebel integration initalized.");
-                } catch (Throwable loggingE) {
-                    // ignore
-                }
             } catch (Throwable e) {
                 classChangeNotifier = null;
                 try {
-                    LOG.error(ERROR_INITIALIZING_JREBEL_INTEGR_MSG + JREBEL_INTEGRATION_DISABLED_MSG, e);
+                    LOG.error(JREBEL_INTEGRATION_ERROR_MSG, e);
                 } catch (Throwable loggingE) {
                     // ignore
                 }
