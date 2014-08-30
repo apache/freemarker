@@ -104,7 +104,7 @@ public class TemplateNotFoundMessageTest {
     }
 
     private String failWith(TemplateLoader tl) {
-        Configuration cfg = new Configuration(new Version(2, 3, 21));
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
         cfg.setTemplateLoader(tl);
         try {
             cfg.getTemplate("missing.ftl");

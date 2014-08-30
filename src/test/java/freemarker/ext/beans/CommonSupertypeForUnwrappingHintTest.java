@@ -20,15 +20,16 @@ import java.io.Serializable;
 import java.util.List;
 
 import junit.framework.TestCase;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
 
 public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     
     final OverloadedMethodsSubset buggy
-            = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 20)).is2321Bugfixed());
+            = new DummyOverloadedMethodsSubset(new BeansWrapper(Configuration.VERSION_2_3_20).is2321Bugfixed());
     final OverloadedMethodsSubset fixed
-            = new DummyOverloadedMethodsSubset(new BeansWrapper(new Version(2, 3, 21)).is2321Bugfixed());
+            = new DummyOverloadedMethodsSubset(new BeansWrapper(Configuration.VERSION_2_3_21).is2321Bugfixed());
 
     public CommonSupertypeForUnwrappingHintTest(String name) {
         super(name);

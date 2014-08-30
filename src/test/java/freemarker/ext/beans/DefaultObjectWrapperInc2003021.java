@@ -16,12 +16,12 @@
 
 package freemarker.ext.beans;
 
-import freemarker.template.Version;
+import freemarker.template.Configuration;
 
 public class DefaultObjectWrapperInc2003021 extends DefaultObjectWrapperWithSortedMethods {
 
     public DefaultObjectWrapperInc2003021() {
-        super(new Version(2, 3, 21), false);
+        super(Configuration.VERSION_2_3_21, false);
     }
 
 }

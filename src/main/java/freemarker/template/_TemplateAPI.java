@@ -26,14 +26,10 @@ import freemarker.template.utility.NullArgumentException;
  */ 
 public class _TemplateAPI {
     
-    public static final Version VERSION_2_3_0 = new Version(2, 3, 0);  
-    public static final Version VERSION_2_3_19 = new Version(2, 3, 19);  
-    public static final Version VERSION_2_3_20 = new Version(2, 3, 20);  
-    public static final Version VERSION_2_3_21 = new Version(2, 3, 21);  
-    public static final int VERSION_INT_2_3_0 = VERSION_2_3_0.intValue();
-    public static final int VERSION_INT_2_3_19 = VERSION_2_3_19.intValue();
-    public static final int VERSION_INT_2_3_20 = VERSION_2_3_20.intValue();
-    public static final int VERSION_INT_2_3_21 = VERSION_2_3_21.intValue();
+    public static final int VERSION_INT_2_3_0 = Configuration.VERSION_2_3_0.intValue();
+    public static final int VERSION_INT_2_3_19 = Configuration.VERSION_2_3_19.intValue();
+    public static final int VERSION_INT_2_3_20 = Configuration.VERSION_2_3_20.intValue();
+    public static final int VERSION_INT_2_3_21 = Configuration.VERSION_2_3_21.intValue();
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);

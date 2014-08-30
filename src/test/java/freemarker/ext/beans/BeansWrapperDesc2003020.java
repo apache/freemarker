@@ -16,12 +16,12 @@
 
 package freemarker.ext.beans;
 
-import freemarker.template.Version;
+import freemarker.template.Configuration;
 
 public class BeansWrapperDesc2003020 extends BeansWrapperWithShortedMethods{
 
     public BeansWrapperDesc2003020() {
-        super(new Version(2, 3, 20), true);
+        super(Configuration.VERSION_2_3_20, true);
     }
     
 }

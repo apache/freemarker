@@ -19,11 +19,11 @@ package freemarker.ext.beans;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import junit.framework.TestCase;
+
 import org.junit.Assert;
 
-import freemarker.template.Version;
-
-import junit.framework.TestCase;
+import freemarker.template.Configuration;
 
 public class MiscNumericalOperationsTest extends TestCase {
 
@@ -84,7 +84,7 @@ public class MiscNumericalOperationsTest extends TestCase {
     @SuppressWarnings("boxing")
     public void testForceNumberArgumentsToParameterTypes() {
         OverloadedMethodsSubset oms
-                = new OverloadedFixArgsMethods(new BeansWrapper(new Version(2, 3, 21)).is2321Bugfixed());
+                = new OverloadedFixArgsMethods(new BeansWrapper(Configuration.VERSION_2_3_21).is2321Bugfixed());
         Class[] paramTypes = new Class[] { Short.TYPE, Short.class, Double.TYPE, BigDecimal.class, BigInteger.class };
         Object[] args;
         

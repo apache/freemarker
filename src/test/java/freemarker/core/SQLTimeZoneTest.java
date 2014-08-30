@@ -345,7 +345,7 @@ public class SQLTimeZoneTest extends TemplateOutputTest {
     }
     
     private Configuration createConfiguration() {
-        Configuration cfg = new Configuration(new Version(2, 3, 21));
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
         cfg.setLocale(Locale.US);
         cfg.setDateFormat("yyyy-MM-dd");
         cfg.setTimeFormat("HH:mm:ss");

@@ -64,7 +64,7 @@ public class TagSyntaxVariationsTest extends TestCase {
         // Default on 2.3.x: cfgBuggy.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
         
         Configuration cfgFixed = new Configuration();
-        cfgFixed.setIncompatibleImprovements(new Version(2, 3, 19));
+        cfgFixed.setIncompatibleImprovements(Configuration.VERSION_2_3_19);
         // Default on 2.3.x: cfgFixed.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
 
         // Permutations 

@@ -29,7 +29,7 @@ import freemarker.template.utility.StringUtil;
 
 public class ParsingErrorMessagesTest {
 
-    private Configuration cfg = new Configuration(new Version(2, 3, 21));
+    private Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
     {
         cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
     }

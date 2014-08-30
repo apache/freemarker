@@ -5466,8 +5466,8 @@ That's all.</programlisting>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
 // version (here 2.3.21) do you want to apply the fixes that are not 100%
-// backward-compatible. Check the JavaDoc-s to see what changes.
-Configuration cfg = new Configuration(new Version(2, 3, 21));
+// backward-compatible. See the Configuration JavaDoc for details.
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -5678,7 +5678,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration */
-        Configuration cfg = new Configuration(new Version(2, 3, 21));
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
@@ -6649,7 +6649,7 @@ list.add("blue");
 // Get the object wrapper we will use. The details of the
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
-        = new DefaultObjectWrapperBuilder(new Version(2, 3, 21))
+        = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21)
           .getResult();
 
 // Normaly, you would create a plain java.util.HashMap here, and
@@ -6855,7 +6855,7 @@ ${theObject.sin(123)}</programlisting>
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration(new Version(2, 3, 21));
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
 <replaceable>..</replaceable>.
 cfg.setSharedVariable("warp", new WarpDirective());
 cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
@@ -7049,7 +7049,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(new Version(2, 3, 21));
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_21);
 myCfg.setLocale(java.util.Locale.ITALY);
 myCfg.setNumberFormat("0.####");</programlisting>
 
@@ -21157,14 +21157,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <listitem>
             <para>create the
             <literal>freemarker.template.Configuration</literal> object like
-            <literal>new Configuration(new Version(2, 3, 21))</literal></para>
+            <literal>new
+            Configuration(Configuration.VERSION_2_3_21)</literal></para>
           </listitem>
 
           <listitem>
             <para>or alter the <literal>Configuration</literal> where you
             initialize its other settings like
-            <literal>cfg.setIncompatibleImprovements(new Version(2, 3,
-            21))</literal></para>
+            <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21)</literal></para>
           </listitem>
 
           <listitem>
@@ -21583,9 +21583,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>ObjectWrapper</literal>-s are often shared among
               multiple <literal>Configuration</literal>-s, so they can't use
               that setting of the <literal>Configuration</literal>.) In new or
-              actively developed projects it's recommended to use <literal>new
-              Version(2, 3, 21)</literal> now. The constructor without the
-              <literal>Version</literal> parameter is now deprecated.</para>
+              actively developed projects it's recommended to use
+              <literal>Configuration.VERSION_2_3_21</literal> now. The
+              constructor without the <literal>Version</literal> parameter is
+              now deprecated.</para>
             </listitem>
 
             <listitem>
@@ -21731,21 +21732,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               improvements</quote> to greater than the current FreeMarker
               version, or less than 2.3.0, an
               <literal>IllegalArgumentException</literal> will be thrown.
-              Thus, <literal>new Configuration(new Version(2, 3,
-              21))</literal> not only activates the fixes up to 2.3.21, but
-              ensures that the application will not run in an environment with
-              an older FreeMarker version. (On an older FreeMarker version the
-              fixes that you have requested aren't implemented yet, so you
-              should get an exception.)</para>
+              Thus, <literal>new
+              Configuration(Configuration.VERSION_2_3_21)</literal> not only
+              activates the fixes up to 2.3.21, but ensures that the
+              application will not run in an environment with an older
+              FreeMarker version. (On an older FreeMarker version the fixes
+              that you have requested aren't implemented yet, so you should
+              get an exception.)</para>
             </listitem>
 
             <listitem>
               <para>Many fixes and improvements in overloaded method
               selection/invocation, but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
-              with constructor parameter <literal>new Version(2, 3,
-              21)</literal> (if you are using <literal>Properties</literal> to
-              configure FreeMarker, you can do that like
+              with constructor parameter
+              <literal>Configuration.VERSION_2_3_21</literal> (or if you are
+              using <literal>Properties</literal> to configure FreeMarker, you
+              can do that like
               <literal>object_wrapper=BeansWrapper(2.3.21)</literal>), or if
               you have a <literal>Configuration</literal> with similar
               <literal>Version</literal> and you leave the
@@ -21753,7 +21756,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               There's a little chance that because of these changes, a
               different overloaded method will be chosen than before, or even
               that ambiguity errors will arise where earlier they didn't
-              (although the opposite is much more probable), hence the fixes
+              (although the opposite is far more frequent), hence the fixes
               aren't automatically activated. But the fix mostly only effect
               calls that were failing or has chosen then wrong method earlier,
               so it's recommended to activate it for projects that are still
@@ -21764,12 +21767,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Earlier, <literal>null</literal> argument values has
                   only matched overloaded methods where the corresponding
                   parameter had <literal>Object</literal> type, not a subclass
-                  of it. Now it considers all overloads where the parameter
-                  type is non-primitive, and just like the Java language, it
-                  choses the one with the most specific type among them. This
-                  is the most important fix, and also the most risky one
-                  regarding backward-compatibility. Like if you have
-                  <literal>m(Object o)</literal> and <literal>m(String
+                  of it. That's clearly a bug. Now it considers all overloads
+                  where the parameter type is non-primitive, and just like the
+                  Java language, it choses the one with the most specific type
+                  among them. This is the most important fix, and also the
+                  most risky one regarding backward-compatibility. Like if you
+                  have <literal>m(Object o)</literal> and <literal>m(String
                   s)</literal> in a Java class, earlier for a
                   <literal>m(null)</literal> call in the template it has
                   chosen <literal>m(Object o)</literal>, but now it will
@@ -22161,6 +22164,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               such as wrong <literal>hashCode</literal>, possible concurrency
               glitches, and acceptance of some malformed version
               strings.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>Version</literal> instances that are
+              <quote>incompatible improvements</quote> break points are now
+              available via constants like:
+              <literal>Configuration.VERSION_2_3_21</literal>.</para>
             </listitem>
 
             <listitem>

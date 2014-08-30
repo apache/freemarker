@@ -38,13 +38,13 @@ public class ConfigurationTest extends TestCase{
     }
     
     public void testIncompatibleImprovementsChangesDefaults() {
-        Version newVersion = new Version(2, 3, 21);
-        Version oldVersion = new Version(2, 3, 20);
+        Version newVersion = Configuration.VERSION_2_3_21;
+        Version oldVersion = Configuration.VERSION_2_3_20;
         
         Configuration cfg = new Configuration();
         assertUsesLegacyObjectWrapper(cfg);
         assertUsesLegacyTemplateLoader(cfg);
-        assertEquals(cfg.getIncompatibleImprovements(), new Version(2, 3, 0));
+        assertEquals(cfg.getIncompatibleImprovements(), Configuration.VERSION_2_3_0);
         
         cfg.setIncompatibleImprovements(newVersion);
         assertUsesNewObjectWrapper(cfg);
@@ -103,7 +103,7 @@ public class ConfigurationTest extends TestCase{
             assertTrue(e.getMessage().contains("wasn't set") && e.getMessage().contains("default"));
         }
         
-        cfg = new Configuration(new Version(2, 3, 21));
+        cfg = new Configuration(Configuration.VERSION_2_3_21);
         try {
             cfg.getTemplate("missing.ftl");
             fail();
@@ -126,7 +126,7 @@ public class ConfigurationTest extends TestCase{
 
     private void assertUsesNewObjectWrapper(Configuration cfg) {
         assertEquals(
-                new Version(2, 3, 21),
+                Configuration.VERSION_2_3_21,
                 ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
     }
     
@@ -204,7 +204,7 @@ public class ConfigurationTest extends TestCase{
             TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
             TimeZone.setDefault(sysDefTZ);
             
-            Configuration cfg = new Configuration(new Version(2, 3, 0));
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
             assertEquals(sysDefTZ, cfg.getTimeZone());
             assertEquals(sysDefTZ.getID(), cfg.getSetting(Configurable.TIME_ZONE_KEY));
             cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
@@ -229,7 +229,7 @@ public class ConfigurationTest extends TestCase{
             TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
             TimeZone.setDefault(sysDefTZ);
             
-            Configuration cfg = new Configuration(new Version(2, 3, 0));
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             assertEquals("null", cfg.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
             
@@ -250,7 +250,7 @@ public class ConfigurationTest extends TestCase{
     }
 
     public void testTimeZoneLayers() throws TemplateException, IOException {
-        Configuration cfg = new Configuration(new Version(2, 3, 0));
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         Template t = new Template(null, "", cfg);
         Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
         Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
@@ -329,7 +329,7 @@ public class ConfigurationTest extends TestCase{
         Configuration cfg = new Configuration();
         assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
         cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "2.3.21");
-        assertEquals(_TemplateAPI.VERSION_2_3_21, cfg.getIncompatibleImprovements());
+        assertEquals(Configuration.VERSION_2_3_21, cfg.getIncompatibleImprovements());
     }
     
 }

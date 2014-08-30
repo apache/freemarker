@@ -223,9 +223,9 @@ public class Template extends Configurable {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         int v = incompatibleImprovements.intValue();
         if (v < _TemplateAPI.VERSION_INT_2_3_19) {
-            return _TemplateAPI.VERSION_2_3_0;
+            return Configuration.VERSION_2_3_0;
         } else if (v > _TemplateAPI.VERSION_INT_2_3_21) {
-            return _TemplateAPI.VERSION_2_3_21;
+            return Configuration.VERSION_2_3_21;
         } else { // if 2.3.19 or 2.3.20 or 2.3.21
             return incompatibleImprovements;
         }

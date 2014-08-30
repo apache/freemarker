@@ -773,7 +773,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
-        return is2321Bugfixed(incompatibleImprovements) ? _TemplateAPI.VERSION_2_3_21 : _TemplateAPI.VERSION_2_3_0;
+        return is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21 : Configuration.VERSION_2_3_0;
     }
     
     /**

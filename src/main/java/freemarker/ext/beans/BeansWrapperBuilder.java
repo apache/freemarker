@@ -32,13 +32,13 @@ import freemarker.template.Version;
  * 
  * <p>The builder meant to be used as a drop-away object (not stored in a field), like in this example: 
  * <pre>
- *    BeansWrapper beansWrapper = new BeansWrapperBuilder(new Version(2, 3, 21)).getResult();
+ *    BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
  * </pre>
  * 
  * <p>Or, a more complex example:</p>
  * <pre>
  *    // Create the builder:
- *    BeansWrapperBuilder builder = new BeansWrapperBuilder(new Version(2, 3, 21));
+ *    BeansWrapperBuilder builder = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
  *    // Set desired BeansWrapper configuration properties:
  *    builder.setUseMoldeCache(true);
  *    builder.setExposeFields(true);

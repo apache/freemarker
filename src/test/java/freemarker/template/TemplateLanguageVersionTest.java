@@ -30,13 +30,13 @@ public class TemplateLanguageVersionTest {
 
     @Test
     public void testDefaultVersion() throws IOException {
-        testDefaultWithVersion(_TemplateAPI.VERSION_2_3_0, _TemplateAPI.VERSION_2_3_0);
-        testDefaultWithVersion(new Version(2, 3, 18), _TemplateAPI.VERSION_2_3_0);
-        testDefaultWithVersion(_TemplateAPI.VERSION_2_3_19, _TemplateAPI.VERSION_2_3_19);
-        testDefaultWithVersion(_TemplateAPI.VERSION_2_3_20, _TemplateAPI.VERSION_2_3_20);
-        testDefaultWithVersion(_TemplateAPI.VERSION_2_3_21, _TemplateAPI.VERSION_2_3_21);
+        testDefaultWithVersion(Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_0);
+        testDefaultWithVersion(new Version(2, 3, 18), Configuration.VERSION_2_3_0);
+        testDefaultWithVersion(Configuration.VERSION_2_3_19, Configuration.VERSION_2_3_19);
+        testDefaultWithVersion(Configuration.VERSION_2_3_20, Configuration.VERSION_2_3_20);
+        testDefaultWithVersion(Configuration.VERSION_2_3_21, Configuration.VERSION_2_3_21);
         try {
-            testDefaultWithVersion(new Version(2, 3, 22), _TemplateAPI.VERSION_2_3_21);
+            testDefaultWithVersion(new Version(2, 3, 22), Configuration.VERSION_2_3_21);
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("version"));

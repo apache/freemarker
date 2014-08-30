@@ -221,8 +221,8 @@ public class TemplateCacheTest extends TestCase
     }
     
     public void testIncompatibleImprovementsChangesURLConCaching() throws IOException {
-        Version newVersion = new Version(2, 3, 21);
-        Version oldVersion = new Version(2, 3, 20);
+        Version newVersion = Configuration.VERSION_2_3_21;
+        Version oldVersion = Configuration.VERSION_2_3_20;
         
         {
             Configuration cfg = new Configuration(oldVersion);
