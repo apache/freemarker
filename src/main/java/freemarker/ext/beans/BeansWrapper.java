@@ -1512,29 +1512,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * Removes all classes from the introspection cache whose fully qualified name starts with the given prefix
-     * followed by {@code '.'} or {@code '$'} or the end of the string. For example, {@code "com.example.action"}
-     * will remove {@code com.example.action.Foo}, {@code com.example.action.shop.Foo}, but not
-     * {@code com.example.actions.Foo} (note the "s" as the end of "actions"). {@code "com.example.action.Foo"} will
-     * remove  {@code "com.example.action.Foo"} itself, and also nested classes like
-     * {@code "com.example.action.Foo$Bar"}.
-     * 
-     * @since 2.3.21
-     */
-    public void removeFromClassIntrospectionCache(String namePrefix) {
-        classIntrospector.removeFromClassIntrospectionCache(namePrefix);
-    }
-    
-    /**
-     * Removes all class introspection data from the cache;
-     * consider using {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * Removes all class introspection data from the cache.
      * 
      * <p>Use this if you want to free up memory on the expense of recreating
-     * the cache entries for the classes that will be used later in templates. If you only need to purge certain
-     * classes/packages, then use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * the cache entries for the classes that will be used later in templates.
      * 
-     * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}; for
-     *     such singletons, you must use {@link #removeFromClassIntrospectionCache(String prefix)} instead.
+     * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}.
      * 
      * @since 2.3.20
      */

@@ -643,19 +643,6 @@ class ClassIntrospector {
     }
 
     /**
-     * Corresponds to {@link BeansWrapper#removeFromClassIntrospectionCache(String)}.
-     * 
-     * @since 2.3.21
-     */
-    void removeFromClassIntrospectionCache(String namePrefix) {
-        synchronized (sharedLock) {
-            clearingCounter++;
-
-            throw new RuntimeException("Not implemented"); // TODO
-        }
-    }
-
-    /**
      * Returns the number of events so far that could make class introspection data returned earlier outdated.
      */
     int getClearingCounter() {
