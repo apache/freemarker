@@ -220,12 +220,11 @@ public class Template extends Configurable {
     }
 
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         int v = incompatibleImprovements.intValue();
         if (v < _TemplateAPI.VERSION_INT_2_3_19) {
-            _TemplateAPI.checkVersionSupported(incompatibleImprovements);
             return _TemplateAPI.VERSION_2_3_0;
         } else if (v > _TemplateAPI.VERSION_INT_2_3_21) {
-            _TemplateAPI.checkVersionSupported(incompatibleImprovements);
             return _TemplateAPI.VERSION_2_3_21;
         } else { // if 2.3.19 or 2.3.20 or 2.3.21
             return incompatibleImprovements;

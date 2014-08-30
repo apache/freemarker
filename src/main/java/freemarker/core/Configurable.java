@@ -122,12 +122,11 @@ public class Configurable
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
-     * The only class that should use this is {@link Configuration}.
      * 
      * @deprecated This shouldn't even be public; don't use it.
      */
     public Configurable() {
-        this((Version) null);
+        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
 
     /**
@@ -136,7 +135,7 @@ public class Configurable
      * Called by the {@link Configuration} constructor.
      */
     protected Configurable(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         parent = null;
         locale = Locale.getDefault();
@@ -149,7 +148,7 @@ public class Configurable
         classicCompatible = new Integer(0);
         templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
-        objectWrapper = getDefaultObjectWrapper(incompatibleImprovements);
+        objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         showErrorTips = Boolean.TRUE;
@@ -768,15 +767,6 @@ public class Configurable
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper != null
                 ? objectWrapper : parent.getObjectWrapper();
-    }
-    
-    static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
-        if (incompatibleImprovements == null
-                || incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
-            return ObjectWrapper.DEFAULT_WRAPPER;
-        } else {
-            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();
-        }
     }
     
     /**

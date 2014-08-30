@@ -325,4 +325,11 @@ public class ConfigurationTest extends TestCase{
         assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
     }
     
+    public void testSetICIViaSetSettingAPI() throws TemplateException {
+        Configuration cfg = new Configuration();
+        assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
+        cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "2.3.21");
+        assertEquals(_TemplateAPI.VERSION_2_3_21, cfg.getIncompatibleImprovements());
+    }
+    
 }

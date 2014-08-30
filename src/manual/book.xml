@@ -7073,6 +7073,7 @@ myCfg.setNumberFormat("0.####");</programlisting>
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.21&lt;/prop&gt;
       &lt;prop key="locale"&gt;it_IT&lt;/prop&gt;
       &lt;prop key="number_format"&gt;0.####&lt;/prop&gt;
     &lt;/props&gt;
@@ -8820,12 +8821,21 @@ TemplateHashModel roundingModeEnums =
     
   &lt;!-- FreeMarker settings: --&gt;
   &lt;init-param&gt;
+    &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
+    &lt;param-value&gt;2.3.21&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
+    &lt;!-- Some may prefer "html_debug" for development. --&gt;
+    &lt;param-value&gt;rethrow&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
     &lt;param-name&gt;template_update_delay&lt;/param-name&gt;
     &lt;param-value&gt;0&lt;/param-value&gt; &lt;!-- 0 is for development only! Use higher value otherwise. --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;
-    &lt;param-value&gt;ISO-8859-1&lt;/param-value&gt; &lt;!-- The encoding of the template files. --&gt;
+    &lt;param-value&gt;UTF-8&lt;/param-value&gt; &lt;!-- The encoding of the template files. --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;number_format&lt;/param-name&gt;

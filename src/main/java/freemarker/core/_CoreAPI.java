@@ -21,9 +21,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
-import freemarker.template.ObjectWrapper;
-import freemarker.template.Version;
-
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -100,10 +97,6 @@ public class _CoreAPI {
     public static void outputInstructionStack(
             TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
         Environment.outputInstructionStack(instructionStackSnapshot, pw);
-    }
-    
-    public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
-        return Configurable.getDefaultObjectWrapper(incompatibleImprovements);
     }
     
 }

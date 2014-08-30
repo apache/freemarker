@@ -575,7 +575,7 @@
   <target name="example-struts-webapp" depends="jar">
     <fail unless="struts.available"><!--
       -->You have to copy the Struts 1.1 jar-s to <!--
-      -->lib/struts to build this example!<!--
+      -->&lt;freemarker_project>/lib/struts to build this example!<!--
     --></fail>
     <copy todir="build/examples/struts-webapp/WEB-INF/lib">
       <fileset dir="lib/struts" />

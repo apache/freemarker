@@ -698,12 +698,13 @@ public class Configuration extends Configurable implements Cloneable {
      * be emptied.
      * 
      * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
-     *     version, or less than 2.3.0.
+     *     version, or less than 2.3.0, or {@code null}.
      * 
      * @since 2.3.20
      */
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        
         boolean hadLegacyTLOWDefaults
                 = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
         this.incompatibleImprovements = incompatibleImprovements;
@@ -713,13 +714,14 @@ public class Configuration extends Configurable implements Cloneable {
             }
             if (!objectWrapperWasSet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
-                super.setObjectWrapper(_CoreAPI.getDefaultObjectWrapper(incompatibleImprovements));
+                super.setObjectWrapper(getDefaultObjectWrapper(incompatibleImprovements));
             }
         }
     }
 
     /**
-     * @see #setIncompatibleImprovements(Version) 
+     * @see #setIncompatibleImprovements(Version)
+     * @return Never {@code null}. 
      * @since 2.3.20
      */
     public Version getIncompatibleImprovements() {
@@ -1412,6 +1414,21 @@ public class Configuration extends Configurable implements Cloneable {
         return version;
     }
     
+    /**
+     * Returns the default object wrapper for a given "incompatible_improvements" version.
+     * 
+     * @see #setIncompatibleImprovements(Version)
+     * 
+     * @since 2.3.21
+     */
+    public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
+        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+            return ObjectWrapper.DEFAULT_WRAPPER;
+        } else {
+            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();
+        }
+    }
+
     /**
      * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
