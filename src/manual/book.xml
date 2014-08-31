@@ -21883,6 +21883,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>The standard <literal>CacheStorage</literal>
+              implementations now have a <literal>getSize()</literal> method
+              for monitoring the cache size.
+              <literal>MruCacheStorage</literal> also has
+              <literal>getSoftSize()</literal> and
+              <literal>getStrongSize()</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller improvements in configuration setting
               errors messages.</para>
             </listitem>
