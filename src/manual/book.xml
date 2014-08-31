@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.21</subtitle>
+  <subtitle>For FreeMarker 2.3.21 RC1</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -21153,18 +21153,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_21">
-        <title>2.3.21</title>
+        <title>2.3.21 RC1</title>
 
-        <para>Date of release: [FIXME]</para>
+        <para>Date of release for Release Candidate 1: 2014-08-31</para>
+
+        <para>Date of release for the final release: Planned for early/mid
+        2014-10.</para>
 
         <para>Note that since 2.3.21 is designed to be backward compatible
         with the previous 2.3.x releases, <emphasis>some of the improvements
         and fixes described below are only activated when you specifically ask
         for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
-        because they can, with small chance, break existing applications. But
-        if the dependent project is still actively developed, allowing 2.3.21
-        "incompatible improvements" is highly recommended. That can be done
-        like this:</para>
+        because they can, with a very small chance, break existing
+        applications. But if the dependent project is still actively
+        developed, allowing 2.3.21 "incompatible improvements" is highly
+        recommended. That can be done like this:</para>
 
         <itemizedlist>
           <listitem>
@@ -21192,6 +21195,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         <para>Note that we have changed our proprietary BSD-style license to
         Apache License, Version 2.0. See the <link linkend="app_license">new
         license here</link>.</para>
+
+        <para>Note that the minimum required Java version was increased from
+        1.2 to 1.4.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -21302,96 +21308,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>java.text.DecimalFormat</literal> did with US locale,
               none of which was understood by any (common) computer
               language.</para>
-            </listitem>
-
-            <listitem>
-              <para>Error message quality improvements (targeting frequent
-              support requests and some error message bugs):</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Fixed glitch where if an <literal>#if</literal> had
-                  and <literal>#else</literal> or <literal>#elseif</literal>,
-                  the
-                  <literal>#if</literal>/<literal>#else</literal>/<literal>#elseif</literal>
-                  wasn't hidden in the FTL stack trace when the error was
-                  inside its nested block.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Some new context sensitive hints in undefined variable
-                  exception error messages.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Fixed unclosed directive error messages at end of file
-                  where the wrong unclosed directive name was reported</para>
-                </listitem>
-
-                <listitem>
-                  <para>Better type error messages when accessing XML data
-                  (applies when wrapped with
-                  <literal>freemarker.ext.dom</literal>):</para>
-
-                  <itemizedlist>
-                    <listitem>
-                      <para>Trying to use
-                      <literal>node.noSuchChildNodes</literal> on a place
-                      where scalar value is expected will explain that the
-                      problem is that you had no matches in the constructing
-                      XML query.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>Trying to use
-                      <literal>node.multipleSuchChildNodes</literal> on a
-                      place where scalar value is expected will explain that
-                      the problem is that you had multiple matches in the
-                      constructing XML query.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>Trying to use
-                      <literal>node.exactlyOneChildNode</literal> as number,
-                      date/time/date-time or boolean will explain that values
-                      coming from XML are always strings (text), and must be
-                      converted explicitly.</para>
-                    </listitem>
-                  </itemizedlist>
-                </listitem>
-
-                <listitem>
-                  <para>Trying to use <literal>obj.someMethod</literal>
-                  without <literal>()</literal> on a place where method value
-                  is not expected will recommend calling the method.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Trying to use methods like
-                  <literal>obj.getFoo</literal> or
-                  <literal>obj.isFoo</literal> without <literal>()</literal>on
-                  a place where method value is not expected will recommend
-                  using the <literal>obj.foo</literal> form.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Bug fixed: <literal>?substring</literal> has thrown
-                  low level
-                  <literal>java.lang.IndexOutOfBoundsException</literal>-s
-                  instead of more descriptive
-                  <literal>TemplateModelException</literal>-s with FTL stack
-                  trace.</para>
-                </listitem>
-
-                <listitem>
-                  <para>Bug fixed: Slicing with ranges sometimes thrown low
-                  level
-                  <literal>java.lang.IndexOutOfBoundsException</literal>-s
-                  instead of more descriptive
-                  <literal>TemplateModelException</literal>-s with FTL stack
-                  trace.</para>
-                </listitem>
-              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -21517,6 +21433,98 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Error message quality improvements (targeting frequent
+              support requests and some error message bugs):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Fixed glitch where if an <literal>#if</literal> had
+                  and <literal>#else</literal> or <literal>#elseif</literal>,
+                  the
+                  <literal>#if</literal>/<literal>#else</literal>/<literal>#elseif</literal>
+                  wasn't hidden in the FTL stack trace when the error was
+                  inside its nested block.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Some new context sensitive hints in undefined variable
+                  exception error messages.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Fixed unclosed directive error messages at end of file
+                  where the wrong unclosed directive name was reported</para>
+                </listitem>
+
+                <listitem>
+                  <para>Better type error messages when accessing XML data
+                  (applies when wrapped with
+                  <literal>freemarker.ext.dom</literal>):</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.<replaceable>noSuchChildNodes</replaceable></literal>
+                      on a place where scalar value is expected will explain
+                      that the problem is that you had no matches in the
+                      constructing XML query.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.<replaceable>multipleSuchChildNodes</replaceable></literal>
+                      on a place where scalar value is expected will explain
+                      that the problem is that you had multiple matches in the
+                      constructing XML query.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Trying to use
+                      <literal>node.<replaceable>exactlyOneChildNode</replaceable></literal>
+                      as number, date/time/date-time or boolean will explain
+                      that values coming from XML are always strings (text),
+                      and must be converted explicitly via
+                      <literal>?number</literal>, <literal>?boolean</literal>,
+                      <literal>?date.xs</literal>, etc.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
+                  <para>Trying to use <literal>obj.someMethod</literal>
+                  without <literal>()</literal> on a place where method value
+                  is not expected will recommend calling the method.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Trying to use methods like
+                  <literal>obj.getFoo</literal> or
+                  <literal>obj.isFoo</literal> without <literal>()</literal>on
+                  a place where method value is not expected will recommend
+                  using the <literal>obj.foo</literal> form.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: <literal>?substring</literal> has thrown
+                  low level
+                  <literal>java.lang.IndexOutOfBoundsException</literal>-s
+                  instead of more descriptive
+                  <literal>TemplateModelException</literal>-s with FTL stack
+                  trace.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Slicing with ranges sometimes thrown low
+                  level
+                  <literal>java.lang.IndexOutOfBoundsException</literal>-s
+                  instead of more descriptive
+                  <literal>TemplateModelException</literal>-s with FTL stack
+                  trace.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>If <literal>incompatible_improvements</literal> in the
               FreeMarker configuration is set to at least 2.3.21, hash
               <emphasis>literals</emphasis> that repeat keys now only have the
@@ -21557,7 +21565,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>When setting the
               <literal>incompatible_improvements</literal> setting (like with
-              the constructor above) to 2.3.21, two things change:</para>
+              the constructor above) to 2.3.21, two setting defaults
+              change:</para>
 
               <itemizedlist>
                 <listitem>
@@ -21764,6 +21773,74 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Template not found exceptions now explain that the
+              template path is interpreted by a template loader, and show the
+              <literal>toString</literal> of the
+              <literal>TemplateLoader</literal>. The out-of-the-box
+              <literal>TemplateLoader</literal> implementations now have an
+              overridden <literal>toString</literal> to show the actual base
+              directory and such details. Custom
+              <literal>TemplateLoader</literal> implementations are encouraged
+              to override <literal>toString</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configuration.setSharedVariables(Map/*&lt;String,
+              Object&gt;*/)</literal> for setting the shared variables from
+              Spring IoC and other IoC solutions. The already existing
+              <literal>Configuration.setSharedVariable(String,
+              Object)</literal> isn't a JavaBean property so it was hard to
+              use for that. Furthermore, the order in which
+              <literal>Configuration.setObjectWrapper</literal> and
+              <literal>Configuration.setSharedVariables</literal> are called
+              doesn't mater (unlike in the case of
+              <literal>Configuration.setSharedVariable</literal>), which is
+              essential in most IoC solutions.</para>
+            </listitem>
+
+            <listitem>
+              <para>Mostly concerning tool (like IDE plugin) authors:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>ParseException</literal>-s now also store the
+                  end-location of the error, not just its start-location. This
+                  is useful if you want to underline the error in the source
+                  code, not just point at it.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>Configuration.getSupportedBuiltInDirectiveNames()</literal>
+                  can be used to return the names of directives supported by
+                  FreeMarker.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>TemplateExceptions</literal> now expose the
+                  position of the error (template name, line, column, end
+                  line, end column) similarly to
+                  <literal>ParseException</literal>-s. Where applicable, they
+                  also expose the blamed expression in its canonical FTL
+                  source form; this is mostly useful for
+                  <literal>InvalidReferenceException</literal>-s.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>The concurrent performance of overloaded method lookups
+              (from the cache) was improved under Java 5 and later.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>Version</literal> instances that are
+              <quote>incompatible improvements</quote> break points are now
+              available via constants like:
+              <literal>Configuration.VERSION_2_3_21</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>From now on, if you try to set the <quote>incompatible
               improvements</quote> to greater than the current FreeMarker
               version, or less than 2.3.0, an
@@ -21773,12 +21850,57 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               not only activates the fixes up to that version, but ensures
               that the application will not run in an environment with an
               older FreeMarker version. (On an older FreeMarker version the
-              fixes that you have requested aren't implemented yet, so you
-              should get an exception.)</para>
+              improvements that you have requested aren't implemented yet, so
+              you should get an exception.)</para>
             </listitem>
 
             <listitem>
-              <para>Many fixes and improvements in overloaded method
+              <para>Added new configuration setting,
+              <literal>show_error_tips</literal>, defaults to
+              <literal>true</literal>. Sets if tips should be shown in error
+              messages of errors arising during template processing.</para>
+            </listitem>
+
+            <listitem>
+              <para>Instead of overriding
+              <literal>BeansWrapper.finetuneMethodAppearance</literal> (now
+              deprecated), now you can use
+              <literal>BeansWrapper.setMethodAppearanceFineTuner(MethodAppearanceFineTuner)</literal>,
+              so you don't need to extend the object wrapper class to
+              customize this aspect.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configuration.getCoreDirecticeNames()</literal> which
+              returns the names of all directives that are provided by
+              FreeMarker. This can useful for IDE-s.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>template_loader</literal> was added as possible
+              configuration setting <literal>Properties</literal> key.</para>
+            </listitem>
+
+            <listitem>
+              <para>Various smaller improvements in configuration setting
+              errors messages.</para>
+            </listitem>
+
+            <listitem>
+              <para>With incompatible improvements 2.3.21 only: Empty ranges
+              return <literal>Constants.EMPTY_SEQUENCE</literal> instead of an
+              empty <literal>SimpleSequence</literal>. This is in theory
+              backward compatible, as the API only promises to give something
+              that implements <literal>TemplateSequenceModel</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Required Java version has changed from 1.2 to 1.4.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bugs fixed and improvements in overloaded method
               selection/invocation, but only if you create the
               <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
               with constructor parameter
@@ -21787,7 +21909,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               can do that like
               <literal>object_wrapper=BeansWrapper(2.3.21)</literal>), or if
               you have a <literal>Configuration</literal> with similar
-              <literal>Version</literal> and you leave the
+              <literal>incompatible_improvements</literal> 2.3.21
+              <emphasis>and</emphasis> you leave the
               <literal>object_wrapper</literal> setting on its default value.
               There's a little chance that because of these changes, a
               different overloaded method will be chosen than before, or even
@@ -22072,65 +22195,84 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   unpredictable as it depended on Java's internal method
                   ordering again.)</para>
                 </listitem>
+
+                <listitem>
+                  <para>When unwrapping method call arguments before calling a
+                  Java method, if the argument was an
+                  <literal>AdapterTemplateModel</literal> and the target
+                  parameter type was primitive,
+                  <literal>AdapterTemplateModel.getAdaptedObject(Class
+                  hint)</literal> has received the primitive type of the
+                  target parameter (like <literal>int</literal> instead of
+                  <literal>Integer</literal>) as the hint. This did not make
+                  sense since <literal>getAdaptedObject</literal> can only
+                  return <literal>Object</literal>-s, not primitive values.
+                  Yet, <literal>BeansWrapper</literal> has expected the
+                  returned value to be of the primitive type, otherwise it has
+                  discarded it. Exactly the same problem occurs with
+                  <literal>WrapperTemplateModel</literal>. Thus, ultimately,
+                  if the target parameter type was primitive and some of these
+                  interfaces were implemented, their return value was always
+                  discarded and FreeMarker has felt back to other means of
+                  unwrapping. Now <literal>BeansWrapper</literal> always
+                  passes in and expects the boxing type (like
+                  <literal>Integer</literal>) instead of the primitive
+                  type.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Bug fixed; active only if the
-              <literal>BeansWrapper</literal>/<literal>DefaultObjectWrapper</literal>
-              was created with constructor parameter <literal>Version(2, 3,
-              21)</literal> or higher: When <literal>BeansWrapper</literal>
-              (and so also <literal>DefaultObjectWrapper</literal>) has
-              unwrapped method call arguments before calling a Java method, if
-              the argument was an <literal>AdapterTemplateModel</literal> and
-              the target parameter type was primitive,
-              <literal>AdapterTemplateModel.getAdaptedObject(Class
-              hint)</literal> has received the primitive type of the target
-              parameter (like <literal>int</literal> instead of
-              <literal>Integer</literal>) as the hint. This did not make sense
-              since <literal>getAdaptedObject</literal> can only return
-              <literal>Object</literal>-s, not primitive values. Yet,
-              <literal>BeansWrapper</literal> has expected the returned value
-              to be of the primitive type, otherwise it has discarded it.
-              Exactly the same problem occurs with
-              <literal>WrapperTemplateModel</literal>. Thus, ultimately, if
-              the target parameter type was primitive and some of these
-              interfaces were implemented, their return value was always
-              discarded and FreeMarker has felt back to other means of
-              unwrapping. Now <literal>BeansWrapper</literal> always passes in
-              and expects the boxing type (like <literal>Integer</literal>)
-              instead of the primitive type.</para>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/373/">373</link>]:
+              These are three bugs actually, which can cause problems when
+              FreeMarker re-loads a template because of a charset override
+              with <literal>&lt;#ftl encoding="..."&gt;</literal>: First, if
+              the template loader was a <literal>URLTemplateLoader</literal>,
+              when <literal>TemplateLoader.getReader()</literal> was called
+              for the second time, and the <literal>Reader</literal> returned
+              for the first time was already used, it might returned an empty
+              or corrupted template, depending on the backing URL
+              implementation. Secondly, when FreeMarer has decided if a
+              template file has to be re-loaded because its encoding specified
+              with <literal>&lt;#ftl encoding="..."&gt;</literal> differs from
+              the encoding used for loading the template first, it has used
+              case-sensitive comparison, thus often re-loaded needlessly (like
+              "UTF-8" and "utf-8" mean the same). Now this comparison is
+              case-insensitive. Last not least, when retrying with the second
+              charset, the <literal>TemplateCache</literal> has forgotten to
+              close the first <literal>Reader</literal>, which can be a handle
+              leak.</para>
             </listitem>
 
             <listitem>
-              <para>Required Java version has changed from 1.2 to 1.4.</para>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/411/">411</link>]:
+              Invalid execution environment names in the OSGi bundle manifest
+              were fixed: J2SE-1.6 to Java2SE-1.6, J2SE-1.7 to JavaSE-1.7.
+              Also, J2SE-1.8 was removed for now, as we don't utilize any
+              features in it dynamically (to prevent misunderstandings, Java 8
+              is still supported).</para>
             </listitem>
 
             <listitem>
-              <para>Template not found exceptions now explain that the
-              template path is relative to a virtual file system, and show the
-              <literal>toString</literal> of the
-              <literal>TemplateLoader</literal>. The out-of-the-box
-              <literal>TemplateLoader</literal> implementations now have an
-              overridden <literal>toString</literal> to show the actual base
-              directory and such details. Custom
-              <literal>TemplateLoader</literal> implementations are encouraged
-              to override <literal>toString</literal>.</para>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
+              Fixed misleading parser error message when a directive called
+              without its required parameters (like
+              <literal>&lt;#list&gt;</literal>) was reported as unknown
+              directive.</para>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>Configuration.setSharedVariables(Map/*&lt;String,
-              Object&gt;*/)</literal> for setting the shared variables from
-              Spring IoC and other IoC solutions. The already existing
-              <literal>Configuration.setSharedVariable(String,
-              Object)</literal> isn't a JavaBean property so it was hard to
-              use for that. Furthermore, the order in which
-              <literal>Configuration.setObjectWrapper</literal> and
-              <literal>Configuration.setSharedVariables</literal> are called
-              doesn't mater (unlike in the case of
-              <literal>Configuration.setSharedVariable</literal>), which is
-              essential in most IoC solutions.</para>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/409/">409</link>]:
+              <literal>SimpleHash</literal>'s internal <literal>Map</literal>
+              is concurrently modified on a non-safe way when getting length-1
+              <literal>String</literal> key that exists but maps to
+              <literal>null</literal>. This operation will accidentally add a
+              <literal>Character</literal> key to the internal map, which is
+              not a thread-safe operation.</para>
             </listitem>
 
             <listitem>
@@ -22177,122 +22319,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Mostly concerning tool (like IDE plugin) authors:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>ParseException</literal>-s now also store the
-                  end-location of the error, not just its start-location. This
-                  is useful if you want to underline the error in the source
-                  code, not just point at it.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>Configuration.getSupportedBuiltInDirectiveNames()</literal>
-                  can be used to return the names of directives supported by
-                  FreeMarker.</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal>TemplateExceptions</literal> now expose the
-                  position of the error (template name, line, column, end
-                  line, end column) similarly to
-                  <literal>ParseException</literal>-s. Where applicable, they
-                  also expose the blamed expression in its canonical FTL
-                  source form; this is mostly useful for
-                  <literal>InvalidReferenceException</literal>-s.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>The concurrent performance of overloaded method lookups
-              (from the cache) was improved under Java 5 and later.</para>
-            </listitem>
-
-            <listitem>
-              <para>Fixed various issues in <literal>Version</literal> class,
-              such as wrong <literal>hashCode</literal>, possible concurrency
-              glitches, and acceptance of some malformed version
-              strings.</para>
-            </listitem>
-
-            <listitem>
-              <para>The <literal>Version</literal> instances that are
-              <quote>incompatible improvements</quote> break points are now
-              available via constants like:
-              <literal>Configuration.VERSION_2_3_21</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/373/">373</link>]:
-              These are three bugs actually, which can cause problems when
-              FreeMarker re-loads a template because of a charset override
-              with <literal>&lt;#ftl encoding="..."&gt;</literal>: First, if
-              the template loader was a <literal>URLTemplateLoader</literal>,
-              when <literal>TemplateLoader.getReader()</literal> was called
-              for the second time, and the <literal>Reader</literal> returned
-              for the first time was already used, it might returned an empty
-              or corrupted template, depending on the backing URL
-              implementation. Secondly, when FreeMarer has decided if a
-              template file has to be re-loaded because its encoding specified
-              with <literal>&lt;#ftl encoding="..."&gt;</literal> differs from
-              the encoding used for loading the template first, it has used
-              case-sensitive comparison, thus often re-loaded needlessly (like
-              "UTF-8" and "utf-8" mean the same). Now this comparison is
-              case-insensitive. Last not least, when retrying with the second
-              charset, the <literal>TemplateCache</literal> has forgotten to
-              close the first <literal>Reader</literal>, which can be a handle
-              leak.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/409/">409</link>]:
-              <literal>SimpleHash</literal>'s internal <literal>Map</literal>
-              is concurrently modified on a non-safe way when getting length-1
-              <literal>String</literal> key that exists but maps to
-              <literal>null</literal>. This operation will accidentally add a
-              <literal>Character</literal> key to the internal map, which is
-              not a thread-safe operation.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/411/">411</link>]:
-              Invalid execution environment names in the OSGi bundle manifest
-              were fixed: J2SE-1.6 to Java2SE-1.6, J2SE-1.7 to JavaSE-1.7.
-              Also, J2SE-1.8 was removed for now, as we don't utilize any
-              features in it dynamically (to prevent misunderstandings, Java 8
-              is still supported).</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed: <literal>ClassUtil.forName</literal>, used
-              inside FreeMarker everywhere to resolve class names to classes,
-              if the thread context class loader is <literal>null</literal>,
-              no longer tries to load with the bootstrap class loader before
-              loading with the defining class loader of FreeMarker.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added new configuration setting,
-              <literal>show_error_tips</literal>, defaults to
-              <literal>true</literal>. Sets if tips should be shown in error
-              messages of errors arising during template processing.</para>
-            </listitem>
-
-            <listitem>
-              <para>Instead of overriding
-              <literal>BeansWrapper.finetuneMethodAppearance</literal> (now
-              deprecated), now you can use
-              <literal>BeansWrapper.setMethodAppearanceFineTuner(MethodAppearanceFineTuner)</literal>,
-              so you don't need to extend the object wrapper class to
-              customize this aspect.</para>
-            </listitem>
-
-            <listitem>
               <para>Bug fixed: When changing the properties of
               <literal>DefaultObjectWrapper</literal> or
               <literal>BeansWrapper</literal> that influenced class
@@ -22305,10 +22331,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">311</link>]:
-              <literal>TemplateBooleanModel.TRUE</literal> and
-              <literal>FALSE</literal> are now serializable</para>
+              <para>Bug fixed: Constants used for empty sequence, empty hash,
+              empty collection and empty iterator weren't
+              <literal>Serializable</literal>.</para>
             </listitem>
 
             <listitem>
@@ -22326,43 +22351,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: <literal>ClassUtil.forName</literal>, used
+              inside FreeMarker everywhere to resolve class names to classes,
+              if the thread context class loader is <literal>null</literal>,
+              no longer tries to load with the bootstrap class loader before
+              loading with the defining class loader of FreeMarker.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
-              Fixed misleading parser error message when a directive called
-              without its required parameters (like
-              <literal>&lt;#list&gt;</literal>) was reported as unknown
-              directive.</para>
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/311/">311</link>]:
+              <literal>TemplateBooleanModel.TRUE</literal> and
+              <literal>FALSE</literal> are now serializable</para>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>Configuration.getCoreDirecticeNames()</literal> which
-              returns the names of all directives that are provided by
-              FreeMarker. This can useful for IDE-s.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal>template_loader</literal> was added as possible
-              configuration setting <literal>Properties</literal> key.</para>
-            </listitem>
-
-            <listitem>
-              <para>Various smaller improvements in configuration setting
-              errors messages.</para>
-            </listitem>
-
-            <listitem>
-              <para>With incompatible improvements 2.3.21 only: Empty ranges
-              return <literal>Constants.EMPTY_SEQUENCE</literal> instead of an
-              empty <literal>SimpleSequence</literal>. This is in theory
-              backward compatible, as the API only promises to give something
-              that implements <literal>TemplateSequenceModel</literal>.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed: Constants used for empty sequence, empty hash,
-              empty collection and empty iterator weren't
-              <literal>Serializable</literal>.</para>
+              <para>Bug fixed: Various issues in <literal>Version</literal>
+              class, such as wrong <literal>hashCode</literal>, possible
+              concurrency glitches, and acceptance of some malformed version
+              strings.</para>
             </listitem>
 
             <listitem>

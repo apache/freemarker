@@ -304,6 +304,17 @@ public class Configuration extends Configurable implements Cloneable {
      *         method values implement {@link TemplateSequenceModel} (because of a historical design quirk in
      *         {@link BeansWrapper}), trying to {@code #list} them will cause error, hence they aren't enumerable.
      *       </li>
+     *       <li><p>
+     *          {@code ?c} will return {@code "INF"}, {@code "-INF"} and {@code "NaN"} for positive/negative infinity
+     *          and IEEE floating point Not-a-Number, respectively. These are the XML Schema compatible representations
+     *          of these special values. Earlier it has returned what {@link DecimalFormat} did with US locale, none of
+     *          which was understood by any (common) computer language.
+     *       </li>
+     *       <li><p>
+     *          FTL hash literals that repeat keys now only have the key once with {@code ?keys}, and only has the last
+     *          value associated to that key with {@code ?values}. This is consistent with the behavior of
+     *          {@code hash[key]} and how maps work in Java.       
+     *       </li>
      *       <li><p>In most cases (where FreeMarker is able to do that), for {@link TemplateLoader}-s that use
      *         {@link URLConnection}, {@code URLConnection#setUseCaches(boolean)} will called with {@code false},
      *         so that only FreeMarker will do caching, not the URL scheme's handler.
@@ -326,12 +337,6 @@ public class Configuration extends Configurable implements Cloneable {
      *          Empty ranges return {@link Constants#EMPTY_SEQUENCE} instead of an empty {@link SimpleSequence}. This
      *          is in theory backward compatible, as the API only promises to give something that implements
      *          {@link TemplateSequenceModel}.
-     *       </li>
-     *       <li><p>
-     *          {@code ?c} will return {@code "INF"}, {@code "-INF"} and {@code "NaN"} for positive/negative infinity
-     *          and IEEE floating point Not-a-Number, respectively. These are the XML Schema compatible representations
-     *          of these special values. Earlier it has returned what {@link DecimalFormat} did with US locale, none of
-     *          which was understood by any (common) computer language.
      *       </li>
      *     </ul>
      *   </li>
