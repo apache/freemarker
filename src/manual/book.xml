@@ -21709,8 +21709,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               specify constructor arguments and JavaBean property assignments.
               For example, now you can write
               <literal>object_wrapper=com.example.MyObjectWrapper(1, 2,
-              exposeFields=true, cacheSize=5000)</literal>is nearly equivalent
-              with this Java code: <literal>obj = new
+              exposeFields=true, cacheSize=5000)</literal>that's nearly
+              equivalent with this Java code: <literal>obj = new
               com.example.MyObjectWrapper(1, 2); obj.setExposeFields(true);
               obj.setCacheSize(5000); object_wrapper = obj;</literal>. If you
               are using this new syntax (i.e., if you have parentheses after
@@ -21733,12 +21733,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               version, or less than 2.3.0, an
               <literal>IllegalArgumentException</literal> will be thrown.
               Thus, <literal>new
-              Configuration(Configuration.VERSION_2_3_21)</literal> not only
-              activates the fixes up to 2.3.21, but ensures that the
-              application will not run in an environment with an older
-              FreeMarker version. (On an older FreeMarker version the fixes
-              that you have requested aren't implemented yet, so you should
-              get an exception.)</para>
+              Configuration(<replaceable>someVersion</replaceable>)</literal>
+              not only activates the fixes up to that version, but ensures
+              that the application will not run in an environment with an
+              older FreeMarker version. (On an older FreeMarker version the
+              fixes that you have requested aren't implemented yet, so you
+              should get an exception.)</para>
             </listitem>
 
             <listitem>
