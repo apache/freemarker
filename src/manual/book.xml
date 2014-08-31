@@ -13305,6 +13305,16 @@ rif: foo XYr baar</programlisting>
           value of the number (like big numbers are possibly ``damaged'' by
           grouping separators).</para>
 
+          <para>If the <literal>incompatible_imporvements</literal> FreeMarker
+          configuration setting is set to 2.3.21 (or higher), this built-in
+          will return <literal>"INF"</literal>, <literal>"-INF"</literal> and
+          <literal>"NaN"</literal> for positive/negative infinity and IEEE
+          floating point Not-a-Number, respectively. These are the XML Schema
+          compatible representations of these special values. (Earlier it has
+          returned what <literal>java.text.DecimalFormat</literal> did with US
+          locale, none of which is understood by any (common) computer
+          language.)</para>
+
           <para>Note that this built-in <link
           linkend="ref_builtin_c_boolean">also works on
           booleans</link>.</para>
