@@ -12477,19 +12477,22 @@ Matching sub-strings:
           </indexterm>
 
           <para>The string converted to numerical value. The number must be in
-          the same format as you specify numerical values directly in FTL.
-          That is, it must be in the locale independent form, where the
-          decimal separator is dot. In additional the built-in recognizes
+          <quote>computer language</quote> format. That is, it must be in the
+          locale independent form, where the decimal separator is dot, and
+          there's no grouping.</para>
+
+          <para>This built-in recognizes numbers in the format that the
+          FreeMarker template language uses. In additionally, it recognizes
           scientific notation (e.g. <literal>"1.23E6"</literal>,
-          <literal>"1.5e-8"</literal>).</para>
+          <literal>"1.5e-8"</literal>). Since FreeMarker 2.3.21, it also
+          recognizes all XML Schema number formats, like
+          <literal>NaN</literal>, <literal>INF</literal>,
+          <literal>-INF</literal>, plus the Java-native formats
+          <literal>Infinity</literal> and <literal>-Infinity</literal>.</para>
 
           <para>If the string is not in the appropriate format, an error will
           abort template processing when you try to access this
           built-in.</para>
-
-          <para>Known problem: If you use earlier Java2 platform than v1.3,
-          the built-ins will not recognize + prefix and scientific
-          notation.<phrase role="forProgrammers"/></para>
 
           <para><phrase role="forProgrammers">In fact, the string is parsed by
           the <literal>toNumber</literal> method of the current
@@ -21266,6 +21269,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               This is for example useful for converting "true" and "false"
               strings coming from XML to real boolean values. <link
               linkend="ref_builtin_boolean">More...</link></para>
+            </listitem>
+
+            <listitem>
+              <para><literal><replaceable>someString</replaceable>?number</literal>
+              now recognizes all XML Schema number formats, like
+              <literal>NaN</literal>, <literal>INF</literal>,
+              <literal>-INF</literal>, plus the Java-native formats
+              <literal>Infinity</literal> and
+              <literal>-Infinity</literal>.</para>
             </listitem>
 
             <listitem>

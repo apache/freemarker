@@ -45,6 +45,15 @@ word_list:
 <#global canufeelitbabe = x?interpret>
 interpret: <#transform canufeelitbabe></#transform>
 <#setting locale="es_ES">number: ${"-123.45"?number + 1.1}
+${"1.5e3"?number?c}
+${"0005"?number?c}
+${"+0"?number?c}
+${"-0"?number?c}
+${"NaN"?number?is_nan?c}
+${("INF"?number?is_infinite && "INF"?number > 0)?c}
+${("-INF"?number?is_infinite && "-INF"?number < 0)?c}
+${("Infinity"?number?is_infinite && "Infinity"?number > 0)?c}
+${("-Infinity"?number?is_infinite && "-Infinity"?number < 0)?c}
 
 ${"freemarker.test.templatesuite.models.NewTestModel"?new()}
 ${"freemarker.test.templatesuite.models.NewTestModel"?new(1)}
