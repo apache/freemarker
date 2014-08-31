@@ -19,6 +19,8 @@ package freemarker.template;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
@@ -28,6 +30,8 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
 
@@ -330,6 +334,63 @@ public class ConfigurationTest extends TestCase{
         assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
         cfg.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, "2.3.21");
         assertEquals(Configuration.VERSION_2_3_21, cfg.getIncompatibleImprovements());
+    }
+    
+    public void testSharedVariables() throws TemplateModelException {
+        Configuration cfg = new Configuration();
+
+        cfg.setSharedVariable("erased", "");
+        assertNotNull(cfg.getSharedVariable("erased"));
+        
+        Map<String, Object> vars = new HashMap<String, Object>(); 
+        vars.put("a", "aa");
+        vars.put("b", "bb");
+        vars.put("c", new MyScalarModel());
+        cfg.setSharedVaribles(vars);
+
+        assertNull(cfg.getSharedVariable("erased"));
+        
+        {
+            TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");
+            assertEquals("aa", aVal.getAsString());
+            assertEquals(SimpleScalar.class, aVal.getClass());
+            
+            TemplateScalarModel bVal = (TemplateScalarModel) cfg.getSharedVariable("b");
+            assertEquals("bb", bVal.getAsString());
+            assertEquals(SimpleScalar.class, bVal.getClass());
+            
+            TemplateScalarModel cVal = (TemplateScalarModel) cfg.getSharedVariable("c");
+            assertEquals("my", cVal.getAsString());
+            assertEquals(MyScalarModel.class, cfg.getSharedVariable("c").getClass());
+        }
+        
+        // Legacy method: Keeps TemplateModel created on the time it was called. 
+        cfg.setSharedVariable("b", "bbLegacy");
+        
+        // Cause re-wrapping of variables added via setSharedVaribles:
+        cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_0).getResult());
+
+        {
+            TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");
+            assertEquals("aa", aVal.getAsString());
+            assertEquals(StringModel.class, aVal.getClass());
+            
+            TemplateScalarModel bVal = (TemplateScalarModel) cfg.getSharedVariable("b");
+            assertEquals("bbLegacy", bVal.getAsString());
+            assertEquals(SimpleScalar.class, bVal.getClass());
+            
+            TemplateScalarModel cVal = (TemplateScalarModel) cfg.getSharedVariable("c");
+            assertEquals("my", cVal.getAsString());
+            assertEquals(MyScalarModel.class, cVal.getClass());
+        }
+    }
+    
+    private static class MyScalarModel implements TemplateScalarModel {
+
+        public String getAsString() throws TemplateModelException {
+            return "my";
+        }
+        
     }
     
 }

@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -207,7 +208,14 @@ public class Configuration extends Configurable implements Cloneable {
 
     private boolean objectWrapperWasSet;
     
-    private HashMap sharedVariables = new HashMap();
+    private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
+    
+    /**
+     * Needed so that it doesn't mater in what order do you call {@link #setSharedVaribles(Map)}
+     * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
+     * control over the order, so it has to work on both ways.
+     */
+    private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
     private Map localeToCharsetMap = _ConcurrentMapFactory.newThreadSafeMap();
@@ -689,8 +697,18 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
+        ObjectWrapper prevObjectWrapper = getObjectWrapper();
         super.setObjectWrapper(objectWrapper);
         objectWrapperWasSet = true;
+        if (objectWrapper != prevObjectWrapper) {
+            try {
+                setSharedVariablesFromRewrappableSharedVariables();
+            } catch (TemplateModelException e) {
+                throw new RuntimeException(
+                        "Failed to re-wrap earliearly set shared variables with the newly set object wrapper",
+                        e);
+            }
+        }
     }
 
     /**
@@ -1026,11 +1044,15 @@ public class Configuration extends Configurable implements Cloneable {
      * @param name the name used to access the data object from your template.
      *     If a shared variable with this name already exists, it will replace
      *     that.
-     * @see #setSharedVariable(String,Object)
+     *     
      * @see #setAllSharedVariables
+     * @see #setSharedVariable(String,Object)
      */
     public void setSharedVariable(String name, TemplateModel tm) {
-        sharedVariables.put(name, tm);
+        Object replaced = sharedVariables.put(name, tm);
+        if (replaced != null && rewrappableSharedVariables != null) {
+            rewrappableSharedVariables.remove(name);
+        }
     }
 
     /**
@@ -1047,13 +1069,64 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds shared variable to the configuration; It uses {@link Configurable#getObjectWrapper()} to wrap the 
      * {@code value}, so it's important that the object wrapper is set before this.
      * 
-     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values.
      * 
+     * <p>The added value should be thread safe, if you are running templates from multiple threads with this
+     * configuration.
+     *
+     * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
+     *
+     * @see #setSharedVaribles(Map)
      * @see #setSharedVariable(String,TemplateModel)
-     * @see #setAllSharedVariables
+     * @see #setAllSharedVariables(TemplateHashModelEx)
      */
     public void setSharedVariable(String name, Object value) throws TemplateModelException {
         setSharedVariable(name, getObjectWrapper().wrap(value));
+    }
+    
+    /**
+     * Replaces all shared variables (removes all previously added ones).
+     *
+     * <p>The values in the map can be {@link TemplateModel}-s or plain Java objects which will be immediately converted
+     * to {@link TemplateModel} with the {@link ObjectWrapper} returned by {@link #getObjectWrapper()}. If
+     * {@link #setObjectWrapper(ObjectWrapper)} is called later, this conversion will be re-applied. Thus, ignoring some
+     * extra resource usage, it doesn't mater if in what order are {@link #setObjectWrapper(ObjectWrapper)} and
+     * {@link #setSharedVaribles(Map)} called. This is essential when you don't have control over the order in which
+     * the setters are called. 
+     *
+     * <p>The values in the map must be thread safe, if you are running templates from multiple threads with
+     * this configuration. This means that both the plain Java object and the {@link TemplateModel}-s created from them
+     * by the {@link ObjectWrapper} must be thread safe. (The standard {@link ObjectWrapper}-s of FreeMarker create
+     * thread safe {@link TemplateModel}-s.) The {@link Map} itself need not be thread-safe.
+     * 
+     * <p>This setter method has no getter pair because of the tricky relation ship with
+     * {@link #setSharedVariable(String, Object)}.
+     * 
+     * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
+     *  
+     * @since 2.3.21
+     */
+    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+        rewrappableSharedVariables = new HashMap(map);
+        sharedVariables.clear();
+        setSharedVariablesFromRewrappableSharedVariables();
+    }
+
+    private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
+        if (rewrappableSharedVariables == null) return;
+        for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext();) {
+            Map.Entry/*<String, Object>*/ ent = (Entry) it.next();
+            String name = (String) ent.getKey();
+            Object value = ent.getValue();
+            
+            TemplateModel valueAsTM;
+            if (value instanceof TemplateModel) {
+                valueAsTM = (TemplateModel) value;
+            } else {
+                valueAsTM = getObjectWrapper().wrap(value);
+            }
+            sharedVariables.put(name, valueAsTM);
+        }
     }
 
     /**

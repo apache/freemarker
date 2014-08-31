@@ -22083,6 +22083,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added
+              <literal>Configuration.setSharedVariables(Map/*&lt;String,
+              Object&gt;*/)</literal> for setting the shared variables from
+              Spring IoC and other IoC solutions. The already existing
+              <literal>Configuration.setSharedVariable(String,
+              Object)</literal> isn't a JavaBean property so it was hard to
+              use for that. Furthermore, the order in which
+              <literal>Configuration.setObjectWrapper</literal> and
+              <literal>Configuration.setSharedVariables</literal> are called
+              doesn't mater (unlike in the case of
+              <literal>Configuration.setSharedVariable</literal>), which is
+              essential in most IoC solutions.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/273/">273</link>]:
               <literal>TemplateLoader</literal>-s that use
