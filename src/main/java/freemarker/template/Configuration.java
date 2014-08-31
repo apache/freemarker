@@ -134,14 +134,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
-    
-    /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
-    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
-    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
-    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
-    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
-    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
-    
+
     /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
     
@@ -153,6 +146,13 @@ public class Configuration extends Configurable implements Cloneable {
     
     /** FreeMarker version 2.3.21 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_21 = new Version(2, 3, 21);
+    
+    /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
+    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
+    /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
+    public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
     private static final Version version;
     static {
