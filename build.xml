@@ -707,7 +707,7 @@
   <url>http://freemarker.org/</url>
   <licenses>
     <license>
-      <name>BSD-style license</name>
+      <name>Apache License, Version 2.0</name>
       <url>http://freemarker.org/LICENSE.txt</url>
     </license>
   </licenses>
@@ -829,8 +829,7 @@ into a Sonatype staging repo. Proceed? </input>
   </description>
 
   <license><!--
-    -->FreeMarker and this plug-in is provided under the terms and conditions <!--
-    -->of a BSD-style license, available at http://freemarker.org/LICENSE.txt.<!--
+    -->Apache License, Version 2.0; see http://freemarker.org/LICENSE.txt.<!--
   --></license>
 
   <plugin
@@ -857,7 +856,7 @@ into a Sonatype staging repo. Proceed? </input>
       <manifest>
         <attribute name="Bundle-SymbolicName" value="${moduleOrg}.${moduleName}.source" />
         <attribute name="Bundle-Version" value="${versionForOSGi}" />
-        <attribute name="Bundle-License" value="BSD-style, see: http://freemarker.org/LICENSE.txt" />
+        <attribute name="Bundle-License" value="Apache License, Version 2.0" />
         <attribute name="Bundle-Vendor" value="freemarker.org" />
         <attribute name="Eclipse-SourceBundle" value='org.freemarker.freemarker;version="${versionForOSGi}";roots:="."' />
       </manifest>
@@ -875,8 +874,7 @@ into a Sonatype staging repo. Proceed? </input>
   </description>
 
   <license><!--
-    -->FreeMarker and this plug-in is provided under the terms and conditions <!--
-    -->of a BSD-style license, available at http://freemarker.org/LICENSE.txt.<!--
+    -->Apache License, Version 2.0; see http://freemarker.org/LICENSE.txt.<!--
   --></license>
 
   <plugin
