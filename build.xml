@@ -670,16 +670,15 @@
   
   <!--
     Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
-    into the place that the central Maven2 repository syncs itself with
-    periodically. Of course it also uploads the Maven-specific metadata files.
+    to a Maven repository (snapshot or central).
     
     Use this after "dist" (without interleaving "clean").
   
     Note: maven-ant-tasks-x.x.x.jar must be added to ${ANT_HOME}/lib for
       this to work. Get it here: http://maven.apache.org/download.html
   -->
-  <target name="maven-stage-dist"
-      description="Stage the last built distro on Sonatype"
+  <target name="maven-dist"
+      description="Releases the already built distro to a Maven repository"
       xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -695,7 +694,7 @@
   
   <groupId>org.freemarker</groupId>
   <artifactId>freemarker-gae</artifactId>
-  <version>${version}</version>
+  <version>${mavenVersion}</version>
   
   <packaging>jar</packaging>
   
@@ -745,25 +744,39 @@
     </jar>
 
     <input
+       validargs="u,f"
+       addproperty="mavenUpload.stability"
+    >
+Will this be an [u]nstable or a [f]inal release? </input>
+    
+    <property name="maven-server-id" value="ossrh" />
+    <condition property="maven-repository-url"
+        value="https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        else="https://oss.sonatype.org/content/repositories/snapshots/">
+      <equals arg1="f" arg2="${mavenUpload.stability}"/>
+    </condition>
+    
+    <input
        validargs="y,n"
        addproperty="mavenUpload.answer"
     >
 You are about uploading
-${dist.dir}/freemarker.jar and its attachments
-into a Sonatype staging repo. Proceed? </input>
+${dist.dir}/freemarker.jar
+and its attachments to this Maven repository:
+${maven-repository-url}
+with Maven artifact version number ${mavenVersion}.
+Note that it's assumed that you have run `ant dist` just before this.
+Proceed? </input>
     <condition property="mavenUpload.yes">
       <equals arg1="y" arg2="${mavenUpload.answer}"/>
     </condition>
     <fail unless="mavenUpload.yes" message="Task aborted by user." />
     
-    <property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
-    <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
-    
 		<!-- Sign and deploy the main artifact -->
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
-			<arg value="-Durl=${maven-staging-repository-url}" />
-			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-Durl=${maven-repository-url}" />
+			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
 			<arg value="-Dfile=${dist.dir}/freemarker.jar" />
       <arg value="-Pgpg" />
@@ -772,8 +785,8 @@ into a Sonatype staging repo. Proceed? </input>
 		<!-- Sign and deploy the sources artifact -->
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
-			<arg value="-Durl=${maven-staging-repository-url}" />
-			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-Durl=${maven-repository-url}" />
+			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
 			<arg value="-Dfile=build/maven-source-attachment.jar" />
 			<arg value="-Dclassifier=sources" />
@@ -783,8 +796,8 @@ into a Sonatype staging repo. Proceed? </input>
 		<!-- Sign and deploy the javadoc artifact -->
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
-			<arg value="-Durl=${maven-staging-repository-url}" />
-			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-Durl=${maven-repository-url}" />
+			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
 			<arg value="-Dfile=build/maven-javadoc-attachment.jar" />
 			<arg value="-Dclassifier=javadoc" />
@@ -792,7 +805,11 @@ into a Sonatype staging repo. Proceed? </input>
 		</artifact:mvn>
     
     <echo>*****************************************************************</echo>
-    <echo>Now you can release the staged repo on https://oss.sonatype.org/.</echo>
+    <echo>Check the above lines for any Maven errors!</echo>
+    <echo>If it was a final release, now you have to release the staged</echo>
+    <echo>repo on https://oss.sonatype.org/.</echo>
+    <echo>If it was an unstable release, you may check the content of</echo>
+    <echo>https://oss.sonatype.org/content/repositories/snapshots/org/.</echo>
     <echo>*****************************************************************</echo>
   </target>
   
