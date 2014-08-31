@@ -21,16 +21,19 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import freemarker.cache.MultiTemplateLoader.MultiSource;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
@@ -97,36 +100,58 @@ public class TemplateCache
     }
     
     /**
-     * Creates a new template cache with a custom template loader that is used
-     * to load the templates.
-     * @param templateLoader the template loader to use.
+     * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
     public TemplateCache(TemplateLoader templateLoader)
     {
-        this(templateLoader, new SoftCacheStorage());
+        this(templateLoader, (Configuration) null);
     }
-    
+
     /**
-     * Creates a new template cache with a custom template loader that is used
-     * to load the templates.
-     * @param templateLoader the template loader to use.
+     * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage)
     {
+        this(templateLoader, cacheStorage, null);
+    }
+
+    /**
+     * Creates an instance with the default {@link CacheStorage}.
+     * 
+     * @since 2.3.21
+     */
+    public TemplateCache(TemplateLoader defaultTemplateLoader, Configuration config) {
+        this(defaultTemplateLoader, new SoftCacheStorage(), config);
+    }
+    
+    /**
+     * @param templateLoader The {@link TemplateLoader} to use. Can't be {@code null}.
+     * @param cacheStorage The {@link CacheStorage} to use. Can't be {@code null}.
+     * @param config The {@link Configuration} this cache will be used for. Can be {@code null} for backward
+     *          compatibility, as it can be set with {@link #setConfiguration(Configuration)} later.
+     *          
+     * @since 2.3.21
+     */
+    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config)
+    {
         this.templateLoader = templateLoader;
-        this.storage = cacheStorage;
         if(cacheStorage == null) 
         {
             throw new IllegalArgumentException("storage == null");
         }
+        this.storage = cacheStorage;
         isStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
             ((ConcurrentCacheStorage)cacheStorage).isConcurrent();
+
+        this.config = config;
     }
 
     /**
      * Sets the configuration object to which this cache belongs. This
      * method is called by the configuration itself to establish the
      * relation, and should not be called by users.
+     * 
+     * @deprecated Use the {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} constructor.
      */
     public void setConfiguration(Configuration config)
     {
@@ -583,7 +608,7 @@ public class TemplateCache
         // Shortcut in case there is no acquisition
         if(asterisk == -1)
         {
-            return templateLoader.findTemplateSource(path);
+            return modifyForConfIcI(templateLoader.findTemplateSource(path));
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
@@ -602,7 +627,7 @@ public class TemplateCache
             tokpath.add(pathToken);
         }
         if (lastAsterisk == -1) {  // if there was no real "*" step after all
-            return templateLoader.findTemplateSource(path);
+            return modifyForConfIcI(templateLoader.findTemplateSource(path));
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
@@ -621,7 +646,7 @@ public class TemplateCache
                 logger.debug("Trying to find template source "
                         + StringUtil.jQuoteNoXSS(fullPath));
             }
-            Object templateSource = templateLoader.findTemplateSource(fullPath);
+            Object templateSource = modifyForConfIcI(templateLoader.findTemplateSource(fullPath));
             if(templateSource != null)
             {
                 return templateSource;
@@ -633,6 +658,28 @@ public class TemplateCache
             l = basePath.lastIndexOf(SLASH, l - 2) + 1;
             buf.setLength(l);
         }
+    }
+
+    /**
+     * If IcI >= 2.3.21, sets {@link URLTemplateSource#setUseCaches(boolean)} to {@code false} for sources that come
+     * from a {@link TemplateLoader} where {@link URLConnection} cache usage wasn't set explicitly.  
+     */
+    private Object modifyForConfIcI(Object templateSource) {
+        if (templateSource == null) return null;
+        
+        if (config.getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+            return templateSource;
+        }
+        
+        if (templateSource instanceof URLTemplateSource) {
+            URLTemplateSource urlTemplateSource = (URLTemplateSource) templateSource;
+            if (urlTemplateSource.getUseCaches() == null) {  // It was left unset
+                urlTemplateSource.setUseCaches(false);
+            }
+        } else if (templateSource instanceof MultiSource) {
+            modifyForConfIcI(((MultiSource) templateSource).getWrappedSource());
+        }
+        return templateSource;
     }
 
     private String concatPath(List path, int from, int to)

@@ -30,19 +30,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template.Version;
 
 @RunWith(JUnit4.class)
 public class EnumModelsTest {
     
     @Test
     public void modelCaching() throws Exception {
-        BeansWrapper bw = new BeansWrapper(new Version(2, 3, 21));
+        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_21);
         TemplateHashModel enums = bw.getEnumModels();
         TemplateHashModel e = (TemplateHashModel) enums.get(E.class.getName());
         assertNotNull(e);

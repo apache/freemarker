@@ -18,10 +18,12 @@ package freemarker.cache;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Locale;
 
 import junit.framework.TestCase;
 import freemarker.template.Configuration;
+import freemarker.template.Version;
 
 public class TemplateCacheTest extends TestCase
 {
@@ -76,7 +78,7 @@ public class TemplateCacheTest extends TestCase
     public void testCachedNotFound() throws Exception
     {
         MockTemplateLoader loader = new MockTemplateLoader();
-        TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage());
+        TemplateCache cache = new TemplateCache(loader, new StrongCacheStorage(), new Configuration());
         cache.setDelay(1000L);
         cache.setLocalizedLookup(false);
         assertNull(cache.getTemplate("t", Locale.getDefault(), "", true));
@@ -216,6 +218,95 @@ public class TemplateCacheTest extends TestCase
         loader.putTemplate("t.ftl", "v11", 10); // same time stamp, different content
         assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
         assertEquals("v10", cfg.getTemplate("t.ftl").toString()); // still v10
+    }
+    
+    public void testIncompatibleImprovementsChangesURLConCaching() throws IOException {
+        Version newVersion = Configuration.VERSION_2_3_21;
+        Version oldVersion = Configuration.VERSION_2_3_20;
+        
+        {
+            Configuration cfg = new Configuration(oldVersion);
+            cfg.setTemplateUpdateDelay(0);
+            final MonitoredClassTemplateLoader templateLoader = new MonitoredClassTemplateLoader();
+            assertNull(templateLoader.getURLConnectionUsesCaches());
+            cfg.setTemplateLoader(templateLoader);
+            
+            assertNull(templateLoader.getLastTemplateSourceModification());
+            cfg.getTemplate("test.ftl");
+            assertNull(templateLoader.getLastTemplateSourceModification());
+            
+            cfg.setIncompatibleImprovements(newVersion);
+            assertNull(templateLoader.getLastTemplateSourceModification());
+            cfg.getTemplate("test.ftl");
+            assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
+            
+            templateLoader.setURLConnectionUsesCaches(Boolean.valueOf(true));
+            templateLoader.setLastTemplateSourceModification(null);
+            cfg.getTemplate("test.ftl");
+            assertNull(templateLoader.getLastTemplateSourceModification());
+            
+            templateLoader.setURLConnectionUsesCaches(Boolean.valueOf(false));
+            templateLoader.setLastTemplateSourceModification(null);
+            cfg.getTemplate("test.ftl");
+            assertNull(templateLoader.getLastTemplateSourceModification());
+
+            templateLoader.setURLConnectionUsesCaches(null);
+            templateLoader.setLastTemplateSourceModification(null);
+            cfg.getTemplate("test.ftl");
+            assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
+            
+            templateLoader.setURLConnectionUsesCaches(null);
+            cfg.setIncompatibleImprovements(oldVersion);
+            templateLoader.setLastTemplateSourceModification(null);
+            cfg.getTemplate("test.ftl");
+            assertNull(templateLoader.getLastTemplateSourceModification());
+            
+            cfg.setTemplateLoader(new MultiTemplateLoader(
+                    new TemplateLoader[] { new MultiTemplateLoader(
+                                    new TemplateLoader[] { templateLoader }) }));
+            cfg.setIncompatibleImprovements(newVersion);
+            cfg.getTemplate("test.ftl");
+            assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
+        }
+    }
+
+    private static class MonitoredClassTemplateLoader extends ClassTemplateLoader {
+        
+        private Boolean lastTemplateSourceModification;
+
+        public MonitoredClassTemplateLoader() {
+            super(TemplateCacheTest.class, "");
+        }
+
+        @Override
+        public Object findTemplateSource(String name) throws IOException {
+            final URL url = getURL(name);
+            if (url == null) return null;
+            return new SpyingURLTemplateSource(url, getURLConnectionUsesCaches());
+        }
+
+        Boolean getLastTemplateSourceModification() {
+            return lastTemplateSourceModification;
+        }
+
+        void setLastTemplateSourceModification(Boolean lastTemplateSourceModification) {
+            this.lastTemplateSourceModification = lastTemplateSourceModification;
+        }
+        
+        private class SpyingURLTemplateSource extends URLTemplateSource {
+            
+            SpyingURLTemplateSource(URL url, Boolean useCaches) throws IOException {
+                super(url, useCaches);
+            }
+
+            @Override
+            void setUseCaches(boolean useCaches) {
+                setLastTemplateSourceModification(Boolean.valueOf(useCaches));
+                super.setUseCaches(useCaches);
+            }
+            
+        }
+        
     }
 
 }

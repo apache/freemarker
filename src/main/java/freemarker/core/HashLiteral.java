@@ -18,6 +18,7 @@ package freemarker.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
 import freemarker.template.SimpleSequence;
@@ -25,6 +26,7 @@ import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
+import freemarker.template._TemplateAPI;
 
 final class HashLiteral extends Expression {
 
@@ -95,27 +97,43 @@ final class HashLiteral extends Expression {
 
     private class SequenceHash implements TemplateHashModelEx {
 
-        private HashMap keyMap; // maps keys to integer offset
+        private HashMap map; // maps keys to integer offset
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
         SequenceHash(Environment env) throws TemplateException {
-            keyMap = new HashMap();
-            ArrayList keyList = new ArrayList(size);
-            ArrayList valueList = new ArrayList(size);
-            for (int i = 0; i< size; i++) {
-                Expression keyExp = (Expression) keys.get(i);
-                Expression valExp = (Expression) values.get(i);
-                String key = keyExp.evalAndCoerceToString(env);
-                TemplateModel value = valExp.eval(env);
-                if (env == null || !env.isClassicCompatible()) {
-                    valExp.assertNonNull(value, env);
+            if (_TemplateAPI.getTemplateLanguageVersionAsInt(HashLiteral.this) >= _TemplateAPI.VERSION_INT_2_3_21) {
+                map = new LinkedHashMap();
+                for (int i = 0; i < size; i++) {
+                    Expression keyExp = (Expression) keys.get(i);
+                    Expression valExp = (Expression) values.get(i);
+                    String key = keyExp.evalAndCoerceToString(env);
+                    TemplateModel value = valExp.eval(env);
+                    if (env == null || !env.isClassicCompatible()) {
+                        valExp.assertNonNull(value, env);
+                    }
+                    map.put(key, value);
                 }
-                keyMap.put(key, value);
-                keyList.add(key);
-                valueList.add(value);
+            } else {
+                // Legacy hash literal, where repeated keys were kept when doing ?values or ?keys, yet overwritten when
+                // doing hash[key].
+                map = new HashMap();
+                ArrayList keyList = new ArrayList(size);
+                ArrayList valueList = new ArrayList(size);
+                for (int i = 0; i< size; i++) {
+                    Expression keyExp = (Expression) keys.get(i);
+                    Expression valExp = (Expression) values.get(i);
+                    String key = keyExp.evalAndCoerceToString(env);
+                    TemplateModel value = valExp.eval(env);
+                    if (env == null || !env.isClassicCompatible()) {
+                        valExp.assertNonNull(value, env);
+                    }
+                    map.put(key, value);
+                    keyList.add(key);
+                    valueList.add(value);
+                }
+                keyCollection = new CollectionAndSequence(new SimpleSequence(keyList));
+                valueCollection = new CollectionAndSequence(new SimpleSequence(valueList));
             }
-            keyCollection = new CollectionAndSequence(new SimpleSequence(keyList));
-            valueCollection = new CollectionAndSequence(new SimpleSequence(valueList));
         }
 
         public int size() {
@@ -123,15 +141,23 @@ final class HashLiteral extends Expression {
         }
 
         public TemplateCollectionModel keys() {
+            if (keyCollection == null) {
+                // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
+                keyCollection = new CollectionAndSequence(new SimpleSequence(map.keySet()));
+            }
             return keyCollection;
         }
 
         public TemplateCollectionModel values() {
+            if (valueCollection == null) {
+                // This can only happen when IcI >= 2.3.21, an the map is a LinkedHashMap.
+                valueCollection = new CollectionAndSequence(new SimpleSequence(map.values()));
+            }
             return valueCollection;
         }
 
         public TemplateModel get(String key) {
-            return (TemplateModel) keyMap.get(key);
+            return (TemplateModel) map.get(key);
         }
 
         public boolean isEmpty() {

@@ -27,6 +27,7 @@
             new_builtin_class_resolver CDATA #IMPLIED
             url_escaping_charset CDATA #IMPLIED
             incompatible_improvements CDATA #IMPLIED
+            time_zone CDATA #IMPLIED
       >
 ]>
 
@@ -45,7 +46,13 @@
    </testcase>
    <testcase name="comment" />
    <testcase name="comparisons" />
-   <testcase name="dateformat" />
+   <testcase name="compress" />
+   <testcase name="dateformat-java" />
+   <testcase name="dateformat-iso-like" nooutput="true" />
+   <testcase name="dateformat-iso-bi" nooutput="true" />
+   <testcase name="dateformat-iso-bi-ici-2.3.21" nooutput="true">
+      <config incompatible_improvements="2.3.21" /> 
+   </testcase>   
    <testcase name="dateparsing" nooutput="true" />
    <testcase name="default"/>
    <testcase name="default-xmlns">
@@ -54,6 +61,12 @@
    <testcase name="encoding-builtins" />
    <testcase name="escapes" />
    <testcase name="hashliteral" />
+   <testcase name="hashliteral-ici-2.3.20" template="hashliteral.ftl" expected="hashliteral.txt">
+      <config incompatible_improvements="2.3.20"/>
+   </testcase>
+   <testcase name="hashliteral-ici-2.3.21"  template="hashliteral.ftl" expected="hashliteral.txt">
+      <config incompatible_improvements="2.3.21" />
+   </testcase>
    <testcase name="identifier" >
       <config strict_syntax="N" />
    </testcase>
@@ -78,6 +91,9 @@
    <testcase name="newlines2" />
    <testcase name="noparse" />
    <testcase name="number-format" />
+   <testcase name="number-format-ici-2.3.21" template="number-format.ftl" expected="number-format.txt">
+   	  <config incompatible_improvements="2.3.21"/>
+   </testcase>
    <testcase name="number-literal" >
       <config locale="fr_FR"/>
    </testcase>
@@ -90,6 +106,12 @@
        <config output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
    </testcase>
    <testcase name="precedence"/>
+   <testcase name="range-ici-2.3.20" nooutput="true">
+   	  <config incompatible_improvements="2.3.20"/>
+   </testcase>
+   <testcase name="range-ici-2.3.21" nooutput="true">
+   	  <config incompatible_improvements="2.3.21"/>
+   </testcase>
    <testcase name="recover" />
    <testcase name="root" />
    <testcase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
@@ -115,6 +137,10 @@
    <testcase name="switch" />
    <testcase name="transforms"/>
    <testcase name="type-builtins"/>
+   <testcase name="type-builtins-ici-2.3.21" template="type-builtins.ftl" expected="type-builtins-ici-2.3.21.txt">
+   	  <config incompatible_improvements="2.3.21"/>
+   </testcase>
+   <testcase name="date-type-builtins" nooutput="true" />
    <testcase name="var-layers"/>
    <testcase name="variables"/>
    <testcase name="whitespace-trim"/>
@@ -157,7 +183,6 @@
       <config output_encoding="utf-8"/>
       <config url_escaping_charset="iso-8859-1"/>
    </testcase>   
-   <testcase name="iso8601" />
    <testcase name="number-to-date" />
    <testcase name="varargs" />
    <testcase name="overloaded-methods-23bc" nooutput="true" />

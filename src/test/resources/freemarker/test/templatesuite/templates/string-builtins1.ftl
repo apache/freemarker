@@ -20,6 +20,22 @@ xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
 <@assertEquals actual="'"?html expected="'" />
 <@assertEquals actual="'"?xhtml expected="&#39;" />
 <@assertEquals actual="'"?xml expected="&apos;" />
+<#-- ?substring: -->
+<@assertEquals actual="ab"?substring(0) expected="ab" />
+<@assertEquals actual="ab"?substring(1) expected="b" />
+<@assertEquals actual="ab"?substring(2) expected="" />
+<@assertFails message="at least 0">${"ab"?substring(-1)}</@><#t>
+<@assertFails message="greater than the length of the string">${"ab"?substring(3)}</@><#t>
+<@assertEquals actual="ab"?substring(0, 0) expected="" />
+<@assertEquals actual="ab"?substring(0, 1) expected="a" />
+<@assertEquals actual="ab"?substring(0, 2) expected="ab" />
+<@assertFails message="at least 0">${"ab"?substring(0, -1)}</@><#t>
+<@assertFails message="greater than the length of the string">${"ab"?substring(0, 3)}</@><#t>
+<@assertEquals actual="ab"?substring(1, 1) expected="" />
+<@assertEquals actual="ab"?substring(1, 2) expected="b" />
+<@assertFails message="at least 0">${"ab"?substring(1, -1)}</@><#t>
+<@assertFails message="greater than the length of the string">${"ab"?substring(1, 3)}</@><#t>
+<@assertFails message="shouldn't be greater than the end index">${"ab"?substring(1, 0)}</@><#t>
 
 word_list:
 <#global words = x?word_list>
@@ -29,6 +45,15 @@ word_list:
 <#global canufeelitbabe = x?interpret>
 interpret: <#transform canufeelitbabe></#transform>
 <#setting locale="es_ES">number: ${"-123.45"?number + 1.1}
+${"1.5e3"?number?c}
+${"0005"?number?c}
+${"+0"?number?c}
+${"-0"?number?c}
+${"NaN"?number?is_nan?c}
+${("INF"?number?is_infinite && "INF"?number > 0)?c}
+${("-INF"?number?is_infinite && "-INF"?number < 0)?c}
+${("Infinity"?number?is_infinite && "Infinity"?number > 0)?c}
+${("-Infinity"?number?is_infinite && "-Infinity"?number < 0)?c}
 
 ${"freemarker.test.templatesuite.models.NewTestModel"?new()}
 ${"freemarker.test.templatesuite.models.NewTestModel"?new(1)}

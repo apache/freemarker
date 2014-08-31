@@ -26,8 +26,8 @@ import freemarker.template.Version;
 
 public class HeaderParsingTest extends TemplateOutputTest {
 
-    private final Configuration cfgStripWS = new Configuration(new Version(2, 3, 21));
-    private final Configuration cfgNoStripWS = new Configuration(new Version(2, 3, 21));
+    private final Configuration cfgStripWS = new Configuration(Configuration.VERSION_2_3_21);
+    private final Configuration cfgNoStripWS = new Configuration(Configuration.VERSION_2_3_21);
     {
         cfgNoStripWS.setWhitespaceStripping(false);
     }

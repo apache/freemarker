@@ -29,13 +29,17 @@ import freemarker.template.utility.StringUtil;
  */
 class MessageUtil {
 
-    static final String[] UNKNOWN_DATE_TYPE_ERROR_TIPS = new String[] {
-            "Use ?time, ?date or ?datetime to tell FreeMarker which parts of the date is used."
-    };
+    static final String UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE
+            = "Can't convert the date-like value to string because it isn't "
+              + "known if it's a date (no time part), time or date-time value.";
+    
+    static final String UNKNOWN_DATE_TYPE_ERROR_TIP = 
+            "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
     
     static final String[] UNKNOWN_DATE_TO_STRING_TIPS = new String[] {
-            "Use ?string(format) to specify which parts to display.",
-            UNKNOWN_DATE_TYPE_ERROR_TIPS[0]
+            UNKNOWN_DATE_TYPE_ERROR_TIP,
+            "If you need a particular format only once, use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), "
+            + "to specify which fields to display. "
     };
 
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";
@@ -249,10 +253,44 @@ class MessageUtil {
                 methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", new Integer(argIdx + 1),
                 ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), "." });
     }
+    
+    /**
+     * The type of the argument was good, but it's value wasn't.
+     */
+    static TemplateModelException newMethodArgInvalidValueException(
+            String methodName, int argIdx, Object[] details) {
+        return new _TemplateModelException(new Object[] {
+                methodName, "(...) argument #", new Integer(argIdx + 1),
+                " had invalid value: ", details });
+    }
 
+    /**
+     * The type of the argument was good, but the values of two or more arguments are inconsistent with each other.
+     */
+    static TemplateModelException newMethodArgsInvalidValueException(
+            String methodName, Object[] details) {
+        return new _TemplateModelException(new Object[] {
+                methodName, "(...) arguments have invalid value: ", details });
+    }
+    
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
         return new _MiscTemplateException(env, new Object[] {
                 "Instantiating ", className, " is not allowed in the template for security reasons." });
+    }
+    
+    static _TemplateModelException newCantFormatUnknownTypeDateException(
+            Expression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
+        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
+                MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
+                .blame(dateSourceExpr)
+                .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
+    }
+
+    static TemplateModelException newCantFormatDateException(
+            Expression dateSourceExpr, UnformattableDateException cause) {
+        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
+                cause.getMessage())
+                .blame(dateSourceExpr));
     }
 
     /**

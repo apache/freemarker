@@ -45,10 +45,16 @@ public final class Version implements Serializable {
     private String calculatedStringValue;  // not final because it's calculated on demand
     private int hashCode;  // not final because it's calculated on demand
 
+    /**
+     * @throws IllegalArgumentException if the version string is malformed
+     */
     public Version(String stringValue) {
         this(stringValue, null, null);
     }
     
+    /**
+     * @throws IllegalArgumentException if the version string is malformed
+     */
     public Version(String stringValue, Boolean gaeCompliant, Date buildDate) {
         stringValue = stringValue.trim();
         originalStringValue = stringValue; 

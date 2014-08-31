@@ -40,10 +40,6 @@ import freemarker.template._TemplateAPI;
 
 public class BeansWrapperSingletonsTest extends TestCase {
 
-    private static final Version V_2_3_0 = new Version(2, 3, 0);
-    private static final Version V_2_3_19 = new Version(2, 3, 19);
-    private static final Version V_2_3_21 = new Version(2, 3, 21);
-
     public BeansWrapperSingletonsTest(String name) {
         super(name);
     }
@@ -56,8 +52,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
     }
 
     public void testBeansWrapperFactoryEquals() throws Exception {
-        assertEquals(V_2_3_21, new BeansWrapperBuilder(V_2_3_21).getIncompatibleImprovements());
-        assertEquals(new Version(2, 3, 0), new BeansWrapperBuilder(new Version(2, 3, 20)).getIncompatibleImprovements());
+        assertEquals(Configuration.VERSION_2_3_21, new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getIncompatibleImprovements());
+        assertEquals(Configuration.VERSION_2_3_0, new BeansWrapperBuilder(Configuration.VERSION_2_3_20).getIncompatibleImprovements());
         try {
             new BeansWrapperBuilder(new Version(2, 3, 22));
             fail();
@@ -68,8 +64,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
         BeansWrapperBuilder pa1;
         BeansWrapperBuilder pa2;
         
-        pa1 = new BeansWrapperBuilder(V_2_3_21);
-        pa2 = new BeansWrapperBuilder(V_2_3_21);
+        pa1 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
+        pa2 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
         assertEquals(pa1, pa2);
         
         pa1.setSimpleMapWrapper(true);
@@ -143,10 +139,10 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(0, getBeansWrapperInstanceCacheSize());
         
         {
-            BeansWrapper bw = getBeansWrapperWithSetting(V_2_3_19, true);
+            BeansWrapper bw = getBeansWrapperWithSetting(Configuration.VERSION_2_3_19, true);
             assertEquals(1, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
-            assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
@@ -165,8 +161,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
                 assertTrue(e.getMessage().contains("modify"));
             }
             
-            assertSame(bw, getBeansWrapperWithSetting(new Version(2, 3, 20), true));
-            assertSame(bw, getBeansWrapperWithSetting(new Version(2, 3, 0), true));
+            assertSame(bw, getBeansWrapperWithSetting(Configuration.VERSION_2_3_20, true));
+            assertSame(bw, getBeansWrapperWithSetting(Configuration.VERSION_2_3_0, true));
             assertEquals(1, getBeansWrapperInstanceCacheSize());
             
             BeansWrapperBuilder factory = new BeansWrapperBuilder(new Version(2, 3, 5));
@@ -178,10 +174,10 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            BeansWrapper bw = getBeansWrapperWithSetting(V_2_3_21, true);
+            BeansWrapper bw = getBeansWrapperWithSetting(Configuration.VERSION_2_3_21, true);
             assertEquals(2, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
-            assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapModel);
@@ -189,7 +185,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertNull(bw.getMethodAppearanceFineTuner());
             assertNull(bw.getMethodSorter());
             
-            BeansWrapperBuilder factory = new BeansWrapperBuilder(V_2_3_21);
+            BeansWrapperBuilder factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
             factory.setSimpleMapWrapper(true);
             assertSame(bw, factory.getResult());
             assertEquals(2, getBeansWrapperInstanceCacheSize());
@@ -199,22 +195,22 @@ public class BeansWrapperSingletonsTest extends TestCase {
         
         {
             // Again... same as the very first
-            BeansWrapper bw = getBeansWrapperWithSetting(V_2_3_19, true);
+            BeansWrapper bw = getBeansWrapperWithSetting(Configuration.VERSION_2_3_19, true);
             assertEquals(2, getBeansWrapperInstanceCacheSize());
-            assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
         }
         
         {
-            BeansWrapper bw = getBeansWrapperWithSetting(V_2_3_19, false);
+            BeansWrapper bw = getBeansWrapperWithSetting(Configuration.VERSION_2_3_19, false);
             assertEquals(3, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
-            assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             
-            assertSame(bw, getBeansWrapperWithSetting(new Version(2, 3, 20), false));
-            assertSame(bw, getBeansWrapperWithSetting(new Version(2, 3, 0), false));
+            assertSame(bw, getBeansWrapperWithSetting(Configuration.VERSION_2_3_20, false));
+            assertSame(bw, getBeansWrapperWithSetting(Configuration.VERSION_2_3_0, false));
             assertSame(bw, new BeansWrapperBuilder(new Version(2, 3, 5)).getResult());
             assertEquals(3, getBeansWrapperInstanceCacheSize());
             
@@ -222,15 +218,15 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            BeansWrapper bw = getBeansWrapperWithSetting(V_2_3_21, false);
+            BeansWrapper bw = getBeansWrapperWithSetting(Configuration.VERSION_2_3_21, false);
             assertEquals(4, getBeansWrapperInstanceCacheSize());
             assertSame(bw.getClass(), BeansWrapper.class);
-            assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
             
-            assertSame(bw, new BeansWrapperBuilder(new Version(2, 3, 21)).getResult());
+            assertSame(bw, new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult());
             assertEquals(4, getBeansWrapperInstanceCacheSize());
             
             hardReferences.add(bw);            
@@ -238,14 +234,14 @@ public class BeansWrapperSingletonsTest extends TestCase {
 
         {
             // Again... same as earlier
-            BeansWrapper bw = getBeansWrapperWithSetting(V_2_3_21, true);
-            assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
+            BeansWrapper bw = getBeansWrapperWithSetting(Configuration.VERSION_2_3_21, true);
+            assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
             assertTrue(bw.isSimpleMapWrapper());
             assertEquals(4, getBeansWrapperInstanceCacheSize());
         }
         
         {
-            BeansWrapperBuilder factory = new BeansWrapperBuilder(V_2_3_19);
+            BeansWrapperBuilder factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
             BeansWrapper bw = factory.getResult();
             BeansWrapper bw2 = factory.getResult();
@@ -253,7 +249,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertSame(bw, bw2);
             
             assertSame(bw.getClass(), BeansWrapper.class);
-            assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
@@ -266,7 +262,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            BeansWrapperBuilder factory = new BeansWrapperBuilder(V_2_3_19);
+            BeansWrapperBuilder factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setExposeFields(true);
             BeansWrapper bw = factory.getResult();
             BeansWrapper bw2 = factory.getResult();
@@ -274,7 +270,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertSame(bw, bw2);
             
             assertSame(bw.getClass(), BeansWrapper.class);
-            assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof MapModel);
@@ -284,7 +280,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            BeansWrapperBuilder factory = new BeansWrapperBuilder(V_2_3_19);
+            BeansWrapperBuilder factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setStrict(true);
             factory.setDefaultDateType(TemplateDateModel.DATETIME);
             factory.setOuterIdentity(new SimpleObjectWrapper());
@@ -299,7 +295,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         
         // Effect of reference and cache clearings:
         {
-            BeansWrapper bw1 = new BeansWrapperBuilder(V_2_3_21).getResult();
+            BeansWrapper bw1 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
             assertEquals(7, getBeansWrapperInstanceCacheSize());
             assertEquals(7, getBeansWrapperNonClearedInstanceCacheSize());
             
@@ -307,23 +303,23 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertEquals(7, getBeansWrapperInstanceCacheSize());
             assertEquals(0, getBeansWrapperNonClearedInstanceCacheSize());
             
-            BeansWrapper bw2 = new BeansWrapperBuilder(V_2_3_21).getResult();
+            BeansWrapper bw2 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
             assertNotSame(bw1, bw2);
             assertEquals(7, getBeansWrapperInstanceCacheSize());
             assertEquals(1, getBeansWrapperNonClearedInstanceCacheSize());
             
-            assertSame(bw2, new BeansWrapperBuilder(V_2_3_21).getResult());
+            assertSame(bw2, new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult());
             assertEquals(1, getBeansWrapperNonClearedInstanceCacheSize());
             
             clearBeansWrapperInstanceCacheReferences(true);
-            BeansWrapper bw3 = new BeansWrapperBuilder(V_2_3_21).getResult();
+            BeansWrapper bw3 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
             assertNotSame(bw2, bw3);
             assertEquals(1, getBeansWrapperInstanceCacheSize());
             assertEquals(1, getBeansWrapperNonClearedInstanceCacheSize());
         }
 
         {
-            BeansWrapperBuilder factory = new BeansWrapperBuilder(V_2_3_19);
+            BeansWrapperBuilder factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setUseModelCache(true);
             BeansWrapper bw = factory.getResult();
             assertTrue(bw.getUseCache());
@@ -346,7 +342,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         
         assertEquals(0, getBeansWrapperInstanceCacheSize());
         
-        BeansWrapper bw1 = new BeansWrapperBuilder(V_2_3_19).getResult();
+        BeansWrapper bw1 = new BeansWrapperBuilder(Configuration.VERSION_2_3_19).getResult();
         assertEquals(1, getBeansWrapperInstanceCacheSize());
         hardReferences.add(bw1);
         
@@ -357,32 +353,32 @@ public class BeansWrapperSingletonsTest extends TestCase {
         BeansWrapper bw2;
         Thread.currentThread().setContextClassLoader(newTCCL);
         try {
-            bw2 = new BeansWrapperBuilder(V_2_3_19).getResult();
+            bw2 = new BeansWrapperBuilder(Configuration.VERSION_2_3_19).getResult();
             assertEquals(2, getBeansWrapperInstanceCacheSize());
             hardReferences.add(bw2);
             
             assertNotSame(bw1, bw2);
-            assertSame(bw2, new BeansWrapperBuilder(V_2_3_19).getResult());
+            assertSame(bw2, new BeansWrapperBuilder(Configuration.VERSION_2_3_19).getResult());
         } finally {
             Thread.currentThread().setContextClassLoader(oldTCCL);
         }
         
-        assertSame(bw1, new BeansWrapperBuilder(V_2_3_19).getResult());
+        assertSame(bw1, new BeansWrapperBuilder(Configuration.VERSION_2_3_19).getResult());
         assertEquals(2, getBeansWrapperInstanceCacheSize());
 
         BeansWrapper bw3;
         Thread.currentThread().setContextClassLoader(newTCCL);
         try {
-            assertSame(bw2, new BeansWrapperBuilder(V_2_3_19).getResult());
+            assertSame(bw2, new BeansWrapperBuilder(Configuration.VERSION_2_3_19).getResult());
             
-            bw3 = new BeansWrapperBuilder(V_2_3_21).getResult();
+            bw3 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
             assertEquals(3, getBeansWrapperInstanceCacheSize());
             hardReferences.add(bw3);
         } finally {
             Thread.currentThread().setContextClassLoader(oldTCCL);
         }
         
-        BeansWrapper bw4 = new BeansWrapperBuilder(V_2_3_21).getResult();
+        BeansWrapper bw4 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
         assertEquals(4, getBeansWrapperInstanceCacheSize());
         hardReferences.add(bw4);
         
@@ -393,12 +389,12 @@ public class BeansWrapperSingletonsTest extends TestCase {
 
     public void testDefaultObjectWrapperFactoryProducts() throws Exception {
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(V_2_3_19);
+            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setSimpleMapWrapper(true);
             BeansWrapper bw = factory.getResult();
             assertSame(bw, factory.getResult());
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
@@ -420,44 +416,44 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            BeansWrapper bw = new DefaultObjectWrapperBuilder(V_2_3_19).getResult();
+            BeansWrapper bw = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19).getResult();
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             
-            assertSame(bw, new DefaultObjectWrapperBuilder(new Version(2, 3, 20)).getResult());
-            assertSame(bw, new DefaultObjectWrapperBuilder(new Version(2, 3, 0)).getResult());
+            assertSame(bw, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_20).getResult());
+            assertSame(bw, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).getResult());
             assertSame(bw, new DefaultObjectWrapperBuilder(new Version(2, 3, 5)).getResult());
         }
         
         {
-            BeansWrapper bw = new DefaultObjectWrapperBuilder(V_2_3_21).getResult();
+            BeansWrapper bw = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(V_2_3_21, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertTrue(bw.isClassIntrospectionCacheRestricted());
             
-            assertSame(bw, new DefaultObjectWrapperBuilder(new Version(2, 3, 21)).getResult());
+            assertSame(bw, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).getResult());
         }
 
         {
-            BeansWrapper bw = new DefaultObjectWrapperBuilder(V_2_3_19).getResult();
-            assertEquals(new Version(2, 3, 0), bw.getIncompatibleImprovements());
+            BeansWrapper bw = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19).getResult();
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
         }
         
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(V_2_3_19);
+            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
             BeansWrapper bw = factory.getResult();
             BeansWrapper bw2 = factory.getResult();
             assertSame(bw, bw2);  // not cached
             
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
@@ -465,14 +461,14 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(V_2_3_19);
+            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setExposeFields(true);
             BeansWrapper bw = factory.getResult();
             BeansWrapper bw2 = factory.getResult();
             assertSame(bw, bw2);  // not cached
             
             assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(V_2_3_0, bw.getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertFalse(bw.isSimpleMapWrapper());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
@@ -482,8 +478,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
     
     public void testClassInrospectorCache() throws TemplateModelException {
         assertFalse(new BeansWrapper().isClassIntrospectionCacheRestricted());
-        assertFalse(new BeansWrapper(new Version(2, 3, 21)).isClassIntrospectionCacheRestricted());
-        assertTrue(new BeansWrapperBuilder(new Version(2, 3, 20)).getResult().isClassIntrospectionCacheRestricted());
+        assertFalse(new BeansWrapper(Configuration.VERSION_2_3_21).isClassIntrospectionCacheRestricted());
+        assertTrue(new BeansWrapperBuilder(Configuration.VERSION_2_3_20).getResult().isClassIntrospectionCacheRestricted());
         
         ClassIntrospectorBuilder.clearInstanceCache();
         BeansWrapperBuilder.clearInstanceCache();
@@ -493,7 +489,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         BeansWrapperBuilder factory;
         
         {
-            factory = new BeansWrapperBuilder(V_2_3_19);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             
             BeansWrapper bw1 = factory.getResult();
             checkClassIntrospectorCacheSize(1);
@@ -519,7 +515,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            factory = new BeansWrapperBuilder(V_2_3_19);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setExposeFields(true);
             BeansWrapper bw = factory.getResult();
             checkClassIntrospectorCacheSize(2);
@@ -604,7 +600,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            factory = new BeansWrapperBuilder(V_2_3_21);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
             factory.setExposeFields(false);
             factory.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
             
@@ -667,7 +663,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            factory = new BeansWrapperBuilder(V_2_3_19);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             BeansWrapper bw = factory.getResult();
             checkClassIntrospectorCacheSize(8);
             assertEquals(2, getClassIntrospectorNonClearedInstanceCacheSize());
@@ -685,7 +681,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(0, getClassIntrospectorNonClearedInstanceCacheSize());
         
         {
-            factory = new BeansWrapperBuilder(V_2_3_21);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
             factory.setExposeFields(true);
             BeansWrapper bw = factory.getResult();
             checkClassIntrospectorCacheSize(1);
@@ -699,7 +695,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
         
         {
-            factory = new BeansWrapperBuilder(V_2_3_19);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
                 public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
                 }
@@ -730,7 +726,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         }
 
         {
-            factory = new BeansWrapperBuilder(V_2_3_19);
+            factory = new BeansWrapperBuilder(Configuration.VERSION_2_3_19);
             factory.setMethodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE);  // doesn't spoils sharing
             
             BeansWrapper bw1 = factory.getResult();

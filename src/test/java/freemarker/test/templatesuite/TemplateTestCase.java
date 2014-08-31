@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +76,7 @@ import freemarker.test.utility.AssertDirective;
 import freemarker.test.utility.AssertEqualsDirective;
 import freemarker.test.utility.AssertFailsDirective;
 import freemarker.test.utility.FileTestCase;
+import freemarker.test.utility.NoOutputDirective;
 
 /**
  * Instances of this are created and called by {@link TemplateTestSuite}. (It's on "Ignore" so that Eclipse doesn't try
@@ -146,6 +148,9 @@ public class TemplateTestCase extends FileTestCase {
         dataModel.put("assert", AssertDirective.INSTANCE);
         dataModel.put("assertEquals", AssertEqualsDirective.INSTANCE);
         dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
+        dataModel.put("noOutput", NoOutputDirective.INSTANCE);
+
+        dataModel.put("testName", getName());
         
         dataModel.put("message", "Hello, world!");
         
@@ -175,7 +180,7 @@ public class TemplateTestCase extends FileTestCase {
     
             w7.setSimpleMapWrapper(true);
     
-            Object test = getTestBean();
+            Object test = getTestMapBean();
     
             dataModel.put("m1", w1.wrap(test));
             dataModel.put("m2", w2.wrap(test));
@@ -221,14 +226,23 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put( "hash2", new BooleanHash2() );
         }
         
-        else if (testName.equals("dateformat")) {
+        else if (testName.startsWith("dateformat")) {
             GregorianCalendar cal = new GregorianCalendar(2002, 10, 15, 14, 54, 13);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
             dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATETIME));
             dataModel.put("unknownDate", new SimpleDate(cal.getTime(), TemplateDateModel.UNKNOWN));
+            dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
+            dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
+            dataModel.put("adaptedToStringScalar", new Object() {
+                public String toString() {
+                    return "GMT+02";
+                }
+            });
+            dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
+            dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
         
-        else if (testName.equals("number-format")) {
+        else if (testName.startsWith("number-format")) {
             dataModel.put("int", new SimpleNumber(new Integer(1)));
             dataModel.put("double", new SimpleNumber(new Double(1.0)));
             dataModel.put("double2", new SimpleNumber(new Double(1 + 1e-15)));
@@ -280,10 +294,21 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("multi", new TestBoolean());
         }
         
-        else if (testName.equals("type-builtins")) {
+        else if (testName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
+            dataModel.put("bean", new TestBean());
+        }
+
+        else if (testName.equals("date-type-builtins")) {
+            GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
+            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date d = cal.getTime();
+            dataModel.put("unknown", d);
+            dataModel.put("timeOnly", new java.sql.Time(d.getTime()));
+            dataModel.put("dateOnly", new java.sql.Date(d.getTime()));
+            dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
         }
         
         else if (testName.equals("var-layers")) {
@@ -343,16 +368,6 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("listWithNullsOnly", listWithNullsOnly);
             
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
-        }
-        
-        else if (testName.equals("iso8601")) {
-            dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
-            dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
-            dataModel.put("adaptedToStringScalar", new Object() {
-                public String toString() {
-                    return "GMT+02";
-                }
-            });
         }
         
         else if (testName.equals("number-to-date")) {
@@ -489,22 +504,38 @@ public class TemplateTestCase extends FileTestCase {
       }
     }
 
-   public Object getTestBean()
+   public Object getTestMapBean()
     {
-        Map testBean = new TestBean();
+        Map testBean = new TestMapBean();
         testBean.put("name", "Chris");
         testBean.put("location", "San Francisco");
         testBean.put("age", new Integer(27));
         return testBean;
     }
 
-    public static class TestBean extends HashMap {
+    public static class TestMapBean extends HashMap {
         public String getName() {
             return "Christopher";
         }
         public int getLuckyNumber() {
             return 7;
         }
+    }
+
+    public static class TestBean {
+
+        public int m(int n) {
+            return n * 10;
+        }
+
+        public int mOverloaded(int n) {
+            return n * 10;
+        }
+
+        public String mOverloaded(String s) {
+            return s.toUpperCase();
+        }
+        
     }
     
 }

@@ -31,7 +31,8 @@ import freemarker.ext.beans.BeansWrapper;
  * interface, using an underlying {@link Map} or {@link SortedMap}.</p>
  *
  * <p>This class is thread-safe if you don't call the <tt>put</tt> or <tt>remove</tt> methods
- * after you have made the object available for multiple threads.
+ * after you have made the object available for multiple threads. Those methods aren't called by FreeMarker, so it's
+ * usually not a concern.
  *
  * <p><b>Note:</b><br />
  * As of 2.0, this class is unsynchronized by default.

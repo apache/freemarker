@@ -25,15 +25,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateModel;
-import freemarker.template.Version;
 
 @RunWith(JUnit4.class)
 public class ModelCacheTest {
     
     @Test
     public void modelCacheOff() throws Exception {
-        BeansWrapper bw = new BeansWrapperBuilder(new Version(2, 3, 21)).getResult();
+        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
         assertFalse(bw.getUseCache());  // default is off
         
         String s = "foo";
@@ -45,7 +45,7 @@ public class ModelCacheTest {
     
     @Test
     public void modelCacheOn() throws Exception {
-        BeansWrapper bw = new BeansWrapper(new Version(2, 3, 21));
+        BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_21);
         bw.setUseCache(true);
         assertTrue(bw.getUseCache());
         

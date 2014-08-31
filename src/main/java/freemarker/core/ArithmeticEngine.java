@@ -50,6 +50,14 @@ public abstract class ArithmeticEngine {
     public abstract Number multiply(Number first, Number second) throws TemplateException;
     public abstract Number divide(Number first, Number second) throws TemplateException;
     public abstract Number modulus(Number first, Number second) throws TemplateException;
+    
+    /**
+     * Should be able to parse all FTL numerical literals, Java Double toString results, and XML Schema numbers.
+     * This means these should be parsed successfully, except if the arithmetical engine
+     * couldn't support the resulting value anyway (such as NaN, infinite, even non-integers):
+     * {@code -123.45}, {@code 1.5e3}, {@code 1.5E3}, {@code 0005}, {@code +0}, {@code -0}, {@code NaN},
+     * {@code INF}, {@code -INF}, {@code Infinity}, {@code -Infinity}. 
+     */    
     public abstract Number toNumber(String s);
 
     protected int minScale = 12;
@@ -155,7 +163,7 @@ public abstract class ArithmeticEngine {
         }
     
         public Number toNumber(String s) {
-            return new BigDecimal(s);
+            return toBigDecimalOrDouble(s);
         }
         
         private BigDecimal divide(BigDecimal left, BigDecimal right) {
@@ -441,7 +449,8 @@ public abstract class ArithmeticEngine {
         }
     
         public Number toNumber(String s) {
-            return OptimizerUtil.optimizeNumberRepresentation(new BigDecimal(s));
+            Number n = toBigDecimalOrDouble(s);
+            return n instanceof BigDecimal ? OptimizerUtil.optimizeNumberRepresentation(n) : n;
         }
         
         private static Map createClassCodesMap() {
@@ -511,4 +520,19 @@ public abstract class ArithmeticEngine {
             throw new NumberFormatException("Can't parse this as BigDecimal number: " + StringUtil.jQuote(num));
         }
     }
+    
+    private static Number toBigDecimalOrDouble(String s) {
+        if (s.length() > 2) {
+            char c = s.charAt(0);
+            if (c == 'I' && (s.equals("INF") || s.equals("Infinity"))) {
+                return new Double(Double.POSITIVE_INFINITY);
+            } else if (c == 'N' && s.equals("NaN")) {
+                return new Double(Double.NaN);
+            } else if (c == '-' && s.charAt(1) == 'I' && (s.equals("-INF") || s.equals("-Infinity"))) {
+                return new Double(Double.NEGATIVE_INFINITY);
+            }
+        }
+        return new BigDecimal(s);
+    }
+    
 }

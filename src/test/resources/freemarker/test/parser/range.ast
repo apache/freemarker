@@ -1,0 +1,248 @@
+#mixed_content  // f.c.MixedContent
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: 0  // f.c.NumberLiteral
+            - right-hand operand: null  // Null
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: 0  // f.c.NumberLiteral
+            - right-hand operand: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..<  // f.c.Range
+            - left-hand operand: 0  // f.c.NumberLiteral
+            - right-hand operand: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..<  // f.c.Range
+            - left-hand operand: 0  // f.c.NumberLiteral
+            - right-hand operand: 1  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+            - right-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: 2  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..<  // f.c.Range
+            - left-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+            - right-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: 2  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..<  // f.c.Range
+            - left-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+            - right-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: 2  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: *  // f.c.ArithmeticExpression
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: *  // f.c.ArithmeticExpression
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: 2  // f.c.NumberLiteral
+                - AST-node subtype: "1"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: ?abs  // f.c.NumericalBuiltins$absBI
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: "abs"  // String
+            - right-hand operand: ?abs  // f.c.NumericalBuiltins$absBI
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: "abs"  // String
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: ...(...)  // f.c.MethodCall
+                - callee: ?index_of  // f.c.StringBuiltins$index_ofBI
+                    - left-hand operand: n  // f.c.Identifier
+                    - right-hand operand: "index_of"  // String
+                - argument value: "x"  // f.c.StringLiteral
+                    - embedded template: null  // Null
+            - right-hand operand: ...(...)  // f.c.MethodCall
+                - callee: ?index_of  // f.c.StringBuiltins$index_ofBI
+                    - left-hand operand: m  // f.c.Identifier
+                    - right-hand operand: "index_of"  // String
+                - argument value: "y"  // f.c.StringLiteral
+                    - embedded template: null  // Null
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ==  // f.c.ComparisonExpression
+            - left-hand operand: ..  // f.c.Range
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: m  // f.c.Identifier
+            - right-hand operand: ..  // f.c.Range
+                - left-hand operand: o  // f.c.Identifier
+                - right-hand operand: p  // f.c.Identifier
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ==  // f.c.ComparisonExpression
+            - left-hand operand: ..  // f.c.Range
+                - left-hand operand: +  // f.c.AddConcatExpression
+                    - left-hand operand: +  // f.c.AddConcatExpression
+                        - left-hand operand: n  // f.c.Identifier
+                        - right-hand operand: 1  // f.c.NumberLiteral
+                    - right-hand operand: 2  // f.c.NumberLiteral
+                - right-hand operand: -  // f.c.ArithmeticExpression
+                    - left-hand operand: -  // f.c.ArithmeticExpression
+                        - left-hand operand: m  // f.c.Identifier
+                        - right-hand operand: 1  // f.c.NumberLiteral
+                        - AST-node subtype: "0"  // Integer
+                    - right-hand operand: 2  // f.c.NumberLiteral
+                    - AST-node subtype: "0"  // Integer
+            - right-hand operand: ..  // f.c.Range
+                - left-hand operand: +  // f.c.AddConcatExpression
+                    - left-hand operand: +  // f.c.AddConcatExpression
+                        - left-hand operand: o  // f.c.Identifier
+                        - right-hand operand: 1  // f.c.NumberLiteral
+                    - right-hand operand: 2  // f.c.NumberLiteral
+                - right-hand operand: -  // f.c.ArithmeticExpression
+                    - left-hand operand: -  // f.c.ArithmeticExpression
+                        - left-hand operand: p  // f.c.Identifier
+                        - right-hand operand: 1  // f.c.NumberLiteral
+                        - AST-node subtype: "0"  // Integer
+                    - right-hand operand: 2  // f.c.NumberLiteral
+                    - AST-node subtype: "0"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: a  // f.c.Identifier
+            - right-hand operand: +...  // f.c.UnaryPlusMinusExpression
+                - right-hand operand: 2  // f.c.NumberLiteral
+                - AST-node subtype: "1"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..  // f.c.Range
+            - left-hand operand: -  // f.c.ArithmeticExpression
+                - left-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: a  // f.c.Identifier
+                - AST-node subtype: "0"  // Integer
+            - right-hand operand: -...  // f.c.UnaryPlusMinusExpression
+                - right-hand operand: 2  // f.c.NumberLiteral
+                - AST-node subtype: "0"  // Integer
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ..*  // f.c.Range
+            - left-hand operand: *  // f.c.ArithmeticExpression
+                - left-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: a  // f.c.Identifier
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: 2  // f.c.NumberLiteral
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ||  // f.c.OrExpression
+            - left-hand operand: &&  // f.c.AndExpression
+                - left-hand operand: a  // f.c.Identifier
+                - right-hand operand: ..  // f.c.Range
+                    - left-hand operand: b  // f.c.Identifier
+                    - right-hand operand: c  // f.c.Identifier
+            - right-hand operand: d  // f.c.Identifier
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #assign  // f.c.Assignment
+        - assignment target: "x"  // String
+        - assignment source: ||  // f.c.OrExpression
+            - left-hand operand: &&  // f.c.AndExpression
+                - left-hand operand: ..  // f.c.Range
+                    - left-hand operand: a  // f.c.Identifier
+                    - right-hand operand: null  // Null
+                - right-hand operand: ..  // f.c.Range
+                    - left-hand operand: b  // f.c.Identifier
+                    - right-hand operand: null  // Null
+            - right-hand operand: d  // f.c.Identifier
+        - variable scope: "1"  // Integer
+        - namespace: null  // Null
+    #text  // f.c.TextBlock
+        - content: "\n"  // String
+    ${...}  // f.c.DollarVariable
+        - content: ...(...)  // f.c.MethodCall
+            - callee: f  // f.c.Identifier
+            - argument value: ..  // f.c.Range
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: null  // Null
+            - argument value: ..  // f.c.Range
+                - left-hand operand: -  // f.c.ArithmeticExpression
+                    - left-hand operand: m  // f.c.Identifier
+                    - right-hand operand: 1  // f.c.NumberLiteral
+                    - AST-node subtype: "0"  // Integer
+                - right-hand operand: null  // Null
+            - argument value: ..  // f.c.Range
+                - left-hand operand: +  // f.c.AddConcatExpression
+                    - left-hand operand: m  // f.c.Identifier
+                    - right-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: -  // f.c.ArithmeticExpression
+                    - left-hand operand: n  // f.c.Identifier
+                    - right-hand operand: 1  // f.c.NumberLiteral
+                    - AST-node subtype: "0"  // Integer
+    #text  // f.c.TextBlock
+        - content: "\n\n"  // String
+    @  // f.c.UnifiedCall
+        - callee: m  // f.c.Identifier
+        - argument value: ..  // f.c.Range
+            - left-hand operand: *  // f.c.ArithmeticExpression
+                - left-hand operand: 1  // f.c.NumberLiteral
+                - right-hand operand: m  // f.c.Identifier
+                - AST-node subtype: "1"  // Integer
+            - right-hand operand: -  // f.c.ArithmeticExpression
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+                - AST-node subtype: "0"  // Integer
+        - argument value: ..  // f.c.Range
+            - left-hand operand: +  // f.c.AddConcatExpression
+                - left-hand operand: m  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+            - right-hand operand: -  // f.c.ArithmeticExpression
+                - left-hand operand: n  // f.c.Identifier
+                - right-hand operand: 1  // f.c.NumberLiteral
+                - AST-node subtype: "0"  // Integer
+        - argument value: ..  // f.c.Range
+            - left-hand operand: m  // f.c.Identifier
+            - right-hand operand: null  // Null

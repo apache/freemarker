@@ -17,12 +17,12 @@
 package freemarker.ext.beans;
 
 import junit.framework.TestCase;
-import freemarker.template.Version;
+import freemarker.template.Configuration;
 import freemarker.test.utility.Helpers;
 
 public class BeansAPINewInstanceTest extends TestCase {
 
-    private BeansWrapper beansWrapper = new BeansWrapperBuilder(new Version(2, 3, 21)).getResult();
+    private BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
 
     public BeansAPINewInstanceTest(String name) {
         super(name);

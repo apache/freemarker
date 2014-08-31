@@ -79,7 +79,7 @@ class EvalUtil
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     static Date modelToDate(TemplateDateModel model, Expression expr)
-        throws TemplateModelException, TemplateException
+        throws TemplateModelException
     {
         Date value = model.getAsDate();
         if(value == null) throw newModelHasStoredNullException(Date.class, model, expr);
@@ -157,8 +157,9 @@ class EvalUtil
                 env);
     }
     
-    private static final String DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN
-            = "date of the comparison is of UNKNOWN type (it's not known if it's date-only, time-only, or date-time), "
+    private static final String VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE
+            = "value of the comparison is a date-like value where "
+              + "it's not known if it's a date (no time part), time, or date-time, "
               + "and thus can't be used in a comparison.";
     
     /**
@@ -252,7 +253,7 @@ class EvalUtil
                 }
                 
                 throw new _MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env, new Object[] {
-                        "The ", sideName, " ", DATE_OF_THE_COMPARISON_IS_OF_TYPE_UNKNOWN });
+                        "The ", sideName, " ", VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE });
             }
             
             if (leftDateType != rightDateType) {
@@ -334,8 +335,7 @@ class EvalUtil
         if (tm instanceof TemplateNumberModel) {
             return env.formatNumber(modelToNumber((TemplateNumberModel) tm, exp));
         } else if (tm instanceof TemplateDateModel) {
-            TemplateDateModel dm = (TemplateDateModel) tm;
-            return env.formatDate(modelToDate(dm, exp), dm.getDateType());
+            return env.formatDate((TemplateDateModel) tm, exp);
         } else if (tm instanceof TemplateScalarModel) {
             return modelToString((TemplateScalarModel) tm, exp, env);
         } else if(tm == null) {

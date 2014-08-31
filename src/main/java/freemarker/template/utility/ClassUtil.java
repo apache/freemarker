@@ -228,7 +228,7 @@ public class ClassUtil
         }
         
         if (TemplateDateModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "date");
+            appendTypeName(sb, typeNamesAppended, "date_or_time_or_datetime");
         }
         
         if (TemplateBooleanModel.class.isAssignableFrom(cl)) {

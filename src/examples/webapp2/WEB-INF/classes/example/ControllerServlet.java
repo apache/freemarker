@@ -41,7 +41,7 @@ public class ControllerServlet extends HttpServlet {
         // - Create a configuration instance, with the not-100%-backward-compatible
         //   fixes up until FreeMarker 2.3.21 applied (as far as it starts
         //   with 2.3, these are only minor changes that doesn't affect most apps):
-        Configuration cfg = new Configuration(new Version(2, 3, 21));
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
         // - Templates are stoted in the WEB-INF/templates directory of the Web app.
         cfg.setServletContextForTemplateLoading(
                 getServletContext(), "WEB-INF/templates");

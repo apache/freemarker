@@ -21,7 +21,6 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
-import freemarker.template.utility.NullArgumentException;
 
 /**
  * Holds {@link BeansWrapper} configuration settings and defines their defaults.
@@ -60,8 +59,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
      */
     protected BeansWrapperConfiguration(Version incompatibleImprovements) {
-        NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
-        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         incompatibleImprovements = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;

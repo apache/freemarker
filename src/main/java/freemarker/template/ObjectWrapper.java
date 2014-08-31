@@ -81,7 +81,11 @@ public interface ObjectWrapper {
      *      it should just return the object as is.
      * 
      * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the
-     *     return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.
+     *     return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.  
+     *     The default expectation is that the {@link TemplateModel} isn't less thread safe than the wrapped object.
+     *     If the {@link ObjectWrapper} returns less thread safe objects, that should be clearly documented, as it
+     *     restricts how it can be used, like, then it can't be used to wrap "shared variables"
+     *     ({@link Configuration#setSharedVaribles(Map)}).
      */
     TemplateModel wrap(Object obj) throws TemplateModelException;
     

@@ -779,6 +779,10 @@ class SequenceBuiltins {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateCollectionModel) {
+                if (model instanceof RightUnboundedRangeModel) {
+                    throw new _TemplateModelException(
+                            "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
+                }
                 return new BIMethodForCollection(env, (TemplateCollectionModel) model);
             } else if (model instanceof TemplateSequenceModel) {
                 return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));

@@ -16,6 +16,8 @@
 
 package freemarker.template.utility;
 
+import java.io.Serializable;
+
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -50,7 +52,9 @@ public class Constants {
     
     public static final TemplateNumberModel MINUS_ONE = new SimpleNumber(-1);
     
-    public static final TemplateModelIterator EMPTY_ITERATOR = new TemplateModelIterator() {
+    public static final TemplateModelIterator EMPTY_ITERATOR = new EmptyIteratorModel();
+    
+    private static class EmptyIteratorModel implements TemplateModelIterator, Serializable {
 
         public TemplateModel next() throws TemplateModelException {
             throw new TemplateModelException("The collection has no more elements.");
@@ -60,19 +64,22 @@ public class Constants {
             return false;
         }
         
-    };
+    }
 
-    public static final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
+    public static final TemplateCollectionModel EMPTY_COLLECTION = new EmptyCollectionModel();
+    
+    private static class EmptyCollectionModel implements TemplateCollectionModel, Serializable {
 
         public TemplateModelIterator iterator() throws TemplateModelException {
             return EMPTY_ITERATOR;
         }
         
-    };
+    }
     
-    public static final TemplateSequenceModel EMPTY_SEQUENCE
-            = new TemplateSequenceModel() {
+    public static final TemplateSequenceModel EMPTY_SEQUENCE = new EmptySequenceModel();
     
+    private static class EmptySequenceModel implements TemplateSequenceModel, Serializable {
+        
         public TemplateModel get(int index) throws TemplateModelException {
             return null;
         }
@@ -81,10 +88,12 @@ public class Constants {
             return 0;
         }
         
-    };
+    }
     
-    public static final TemplateHashModelEx EMPTY_HASH = new TemplateHashModelEx() {
-
+    public static final TemplateHashModelEx EMPTY_HASH = new EmptyHashModel();
+    
+    private static class EmptyHashModel implements TemplateHashModelEx, Serializable {
+        
         public int size() throws TemplateModelException {
             return 0;
         }
@@ -105,6 +114,6 @@ public class Constants {
             return true;
         }
         
-    };
+    }
     
 }

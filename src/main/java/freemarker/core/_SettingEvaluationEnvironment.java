@@ -19,7 +19,7 @@ package freemarker.core;
 import java.util.Properties;
 
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.template.Version;
+import freemarker.template.Configuration;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -51,7 +51,7 @@ public class _SettingEvaluationEnvironment {
 
     public BeansWrapper getObjectWrapper() {
         if (objectWrapper == null) {
-            objectWrapper = new BeansWrapper(new Version(2, 3, 21));
+            objectWrapper = new BeansWrapper(Configuration.VERSION_2_3_21);
         }
         return objectWrapper;
     }

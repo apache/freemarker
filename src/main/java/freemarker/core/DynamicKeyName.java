@@ -17,6 +17,7 @@
 package freemarker.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -26,19 +27,21 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
+import freemarker.template.utility.Constants;
 
 /**
- * A unary operator that uses the string value of an expression as a hash key.
- * It associates with the <tt>Identifier</tt> or <tt>Dot</tt> to its left.
+ * {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number or a range,
+ * and {@code target} can be a hash or a sequence.
  */
 final class DynamicKeyName extends Expression {
 
-    private final Expression nameExpression;
+    private final Expression keyExpression;
     private final Expression target;
 
-    DynamicKeyName(Expression target, Expression nameExpression) {
+    DynamicKeyName(Expression target, Expression keyExpression) {
         this.target = target; 
-        this.nameExpression = nameExpression;
+        this.keyExpression = keyExpression;
     }
 
     TemplateModel _eval(Environment env) throws TemplateException
@@ -51,27 +54,28 @@ final class DynamicKeyName extends Expression {
                 throw InvalidReferenceException.getInstance(target, env);
             }
         }
-        if (nameExpression instanceof Range) {
-            return dealWithRangeKey(targetModel, (Range) nameExpression, env);
-        }
-        TemplateModel keyModel = nameExpression.eval(env);
-        if(keyModel == null) {
+        
+        TemplateModel keyModel = keyExpression.eval(env);
+        if (keyModel == null) {
             if(env.isClassicCompatible()) {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                nameExpression.assertNonNull(keyModel, env);
+                keyExpression.assertNonNull(keyModel, env);
             }
         }
         if (keyModel instanceof TemplateNumberModel) {
-            int index = nameExpression.modelToNumber(keyModel, env).intValue();
+            int index = keyExpression.modelToNumber(keyModel, env).intValue();
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, nameExpression, env);
+            String key = EvalUtil.modelToString((TemplateScalarModel)keyModel, keyExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
-        throw new UnexpectedTypeException(nameExpression, keyModel, "number, range, or string",
+        if (keyModel instanceof RangeModel) {
+            return dealWithRangeKey(targetModel, (RangeModel) keyModel, env);
+        }
+        throw new UnexpectedTypeException(keyExpression, keyModel, "number, range, or string",
                 new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, Range.class }, env);
     }
 
@@ -127,94 +131,133 @@ final class DynamicKeyName extends Expression {
         throw new NonHashException(target, targetModel, env);
     }
 
-    private TemplateModel dealWithRangeKey(TemplateModel targetModel, 
-                                           Range range, 
-                                           Environment env)
-        throws TemplateException
-    {
-        int start = range.lho.evalToNumber(env).intValue();
-        int end = 0;
-        boolean hasRhs = range.hasRho();
-        if (hasRhs) {
-            end = range.rho.evalToNumber(env).intValue();
-        }
-        if (targetModel instanceof TemplateSequenceModel) {
-            TemplateSequenceModel sequence = (TemplateSequenceModel) targetModel;
-            if (!hasRhs) end = sequence.size() -1;
-            if (start < 0) {
-                throw new _MiscTemplateException(range.lho, new Object[] {
-                        "Negative starting index ", new Integer(start), " for slicing range." });
-            }
-            if (end < 0) {
-                throw new _MiscTemplateException(range.rho, new Object[] {
-                        "Negative ending index ", new Integer(end), " for slicing range." });
-            }
-            if (start >= sequence.size()) {
-                throw new _MiscTemplateException(range.lho, new Object[] {
-                        "Left side index of range out of bounds, is ", new Integer(start),
-                        ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
-                        "(Note that indices are 0 based, and ranges are inclusive)." });
-            }
-            if (end >= sequence.size()) {
-                throw new _MiscTemplateException(range.rho, new Object[] {
-                        "Right side index of range out of bounds, is ", new Integer(end),
-                        ", but the sequence has only ", new Integer(sequence.size()), " element(s). ",
-                        "(Note that indices are 0 based, and ranges are inclusive)." });
-            }
-            ArrayList list = new ArrayList(1+Math.abs(start-end));
-            if (start>end) {
-                for (int i = start; i>=end; i--) {
-                    list.add(sequence.get(i));
-                }
-            }
-            else {
-                for (int i = start; i<=end; i++) {
-                    list.add(sequence.get(i));
-                }
-            }
-            return new SimpleSequence(list);
-        }
-        
+    private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env)
+    throws UnexpectedTypeException, InvalidReferenceException, TemplateException {
+        final TemplateSequenceModel targetSeq;
         final String targetStr;
-        try {
-            targetStr = target.evalAndCoerceToString(env);
-        } catch(NonStringException e) {
-            throw new UnexpectedTypeException(
-                    target, target.eval(env),
-                    "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
-                    NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
+        if (targetModel instanceof TemplateSequenceModel) {
+            targetSeq = (TemplateSequenceModel) targetModel;
+            targetStr = null;
+        } else {
+            targetSeq = null;
+            try {
+                targetStr = target.evalAndCoerceToString(env);
+            } catch(NonStringException e) {
+                throw new UnexpectedTypeException(
+                        target, target.eval(env),
+                        "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
+                        NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
+            }
         }
         
-        if (!hasRhs) end = targetStr.length() -1;
-        if (start < 0) {
-            throw new _MiscTemplateException(range.lho, new Object[] {
-                    "Negative starting index ", new Integer(start), " for slicing range." });
+        final int size = range.size();
+        final boolean rightUnbounded = range.isRightUnbounded();
+        final boolean rightAdaptive = range.isRightAdaptive();
+        
+        // Right bounded empty ranges are accepted even if the begin index is out of bounds. That's because a such range
+        // produces an empty sequence, which thus doesn't contain any illegal indexes.
+        if (!rightUnbounded && size == 0) {
+            return emptyResult(targetSeq != null);
         }
-        if (end < 0) {
-            throw new _MiscTemplateException(range.rho, new Object[] {
-                    "Negative ending index ", new Integer(end), " for slicing range." });
+
+        final int firstIdx = range.getBegining();
+        if (firstIdx < 0) {
+            throw new _MiscTemplateException(keyExpression, new Object[] {
+                    "Negative range start index (", new Integer(firstIdx),
+                    ") isn't allowed for a range used for slicing." });
         }
-        if (start > targetStr.length()) {
-            throw new _MiscTemplateException(range.lho, new Object[] {
-                    "Left side of range out of bounds, is: ", new Integer(start),
-                    "\nbut the string has ", new Integer(targetStr.length()), " elements." });
+        
+        final int targetSize = targetStr != null ? targetStr.length() : targetSeq.size();
+        final int step = range.getStep();
+        
+        // Right-adaptive increasing ranges can start 1 after the last element of the target, because they are like
+        // ranges with exclusive end index of at most targetSize. Thence a such range is just an empty list of indexes,
+        // and thus it isn't out-of-bounds.
+        // Right-adaptive decreasing ranges has exclusive end -1, so it can't help on a  to high firstIndex. 
+        // Right-bounded ranges at this point aren't empty, so the right index surely can't reach targetSize. 
+        if (rightAdaptive && step == 1 ? firstIdx > targetSize : firstIdx >= targetSize) {
+            throw new _MiscTemplateException(keyExpression, new Object[] {
+                    "Range start index ", new Integer(firstIdx), " is out of bounds, because the sliced ",
+                    (targetStr != null ? "string" : "sequence"),
+                    " has only ", new Integer(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
+                    ". ", "(Note that indices are 0-based)." });
         }
-        if (end >= targetStr.length()) {
-            throw new _MiscTemplateException(range.rho, new Object[] {
-                    "Right side of range out of bounds, is: ", new Integer(end),
-                    "\nbut the string is only ", new Integer(targetStr.length()), " characters long." });
+        
+        final int resultSize;
+        if (!rightUnbounded) {
+            final int lastIdx = firstIdx + (size - 1) * step;
+            if (lastIdx < 0) {
+                if (!rightAdaptive) {
+                    throw new _MiscTemplateException(keyExpression, new Object[] {
+                            "Negative range end index (", new Integer(lastIdx),
+                            ") isn't allowed for a range used for slicing." });
+                } else {
+                    resultSize = firstIdx + 1;
+                }
+            } else if (lastIdx >= targetSize) {
+                if (!rightAdaptive) {
+                    throw new _MiscTemplateException(keyExpression, new Object[] {
+                            "Range end index ", new Integer(lastIdx), " is out of bounds, because the sliced ",
+                            (targetStr != null ? "string" : "sequence"),
+                            " has only ", new Integer(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
+                            ". (Note that indices are 0-based)." });
+                } else {
+                    resultSize = Math.abs(targetSize - firstIdx);
+                }
+            } else {
+                resultSize = size;
+            }
+        } else {
+            resultSize = targetSize - firstIdx;
         }
-        try {
-            return new SimpleScalar(targetStr.substring(start, end+1));
-        } catch (RuntimeException re) {
-            throw new _MiscTemplateException(re, new Object[] { "Unexpected exception: ", re });
+        
+        if (resultSize == 0) {
+            return emptyResult(targetSeq != null);
         }
+        if (targetSeq != null) {
+            ArrayList/*<TemplateModel>*/ list = new ArrayList(resultSize);
+            int srcIdx = firstIdx;
+            for (int i = 0; i < resultSize; i++) {
+                list.add(targetSeq.get(srcIdx));
+                srcIdx += step;
+            }
+            // List items are already wrapped, so the wrapper will be null:
+            return new SimpleSequence(list, null);
+        } else {
+            final int exclEndIdx;
+            if (step < 0 && resultSize > 1) {
+                if (!(range.isAffactedByStringSlicingBug() && resultSize == 2)) {
+                    throw new _MiscTemplateException(
+                            keyExpression, new Object[] {
+                                "Decreasing ranges aren't allowed for slicing strings (as it would give reversed "
+                                + "text). The index range was: first = ",
+                                new Integer(firstIdx), ", last = ", new Integer(firstIdx + (resultSize - 1) * step)
+                            });
+                } else {
+                    // Emulate the legacy bug, where "foo"[n .. n-1] gives "" instead of an error (if n >= 1).  
+                    // Fix this in FTL [2.4]
+                    exclEndIdx = firstIdx;
+                }
+            } else {
+                exclEndIdx = firstIdx + resultSize;
+            }
+            
+            return new SimpleScalar(targetStr.substring(firstIdx, exclEndIdx));
+        }
+    }
+
+    private TemplateModel emptyResult(boolean seq) {
+        return seq
+                ? (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
+                        ? new SimpleSequence(Collections.EMPTY_LIST, null)
+                        : Constants.EMPTY_SEQUENCE)
+                : TemplateScalarModel.EMPTY_STRING;
     }
 
     public String getCanonicalForm() {
         return target.getCanonicalForm() 
                + "[" 
-               + nameExpression.getCanonicalForm() 
+               + keyExpression.getCanonicalForm() 
                + "]";
     }
     
@@ -223,7 +266,7 @@ final class DynamicKeyName extends Expression {
     }
     
     boolean isLiteral() {
-        return constantValue != null || (target.isLiteral() && nameExpression.isLiteral());
+        return constantValue != null || (target.isLiteral() && keyExpression.isLiteral());
     }
     
     int getParameterCount() {
@@ -231,7 +274,7 @@ final class DynamicKeyName extends Expression {
     }
 
     Object getParameterValue(int idx) {
-        return idx == 0 ? target : nameExpression;
+        return idx == 0 ? target : keyExpression;
     }
 
     ParameterRole getParameterRole(int idx) {
@@ -242,6 +285,6 @@ final class DynamicKeyName extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
     	return new DynamicKeyName(
     	        target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-    	        nameExpression.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    	        keyExpression.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }
 }

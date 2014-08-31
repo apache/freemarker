@@ -16,13 +16,13 @@
 
 package freemarker.core;
 
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 import freemarker.ext.beans.BeanModel;
+import freemarker.ext.beans.OverloadedMethodsModel;
+import freemarker.ext.beans.SimpleMethodModel;
 import freemarker.ext.beans._BeansAPI;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
@@ -42,8 +42,7 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
-import freemarker.template.utility.DateUtil;
-import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
+import freemarker.template._TemplateAPI;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -113,7 +112,7 @@ class MiscellaneousBuiltins {
         {
             private final String text;
             private final Environment env;
-            private final DateFormat defaultFormat;
+            private final TemplateDateFormat defaultFormat;
             private Date cachedValue;
             
             DateParser(String text, Environment env)
@@ -122,7 +121,8 @@ class MiscellaneousBuiltins {
             {
                 this.text = text;
                 this.env = env;
-                this.defaultFormat = env.getJDateFormat(dateType, Date.class);
+                // Deliberately creating a snapshot here:
+                this.defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target);
             }
             
             public Date getAsDate() throws TemplateModelException {
@@ -138,7 +138,7 @@ class MiscellaneousBuiltins {
     
             public TemplateModel get(String pattern) throws TemplateModelException {
                 return new SimpleDate(
-                    pattern.equals("xs") ? parseXS(dateType) : parse(env.getJDateFormat(dateType, Date.class, pattern)),
+                    parse(env.getTemplateDateFormat(dateType, Date.class, pattern, target)),
                     dateType);
             }
     
@@ -152,7 +152,7 @@ class MiscellaneousBuiltins {
                 return false;
             }
     
-            private Date parse(DateFormat df)
+            private Date parse(TemplateDateFormat df)
             throws
                 TemplateModelException
             {
@@ -160,33 +160,12 @@ class MiscellaneousBuiltins {
                     return df.parse(text);
                 }
                 catch(java.text.ParseException e) {
-                    String pattern = null;
-                    if (df instanceof SimpleDateFormat) {
-                        pattern = ((SimpleDateFormat) df).toPattern();
-                    }
-                    throw new _TemplateModelException(new Object[] {
-                            "The string doesn't match the expected date/time format. The string to parse was: ",
-                            new _DelayedJQuote(text), ". ",
-                            (pattern != null ? "The expected format was: " : ""),
-                            (pattern != null ? (Object) new _DelayedJQuote(pattern) : (Object) ""),
-                            (pattern != null ? ". " : "") });
-                }
-            }
-            
-            public Date parseXS(int dateType) throws _TemplateModelException {
-                try {
-                    CalendarFieldsToDateConverter calToDateConverter = env.getCalendarFieldsToDateCalculator();
-                    if (dateType == TemplateDateModel.DATE) {
-                        return DateUtil.parseXSDate(text, env.getTimeZone(), calToDateConverter);
-                    } else if (dateType == TemplateDateModel.TIME) {
-                        return DateUtil.parseXSTime(text, env.getTimeZone(), calToDateConverter);
-                    } else if (dateType == TemplateDateModel.DATETIME) {
-                        return DateUtil.parseXSDateTime(text, env.getTimeZone(), calToDateConverter);
-                    } else {
-                        throw new BugException("Unexpected date type: " + dateType);
-                    }
-                } catch (DateUtil.DateParseException e) {
-                    throw new _TemplateModelException(e.getMessage());
+                    throw new _TemplateModelException(e, new Object[] {
+                            "The string doesn't match the expected date/time/date-time format. "
+                            + "The string to parse was: ", new _DelayedJQuote(text), ". ",
+                            "The expected format was: ", new _DelayedJQuote(df.getDescription()), ".",
+                            e.getMessage() != null ? "\nThe nested reason given follows:\n" : "",
+                            e.getMessage() != null ? e.getMessage() : "" });
                 }
             }
             
@@ -202,8 +181,7 @@ class MiscellaneousBuiltins {
                 return new NumberFormatter(EvalUtil.modelToNumber((TemplateNumberModel)model, target), env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel)model;
-                int dateType = dm.getDateType();
-                return new DateFormatter(EvalUtil.modelToDate(dm, target), dateType, env);
+                return new DateFormatter(dm, env);
             } else if (model instanceof SimpleScalar) {
                 return model;
             } else if (model instanceof TemplateBooleanModel) {
@@ -272,43 +250,51 @@ class MiscellaneousBuiltins {
             TemplateHashModel,
             TemplateMethodModel
         {
-            private final Date date;
-            private final int dateType;
+            private final TemplateDateModel dateModel;
             private final Environment env;
-            private final DateFormat defaultFormat;
+            private final TemplateDateFormat defaultFormat;
             private String cachedValue;
     
-            DateFormatter(Date date, int dateType, Environment env)
+            DateFormatter(TemplateDateModel dateModel, Environment env)
             throws
                 TemplateModelException
             {
-                this.date = date;
-                this.dateType = dateType;
+                this.dateModel = dateModel;
                 this.env = env;
-                defaultFormat = env.getJDateFormat(dateType, date.getClass());
+                
+                final int dateType = dateModel.getDateType();
+                this.defaultFormat = dateType == TemplateDateModel.UNKNOWN
+                        ? null  // Lazy unknown type error in getAsString()
+                        : env.getTemplateDateFormat(
+                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target);
             }
     
             public String getAsString()
             throws
                 TemplateModelException
             {
-                if(dateType == TemplateDateModel.UNKNOWN) {
-                    throw new _TemplateModelException(new _ErrorDescriptionBuilder(
-                            "Can't convert the date to string, because it isn't known if it's a "
-                            + "date-only, time-only, or date-time value.")
-                            .tip(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
-                }
                 if(cachedValue == null) {
-                    cachedValue = defaultFormat.format(date);
+                    try {
+                        if (defaultFormat == null) {
+                            if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
+                                throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
+                            } else {
+                                throw new BugException();
+                            }
+                        }
+                        cachedValue = defaultFormat.format(dateModel);
+                    } catch (UnformattableDateException e) {
+                        throw MessageUtil.newCantFormatDateException(target, e);
+                    }
                 }
                 return cachedValue;
             }
-    
+
             public TemplateModel get(String key)
             throws
                 TemplateModelException
             {
-                return new SimpleScalar(env.getJDateFormat(dateType, date.getClass(), key).format(date));
+                return new SimpleScalar(env.formatDate(dateModel, key, target));
             }
             
             public Object exec(List args) throws TemplateModelException {
@@ -391,12 +377,28 @@ class MiscellaneousBuiltins {
         }
     }
 
-    static class is_dateBI extends BuiltIn {
+    static class is_dateLikeBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateDateModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
+    static class is_dateOfTypeBI extends BuiltIn {
+        
+        private final int dateType;
+        
+        is_dateOfTypeBI(int dateType) {
+            this.dateType = dateType;
+        }
+
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateDateModel) && ((TemplateDateModel) tm).getDateType() == dateType
+                ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -472,8 +474,11 @@ class MiscellaneousBuiltins {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)  ?
-                TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
+                    && (_TemplateAPI.getTemplateLanguageVersionAsInt(this) < _TemplateAPI.VERSION_INT_2_3_21
+                        // These implement TemplateSequenceModel, yet they can't be #list-ed:
+                        || !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel))
+                    ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -500,18 +505,13 @@ class MiscellaneousBuiltins {
             }
         }
     }
-
-    static class cBI extends BuiltIn {
+    
+    static abstract class AbstractCBI extends BuiltIn {
+        
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
-                if (num instanceof Integer || num instanceof Long) {
-                    // Accelerate these fairly common cases
-                    return new SimpleScalar(num.toString());
-                } else {
-                    return new SimpleScalar(env.getCNumberFormat().format(num));
-                }
+                return formatNumber(env, model);
             } else if (model instanceof TemplateBooleanModel) {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
                         ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
@@ -522,6 +522,86 @@ class MiscellaneousBuiltins {
                         env);
             }
         }
+
+        protected abstract TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException;
+        
+    }
+
+    static class cBI extends AbstractCBI implements ICIChainMember {
+        
+        private final BIBeforeICE2d3d21 prevICIObj = new BIBeforeICE2d3d21();
+        
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateNumberModel) {
+                return formatNumber(env, model);
+            } else if (model instanceof TemplateBooleanModel) {
+                return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
+                        ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
+            } else {
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
+                        env);
+            }
+        }
+
+        protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
+            Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+            if (num instanceof Integer || num instanceof Long) {
+                // Accelerate these fairly common cases
+                return new SimpleScalar(num.toString());
+            } else if (num instanceof Double) {
+                double n = num.doubleValue();
+                if (n == Double.POSITIVE_INFINITY) {
+                    return new SimpleScalar("INF");
+                }
+                if (n == Double.NEGATIVE_INFINITY) {
+                    return new SimpleScalar("-INF");
+                }
+                if (Double.isNaN(n)) {
+                    return new SimpleScalar("NaN");
+                }
+                // Deliberately falls through
+            } else if (num instanceof Float) {
+                float n = num.floatValue();
+                if (n == Float.POSITIVE_INFINITY) {
+                    return new SimpleScalar("INF");
+                }
+                if (n == Float.NEGATIVE_INFINITY) {
+                    return new SimpleScalar("-INF");
+                }
+                if (Float.isNaN(n)) {
+                    return new SimpleScalar("NaN");
+                }
+                // Deliberately falls through
+            }
+        
+            return new SimpleScalar(env.getCNumberFormat().format(num));
+        }
+
+        public int getMinimumICIVersion() {
+            return _TemplateAPI.VERSION_INT_2_3_21;
+        }
+
+        public Object getPreviousICIChainMember() {
+            return prevICIObj;
+        }
+        
+        static class BIBeforeICE2d3d21 extends AbstractCBI {
+
+            protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
+                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+                if (num instanceof Integer || num instanceof Long) {
+                    // Accelerate these fairly common cases
+                    return new SimpleScalar(num.toString());
+                } else {
+                    return new SimpleScalar(env.getCNumberFormat().format(num));
+                }
+            }
+            
+        }
+        
     }
 
 }

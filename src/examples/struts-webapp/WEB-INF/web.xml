@@ -46,12 +46,22 @@ Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
     
     <!-- FreeMarker settings: -->
     <init-param>
+      <param-name>incompatible_improvements</param-name>
+      <param-value>2.3.21</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_exception_handler</param-name>
+      <!-- Some may prefer "html_debug" for development. -->
+      <param-value>rethrow</param-value>
+    </init-param>
+    <init-param>
       <param-name>template_update_delay</param-name>
-      <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
+      <!-- 0 is for development only! Use higher value otherwise. -->
+      <param-value>0</param-value>
     </init-param>
     <init-param>
       <param-name>default_encoding</param-name>
-      <param-value>ISO-8859-1</param-value>
+      <param-value>UTF-8</param-value>
     </init-param>
     <init-param>
       <param-name>locale</param-name>
@@ -59,7 +69,7 @@ Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
     </init-param>
     <init-param>
       <param-name>number_format</param-name>
-      <param-value>0.##########</param-value>
+      <param-value>0.####</param-value>
     </init-param>
     
     <load-on-startup>1</load-on-startup>

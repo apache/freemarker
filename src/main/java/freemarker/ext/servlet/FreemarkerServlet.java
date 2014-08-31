@@ -204,6 +204,12 @@ public class FreemarkerServlet extends HttpServlet
         try {
             config = createConfiguration();
             
+            // Only override what's coming from the config if it was explicitly specified: 
+            final String iciInitParamValue = getInitParameter(Configuration.INCOMPATIBLE_IMPROVEMENTS);
+            if (iciInitParamValue != null) {
+                config.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, iciInitParamValue);
+            }
+            
             // Set defaults:
             config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
             contentType = DEFAULT_CONTENT_TYPE;
@@ -211,7 +217,7 @@ public class FreemarkerServlet extends HttpServlet
             // Process object_wrapper init-param out of order: 
             wrapper = createObjectWrapper();
             if (logger.isDebugEnabled()) {
-                logger.debug("Using object wrapper of class " + wrapper.getClass().getName());
+                logger.debug("Using object wrapper: " + wrapper);
             }
             config.setObjectWrapper(wrapper);
             
@@ -240,7 +246,8 @@ public class FreemarkerServlet extends HttpServlet
                 
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(Configurable.OBJECT_WRAPPER_KEY)
-                        || name.equals(INITPARAM_TEMPLATE_PATH)) {
+                        || name.equals(INITPARAM_TEMPLATE_PATH)
+                        || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
                     if (getInitParameter(Configuration.DEFAULT_ENCODING_KEY) != null) {
@@ -631,13 +638,11 @@ public class FreemarkerServlet extends HttpServlet
                     throw new NoClassDefFoundError(e.getMessage());
                 }
             }
-//            return BeansWrapper.getDefaultInstance();
-            return ObjectWrapper.DEFAULT_WRAPPER;
+            return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
         } else {
             wrapper = getInitParameter(Configurable.OBJECT_WRAPPER_KEY);
             if (wrapper == null) {
-//                return BeansWrapper.getDefaultInstance();
-                return ObjectWrapper.DEFAULT_WRAPPER;
+                return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
             } else {
                 try {
                     config.setSetting(Configurable.OBJECT_WRAPPER_KEY, wrapper);
@@ -656,7 +661,7 @@ public class FreemarkerServlet extends HttpServlet
     protected final String getTemplatePath() {
         return templatePath;
     }
-
+    
     protected HttpRequestParametersHashModel createRequestParametersHashModel(HttpServletRequest request) {
         return new HttpRequestParametersHashModel(request);
     }

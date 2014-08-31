@@ -85,6 +85,11 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
         return null;
     }
     
+    private Object modifyForIcI(Object source) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     public long getLastModified(Object templateSource)
     {
         return ((MultiSource)templateSource).getLastModified();
@@ -120,7 +125,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
      * serves as the complete template source descriptor used by the
      * MultiTemplateLoader class.
      */
-    private static final class MultiSource
+    static final class MultiSource
     {
         private final Object source;
         private final TemplateLoader loader;
@@ -148,6 +153,10 @@ public class MultiTemplateLoader implements StatefulTemplateLoader
             IOException
         {
             loader.closeTemplateSource(source);
+        }
+        
+        Object getWrappedSource() {
+            return source;
         }
         
         public boolean equals(Object o) {

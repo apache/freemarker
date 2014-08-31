@@ -18,48 +18,64 @@ package freemarker.core;
 
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template._TemplateAPI;
 
 /**
  * A class that represents a Range between two integers.
  */
 final class Range extends Expression {
 
+    static final int END_INCLUSIVE = 0; 
+    static final int END_EXCLUSIVE = 1; 
+    static final int END_UNBOUND = 2; 
+    static final int END_SIZE_LIMITED = 3; 
+    
     final Expression lho;
     final Expression rho;
+    final int endType;
 
-    Range(Expression lho, Expression rho) {
+    Range(Expression lho, Expression rho, int endType) {
         this.lho = lho;
         this.rho = rho;
+        this.endType = endType;
     }
     
-    boolean hasRho() {
-        return rho != null;
+    int getEndType() {
+        return endType;
     }
 
-    TemplateModel _eval(Environment env) 
-        throws TemplateException
-    {
-        int min = lho.evalToNumber(env).intValue();
-        int max = 0;
-        if (rho != null) {
-            max = rho.evalToNumber(env).intValue();
-            return new NumericalRange(min, max);
+    TemplateModel _eval(Environment env) throws TemplateException {
+        final int begin = lho.evalToNumber(env).intValue();
+        if (endType != END_UNBOUND) {
+            final int lhoValue = rho.evalToNumber(env).intValue();
+            return new BoundedRangeModel(
+                    begin, endType != END_SIZE_LIMITED ? lhoValue : begin + lhoValue,
+                    endType == END_INCLUSIVE, endType == END_SIZE_LIMITED); 
+        } else {
+            return _TemplateAPI.getTemplateLanguageVersionAsInt(this) >= _TemplateAPI.VERSION_INT_2_3_21
+                    ? (RangeModel) new ListableRightUnboundedRangeModel(begin)
+                    : (RangeModel) new NonListableRightUnboundedRangeModel(begin);
         }
-        return new NumericalRange(min);
     }
     
     // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
     boolean evalToBoolean(Environment env) throws TemplateException {
-        throw new NonBooleanException(this, new NumericalRange(0, 0), env);
+        throw new NonBooleanException(this, new BoundedRangeModel(0, 0, false, false), env);
     }
 
     public String getCanonicalForm() {
         String rhs = rho != null ? rho.getCanonicalForm() : "";
-        return lho.getCanonicalForm() + ".." + rhs;
+        return lho.getCanonicalForm() + getNodeTypeSymbol() + rhs;
     }
     
     String getNodeTypeSymbol() {
-        return "..";
+        switch (endType) {
+        case END_EXCLUSIVE: return "..<";
+        case END_INCLUSIVE: return "..";
+        case END_UNBOUND: return "..";
+        case END_SIZE_LIMITED: return "..*";
+        default: throw new BugException(endType);
+        }
     }
     
     boolean isLiteral() {
@@ -71,7 +87,8 @@ final class Range extends Expression {
             String replacedIdentifier, Expression replacement, ReplacemenetState replacementState) {
         return new Range(
                 lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+                rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                endType);
     }
     
     int getParameterCount() {

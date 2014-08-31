@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
@@ -44,6 +47,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.cache._CacheAPI;
 import freemarker.core.BugException;
@@ -58,6 +62,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.Constants;
 import freemarker.template.utility.HtmlEscape;
 import freemarker.template.utility.NormalizeNewlines;
 import freemarker.template.utility.NullArgumentException;
@@ -131,9 +136,21 @@ public class Configuration extends Configurable implements Cloneable {
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
+
+    /** FreeMarker version 2.3.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_0 = new Version(2, 3, 0);
+    
+    /** FreeMarker version 2.3.19 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_19 = new Version(2, 3, 19);
+    
+    /** FreeMarker version 2.3.20 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_20 = new Version(2, 3, 20);
+    
+    /** FreeMarker version 2.3.21 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_21 = new Version(2, 3, 21);
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
-    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = _TemplateAPI.VERSION_2_3_0;
+    public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -192,7 +209,14 @@ public class Configuration extends Configurable implements Cloneable {
 
     private boolean objectWrapperWasSet;
     
-    private HashMap sharedVariables = new HashMap();
+    private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
+    
+    /**
+     * Needed so that it doesn't mater in what order do you call {@link #setSharedVaribles(Map)}
+     * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
+     * control over the order, so it has to work on both ways.
+     */
+    private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
     private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
     private Map localeToCharsetMap = _ConcurrentMapFactory.newThreadSafeMap();
@@ -201,20 +225,27 @@ public class Configuration extends Configurable implements Cloneable {
     private Map autoImportNsToTmpMap = new HashMap();   // TODO No need for this, instead use List<NamespaceToTemplate> below.
 
     /**
-     * @deprecated Use {@link #Configuration(Version)} instead.
+     * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
+     *     {@link Configuration#setIncompatibleImprovements(Version)} (or
+     *     {@link Configuration#setSettings(Properties)}).  
      */
     public Configuration() {
         this(DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
 
     /**
-     * Sets which of the non-backward-compatible bugfixes/improvements should be enabled. The setting value is the
-     * FreeMarker version number where the bugfixes/improvements to enable were already implemented (but wasn't
-     * active by default, as that would break backward-compatibility).
+     * Creates a new instance and sets which of the non-backward-compatible bugfixes/improvements should be enabled.
+     * Note that the specified versions corresponds to the {@code incompatible_improvements} configuration setting, and
+     * can be changed later, with {@link #setIncompatibleImprovements(Version)} for example. 
+     *
+     * <p><b>About the "incompatible improvements" setting</b>
+     *
+     * <p>The setting value is the FreeMarker version number where the bugfixes/improvements to enable were already
+     * implemented (but possibly wasn't active by default, as that would break backward-compatibility).
      * 
      * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
-     * existing application. But if you develop a new application with, say, 2.3.20, it's probably a good idea to set
-     * this from 2.3.0 to 2.3.20. As far as the 1st and 2nd version number remains, these changes are always very
+     * existing application. But if you develop a new application with, say, 2.3.21, it's probably a good idea to set
+     * this from 2.3.0 to 2.3.21. As far as the 1st and 2nd version number remains, these changes are always very
      * low-risk changes, so usually they don't break anything in older applications either.
      * 
      * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
@@ -227,7 +258,7 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Currently the effects of this setting are:
      * <ul>
      *   <li><p>
-     *     2.3.0: This is just the starting point, the version used in older projects.
+     *     2.3.0: This is the lowest supported value, the version used in older projects.
      *   </li>
      *   <li><p>
      *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
@@ -256,10 +287,38 @@ public class Configuration extends Configurable implements Cloneable {
      *         won't remain hidden now. As the old default is a singleton too, potentially shared by independently
      *         developed components, most of them expects the out-of-the-box behavior from it (and the others are
      *         necessarily buggy). Also, then concurrency glitches can occur (and even pollute the class introspection
-     *         cache) because the singleton is modified after publishing.)
+     *         cache) because the singleton is modified after publishing to other threads.)
      *         Furthermore the new default object wrapper shares class introspection cache with other
      *         {@link BeansWrapper}-s created with {@link BeansWrapperBuilder}, which has an impact as
      *         {@link BeansWrapper#clearClassIntrospecitonCache()} will be disallowed; see more about it there.
+     *       </li>
+     *       <li><p>
+     *          The {@code ?iso_...} built-ins won't show the time zone offset for {@link java.sql.Time} values anymore,
+     *          because most databases store time values that aren't in any time zone, but just store hour, minute,
+     *          second, and decimal second field values. If you still want to show the offset (like for PostgreSQL
+     *          "time with time zone" columns you should), you can force showing the time zone offset by using
+     *          {@code myTime?string.iso_fz} (and its other variants).
+     *       </li>
+     *       <li><p>{@code ?is_enumerable} correctly returns {@code false} for Java methods get from Java objects that
+     *         are wrapped with {@link BeansWrapper} and its subclasses, like {@link DefaultObjectWrapper}. Although
+     *         method values implement {@link TemplateSequenceModel} (because of a historical design quirk in
+     *         {@link BeansWrapper}), trying to {@code #list} them will cause error, hence they aren't enumerable.
+     *       </li>
+     *       <li><p>
+     *          {@code ?c} will return {@code "INF"}, {@code "-INF"} and {@code "NaN"} for positive/negative infinity
+     *          and IEEE floating point Not-a-Number, respectively. These are the XML Schema compatible representations
+     *          of these special values. Earlier it has returned what {@link DecimalFormat} did with US locale, none of
+     *          which was understood by any (common) computer language.
+     *       </li>
+     *       <li><p>
+     *          FTL hash literals that repeat keys now only have the key once with {@code ?keys}, and only has the last
+     *          value associated to that key with {@code ?values}. This is consistent with the behavior of
+     *          {@code hash[key]} and how maps work in Java.       
+     *       </li>
+     *       <li><p>In most cases (where FreeMarker is able to do that), for {@link TemplateLoader}-s that use
+     *         {@link URLConnection}, {@code URLConnection#setUseCaches(boolean)} will called with {@code false},
+     *         so that only FreeMarker will do caching, not the URL scheme's handler.
+     *         See {@link URLTemplateLoader#setURLConnectionUsesCaches(Boolean)} for more details.
      *       </li>
      *       <li><p>
      *         The default of the {@code template_loader} setting ({@link Configuration#getTemplateLoader()}) changes
@@ -267,8 +326,17 @@ public class Configuration extends Configurable implements Cloneable {
      *         the default was a {@link FileTemplateLoader} that used the current directory as the root. This was
      *         dangerous and fragile as you usually don't have good control over what the current directory will be.
      *         Luckily, the old default almost never looked for the templates at the right place
-     *         anyway, so pretty much all applications had to set a {@code template_loader} setting, so it's unlikely
+     *         anyway, so pretty much all applications had to set the {@code template_loader} setting, so it's unlikely
      *         that changing the default breaks your application.
+     *       </li>
+     *       <li><p>
+     *          Right-unlimited ranges become readable (like listable), so {@code <#list 1.. as i>...</#list>} works.
+     *          Earlier they were only usable for slicing (like {@code hits[10..]}).
+     *       </li>
+     *       <li><p>
+     *          Empty ranges return {@link Constants#EMPTY_SEQUENCE} instead of an empty {@link SimpleSequence}. This
+     *          is in theory backward compatible, as the API only promises to give something that implements
+     *          {@link TemplateSequenceModel}.
      *       </li>
      *     </ul>
      *   </li>
@@ -304,7 +372,7 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     private TemplateLoader getDefaultTemplateLoader() {
-        return incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION
+        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21
                 ? _CacheAPI.createLegacyDefaultTemplateLoader()
                 : null;
     }
@@ -641,8 +709,18 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
+        ObjectWrapper prevObjectWrapper = getObjectWrapper();
         super.setObjectWrapper(objectWrapper);
         objectWrapperWasSet = true;
+        if (objectWrapper != prevObjectWrapper) {
+            try {
+                setSharedVariablesFromRewrappableSharedVariables();
+            } catch (TemplateModelException e) {
+                throw new RuntimeException(
+                        "Failed to re-wrap earliearly set shared variables with the newly set object wrapper",
+                        e);
+            }
+        }
     }
 
     /**
@@ -662,28 +740,30 @@ public class Configuration extends Configurable implements Cloneable {
      * be emptied.
      * 
      * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
-     *     version, or less than 2.3.0.
+     *     version, or less than 2.3.0, or {@code null}.
      * 
      * @since 2.3.20
      */
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionSupported(incompatibleImprovements);
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        
         boolean hadLegacyTLOWDefaults
-                = this.incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION; 
+                = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
         this.incompatibleImprovements = incompatibleImprovements;
-        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _CoreAPI.DEFAULT_TL_AND_OW_CHANGE_VERSION) {
+        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             if (!templateLoaderWasSet) {
                 recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
             }
             if (!objectWrapperWasSet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
-                super.setObjectWrapper(_CoreAPI.getDefaultObjectWrapper(incompatibleImprovements));
+                super.setObjectWrapper(getDefaultObjectWrapper(incompatibleImprovements));
             }
         }
     }
 
     /**
-     * @see #setIncompatibleImprovements(Version) 
+     * @see #setIncompatibleImprovements(Version)
+     * @return Never {@code null}. 
      * @since 2.3.20
      */
     public Version getIncompatibleImprovements() {
@@ -976,11 +1056,15 @@ public class Configuration extends Configurable implements Cloneable {
      * @param name the name used to access the data object from your template.
      *     If a shared variable with this name already exists, it will replace
      *     that.
-     * @see #setSharedVariable(String,Object)
+     *     
      * @see #setAllSharedVariables
+     * @see #setSharedVariable(String,Object)
      */
     public void setSharedVariable(String name, TemplateModel tm) {
-        sharedVariables.put(name, tm);
+        Object replaced = sharedVariables.put(name, tm);
+        if (replaced != null && rewrappableSharedVariables != null) {
+            rewrappableSharedVariables.remove(name);
+        }
     }
 
     /**
@@ -997,13 +1081,64 @@ public class Configuration extends Configurable implements Cloneable {
      * Adds shared variable to the configuration; It uses {@link Configurable#getObjectWrapper()} to wrap the 
      * {@code value}, so it's important that the object wrapper is set before this.
      * 
-     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values. 
+     * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values.
      * 
+     * <p>The added value should be thread safe, if you are running templates from multiple threads with this
+     * configuration.
+     *
+     * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
+     *
+     * @see #setSharedVaribles(Map)
      * @see #setSharedVariable(String,TemplateModel)
-     * @see #setAllSharedVariables
+     * @see #setAllSharedVariables(TemplateHashModelEx)
      */
     public void setSharedVariable(String name, Object value) throws TemplateModelException {
         setSharedVariable(name, getObjectWrapper().wrap(value));
+    }
+    
+    /**
+     * Replaces all shared variables (removes all previously added ones).
+     *
+     * <p>The values in the map can be {@link TemplateModel}-s or plain Java objects which will be immediately converted
+     * to {@link TemplateModel} with the {@link ObjectWrapper} returned by {@link #getObjectWrapper()}. If
+     * {@link #setObjectWrapper(ObjectWrapper)} is called later, this conversion will be re-applied. Thus, ignoring some
+     * extra resource usage, it doesn't mater if in what order are {@link #setObjectWrapper(ObjectWrapper)} and
+     * {@link #setSharedVaribles(Map)} called. This is essential when you don't have control over the order in which
+     * the setters are called. 
+     *
+     * <p>The values in the map must be thread safe, if you are running templates from multiple threads with
+     * this configuration. This means that both the plain Java object and the {@link TemplateModel}-s created from them
+     * by the {@link ObjectWrapper} must be thread safe. (The standard {@link ObjectWrapper}-s of FreeMarker create
+     * thread safe {@link TemplateModel}-s.) The {@link Map} itself need not be thread-safe.
+     * 
+     * <p>This setter method has no getter pair because of the tricky relation ship with
+     * {@link #setSharedVariable(String, Object)}.
+     * 
+     * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
+     *  
+     * @since 2.3.21
+     */
+    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+        rewrappableSharedVariables = new HashMap(map);
+        sharedVariables.clear();
+        setSharedVariablesFromRewrappableSharedVariables();
+    }
+
+    private void setSharedVariablesFromRewrappableSharedVariables() throws TemplateModelException {
+        if (rewrappableSharedVariables == null) return;
+        for (Iterator it = rewrappableSharedVariables.entrySet().iterator(); it.hasNext();) {
+            Map.Entry/*<String, Object>*/ ent = (Entry) it.next();
+            String name = (String) ent.getKey();
+            Object value = ent.getValue();
+            
+            TemplateModel valueAsTM;
+            if (value instanceof TemplateModel) {
+                valueAsTM = (TemplateModel) value;
+            } else {
+                valueAsTM = getObjectWrapper().wrap(value);
+            }
+            sharedVariables.put(name, valueAsTM);
+        }
     }
 
     /**
@@ -1377,6 +1512,21 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
+     * Returns the default object wrapper for a given "incompatible_improvements" version.
+     * 
+     * @see #setIncompatibleImprovements(Version)
+     * 
+     * @since 2.3.21
+     */
+    public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
+        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+            return ObjectWrapper.DEFAULT_WRAPPER;
+        } else {
+            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();
+        }
+    }
+
+    /**
      * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
      * to be future-proof, it's an instance method. 
@@ -1397,8 +1547,8 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @since 2.3.21
      */
-    public Set getSupportedCoreDirectiveNames() {
-        return _CoreAPI.CORE_DIRECTIVE_NAMES;
+    public Set getSupportedBuiltInDirectiveNames() {
+        return _CoreAPI.BUILT_IN_DIRECTIVE_NAMES;
     }
 
     private static String getRequiredVersionProperty(Properties vp, String properyName) {

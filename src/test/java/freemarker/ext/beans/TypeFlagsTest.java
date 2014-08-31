@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import freemarker.template.Version;
+import freemarker.template.Configuration;
 
 public class TypeFlagsTest extends TestCase {
 
@@ -40,7 +40,7 @@ public class TypeFlagsTest extends TestCase {
         super(name);
     }
     
-    private final BeansWrapper bw = new BeansWrapper(new Version(2, 3, 21)); 
+    private final BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_21); 
 
     public void testSingleNumType() {
         checkTypeFlags(SingleNumTypeC.class, "mInt",

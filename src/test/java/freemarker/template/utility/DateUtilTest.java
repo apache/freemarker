@@ -249,8 +249,101 @@ public class DateUtilTest extends TestCase {
         assertEquals("2000-02-08T09Z",
                 dateToISO8601String(d, true, true, true,
                         DateUtil.ACCURACY_HOURS, null));
+        
+        d = df.parse("AD 1998-10-30 19:30:00:000 +0400");
+        assertEquals(
+                "15:30:00Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.000Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.000Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
+                
+        d = df.parse("AD 1998-10-30 19:30:00:100 +0400");
+        assertEquals(
+                "15:30:00.1Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.100Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.1Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.100Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
+        
+        d = df.parse("AD 1998-10-30 19:30:00:010 +0400");
+        assertEquals(
+                "15:30:00.01Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.010Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.01Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.010Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
+        
+        d = df.parse("AD 1998-10-30 19:30:00:001 +0400");
+        assertEquals(
+                "15:30:00.001Z",
+                dateToISO8601UTCTimeMSString(d, true));
+        assertEquals(
+                "15:30:00.001Z",
+                dateToISO8601UTCTimeMSFString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.001Z",
+                dateToISO8601UTCDateTimeMSString(d, true));
+        assertEquals(
+                "1998-10-30T15:30:00.001Z",
+                dateToISO8601UTCDateTimeMSFString(d, true));
     }
 
+    public void testXSFormatISODeviations() throws ParseException, UnrecognizedTimeZoneException {
+        Date dsum = df.parse("AD 2010-05-09 20:00:00:0 UTC");
+        Date dwin = df.parse("AD 2010-01-01 20:00:00:0 UTC");
+        
+        TimeZone tzRome = DateUtil.getTimeZone("Europe/Rome");
+        
+        assertEquals(
+                "2010-01-01T21:00:00+01:00",
+                DateUtil.dateToXSString(dwin, true, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "2010-05-09T22:00:00+02:00",
+                DateUtil.dateToXSString(dsum, true, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "2010-01-01+01:00",  // ISO doesn't allow date-only with TZ
+                DateUtil.dateToXSString(dwin, true, false, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "2010-05-09+02:00",  // ISO doesn't allow date-only with TZ
+                DateUtil.dateToXSString(dsum, true, false, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "21:00:00+01:00",
+                DateUtil.dateToXSString(dwin, false, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        assertEquals(
+                "22:00:00+02:00",
+                DateUtil.dateToXSString(dsum, false, true, true, DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+        
+        assertEquals(
+                "-1-02-29T06:15:24Z",  // ISO uses 0 for BC 1
+                DateUtil.dateToXSString(
+                        df.parse("BC 0001-03-02 09:15:24:0 +0300"),
+                        true, true, true, DateUtil.ACCURACY_SECONDS, DateUtil.UTC, calendarFactory));
+        assertEquals(
+                "-2-02-28T06:15:24Z",  // ISO uses -1 for BC 2
+                DateUtil.dateToXSString(
+                        df.parse("BC 2-03-02 09:15:24:0 +0300"),
+                        true, true, true, DateUtil.ACCURACY_SECONDS, DateUtil.UTC, calendarFactory));
+    }
+    
     private String dateToISO8601DateTimeString(
             Date date, TimeZone tz) {
         return dateToISO8601String(date, true, true, true,
@@ -268,7 +361,13 @@ public class DateUtilTest extends TestCase {
         return dateToISO8601String(date, true, true, offsetPart,
                 DateUtil.ACCURACY_MILLISECONDS, DateUtil.UTC);
     }
-    
+
+    private String dateToISO8601UTCDateTimeMSFString(
+            Date date, boolean offsetPart) {
+        return dateToISO8601String(date, true, true, offsetPart,
+                DateUtil.ACCURACY_MILLISECONDS_FORCED, DateUtil.UTC);
+    }
+        
     private String dateToISO8601DateString(Date date, TimeZone tz) {
         return dateToISO8601String(date, true, false, false,
                 DateUtil.ACCURACY_SECONDS, tz);
@@ -296,6 +395,12 @@ public class DateUtilTest extends TestCase {
         return dateToISO8601String(date, false, true, offsetPart,
                 DateUtil.ACCURACY_MILLISECONDS, DateUtil.UTC);
     }
+
+    private String dateToISO8601UTCTimeMSFString(
+            Date date, boolean offsetPart) {
+        return dateToISO8601String(date, false, true, offsetPart,
+                DateUtil.ACCURACY_MILLISECONDS_FORCED, DateUtil.UTC);
+    }
     
     private String dateToISO8601String(
             Date date,
@@ -310,408 +415,418 @@ public class DateUtilTest extends TestCase {
                 calendarFactory);        
     }
     
-    public void testParseXSDate1() throws DateParseException {
-        assertEquals(
+    public void testParseDate() throws DateParseException {
+        assertDateParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate(
-                        "1998-10-30+04:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                null,
+                "1998-10-30+04:00", DateUtil.UTC);
+        assertDateParsing(
                 "AD 1998-10-30 02:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate(
-                        "1998-10-30-02:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                null,
+                "1998-10-30-02:00", DateUtil.UTC);
+        assertDateParsing(
+                "AD 1998-10-30 02:00:00:0 +0000",
+                "1998-10-30", DateUtil.parseXSTimeZone("-02:00"));
+        assertDateParsing(
+                null,
+                "AD 1998-10-30 02:00:00:0 +0000",
+                "19981030", DateUtil.parseXSTimeZone("-02:00"));
+        assertDateParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate("1998-10-30Z", DateUtil.UTC, cf2dc)));
+                null,
+                "1998-10-30Z", DateUtil.UTC);
+        assertDateParsing(
+                "AD 1998-10-30 00:00:00:0 +0000",
+                "1998-10-30", DateUtil.UTC);
+        assertDateParsing(
+                null,
+                "AD 1998-10-30 00:00:00:0 +0000",
+                "19981030", DateUtil.UTC);
 
-        assertEquals(
+        assertDateParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate("1998-10-30+04:00",
-                        DateUtil.UTC, cf2dc)));
-        assertEquals(
+                null,
+                "1998-10-30+04:00", DateUtil.UTC);
+        assertDateParsing(
+                "AD 1998-10-30 04:00:00:0 +0000",
+                null,
+                "1998-10-30-04:00", DateUtil.UTC);
+        assertDateParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate("1998-10-30Z",
-                        DateUtil.UTC, cf2dc)));
+                null,
+                "1998-10-30Z", DateUtil.UTC);
         
-        // pre-ISO 8601:2000 Second Edition BC years
         try {
-            df.format(DateUtil.parseXSDate("0000-02-03Z", DateUtil.UTC, cf2dc));
+            // XS doesn't have year 0
+            assertDateParsing(
+                    "BC 0000-02-05 00:00:00:0 +0000",
+                    null,
+                    "0000-02-03Z", DateUtil.UTC);
             fail();
         } catch (DateParseException e) {
             echo(e);
         }
-        assertEquals(
+        assertDateParsing(
+                null,
+                "BC 0001-02-05 00:00:00:0 +0000",
+                "0000-02-03", DateUtil.UTC);
+        assertDateParsing(
+                null,
+                "BC 0001-02-05 00:00:00:0 +0000",
+                "00000203", DateUtil.UTC);
+        
+        assertDateParsing(
                 "BC 0001-02-05 00:00:00:0 +0000",  // Julian
-                df.format(DateUtil.parseXSDate("-0001-02-03Z", DateUtil.UTC, cf2dc)));  // Proleptic Gregorian
+                "BC 0002-02-05 00:00:00:0 +0000",  // Julian
+                "-0001-02-03", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateParsing(
+                null,
+                "BC 0002-02-05 00:00:00:0 +0000",  // Julian
+                "-00010203", DateUtil.UTC);  // Proleptic Gregorian
 
-        assertEquals(
+        assertDateParsing(
                 "AD 0001-02-05 00:00:00:0 +0000",  // Julian
-                df.format(DateUtil.parseXSDate("0001-02-03Z", DateUtil.UTC, cf2dc)));  // Proleptic Gregorian
-        assertEquals(
+                null,
+                "0001-02-03Z", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateParsing(
+                "AD 0001-02-05 00:00:00:0 +0000",  // Julian
+                "0001-02-03", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateParsing(
+                null,
+                "AD 0001-02-05 00:00:00:0 +0000",  // Julian
+                "00010203", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateParsing(
                 "AD 1001-12-07 00:00:00:0 +0000",  // Julian
-                df.format(DateUtil.parseXSDate("1001-12-13Z", DateUtil.UTC, cf2dc)));  // Proleptic Gregorian
+                null,
+                "1001-12-13Z", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateParsing(
+                "AD 1001-12-07 00:00:00:0 +0000",  // Julian
+                "1001-12-13", DateUtil.UTC);  // Proleptic Gregorian
         
-        assertEquals(
+        assertDateParsing(
                 "AD 2006-12-31 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate("2006-12-31Z", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                null,
+                "2006-12-31Z", DateUtil.UTC);
+        assertDateParsing(
+                "AD 2006-12-31 00:00:00:0 +0000",
+                "2006-12-31", DateUtil.UTC);
+        assertDateParsing(
                 "AD 2006-01-01 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDate("2006-01-01Z", DateUtil.UTC, cf2dc)));
+                null,
+                "2006-01-01Z", DateUtil.UTC);
+        assertDateParsing(
+                "AD 2006-01-01 00:00:00:0 +0000",
+                "2006-01-01", DateUtil.UTC);
+        assertDateParsing(
+                "AD 12006-01-01 00:00:00:0 +0000",
+                "12006-01-01", DateUtil.UTC);
+        assertDateParsing(
+                null,
+                "AD 12006-01-01 00:00:00:0 +0000",
+                "120060101", DateUtil.UTC);
     }
 
-    public void testParseXSDate2() {
-        try {
-            DateUtil.parseXSDate("1998-10-30x", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate("+1998-10-30", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate("1998-10-", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate("1998-1-30", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate(
-                    "1998-10-30+01", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
+    public void testParseDateMalformed() {
+        assertDateMalformed("1998-10-30x");
+        assertDateMalformed("+1998-10-30");
+        assertDateMalformed("1998-10-");
+        assertDateMalformed("1998-1-30");
+        assertDateMalformed("1998-10-30+01");
+        assertDateMalformed("1998-00-01");
+        assertDateMalformed("1998-13-01");
+        assertDateMalformed("1998-10-00");
+        assertDateMalformed("1998-10-32");
+        assertDateMalformed("1998-02-31");
         
-        try {
-            DateUtil.parseXSDate("1998-00-01", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate("1998-13-01", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate("1998-10-00", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDate("1998-10-32", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-
-        try {
-            DateUtil.parseXSDate("1998-02-31", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
+        assertISO8601DateMalformed("2100103");
+        assertISO8601DateMalformed("210-01-03");
+        assertISO8601DateMalformed("2012-0301");
+        assertISO8601DateMalformed("201203-01");
+        assertISO8601DateMalformed("2012-01-01+01:00");
     }
     
-    public void testParseXSTime1() throws DateParseException {
-        assertEquals(
+    public void testParseTime() throws DateParseException {
+        assertTimeParsing(
                 "AD 1970-01-01 17:30:05:0 +0000",
-                df.format(DateUtil.parseXSTime("17:30:05", DateUtil.UTC, cf2dc)));
-
-        assertEquals(
+                "17:30:05", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 17:30:05:0 +0000",
+                "173005", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:100 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.1", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "07:30:00.1", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:120 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.12", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "07:30:00.12", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.123", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "07:30:00.123", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.1235", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "07:30:00.1235", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.12346", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "07:30:00.12346", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 07:30:00:123 +0000",
+                "073000.12346", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 07:30:00:123 +0000",
+                "073000,12346", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:120 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.12", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "07:30:00.12", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 07:30:00:500 +0000",
-                df.format(DateUtil.parseXSTime("07:30:00.5", DateUtil.UTC, cf2dc)));
+                "07:30:00.5", DateUtil.UTC);
 
-        assertEquals(
+        assertTimeParsing(
                 "AD 1970-01-01 16:30:05:0 +0000",
-                df.format(DateUtil.parseXSTime("17:30:05+01:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "17:30:05+01:00", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:30:05:0 +0000",
+                "173005+01", DateUtil.UTC);
+        assertTimeParsing(
+                "AD 1970-01-01 19:00:05:0 +0000",
+                "17:30:05-01:30", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 19:00:05:0 +0000",
+                "173005-0130", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-01 16:30:05:500 +0000",
-                df.format(DateUtil.parseXSTime("17:30:05.5+01:00", DateUtil.UTC, cf2dc)));
+                "17:30:05.5+01:00", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:30:05:500 +0000",
+                "173005.5+0100", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:30:05:500 +0000",
+                "173005.5+01", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:00:00:0 +0000",
+                "170000+01", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:00:00:0 +0000",
+                "1700+01", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:00:00:0 +0000",
+                "17+01", DateUtil.UTC);
         
-        assertEquals(
+        assertTimeParsing(
                 "AD 1970-01-01 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSTime("00:00:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "00:00:00", DateUtil.UTC);
+        assertTimeParsing(
                 "AD 1970-01-02 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSTime("24:00:00", DateUtil.UTC, cf2dc)));
+                "24:00:00", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-02 00:00:00:0 +0000",
+                "240000", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-02 00:00:00:0 +0000",
+                "2400", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-02 00:00:00:0 +0000",
+                "24:00", DateUtil.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-02 00:00:00:0 +0000",
+                "24", DateUtil.UTC);
         
-        assertEquals(
+        assertTimeParsing(
                 "AD 1970-01-01 23:59:59:999 +0000",
-                df.format(DateUtil.parseXSTime("23:59:59.999", DateUtil.UTC, cf2dc)));
+                "23:59:59.999", DateUtil.UTC);
     }
 
-    public void testParseXSTime2() {
-        try {
-            df.format(DateUtil.parseXSTime("00:0000", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            df.format(DateUtil.parseXSTime("00:00:00-01", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
+    public void testParseTimeMalformed() {
+        assertTimeMalformed("00:0000");
+        assertTimeMalformed("00:00:00-01:60");
+        assertTimeMalformed("24:00:01");
+        assertTimeMalformed("00:00:61");
+        assertTimeMalformed("00:60:00");
+        assertTimeMalformed("25:00:00");
+        assertTimeMalformed("2:00:00");
+        assertTimeMalformed("02:0:00");
+        assertTimeMalformed("02:00:0");
         
-        try {
-            df.format(DateUtil.parseXSTime("24:00:01", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        
-        try {
-            df.format(DateUtil.parseXSTime("00:00:61", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            df.format(DateUtil.parseXSTime("00:60:00", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            df.format(DateUtil.parseXSTime("25:00:00", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
+        assertISO8601TimeMalformed("1010101");
+        assertISO8601TimeMalformed("10101");
+        assertISO8601TimeMalformed("101");
+        assertISO8601TimeMalformed("1");
+        assertISO8601TimeMalformed("101010-1");
+        assertISO8601TimeMalformed("101010-100");
+        assertISO8601TimeMalformed("101010-10000");
+        assertISO8601TimeMalformed("101010+1");
+        assertISO8601TimeMalformed("101010+100");
+        assertISO8601TimeMalformed("101010+10000");
     }
     
-    public void testParseXSDateTime1() throws DateParseException {
-        assertEquals(
+    public void testParseDateTime() throws DateParseException {
+        assertDateTimeParsing( 
                 "AD 1998-10-30 11:30:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00+04:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T15:30:00+04:00", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 11:30:00:0 +0000",
+                "19981030T153000+0400", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 11:30:00:500 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00.5+04:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T15:30:00.5+04:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00Z", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T15:30:00Z", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 15:30:00:0 +0000",
+                "19981030T1530Z", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:500 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00.5Z", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T15:30:00.5Z", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 11:30:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00+04:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T15:30:00+04:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00Z", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T15:30:00Z", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T15:30:00", DateUtil.UTC, cf2dc)));
+                "1998-10-30T15:30:00", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 15:30:00:0 +0000",
+                "1998-10-30T15:30", DateUtil.UTC);
         
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T00:00:00+04:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T00:00:00+04:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 02:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T00:00:00-02:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T00:00:00-02:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T00:00:00Z", DateUtil.UTC, cf2dc)));
+                "1998-10-30T00:00:00Z", DateUtil.UTC);
 
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T00:00:00+04:00",
-                        DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1998-10-30T00:00:00+04:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1998-10-30T00:00:00Z",
-                        DateUtil.UTC, cf2dc)));
+                "1998-10-30T00:00:00Z", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 00:00:00:0 +0000",
+                "1998-10-30T00:00Z", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 00:00:00:0 +0000",
+                "1998-10-30T00:00", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 00:00:00:0 +0000",
+                "19981030T00Z", DateUtil.UTC);
         
         // BC years
         try {
-                df.format(DateUtil.parseXSDateTime(
-                        "0000-02-03T00:00:00Z", DateUtil.UTC, cf2dc));
-                fail();
+            assertDateTimeParsing(
+                        "",
+                        null,
+                        "0000-02-03T00:00:00Z", DateUtil.UTC);
+            fail();
         } catch (DateParseException e) {
             echo(e);
         }
-        assertEquals(
+        assertDateTimeParsing(
+                null,
+                "BC 0001-02-05 00:00:00:0 +0000",
+                "0000-02-03T00:00:00Z", DateUtil.UTC);
+        
+        assertDateTimeParsing(
                 "BC 0001-02-05 00:00:00:0 +0000",  // Julian
-                df.format(DateUtil.parseXSDateTime(
-                        "-0001-02-03T00:00:00Z", DateUtil.UTC, cf2dc)));  // Proleptic Gregorian
+                "BC 0002-02-05 00:00:00:0 +0000",  // Julian
+                "-0001-02-03T00:00:00Z", DateUtil.UTC);  // Proleptic Gregorian
 
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 0001-02-05 00:00:00:0 +0000",  // Julian
-                df.format(DateUtil.parseXSDateTime(
-                        "0001-02-03T00:00:00Z", DateUtil.UTC, cf2dc)));  // Proleptic Gregorian
-        assertEquals(
+                "0001-02-03T00:00:00Z", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateTimeParsing(
                 "AD 1001-12-07 00:00:00:0 +0000",  // Julian
-                df.format(DateUtil.parseXSDateTime(
-                        "1001-12-13T00:00:00Z", DateUtil.UTC, cf2dc)));  // Proleptic Gregorian
+                "1001-12-13T00:00:00Z", DateUtil.UTC);  // Proleptic Gregorian
+        assertDateTimeParsing(
+                "AD 11001-12-13 00:00:00:0 +0000",
+                "11001-12-13T00:00:00Z", DateUtil.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 11001-12-13 00:00:00:0 +0000",
+                "110011213T00Z", DateUtil.UTC);
         
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 2006-12-31 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "2006-12-31T00:00:00Z", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "2006-12-31T00:00:00Z", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 2006-01-01 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "2006-01-01T00:00:00Z", DateUtil.UTC, cf2dc)));
+                "2006-01-01T00:00:00Z", DateUtil.UTC);
         
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T07:30:00.123", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1970-01-01T07:30:00.123", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T07:30:00.1235", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1970-01-01T07:30:00.1235", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T07:30:00.12346", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1970-01-01T07:30:00.12346", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:120 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T07:30:00.12", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1970-01-01T07:30:00.12", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:500 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T07:30:00.5", DateUtil.UTC, cf2dc)));
+                "1970-01-01T07:30:00.5", DateUtil.UTC);
 
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 1970-01-01 16:30:05:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T17:30:05+01:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1970-01-01T17:30:05+01:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1970-01-01 16:30:05:500 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T17:30:05.5+01:00",
-                        DateUtil.UTC, cf2dc)));
+                "1970-01-01T17:30:05.5+01:00", DateUtil.UTC);
         
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 1970-01-01 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T00:00:00", DateUtil.UTC, cf2dc)));
-        assertEquals(
+                "1970-01-01T00:00:00", DateUtil.UTC);
+        assertDateTimeParsing(
                 "AD 1970-01-02 00:00:00:0 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T24:00:00", DateUtil.UTC, cf2dc)));
+                "1970-01-01T24:00:00", DateUtil.UTC);
         
-        assertEquals(
+        assertDateTimeParsing(
                 "AD 1970-01-01 23:59:59:999 +0000",
-                df.format(DateUtil.parseXSDateTime(
-                        "1970-01-01T23:59:59.999", DateUtil.UTC, cf2dc)));
+                "1970-01-01T23:59:59.999", DateUtil.UTC);
     }
 
-    public void testParseXSDateTime2() throws DateParseException {
-        try {
-            DateUtil.parseXSDateTime(
-                    "1998-00-01T00:00:00", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDateTime(
-                    "1998-13-01T00:00:00", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDateTime(
-                    "1998-10-00T00:00:00", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            DateUtil.parseXSDateTime(
-                    "1998-10-32T00:00:00", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-
-        try {
-            DateUtil.parseXSDateTime(
-                    "1998-02-31T00:00:00", DateUtil.UTC, cf2dc);
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
+    public void testParseDateTimeMalformed() throws DateParseException {
+        assertDateTimeMalformed("1998-00-01T00:00:00");
+        assertDateTimeMalformed("1998-13-01T00:00:00");
+        assertDateTimeMalformed("1998-10-00T00:00:00");
+        assertDateTimeMalformed("1998-10-32T00:00:00");
+        assertDateTimeMalformed("1998-02-31T00:00:00");
+        assertDateTimeMalformed("1970-01-02T24:00:01");
+        assertDateTimeMalformed("1970-01-01T00:00:61");
+        assertDateTimeMalformed("1970-01-01T00:60:00");
+        assertDateTimeMalformed("1970-01-01T25:00:00");
         
-        try {
-            df.format(DateUtil.parseXSDateTime(
-                    "1970-01-02T24:00:01", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        
-        try {
-            df.format(DateUtil.parseXSDateTime(
-                    "1970-01-01T00:00:61", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            df.format(DateUtil.parseXSDateTime(
-                    "1970-01-01T00:60:00", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
-        try {
-            df.format(DateUtil.parseXSDateTime(
-                    "1970-01-01T25:00:00", DateUtil.UTC, cf2dc));
-            fail();
-        } catch (DateParseException e) {
-            echo(e);
-        }
+        assertISO8601DateTimeMalformed("197-01-01T20:00:00");
     }
     
-    public void testParseXSTimeZone1() throws DateParseException {
+    public void testParseXSTimeZone() throws DateParseException {
         assertEquals(0,
                 DateUtil.parseXSTimeZone("Z").getOffset(0));
         assertEquals(0,
@@ -728,9 +843,7 @@ public class DateUtilTest extends TestCase {
                 DateUtil.parseXSTimeZone("+23:59").getOffset(0));
     }
 
-    public void testParseXSTimeZone2() {
-        //setEcho(true);
-        
+    public void testParseXSTimeZoneWrong() {
         try {
             DateUtil.parseXSTimeZone("04:00").getOffset(0);
             fail();
@@ -791,6 +904,8 @@ public class DateUtilTest extends TestCase {
         assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59");
         assertJavaxAndFTLXSDateTimesSame("2014-01-01T24:00:00");
         assertJavaxAndFTLXSDateTimesSame("2014-01-02T00:00:00");  // same as the previous
+        assertJavaxAndFTLXSDateTimesSame("2014-01-31T24:00:00");
+        assertJavaxAndFTLXSDateTimesSame("2014-02-01T00:00:00");  // same as the previous
         
         // Under ms
         assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59.123456789");
@@ -813,6 +928,141 @@ public class DateUtilTest extends TestCase {
         assertEquals(javaxDate, ftlDate);
     }
 
+    private void assertDateParsing(String expected, String parsed, TimeZone tz) throws DateParseException {
+        assertDateParsing(expected, expected, parsed, tz);
+    }
+
+    private void assertDateParsing(String expectedXS, String expectedISO8601, String parsed, TimeZone tz)
+            throws DateParseException {
+        if (expectedXS != null) {
+            assertEquals(
+                    expectedXS,
+                    df.format(DateUtil.parseXSDate(parsed, tz, cf2dc)));
+        }
+        if (expectedISO8601 != null) {
+            assertEquals(
+                    expectedISO8601,
+                    df.format(DateUtil.parseISO8601Date(parsed, tz, cf2dc)));
+        }
+    }
+
+    private void assertDateTimeParsing(String expected, String parsed, TimeZone tz) throws DateParseException {
+        assertDateTimeParsing(expected, expected, parsed, tz);
+    }
+
+    private void assertDateTimeParsing(String expectedXS, String expectedISO8601, String parsed, TimeZone tz)
+            throws DateParseException {
+        if (expectedXS != null) {
+            assertEquals(
+                    expectedXS,
+                    df.format(DateUtil.parseXSDateTime(parsed, tz, cf2dc)));
+        }
+        if (expectedISO8601 != null) {
+            assertEquals(
+                    expectedISO8601,
+                    df.format(DateUtil.parseISO8601DateTime(parsed, tz, cf2dc)));
+        }
+    }
+
+    private void assertTimeParsing(String expected, String parsed, TimeZone tz) throws DateParseException {
+        assertTimeParsing(expected, expected, parsed, tz);
+    }
+
+    private void assertTimeParsing(String expectedXS, String expectedISO8601, String parsed, TimeZone tz)
+            throws DateParseException {
+        if (expectedXS != null) {
+            assertEquals(
+                    expectedXS,
+                    df.format(DateUtil.parseXSTime(parsed, tz, cf2dc)));
+        }
+        if (expectedISO8601 != null) {
+            assertEquals(
+                    expectedISO8601,
+                    df.format(DateUtil.parseISO8601Time(parsed, tz, cf2dc)));
+        }
+    }
+    
+    private void assertDateMalformed(String parsed) {
+        try {
+            DateUtil.parseXSDate(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+        try {
+            DateUtil.parseISO8601Date(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+    }
+
+    private void assertTimeMalformed(String parsed) {
+        try {
+            DateUtil.parseXSTime(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+        try {
+            DateUtil.parseISO8601Time(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+    }
+
+    private void assertDateTimeMalformed(String parsed) {
+        try {
+            DateUtil.parseXSDateTime(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+        try {
+            DateUtil.parseISO8601DateTime(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+    }
+
+    private void assertISO8601DateMalformed(String parsed) {
+        try {
+            DateUtil.parseISO8601Date(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+    }
+    
+    private void assertISO8601TimeMalformed(String parsed) {
+        try {
+            DateUtil.parseISO8601Time(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+    }
+    
+    private void assertISO8601DateTimeMalformed(String parsed) {
+        try {
+            DateUtil.parseISO8601DateTime(parsed, DateUtil.UTC, cf2dc);
+            fail();
+        } catch (DateParseException e) {
+            // Expected
+            echo(e);
+        }
+    }
+    
     private void echo(@SuppressWarnings("unused") DateParseException e) {
         // System.out.println(e);
     }

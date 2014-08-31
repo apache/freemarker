@@ -48,7 +48,7 @@ implements
         };
         
     // Cached length of the array
-    private int length;
+    private final int length;
 
     /**
      * Creates a new model that wraps the specified array object.

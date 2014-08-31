@@ -35,7 +35,7 @@ import freemarker.template.utility.StringUtil;
 @Ignore
 public abstract class TemplateErrorMessageTest {
     
-    protected final Configuration cfg = new Configuration(new Version(2, 3, 0));
+    protected final Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
     private Map<String, Object> dataModel = new HashMap<String, Object>();
     {
         buildDataModel(dataModel);

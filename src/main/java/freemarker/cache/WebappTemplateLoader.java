@@ -39,6 +39,8 @@ public class WebappTemplateLoader implements TemplateLoader
     
     private final ServletContext servletContext;
     private final String subdirPath;
+
+    private Boolean urlConnectionUsesCaches;
     
     /**
      * Creates a resource template cache that will use the specified servlet
@@ -111,7 +113,7 @@ public class WebappTemplateLoader implements TemplateLoader
                     e);
             return null;
         }
-        return url == null ? null : new URLTemplateSource(url);
+        return url == null ? null : new URLTemplateSource(url, getURLConnectionUsesCaches());
     }
     
     public long getLastModified(Object templateSource) {
@@ -142,6 +144,24 @@ public class WebappTemplateLoader implements TemplateLoader
             ((URLTemplateSource) templateSource).close();
         }
     }
+    
+    /**
+     * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
+     * 
+     * @since 2.3.21
+     */
+    public Boolean getURLConnectionUsesCaches() {
+        return urlConnectionUsesCaches;
+    }
+
+    /**
+     * It does the same as {@link URLTemplateLoader#setURLConnectionUsesCaches(Boolean)}; see there.
+     * 
+     * @since 2.3.21
+     */
+    public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
+        this.urlConnectionUsesCaches = urlConnectionUsesCaches;
+    }
 
     /**
      * Show class name and some details that are useful in template-not-found errors.
@@ -153,5 +173,6 @@ public class WebappTemplateLoader implements TemplateLoader
                 + StringUtil.jQuote(servletContext.getServletContextName()) + ", subdirPath=" + StringUtil.jQuote(subdirPath)
                 + ")";
     }
+
     
 }

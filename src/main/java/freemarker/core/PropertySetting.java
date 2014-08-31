@@ -49,7 +49,7 @@ final class PropertySetting extends TemplateElement {
             !key.equals(Configurable.DATE_FORMAT_KEY) &&
             !key.equals(Configurable.DATETIME_FORMAT_KEY) &&
             !key.equals(Configurable.TIME_ZONE_KEY) &&
-            !key.equals(Configurable.USE_SYSTEM_DEFAULT_TIME_ZONE_FOR_SQL_DATE_AND_TIME) &&
+            !key.equals(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY) &&
             !key.equals(Configurable.BOOLEAN_FORMAT_KEY) &&
             !key.equals(Configurable.CLASSIC_COMPATIBLE_KEY) &&
             !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY)) 
