@@ -242,7 +242,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
         
-        else if (testName.equals("number-format")) {
+        else if (testName.startsWith("number-format")) {
             dataModel.put("int", new SimpleNumber(new Integer(1)));
             dataModel.put("double", new SimpleNumber(new Double(1.0)));
             dataModel.put("double2", new SimpleNumber(new Double(1 + 1e-15)));

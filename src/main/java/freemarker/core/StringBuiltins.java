@@ -284,13 +284,13 @@ class StringBuiltins {
 
     static class htmlBI extends StringBuiltIn implements ICIChainMember {
         
-        private final BIBeforeICE2d3d20 prevICEObj = new BIBeforeICE2d3d20();
+        private final BIBeforeICI2d3d20 prevICIObj = new BIBeforeICI2d3d20();
         
         TemplateModel calculateResult(String s, Environment env) {
             return new SimpleScalar(StringUtil.XHTMLEnc(s));
         }
         
-        static class BIBeforeICE2d3d20 extends StringBuiltIn {
+        static class BIBeforeICI2d3d20 extends StringBuiltIn {
             TemplateModel calculateResult(String s, Environment env) {
                 return new SimpleScalar(StringUtil.HTMLEnc(s));
             }
@@ -301,7 +301,7 @@ class StringBuiltins {
         }
     
         public Object getPreviousICIChainMember() {
-            return prevICEObj;
+            return prevICIObj;
         }
     }
 

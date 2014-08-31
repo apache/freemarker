@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -325,6 +326,12 @@ public class Configuration extends Configurable implements Cloneable {
      *          Empty ranges return {@link Constants#EMPTY_SEQUENCE} instead of an empty {@link SimpleSequence}. This
      *          is in theory backward compatible, as the API only promises to give something that implements
      *          {@link TemplateSequenceModel}.
+     *       </li>
+     *       <li><p>
+     *          {@code ?c} will return {@code "INF"}, {@code "-INF"} and {@code "NaN"} for positive/negative infinity
+     *          and IEEE floating point Not-a-Number, respectively. These are the XML Schema compatible representations
+     *          of these special values. Earlier it has returned what {@link DecimalFormat} did with US locale, none of
+     *          which was understood by any (common) computer language.
      *       </li>
      *     </ul>
      *   </li>

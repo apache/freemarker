@@ -91,6 +91,9 @@
    <testcase name="newlines2" />
    <testcase name="noparse" />
    <testcase name="number-format" />
+   <testcase name="number-format-ici-2.3.21" template="number-format.ftl" expected="number-format.txt">
+   	  <config incompatible_improvements="2.3.21"/>
+   </testcase>
    <testcase name="number-literal" >
       <config locale="fr_FR"/>
    </testcase>

@@ -505,18 +505,13 @@ class MiscellaneousBuiltins {
             }
         }
     }
-
-    static class cBI extends BuiltIn {
+    
+    static abstract class AbstractCBI extends BuiltIn {
+        
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
-                if (num instanceof Integer || num instanceof Long) {
-                    // Accelerate these fairly common cases
-                    return new SimpleScalar(num.toString());
-                } else {
-                    return new SimpleScalar(env.getCNumberFormat().format(num));
-                }
+                return formatNumber(env, model);
             } else if (model instanceof TemplateBooleanModel) {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
                         ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
@@ -527,6 +522,86 @@ class MiscellaneousBuiltins {
                         env);
             }
         }
+
+        protected abstract TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException;
+        
+    }
+
+    static class cBI extends AbstractCBI implements ICIChainMember {
+        
+        private final BIBeforeICE2d3d21 prevICIObj = new BIBeforeICE2d3d21();
+        
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateNumberModel) {
+                return formatNumber(env, model);
+            } else if (model instanceof TemplateBooleanModel) {
+                return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
+                        ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
+            } else {
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
+                        env);
+            }
+        }
+
+        protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
+            Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+            if (num instanceof Integer || num instanceof Long) {
+                // Accelerate these fairly common cases
+                return new SimpleScalar(num.toString());
+            } else if (num instanceof Double) {
+                double n = num.doubleValue();
+                if (n == Double.POSITIVE_INFINITY) {
+                    return new SimpleScalar("INF");
+                }
+                if (n == Double.NEGATIVE_INFINITY) {
+                    return new SimpleScalar("-INF");
+                }
+                if (Double.isNaN(n)) {
+                    return new SimpleScalar("NaN");
+                }
+                // Deliberately falls through
+            } else if (num instanceof Float) {
+                float n = num.floatValue();
+                if (n == Float.POSITIVE_INFINITY) {
+                    return new SimpleScalar("INF");
+                }
+                if (n == Float.NEGATIVE_INFINITY) {
+                    return new SimpleScalar("-INF");
+                }
+                if (Float.isNaN(n)) {
+                    return new SimpleScalar("NaN");
+                }
+                // Deliberately falls through
+            }
+        
+            return new SimpleScalar(env.getCNumberFormat().format(num));
+        }
+
+        public int getMinimumICIVersion() {
+            return _TemplateAPI.VERSION_INT_2_3_21;
+        }
+
+        public Object getPreviousICIChainMember() {
+            return prevICIObj;
+        }
+        
+        static class BIBeforeICE2d3d21 extends AbstractCBI {
+
+            protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
+                Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+                if (num instanceof Integer || num instanceof Long) {
+                    // Accelerate these fairly common cases
+                    return new SimpleScalar(num.toString());
+                } else {
+                    return new SimpleScalar(env.getCNumberFormat().format(num));
+                }
+            }
+            
+        }
+        
     }
 
 }
