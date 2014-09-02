@@ -17,6 +17,7 @@
 package freemarker.core;
 
 import freemarker.ext.beans.BeanModel;
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -104,14 +105,30 @@ abstract public class Expression extends TemplateObject {
     }
     
     boolean evalToBoolean(Environment env) throws TemplateException {
-        TemplateModel model = eval(env);
-        return modelToBoolean(model, env);
+        return evalToBoolean(env, null);
     }
 
+    boolean evalToBoolean(Configuration cfg) throws TemplateException {
+        return evalToBoolean(null, cfg);
+    }
+    
+    private boolean evalToBoolean(Environment env, Configuration cfg) throws TemplateException {
+        TemplateModel model = eval(env);
+        return modelToBoolean(model, env, cfg);
+    }
+    
     boolean modelToBoolean(TemplateModel model, Environment env) throws TemplateException {
+        return modelToBoolean(model, env, null);
+    }
+
+    boolean modelToBoolean(TemplateModel model, Configuration cfg) throws TemplateException {
+        return modelToBoolean(model, null, cfg);
+    }
+    
+    private boolean modelToBoolean(TemplateModel model, Environment env, Configuration cfg) throws TemplateException {
         if (model instanceof TemplateBooleanModel) {
             return ((TemplateBooleanModel) model).getAsBoolean();
-        } else if (env.isClassicCompatible()) {
+        } else if (env != null ? env.isClassicCompatible() : cfg.isClassicCompatible()) {
             return model != null && !isEmpty(model);
         } else {
             throw new NonBooleanException(this, model, env);

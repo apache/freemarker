@@ -2231,7 +2231,7 @@ Include Include() :
 {
     Expression nameExp;
     Token att, start, end;
-    Expression exp, parseExp = null, encodingExp = null;
+    Expression exp, parseExp = null, encodingExp = null, ignoreMissingExp = null;
 }
 {
     start = <_INCLUDE>
@@ -2247,14 +2247,19 @@ Include Include() :
         	    parseExp = exp;
             } else if (attString.equalsIgnoreCase("encoding")) {
             	encodingExp = exp;
+            } else if (attString.equalsIgnoreCase("ignore_missing")) {
+            	ignoreMissingExp = exp;
             } else {
-                throw new ParseException("Expecting parse= or encoding= to be specified.", template, att);
+                throw new ParseException(
+                		"Unsupported named #include parameter: \"" + attString + "\". Supported parameters are: "
+                		+ "\"parse\", \"encoding\", \"ignore_missing\".",
+                		template, att);
             }
         }
     )*
     end = LooseDirectiveEnd()
     {
-        Include result = new Include(template, nameExp, encodingExp, parseExp);
+        Include result = new Include(template, nameExp, encodingExp, parseExp, ignoreMissingExp);
         result.setLocation(template, start, end);
         return result;
     }

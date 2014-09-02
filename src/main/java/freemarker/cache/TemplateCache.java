@@ -548,25 +548,23 @@ public class TemplateCache
      *     will be ignored, otherwise it's interpreted as relative to {@code currentDir}
      * @param currentTemplateDir must end with "/", might contains "://".  
      */
-    public static String getFullTemplatePath(Environment env, String currentTemplateDir, String targetTemplatePath)
-    {
+    public static String getFullTemplatePath(Environment env, String currentTemplateDir, String targetTemplatePath) {
         if (!env.isClassicCompatible()) {
-            if (targetTemplatePath.indexOf("://") >0) {
-                ;
-            }
-            else if (targetTemplatePath.length() > 0 && targetTemplatePath.charAt(0) == '/')  {
-                int protIndex = currentTemplateDir.indexOf("://");
-                if (protIndex >0) {
-                    targetTemplatePath = currentTemplateDir.substring(0, protIndex + 2) + targetTemplatePath;
+            if (targetTemplatePath.indexOf("://") > 0) {
+                return targetTemplatePath;
+            } else if (targetTemplatePath.startsWith("/"))  {
+                int schemeSepIdx = currentTemplateDir.indexOf("://");
+                if (schemeSepIdx > 0) {
+                    return currentTemplateDir.substring(0, schemeSepIdx + 2) + targetTemplatePath;
                 } else {
-                    targetTemplatePath = targetTemplatePath.substring(1);
+                    return targetTemplatePath.substring(1);
                 }
+            } else {
+                return currentTemplateDir + targetTemplatePath;
             }
-            else {
-                targetTemplatePath = currentTemplateDir + targetTemplatePath;
-            }
+        } else {
+            return targetTemplatePath;
         }
-        return targetTemplatePath;
     }
 
     private Object findTemplateSource(String name, Locale locale)

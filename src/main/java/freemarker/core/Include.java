@@ -24,7 +24,6 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
-import freemarker.template.utility.UndeclaredThrowableException;
 
 
 /**
@@ -33,107 +32,148 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 final class Include extends TemplateElement {
 
-    private Expression templateName, encodingExp, parseExp;
-    private String encoding;
-    private boolean parse;
-    private final String templatePath;
+    private final Expression includedTemplatePathExp, encodingExp, parseExp, ignoreMissingExp;
+    private final String encoding;
+    private final Boolean parse;
+    private final Boolean ignoreMissing;
+    private final String baseDirectoryPath;
 
     /**
-     * @param template the template that this <tt>Include</tt> is a part of.
-     * @param includedTemplateName the name of the template to be included.
-     * @param encodingExp the encoding to be used or null, if it's a default.
+     * @param template the template that this <tt>#include</tt> is a part of.
+     * @param includedTemplatePathExp the path of the template to be included.
+     * @param encodingExp the encoding to be used or null, if it's the default.
      * @param parseExp whether the template should be parsed (or is raw text)
      */
     Include(Template template,
-            Expression includedTemplateName,
-            Expression encodingExp,
-            Expression parseExp) throws ParseException
-    {
-        String templatePath1 = template.getName();
-        if (templatePath1 == null) {
-            // This can be the case if the template wasn't created throuh a TemplateLoader. 
-            templatePath1 = "";
-        }
-        int lastSlash = templatePath1.lastIndexOf('/');
-        templatePath = lastSlash == -1 ? "" : templatePath1.substring(0, lastSlash + 1);
-        this.templateName = includedTemplateName;
-        if (encodingExp instanceof StringLiteral) {
-            encoding = encodingExp.toString();
-            encoding = encoding.substring(1, encoding.length() -1);
-        }
-        else {
-            this.encodingExp = encodingExp;
-        }
-        if(parseExp == null) {
-            parse = true;
-        }
-        else if(parseExp.isLiteral()) {
-            try {
-                if (parseExp instanceof StringLiteral) {
-                    parse = StringUtil.getYesNo(parseExp.evalAndCoerceToString(null));
+            Expression includedTemplatePathExp,
+            Expression encodingExp, Expression parseExp, Expression ignoreMissingExp) throws ParseException {
+        this.baseDirectoryPath = getBaseDirectoryPath(template);
+        this.includedTemplatePathExp = includedTemplatePathExp;
+        
+        this.encodingExp = encodingExp;
+        if (encodingExp == null) {
+            encoding = null;
+        } else {
+            if (encodingExp.isLiteral()) {
+                try {
+                    TemplateModel tm = encodingExp.eval(null);
+                    if (!(tm instanceof TemplateScalarModel)) {
+                        throw new ParseException("Expected a string as the value of the \"encoding\" argument",
+                                encodingExp);
+                    }
+                    encoding = ((TemplateScalarModel) tm).getAsString();
+                } catch (TemplateException e) {
+                    // evaluation of literals must not throw a TemplateException
+                    throw new BugException(e);
                 }
-                else {
+            } else {
+                encoding = null;
+            }
+        }
+        
+        this.parseExp = parseExp;
+        if (parseExp == null) {
+            parse = Boolean.TRUE;
+        } else {
+            if (parseExp.isLiteral()) {
+                try {
+                    if (parseExp instanceof StringLiteral) {
+                        // Legacy
+                        parse = Boolean.valueOf(StringUtil.getYesNo(parseExp.evalAndCoerceToString(null)));
+                    } else {
+                        try {
+                            parse = Boolean.valueOf(parseExp.evalToBoolean(template.getConfiguration()));
+                        } catch(NonBooleanException e) {
+                            throw new ParseException("Expected a boolean or string as the value of the parse attribute",
+                                    parseExp, e);
+                        }
+                    }
+                } catch (TemplateException e) {
+                    // evaluation of literals must not throw a TemplateException
+                    throw new BugException(e);
+                }
+            } else {
+                parse = null;
+            }
+        }
+        
+        this.ignoreMissingExp = ignoreMissingExp;
+        if (ignoreMissingExp == null) {
+            ignoreMissing = Boolean.FALSE;
+        } else {
+            if (ignoreMissingExp.isLiteral()) {
+                try {
                     try {
-                        parse = parseExp.evalToBoolean(null);
+                        ignoreMissing = Boolean.valueOf(
+                                ignoreMissingExp.evalToBoolean(template.getConfiguration()));
+                    } catch(NonBooleanException e) {
+                        throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
+                                ignoreMissingExp, e);
                     }
-                    catch(NonBooleanException e) {
-                        throw new ParseException("Expected a boolean or string as the value of the parse attribute", parseExp);
-                    }
+                } catch(TemplateException e) {
+                    // evaluation of literals must not throw a TemplateException
+                    throw new BugException(e);
                 }
+            } else {
+                ignoreMissing = null;
             }
-            catch(TemplateException e) {
-                // evaluation of literals must not throw a TemplateException
-                throw new UndeclaredThrowableException(e);
-            }
-        }
-        else {
-            this.parseExp = parseExp;
         }
     }
 
+    private String getBaseDirectoryPath(Template template) {
+        String s = template.getName();
+        if (s == null) {
+            // Possible if the template wasn't created through Configuration.getTemplate. 
+            return "";
+        }
+        int lastSlash = s.lastIndexOf('/');
+        return lastSlash == -1 ? "" : s.substring(0, lastSlash + 1);
+    }
+
     void accept(Environment env) throws TemplateException, IOException {
-        String templateNameString = templateName.evalAndCoerceToString(env);
-        String enc = encoding;
-        if (encoding == null && encodingExp != null) {
-            enc = encodingExp.evalAndCoerceToString(env);
-        }
+        final String includedTemplatePath = includedTemplatePathExp.evalAndCoerceToString(env);
         
-        boolean parse = this.parse;
-        if (parseExp != null) {
+        final String encoding = this.encoding != null
+                ? this.encoding
+                : (encodingExp != null
+                        ? encodingExp.evalAndCoerceToString(env)
+                        : null);
+        
+        final boolean parse;
+        if (this.parse != null) {
+            parse = this.parse.booleanValue();
+        } else {
             TemplateModel tm = parseExp.eval(env);
-            if(tm == null) {
-                if(env.isClassicCompatible()) {
-                    parse = false;
-                }
-                else {
-                    parseExp.assertNonNull(tm, env);
-                }
-            }
             if (tm instanceof TemplateScalarModel) {
-                parse = getYesNo(EvalUtil.modelToString((TemplateScalarModel)tm, parseExp, env));
-            }
-            else {
-                parse = parseExp.evalToBoolean(env);
+                // Legacy
+                parse = getYesNo(parseExp, EvalUtil.modelToString((TemplateScalarModel) tm, parseExp, env));
+            } else {
+                parse = parseExp.modelToBoolean(tm, env);
             }
         }
         
-        Template includedTemplate;
+        final boolean ignoreMissing = this.ignoreMissing != null
+                ? this.ignoreMissing.booleanValue()
+                : ignoreMissingExp.evalToBoolean(env);
+        
+        final Template includedTemplate;
+        final String fullIncludedTemplatePath = TemplateCache.getFullTemplatePath(
+                env, baseDirectoryPath, includedTemplatePath);
         try {
-            templateNameString = TemplateCache.getFullTemplatePath(env, templatePath, templateNameString);
-            includedTemplate = env.getTemplateForInclusion(templateNameString, enc, parse);
-        }
-        catch (ParseException pe) {
-            throw new _MiscTemplateException(pe, env, new Object[] {
+            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplatePath, encoding, parse, ignoreMissing);
+        } catch (ParseException e) {
+            throw new _MiscTemplateException(e, env, new Object[] {
                     "Error parsing included template ",
-                    new _DelayedJQuote(templateNameString), ":\n",
-                    new _DelayedGetMessage(pe) });
+                    new _DelayedJQuote(fullIncludedTemplatePath), ":\n",
+                    new _DelayedGetMessage(e) });
+        } catch (IOException e) {
+            throw new _MiscTemplateException(e, env, new Object[] {
+                    "Error reading included file ", new _DelayedJQuote(fullIncludedTemplatePath), ":\n",
+                    new _DelayedGetMessage(e) });
         }
-        catch (IOException ioe) {
-            throw new _MiscTemplateException(ioe, env, new Object[] {
-                    "Error reading included file ", new _DelayedJQuote(templateNameString), ":\n",
-                    new _DelayedGetMessage(ioe) });
+        if (includedTemplate != null) {
+            env.include(includedTemplate);
         }
-        env.include(includedTemplate);
     }
     
     protected String dump(boolean canonical) {
@@ -141,16 +181,15 @@ final class Include extends TemplateElement {
         if (canonical) buf.append('<');
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
-        buf.append(templateName.getCanonicalForm());
-        if (encoding != null) {
-            buf.append(" encoding=\"");
-            buf.append(encodingExp.getCanonicalForm());
-            buf.append('"');
+        buf.append(includedTemplatePathExp.getCanonicalForm());
+        if (encodingExp != null) {
+            buf.append(" encoding=").append(encodingExp.getCanonicalForm());
         }
-        if(parseExp != null) {
-            buf.append(" parse=" + parseExp.getCanonicalForm());
-        } else if (!parse) {
-            buf.append(" parse=false");
+        if (parseExp != null) {
+            buf.append(" parse=").append(parseExp.getCanonicalForm());
+        }
+        if (ignoreMissingExp != null) {
+            buf.append(" ignore_missing=").append(ignoreMissingExp.getCanonicalForm());
         }
         if (canonical) buf.append("/>");
         return buf.toString();
@@ -160,13 +199,13 @@ final class Include extends TemplateElement {
         return "#include";
     }
     
-    private boolean getYesNo(String s) throws TemplateException {
+    private boolean getYesNo(Expression exp, String s) throws TemplateException {
         try {
            return StringUtil.getYesNo(s);
         }
         catch (IllegalArgumentException iae) {
-            throw new _MiscTemplateException(parseExp, new Object[] {
-                     "Value of include parse parameter must be boolean (or one of these strings: "
+            throw new _MiscTemplateException(exp, new Object[] {
+                     "Value must be boolean (or one of these strings: "
                      + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
                      new _DelayedJQuote(s), "." });
         }
@@ -178,9 +217,10 @@ final class Include extends TemplateElement {
 
     Object getParameterValue(int idx) {
         switch (idx) {
-        case 0: return templateName;
-        case 1: return new Boolean(parse);
-        case 2: return encoding;
+        case 0: return includedTemplatePathExp;
+        case 1: return parseExp;
+        case 2: return encodingExp;
+        case 3: return ignoreMissingExp;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -190,6 +230,7 @@ final class Include extends TemplateElement {
         case 0: return ParameterRole.TEMPLATE_NAME;
         case 1: return ParameterRole.PARSE_PARAMETER;
         case 2: return ParameterRole.ENCODING_PARAMETER;
+        case 3: return ParameterRole.IGNORE_MISSING_PARAMETER;
         default: throw new IndexOutOfBoundsException();
         }
     }

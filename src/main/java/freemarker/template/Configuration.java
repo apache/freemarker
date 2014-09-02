@@ -856,8 +856,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.
      * 
-     * <p>This is a shorthand for {@link #getTemplate(String, Locale, String, boolean)
-     * getTemplate(name, getLocale(), getEncoding(getLocale()), true)}; see more details there.
+     * <p>This is a shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
+     * getTemplate(name, getLocale(), getEncoding(getLocale()), true, false)}; see more details there.
      * 
      * <p>See {@link Configuration} for an example of basic usage.
      */
@@ -867,27 +867,35 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean)
-     * getTemplate(name, locale, getEncoding(locale), true)}.
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
+     * getTemplate(name, locale, getEncoding(locale), true, false)}.
      */
     public Template getTemplate(String name, Locale locale) throws IOException {
         return getTemplate(name, locale, getEncoding(locale), true);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean)
-     * getTemplate(name, getLocale(), encoding, true)}.
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
+     * getTemplate(name, getLocale(), encoding, true, false)}.
      */
     public Template getTemplate(String name, String encoding) throws IOException {
         return getTemplate(name, getLocale(), encoding, true);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean)
-     * getTemplate(name, locale, encoding, true)}.
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
+     * getTemplate(name, locale, encoding, true, false)}.
      */
     public Template getTemplate(String name, Locale locale, String encoding) throws IOException {
         return getTemplate(name, locale, encoding, true);
+    }
+    
+    /**
+     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
+     * getTemplate(name, locale, encoding, parseAsFTL, false)}.
+     */
+    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
+        return getTemplate(name, locale, encoding, parseAsFTL, false);
     }
 
     /**
@@ -908,7 +916,7 @@ public class Configuration extends Configurable implements Cloneable {
      *     it's always interpreted relative to the "template root directory".
      *     Then, the {@code ..} and {@code .} path meta-elements will be resolved.
      *     For example, if the name is {@code a/../b/./c.ftl}, then it will be
-     *     simplified to {@code b/c.ftl}. The rules regarding this are same as with conventional
+     *     simplified to {@code b/c.ftl}. The rules regarding this are the same as with conventional
      *     UN*X paths. The path must not reach outside the template root directory, that is,
      *     it can't be something like {@code "../templates/my.ftl"} (not even if this path
      *     happens to be equivalent with {@code "/my.ftl"}).
@@ -934,16 +942,26 @@ public class Configuration extends Configurable implements Cloneable {
      *     as a regular FreeMarker template. If {@code false}, the loaded template is
      *     treated as a static text, so <code>${...}</code>, {@code <#...>} etc. will not have special meaning
      *     in it.
+     *     
+     * @param ignoreMissing If {@code true}, the method won't throw {@link FileNotFoundException} if the template
+     *     doesn't exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
      * 
-     * @return the requested template; not {@code null}.
+     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@core true}.
      * 
      * @throws FileNotFoundException if the template could not be found.
      * @throws IOException if there was a problem loading the template.
      * @throws ParseException (extends <code>IOException</code>) if the template is syntactically bad.
+     * 
+     * @since 2.3.21
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
+    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL, boolean ignoreMissing)
+            throws IOException {
         Template result = cache.getTemplate(name, locale, encoding, parseAsFTL);
         if (result == null) {
+            if (ignoreMissing) {
+                return null;
+            }
+            
             TemplateLoader tl = getTemplateLoader();  
             String msg; 
             if (tl == null) {
@@ -969,7 +987,7 @@ public class Configuration extends Configurable implements Cloneable {
         }
         return result;
     }
-
+    
     /**
      * Sets the charset used for decoding byte sequences to character sequences when
      * reading template files in a locale for which no explicit encoding
