@@ -671,11 +671,7 @@
   <!--
     Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
     to a Maven repository (snapshot or central).
-    
     Use this after "dist" (without interleaving "clean").
-  
-    Note: maven-ant-tasks-x.x.x.jar must be added to ${ANT_HOME}/lib for
-      this to work. Get it here: http://maven.apache.org/download.html
   -->
   <target name="maven-dist"
       description="Releases the already built distro to a Maven repository">
