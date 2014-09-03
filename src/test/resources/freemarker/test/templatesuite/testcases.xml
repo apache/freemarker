@@ -74,6 +74,9 @@
       <config auto_import="import_lib.ftl as my"/>
    </testcase>
    <testcase name="include" />
+   <testcase name="include2">
+      <config input_encoding="utf-8" />
+   </testcase>
    <testcase name="interpret"/>
    <testcase name="iterators"/>
    <testcase name="lastcharacter"/>

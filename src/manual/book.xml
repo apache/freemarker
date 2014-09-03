@@ -16761,6 +16761,11 @@ or
                   Expression evaluates to boolean (also accepts a few string
                   values for backward compatibility)</para>
                 </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>ignore_missing</replaceable></literal>:
+                  Expression evaluates to boolean</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
@@ -16775,12 +16780,12 @@ or
           is inserted at the point where the <literal>include</literal> tag
           occurs. The included file shares the variables with the including
           template, similarly like if it was copy-pasted into it. The
-          <literal>include</literal> directive is not replaced by the content
-          of the included file, it just processes the included file each time
-          when FreeMarker reaches the <literal>include</literal> directive in
-          the course of template processing. So for example if the
-          <literal>include</literal> is inside a <literal>list</literal>loop,
-          you can specify different file names in each cycle.</para>
+          <literal>include</literal> directive is not really replaced by the
+          content of the included file, instead it processes the included file
+          each time when FreeMarker reaches the <literal>include</literal>
+          directive in the course of template processing. So for example if
+          the <literal>include</literal> is inside a <literal>list</literal>
+          loop, you can specify different file names in each cycle.</para>
 
           <note>
             <para>This directive is not be confused with the JSP (Servlet)
@@ -16794,10 +16799,10 @@ or
           parameter can be a relative path like <literal>"foo.ftl"</literal>
           and <literal>"../foo.ftl"</literal>, or an absolute like
           <literal>"/foo.ftl"</literal>. Relative paths are relative to the
-          directory of the template that uses the <literal>import</literal>
-          directive. Absolute paths are relative to a base (often referred as
-          the ''root directory of the templates'') that the programmer defines
-          when he configures FreeMarker.</para>
+          directory of the template that contains the
+          <literal>import</literal> directive. Absolute paths are relative to
+          a base (often referred as the 'root directory of the templates')
+          that the programmer defines when he configures FreeMarker.</para>
 
           <note>
             <para>This is different than the way it worked prior FreeMarker
@@ -16807,10 +16812,9 @@ or
           </note>
 
           <para>Always use <literal>/</literal> (slash) to separate path
-          components, never <literal>\</literal> (backslash). If you are
+          components, never <literal>\</literal> (backslash). Even if you are
           loading templates from your local file system and it uses
-          backslashes (like under. Windows), FreeMarker will convert them
-          automatically.</para>
+          backslashes (like under. Windows), use <literal>/</literal>.</para>
 
           <para>Example:</para>
 
@@ -16840,21 +16844,33 @@ All rights reserved.</emphasis></programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>parse: If it is true, then the included file will be
-              parsed as FTL, otherwise the whole file will be considered as
-              simple text (i.e, no FreeMarker constructs will be searched in
-              it). If you omit this option, then it defaults to true.</para>
+              <para><literal>parse</literal>: If it is
+              <literal>true</literal>, then the included file will be parsed
+              as FTL, otherwise the whole file will be considered as simple
+              text (i.e, no FreeMarker constructs will be searched in it). If
+              you omit this option, then it defaults to
+              <literal>true</literal>.</para>
             </listitem>
 
             <listitem>
-              <para>encoding: The included file inherits the encoding (in
-              practice: the charset) of the including template, unless you
-              specify an encoding with this option. <phrase
-              role="forProgrammers">Encoding names are the same as the ones
-              supported be java.io.InputStreamReader (as of Java API 1.3:
+              <para><literal>encoding</literal>: The included file inherits
+              the encoding (the charset) of the top-level template, unless you
+              specify an encoding with this option. Examples of valid names:
+              UTF-8, ISO-8859-1, ISO-8859-2, Shift_JIS, Big5, EUC-KR, GB2312.
+              <phrase role="forProgrammers">Encoding names are the same as the
+              ones supported be java.io.InputStreamReader (as of Java API 1.3:
               MIME-preferred charset names from the IANA Charset
-              Registry).</phrase> Examples of valid names: ISO-8859-2, UTF-8,
-              Shift_JIS, Big5, EUC-KR, GB2312.</para>
+              Registry)</phrase></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>ignore_missing</literal>: When
+              <literal>true</literal>, suppresses the error when the template
+              to include is missing, instead <literal>&lt;#include
+              ...&gt;</literal> will print nothing. When
+              <literal>false</literal>, the template processing will stop with
+              error if the template is missing. If you omit this option, then
+              it defaults to <literal>false</literal>.</para>
             </listitem>
           </itemizedlist>
 
@@ -21152,13 +21168,50 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
-      <section xml:id="versions_2_3_21">
+      <section xml:id="versions_2_3_21_rc2">
+        <title>2.3.21 RC2</title>
+
+        <para>Date of release for release: 2014-09-FIXME</para>
+
+        <para>Date of release for the final release: Planned for
+        2014-10-12.</para>
+
+        <para>See also <link linkend="versions_2_3_21_rc1">the RC1
+        changes</link> below!</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>New <literal>include</literal> directive option,
+              <literal>ignore_missing=<replaceable>boolean</replaceable></literal>.
+              When this is set to <literal>true</literal>, and the template to
+              include is missing, the error will be silently ignored, and
+              nothing will be included.</para>
+            </listitem>
+
+            <listitem>
+              <para/>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para/>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
+      <section xml:id="versions_2_3_21_rc1">
         <title>2.3.21 RC1</title>
 
-        <para>Date of release for Release Candidate 1: 2014-08-31</para>
-
-        <para>Date of release for the final release: Planned for early/mid
-        2014-10.</para>
+        <para>Date of release: 2014-08-31</para>
 
         <para>Note that since 2.3.21 is designed to be backward compatible
         with the previous 2.3.x releases, <emphasis>some of the improvements
