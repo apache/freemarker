@@ -1,3 +1,7 @@
+<#include "include2" + "-included.ftl">
+<#assign s = "de">
+<#include "inclu" + s + "2-included.ftl">
+
 <#assign bTrue=true>
 <#assign sY='y'>
 <#include "include2-included.ftl">
