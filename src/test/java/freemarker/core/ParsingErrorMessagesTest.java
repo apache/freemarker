@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 
 public class ParsingErrorMessagesTest {
@@ -50,8 +49,10 @@ public class ParsingErrorMessagesTest {
 
     @Test
     public void testBug402() {
-        assertErrorContains("<#list 1..i as k>${k}<#list>", "parameters", "start-tag", "#list");
-        assertErrorContains("<#assign>", "parameters", "start-tag", "#assign");
+        assertErrorContains("<#list 1..i as k>${k}<#list>", "existing directive", "malformed", "#list");
+        assertErrorContains("<#assign>", "existing directive", "malformed", "#assign");
+        assertErrorContains("</#if x>", "existing directive", "malformed", "#if");
+        assertErrorContains("<#compress x>", "existing directive", "malformed", "#compress");
     }
 
     @Test
