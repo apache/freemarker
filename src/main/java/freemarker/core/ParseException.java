@@ -336,10 +336,9 @@ public class ParseException extends java.io.IOException implements FMParserConst
     private boolean isInJBossToolsMode() {
         if (jbossToolsMode == null) {
             try {
-                jbossToolsMode =
+                jbossToolsMode = Boolean.valueOf(
                         ParseException.class.getClassLoader().toString().indexOf(
-                                "[org.jboss.ide.eclipse.freemarker:") != -1
-                                ? Boolean.TRUE : Boolean.FALSE;
+                                "[org.jboss.ide.eclipse.freemarker:") != -1);
             } catch (Throwable e) {
                 jbossToolsMode = Boolean.FALSE;
             }

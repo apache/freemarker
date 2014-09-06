@@ -284,8 +284,7 @@ class SequenceBuiltins {
                     case KEY_TYPE_BOOLEAN:
                         try {
                             res.add(new KVP(
-                                    ((TemplateBooleanModel) key).getAsBoolean() ?
-                                            Boolean.TRUE : Boolean.FALSE,
+                                    Boolean.valueOf(((TemplateBooleanModel) key).getAsBoolean()),
                                     item));
                         } catch (ClassCastException e) {
                             if (!(key instanceof TemplateBooleanModel)) {

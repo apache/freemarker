@@ -865,7 +865,7 @@ public class Configurable
      * @since 2.3.17
      */
     public void setAutoFlush(boolean autoFlush) {
-        this.autoFlush = autoFlush ? Boolean.TRUE : Boolean.FALSE;
+        this.autoFlush = Boolean.valueOf(autoFlush);
         properties.setProperty(AUTO_FLUSH_KEY, String.valueOf(autoFlush));
     }
     
@@ -887,7 +887,7 @@ public class Configurable
      * @since 2.3.21
      */
     public void setShowErrorTips(boolean showTips) {
-        this.showErrorTips = showTips ? Boolean.TRUE : Boolean.FALSE;
+        this.showErrorTips = Boolean.valueOf(showTips);
         properties.setProperty(SHOW_ERROR_TIPS_KEY, String.valueOf(showTips));
     }
     

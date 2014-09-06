@@ -45,7 +45,7 @@ public class Page {
     }
 
     public void put(String name, boolean value) {
-        root.put(name, new Boolean(value));
+        root.put(name, Boolean.valueOf(value));
     }
     
     public Map getRoot() {

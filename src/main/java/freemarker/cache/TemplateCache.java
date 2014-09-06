@@ -769,7 +769,7 @@ public class TemplateCache
                 name.hashCode() ^
                 locale.hashCode() ^
                 encoding.hashCode() ^
-                (parse ? Boolean.FALSE : Boolean.TRUE).hashCode();
+                Boolean.valueOf(!parse).hashCode();
         }
     }
 

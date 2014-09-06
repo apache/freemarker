@@ -1023,8 +1023,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         
         if(boolean.class == hint || Boolean.class == hint) {
             if(model instanceof TemplateBooleanModel) {
-                return ((TemplateBooleanModel)model).getAsBoolean() 
-                ? Boolean.TRUE : Boolean.FALSE;
+                return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
             }
             // Boolean is final, no other conversion will work
             return CAN_NOT_UNWRAP;
@@ -1130,7 +1129,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
                     && model instanceof TemplateBooleanModel
                     && (itf != 0 || hint.isAssignableFrom(Boolean.class))) {
-                return ((TemplateBooleanModel) model).getAsBoolean() ? Boolean.TRUE : Boolean.FALSE;
+                return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_MAP) != 0)
                     && model instanceof TemplateHashModel

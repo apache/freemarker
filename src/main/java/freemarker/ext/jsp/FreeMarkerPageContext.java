@@ -199,7 +199,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                         return ((TemplateNumberModel) m).getAsNumber();
                     }
                     if (m instanceof TemplateBooleanModel) {
-                        return ((TemplateBooleanModel) m).getAsBoolean() ? Boolean.TRUE : Boolean.FALSE;
+                        return Boolean.valueOf(((TemplateBooleanModel) m).getAsBoolean());
                     }
                     return m;
                 }

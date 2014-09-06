@@ -122,7 +122,7 @@ public class DeepUnwrap
             return ((TemplateDateModel)model).getAsDate();
         }
         if(model instanceof TemplateBooleanModel) {
-            return ((TemplateBooleanModel)model).getAsBoolean() ? Boolean.TRUE : Boolean.FALSE;
+            return Boolean.valueOf(((TemplateBooleanModel)model).getAsBoolean());
         }
         if(model instanceof TemplateSequenceModel) {
             TemplateSequenceModel seq = (TemplateSequenceModel)model;
