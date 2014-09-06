@@ -606,7 +606,7 @@ TOKEN:
                 // unknown directive:
                 if (_CoreAPI.BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                     throw new TokenMgrError(
-                            "The start-tag of #" + dn + " must contain parameters.",
+                            "#" + dn + " is an existing directive, but the tag is malformed.",
                             TokenMgrError.LEXICAL_ERROR,
                             matchedToken.beginLine, matchedToken.beginColumn + 1,
                             matchedToken.endLine, matchedToken.endColumn);
