@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import freemarker.core.CollectionAndSequence;
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
@@ -192,8 +195,11 @@ implements
         }
         catch(Exception e)
         {
-            throw new TemplateModelException("get(" + key + ") failed on " +
-                "instance of " + object.getClass().getName() + ". See cause exception.", e);
+            throw new _TemplateModelException(e, new Object [] {
+                    "An error has occured when reading existing sub-variable ", new _DelayedJQuote(key),
+                    "; see cause exception! The type of the containing value was: ",
+                    new _DelayedFTLTypeDescription(this)
+            });
         }
     }
 
