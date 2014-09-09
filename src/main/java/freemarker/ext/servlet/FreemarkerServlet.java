@@ -431,17 +431,12 @@ public class FreemarkerServlet extends HttpServlet
             } else {
                 ServletException e = new ServletException(
                         "Error executing FreeMarker template", te);
-                // Attempt to set init cause, but don't freak out if the method
-                // is not available (i.e. pre-1.4 JRE). This is required as the
-                // constructor-passed throwable won't show up automatically in
-                // stack traces.
                 try {
-                    e.getClass().getMethod("initCause",
-                            new Class[] { Throwable.class }).invoke(e,
-                            new Object[] { te });
+                    // Prior to Servlet 2.5, the cause exception wasn't set by the above constructor.
+                    // If we are on 2.5+ then this will throw an exception as the cause was already set.
+                    e.initCause(te);
                 } catch (Exception ex) {
-                    // Can't set init cause, we're probably running on a pre-1.4
-                    // JDK, oh well...
+                    // Ignored; see above
                 }
                 throw e;
             }

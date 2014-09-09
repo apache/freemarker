@@ -224,7 +224,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("number_to_time", new number_to_dateBI(TemplateDateModel.TIME));
         builtins.put("number_to_datetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         builtins.put("parent", new parentBI());
-        builtins.put("replace", new StringBuiltins.replaceBI());
         builtins.put("reverse", new reverseBI());
         builtins.put("right_pad", new StringBuiltins.padBI(false));
         builtins.put("root", new rootBI());
@@ -237,7 +236,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("size", new MiscellaneousBuiltins.sizeBI());
         builtins.put("sort_by", new sort_byBI());
         builtins.put("sort", new sortBI());
-        builtins.put("split", new StringBuiltins.splitBI());
         builtins.put("starts_with", new StringBuiltins.starts_withBI());
         builtins.put("string", new MiscellaneousBuiltins.stringBI());
         builtins.put("substring", new substringBI());
