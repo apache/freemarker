@@ -946,7 +946,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @param ignoreMissing If {@code true}, the method won't throw {@link FileNotFoundException} if the template
      *     doesn't exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
      * 
-     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@core true}.
+     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
      * 
      * @throws FileNotFoundException if the template could not be found.
      * @throws IOException if there was a problem loading the template.
