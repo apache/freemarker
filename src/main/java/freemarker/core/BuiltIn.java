@@ -247,6 +247,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("uncap_first", new uncap_firstBI());
         builtins.put("upper_case", new upper_caseBI());
         builtins.put("url", new StringBuiltins.urlBI());
+        builtins.put("url_path", new StringBuiltins.urlPathBI());
         builtins.put("values", new HashBuiltins.valuesBI());
         builtins.put("web_safe", builtins.get("html"));  // deprecated; use ?html instead
         builtins.put("word_list", new word_listBI());

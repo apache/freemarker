@@ -12880,10 +12880,10 @@ ${x?url}</programlisting>
           <programlisting role="template">&lt;a href="foo.cgi?x=${x?url}&amp;y=${y?url}"&gt;Click here...&lt;/a&gt;</programlisting>
 
           <note>
-            <para>Above no HTML encoding (<literal>?htm</literal>) was needed,
-            because URL escaping escapes all reserved HTML characters anyway.
-            But watch: always quote the attribute value, and always with
-            normal quotation mark (<literal>"</literal>), never with
+            <para>Above no HTML encoding (<literal>?html</literal>) was
+            needed, because URL escaping escapes all reserved HTML characters
+            anyway. But watch: always quote the attribute value, and always
+            with normal quotation mark (<literal>"</literal>), never with
             apostrophe quotation mark (<literal>'</literal>), because
             apostrophe quotation mark is not escaped by the URL
             escaping.</para>
@@ -12946,6 +12946,53 @@ ${x?url}</programlisting>
           <literal>setting</literal> directive, so that's surely the task of
           the enclosing software. You may find more information regarding this
           <link linkend="pgui_misc_charset">here...</link></phrase></para>
+        </section>
+
+        <section xml:id="ref_builtin_url_path">
+          <title>url_path</title>
+
+          <indexterm>
+            <primary>url_path built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>escaping</primary>
+
+            <secondary>URL path</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>encoding</primary>
+
+            <secondary>URL path</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>URL escaping</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>URL encoding</primary>
+          </indexterm>
+
+          <para>This is the same as <link linkend="ref_builtin_url">the
+          <literal>url</literal> built-in</link>, except that it doesn't
+          escape slash (<literal>/</literal>) characters. This meant to be
+          used for converting paths (like paths coming from the OS or some
+          content repository) that use slash (not backslash!) to a path the
+          can be inserted into an URL. The most common reason why this
+          conversion is needed is that folder names or file names might
+          contain non-US-ASCII letters (<quote>national</quote>
+          characters).</para>
+
+          <note>
+            <para>Just like with <link linkend="ref_builtin_url">the
+            <literal>url</literal> built-in</link>, the desired URL escaping
+            charset (or as a fall back, the output encoding) must be set in
+            the FreeMarker configuration settings, or else the built-in will
+            give error. Or, you you have to specify the charset like
+            <literal>somePath?url_path('utf-8')</literal>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_word_list">
@@ -21206,6 +21253,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>The <literal>setting</literal> directive now can set the
               <literal>output_encoding</literal> setting.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in, <literal>?url_path</literal>: This is the
+              same as <link linkend="ref_builtin_url">the
+              <literal>url</literal> built-in</link>, except that it doesn't
+              escape slash (<literal>/</literal>) characters. This meant to be
+              used for converting paths (like paths coming from the OS or some
+              content repository) that use slash (not backslash!) to a path
+              the can be inserted into an URL.</para>
             </listitem>
           </itemizedlist>
         </section>

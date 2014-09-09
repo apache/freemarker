@@ -25,7 +25,6 @@ import java.util.StringTokenizer;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
 
@@ -284,18 +283,29 @@ public class StringUtil {
     }
 
     /**
-     * URL encoding (like%20this).
+     * URL encoding (like%20this) for query parameter values, path <em>segments</em>, fragments; this encodes all
+     * characters that are reserved anywhere.
      */
-    public static String URLEnc(String s, String charset)
+    public static String URLEnc(String s, String charset) throws UnsupportedEncodingException {
+        return URLEnc(s, charset, false);
+    }
+    
+    /**
+     * Like {@link #URLEnc(String, String)} but doesn't escape the slash character ({@code /}).
+     * This can be used to encode a path only if you know that no folder or file name will contain {@code /}
+     * character.
+     */
+    public static String URLPathEnc(String s, String charset) throws UnsupportedEncodingException {
+        return URLEnc(s, charset, true);
+    }
+    
+    private static String URLEnc(String s, String charset, boolean keepSlash)
             throws UnsupportedEncodingException {
         int ln = s.length();
         int i;
         for (i = 0; i < ln; i++) {
             char c = s.charAt(i);
-            if (!(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
-                    || c >= '0' && c <= '9'
-                    || c == '_' || c == '-' || c == '.' || c == '!' || c == '~'
-                    || c >= '\'' && c <= '*')) {
+            if (!safeInURL(c, keepSlash)) {
                 break;
             }
         }
@@ -307,15 +317,12 @@ public class StringUtil {
         StringBuffer b = new StringBuffer(ln + ln / 3 + 2);
         b.append(s.substring(0, i));
 
-        int encstart = i;
+        int encStart = i;
         for (i++; i < ln; i++) {
             char c = s.charAt(i);
-            if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
-                    || c >= '0' && c <= '9'
-                    || c == '_' || c == '-' || c == '.' || c == '!' || c == '~'
-                    || c >= '\'' && c <= '*') {
-                if (encstart != -1) {
-                    byte[] o = s.substring(encstart, i).getBytes(charset);
+            if (safeInURL(c, keepSlash)) {
+                if (encStart != -1) {
+                    byte[] o = s.substring(encStart, i).getBytes(charset);
                     for (int j = 0; j < o.length; j++) {
                         b.append('%');
                         byte bc = o[j];
@@ -324,17 +331,17 @@ public class StringUtil {
                         b.append((char) (c2 < 10 ? c2 + '0' : c2 - 10 + 'A'));
                         b.append((char) (c1 < 10 ? c1 + '0' : c1 - 10 + 'A'));
                     }
-                    encstart = -1;
+                    encStart = -1;
                 }
                 b.append(c);
             } else {
-                if (encstart == -1) {
-                    encstart = i;
+                if (encStart == -1) {
+                    encStart = i;
                 }
             }
         }
-        if (encstart != -1) {
-            byte[] o = s.substring(encstart, i).getBytes(charset);
+        if (encStart != -1) {
+            byte[] o = s.substring(encStart, i).getBytes(charset);
             for (int j = 0; j < o.length; j++) {
                 b.append('%');
                 byte bc = o[j];
@@ -346,6 +353,14 @@ public class StringUtil {
         }
         
         return b.toString();
+    }
+
+    private static boolean safeInURL(char c, boolean keepSlash) {
+        return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
+                || c >= '0' && c <= '9'
+                || c == '_' || c == '-' || c == '.' || c == '!' || c == '~'
+                || c >= '\'' && c <= '*'
+                || keepSlash && c == '/';
     }
     
     private static char[] createEscapes()

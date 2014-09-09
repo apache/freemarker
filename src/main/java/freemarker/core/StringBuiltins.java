@@ -323,64 +323,97 @@ class StringBuiltins {
         }
     }
 
-    static class urlBI extends StringBuiltIn {
+    static abstract class AbstractUrlBIResult implements
+    TemplateScalarModel, TemplateMethodModel {
         
-        TemplateModel calculateResult(String s, Environment env) {
-            return new urlBIResult(s, env);
+        protected final BuiltIn parent;
+        protected final String targetAsString;
+        private final Environment env;
+        private String cachedResult;
+        
+        protected AbstractUrlBIResult(BuiltIn parent, String target, Environment env) {
+            this.parent = parent;
+            this.targetAsString = target;
+            this.env = env;
         }
         
-        static class urlBIResult implements
-                TemplateScalarModel, TemplateMethodModel {
-            
-            private final String target;
-            private final Environment env;
-            private String cachedResult;
-    
-            private urlBIResult(String target, Environment env) {
-                this.target = target;
-                this.env = env;
-            }
-            
-            public String getAsString() throws TemplateModelException {
-                if (cachedResult == null) {
-                    String cs = env.getEffectiveURLEscapingCharset();
-                    if (cs == null) {
-                        throw new _TemplateModelException(
-                                "To do URL encoding, the framework that encloses "
-                                + "FreeMarker must specify the output encoding "
-                                + "or the URL encoding charset, so ask the "
-                                + "programmers to fix it. Or, as a last chance, "
-                                + "you can set the url_encoding_charset setting in "
-                                + "the template, e.g. "
-                                + "<#setting url_escaping_charset='ISO-8859-1'>, or "
-                                + "give the charset explicitly to the buit-in, e.g. "
-                                + "foo?url('ISO-8859-1').");
-                    }
-                    try {
-                        cachedResult = StringUtil.URLEnc(target, cs);
-                    } catch (UnsupportedEncodingException e) {
-                        throw new _TemplateModelException(e, "Failed to execute URL encoding.");
-                    }
-                }
-                return cachedResult;
-            }
-    
-            public Object exec(List args) throws TemplateModelException {
-                if (args.size() != 1) {
+        public String getAsString() throws TemplateModelException {
+            if (cachedResult == null) {
+                String cs = env.getEffectiveURLEscapingCharset();
+                if (cs == null) {
                     throw new _TemplateModelException(
-                            "The \"url\" built-in needs exactly 1 parameter, the charset.");
+                            "To do URL encoding, the framework that encloses "
+                            + "FreeMarker must specify the output encoding "
+                            + "or the URL encoding charset, so ask the "
+                            + "programmers to fix it. Or, as a last chance, "
+                            + "you can set the url_encoding_charset setting in "
+                            + "the template, e.g. "
+                            + "<#setting url_escaping_charset='ISO-8859-1'>, or "
+                            + "give the charset explicitly to the buit-in, e.g. "
+                            + "foo?url('ISO-8859-1').");
                 }
                 try {
-                    return new SimpleScalar(
-                            StringUtil.URLEnc(target, (String) args.get(0)));
+                    cachedResult = encodeWithCharset(cs);
                 } catch (UnsupportedEncodingException e) {
                     throw new _TemplateModelException(e, "Failed to execute URL encoding.");
                 }
             }
+            return cachedResult;
+        }
+
+        protected abstract String encodeWithCharset(String cs) throws UnsupportedEncodingException;
+        
+        public Object exec(List args) throws TemplateModelException {
+            parent.checkMethodArgCount(args.size(), 1);
+            try {
+                return new SimpleScalar(encodeWithCharset((String) args.get(0)));
+            } catch (UnsupportedEncodingException e) {
+                throw new _TemplateModelException(e, "Failed to execute URL encoding.");
+            }
+        }
+        
+    }
+    
+    static class urlBI extends StringBuiltIn {
+        
+        TemplateModel calculateResult(String s, Environment env) {
+            return new UrlBIResult(this, s, env);
+        }
+        
+        static class UrlBIResult extends AbstractUrlBIResult {
+
+            protected UrlBIResult(BuiltIn parent, String target, Environment env) {
+                super(parent, target, env);
+            }
+
+            protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
+                return StringUtil.URLEnc(targetAsString, cs);
+            }
             
         }
+        
     }
 
+    static class urlPathBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) {
+            return new UrlPathBIResult(this, s, env);
+        }
+        
+        static class UrlPathBIResult extends AbstractUrlBIResult {
+
+            protected UrlPathBIResult(BuiltIn parent, String target, Environment env) {
+                super(parent, target, env);
+            }
+
+            protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
+                return StringUtil.URLPathEnc(targetAsString, cs);
+            }
+            
+        }
+        
+    }
+    
     static class starts_withBI extends StringBuiltIn {
     
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
