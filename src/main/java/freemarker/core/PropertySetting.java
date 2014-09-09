@@ -52,7 +52,9 @@ final class PropertySetting extends TemplateElement {
             !key.equals(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY) &&
             !key.equals(Configurable.BOOLEAN_FORMAT_KEY) &&
             !key.equals(Configurable.CLASSIC_COMPATIBLE_KEY) &&
-            !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY)) 
+            !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY) &&
+            !key.equals(Configurable.OUTPUT_ENCODING_KEY)
+            ) 
         {
             throw new ParseException(
                     "Invalid setting name, or it's not allowed to change "

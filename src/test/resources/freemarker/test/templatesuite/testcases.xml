@@ -117,6 +117,7 @@
    </testcase>
    <testcase name="recover" />
    <testcase name="root" />
+   <testcase name="setting" nooutput="true" />
    <testcase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/> 
    </testcase>

@@ -18041,6 +18041,18 @@ or
 
             <listitem>
               <para><indexterm>
+                  <primary>output_encoding</primary>
+                </indexterm><literal>output_encoding</literal>: Tells
+              FreeMarker what the charset of the output is. As FreeMarker
+              outputs a stream of UNICODE characters (<phrase
+              role="forProgrammers">it writes into a
+              <literal>java.io.Writer</literal></phrase>), it's not affected
+              by the output encoding, but some macros/functions and built-ins
+              may want to used this information.</para>
+            </listitem>
+
+            <listitem>
+              <para><indexterm>
                   <primary>classic_compatible</primary>
                 </indexterm><literal>classic_compatible</literal>: This is for
               experts. Its value should be a boolean. See the documentation of
@@ -21192,7 +21204,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para/>
+              <para>The <literal>setting</literal> directive now can set the
+              <literal>output_encoding</literal> setting.</para>
             </listitem>
           </itemizedlist>
         </section>
