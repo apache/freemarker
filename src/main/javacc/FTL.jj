@@ -44,7 +44,7 @@ public class FMParser {
     private int loopNesting, switchNesting;
     private boolean inMacro, inFunction, stripWhitespace, stripText;
     private LinkedList escapes = new LinkedList();
-    private int contentNesting; // for stripText
+    private int mixedContentNesting; // for stripText
     private int incompatibleImprovements;
 
     /**
@@ -651,9 +651,9 @@ TOKEN:
     |
     <FALSE_ALERT : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
     |
-    <OUTPUT_ESCAPE : "${"> : FM_EXPRESSION
+    <DOLLAR_INTERPOLATION_OPENING : "${"> : FM_EXPRESSION
     |
-    <NUMERICAL_ESCAPE : "#{"> : FM_EXPRESSION
+    <HASH_INTERPOLATION_OPENING : "#{"> : FM_EXPRESSION
 }
 
 <FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
@@ -793,12 +793,12 @@ TOKEN:
         }
     }
     |
-    <OPEN_BRACE : "{">
+    <OPENING_CURLY_BRACKET : "{">
     {
         ++hashLiteralNesting;
     }
     |
-    <CLOSE_BRACE : "}">
+    <CLOSING_CURLY_BRACKET : "}">
     {
         if (hashLiteralNesting == 0) SwitchTo(DEFAULT);
         else --hashLiteralNesting;
@@ -1644,7 +1644,7 @@ HashLiteral HashLiteral() :
     ArrayList values = new ArrayList();
 }
 {
-    begin = <OPEN_BRACE>
+    begin = <OPENING_CURLY_BRACKET>
     [
         key = Expression()
         (<COMMA>|<COLON>)
@@ -1666,7 +1666,7 @@ HashLiteral HashLiteral() :
             }
         )*
     ]
-    end = <CLOSE_BRACE>
+    end = <CLOSING_CURLY_BRACKET>
     {
         HashLiteral result = new HashLiteral(keys, values);
         result.setLocation(template, begin, end);
@@ -1684,13 +1684,13 @@ DollarVariable StringOutput() :
     Token begin, end;
 }
 {
-    begin = <OUTPUT_ESCAPE>
+    begin = <DOLLAR_INTERPOLATION_OPENING>
     exp = Expression()
     {
         notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
         notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
     }
-    end = <CLOSE_BRACE>
+    end = <CLOSING_CURLY_BRACKET>
     {
         DollarVariable result = new DollarVariable(exp, escapedExpression(exp));
         result.setLocation(template, begin, end);
@@ -1704,13 +1704,13 @@ NumericalOutput NumericalOutput() :
     Token fmt = null, begin, end;
 }
 {
-    begin = <NUMERICAL_ESCAPE>
+    begin = <HASH_INTERPOLATION_OPENING>
     exp = Expression() { numberLiteralOnly(exp); }
     [
         <SEMICOLON>
         fmt = <ID>
     ]
-    end = <CLOSE_BRACE>
+    end = <CLOSING_CURLY_BRACKET>
     {
         NumericalOutput result;
         if (fmt != null) {
@@ -2852,7 +2852,7 @@ TextBlock PCData() :
         }
     )+
     {
-        if (stripText && contentNesting == 1) return TextBlock.EMPTY_BLOCK;
+        if (stripText && mixedContentNesting == 1) return TextBlock.EMPTY_BLOCK;
 
         TextBlock result = new TextBlock(buf.toString(), false);
         result.setLocation(template, start, t);
@@ -2883,11 +2883,11 @@ Token UnparsedContent(StringBuffer buf) :
     }
 }
 
-TemplateElement Content() :
+TemplateElement MixedContent() :
 {
-    MixedContent nodes = new MixedContent();
+    MixedContent mixedContent = new MixedContent();
     TemplateElement elem, begin = null;
-    contentNesting++;
+    mixedContentNesting++;
 }
 {
     (
@@ -2905,13 +2905,13 @@ TemplateElement Content() :
             if (begin == null) {
                 begin = elem;
             }
-            nodes.addElement(elem);
+            mixedContent.addElement(elem);
         }
     )+
     {
-        contentNesting--;
-        nodes.setLocation(template, begin, elem);
-        return nodes;
+        mixedContentNesting--;
+        mixedContent.setLocation(template, begin, elem);
+        return mixedContent;
     }
 }
 
@@ -2958,7 +2958,7 @@ TemplateElement OptionalBlock() :
 {
     [
         LOOKAHEAD(1) // has no effect but to get rid of a spurious warning.
-        tp = Content()
+        tp = MixedContent()
     ]
     {
         return tp;

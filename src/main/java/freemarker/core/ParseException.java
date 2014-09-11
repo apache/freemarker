@@ -451,7 +451,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
                     case END_ATTEMPT:
                         endNames.add( "#attempt");
                         break;
-                    case CLOSE_BRACE:
+                    case CLOSING_CURLY_BRACKET:
                         endNames.add( "\"{\"");
                         break;
                     case CLOSE_BRACKET:
