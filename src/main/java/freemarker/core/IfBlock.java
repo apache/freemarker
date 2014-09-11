@@ -42,7 +42,7 @@ final class IfBlock extends TemplateElement {
         for (int i = 0; i<nestedElements.size(); i++) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(i);
             Expression condition = cblock.condition;
-            env.replaceElemetStackTop(cblock);
+            env.replaceElementStackTop(cblock);
             if (condition == null || condition.evalToBoolean(env)) {
                 if (cblock.nestedBlock != null) {
                     env.visitByHiddingParent(cblock.nestedBlock);
