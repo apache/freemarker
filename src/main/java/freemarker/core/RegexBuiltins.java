@@ -207,8 +207,7 @@ class RegexBuiltins {
                     logFlagWarning("?" + key + " doesn't support the \"f\" flag.");
                 }
                 Pattern pattern = getPattern(patternString, (int) flags);
-                Matcher matcher = pattern.matcher(matchString);
-                return new RegexMatchModel(matcher, matchString);
+                return new RegexMatchModel(pattern, matchString);
             }
         }
         
@@ -221,7 +220,7 @@ class RegexBuiltins {
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
             } else if (targetModel instanceof RegexMatchModel.Match) {
-                return ((RegexMatchModel.Match) targetModel).subs;
+                return ((RegexMatchModel.Match) targetModel).groupsSeq;
             } else {
                 throw new UnexpectedTypeException(target, targetModel,
                         "regular expression matcher",
@@ -312,8 +311,8 @@ class RegexBuiltins {
         TemplateSequenceModel groups;
         private ArrayList data;
         
-        RegexMatchModel(Matcher matcher, String input) {
-            this.matcher = matcher;
+        RegexMatchModel(Pattern pattern, String input) {
+            this.matcher = pattern.matcher(input);
             this.input = input;
             this.matches = matcher.matches();
         }
@@ -375,22 +374,26 @@ class RegexBuiltins {
                 
                 public TemplateModel next() throws TemplateModelException {
                     if (!hasNext()) throw new _TemplateModelException("No more matches");
-                    Match result = new Match();
+                    Match result = new Match(input, matcher);
                     hasFindInfo = matcher.find();
                     return result;
                 }
             };
         }
         
-        class Match implements TemplateScalarModel {
-            String match;
-            SimpleSequence subs = new SimpleSequence();
-            Match() {
+        static class Match implements TemplateScalarModel {
+            final String match;
+            final SimpleSequence groupsSeq;
+            
+            Match(String input, Matcher matcher) {
                 match = input.substring(matcher.start(), matcher.end());
-                for (int i=0; i< matcher.groupCount() + 1; i++) {
-                    subs.add(matcher.group(i));
+                final int grpCount = matcher.groupCount() + 1;
+                groupsSeq = new SimpleSequence(grpCount);
+                for (int i = 0; i < grpCount; i++) {
+                    groupsSeq.add(matcher.group(i));
                 }
             }
+            
             public String getAsString() {
                 return match;
             }
