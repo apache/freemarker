@@ -135,6 +135,7 @@
    <testcase name="string-builtins1" />
    <testcase name="string-builtins2" />
    <testcase name="string-builtins-regexps" />
+   <testcase name="string-builtins-regexps-matches" />
    <testcase name="stringbimethods" />
    <testcase name="stringliteral"/>
    <testcase name="if" />

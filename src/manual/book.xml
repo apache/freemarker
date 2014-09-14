@@ -12383,19 +12383,13 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <link linkend="gloss.regularExpression">regular
           expressions</link>.</para>
 
-          <note>
-            <para>This built-in will work only if you use Java2 platform 1.4
-            or later. Otherwise it will stop template processing with
-            error.</para>
-          </note>
-
           <para>This built-in determines if the string exactly matches the
           pattern. Also, it returns the list of matching sub-strings. The
           return value is a multi-type value:</para>
 
           <itemizedlist>
             <listitem>
-              <para>Boolean: <literal>true</literal>, if it the string exactly
+              <para>Boolean: <literal>true</literal>, if it the entire string
               matches the pattern, otherwise <literal>false</literal>. For
               example, <literal>"fooo"?matches('fo*')</literal> is
               <literal>true</literal>, but
@@ -12433,19 +12427,34 @@ Matching sub-strings:
           you can access them with the <literal>groups</literal>
           built-in:</para>
 
-          <programlisting role="template">&lt;#assign res = "aa/rx; ab/r;"?matches("(\\w[^/]+)/([^;]+);")&gt;
+          <programlisting role="template">&lt;#-- Entire input match --&gt;
+&lt;#assign res = "John Doe"?matches(r"(\w+) (\w+)")&gt;
+&lt;#if res&gt; &lt;#-- Must not try to access groups if there was no match! --&gt;
+  First name: ${res?groups[1]}
+  Second name: ${res?groups[2]}
+&lt;/#if&gt;
+
+&lt;#-- Subtring matches --&gt;
+&lt;#assign res = "aa/rx; ab/r;"?matches("(.+?)/*(.+?);")&gt;
 &lt;#list res as m&gt;
-- ${m} is ${m?groups[1]} per ${m?groups[2]}
+  - "${m}" is "${m?groups[1]}" per "${m?groups[2]}"
 &lt;/#list&gt;</programlisting>
 
           <para>This will print:</para>
 
-          <programlisting role="output">- aa/rx; is aa per rx
-- ab/r; is ab per r</programlisting>
+          <programlisting role="output">  First name: John
+  Second name: Doe
+
+  - "aa/rx;" is "a" per "a/rx"
+  - " ab/r;" is " " per "ab/r"</programlisting>
+
+          <para>Note above that <literal>groups</literal> has worked both with
+          substring matches and with the result of entire string
+          matching.</para>
 
           <para><literal>matches</literal> accepts an optional 2nd parameter,
           the <link linkend="ref_builtin_string_flags">flags</link>. Note that
-          it does not support flag <literal>f</literal>, and ignores the
+          it doesn't support flag <literal>f</literal>, and ignores the
           <literal>r</literal> flag.</para>
         </section>
 
@@ -21263,6 +21272,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               used for converting paths (like paths coming from the OS or some
               content repository) that use slash (not backslash!) to a path
               the can be inserted into an URL.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
+              The result of <literal>?matches</literal> wasn't
+              <quote>reentrant</quote>. For example, you couldn't list the
+              matches inside another listing where you are also listing
+              exactly the same result value, as they would consume from the
+              same iterator. Most importantly, even accessing the
+              <literal>?size</literal> of the same result value has terminated
+              the outer listing of the same value.</para>
             </listitem>
           </itemizedlist>
         </section>
