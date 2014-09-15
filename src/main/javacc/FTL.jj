@@ -324,7 +324,7 @@ TOKEN_MGR_DECLS:
     // at the UNKNOWN_DIRECTIVE token too.
     private void strictSyntaxCheck(Token tok, int newLexState) {
         if (onlyTextOutput) {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         char firstChar = tok.image.charAt(0);
@@ -332,7 +332,7 @@ TOKEN_MGR_DECLS:
             squBracTagSyntax = (firstChar == '[');
         }
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         if (!strictEscapeSyntax) {
@@ -341,7 +341,7 @@ TOKEN_MGR_DECLS:
         }
         if (!squBracTagSyntax) {
             if (!tok.image.startsWith("<#") && !tok.image.startsWith("</#")) {
-                tok.kind = PRINTABLE_CHARS;
+                tok.kind = STATIC_TEXT_NON_WS;
                 return;
             }
         }
@@ -355,11 +355,11 @@ TOKEN_MGR_DECLS:
             squBracTagSyntax = (firstChar == '[');
         }
         if (squBracTagSyntax && firstChar == '<') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         if (!squBracTagSyntax && firstChar == '[') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         directiveSyntaxEstablished = true;
@@ -369,11 +369,11 @@ TOKEN_MGR_DECLS:
     private void unifiedCallEnd(Token tok) {
         char firstChar = tok.image.charAt(0);
         if (squBracTagSyntax && firstChar == '<') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         if (!squBracTagSyntax && firstChar == '[') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
     }
@@ -426,9 +426,9 @@ TOKEN_MGR_DECLS:
         char firstChar = img.charAt(0);
         char lastChar = img.charAt(img.length() - 1);
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
-            matchedToken.kind = PRINTABLE_CHARS;
+            matchedToken.kind = STATIC_TEXT_NON_WS;
         }
-        if (matchedToken.kind != PRINTABLE_CHARS) {
+        if (matchedToken.kind != STATIC_TEXT_NON_WS) {
             if (lastChar != '>' && lastChar != ']') {
                 SwitchTo(FM_EXPRESSION);
                 inFTLHeader = true;
@@ -582,7 +582,7 @@ TOKEN:
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
         if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
-            matchedToken.kind = PRINTABLE_CHARS;
+            matchedToken.kind = STATIC_TEXT_NON_WS;
         } else {
             char firstChar = matchedToken.image.charAt(0);
 
@@ -592,9 +592,9 @@ TOKEN:
             }
 
             if (firstChar == '<' && squBracTagSyntax) {
-                matchedToken.kind = PRINTABLE_CHARS;
+                matchedToken.kind = STATIC_TEXT_NON_WS;
             } else if (firstChar == '[' && !squBracTagSyntax) {
-                matchedToken.kind = PRINTABLE_CHARS;
+                matchedToken.kind = STATIC_TEXT_NON_WS;
             } else if (strictEscapeSyntax) {
                 String dn = matchedToken.image;
                 int index = dn.indexOf('#');
@@ -645,11 +645,11 @@ TOKEN:
 
 <DEFAULT, NODIRECTIVE> TOKEN :
 {
-    <WHITESPACE : (["\n", "\r", "\t", " "])+>
+    <STATIC_TEXT_WS : (["\n", "\r", "\t", " "])+>
     |
-    <PRINTABLE_CHARS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
+    <STATIC_TEXT_NON_WS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
     |
-    <FALSE_ALERT : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
+    <STATIC_TEXT_FALSE_ALARM : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
     |
     <DOLLAR_INTERPOLATION_OPENING : "${"> : FM_EXPRESSION
     |
@@ -2620,7 +2620,7 @@ SwitchBlock Switch() :
             switchBlock.addCase(caseIns);
         }
     )*
-    [<WHITESPACE>]
+    [<STATIC_TEXT_WS>]
     end = <END_SWITCH>
     {
         --switchNesting;
@@ -2636,7 +2636,7 @@ Case Case() :
     Token start;
 }
 {
-    [<WHITESPACE>]
+    [<STATIC_TEXT_WS>]
     (
         start = <CASE> exp = Expression() <DIRECTIVE_END>
         |
@@ -2817,14 +2817,14 @@ TextBlock PCData() :
 }
 {
     (
-        LOOKAHEAD(<WHITESPACE>|<PRINTABLE_CHARS>|<FALSE_ALERT>)
+        LOOKAHEAD(<STATIC_TEXT_WS>|<STATIC_TEXT_NON_WS>|<STATIC_TEXT_FALSE_ALARM>)
         (
             { prevToken = t; }
-            t = <WHITESPACE>
+            t = <STATIC_TEXT_WS>
             |
-            t = <PRINTABLE_CHARS>
+            t = <STATIC_TEXT_NON_WS>
             |
-            t = <FALSE_ALERT>
+            t = <STATIC_TEXT_FALSE_ALARM>
         )
         {
             buf.append(t.image);
@@ -2864,7 +2864,7 @@ Token UnparsedContent(StringBuffer buf) :
     }
 }
 
-TemplateElement MixedContent() :
+MixedContent MixedContent() :
 {
     MixedContent mixedContent = new MixedContent();
     TemplateElement elem, begin = null;
@@ -2952,7 +2952,7 @@ void HeaderElement() :
     Expression exp = null;
 }
 {
-    [<WHITESPACE>]
+    [<STATIC_TEXT_WS>]
     (
         <TRIVIAL_FTL_HEADER>
         |
@@ -3069,7 +3069,7 @@ TemplateElement Root() :
 }
 {
     [
-        LOOKAHEAD([<WHITESPACE>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
+        LOOKAHEAD([<STATIC_TEXT_WS>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
         HeaderElement()
     ]
     doc = OptionalBlock()
