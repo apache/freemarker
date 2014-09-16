@@ -21303,7 +21303,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para/>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
+              Poor quality error message when
+              <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
+              fails with string index out of bounds.</para>
             </listitem>
           </itemizedlist>
         </section>

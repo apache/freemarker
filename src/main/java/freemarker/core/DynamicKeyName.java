@@ -108,9 +108,19 @@ final class DynamicKeyName extends Expression {
         {
             String s = target.evalAndCoerceToString(env);
             try {
-               return new SimpleScalar(s.substring(index, index + 1));
-            } catch (RuntimeException re) {
-                throw new _MiscTemplateException(re, env);
+                return new SimpleScalar(s.substring(index, index + 1));
+            } catch (IndexOutOfBoundsException e) {
+                if (index < 0) {
+                    throw new _MiscTemplateException(new Object[] {
+                                "Negative index not allowed: ",
+                                new Integer(index) });
+                }
+                if (index >= s.length()) {
+                    throw new _MiscTemplateException(new Object[] {
+                            "String index out of range: The index was ", new Integer(index),
+                            " (0-based), but the length of the string is only ", new Integer(s.length()) , "." });
+                }
+                throw new RuntimeException("Can't explain exception", e);
             }
         }
         catch(NonStringException e)
