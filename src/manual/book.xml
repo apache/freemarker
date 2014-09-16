@@ -21309,6 +21309,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
               fails with string index out of bounds.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/27/">27</link>]:
+              Not very good quality error messages when
+              <literal>#import</literal>-ing a template whose parsing
+              fails.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
