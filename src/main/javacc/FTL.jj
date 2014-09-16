@@ -891,7 +891,10 @@ TOKEN:
     {
         if (noparseTag.equals("-->")) {
             boolean squareBracket = matchedToken.image.endsWith("]");
-            if ((squBracTagSyntax && squareBracket) || (!squBracTagSyntax && !squareBracket)) SwitchTo(DEFAULT);
+            if ((squBracTagSyntax && squareBracket) || (!squBracTagSyntax && !squareBracket)) {
+                matchedToken.image = matchedToken.image + ";"; 
+                SwitchTo(DEFAULT);
+            }
         }
     }
     |
@@ -906,6 +909,7 @@ TOKEN:
     {
         StringTokenizer st = new StringTokenizer(image.toString(), " \t\n\r<>[]/#", false);
         if (st.nextToken().equals(noparseTag)) {
+            matchedToken.image = matchedToken.image + ";"; 
             SwitchTo(DEFAULT);
         }
     }
@@ -2531,7 +2535,7 @@ Comment Comment() :
         |
         start = <TERSE_COMMENT>
     )
-    end = UnparsedContent(buf)
+    end = UnparsedContent(start, buf)
     {
         Comment result = new Comment(buf.toString());
         result.setLocation(template, start, end);
@@ -2546,7 +2550,7 @@ TextBlock NoParse() :
 }
 {
     start = <NOPARSE>
-    end = UnparsedContent(buf)
+    end = UnparsedContent(start, buf)
     {
         TextBlock result = new TextBlock(buf.toString(), true);
         result.setLocation(template, start, end);
@@ -2847,7 +2851,7 @@ TextBlock PCData() :
  * It returns the ending token. The content
  * of the tag is put in buf.
  */
-Token UnparsedContent(StringBuffer buf) :
+Token UnparsedContent(Token start, StringBuffer buf) :
 {
     Token t;
 }
@@ -2860,6 +2864,10 @@ Token UnparsedContent(StringBuffer buf) :
     )+
     {
         buf.setLength(buf.length() - t.image.length());
+        if (!t.image.endsWith(";")
+                && _TemplateAPI.getTemplateLanguageVersionAsInt(template) >= _TemplateAPI.VERSION_INT_2_3_21) {
+            throw new ParseException("Unclosed \"" + start.image + "\"", template, start);
+        }
         return t;
     }
 }

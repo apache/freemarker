@@ -21285,6 +21285,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>?size</literal> of the same result value has terminated
               the outer listing of the same value.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/229/">229</link>]:
+              If you set <literal>incompatible_improvements</literal> to
+              2.3.21 (or higher), unclosed comments and
+              <literal>#noparse</literal>-s won't be silently closed at the
+              end of template anymore, but cause a parsing error
+              instead.</para>
+            </listitem>
           </itemizedlist>
         </section>
 

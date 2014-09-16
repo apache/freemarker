@@ -45,7 +45,11 @@ public class _TemplateAPI {
     }
     
     public static int getTemplateLanguageVersionAsInt(TemplateObject to) {
-        return to.getTemplate().getTemplateLanguageVersion().intValue();
+        return getTemplateLanguageVersionAsInt(to.getTemplate());
+    }
+
+    public static int getTemplateLanguageVersionAsInt(Template t) {
+        return t.getTemplateLanguageVersion().intValue();
     }
     
     /** For unit testing only */
