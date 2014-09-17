@@ -85,9 +85,13 @@ public class Template extends Configurable {
      */
     private Template(String name, Configuration cfg)
     {
-        super(cfg != null ? cfg : Configuration.getDefaultConfiguration());
+        super(toNonNull(cfg));
         this.name = name;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
+    }
+
+    private static Configuration toNonNull(Configuration cfg) {
+        return cfg != null ? cfg : Configuration.getDefaultConfiguration();
     }
     
 

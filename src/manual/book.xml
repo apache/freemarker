@@ -21317,6 +21317,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>#import</literal>-ing a template whose parsing
               fails.</para>
             </listitem>
+
+            <listitem>
+              <para>Bugs found in R1 fixed:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Legacy (deprecated) <literal>Template</literal>
+                  constructors without <literal>Configuration</literal>
+                  parameter have failed with
+                  <literal>NullPointerException</literal></para>
+                </listitem>
+
+                <listitem>
+                  <para/>
+                </listitem>
+              </itemizedlist>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
