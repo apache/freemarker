@@ -419,7 +419,8 @@ public class TemplateException extends Exception {
     }
 
     public String getMessage() {
-        if (messageWasAlreadyPrintedForThisTrace != null && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
+        if (messageWasAlreadyPrintedForThisTrace != null
+                && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
             return "[... Exception message was already printed; see it above ...]";
         } else {
             synchronized (lock) {  // Switch to double-check + volatile with Java 5

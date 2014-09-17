@@ -40,7 +40,7 @@ public class NestedContentNotSupportedException extends TemplateException {
 
     public NestedContentNotSupportedException(String description, Exception cause, Environment env) {
         super( "Nested content (body) not supported."
-                + (description == null ? " " + StringUtil.jQuote(description) : ""),
+                + (description != null ? " " + StringUtil.jQuote(description) : ""),
                 cause, env);
     }
     

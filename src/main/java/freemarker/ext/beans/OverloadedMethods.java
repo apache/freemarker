@@ -141,22 +141,19 @@ final class OverloadedMethods {
         return new _DelayedConversionToString(null) {
             
             protected String doConversion(Object obj) {
-                Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
-                Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
+                final Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
+                final Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
                 
                 boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
                 if (hasMethods) {
                     StringBuffer sb = new StringBuffer();
                     HashSet fixArgMethods = new HashSet();
-                    if (fixArgMethodsIter != null) {
-                        
-                        while (fixArgMethodsIter.hasNext()) {
-                            if (sb.length() != 0) sb.append(",\n");
-                            sb.append("    ");
-                            CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
-                            fixArgMethods.add(callableMemberDesc);
-                            sb.append(callableMemberDesc.getDeclaration());
-                        }
+                    while (fixArgMethodsIter.hasNext()) {
+                        if (sb.length() != 0) sb.append(",\n");
+                        sb.append("    ");
+                        CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
+                        fixArgMethods.add(callableMemberDesc);
+                        sb.append(callableMemberDesc.getDeclaration());
                     }
                     if (varargMethodsIter != null) {
                         while (varargMethodsIter.hasNext()) {

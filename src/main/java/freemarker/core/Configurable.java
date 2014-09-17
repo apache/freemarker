@@ -1219,7 +1219,7 @@ public class Configurable
                 if (Character.isDigit(firstChar) || firstChar == '+' || firstChar == '-') {
                     setClassicCompatibleAsInt(Integer.parseInt(value));
                 } else {
-                    setClassicCompatible(StringUtil.getYesNo(value));
+                    setClassicCompatible(value != null ? StringUtil.getYesNo(value) : false);
                 }
             } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {

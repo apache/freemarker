@@ -61,7 +61,7 @@ final class DynamicKeyName extends Expression {
                 keyModel = TemplateScalarModel.EMPTY_STRING;
             }
             else {
-                keyExpression.assertNonNull(keyModel, env);
+                keyExpression.assertNonNull(null, env);
             }
         }
         if (keyModel instanceof TemplateNumberModel) {

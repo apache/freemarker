@@ -32,6 +32,7 @@ import java.net.URL;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Test case that needs to compare a string to a reference (expected) text file, or two text files. 
@@ -144,6 +145,7 @@ public abstract class FileTestCase extends TestCase {
         return getExpectedFileDirectory();
     }
    
+    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE")
     protected final File getTestClassDirectory() throws IOException {
         URL url = this.getClass().getResource(".");  // Deliberately gets the package URL of the subclass
         if (url == null) throw new IOException("Couldn't get resource URL for \".\"");

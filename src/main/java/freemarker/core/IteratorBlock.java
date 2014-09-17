@@ -61,7 +61,7 @@ final class IteratorBlock extends TemplateElement {
                 // Classic behavior of simply ignoring null references.
                 return;
             }
-            listSource.assertNonNull(baseModel, env);
+            listSource.assertNonNull(null, env);
         }
 
         env.visitIteratorBlock(new Context(baseModel));

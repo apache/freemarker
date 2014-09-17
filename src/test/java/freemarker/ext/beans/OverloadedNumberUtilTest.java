@@ -134,8 +134,8 @@ public class OverloadedNumberUtilTest extends TestCase {
         cipEqu(new BigDecimal(123.5), TypeFlags.INTEGER | TypeFlags.LONG);
         cipEqu(new BigDecimal(123.5), TypeFlags.DOUBLE | TypeFlags.FLOAT);
         
-        cipEqu(new BigDecimal(0.01));
-        cipEqu(new BigDecimal(-0.01));
+        cipEqu(new BigDecimal("0.01"));
+        cipEqu(new BigDecimal("-0.01"));
         cipEqu(BigDecimal.ZERO, new OverloadedNumberUtil.IntegerBigDecimal(BigDecimal.ZERO));
     }
 

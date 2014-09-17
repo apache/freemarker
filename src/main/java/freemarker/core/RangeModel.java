@@ -38,7 +38,7 @@ abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable
             throw new _TemplateModelException(new Object[] {
                     "Range item index ", new Integer(index), " is out of bounds." });
         }
-        long value = (long) begin + getStep() * index;
+        long value = begin + getStep() * (long) index;
         return value <= Integer.MAX_VALUE ? new SimpleNumber((int) value) : new SimpleNumber(value);
     }
     

@@ -124,7 +124,7 @@ public class _ObjectBuilderSettingEvaluator {
                 return null;
             }
             exp.className = shorthandToFullQualified(fetchedClassName);
-            if (fetchedClassName != exp.className) {
+            if (!fetchedClassName.equals(exp.className)) {
                 // Before 2.3.21 only full-qualified class names were allowed
                 v2321Mode = true;
             }

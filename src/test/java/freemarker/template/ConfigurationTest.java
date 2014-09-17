@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
@@ -317,7 +318,7 @@ public class ConfigurationTest extends TestCase{
         assertEquals(otherTZ2.getID(), env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
         
         try {
-            env2.setTimeZone(null);
+            setTimeZoneToNull(env2);
             fail();
         } catch (IllegalArgumentException e) {
             // expected
@@ -327,6 +328,11 @@ public class ConfigurationTest extends TestCase{
         assertNull(env2.getSQLDateAndTimeTimeZone());
         assertEquals(otherTZ1.getID(), env2.getSetting(Configurable.TIME_ZONE_KEY));
         assertEquals("null", env2.getSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY));
+    }
+
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Meant to fail")
+    private void setTimeZoneToNull(Environment env2) {
+        env2.setTimeZone(null);
     }
     
     public void testSetICIViaSetSettingAPI() throws TemplateException {
