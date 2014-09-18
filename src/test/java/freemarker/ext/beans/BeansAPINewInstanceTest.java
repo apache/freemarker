@@ -22,7 +22,7 @@ import freemarker.test.utility.Helpers;
 
 public class BeansAPINewInstanceTest extends TestCase {
 
-    private BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
+    private BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
 
     public BeansAPINewInstanceTest(String name) {
         super(name);

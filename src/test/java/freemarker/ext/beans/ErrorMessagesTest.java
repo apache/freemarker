@@ -13,7 +13,7 @@ public class ErrorMessagesTest {
 
     @Test
     public void getterMessage() throws TemplateModelException {
-        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).getResult();
+        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build();
         TemplateHashModel thm = (TemplateHashModel) bw.wrap(new TestBean());
         try {
             thm.get("foo");

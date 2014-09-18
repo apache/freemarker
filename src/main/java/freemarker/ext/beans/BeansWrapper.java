@@ -319,7 +319,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = bwConf.classIntrospectorFactory.getResult();
+            classIntrospector = bwConf.classIntrospectorFactory.build();
             sharedInrospectionLock = classIntrospector.getSharedLock(); 
         }
         

@@ -374,7 +374,7 @@ public class ConfigurationTest extends TestCase{
         cfg.setSharedVariable("b", "bbLegacy");
         
         // Cause re-wrapping of variables added via setSharedVaribles:
-        cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_0).getResult());
+        cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_0).build());
 
         {
             TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");

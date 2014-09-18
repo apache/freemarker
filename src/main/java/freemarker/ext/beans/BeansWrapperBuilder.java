@@ -32,7 +32,7 @@ import freemarker.template.Version;
  * 
  * <p>The builder meant to be used as a drop-away object (not stored in a field), like in this example: 
  * <pre>
- *    BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
+ *    BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
  * </pre>
  * 
  * <p>Or, a more complex example:</p>
@@ -44,7 +44,7 @@ import freemarker.template.Version;
  *    builder.setExposeFields(true);
  *    
  *    // Get the singleton:
- *    BeansWrapper beansWrapper = builder.getResult();
+ *    BeansWrapper beansWrapper = builder.build();
  *    // You don't need the builder anymore.
  * </pre>
  * 
@@ -141,9 +141,9 @@ public class BeansWrapperBuilder extends BeansWrapperConfiguration {
 
     /**
      * Returns a {@link BeansWrapper} instance that matches the settings of this builder. This will be possibly a
-     * singleton that is also in use elsewhere.
+     * singleton that is also in use elsewhere, not necessarily a new object.
      */
-    public BeansWrapper getResult() {
+    public BeansWrapper build() {
         return _BeansAPI.getBeansWrapperSubclassSingleton(
                 this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, BeansWrapperFactory.INSTANCE);
     }

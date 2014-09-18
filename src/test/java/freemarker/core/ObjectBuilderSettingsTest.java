@@ -727,7 +727,7 @@ public class ObjectBuilderSettingsTest {
             this.x = x;
         }
         
-        public TestBean2 getResult() {
+        public TestBean2 build() {
             return new TestBean2(this);
         }
         

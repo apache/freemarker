@@ -950,10 +950,10 @@ public class Configurable
      *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
      *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
-     *       or {@link DefaultObjectWrapperBuilder#getResult()}),
+     *       or {@link DefaultObjectWrapperBuilder#build()}),
      *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
-     *       or {@link BeansWrapperBuilder#getResult()}),
+     *       or {@link BeansWrapperBuilder#build()}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
@@ -1158,8 +1158,8 @@ public class Configurable
      *   <li>
      *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
      *      instead with the given constructor arguments, and the JavaBean properties of that builder instance will be
-     *      set. After that, the public <tt>getResult()</tt> method of the instance will be called, whose return value
-     *      will be the value of the whole expression. (The builder class and the <tt>getResult()</tt> method is simply
+     *      set. After that, the public <tt>build()</tt> method of the instance will be called, whose return value
+     *      will be the value of the whole expression. (The builder class and the <tt>build()</tt> method is simply
      *      found by name, there's no special interface to implement.) Note that if you use the backward compatible
      *      syntax, where these's no parenthesis after the class name, then it will not look for builder class.
      *   </li>

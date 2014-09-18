@@ -6650,7 +6650,7 @@ list.add("blue");
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
         = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21)
-          .getResult();
+          .build();
 
 // Normaly, you would create a plain java.util.HashMap here, and
 // later let the ObjectWrapper wrap it in Template.process(...).
@@ -21303,6 +21303,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>The <literal>getResult()</literal> method of builder
+              classes was renamed to <literal>build()</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
               Poor quality error message when
@@ -21327,10 +21332,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   constructors without <literal>Configuration</literal>
                   parameter have failed with
                   <literal>NullPointerException</literal></para>
-                </listitem>
-
-                <listitem>
-                  <para/>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -21760,8 +21761,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
                   almost identical <literal>DefaultObjectWrapper</literal>
                   singleton, returned by <literal>new
-                  DefaultObjectWrapperBuilder(Version).getResult()</literal>.
-                  The new default object wrapper's <quote>incompatible
+                  DefaultObjectWrapperBuilder(Version).build()</literal>. The
+                  new default object wrapper's <quote>incompatible
                   improvements</quote> version is set to the same as of the
                   <literal>Configuration</literal>. (See later regarding the
                   2.3.21 <quote>incompatible improvements</quote> of
@@ -21830,14 +21831,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   and <literal>new
                   BeansWrapper(<replaceable>...</replaceable>)</literal>, from
                   now on you should use <literal>new
-                  DefaultObjectWrapperBuilder(version).getResult()</literal>
-                  and <literal>new
-                  BeansWrapperBuilder(version).getResult()</literal>. (The
-                  builder objects have properties (configuration settings)
-                  like <literal>BeansWrapper</literal> has, which specify the
-                  properties of the objects created.) The created objects are
-                  <emphasis>singletons</emphasis> (VM-wide, or at least
-                  Web-Application-wide) and read-only (means,
+                  DefaultObjectWrapperBuilder(version).build()</literal> and
+                  <literal>new BeansWrapperBuilder(version).build()</literal>.
+                  (The builder objects have properties (configuration
+                  settings) like <literal>BeansWrapper</literal> has, which
+                  specify the properties of the objects created.) The created
+                  objects are <emphasis>singletons</emphasis> (VM-wide, or at
+                  least Web-Application-wide) and read-only (means,
                   non-configurable, hence safe to share). The main benefit of
                   using these factories instead of creating new instances is
                   that it allows FreeMarker to share the class introspection

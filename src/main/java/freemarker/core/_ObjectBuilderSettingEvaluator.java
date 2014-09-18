@@ -55,7 +55,7 @@ public class _ObjectBuilderSettingEvaluator {
     
     private static final String INSTANCE_FIELD_NAME = "INSTANCE";
 
-    private static final String GET_RESULT_METHOD_NAME = "getResult";
+    private static final String BUILD_METHOD_NAME = "build";
 
     private static final String BUILDER_CLASS_POSTFIX = "Builder";
 
@@ -517,7 +517,7 @@ public class _ObjectBuilderSettingEvaluator {
 
             final Object result;
             if (clIsBuilderClass) {
-                result = callGetResult(constructorResult);
+                result = callBuild(constructorResult);
             } else {
                 if (constructorResult instanceof WriteProtectable) {
                     ((WriteProtectable) constructorResult).writeProtect();
@@ -634,22 +634,22 @@ public class _ObjectBuilderSettingEvaluator {
             }
         }
 
-        private Object callGetResult(Object constructorResult)
+        private Object callBuild(Object constructorResult)
                 throws _ObjectBuilderSettingEvaluationException {
             final Class cl = constructorResult.getClass();
-            Method getResultMethod; 
+            Method buildMethod; 
             try {
-                getResultMethod = constructorResult.getClass().getMethod(GET_RESULT_METHOD_NAME, (Class[]) null);
+                buildMethod = constructorResult.getClass().getMethod(BUILD_METHOD_NAME, (Class[]) null);
             } catch (NoSuchMethodException e) {
                 throw new _ObjectBuilderSettingEvaluationException("The " + cl.getName()
-                        + " builder class must have a public " + GET_RESULT_METHOD_NAME + "() method", e);
+                        + " builder class must have a public " + BUILD_METHOD_NAME + "() method", e);
             } catch (Exception e) {
-                throw new _ObjectBuilderSettingEvaluationException("Failed to get the " + GET_RESULT_METHOD_NAME
+                throw new _ObjectBuilderSettingEvaluationException("Failed to get the " + BUILD_METHOD_NAME
                         + "() method of the " + cl.getName() + " builder class", e);
             }
             
             try {
-                return getResultMethod.invoke(constructorResult, (Object[]) null);
+                return buildMethod.invoke(constructorResult, (Object[]) null);
             } catch (Exception e) {
                 Throwable cause;
                 if (e instanceof InvocationTargetException) {
@@ -657,7 +657,7 @@ public class _ObjectBuilderSettingEvaluator {
                 } else {
                     cause = e;
                 }
-                throw new _ObjectBuilderSettingEvaluationException("Failed to call " + GET_RESULT_METHOD_NAME + "() method on "
+                throw new _ObjectBuilderSettingEvaluationException("Failed to call " + BUILD_METHOD_NAME + "() method on "
                         + cl.getName() + " instance", cause);
             }
         }

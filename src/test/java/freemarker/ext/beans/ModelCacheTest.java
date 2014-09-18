@@ -33,7 +33,7 @@ public class ModelCacheTest {
     
     @Test
     public void modelCacheOff() throws Exception {
-        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getResult();
+        BeansWrapper bw = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
         assertFalse(bw.getUseCache());  // default is off
         
         String s = "foo";

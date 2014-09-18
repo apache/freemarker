@@ -160,7 +160,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
      * Returns an instance that is possibly shared (singleton). Note that this comes with its own "shared lock",
      * since everyone who uses this object will have to lock with that common object.
      */
-    ClassIntrospector getResult() {
+    ClassIntrospector build() {
         if ((methodAppearanceFineTuner == null || methodAppearanceFineTuner instanceof SingletonCustomizer)
                 && (methodSorter == null || methodSorter instanceof SingletonCustomizer)) {
             // Instance can be cached.

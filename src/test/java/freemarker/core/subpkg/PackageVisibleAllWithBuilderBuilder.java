@@ -18,7 +18,7 @@ package freemarker.core.subpkg;
 
 public class PackageVisibleAllWithBuilderBuilder {
     
-    public PackageVisibleAllWithBuilder getResult() {
+    public PackageVisibleAllWithBuilder build() {
         return new PackageVisibleAllWithBuilder();
     }
 
