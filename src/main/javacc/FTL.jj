@@ -44,7 +44,7 @@ public class FMParser {
     private int loopNesting, switchNesting;
     private boolean inMacro, inFunction, stripWhitespace, stripText;
     private LinkedList escapes = new LinkedList();
-    private int contentNesting; // for stripText
+    private int mixedContentNesting; // for stripText
     private int incompatibleImprovements;
 
     /**
@@ -324,7 +324,7 @@ TOKEN_MGR_DECLS:
     // at the UNKNOWN_DIRECTIVE token too.
     private void strictSyntaxCheck(Token tok, int newLexState) {
         if (onlyTextOutput) {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         char firstChar = tok.image.charAt(0);
@@ -332,7 +332,7 @@ TOKEN_MGR_DECLS:
             squBracTagSyntax = (firstChar == '[');
         }
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         if (!strictEscapeSyntax) {
@@ -341,7 +341,7 @@ TOKEN_MGR_DECLS:
         }
         if (!squBracTagSyntax) {
             if (!tok.image.startsWith("<#") && !tok.image.startsWith("</#")) {
-                tok.kind = PRINTABLE_CHARS;
+                tok.kind = STATIC_TEXT_NON_WS;
                 return;
             }
         }
@@ -355,11 +355,11 @@ TOKEN_MGR_DECLS:
             squBracTagSyntax = (firstChar == '[');
         }
         if (squBracTagSyntax && firstChar == '<') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         if (!squBracTagSyntax && firstChar == '[') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         directiveSyntaxEstablished = true;
@@ -369,11 +369,11 @@ TOKEN_MGR_DECLS:
     private void unifiedCallEnd(Token tok) {
         char firstChar = tok.image.charAt(0);
         if (squBracTagSyntax && firstChar == '<') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
         if (!squBracTagSyntax && firstChar == '[') {
-            tok.kind = PRINTABLE_CHARS;
+            tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
     }
@@ -426,9 +426,9 @@ TOKEN_MGR_DECLS:
         char firstChar = img.charAt(0);
         char lastChar = img.charAt(img.length() - 1);
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
-            matchedToken.kind = PRINTABLE_CHARS;
+            matchedToken.kind = STATIC_TEXT_NON_WS;
         }
-        if (matchedToken.kind != PRINTABLE_CHARS) {
+        if (matchedToken.kind != STATIC_TEXT_NON_WS) {
             if (lastChar != '>' && lastChar != ']') {
                 SwitchTo(FM_EXPRESSION);
                 inFTLHeader = true;
@@ -582,7 +582,7 @@ TOKEN:
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z","A"-"Z", "_"])+>
     {
         if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
-            matchedToken.kind = PRINTABLE_CHARS;
+            matchedToken.kind = STATIC_TEXT_NON_WS;
         } else {
             char firstChar = matchedToken.image.charAt(0);
 
@@ -592,9 +592,9 @@ TOKEN:
             }
 
             if (firstChar == '<' && squBracTagSyntax) {
-                matchedToken.kind = PRINTABLE_CHARS;
+                matchedToken.kind = STATIC_TEXT_NON_WS;
             } else if (firstChar == '[' && !squBracTagSyntax) {
-                matchedToken.kind = PRINTABLE_CHARS;
+                matchedToken.kind = STATIC_TEXT_NON_WS;
             } else if (strictEscapeSyntax) {
                 String dn = matchedToken.image;
                 int index = dn.indexOf('#');
@@ -606,7 +606,7 @@ TOKEN:
                 // unknown directive:
                 if (_CoreAPI.BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                     throw new TokenMgrError(
-                            "The start-tag of #" + dn + " must contain parameters.",
+                            "#" + dn + " is an existing directive, but the tag is malformed.",
                             TokenMgrError.LEXICAL_ERROR,
                             matchedToken.beginLine, matchedToken.beginColumn + 1,
                             matchedToken.endLine, matchedToken.endColumn);
@@ -645,15 +645,15 @@ TOKEN:
 
 <DEFAULT, NODIRECTIVE> TOKEN :
 {
-    <WHITESPACE : (["\n", "\r", "\t", " "])+>
+    <STATIC_TEXT_WS : (["\n", "\r", "\t", " "])+>
     |
-    <PRINTABLE_CHARS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
+    <STATIC_TEXT_NON_WS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
     |
-    <FALSE_ALERT : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
+    <STATIC_TEXT_FALSE_ALARM : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
     |
-    <OUTPUT_ESCAPE : "${"> : FM_EXPRESSION
+    <DOLLAR_INTERPOLATION_OPENING : "${"> : FM_EXPRESSION
     |
-    <NUMERICAL_ESCAPE : "#{"> : FM_EXPRESSION
+    <HASH_INTERPOLATION_OPENING : "#{"> : FM_EXPRESSION
 }
 
 <FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
@@ -793,12 +793,12 @@ TOKEN:
         }
     }
     |
-    <OPEN_BRACE : "{">
+    <OPENING_CURLY_BRACKET : "{">
     {
         ++hashLiteralNesting;
     }
     |
-    <CLOSE_BRACE : "}">
+    <CLOSING_CURLY_BRACKET : "}">
     {
         if (hashLiteralNesting == 0) SwitchTo(DEFAULT);
         else --hashLiteralNesting;
@@ -810,7 +810,7 @@ TOKEN:
     |
     <USING : "using">
     |
-    <ID: <LETTER> (<LETTER>|<DIGIT>)*>
+    <ID: <NAME_START_CHAR> (<NAME_START_CHAR>|<ASCII_DIGIT>)*>
     |
     <OPEN_MISPLACED_INTERPOLATION : "${" | "#{">
     {
@@ -827,16 +827,15 @@ TOKEN:
         }
     }
     |
-    <#LETTER:
+    <#NAME_START_CHAR:
         [
-            "\u0024",
-            "\u0040" - "\u005a",
-            "\u005f",
-            "\u0061" - "\u007a",
+            "$",
+            "@" - "Z",
+            "_",
+            "a" - "z",
             "\u00c0" - "\u00d6",
             "\u00d8" - "\u00f6",
-            "\u00f8" - "\u00ff",
-            "\u0100" - "\u1fff",
+            "\u00f8" - "\u1fff",
             "\u3040" - "\u318f",
             "\u3300" - "\u337f",
             "\u3400" - "\u3d2d",
@@ -845,25 +844,7 @@ TOKEN:
         ]
     >
     |
-    <#DIGIT:
-        [
-            "\u0030" - "\u0039",
-            "\u0660" - "\u0669",
-            "\u06f0" - "\u06f9",
-            "\u0966" - "\u096f",
-            "\u09e6" - "\u09ef",
-            "\u0a66" - "\u0a6f",
-            "\u0ae6" - "\u0aef",
-            "\u0b66" - "\u0b6f",
-            "\u0be7" - "\u0bef",
-            "\u0c66" - "\u0c6f",
-            "\u0ce6" - "\u0cef",
-            "\u0d66" - "\u0d6f",
-            "\u0e50" - "\u0e59",
-            "\u0ed0" - "\u0ed9",
-            "\u1040" - "\u1049"
-        ]
-    >
+    <#ASCII_DIGIT: ["0" - "9"] >
 }
 
 <FM_EXPRESSION, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :
@@ -910,7 +891,10 @@ TOKEN:
     {
         if (noparseTag.equals("-->")) {
             boolean squareBracket = matchedToken.image.endsWith("]");
-            if ((squBracTagSyntax && squareBracket) || (!squBracTagSyntax && !squareBracket)) SwitchTo(DEFAULT);
+            if ((squBracTagSyntax && squareBracket) || (!squBracTagSyntax && !squareBracket)) {
+                matchedToken.image = matchedToken.image + ";"; 
+                SwitchTo(DEFAULT);
+            }
         }
     }
     |
@@ -925,6 +909,7 @@ TOKEN:
     {
         StringTokenizer st = new StringTokenizer(image.toString(), " \t\n\r<>[]/#", false);
         if (st.nextToken().equals(noparseTag)) {
+            matchedToken.image = matchedToken.image + ";"; 
             SwitchTo(DEFAULT);
         }
     }
@@ -1644,7 +1629,7 @@ HashLiteral HashLiteral() :
     ArrayList values = new ArrayList();
 }
 {
-    begin = <OPEN_BRACE>
+    begin = <OPENING_CURLY_BRACKET>
     [
         key = Expression()
         (<COMMA>|<COLON>)
@@ -1666,7 +1651,7 @@ HashLiteral HashLiteral() :
             }
         )*
     ]
-    end = <CLOSE_BRACE>
+    end = <CLOSING_CURLY_BRACKET>
     {
         HashLiteral result = new HashLiteral(keys, values);
         result.setLocation(template, begin, end);
@@ -1684,13 +1669,13 @@ DollarVariable StringOutput() :
     Token begin, end;
 }
 {
-    begin = <OUTPUT_ESCAPE>
+    begin = <DOLLAR_INTERPOLATION_OPENING>
     exp = Expression()
     {
         notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
         notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
     }
-    end = <CLOSE_BRACE>
+    end = <CLOSING_CURLY_BRACKET>
     {
         DollarVariable result = new DollarVariable(exp, escapedExpression(exp));
         result.setLocation(template, begin, end);
@@ -1704,13 +1689,13 @@ NumericalOutput NumericalOutput() :
     Token fmt = null, begin, end;
 }
 {
-    begin = <NUMERICAL_ESCAPE>
+    begin = <HASH_INTERPOLATION_OPENING>
     exp = Expression() { numberLiteralOnly(exp); }
     [
         <SEMICOLON>
         fmt = <ID>
     ]
-    end = <CLOSE_BRACE>
+    end = <CLOSING_CURLY_BRACKET>
     {
         NumericalOutput result;
         if (fmt != null) {
@@ -2550,7 +2535,7 @@ Comment Comment() :
         |
         start = <TERSE_COMMENT>
     )
-    end = UnparsedContent(buf)
+    end = UnparsedContent(start, buf)
     {
         Comment result = new Comment(buf.toString());
         result.setLocation(template, start, end);
@@ -2565,7 +2550,7 @@ TextBlock NoParse() :
 }
 {
     start = <NOPARSE>
-    end = UnparsedContent(buf)
+    end = UnparsedContent(start, buf)
     {
         TextBlock result = new TextBlock(buf.toString(), true);
         result.setLocation(template, start, end);
@@ -2639,7 +2624,7 @@ SwitchBlock Switch() :
             switchBlock.addCase(caseIns);
         }
     )*
-    [<WHITESPACE>]
+    [<STATIC_TEXT_WS>]
     end = <END_SWITCH>
     {
         --switchNesting;
@@ -2655,7 +2640,7 @@ Case Case() :
     Token start;
 }
 {
-    [<WHITESPACE>]
+    [<STATIC_TEXT_WS>]
     (
         start = <CASE> exp = Expression() <DIRECTIVE_END>
         |
@@ -2836,14 +2821,14 @@ TextBlock PCData() :
 }
 {
     (
-        LOOKAHEAD(<WHITESPACE>|<PRINTABLE_CHARS>|<FALSE_ALERT>)
+        LOOKAHEAD(<STATIC_TEXT_WS>|<STATIC_TEXT_NON_WS>|<STATIC_TEXT_FALSE_ALARM>)
         (
             { prevToken = t; }
-            t = <WHITESPACE>
+            t = <STATIC_TEXT_WS>
             |
-            t = <PRINTABLE_CHARS>
+            t = <STATIC_TEXT_NON_WS>
             |
-            t = <FALSE_ALERT>
+            t = <STATIC_TEXT_FALSE_ALARM>
         )
         {
             buf.append(t.image);
@@ -2852,7 +2837,7 @@ TextBlock PCData() :
         }
     )+
     {
-        if (stripText && contentNesting == 1) return TextBlock.EMPTY_BLOCK;
+        if (stripText && mixedContentNesting == 1) return TextBlock.EMPTY_BLOCK;
 
         TextBlock result = new TextBlock(buf.toString(), false);
         result.setLocation(template, start, t);
@@ -2866,7 +2851,7 @@ TextBlock PCData() :
  * It returns the ending token. The content
  * of the tag is put in buf.
  */
-Token UnparsedContent(StringBuffer buf) :
+Token UnparsedContent(Token start, StringBuffer buf) :
 {
     Token t;
 }
@@ -2879,15 +2864,19 @@ Token UnparsedContent(StringBuffer buf) :
     )+
     {
         buf.setLength(buf.length() - t.image.length());
+        if (!t.image.endsWith(";")
+                && _TemplateAPI.getTemplateLanguageVersionAsInt(template) >= _TemplateAPI.VERSION_INT_2_3_21) {
+            throw new ParseException("Unclosed \"" + start.image + "\"", template, start);
+        }
         return t;
     }
 }
 
-TemplateElement Content() :
+MixedContent MixedContent() :
 {
-    MixedContent nodes = new MixedContent();
+    MixedContent mixedContent = new MixedContent();
     TemplateElement elem, begin = null;
-    contentNesting++;
+    mixedContentNesting++;
 }
 {
     (
@@ -2905,13 +2894,13 @@ TemplateElement Content() :
             if (begin == null) {
                 begin = elem;
             }
-            nodes.addElement(elem);
+            mixedContent.addElement(elem);
         }
     )+
     {
-        contentNesting--;
-        nodes.setLocation(template, begin, elem);
-        return nodes;
+        mixedContentNesting--;
+        mixedContent.setLocation(template, begin, elem);
+        return mixedContent;
     }
 }
 
@@ -2958,7 +2947,7 @@ TemplateElement OptionalBlock() :
 {
     [
         LOOKAHEAD(1) // has no effect but to get rid of a spurious warning.
-        tp = Content()
+        tp = MixedContent()
     ]
     {
         return tp;
@@ -2971,7 +2960,7 @@ void HeaderElement() :
     Expression exp = null;
 }
 {
-    [<WHITESPACE>]
+    [<STATIC_TEXT_WS>]
     (
         <TRIVIAL_FTL_HEADER>
         |
@@ -3088,7 +3077,7 @@ TemplateElement Root() :
 }
 {
     [
-        LOOKAHEAD([<WHITESPACE>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
+        LOOKAHEAD([<STATIC_TEXT_WS>](<TRIVIAL_FTL_HEADER>|<FTL_HEADER>))
         HeaderElement()
     ]
     doc = OptionalBlock()

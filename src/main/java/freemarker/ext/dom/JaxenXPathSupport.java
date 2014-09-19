@@ -134,7 +134,7 @@ class JaxenXPathSupport implements XPathSupport {
                     return ((TemplateDateModel)model).getAsDate();
                 }
                 if(model instanceof TemplateBooleanModel) {
-                    return ((TemplateBooleanModel)model).getAsBoolean() ? Boolean.TRUE : Boolean.FALSE;
+                    return Boolean.valueOf(((TemplateBooleanModel)model).getAsBoolean());
                 }
             }
             catch(TemplateModelException e) {

@@ -109,9 +109,10 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             NodeModel nm = (NodeModel) get(0);
             return nm.get(key);
         }
-        if (key.equals("@@markup") 
+        if (key.startsWith("@@") &&
+            (key.equals("@@markup") 
             || key.equals("@@nested_markup") 
-            || key.equals("@@text"))
+            || key.equals("@@text")))
         {
             StringBuffer result = new StringBuffer();
             for (int i=0; i<size(); i++) {

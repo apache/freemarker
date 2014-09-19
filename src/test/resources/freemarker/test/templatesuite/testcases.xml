@@ -74,6 +74,9 @@
       <config auto_import="import_lib.ftl as my"/>
    </testcase>
    <testcase name="include" />
+   <testcase name="include2">
+      <config input_encoding="utf-8" />
+   </testcase>
    <testcase name="interpret"/>
    <testcase name="iterators"/>
    <testcase name="lastcharacter"/>
@@ -114,6 +117,7 @@
    </testcase>
    <testcase name="recover" />
    <testcase name="root" />
+   <testcase name="setting" nooutput="true" />
    <testcase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/> 
    </testcase>
@@ -131,6 +135,7 @@
    <testcase name="string-builtins1" />
    <testcase name="string-builtins2" />
    <testcase name="string-builtins-regexps" />
+   <testcase name="string-builtins-regexps-matches" />
    <testcase name="stringbimethods" />
    <testcase name="stringliteral"/>
    <testcase name="if" />
@@ -141,6 +146,7 @@
    	  <config incompatible_improvements="2.3.21"/>
    </testcase>
    <testcase name="date-type-builtins" nooutput="true" />
+   <testcase name="url" nooutput="true" />
    <testcase name="var-layers"/>
    <testcase name="variables"/>
    <testcase name="whitespace-trim"/>

@@ -207,8 +207,7 @@ class RegexBuiltins {
                     logFlagWarning("?" + key + " doesn't support the \"f\" flag.");
                 }
                 Pattern pattern = getPattern(patternString, (int) flags);
-                Matcher matcher = pattern.matcher(matchString);
-                return new RegexMatchModel(matcher, matchString);
+                return new RegexMatchModel(pattern, matchString);
             }
         }
         
@@ -220,12 +219,12 @@ class RegexBuiltins {
             assertNonNull(targetModel, env);
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
-            } else if (targetModel instanceof RegexMatchModel.Match) {
-                return ((RegexMatchModel.Match) targetModel).subs;
+            } else if (targetModel instanceof RegexMatchModel.MatchWithGroups) {
+                return ((RegexMatchModel.MatchWithGroups) targetModel).groupsSeq;
             } else {
                 throw new UnexpectedTypeException(target, targetModel,
                         "regular expression matcher",
-                        new Class[] { RegexMatchModel.class, RegexMatchModel.Match.class },
+                        new Class[] { RegexMatchModel.class, RegexMatchModel.MatchWithGroups.class },
                         env);
             }
         }
@@ -306,93 +305,167 @@ class RegexBuiltins {
   
     static class RegexMatchModel 
     implements TemplateBooleanModel, TemplateCollectionModel, TemplateSequenceModel {
-        final Matcher matcher;
+        final Pattern pattern;
         final String input;
-        final boolean matches;
-        TemplateSequenceModel groups;
-        private ArrayList data;
         
-        RegexMatchModel(Matcher matcher, String input) {
-            this.matcher = matcher;
+        private Matcher firedEntireInputMatcher;
+        private Boolean entireInputMatched;
+        private TemplateSequenceModel entireInputMatchGroups;
+        
+        private ArrayList matchingInputParts;
+        
+        RegexMatchModel(Pattern pattern, String input) {
+            this.pattern = pattern;
             this.input = input;
-            this.matches = matcher.matches();
         }
         
         public boolean getAsBoolean() {
+            Boolean result = entireInputMatched;
+            return result != null ? result.booleanValue() : isEntrieInputMatchesAndStoreResults();
+        }
+        
+        private boolean isEntrieInputMatchesAndStoreResults() {
+            Matcher matcher = pattern.matcher(input);
+            boolean matches = matcher.matches();
+            firedEntireInputMatcher = matcher;
+            entireInputMatched = Boolean.valueOf(matches);
             return matches;
         }
         
         public TemplateModel get(int i) throws TemplateModelException {
-            if (data == null) initSequence();
-            return (TemplateModel) data.get(i);
+            ArrayList matchingInputParts = this.matchingInputParts;
+            if (matchingInputParts == null) {
+                matchingInputParts = getMatchingInputPartsAndStoreResults();
+            }
+            return (TemplateModel) matchingInputParts.get(i);
         }
         
         public int size() throws TemplateModelException {
-            if (data == null) initSequence();
-            return data.size();
+            ArrayList matchingInputParts = this.matchingInputParts;
+            if (matchingInputParts == null) {
+                matchingInputParts = getMatchingInputPartsAndStoreResults();
+            }
+            return matchingInputParts.size();
         }
         
-        private void initSequence() throws TemplateModelException {
-            data = new ArrayList();
-            TemplateModelIterator it = iterator();
-            while (it.hasNext()) {
-                data.add(it.next());
+        private ArrayList getMatchingInputPartsAndStoreResults() throws TemplateModelException {
+            ArrayList matchingInputParts = new ArrayList();
+            
+            Matcher matcher = pattern.matcher(input);
+            while (matcher.find()) {
+                matchingInputParts.add(new MatchWithGroups(input, matcher));
             }
+
+            this.matchingInputParts = matchingInputParts;
+            return matchingInputParts;
         }
         
         public TemplateModel getGroups() {
-           if (groups == null) {
-                groups = new TemplateSequenceModel() {
+           TemplateSequenceModel entireInputMatchGroups = this.entireInputMatchGroups;
+           if (entireInputMatchGroups == null) {
+               Matcher t = this.firedEntireInputMatcher;
+               if (t == null) {
+                   isEntrieInputMatchesAndStoreResults();
+                   t = this.firedEntireInputMatcher;
+               }
+               final Matcher firedEntireInputMatcher = t;
+               
+                entireInputMatchGroups = new TemplateSequenceModel() {
+                    
                     public int size() throws TemplateModelException {
                         try {
-                            return matcher.groupCount() + 1;
+                            return firedEntireInputMatcher.groupCount() + 1;
                         }
                         catch (Exception e) {
-                            throw new _TemplateModelException(e);
+                            throw new _TemplateModelException(e, "Failed to get match group count");
                         }
                     }
+                    
                     public TemplateModel get(int i) throws TemplateModelException {
                         try {
-                            return new SimpleScalar(matcher.group(i));
+                            return new SimpleScalar(firedEntireInputMatcher.group(i));
+                        } catch (Exception e) {
+                            throw new _TemplateModelException(e, "Failed to read match group");
                         }
-                        catch (Exception e) {
-                            throw new _TemplateModelException(e);
+                    }
+                    
+                };
+                this.entireInputMatchGroups = entireInputMatchGroups;
+            }
+            return entireInputMatchGroups;
+        }
+        
+        public TemplateModelIterator iterator() {
+            final ArrayList matchingInputParts = this.matchingInputParts;
+            if (matchingInputParts == null) {
+                final Matcher matcher = pattern.matcher(input);
+                return new TemplateModelIterator() {
+                    
+                    private int nextIdx = 0;
+                    boolean hasFindInfo = matcher.find();
+                    
+                    public boolean hasNext() {
+                        final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
+                        if (matchingInputParts == null) {
+                            return hasFindInfo;
+                        } else {
+                            return nextIdx < matchingInputParts.size();
+                        }
+                    }
+                    
+                    public TemplateModel next() throws TemplateModelException {
+                        final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
+                        if (matchingInputParts == null) {
+                            if (!hasFindInfo) throw new _TemplateModelException("There were no more matches");
+                            MatchWithGroups result = new MatchWithGroups(input, matcher);
+                            nextIdx++;
+                            hasFindInfo = matcher.find();
+                            return result;
+                        } else {
+                            try {
+                                return (TemplateModel) matchingInputParts.get(nextIdx++);
+                            } catch (IndexOutOfBoundsException e) {
+                                throw new _TemplateModelException(e, "There were no more matches");
+                            }
+                        }
+                    }
+                    
+                };
+            } else {
+                return new TemplateModelIterator() {
+                    
+                    private int nextIdx = 0;
+                    
+                    public boolean hasNext() {
+                        return nextIdx < matchingInputParts.size();
+                    }
+                    
+                    public TemplateModel next() throws TemplateModelException {
+                        try {
+                            return (TemplateModel) matchingInputParts.get(nextIdx++);
+                        } catch (IndexOutOfBoundsException e) {
+                            throw new _TemplateModelException(e, "There were no more matches");
                         }
                     }
                 };
             }
-            return groups;
         }
         
-        public TemplateModelIterator iterator() {
-            matcher.reset();
-            return new TemplateModelIterator() {
-                boolean hasFindInfo = matcher.find();
-                
-                public boolean hasNext() {
-                    return hasFindInfo;
-                }
-                
-                public TemplateModel next() throws TemplateModelException {
-                    if (!hasNext()) throw new _TemplateModelException("No more matches");
-                    Match result = new Match();
-                    hasFindInfo = matcher.find();
-                    return result;
-                }
-            };
-        }
-        
-        class Match implements TemplateScalarModel {
-            String match;
-            SimpleSequence subs = new SimpleSequence();
-            Match() {
-                match = input.substring(matcher.start(), matcher.end());
-                for (int i=0; i< matcher.groupCount() + 1; i++) {
-                    subs.add(matcher.group(i));
+        static class MatchWithGroups implements TemplateScalarModel {
+            final String matchedInputPart;
+            final SimpleSequence groupsSeq;
+            
+            MatchWithGroups(String input, Matcher matcher) {
+                matchedInputPart = input.substring(matcher.start(), matcher.end());
+                final int grpCount = matcher.groupCount() + 1;
+                groupsSeq = new SimpleSequence(grpCount);
+                for (int i = 0; i < grpCount; i++) {
+                    groupsSeq.add(matcher.group(i));
                 }
             }
+            
             public String getAsString() {
-                return match;
+                return matchedInputPart;
             }
         }
     }

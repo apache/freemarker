@@ -6650,7 +6650,7 @@ list.add("blue");
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
         = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21)
-          .getResult();
+          .build();
 
 // Normaly, you would create a plain java.util.HashMap here, and
 // later let the ObjectWrapper wrap it in Template.process(...).
@@ -12383,19 +12383,13 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <link linkend="gloss.regularExpression">regular
           expressions</link>.</para>
 
-          <note>
-            <para>This built-in will work only if you use Java2 platform 1.4
-            or later. Otherwise it will stop template processing with
-            error.</para>
-          </note>
-
           <para>This built-in determines if the string exactly matches the
           pattern. Also, it returns the list of matching sub-strings. The
           return value is a multi-type value:</para>
 
           <itemizedlist>
             <listitem>
-              <para>Boolean: <literal>true</literal>, if it the string exactly
+              <para>Boolean: <literal>true</literal>, if it the entire string
               matches the pattern, otherwise <literal>false</literal>. For
               example, <literal>"fooo"?matches('fo*')</literal> is
               <literal>true</literal>, but
@@ -12433,19 +12427,34 @@ Matching sub-strings:
           you can access them with the <literal>groups</literal>
           built-in:</para>
 
-          <programlisting role="template">&lt;#assign res = "aa/rx; ab/r;"?matches("(\\w[^/]+)/([^;]+);")&gt;
+          <programlisting role="template">&lt;#-- Entire input match --&gt;
+&lt;#assign res = "John Doe"?matches(r"(\w+) (\w+)")&gt;
+&lt;#if res&gt; &lt;#-- Must not try to access groups if there was no match! --&gt;
+  First name: ${res?groups[1]}
+  Second name: ${res?groups[2]}
+&lt;/#if&gt;
+
+&lt;#-- Subtring matches --&gt;
+&lt;#assign res = "aa/rx; ab/r;"?matches("(.+?)/*(.+?);")&gt;
 &lt;#list res as m&gt;
-- ${m} is ${m?groups[1]} per ${m?groups[2]}
+  - "${m}" is "${m?groups[1]}" per "${m?groups[2]}"
 &lt;/#list&gt;</programlisting>
 
           <para>This will print:</para>
 
-          <programlisting role="output">- aa/rx; is aa per rx
-- ab/r; is ab per r</programlisting>
+          <programlisting role="output">  First name: John
+  Second name: Doe
+
+  - "aa/rx;" is "a" per "a/rx"
+  - " ab/r;" is " " per "ab/r"</programlisting>
+
+          <para>Note above that <literal>groups</literal> has worked both with
+          substring matches and with the result of entire string
+          matching.</para>
 
           <para><literal>matches</literal> accepts an optional 2nd parameter,
           the <link linkend="ref_builtin_string_flags">flags</link>. Note that
-          it does not support flag <literal>f</literal>, and ignores the
+          it doesn't support flag <literal>f</literal>, and ignores the
           <literal>r</literal> flag.</para>
         </section>
 
@@ -12880,10 +12889,10 @@ ${x?url}</programlisting>
           <programlisting role="template">&lt;a href="foo.cgi?x=${x?url}&amp;y=${y?url}"&gt;Click here...&lt;/a&gt;</programlisting>
 
           <note>
-            <para>Above no HTML encoding (<literal>?htm</literal>) was needed,
-            because URL escaping escapes all reserved HTML characters anyway.
-            But watch: always quote the attribute value, and always with
-            normal quotation mark (<literal>"</literal>), never with
+            <para>Above no HTML encoding (<literal>?html</literal>) was
+            needed, because URL escaping escapes all reserved HTML characters
+            anyway. But watch: always quote the attribute value, and always
+            with normal quotation mark (<literal>"</literal>), never with
             apostrophe quotation mark (<literal>'</literal>), because
             apostrophe quotation mark is not escaped by the URL
             escaping.</para>
@@ -12946,6 +12955,53 @@ ${x?url}</programlisting>
           <literal>setting</literal> directive, so that's surely the task of
           the enclosing software. You may find more information regarding this
           <link linkend="pgui_misc_charset">here...</link></phrase></para>
+        </section>
+
+        <section xml:id="ref_builtin_url_path">
+          <title>url_path</title>
+
+          <indexterm>
+            <primary>url_path built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>escaping</primary>
+
+            <secondary>URL path</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>encoding</primary>
+
+            <secondary>URL path</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>URL escaping</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>URL encoding</primary>
+          </indexterm>
+
+          <para>This is the same as <link linkend="ref_builtin_url">the
+          <literal>url</literal> built-in</link>, except that it doesn't
+          escape slash (<literal>/</literal>) characters. This meant to be
+          used for converting paths (like paths coming from the OS or some
+          content repository) that use slash (not backslash!) to a path the
+          can be inserted into an URL. The most common reason why this
+          conversion is needed is that folder names or file names might
+          contain non-US-ASCII letters (<quote>national</quote>
+          characters).</para>
+
+          <note>
+            <para>Just like with <link linkend="ref_builtin_url">the
+            <literal>url</literal> built-in</link>, the desired URL escaping
+            charset (or as a fall back, the output encoding) must be set in
+            the FreeMarker configuration settings, or else the built-in will
+            give error. Or, you you have to specify the charset like
+            <literal>somePath?url_path('utf-8')</literal>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_word_list">
@@ -16761,6 +16817,11 @@ or
                   Expression evaluates to boolean (also accepts a few string
                   values for backward compatibility)</para>
                 </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>ignore_missing</replaceable></literal>:
+                  Expression evaluates to boolean</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
@@ -16775,12 +16836,12 @@ or
           is inserted at the point where the <literal>include</literal> tag
           occurs. The included file shares the variables with the including
           template, similarly like if it was copy-pasted into it. The
-          <literal>include</literal> directive is not replaced by the content
-          of the included file, it just processes the included file each time
-          when FreeMarker reaches the <literal>include</literal> directive in
-          the course of template processing. So for example if the
-          <literal>include</literal> is inside a <literal>list</literal>loop,
-          you can specify different file names in each cycle.</para>
+          <literal>include</literal> directive is not really replaced by the
+          content of the included file, instead it processes the included file
+          each time when FreeMarker reaches the <literal>include</literal>
+          directive in the course of template processing. So for example if
+          the <literal>include</literal> is inside a <literal>list</literal>
+          loop, you can specify different file names in each cycle.</para>
 
           <note>
             <para>This directive is not be confused with the JSP (Servlet)
@@ -16794,10 +16855,10 @@ or
           parameter can be a relative path like <literal>"foo.ftl"</literal>
           and <literal>"../foo.ftl"</literal>, or an absolute like
           <literal>"/foo.ftl"</literal>. Relative paths are relative to the
-          directory of the template that uses the <literal>import</literal>
-          directive. Absolute paths are relative to a base (often referred as
-          the ''root directory of the templates'') that the programmer defines
-          when he configures FreeMarker.</para>
+          directory of the template that contains the
+          <literal>import</literal> directive. Absolute paths are relative to
+          a base (often referred as the 'root directory of the templates')
+          that the programmer defines when he configures FreeMarker.</para>
 
           <note>
             <para>This is different than the way it worked prior FreeMarker
@@ -16807,10 +16868,9 @@ or
           </note>
 
           <para>Always use <literal>/</literal> (slash) to separate path
-          components, never <literal>\</literal> (backslash). If you are
+          components, never <literal>\</literal> (backslash). Even if you are
           loading templates from your local file system and it uses
-          backslashes (like under. Windows), FreeMarker will convert them
-          automatically.</para>
+          backslashes (like under. Windows), use <literal>/</literal>.</para>
 
           <para>Example:</para>
 
@@ -16840,21 +16900,33 @@ All rights reserved.</emphasis></programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>parse: If it is true, then the included file will be
-              parsed as FTL, otherwise the whole file will be considered as
-              simple text (i.e, no FreeMarker constructs will be searched in
-              it). If you omit this option, then it defaults to true.</para>
+              <para><literal>parse</literal>: If it is
+              <literal>true</literal>, then the included file will be parsed
+              as FTL, otherwise the whole file will be considered as simple
+              text (i.e, no FreeMarker constructs will be searched in it). If
+              you omit this option, then it defaults to
+              <literal>true</literal>.</para>
             </listitem>
 
             <listitem>
-              <para>encoding: The included file inherits the encoding (in
-              practice: the charset) of the including template, unless you
-              specify an encoding with this option. <phrase
-              role="forProgrammers">Encoding names are the same as the ones
-              supported be java.io.InputStreamReader (as of Java API 1.3:
+              <para><literal>encoding</literal>: The included file inherits
+              the encoding (the charset) of the top-level template, unless you
+              specify an encoding with this option. Examples of valid names:
+              UTF-8, ISO-8859-1, ISO-8859-2, Shift_JIS, Big5, EUC-KR, GB2312.
+              <phrase role="forProgrammers">Encoding names are the same as the
+              ones supported be java.io.InputStreamReader (as of Java API 1.3:
               MIME-preferred charset names from the IANA Charset
-              Registry).</phrase> Examples of valid names: ISO-8859-2, UTF-8,
-              Shift_JIS, Big5, EUC-KR, GB2312.</para>
+              Registry)</phrase></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>ignore_missing</literal>: When
+              <literal>true</literal>, suppresses the error when the template
+              to include is missing, instead <literal>&lt;#include
+              ...&gt;</literal> will print nothing. When
+              <literal>false</literal>, the template processing will stop with
+              error if the template is missing. If you omit this option, then
+              it defaults to <literal>false</literal>.</para>
             </listitem>
           </itemizedlist>
 
@@ -18021,6 +18093,18 @@ or
               role="forProgrammers">(Programmers can read more about this
               <link
               linkend="pgui_misc_charset">here...</link>)</phrase></para>
+            </listitem>
+
+            <listitem>
+              <para><indexterm>
+                  <primary>output_encoding</primary>
+                </indexterm><literal>output_encoding</literal>: Tells
+              FreeMarker what the charset of the output is. As FreeMarker
+              outputs a stream of UNICODE characters (<phrase
+              role="forProgrammers">it writes into a
+              <literal>java.io.Writer</literal></phrase>), it's not affected
+              by the output encoding, but some macros/functions and built-ins
+              may want to used this information.</para>
             </listitem>
 
             <listitem>
@@ -21152,13 +21236,113 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
-      <section xml:id="versions_2_3_21">
+      <section xml:id="versions_2_3_21_rc2">
+        <title>2.3.21 RC2</title>
+
+        <para>Date of release for release: 2014-09-FIXME</para>
+
+        <para>Date of release for the final release: Planned for
+        2014-10-12.</para>
+
+        <para>See also <link linkend="versions_2_3_21_rc1">the RC1
+        changes</link> below!</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>New <literal>include</literal> directive option,
+              <literal>ignore_missing=<replaceable>boolean</replaceable></literal>.
+              When this is set to <literal>true</literal>, and the template to
+              include is missing, the error will be silently ignored, and
+              nothing will be included.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>setting</literal> directive now can set the
+              <literal>output_encoding</literal> setting.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in, <literal>?url_path</literal>: This is the
+              same as <link linkend="ref_builtin_url">the
+              <literal>url</literal> built-in</link>, except that it doesn't
+              escape slash (<literal>/</literal>) characters. This meant to be
+              used for converting paths (like paths coming from the OS or some
+              content repository) that use slash (not backslash!) to a path
+              the can be inserted into an URL.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
+              The result of <literal>?matches</literal> wasn't
+              <quote>reentrant</quote>. For example, you couldn't list the
+              matches inside another listing where you are also listing
+              exactly the same result value, as they would consume from the
+              same iterator. Most importantly, even accessing the
+              <literal>?size</literal> of the same result value has terminated
+              the outer listing of the same value.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/229/">229</link>]:
+              If you set <literal>incompatible_improvements</literal> to
+              2.3.21 (or higher), unclosed comments and
+              <literal>#noparse</literal>-s won't be silently closed at the
+              end of template anymore, but cause a parsing error
+              instead.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>The <literal>getResult()</literal> method of builder
+              classes was renamed to <literal>build()</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
+              Poor quality error message when
+              <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
+              fails with string index out of bounds.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/27/">27</link>]:
+              Not very good quality error messages when
+              <literal>#import</literal>-ing a template whose parsing
+              fails.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bugs found in R1 fixed:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Legacy (deprecated) <literal>Template</literal>
+                  constructors without <literal>Configuration</literal>
+                  parameter have failed with
+                  <literal>NullPointerException</literal></para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
+      <section xml:id="versions_2_3_21_rc1">
         <title>2.3.21 RC1</title>
 
-        <para>Date of release for Release Candidate 1: 2014-08-31</para>
-
-        <para>Date of release for the final release: Planned for early/mid
-        2014-10.</para>
+        <para>Date of release: 2014-08-31</para>
 
         <para>Note that since 2.3.21 is designed to be backward compatible
         with the previous 2.3.x releases, <emphasis>some of the improvements
@@ -21577,8 +21761,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to another
                   almost identical <literal>DefaultObjectWrapper</literal>
                   singleton, returned by <literal>new
-                  DefaultObjectWrapperBuilder(Version).getResult()</literal>.
-                  The new default object wrapper's <quote>incompatible
+                  DefaultObjectWrapperBuilder(Version).build()</literal>. The
+                  new default object wrapper's <quote>incompatible
                   improvements</quote> version is set to the same as of the
                   <literal>Configuration</literal>. (See later regarding the
                   2.3.21 <quote>incompatible improvements</quote> of
@@ -21647,14 +21831,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   and <literal>new
                   BeansWrapper(<replaceable>...</replaceable>)</literal>, from
                   now on you should use <literal>new
-                  DefaultObjectWrapperBuilder(version).getResult()</literal>
-                  and <literal>new
-                  BeansWrapperBuilder(version).getResult()</literal>. (The
-                  builder objects have properties (configuration settings)
-                  like <literal>BeansWrapper</literal> has, which specify the
-                  properties of the objects created.) The created objects are
-                  <emphasis>singletons</emphasis> (VM-wide, or at least
-                  Web-Application-wide) and read-only (means,
+                  DefaultObjectWrapperBuilder(version).build()</literal> and
+                  <literal>new BeansWrapperBuilder(version).build()</literal>.
+                  (The builder objects have properties (configuration
+                  settings) like <literal>BeansWrapper</literal> has, which
+                  specify the properties of the objects created.) The created
+                  objects are <emphasis>singletons</emphasis> (VM-wide, or at
+                  least Web-Application-wide) and read-only (means,
                   non-configurable, hence safe to share). The main benefit of
                   using these factories instead of creating new instances is
                   that it allows FreeMarker to share the class introspection

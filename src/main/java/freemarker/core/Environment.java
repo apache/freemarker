@@ -1710,7 +1710,7 @@ public final class Environment extends Configurable {
         instructionStack.remove(instructionStack.size() - 1);
     }
     
-    void replaceElemetStackTop(TemplateElement instr) {
+    void replaceElementStackTop(TemplateElement instr) {
         instructionStack.set(instructionStack.size() - 1, instr);
     }
 

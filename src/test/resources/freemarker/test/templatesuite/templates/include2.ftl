@@ -1,22 +1,33 @@
-<html>
-<head>
-<title>FreeMarker: Include Instruction Test</title>
-</head>
-<body>
+<#include "include2" + "-included.ftl">
+<#assign s = "de">
+<#include "inclu" + s + "2-included.ftl">
 
-<p>A simple test follows:</p>
+<#assign bTrue=true>
+<#assign sY='y'>
+<#include "include2-included.ftl">
+<#include "include2-included.ftl" parse=true>
+<#include "include2-included.ftl" parse=bTrue>
+<#include "include2-included.ftl" parse='y'>
+<#include "include2-included.ftl" parse=sY>
 
-${message}
+<#assign bFalse=false>
+<#assign sN='n'>
+<#include "include2-included.ftl" parse=false>
+<#include "include2-included.ftl" parse=bFalse>
+<#include "include2-included.ftl" parse='n'>
+<#include "include2-included.ftl" parse=sN>
 
-<if message>
-	<p>Message exists!
-</if>
+<#assign sEncoding="ISO-8859-1">
+<#include "include2-included.ftl" encoding="ISO-8859-1">
+<#include "include2-included.ftl" encoding=sEncoding>
+<#include "include2-included-encoding.ftl" encoding="ISO-8859-1">
+<#include "include2-included-encoding.ftl" encoding=sEncoding>
 
-<p>Test normal includes:</p>
-<include "../bogus/included.ftl">
+<#include "include2-included.ftl" ignore_missing=true>
+<#include "include2-included.ftl" ignore_missing=bTrue>
+<#include "include2-included.ftl" ignore_missing=false>
+<#include "include2-included.ftl" ignore_missing=bFalse>
 
-<p>Test unparsed includes:</p>
-<include "../bogus/included.ftl" parse="n">
-
-</body>
-</html>
+<@assertFails message="not found"><#include "missing.ftl"></@>
+[<#include "missing.ftl" ignore_missing=true>]
+[<#include "missing.ftl" ignore_missing=bTrue>]

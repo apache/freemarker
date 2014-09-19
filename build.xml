@@ -737,18 +737,12 @@
       <fileset dir="${dist.dir}/documentation/_html/api" />
     </jar>
 
-    <input
-       validargs="u,f"
-       addproperty="mavenUpload.stability"
-    >
-Will this be an [u]nstable or a [f]inal release? </input>
-    
     <property name="maven-server-id" value="ossrh" />
-    <condition property="maven-repository-url"
-        value="https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-        else="https://oss.sonatype.org/content/repositories/snapshots/">
-      <equals arg1="f" arg2="${mavenUpload.stability}"/>
-    </condition>
+    <property name="maven-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+    <!--
+    Don't deploy to public snapshot repositories here!
+    It isn't backward compatible as version ranges will pick them up.
+    -->
     
     <input
        validargs="y,n"

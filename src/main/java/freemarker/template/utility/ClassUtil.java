@@ -176,8 +176,6 @@ public class ClassUtil
                 return TemplateBooleanModel.class;
             } else if (tm instanceof DateModel) {
                 return TemplateDateModel.class;
-            } else if (tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel) {
-                return TemplateMethodModelEx.class;
             } else if (tm instanceof StringModel) {
                 Object wrapped = ((BeanModel) tm).getWrappedObject();
                 return wrapped instanceof String
@@ -186,6 +184,8 @@ public class ClassUtil
             } else {
                 return null;
             }
+        } else if (tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel) {
+            return TemplateMethodModelEx.class;
         } else {
             return null;
         }

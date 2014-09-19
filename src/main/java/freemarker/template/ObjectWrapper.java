@@ -43,7 +43,7 @@ public interface ObjectWrapper {
      * custom handling for Java {@link Map}-s, {@link ResourceBundle}-s, etc. It doesn't treat
      * {@link org.w3c.dom.Node}-s and Jython objects specially, however.
      * 
-     * @deprecated Use {@link BeansWrapperBuilder#getResult()} instead; this instance isn't read-only
+     * @deprecated Use {@link BeansWrapperBuilder#build()} instead; this instance isn't read-only
      *    and thus can't be trusted.
      */
     ObjectWrapper BEANS_WRAPPER = BeansWrapper.getDefaultInstance();
@@ -56,7 +56,7 @@ public interface ObjectWrapper {
      * Furthermore it uses {@link SimpleScalar}, {@link SimpleNumber} to wrap {@link String}-s and {@link Number}-s,
      * although this is not considered to be harmful.    
      * 
-     * @deprecated Use {@link BeansWrapperBuilder#getResult()} instead; this instance isn't
+     * @deprecated Use {@link BeansWrapperBuilder#build()} instead; this instance isn't
      *    read-only and thus can't be trusted.
      */
     ObjectWrapper DEFAULT_WRAPPER = DefaultObjectWrapper.instance;

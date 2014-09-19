@@ -323,64 +323,97 @@ class StringBuiltins {
         }
     }
 
-    static class urlBI extends StringBuiltIn {
+    static abstract class AbstractUrlBIResult implements
+    TemplateScalarModel, TemplateMethodModel {
         
-        TemplateModel calculateResult(String s, Environment env) {
-            return new urlBIResult(s, env);
+        protected final BuiltIn parent;
+        protected final String targetAsString;
+        private final Environment env;
+        private String cachedResult;
+        
+        protected AbstractUrlBIResult(BuiltIn parent, String target, Environment env) {
+            this.parent = parent;
+            this.targetAsString = target;
+            this.env = env;
         }
         
-        static class urlBIResult implements
-                TemplateScalarModel, TemplateMethodModel {
-            
-            private final String target;
-            private final Environment env;
-            private String cachedResult;
-    
-            private urlBIResult(String target, Environment env) {
-                this.target = target;
-                this.env = env;
-            }
-            
-            public String getAsString() throws TemplateModelException {
-                if (cachedResult == null) {
-                    String cs = env.getEffectiveURLEscapingCharset();
-                    if (cs == null) {
-                        throw new _TemplateModelException(
-                                "To do URL encoding, the framework that encloses "
-                                + "FreeMarker must specify the output encoding "
-                                + "or the URL encoding charset, so ask the "
-                                + "programmers to fix it. Or, as a last chance, "
-                                + "you can set the url_encoding_charset setting in "
-                                + "the template, e.g. "
-                                + "<#setting url_escaping_charset='ISO-8859-1'>, or "
-                                + "give the charset explicitly to the buit-in, e.g. "
-                                + "foo?url('ISO-8859-1').");
-                    }
-                    try {
-                        cachedResult = StringUtil.URLEnc(target, cs);
-                    } catch (UnsupportedEncodingException e) {
-                        throw new _TemplateModelException(e, "Failed to execute URL encoding.");
-                    }
-                }
-                return cachedResult;
-            }
-    
-            public Object exec(List args) throws TemplateModelException {
-                if (args.size() != 1) {
+        public String getAsString() throws TemplateModelException {
+            if (cachedResult == null) {
+                String cs = env.getEffectiveURLEscapingCharset();
+                if (cs == null) {
                     throw new _TemplateModelException(
-                            "The \"url\" built-in needs exactly 1 parameter, the charset.");
+                            "To do URL encoding, the framework that encloses "
+                            + "FreeMarker must specify the output encoding "
+                            + "or the URL encoding charset, so ask the "
+                            + "programmers to fix it. Or, as a last chance, "
+                            + "you can set the url_encoding_charset setting in "
+                            + "the template, e.g. "
+                            + "<#setting url_escaping_charset='ISO-8859-1'>, or "
+                            + "give the charset explicitly to the buit-in, e.g. "
+                            + "foo?url('ISO-8859-1').");
                 }
                 try {
-                    return new SimpleScalar(
-                            StringUtil.URLEnc(target, (String) args.get(0)));
+                    cachedResult = encodeWithCharset(cs);
                 } catch (UnsupportedEncodingException e) {
                     throw new _TemplateModelException(e, "Failed to execute URL encoding.");
                 }
             }
+            return cachedResult;
+        }
+
+        protected abstract String encodeWithCharset(String cs) throws UnsupportedEncodingException;
+        
+        public Object exec(List args) throws TemplateModelException {
+            parent.checkMethodArgCount(args.size(), 1);
+            try {
+                return new SimpleScalar(encodeWithCharset((String) args.get(0)));
+            } catch (UnsupportedEncodingException e) {
+                throw new _TemplateModelException(e, "Failed to execute URL encoding.");
+            }
+        }
+        
+    }
+    
+    static class urlBI extends StringBuiltIn {
+        
+        TemplateModel calculateResult(String s, Environment env) {
+            return new UrlBIResult(this, s, env);
+        }
+        
+        static class UrlBIResult extends AbstractUrlBIResult {
+
+            protected UrlBIResult(BuiltIn parent, String target, Environment env) {
+                super(parent, target, env);
+            }
+
+            protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
+                return StringUtil.URLEnc(targetAsString, cs);
+            }
             
         }
+        
     }
 
+    static class urlPathBI extends StringBuiltIn {
+
+        TemplateModel calculateResult(String s, Environment env) {
+            return new UrlPathBIResult(this, s, env);
+        }
+        
+        static class UrlPathBIResult extends AbstractUrlBIResult {
+
+            protected UrlPathBIResult(BuiltIn parent, String target, Environment env) {
+                super(parent, target, env);
+            }
+
+            protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
+                return StringUtil.URLPathEnc(targetAsString, cs);
+            }
+            
+        }
+        
+    }
+    
     static class starts_withBI extends StringBuiltIn {
     
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
@@ -419,74 +452,6 @@ class StringBuiltins {
                 checkMethodArgCount(args, 1);
                 return s.endsWith(getStringMethodArg(args, 0)) ?
                         TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-            }
-        }
-    }
-
-    /** This isn't used on J2SE 1.4 and later. Remove it in 2.4. */
-    static class replaceBI extends StringBuiltIn {
-    
-        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
-            return new BIMethod(s);
-        }
-    
-        private class BIMethod implements TemplateMethodModel {
-            private String s;
-    
-            private BIMethod(String s) {
-                this.s = s;
-            }
-    
-            public Object exec(List args) throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 2, 3);
-                String first = (String) args.get(0);
-                String second = (String) args.get(1);
-                boolean caseInsensitive;
-                boolean firstOnly;
-                if (argCnt > 2) {
-                    String flags = (String) args.get(2);
-                    caseInsensitive = flags.indexOf('i') >= 0;
-                    firstOnly = flags.indexOf('f') >= 0;
-                    if (flags.indexOf('r') >=0) {
-                        throw new _TemplateModelException(
-                                "The regular expression classes are not available.");
-                    }
-                } else {
-                    caseInsensitive = false;
-                    firstOnly = false;
-                }
-                return new SimpleScalar(StringUtil.replace(
-                        s, first, second, caseInsensitive, firstOnly));
-            }
-        }
-    }
-
-    /** This isn't used on J2SE 1.4 and later. Remove it in 2.4. */
-    static class splitBI extends StringBuiltIn {
-    
-        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
-            return new BIMethod(s);
-        }
-    
-        private class BIMethod implements TemplateMethodModel {
-            private String s;
-    
-            private BIMethod(String s) {
-                this.s = s;
-            }
-    
-            public Object exec(List args) throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 2);
-                String splitString = (String) args.get(0);
-                String flags = argCnt == 2 ? (String) args.get(1) : "";
-                boolean caseInsensitive = flags.indexOf('i') >=0;
-                if (flags.indexOf('r') >=0) {
-                    throw new _TemplateModelException("Regular expression classes not available");
-                }
-                return new StringArraySequence(StringUtil.split(
-                        s, splitString, caseInsensitive));
             }
         }
     }

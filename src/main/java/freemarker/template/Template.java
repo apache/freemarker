@@ -87,9 +87,13 @@ public class Template extends Configurable {
      */
     private Template(String name, Configuration cfg)
     {
-        super(cfg != null ? cfg : Configuration.getDefaultConfiguration());
+        super(toNonNull(cfg));
         this.name = name;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
+    }
+
+    private static Configuration toNonNull(Configuration cfg) {
+        return cfg != null ? cfg : Configuration.getDefaultConfiguration();
     }
     
 
@@ -198,8 +202,8 @@ public class Template extends Configurable {
      * @deprecated Has problems setting actualTagSyntax and templateLanguageVersion; will be removed in 2.4.
      */
     // [2.4] remove this
-    Template(String name, TemplateElement root, Configuration config) {
-        this(name, config);
+    Template(String name, TemplateElement root, Configuration cfg) {
+        this(name, cfg);
         this.rootElement = root;
         DebuggerService.registerTemplate(this);
     }

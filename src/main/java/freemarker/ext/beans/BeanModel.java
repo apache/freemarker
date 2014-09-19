@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import freemarker.core.CollectionAndSequence;
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.util.ModelFactory;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
@@ -169,20 +172,20 @@ implements
                 if(fd != null) {
                     retval = invokeThroughDescriptor(fd, classInfo);
                     if (retval == UNKNOWN && model == nullModel) {
-                    	// This is the (somewhat subtle) case where the generic get() returns null
-                    	// and we have no bean info, so we respect the fact that
-                    	// the generic get() returns null and return null. (JR)
-                    	retval = nullModel;
+                        // This is the (somewhat subtle) case where the generic get() returns null
+                        // and we have no bean info, so we respect the fact that
+                        // the generic get() returns null and return null. (JR)
+                        retval = nullModel;
                     }
                 }
             }
             if (retval == UNKNOWN) {
-            	if (wrapper.isStrict()) {
+                if (wrapper.isStrict()) {
                     throw new InvalidPropertyException("No such bean property: " + key);
-            	} else if (logger.isDebugEnabled()) {
+                } else if (logger.isDebugEnabled()) {
                     logNoSuchKey(key, classInfo);
-            	}
-        		retval = wrapper.wrap(null);
+                }
+                retval = wrapper.wrap(null);
             }
             return retval;
         }
@@ -192,8 +195,11 @@ implements
         }
         catch(Exception e)
         {
-            throw new TemplateModelException("get(" + key + ") failed on " +
-                "instance of " + object.getClass().getName() + ". See cause exception.", e);
+            throw new _TemplateModelException(e, new Object [] {
+                    "An error has occured when reading existing sub-variable ", new _DelayedJQuote(key),
+                    "; see cause exception! The type of the containing value was: ",
+                    new _DelayedFTLTypeDescription(this)
+            });
         }
     }
 
@@ -209,7 +215,7 @@ implements
      */
     
     protected boolean hasPlainGetMethod() {
-    	return wrapper.getClassIntrospector().get(object.getClass()).get(ClassIntrospector.GENERIC_GET_KEY) != null;
+        return wrapper.getClassIntrospector().get(object.getClass()).get(ClassIntrospector.GENERIC_GET_KEY) != null;
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map classInfo)
@@ -321,9 +327,9 @@ implements
         if (object instanceof Collection) {
             return ((Collection) object).isEmpty();
         }
-	if (object instanceof Map) {
-	    return ((Map) object).isEmpty();
-	}
+        if (object instanceof Map) {
+            return ((Map) object).isEmpty();
+        }
         return object == null || Boolean.FALSE.equals(object);
     }
     

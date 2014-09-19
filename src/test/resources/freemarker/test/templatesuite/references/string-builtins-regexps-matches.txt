@@ -1,0 +1,81 @@
+
+List mode:
+Size: 4
+[L16][L27][L38][L49]
+[L16][L27][L38][L49]
+
+Iterator mode:
+[L16][L27][L38][L49]
+[L16(L16, L27, L38, L49)][L27(L16, L27, L38, L49)][L38(L16, L27, L38, L49)][L49(L16, L27, L38, L49)]
+[L16][L27][L38][L49]
+
+Iterator mode changes to list mode:
+[L16]/4[L27]/4[L38]/4[L49]/4
+[L16][L27][L38][L49]
+
+Iterator mode changes to list mode 2:
+[L16][L27][L38][L49]
+[L16]/4[L27]/4[L38]/4[L49]/4
+
+List mode with embedded iteration:
+[L16(L16, L27, L38, L49)][L27(L16, L27, L38, L49)][L38(L16, L27, L38, L49)][L49(L16, L27, L38, L49)]
+
+Entire input match:
+- M: L16
+    - G: L16
+    - G: 1
+    - G: 6
+- M: L27
+    - G: L27
+    - G: 2
+    - G: 7
+- M: L38
+    - G: L38
+    - G: 3
+    - G: 8
+- M: L49
+    - G: L49
+    - G: 4
+    - G: 9
+firstGS was: L16, 1, 6
+
+Entire input match 2:
+Matches: true
+- G: x12
+- G: 1
+- G: 2
+As list:
+- M: x12
+    - G: x12
+    - G: 1
+    - G: 2
+Groups again:
+- G: x12
+- G: 1
+- G: 2
+
+Entire input match 3:
+Matches: false
+
+Entire input match 4:
+Matches: true
+- G: x12
+- G: 1
+- G: 2
+
+Substring match nested into entire input match:
+- G: x12 ([x12{x12, 1, 2}])
+- G: 1 ([x12{x12, 1, 2}])
+- G: 2 ([x12{x12, 1, 2}])
+
+Different entire input and substring matches:
+123, 123
+- M: 1 (Gs: 1, 1)
+- M: 2 (Gs: 2, 2)
+- M: 3 (Gs: 3, 3)
+
+Different entire input and substring matches 2:
+123
+- M: 1 (Gs: 1)
+- M: 2 (Gs: 2)
+- M: 3 (Gs: 3)

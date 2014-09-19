@@ -208,17 +208,8 @@ public class TemplateException extends Exception {
     }
     
     /**
-     * <p>Returns the underlying exception that caused this exception to be
-     * generated.</p>
-     * <p><b>Note:</b><br />
-     * avoided calling it <code>getCause</code> to avoid name clash with
-     * JDK 1.4 method. This would be problematic because the JDK 1.4 method
-     * returns a <code>Throwable</code> rather than an {@link Exception}.</p>
-     *
-     * @return the underlying {@link Exception}, if any, that caused this
-     * exception to be raised
-     * 
-     * @deprecated Use {@link #getCause()} instead, as this can't return runtime exceptions and errors as is.
+     * @deprecated Java 1.4 has introduced {@link #getCause()} - use that instead, especially as this can't return
+     * runtime exceptions and errors as is.
      */
     public Exception getCauseException() {
         return getCause() instanceof Exception
@@ -428,7 +419,8 @@ public class TemplateException extends Exception {
     }
 
     public String getMessage() {
-        if (messageWasAlreadyPrintedForThisTrace != null && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
+        if (messageWasAlreadyPrintedForThisTrace != null
+                && messageWasAlreadyPrintedForThisTrace.get() == Boolean.TRUE) {
             return "[... Exception message was already printed; see it above ...]";
         } else {
             synchronized (lock) {  // Switch to double-check + volatile with Java 5

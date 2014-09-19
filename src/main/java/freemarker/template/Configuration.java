@@ -279,7 +279,7 @@ public class Configuration extends Configurable implements Cloneable {
      *       <li><p>
      *         The <em>default</em> of the {@code object_wrapper} setting ({@link #getObjectWrapper()}) changes from
      *         {@link ObjectWrapper#DEFAULT_WRAPPER} to another almost identical {@link DefaultObjectWrapper} singleton,
-     *         returned by {@link DefaultObjectWrapperBuilder#getResult()}. The new default object wrapper's
+     *         returned by {@link DefaultObjectWrapperBuilder#build()}. The new default object wrapper's
      *         "incompatible improvements" version is set to the same as of the {@link Configuration}.
      *         See {@link BeansWrapper#BeansWrapper(Version)} for further details. Furthermore, the new default
      *         object wrapper doesn't allow changing its settings; setter methods throw {@link IllegalStateException}).
@@ -946,7 +946,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @param ignoreMissing If {@code true}, the method won't throw {@link FileNotFoundException} if the template
      *     doesn't exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
      * 
-     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@core true}.
+     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
      * 
      * @throws FileNotFoundException if the template could not be found.
      * @throws IOException if there was a problem loading the template.
@@ -1540,7 +1540,7 @@ public class Configuration extends Configurable implements Cloneable {
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             return ObjectWrapper.DEFAULT_WRAPPER;
         } else {
-            return new DefaultObjectWrapperBuilder(incompatibleImprovements).getResult();
+            return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();
         }
     }
 

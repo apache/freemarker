@@ -128,10 +128,10 @@ public class TypeFlagsTest extends TestCase {
         checkTypeFlags(MultiNumTypeC.class, "m6",
                 TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER
                 );
-        assertEquals(getTypeFlags(MultiNumTypeC.class, "m6", false, 2), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
-        assertEquals(getTypeFlags(MultiNumTypeC.class, "m6", true, 2), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
-        assertEquals(getTypeFlags(MultiNumTypeC.class, "m6", false, 3), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
-        assertEquals(getTypeFlags(MultiNumTypeC.class, "m6", true, 3), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
+        assertSame(getTypeFlags(MultiNumTypeC.class, "m6", false, 2), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
+        assertSame(getTypeFlags(MultiNumTypeC.class, "m6", true, 2), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
+        assertSame(getTypeFlags(MultiNumTypeC.class, "m6", false, 3), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
+        assertSame(getTypeFlags(MultiNumTypeC.class, "m6", true, 3), OverloadedMethodsSubset.ALL_ZEROS_ARRAY);
         checkTypeFlags(MultiNumTypeC.class, "m6",
                 TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT | TypeFlags.DOUBLE | TypeFlags.ACCEPTS_NUMBER,
                 TypeFlags.INTEGER | TypeFlags.ACCEPTS_NUMBER,
@@ -319,9 +319,9 @@ public class TypeFlagsTest extends TestCase {
     
     public void testAllZeros() {
         for (boolean reverse : new boolean[] { true, false }) {
-            assertEquals(OverloadedMethodsSubset.ALL_ZEROS_ARRAY, getTypeFlags(AllZeroC.class, "m1", reverse, 0));
-            assertEquals(OverloadedMethodsSubset.ALL_ZEROS_ARRAY, getTypeFlags(AllZeroC.class, "m2", reverse, 2));
-            assertEquals(OverloadedMethodsSubset.ALL_ZEROS_ARRAY, getTypeFlags(AllZeroC.class, "m3", reverse, 1));
+            assertSame(OverloadedMethodsSubset.ALL_ZEROS_ARRAY, getTypeFlags(AllZeroC.class, "m1", reverse, 0));
+            assertSame(OverloadedMethodsSubset.ALL_ZEROS_ARRAY, getTypeFlags(AllZeroC.class, "m2", reverse, 2));
+            assertSame(OverloadedMethodsSubset.ALL_ZEROS_ARRAY, getTypeFlags(AllZeroC.class, "m3", reverse, 1));
         }
     }
     
