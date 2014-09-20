@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.21 RC1</subtitle>
+  <subtitle>For FreeMarker 2.3.21 RC2</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -8617,14 +8617,13 @@ TemplateHashModel roundingModeEnums =
         xlink:href="http://jakarta.apache.org/log4j">Log4J</link>, <link
         xlink:href="http://jakarta.apache.org/avalon/logkit">Avalon
         LogKit</link>, and <link
-        xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>
-        (Java 1.4 and above). By default, FreeMarker will look for the
-        following logging packages in this order, and will automatically use
-        the first package it finds: <remark>[2.4 - un-remark this] SLF4J,
-        Apache Commons Logging, </remark>Log4J, Avalon,
-        <literal>java.util.logging</literal>. However, if you call the static
-        <literal>selectLoggerLibrary</literal> method on the
-        <literal>freemarker.log.Logger</literal> class with appropriate
+        xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
+        By default, FreeMarker will look for the following logging packages in
+        this order, and will automatically use the first package it finds:
+        <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
+        </remark>Log4J, Avalon, <literal>java.util.logging</literal>. However,
+        if you call the static <literal>selectLoggerLibrary</literal> method
+        on the <literal>freemarker.log.Logger</literal> class with appropriate
         parameter and <emphasis>before using any FreeMarker classes that log
         messages</emphasis>, you can explicitly select a logger package, or
         even disable the logging. See the API documentation for more
@@ -8682,10 +8681,12 @@ TemplateHashModel roundingModeEnums =
             <tr>
               <td><literal>freemarker.runtime.attempt</literal></td>
 
-              <td>Logs template exceptions thrown during template processing,
-              but caught by
+              <td>Logs template exceptions thrown during template processing
+              and caught by
               <literal>attempt</literal>/<literal>recover</literal>
-              directives. Enable DEBUG severity to see the exceptions.</td>
+              directives, with DEBUG severity. Note that such exceptions will
+              be still also logged with their normal logger (like
+              <literal>freemarker.runtime</literal>).</td>
             </tr>
 
             <tr>
