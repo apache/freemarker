@@ -33,111 +33,9 @@ import freemarker.template.utility.NumberUtil;
 /**
  * A holder for builtins that operate exclusively on number left-hand value.
  */
-class NumericalBuiltins {
+class BuiltInsForNumbers {
     
-    // Can't be instantiated
-    private NumericalBuiltins() { }
-    
-    private abstract static class NumberBuiltIn extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
-            TemplateModel model = target.eval(env);
-            return calculateResult(target.modelToNumber(model, env), model);
-        }
-        
-        abstract TemplateModel calculateResult(Number num, TemplateModel model)
-        throws TemplateModelException;
-    }
-
-    static class byteBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            if (num instanceof Byte) {
-                return model;
-            }
-            return new SimpleNumber(new Byte(num.byteValue()));
-        }
-    }
-
-    static class shortBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            if (num instanceof Short) {
-                return model;
-            }
-            return new SimpleNumber(new Short(num.shortValue()));
-        }
-    }
-
-    static class intBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            if (num instanceof Integer) {
-                return model;
-            }
-            return new SimpleNumber(num.intValue());
-        }
-    }
-
-    // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
-    static class longBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
-            TemplateModel model = target.eval(env);
-            if (!(model instanceof TemplateNumberModel)
-                    && model instanceof TemplateDateModel) {
-                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target);
-                return new SimpleNumber(date.getTime());
-            } else {
-                Number num = target.modelToNumber(model, env);
-                if (num instanceof Long) {
-                    return model;
-                }
-                return new SimpleNumber(num.longValue());
-            }
-        }
-    }
-
-    static class floatBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            if (num instanceof Float) {
-                return model;
-            }
-            return new SimpleNumber(num.floatValue());
-        }
-    }
-
-    static class doubleBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            if (num instanceof Double) {
-                return model;
-            }
-            return new SimpleNumber(num.doubleValue());
-        }
-    }
-
-
-    private static final BigDecimal BIG_DECIMAL_ONE = new BigDecimal("1");
-
-    static class floorBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            return new SimpleNumber(new BigDecimal(num.doubleValue()).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_FLOOR));
-        }
-    }
-
-    static class ceilingBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            return new SimpleNumber(new BigDecimal(num.doubleValue()).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_CEILING));
-        }
-    }
-
-    static class roundBI extends NumberBuiltIn {
-        private static final BigDecimal half = new BigDecimal("0.5");
-        TemplateModel calculateResult(Number num, TemplateModel model) {
-            return new SimpleNumber(new BigDecimal(num.doubleValue()).add(half).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_FLOOR));
-        }
-    }
-
-    static class absBI extends NumberBuiltIn {
+    static class absBI extends BuiltInForNumber {
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             if (num instanceof Integer) {
                 int n = ((Integer) num).intValue();
@@ -202,23 +100,117 @@ class NumericalBuiltins {
         }
     }
     
-    static class is_nanBI extends NumberBuiltIn {
+    static class byteBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            if (num instanceof Byte) {
+                return model;
+            }
+            return new SimpleNumber(new Byte(num.byteValue()));
+        }
+    }
+
+    static class ceilingBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            return new SimpleNumber(new BigDecimal(num.doubleValue()).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_CEILING));
+        }
+    }
+
+    static class doubleBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            if (num instanceof Double) {
+                return model;
+            }
+            return new SimpleNumber(num.doubleValue());
+        }
+    }
+
+    static class floatBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            if (num instanceof Float) {
+                return model;
+            }
+            return new SimpleNumber(num.floatValue());
+        }
+    }
+
+    static class floorBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            return new SimpleNumber(new BigDecimal(num.doubleValue()).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_FLOOR));
+        }
+    }
+
+    static class intBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            if (num instanceof Integer) {
+                return model;
+            }
+            return new SimpleNumber(num.intValue());
+        }
+    }
+
+    static class is_infiniteBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            return NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
+
+    static class is_nanBI extends BuiltInForNumber {
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             return NumberUtil.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
-    static class is_infiniteBI extends NumberBuiltIn {
-        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
-            return NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+    // Does both someNumber?long and someDate?long, thus it doesn't extend NumberBuiltIn
+    static class longBI extends BuiltIn {
+        TemplateModel _eval(Environment env)
+                throws TemplateException
+        {
+            TemplateModel model = target.eval(env);
+            if (!(model instanceof TemplateNumberModel)
+                    && model instanceof TemplateDateModel) {
+                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target);
+                return new SimpleNumber(date.getTime());
+            } else {
+                Number num = target.modelToNumber(model, env);
+                if (num instanceof Long) {
+                    return model;
+                }
+                return new SimpleNumber(num.longValue());
+            }
+        }
+    }
+
+    static class number_to_dateBI extends BuiltInForNumber {
+        
+        private final int dateType;
+        
+        number_to_dateBI(int dateType) {
+            this.dateType = dateType;
+        }
+        
+        TemplateModel calculateResult(Number num, TemplateModel model)
+        throws TemplateModelException {
+            return new SimpleDate(new Date(safeToLong(num)), dateType);
+        }
+    }
+
+    static class roundBI extends BuiltInForNumber {
+        private static final BigDecimal half = new BigDecimal("0.5");
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            return new SimpleNumber(new BigDecimal(num.doubleValue()).add(half).divide(BIG_DECIMAL_ONE, 0, BigDecimal.ROUND_FLOOR));
         }
     }
     
-    private static final BigDecimal BIG_DECIMAL_LONG_MIN = BigDecimal.valueOf(Long.MIN_VALUE);
-    private static final BigDecimal BIG_DECIMAL_LONG_MAX = BigDecimal.valueOf(Long.MAX_VALUE); 
-    private static final BigInteger BIG_INTEGER_LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
-    private static final BigInteger BIG_INTEGER_LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE); 
-    
+    static class shortBI extends BuiltInForNumber {
+        TemplateModel calculateResult(Number num, TemplateModel model) {
+            if (num instanceof Short) {
+                return model;
+            }
+            return new SimpleNumber(new Short(num.shortValue()));
+        }
+    }
+
     private static final long safeToLong(Number num) throws TemplateModelException {
         if (num instanceof Double) {
             double d = Math.round(((Double) num).doubleValue());
@@ -260,18 +252,14 @@ class NumericalBuiltins {
         }
     }
     
-    static class number_to_dateBI extends NumberBuiltIn {
-        
-        private final int dateType;
-        
-        number_to_dateBI(int dateType) {
-            this.dateType = dateType;
-        }
-        
-        TemplateModel calculateResult(Number num, TemplateModel model)
-        throws TemplateModelException {
-            return new SimpleDate(new Date(safeToLong(num)), dateType);
-        }
-    }
+    private static final BigDecimal BIG_DECIMAL_ONE = new BigDecimal("1");
+    private static final BigDecimal BIG_DECIMAL_LONG_MIN = BigDecimal.valueOf(Long.MIN_VALUE); 
+    private static final BigDecimal BIG_DECIMAL_LONG_MAX = BigDecimal.valueOf(Long.MAX_VALUE);
+    private static final BigInteger BIG_INTEGER_LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE); 
+    
+    private static final BigInteger BIG_INTEGER_LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+    
+    // Can't be instantiated
+    private BuiltInsForNumbers() { }
     
 }

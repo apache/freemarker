@@ -76,10 +76,10 @@
     #assign  // f.c.Assignment
         - assignment target: "x"  // String
         - assignment source: ..  // f.c.Range
-            - left-hand operand: ?abs  // f.c.NumericalBuiltins$absBI
+            - left-hand operand: ?abs  // f.c.BuiltInsForNumbers$absBI
                 - left-hand operand: n  // f.c.Identifier
                 - right-hand operand: "abs"  // String
-            - right-hand operand: ?abs  // f.c.NumericalBuiltins$absBI
+            - right-hand operand: ?abs  // f.c.BuiltInsForNumbers$absBI
                 - left-hand operand: m  // f.c.Identifier
                 - right-hand operand: "abs"  // String
         - variable scope: "1"  // Integer
@@ -88,13 +88,13 @@
         - assignment target: "x"  // String
         - assignment source: ..  // f.c.Range
             - left-hand operand: ...(...)  // f.c.MethodCall
-                - callee: ?index_of  // f.c.StringBuiltins$index_ofBI
+                - callee: ?index_of  // f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: n  // f.c.Identifier
                     - right-hand operand: "index_of"  // String
                 - argument value: "x"  // f.c.StringLiteral
                     - embedded template: null  // Null
             - right-hand operand: ...(...)  // f.c.MethodCall
-                - callee: ?index_of  // f.c.StringBuiltins$index_ofBI
+                - callee: ?index_of  // f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: m  // f.c.Identifier
                     - right-hand operand: "index_of"  // String
                 - argument value: "y"  // f.c.StringLiteral
