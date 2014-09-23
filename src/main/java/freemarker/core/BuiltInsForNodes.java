@@ -20,7 +20,6 @@ import java.util.List;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -30,27 +29,9 @@ import freemarker.template.utility.StringUtil;
 /**
  * A holder for builtins that operate exclusively on (XML-)node left-hand value.
  */
-class NodeBuiltins {
+class BuiltInsForNodes {
     
-    // Can't be instantiated
-    private NodeBuiltins() { }
-    
-    private abstract static class NodeBuiltIn extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
-            TemplateModel model = target.eval(env);
-            if (model instanceof TemplateNodeModel) {
-                return calculateResult((TemplateNodeModel) model, env);
-            } else {
-                throw new NonNodeException(target, model, env);
-            }
-        }
-        abstract TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env)
-                throws TemplateModelException;
-    }
-
-    static class ancestorsBI extends NodeBuiltIn {
+    static class ancestorsBI extends BuiltInForNode {
        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
            AncestorSequence result = new AncestorSequence(env);
            TemplateNodeModel parent = nodeModel.getParentNode();
@@ -62,32 +43,39 @@ class NodeBuiltins {
        }
     }
     
-    static class childrenBI extends NodeBuiltIn {
+    static class childrenBI extends BuiltInForNode {
        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getChildNodes();
        }
     }
     
-    
-    static class node_nameBI extends NodeBuiltIn {
+    static class node_nameBI extends BuiltInForNode {
        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return new SimpleScalar(nodeModel.getNodeName());
        }
     }
     
-    static class node_typeBI extends NodeBuiltIn {
+    
+    static class node_namespaceBI extends BuiltInForNode {
+        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
+            String nsURI = nodeModel.getNodeNamespace();
+            return nsURI == null ? null : new SimpleScalar(nsURI);
+        }
+    }
+    
+    static class node_typeBI extends BuiltInForNode {
        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return new SimpleScalar(nodeModel.getNodeType());
         }
     }
 
-    static class parentBI extends NodeBuiltIn {
+    static class parentBI extends BuiltInForNode {
        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             return nodeModel.getParentNode();
        }
     }
     
-    static class rootBI extends NodeBuiltIn {
+    static class rootBI extends BuiltInForNode {
        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
             TemplateNodeModel result = nodeModel;
             TemplateNodeModel parent = nodeModel.getParentNode();
@@ -99,14 +87,11 @@ class NodeBuiltins {
        }
     }
     
-    static class node_namespaceBI extends NodeBuiltIn {
-        TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException {
-            String nsURI = nodeModel.getNodeNamespace();
-            return nsURI == null ? null : new SimpleScalar(nsURI);
-        }
-    }
     
-    
+    // Can't be instantiated
+    private BuiltInsForNodes() { }
+
+
     static class AncestorSequence extends SimpleSequence implements TemplateMethodModel {
         
         private Environment env;
