@@ -233,23 +233,24 @@
         again for each visiting. This ensures that the displayed information
         is always up-to-date.</para>
 
-        <para>Now, you already may have noticed that the template contains no
-        instructions regarding how to find out who the current visitor is, or
-        how to query the database to find out what the latest product is. It
-        seems it just already know these values. And indeed that's the case.
-        An important idea behind FreeMarker (actually, behind Web MVC) is that
-        presentation logic and "business logic" should be separated. In the
-        template you only deal with presentation issues, that is, visual
-        design issues, formatting issues. The data that will be displayed
-        (such as the user name and so on) is prepared outside FreeMarker,
-        usually by routines written in Java language or other general purpose
-        language. So the template author doesn't have to know how these values
-        are calculated. In fact, the way these values are calculated can be
-        completely changed while the templates can remain the same, and also,
-        the look of the page can be completely changed without touching
-        anything but the template. This separation can be especially useful
-        when the template authors (designers) and the programmers are
-        different individuals.</para>
+        <para>As you see above, the template contains no instructions
+        regarding how to find out who the current visitor is, or how to query
+        the database to find out what the latest product is. It seems it just
+        already know these values. And indeed that's the case. An important
+        idea behind FreeMarker (actually, behind Web MVC) is that presentation
+        logic and "business logic" should be separated. In the template you
+        only deal with presentation issues, that is, visual design issues,
+        formatting issues. The data that will be displayed (such as the user
+        name and so on) is prepared outside FreeMarker, usually by routines
+        written in Java language or other general purpose language. So the
+        template author doesn't have to know how these values are calculated.
+        In fact, the way these values are calculated can be completely changed
+        while the templates can remain the same, and also, the look of the
+        page can be completely changed without touching anything but the
+        template. This separation can be especially useful when the template
+        authors (designers) and the programmers are different individuals, but
+        also helps managing application complexity even if the template author
+        and the programmer is the same person.</para>
 
         <para><indexterm>
             <primary>data-model</primary>
@@ -275,8 +276,9 @@
 
         <para>(To prevent misunderstandings: The data-model is not a text
         file, the above is just a visualization of a data-model for you. It's
-        from Java objects, but let that be the problem of the Java
-        programmers.)</para>
+        from Java objects, such as JavaBeans, <literal>Map</literal>-s,
+        <literal>List</literal>-s, etc., but let that be the problem of the
+        Java programmers.)</para>
 
         <para>Compare this with what you saw in the template earlier:
         <literal>${user}</literal> and
@@ -289,7 +291,7 @@
         <literal>latestProduct</literal> directory. So
         <literal>latestProduct.name</literal> is like saying
         <literal>name</literal> in the <literal>latestProduct</literal>
-        directory. But as I said, it was just a simile; there are no files or
+        directory. But as I said, it's just an analogy; there are no files or
         directories here.</para>
 
         <para>To recapitulate, a template and a data-model is needed for
@@ -5444,8 +5446,8 @@ That's all.</programlisting>
     <chapter xml:id="pgui_quickstart">
       <title>Getting Started</title>
 
-      <para>Note that, if you are new to FreeMarker, you should read at least
-      the <xref linkend="dgui_quickstart"/> before this chapter.</para>
+      <para>If you are new to FreeMarker, you should read at least the <xref
+      linkend="dgui_quickstart_basics"/> before this chapter.</para>
 
       <section xml:id="pgui_quickstart_createconfiguration">
         <title>Create a configuration instance</title>
@@ -5458,10 +5460,11 @@ That's all.</programlisting>
         <literal>freemarker.template.Configuration</literal> instance and
         adjust its settings. A <literal>Configuration</literal> instance is a
         central place to store the application level settings of FreeMarker.
-        Also, it deals with the creation and caching of pre-parsed templates
-        (i.e., <literal>Template</literal> objects).</para>
+        Also, it deals with the creation and <emphasis>caching</emphasis> of
+        pre-parsed templates (i.e., <literal>Template</literal>
+        objects).</para>
 
-        <para>Probably you will <emphasis>do it only once</emphasis> at the
+        <para>Normally you will <emphasis>do this only once</emphasis> at the
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
@@ -5485,9 +5488,14 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</prog
         configuration instance (i.e., its a singleton). Note however that if a
         system has multiple independent components that use FreeMarker, then
         of course they will use their own private
-        <literal>Configuration</literal> instances. Do not needlessly
-        re-create configuration instances; it's expensive as you lose the
-        caches.</para>
+        <literal>Configuration</literal> instances.</para>
+
+        <warning>
+          <para>Do not needlessly re-create <literal>Configuration</literal>
+          instances; it's expensive, among others because you lose the caches.
+          <literal>Configuration</literal> instances meant to
+          application-level singletons.</para>
+        </warning>
 
         <para>When using in multi-threaded applications (like for Web sites),
         the settings in the <literal>Configuration</literal> instance must not
@@ -5617,9 +5625,9 @@ latest.put("name", "green mouse");</programlisting>
 
         <para><literal>Configuration</literal> caches
         <literal>Template</literal> instances, so when you get
-        <literal>test.ftl</literal> again, it probably will not create new
-        <literal>Template</literal> instance (thus doesn't read and parse the
-        file), just returns the same instance as for the first time.</para>
+        <literal>test.ftl</literal> again, it probably won't read and parse
+        the template file again, just returns the same
+        <literal>Template</literal> instance as for the first time.</para>
       </section>
 
       <section xml:id="pgui_quickstart_merge">
@@ -5651,10 +5659,20 @@ temp.process(root, out);</programlisting>
         in the <link linkend="example.first">first example</link> of the
         Template Author's Guide.</para>
 
-        <para>Once you have obtained a <literal>Template</literal> instance,
-        you can merge it with different data-models for unlimited times
-        (<literal>Template</literal> instances are basically stateless). Also,
-        the <literal>test.ftl</literal> file is accessed only while the
+        <para>Java I/O related notes: Depending on what <literal>out</literal>
+        is, you may need to ensure that <literal>out.close()</literal> is
+        called. This is typically needed when <literal>out</literal> writes
+        into a file that was opened to store the output of the template. In
+        other times, like in typical Web applications, you must
+        <emphasis>not</emphasis> close <literal>out</literal>. FreeMarker
+        calls <literal>out.flush()</literal> after a successful template
+        execution (can be disabled in <literal>Configuration</literal>), so
+        you don't need to worry about that.</para>
+
+        <para>Note that once you have obtained a <literal>Template</literal>
+        instance, you can merge it with different data-models for unlimited
+        times (<literal>Template</literal> instances are stateless). Also, the
+        <literal>test.ftl</literal> file is accessed only while the
         <literal>Template</literal> instance is created, not when you call the
         process method.</para>
       </section>
@@ -5677,14 +5695,14 @@ public class Test {
         /* ------------------------------------------------------------------------ */    
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
-        /* Create and adjust the configuration */
+        /* Create and adjust the configuration singleton */
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 
         /* ------------------------------------------------------------------------ */    
-        /* You usually do these for many times in the application life-cycle:       */    
+        /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -5694,12 +5712,14 @@ public class Test {
         latest.put("url", "products/greenmouse.html");
         latest.put("name", "green mouse");
 
-        /* Get the template */
+        /* Get the template (uses cache internally) */
         Template temp = cfg.getTemplate("test.ftl");
 
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);
         temp.process(root, out);
+        // Note: Depending on what `out` is, you may need to call `out.close()`.
+        // This is usually the case for file output, but not for servlet output.
     }
 }</programlisting>
 
