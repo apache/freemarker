@@ -58,7 +58,7 @@
 
       <para>FreeMarker is <link
       xlink:href="http://www.fsf.org/philosophy/free-sw.html">Free</link>,
-      released under a BSD-style license. It is <link
+      released under the Apache License, Version 2.0. It is <link
       xlink:href="http://www.opensource.org/">OSI Certified Open Source
       Software</link>. OSI Certified is a certification mark of the Open
       Source Initiative.</para>
