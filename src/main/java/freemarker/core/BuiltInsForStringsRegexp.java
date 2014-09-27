@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateBooleanModel;
@@ -122,38 +121,6 @@ class BuiltInsForStringsRegexp {
         
         TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
             return new ReplaceMethod(s);
-        }
-        
-    }
-    
-    static class split_BI extends BuiltInForString {
-        class SplitMethod implements TemplateMethodModel {
-            private String s;
-
-            SplitMethod(String s) {
-                this.s = s;
-            }
-
-            public Object exec(List args) throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 2);
-                String splitString = (String) args.get(0);
-                long flags = argCnt > 1 ? RegexpHelper.parseFlagString((String) args.get(1)) : 0;
-                String[] result = null;
-                if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                    RegexpHelper.checkNonRegexpFlags("split", flags);
-                    result = StringUtil.split(s, splitString,
-                            (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0);
-                } else {
-                    Pattern pattern = RegexpHelper.getPattern(splitString, (int) flags);
-                    result = pattern.split(s);
-                } 
-                return ObjectWrapper.DEFAULT_WRAPPER.wrap(result);
-            }
-        }
-        
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
-            return new SplitMethod(s);
         }
         
     }

@@ -2,12 +2,16 @@ package freemarker.core;
 
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -87,6 +91,48 @@ class BuiltInsForStringsBasic {
         }
     }
 
+    static class ensure_ends_withBI extends BuiltInForString {
+        
+        private class BIMethod implements TemplateMethodModelEx {
+            private String s;
+    
+            private BIMethod(String s) {
+                this.s = s;
+            }
+    
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                String suffix = getStringMethodArg(args, 0);
+                return new SimpleScalar(s.endsWith(suffix) ? s : s + suffix);
+            }
+        }
+    
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
+        }
+    }
+
+    static class ensure_starts_withBI extends BuiltInForString {
+        
+        private class BIMethod implements TemplateMethodModelEx {
+            private String s;
+    
+            private BIMethod(String s) {
+                this.s = s;
+            }
+    
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                String prefix = getStringMethodArg(args, 0);
+                return new SimpleScalar(s.startsWith(prefix) ? s : prefix + s);
+            }
+        }
+    
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
+        }
+    }
+
     static class index_ofBI extends BuiltIn {
         
         private class BIMethod implements TemplateMethodModelEx {
@@ -122,20 +168,65 @@ class BuiltInsForStringsBasic {
         } 
     }
 
+    static class keep_until_BI extends BuiltInForString {
+        class KeepUntilMethod implements TemplateMethodModelEx {
+            private String s;
+
+            KeepUntilMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String stopString = getStringMethodArg(args, 0);
+                long flags = argCnt > 1 ? RegexpHelper.parseFlagString(getStringMethodArg(args, 1)) : 0;
+                
+                int stopIndex;
+                if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
+                    RegexpHelper.checkNonRegexpFlags("keep_until", flags);
+                    if (flags == 0) {
+                        stopIndex = s.indexOf(stopString);
+                    } else if (flags == RegexpHelper.RE_FLAG_CASE_INSENSITIVE) {
+                        stopIndex = s.toLowerCase().indexOf(stopString.toLowerCase());
+                    } else {
+                        throw newMethodArgInvalidValueException(
+                                2,
+                                new Object[] { "Without the 'r' flag, only 'i' is supported" });
+                    }
+                } else {
+                    Pattern pattern = RegexpHelper.getPattern(stopString, (int) flags);
+                    final Matcher matcher = pattern.matcher(s);
+                    if (matcher.find()) {
+                        stopIndex = matcher.start();
+                    } else {
+                        stopIndex = -1;
+                    }
+                } 
+                return stopIndex == -1 ? new SimpleScalar(s) : new SimpleScalar(s.substring(0, stopIndex));
+            }
+        }
+        
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new KeepUntilMethod(s);
+        }
+        
+    }
+    
     static class lengthBI extends BuiltInForString {
     
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new SimpleNumber(s.length());
         }
         
-    }
+    }    
 
     static class lower_caseBI extends BuiltInForString {
         TemplateModel calculateResult(String s, Environment env)
         {
             return new SimpleScalar(s.toLowerCase(env.getLocale()));
         }
-    }
+    }    
 
     static class padBI extends BuiltInForString {
         
@@ -185,7 +276,81 @@ class BuiltInsForStringsBasic {
             return new BIMethod(s);
         }
     }
+    
+    static class remove_beginningBI extends BuiltInForString {
+        
+        private class BIMethod implements TemplateMethodModelEx {
+            private String s;
+    
+            private BIMethod(String s) {
+                this.s = s;
+            }
+    
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                String prefix = getStringMethodArg(args, 0);
+                return new SimpleScalar(s.startsWith(prefix) ? s.substring(prefix.length()) : s);
+            }
+        }
+    
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
+        }
+    }
 
+    static class remove_endingBI extends BuiltInForString {
+    
+        private class BIMethod implements TemplateMethodModelEx {
+            private String s;
+    
+            private BIMethod(String s) {
+                this.s = s;
+            }
+    
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                String suffix = getStringMethodArg(args, 0);
+                return new SimpleScalar(s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : s);
+            }
+        }
+    
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
+            return new BIMethod(s);
+        }
+    }
+    
+    static class split_BI extends BuiltInForString {
+        class SplitMethod implements TemplateMethodModel {
+            private String s;
+
+            SplitMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String splitString = (String) args.get(0);
+                long flags = argCnt > 1 ? RegexpHelper.parseFlagString((String) args.get(1)) : 0;
+                String[] result = null;
+                if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
+                    RegexpHelper.checkNonRegexpFlags("split", flags);
+                    result = StringUtil.split(s, splitString,
+                            (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0);
+                } else {
+                    Pattern pattern = RegexpHelper.getPattern(splitString, (int) flags);
+                    result = pattern.split(s);
+                } 
+                return ObjectWrapper.DEFAULT_WRAPPER.wrap(result);
+            }
+        }
+        
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new SplitMethod(s);
+        }
+        
+    }
+    
     static class starts_withBI extends BuiltInForString {
     
         private class BIMethod implements TemplateMethodModelEx {
