@@ -21329,6 +21329,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>OSGi execution environment header was tweaked again, now
+              it's <literal>Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+              J2SE-1.4</literal>. That is, we prefer (and compile against)
+              1.5, but only require 1.4.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
               Poor quality error message when
