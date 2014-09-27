@@ -13173,10 +13173,9 @@ ${x?url}</programlisting>
               <link linkend="gloss.regularExpression">regular
               expression</link>. FreeMarker uses the variation of regular
               expressions described at <link
-              xlink:href="http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html">http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html</link>.
-              <emphasis>This flag will work only if you use Java2 platform 1.4
-              or later. Otherwise it will cause template processing to stop
-              with error.</emphasis></para>
+              xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html</link>
+              (note that the presence of some pattern features depends on the
+              Java version used).</para>
             </listitem>
 
             <listitem>
