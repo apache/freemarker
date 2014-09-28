@@ -122,9 +122,35 @@ class BuiltInsForStringsBasic {
             }
     
             public Object exec(List args) throws TemplateModelException {
-                checkMethodArgCount(args, 1);
-                String prefix = getStringMethodArg(args, 0);
-                return new SimpleScalar(s.startsWith(prefix) ? s : prefix + s);
+                checkMethodArgCount(args, 1, 3);
+                
+                final String checkedPrefix = getStringMethodArg(args, 0);
+                
+                final boolean startsWithPrefix;
+                final String addedPrefix; 
+                if (args.size() > 1) {
+                    addedPrefix = getStringMethodArg(args, 1);
+                    long flags = args.size() > 2
+                            ? RegexpHelper.parseFlagString(getStringMethodArg(args, 2))
+                            : RegexpHelper.RE_FLAG_REGEXP;
+                  
+                    if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
+                        RegexpHelper.checkNonRegexpFlags(key, flags, true);
+                        if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
+                            startsWithPrefix = s.startsWith(checkedPrefix);
+                        } else {
+                            startsWithPrefix = s.toLowerCase().startsWith(checkedPrefix.toLowerCase());
+                        }
+                    } else {
+                        Pattern pattern = RegexpHelper.getPattern(checkedPrefix, (int) flags);
+                        final Matcher matcher = pattern.matcher(s);
+                        startsWithPrefix = matcher.lookingAt();
+                    } 
+                } else {
+                    startsWithPrefix = s.startsWith(checkedPrefix);
+                    addedPrefix = checkedPrefix;
+                }
+                return new SimpleScalar(startsWithPrefix ? s : addedPrefix + s);
             }
         }
     
@@ -167,8 +193,52 @@ class BuiltInsForStringsBasic {
                     "For sequences/collections (lists and such) use \"?seq_index_of\" instead."));
         } 
     }
+    
+    static class keep_afterBI extends BuiltInForString {
+        class KeepAfterMethod implements TemplateMethodModelEx {
+            private String s;
 
-    static class keep_until_BI extends BuiltInForString {
+            KeepAfterMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String separatorString = getStringMethodArg(args, 0);
+                long flags = argCnt > 1 ? RegexpHelper.parseFlagString(getStringMethodArg(args, 1)) : 0;
+                
+                int startIndex;
+                if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
+                    RegexpHelper.checkNonRegexpFlags(key, flags, true);
+                    if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
+                        startIndex = s.indexOf(separatorString);
+                    } else {
+                        startIndex = s.toLowerCase().indexOf(separatorString.toLowerCase());
+                    }
+                    if (startIndex >= 0) {
+                        startIndex += separatorString.length();
+                    }
+                } else {
+                    Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
+                    final Matcher matcher = pattern.matcher(s);
+                    if (matcher.find()) {
+                        startIndex = matcher.end();
+                    } else {
+                        startIndex = -1;
+                    }
+                } 
+                return startIndex == -1 ? SimpleScalar.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
+            }
+        }
+        
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new KeepAfterMethod(s);
+        }
+        
+    }
+    
+    static class keep_beforeBI extends BuiltInForString {
         class KeepUntilMethod implements TemplateMethodModelEx {
             private String s;
 
@@ -179,23 +249,19 @@ class BuiltInsForStringsBasic {
             public Object exec(List args) throws TemplateModelException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
-                String stopString = getStringMethodArg(args, 0);
+                String separatorString = getStringMethodArg(args, 0);
                 long flags = argCnt > 1 ? RegexpHelper.parseFlagString(getStringMethodArg(args, 1)) : 0;
                 
                 int stopIndex;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                    RegexpHelper.checkNonRegexpFlags("keep_until", flags);
-                    if (flags == 0) {
-                        stopIndex = s.indexOf(stopString);
-                    } else if (flags == RegexpHelper.RE_FLAG_CASE_INSENSITIVE) {
-                        stopIndex = s.toLowerCase().indexOf(stopString.toLowerCase());
+                    RegexpHelper.checkNonRegexpFlags(key, flags, true);
+                    if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
+                        stopIndex = s.indexOf(separatorString);
                     } else {
-                        throw newMethodArgInvalidValueException(
-                                2,
-                                new Object[] { "Without the 'r' flag, only 'i' is supported" });
+                        stopIndex = s.toLowerCase().indexOf(separatorString.toLowerCase());
                     }
                 } else {
-                    Pattern pattern = RegexpHelper.getPattern(stopString, (int) flags);
+                    Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
                     final Matcher matcher = pattern.matcher(s);
                     if (matcher.find()) {
                         stopIndex = matcher.start();

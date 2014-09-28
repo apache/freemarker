@@ -196,7 +196,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("join", new BuiltInsForSequences.joinBI());
         builtins.put("js_string", new BuiltInsForStringsEncoding.js_stringBI());
         builtins.put("json_string", new BuiltInsForStringsEncoding.json_stringBI());
-        builtins.put("keep_until", new BuiltInsForStringsBasic.keep_until_BI());
+        builtins.put("keep_after", new BuiltInsForStringsBasic.keep_afterBI());
+        builtins.put("keep_before", new BuiltInsForStringsBasic.keep_beforeBI());
         builtins.put("keys", new BuiltInsForHashes.keysBI());
         builtins.put("last_index_of", new BuiltInsForStringsBasic.index_ofBI(true));
         builtins.put("last", new lastBI());

@@ -146,27 +146,39 @@ final class RegexpHelper {
                 return;
             }
         }
-        message += " This will be an error in FreeMarker 2.4!";
+        message += " This will be an error in some later FreeMarker version!";
         if (cnt + 1 == MAX_FLAG_WARNINGS_LOGGED) {
             message += " [Will not log more regular expression flag problems until restart!]";
         }
         LOG.warn(message);
     }
 
-    static void checkNonRegexpFlags(String biName, long flags) {
-        if (!flagWarningsEnabled) return;
+    static void checkNonRegexpFlags(String biName, long flags) throws _TemplateModelException {
+        checkNonRegexpFlags(biName, flags, false);
+    }
+    
+    static void checkNonRegexpFlags(String biName, long flags, boolean strict)
+            throws _TemplateModelException {
+        if (!strict && !flagWarningsEnabled) return;
         
+        String flag; 
         if ((flags & RE_FLAG_MULTILINE) != 0) {
-            logFlagWarning("?" + biName + " doesn't support the \"m\" flag "
-                    + "without the \"r\" flag.");
+            flag = "m";
+        } else if ((flags & RE_FLAG_DOTALL) != 0) {
+            flag = "s";
+        } else if ((flags & RE_FLAG_COMMENTS) != 0) {
+            flag = "c";
+        } else {
+            return;
         }
-        if ((flags & RE_FLAG_DOTALL) != 0) {
-            logFlagWarning("?" + biName + " doesn't support the \"s\" flag "
-                    + "without the \"r\" flag.");
-        }
-        if ((flags & RE_FLAG_COMMENTS) != 0) {
-            logFlagWarning("?" + biName + " doesn't support the \"c\" flag "
-                    + "without the \"r\" flag.");
+
+        final Object[] msg = new Object[] { "?", biName ," doesn't support the \"", flag, "\" flag "
+                + "without the \"r\" flag." };
+        if (strict) {
+            throw new _TemplateModelException(msg);
+        } else {
+            // Suppress error for backward compatibility
+            logFlagWarning(new _ErrorDescriptionBuilder(msg).toString());
         }
     }
     

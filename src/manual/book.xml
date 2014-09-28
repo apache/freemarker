@@ -11524,6 +11524,16 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_ensure_ends_with">ensure_ends_with</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_ensure_starts_with">ensure_starts_with</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_eval">eval</link></para>
           </listitem>
 
@@ -11595,6 +11605,16 @@ End book</programlisting>
           <listitem>
             <para><link
             linkend="ref_builtin_js_string">js_string</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_keep_after">keep_after</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_keep_before">keep_before</link></para>
           </listitem>
 
           <listitem>
@@ -11670,6 +11690,16 @@ End book</programlisting>
 
           <listitem>
             <para><link linkend="ref_builtin_replace">replace</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_remove_beginning">remove_beginning</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_remove_ending">remove_ending</link></para>
           </listitem>
 
           <listitem>
@@ -12055,10 +12085,61 @@ Green Mouse</programlisting>
             <primary>ends_with built-in</primary>
           </indexterm>
 
-          <para>Returns if this string ends with the specified substring. For
-          example <literal>"redhead"?ends_with("head")</literal> returns
-          boolean true. Also, <literal>"head"?ends_with("head")</literal> will
-          return true.</para>
+          <para>Returns whether this string ends with the substring specified
+          in the parameter. For example
+          <literal>"ahead"?ends_with("head")</literal> returns boolean
+          <literal>true</literal>. Also,
+          <literal>"head"?ends_with("head")</literal> will return
+          <literal>true</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_ensure_ends_with">
+          <title>ensure_ends_with</title>
+
+          <indexterm>
+            <primary>ensure_ends_with built-in</primary>
+          </indexterm>
+
+          <para>If the string doesn't end with the substring specified as the
+          1st parameter, it adds it after the string, otherwise it returns the
+          original string. For example, both
+          <literal>"foo"?ensure_ends_with("/")</literal> and
+          <literal>"foo"?ensure_ends_with("/")</literal> returns
+          <literal>"foo/"</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_ensure_starts_with">
+          <title>ensure_starts_with</title>
+
+          <indexterm>
+            <primary>ensure_ends_with built-in</primary>
+          </indexterm>
+
+          <para>If the string doesn't start with the substring specified as
+          the 1st parameter, it adds it before the string, otherwise it
+          returns the original string. For example, both
+          <literal>"foo"?ensure_starts_with("/")</literal> and
+          <literal>"/foo"?ensure_starts_with("/")</literal> returns
+          <literal>"/foo"</literal>.</para>
+
+          <para>If you specify two parameters, then the 1st parameter is
+          interpreted as a Java regular expression, and if it doesn't match
+          the beginning of the string, then the string specified as the 2nd
+          parameter is added before the string. For example
+          <literal>someURL?ensure_starts_with("[a-zA-Z]+://",
+          "http://")</literal> will check if the string starts with something
+          that matches <literal>"[a-zA-Z]+://"</literal> (note that no
+          <literal>^</literal> is needed), and if it doesn't, it prepends
+          <literal>"http://"</literal>.</para>
+
+          <para>This method also accepts a 3rd <link
+          linkend="ref_builtin_string_flags">flags parameter</link>. As
+          calling with 2 parameters implies <literal>"r"</literal> there
+          (i.e., regular expression mode), you rarely need this. One notable
+          case is when you don't want the 1st parameter to be interpreted as a
+          regular expression, only as plain text, but you want the comparison
+          to be case-insensitive, in which case you would use
+          <literal>"i"</literal> as the 3rd parameter.</para>
         </section>
 
         <section xml:id="ref_builtin_groups">
@@ -12256,6 +12337,68 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           sequence in JSON (like <literal>\n</literal>, <literal>\t</literal>,
           etc.), they will be replaced with a UNICODE escape
           (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
+        </section>
+
+        <section xml:id="ref_builtin_keep_after">
+          <title>keep_after</title>
+
+          <indexterm>
+            <primary>keep_after built-in</primary>
+          </indexterm>
+
+          <para>Removes the part of the string that is not after the first
+          occurrence of the given substring. For example:</para>
+
+          <programlisting role="template">${"abcdefgh"?keep_until("de")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">fgh</programlisting>
+
+          <para>If the parameter string is not found, it will return an empty
+          string. If the parameter string is a 0-length string, it will return
+          the original string unchanged.</para>
+
+          <para>This method accepts an optional <link
+          linkend="ref_builtin_string_flags">flags parameter</link>, as its
+          2nd parameter:</para>
+
+          <programlisting role="template">${"foo : bar"?keep_until(r"\s*:\s*", "r")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">bar</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_keep_before">
+          <title>keep_before</title>
+
+          <indexterm>
+            <primary>keep_before built-in</primary>
+          </indexterm>
+
+          <para>Removes the part of the string that starts with the given
+          substring. For example:</para>
+
+          <programlisting role="template">${"abcdef"?keep_before("de")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">abc</programlisting>
+
+          <para>If the parameter string is not found, it will return the
+          original string unchanged. If the parameter string is a 0-length
+          string, it will return an empty string.</para>
+
+          <para>This method accepts an optional <link
+          linkend="ref_builtin_string_flags">flags parameter</link>, as its
+          2nd parameter:</para>
+
+          <programlisting role="template">${"foo : bar"?keep_before(r"\s*:\s*", "r")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">foo</programlisting>
         </section>
 
         <section xml:id="ref_builtin_last_index_of">
@@ -12623,6 +12766,46 @@ Matching sub-strings:
 [abO.oO.o]
 [abc.oO.o]
 [abcdoO.o]</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_remove_beginning">
+          <title>remove_beginning</title>
+
+          <indexterm>
+            <primary>remove_beginning built-in</primary>
+          </indexterm>
+
+          <para>Removes the parameter substring from the beginning of the
+          string, or returns the original string if it doesn't start with the
+          parameter substring. For example:</para>
+
+          <programlisting role="template">${"abcdef"?remove_beginning("abc")}
+${"foobar"?remove_beginning("abc")}</programlisting>
+
+          <para>will return:</para>
+
+          <programlisting role="output">def
+foobar</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_remove_ending">
+          <title>remove_ending</title>
+
+          <indexterm>
+            <primary>remove_ending built-in</primary>
+          </indexterm>
+
+          <para>Removes the parameter substring from the beginning of the
+          string, or returns the original string if it doesn't start with the
+          parameter substring. For example:</para>
+
+          <programlisting role="template">${"abcdef"?remove_ending("def")}
+${"foobar"?remove_ending("def")}</programlisting>
+
+          <para>will return:</para>
+
+          <programlisting role="output">abc
+foobar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_rtf">
@@ -21295,15 +21478,58 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>New built-ins for string manipulation:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?keep_before(<replaceable>substring</replaceable>[,
+                  <replaceable>flags</replaceable>])</literal>: <link
+                  linkend="ref_builtin_keep_before">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?keep_after(<replaceable>substring</replaceable>[,
+                  <replaceable>flags</replaceable>])</literal>: <link
+                  linkend="ref_builtin_keep_after">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?remove_beginning(<replaceable>substring</replaceable>)</literal>:
+                  <link
+                  linkend="ref_builtin_remove_beginning">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?remove_ending(<replaceable>substring</replaceable>)</literal>:
+                  <link
+                  linkend="ref_builtin_remove_ending">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?ensure_starts_with(<replaceable>substring</replaceable>[,
+                  <replaceable>substitution</replaceable>[,
+                  <replaceable>flags</replaceable>]])</literal>: <link
+                  linkend="ref_builtin_ensure_starts_with">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?ensure_ends_with(<replaceable>substring</replaceable>)</literal>:
+                  <link
+                  linkend="ref_builtin_ensure_ends_with">More...</link></para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
-              The result of <literal>?matches</literal> wasn't
+              The result value of <literal>?matches</literal> wasn't
               <quote>reentrant</quote>. For example, you couldn't list the
               matches inside another listing where you are also listing
-              exactly the same result value, as they would consume from the
-              same iterator. Most importantly, even accessing the
-              <literal>?size</literal> of the same result value has terminated
-              the outer listing of the same value.</para>
+              exactly the same result value (stored in a common variable), as
+              they would consume from the same iterator. Most importantly,
+              even accessing the <literal>?size</literal> of the same result
+              value has terminated the outer listing of the same value.</para>
             </listitem>
 
             <listitem>
