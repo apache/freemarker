@@ -12904,6 +12904,12 @@ foobar</programlisting>
           elements from the end of the resulting list, so with
           <literal>?split(",", "r")</literal> in the last example the last
           <literal>""</literal> would be missing from the output.</para>
+
+          <note>
+            <para>To check if a strings ends with something and append it
+            otherwise, use <link linkend="ref_builtin_ensure_ends_with">the
+            <literal>ensure_ends_with</literal> built-in</link>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_starts_with">
@@ -12914,9 +12920,16 @@ foobar</programlisting>
           </indexterm>
 
           <para>Returns if this string starts with the specified substring.
-          For example <literal>"redhead"?starts_with("red")</literal> returns
-          boolean true. Also, <literal>"red"?starts_with("red")</literal> will
-          return true.</para>
+          For example <literal>"redirect"?starts_with("red")</literal> returns
+          boolean <literal>true</literal>. Also,
+          <literal>"red"?starts_with("red")</literal> will return
+          <literal>true</literal>.</para>
+
+          <note>
+            <para>To check if a strings starts with something and prepend it
+            otherwise, use <link linkend="ref_builtin_ensure_starts_with">the
+            <literal>ensure_starts_with</literal> built-in</link>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_string_for_string">
