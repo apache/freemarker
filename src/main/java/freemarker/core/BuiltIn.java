@@ -24,7 +24,6 @@ import java.util.List;
 
 import freemarker.core.BuiltInsForDates.iso_BI;
 import freemarker.core.BuiltInsForDates.iso_utc_or_local_BI;
-import freemarker.core.BuiltInsForStringsMisc.evalBI;
 import freemarker.core.BuiltInsForNodes.ancestorsBI;
 import freemarker.core.BuiltInsForNodes.childrenBI;
 import freemarker.core.BuiltInsForNodes.node_nameBI;
@@ -53,6 +52,7 @@ import freemarker.core.BuiltInsForSequences.seq_containsBI;
 import freemarker.core.BuiltInsForSequences.seq_index_ofBI;
 import freemarker.core.BuiltInsForSequences.sortBI;
 import freemarker.core.BuiltInsForSequences.sort_byBI;
+import freemarker.core.BuiltInsForStringsMisc.evalBI;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateModel;
@@ -92,6 +92,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("default", new ExistenceBuiltins.defaultBI());
         builtins.put("double", new doubleBI());
         builtins.put("ends_with", new BuiltInsForStringsBasic.ends_withBI());
+        builtins.put("ensure_ends_with", new BuiltInsForStringsBasic.ensure_ends_withBI());
+        builtins.put("ensure_starts_with", new BuiltInsForStringsBasic.ensure_starts_withBI());
         builtins.put("eval", new evalBI());
         builtins.put("exists", new ExistenceBuiltins.existsBI());
         builtins.put("first", new firstBI());
@@ -194,6 +196,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("join", new BuiltInsForSequences.joinBI());
         builtins.put("js_string", new BuiltInsForStringsEncoding.js_stringBI());
         builtins.put("json_string", new BuiltInsForStringsEncoding.json_stringBI());
+        builtins.put("keep_after", new BuiltInsForStringsBasic.keep_afterBI());
+        builtins.put("keep_before", new BuiltInsForStringsBasic.keep_beforeBI());
         builtins.put("keys", new BuiltInsForHashes.keysBI());
         builtins.put("last_index_of", new BuiltInsForStringsBasic.index_ofBI(true));
         builtins.put("last", new lastBI());
@@ -215,6 +219,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("right_pad", new BuiltInsForStringsBasic.padBI(false));
         builtins.put("root", new rootBI());
         builtins.put("round", new roundBI());
+        builtins.put("remove_ending", new BuiltInsForStringsBasic.remove_endingBI());
+        builtins.put("remove_beginning", new BuiltInsForStringsBasic.remove_beginningBI());
         builtins.put("rtf", new BuiltInsForStringsEncoding.rtfBI());
         builtins.put("seq_contains", new seq_containsBI());
         builtins.put("seq_index_of", new seq_index_ofBI(1));
@@ -223,6 +229,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("size", new BuiltInsForMultipleTypes.sizeBI());
         builtins.put("sort_by", new sort_byBI());
         builtins.put("sort", new sortBI());
+        builtins.put("split", new BuiltInsForStringsBasic.split_BI());
         builtins.put("starts_with", new BuiltInsForStringsBasic.starts_withBI());
         builtins.put("string", new BuiltInsForMultipleTypes.stringBI());
         builtins.put("substring", new BuiltInsForStringsBasic.substringBI());
@@ -241,7 +248,6 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("matches", new BuiltInsForStringsRegexp.matchesBI());
         builtins.put("groups", new BuiltInsForStringsRegexp.groupsBI());
         builtins.put("replace", new BuiltInsForStringsRegexp.replace_reBI());
-        builtins.put("split", new BuiltInsForStringsRegexp.split_BI());
     }
 
     static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
@@ -353,6 +359,14 @@ abstract class BuiltIn extends Expression implements Cloneable {
         } else {
             return EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
         }
+    }
+    
+    protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
+        return MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
+    }
+
+    protected final TemplateModelException newMethodArgsInvalidValueException(Object[] details) {
+        return MessageUtil.newMethodArgsInvalidValueException("?" + key, details);
     }
     
     protected final Expression deepCloneWithIdentifierReplaced_inner(

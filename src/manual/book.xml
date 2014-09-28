@@ -58,7 +58,7 @@
 
       <para>FreeMarker is <link
       xlink:href="http://www.fsf.org/philosophy/free-sw.html">Free</link>,
-      released under a BSD-style license. It is <link
+      released under the Apache License, Version 2.0. It is <link
       xlink:href="http://www.opensource.org/">OSI Certified Open Source
       Software</link>. OSI Certified is a certification mark of the Open
       Source Initiative.</para>
@@ -233,23 +233,24 @@
         again for each visiting. This ensures that the displayed information
         is always up-to-date.</para>
 
-        <para>Now, you already may have noticed that the template contains no
-        instructions regarding how to find out who the current visitor is, or
-        how to query the database to find out what the latest product is. It
-        seems it just already know these values. And indeed that's the case.
-        An important idea behind FreeMarker (actually, behind Web MVC) is that
-        presentation logic and "business logic" should be separated. In the
-        template you only deal with presentation issues, that is, visual
-        design issues, formatting issues. The data that will be displayed
-        (such as the user name and so on) is prepared outside FreeMarker,
-        usually by routines written in Java language or other general purpose
-        language. So the template author doesn't have to know how these values
-        are calculated. In fact, the way these values are calculated can be
-        completely changed while the templates can remain the same, and also,
-        the look of the page can be completely changed without touching
-        anything but the template. This separation can be especially useful
-        when the template authors (designers) and the programmers are
-        different individuals.</para>
+        <para>As you see above, the template contains no instructions
+        regarding how to find out who the current visitor is, or how to query
+        the database to find out what the latest product is. It seems it just
+        already know these values. And indeed that's the case. An important
+        idea behind FreeMarker (actually, behind Web MVC) is that presentation
+        logic and "business logic" should be separated. In the template you
+        only deal with presentation issues, that is, visual design issues,
+        formatting issues. The data that will be displayed (such as the user
+        name and so on) is prepared outside FreeMarker, usually by routines
+        written in Java language or other general purpose language. So the
+        template author doesn't have to know how these values are calculated.
+        In fact, the way these values are calculated can be completely changed
+        while the templates can remain the same, and also, the look of the
+        page can be completely changed without touching anything but the
+        template. This separation can be especially useful when the template
+        authors (designers) and the programmers are different individuals, but
+        also helps managing application complexity even if the template author
+        and the programmer is the same person.</para>
 
         <para><indexterm>
             <primary>data-model</primary>
@@ -275,8 +276,9 @@
 
         <para>(To prevent misunderstandings: The data-model is not a text
         file, the above is just a visualization of a data-model for you. It's
-        from Java objects, but let that be the problem of the Java
-        programmers.)</para>
+        from Java objects, such as JavaBeans, <literal>Map</literal>-s,
+        <literal>List</literal>-s, etc., but let that be the problem of the
+        Java programmers.)</para>
 
         <para>Compare this with what you saw in the template earlier:
         <literal>${user}</literal> and
@@ -289,7 +291,7 @@
         <literal>latestProduct</literal> directory. So
         <literal>latestProduct.name</literal> is like saying
         <literal>name</literal> in the <literal>latestProduct</literal>
-        directory. But as I said, it was just a simile; there are no files or
+        directory. But as I said, it's just an analogy; there are no files or
         directories here.</para>
 
         <para>To recapitulate, a template and a data-model is needed for
@@ -2766,7 +2768,7 @@ J</programlisting>
                 instead of an error. (It should be an error as it's a
                 decreasing range.) Currently this bug is emulated for backward
                 compatibility, but you shouldn't utilize it, as in the future
-                it will be certainly disabled.</para>
+                it will be certainly an error.</para>
               </listitem>
             </itemizedlist>
 
@@ -2786,6 +2788,18 @@ CD
 CDE
 CDEF
 CDEF</programlisting>
+
+            <note>
+              <para>Some of the typical use-cases of string slicing is covered
+              by convenient built-ins: <link
+              linkend="ref_builtin_remove_beginning"><literal>remove_beginning</literal></link>,
+              <link
+              linkend="ref_builtin_remove_ending"><literal>remove_ending</literal></link>,
+              <link
+              linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
+              <link
+              linkend="ref_builtin_keep_after"><literal>keep_after</literal></link></para>
+            </note>
           </section>
         </section>
 
@@ -2932,6 +2946,13 @@ Slicing with right-unlimited ranges:
             <para>Note above that slicing with length limited and right
             unbounded ranges allow the starting index to be past the last item
             <emphasis>by one</emphasis> (but no more).</para>
+
+            <note>
+              <para>To split a sequence to slices of a given size, you should
+              use the <link
+              linkend="ref_builtin_chunk"><literal>chunk</literal></link>
+              built-in.</para>
+            </note>
           </section>
         </section>
 
@@ -5444,8 +5465,8 @@ That's all.</programlisting>
     <chapter xml:id="pgui_quickstart">
       <title>Getting Started</title>
 
-      <para>Note that, if you are new to FreeMarker, you should read at least
-      the <xref linkend="dgui_quickstart"/> before this chapter.</para>
+      <para>If you are new to FreeMarker, you should read at least the <xref
+      linkend="dgui_quickstart_basics"/> before this chapter.</para>
 
       <section xml:id="pgui_quickstart_createconfiguration">
         <title>Create a configuration instance</title>
@@ -5458,10 +5479,11 @@ That's all.</programlisting>
         <literal>freemarker.template.Configuration</literal> instance and
         adjust its settings. A <literal>Configuration</literal> instance is a
         central place to store the application level settings of FreeMarker.
-        Also, it deals with the creation and caching of pre-parsed templates
-        (i.e., <literal>Template</literal> objects).</para>
+        Also, it deals with the creation and <emphasis>caching</emphasis> of
+        pre-parsed templates (i.e., <literal>Template</literal>
+        objects).</para>
 
-        <para>Probably you will <emphasis>do it only once</emphasis> at the
+        <para>Normally you will <emphasis>do this only once</emphasis> at the
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
@@ -5485,9 +5507,14 @@ cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</prog
         configuration instance (i.e., its a singleton). Note however that if a
         system has multiple independent components that use FreeMarker, then
         of course they will use their own private
-        <literal>Configuration</literal> instances. Do not needlessly
-        re-create configuration instances; it's expensive as you lose the
-        caches.</para>
+        <literal>Configuration</literal> instances.</para>
+
+        <warning>
+          <para>Do not needlessly re-create <literal>Configuration</literal>
+          instances; it's expensive, among others because you lose the caches.
+          <literal>Configuration</literal> instances meant to
+          application-level singletons.</para>
+        </warning>
 
         <para>When using in multi-threaded applications (like for Web sites),
         the settings in the <literal>Configuration</literal> instance must not
@@ -5617,9 +5644,9 @@ latest.put("name", "green mouse");</programlisting>
 
         <para><literal>Configuration</literal> caches
         <literal>Template</literal> instances, so when you get
-        <literal>test.ftl</literal> again, it probably will not create new
-        <literal>Template</literal> instance (thus doesn't read and parse the
-        file), just returns the same instance as for the first time.</para>
+        <literal>test.ftl</literal> again, it probably won't read and parse
+        the template file again, just returns the same
+        <literal>Template</literal> instance as for the first time.</para>
       </section>
 
       <section xml:id="pgui_quickstart_merge">
@@ -5651,10 +5678,20 @@ temp.process(root, out);</programlisting>
         in the <link linkend="example.first">first example</link> of the
         Template Author's Guide.</para>
 
-        <para>Once you have obtained a <literal>Template</literal> instance,
-        you can merge it with different data-models for unlimited times
-        (<literal>Template</literal> instances are basically stateless). Also,
-        the <literal>test.ftl</literal> file is accessed only while the
+        <para>Java I/O related notes: Depending on what <literal>out</literal>
+        is, you may need to ensure that <literal>out.close()</literal> is
+        called. This is typically needed when <literal>out</literal> writes
+        into a file that was opened to store the output of the template. In
+        other times, like in typical Web applications, you must
+        <emphasis>not</emphasis> close <literal>out</literal>. FreeMarker
+        calls <literal>out.flush()</literal> after a successful template
+        execution (can be disabled in <literal>Configuration</literal>), so
+        you don't need to worry about that.</para>
+
+        <para>Note that once you have obtained a <literal>Template</literal>
+        instance, you can merge it with different data-models for unlimited
+        times (<literal>Template</literal> instances are stateless). Also, the
+        <literal>test.ftl</literal> file is accessed only while the
         <literal>Template</literal> instance is created, not when you call the
         process method.</para>
       </section>
@@ -5677,14 +5714,14 @@ public class Test {
         /* ------------------------------------------------------------------------ */    
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
-        /* Create and adjust the configuration */
+        /* Create and adjust the configuration singleton */
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 
         /* ------------------------------------------------------------------------ */    
-        /* You usually do these for many times in the application life-cycle:       */    
+        /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
 
         /* Create a data-model */
         Map root = new HashMap();
@@ -5694,12 +5731,14 @@ public class Test {
         latest.put("url", "products/greenmouse.html");
         latest.put("name", "green mouse");
 
-        /* Get the template */
+        /* Get the template (uses cache internally) */
         Template temp = cfg.getTemplate("test.ftl");
 
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);
         temp.process(root, out);
+        // Note: Depending on what `out` is, you may need to call `out.close()`.
+        // This is usually the case for file output, but not for servlet output.
     }
 }</programlisting>
 
@@ -11504,6 +11543,16 @@ End book</programlisting>
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_ensure_ends_with">ensure_ends_with</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_ensure_starts_with">ensure_starts_with</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_eval">eval</link></para>
           </listitem>
 
@@ -11575,6 +11624,16 @@ End book</programlisting>
           <listitem>
             <para><link
             linkend="ref_builtin_js_string">js_string</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_keep_after">keep_after</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_keep_before">keep_before</link></para>
           </listitem>
 
           <listitem>
@@ -11650,6 +11709,16 @@ End book</programlisting>
 
           <listitem>
             <para><link linkend="ref_builtin_replace">replace</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_remove_beginning">remove_beginning</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_remove_ending">remove_ending</link></para>
           </listitem>
 
           <listitem>
@@ -12035,10 +12104,61 @@ Green Mouse</programlisting>
             <primary>ends_with built-in</primary>
           </indexterm>
 
-          <para>Returns if this string ends with the specified substring. For
-          example <literal>"redhead"?ends_with("head")</literal> returns
-          boolean true. Also, <literal>"head"?ends_with("head")</literal> will
-          return true.</para>
+          <para>Returns whether this string ends with the substring specified
+          in the parameter. For example
+          <literal>"ahead"?ends_with("head")</literal> returns boolean
+          <literal>true</literal>. Also,
+          <literal>"head"?ends_with("head")</literal> will return
+          <literal>true</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_ensure_ends_with">
+          <title>ensure_ends_with</title>
+
+          <indexterm>
+            <primary>ensure_ends_with built-in</primary>
+          </indexterm>
+
+          <para>If the string doesn't end with the substring specified as the
+          1st parameter, it adds it after the string, otherwise it returns the
+          original string. For example, both
+          <literal>"foo"?ensure_ends_with("/")</literal> and
+          <literal>"foo"?ensure_ends_with("/")</literal> returns
+          <literal>"foo/"</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_ensure_starts_with">
+          <title>ensure_starts_with</title>
+
+          <indexterm>
+            <primary>ensure_ends_with built-in</primary>
+          </indexterm>
+
+          <para>If the string doesn't start with the substring specified as
+          the 1st parameter, it adds it before the string, otherwise it
+          returns the original string. For example, both
+          <literal>"foo"?ensure_starts_with("/")</literal> and
+          <literal>"/foo"?ensure_starts_with("/")</literal> returns
+          <literal>"/foo"</literal>.</para>
+
+          <para>If you specify two parameters, then the 1st parameter is
+          interpreted as a Java regular expression, and if it doesn't match
+          the beginning of the string, then the string specified as the 2nd
+          parameter is added before the string. For example
+          <literal>someURL?ensure_starts_with("[a-zA-Z]+://",
+          "http://")</literal> will check if the string starts with something
+          that matches <literal>"[a-zA-Z]+://"</literal> (note that no
+          <literal>^</literal> is needed), and if it doesn't, it prepends
+          <literal>"http://"</literal>.</para>
+
+          <para>This method also accepts a 3rd <link
+          linkend="ref_builtin_string_flags">flags parameter</link>. As
+          calling with 2 parameters implies <literal>"r"</literal> there
+          (i.e., regular expression mode), you rarely need this. One notable
+          case is when you don't want the 1st parameter to be interpreted as a
+          regular expression, only as plain text, but you want the comparison
+          to be case-insensitive, in which case you would use
+          <literal>"i"</literal> as the 3rd parameter.</para>
         </section>
 
         <section xml:id="ref_builtin_groups">
@@ -12236,6 +12356,68 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           sequence in JSON (like <literal>\n</literal>, <literal>\t</literal>,
           etc.), they will be replaced with a UNICODE escape
           (<literal>\u<replaceable>XXXX</replaceable></literal>).</para>
+        </section>
+
+        <section xml:id="ref_builtin_keep_after">
+          <title>keep_after</title>
+
+          <indexterm>
+            <primary>keep_after built-in</primary>
+          </indexterm>
+
+          <para>Removes the part of the string that is not after the first
+          occurrence of the given substring. For example:</para>
+
+          <programlisting role="template">${"abcdefgh"?keep_until("de")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">fgh</programlisting>
+
+          <para>If the parameter string is not found, it will return an empty
+          string. If the parameter string is a 0-length string, it will return
+          the original string unchanged.</para>
+
+          <para>This method accepts an optional <link
+          linkend="ref_builtin_string_flags">flags parameter</link>, as its
+          2nd parameter:</para>
+
+          <programlisting role="template">${"foo : bar"?keep_until(r"\s*:\s*", "r")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">bar</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_keep_before">
+          <title>keep_before</title>
+
+          <indexterm>
+            <primary>keep_before built-in</primary>
+          </indexterm>
+
+          <para>Removes the part of the string that starts with the given
+          substring. For example:</para>
+
+          <programlisting role="template">${"abcdef"?keep_before("de")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">abc</programlisting>
+
+          <para>If the parameter string is not found, it will return the
+          original string unchanged. If the parameter string is a 0-length
+          string, it will return an empty string.</para>
+
+          <para>This method accepts an optional <link
+          linkend="ref_builtin_string_flags">flags parameter</link>, as its
+          2nd parameter:</para>
+
+          <programlisting role="template">${"foo : bar"?keep_before(r"\s*:\s*", "r")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">foo</programlisting>
         </section>
 
         <section xml:id="ref_builtin_last_index_of">
@@ -12605,6 +12787,46 @@ Matching sub-strings:
 [abcdoO.o]</programlisting>
         </section>
 
+        <section xml:id="ref_builtin_remove_beginning">
+          <title>remove_beginning</title>
+
+          <indexterm>
+            <primary>remove_beginning built-in</primary>
+          </indexterm>
+
+          <para>Removes the parameter substring from the beginning of the
+          string, or returns the original string if it doesn't start with the
+          parameter substring. For example:</para>
+
+          <programlisting role="template">${"abcdef"?remove_beginning("abc")}
+${"foobar"?remove_beginning("abc")}</programlisting>
+
+          <para>will print:</para>
+
+          <programlisting role="output">def
+foobar</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_remove_ending">
+          <title>remove_ending</title>
+
+          <indexterm>
+            <primary>remove_ending built-in</primary>
+          </indexterm>
+
+          <para>Removes the parameter substring from the beginning of the
+          string, or returns the original string if it doesn't start with the
+          parameter substring. For example:</para>
+
+          <programlisting role="template">${"abcdef"?remove_ending("def")}
+${"foobar"?remove_ending("def")}</programlisting>
+
+          <para>will print:</para>
+
+          <programlisting role="output">abc
+foobar</programlisting>
+        </section>
+
         <section xml:id="ref_builtin_rtf">
           <title>rtf</title>
 
@@ -12682,6 +12904,12 @@ Matching sub-strings:
           elements from the end of the resulting list, so with
           <literal>?split(",", "r")</literal> in the last example the last
           <literal>""</literal> would be missing from the output.</para>
+
+          <note>
+            <para>To check if a strings ends with something and append it
+            otherwise, use <link linkend="ref_builtin_ensure_ends_with">the
+            <literal>ensure_ends_with</literal> built-in</link>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_starts_with">
@@ -12692,9 +12920,16 @@ Matching sub-strings:
           </indexterm>
 
           <para>Returns if this string starts with the specified substring.
-          For example <literal>"redhead"?starts_with("red")</literal> returns
-          boolean true. Also, <literal>"red"?starts_with("red")</literal> will
-          return true.</para>
+          For example <literal>"redirect"?starts_with("red")</literal> returns
+          boolean <literal>true</literal>. Also,
+          <literal>"red"?starts_with("red")</literal> will return
+          <literal>true</literal>.</para>
+
+          <note>
+            <para>To check if a strings starts with something and prepend it
+            otherwise, use <link linkend="ref_builtin_ensure_starts_with">the
+            <literal>ensure_starts_with</literal> built-in</link>.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_string_for_string">
@@ -13153,10 +13388,9 @@ ${x?url}</programlisting>
               <link linkend="gloss.regularExpression">regular
               expression</link>. FreeMarker uses the variation of regular
               expressions described at <link
-              xlink:href="http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html">http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html</link>.
-              <emphasis>This flag will work only if you use Java2 platform 1.4
-              or later. Otherwise it will cause template processing to stop
-              with error.</emphasis></para>
+              xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html</link>
+              (note that the presence of some pattern features depends on the
+              Java version used).</para>
             </listitem>
 
             <listitem>
@@ -21238,15 +21472,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_21_rc2">
-        <title>2.3.21 RC2</title>
+        <title>2.3.21 RC2 (compared to RC1)</title>
 
-        <para>Date of release for release: 2014-09-FIXME</para>
+        <para>Date of release for release: 2014-09-28</para>
 
         <para>Date of release for the final release: Planned for
         2014-10-12.</para>
 
-        <para>See also <link linkend="versions_2_3_21_rc1">the RC1
-        changes</link> below!</para>
+        <para>Also, check out <link linkend="versions_2_3_21_rc1">the RC1
+        changes here</link>!</para>
+
+        <para>Please give feedback if you find any problems, or you have any
+        comments on the new features! This is the last chance before things
+        get graved into stone, in October the 12th!</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -21276,15 +21514,58 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>New built-ins for string manipulation:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?keep_before(<replaceable>substring</replaceable>[,
+                  <replaceable>flags</replaceable>])</literal>: <link
+                  linkend="ref_builtin_keep_before">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?keep_after(<replaceable>substring</replaceable>[,
+                  <replaceable>flags</replaceable>])</literal>: <link
+                  linkend="ref_builtin_keep_after">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?remove_beginning(<replaceable>substring</replaceable>)</literal>:
+                  <link
+                  linkend="ref_builtin_remove_beginning">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?remove_ending(<replaceable>substring</replaceable>)</literal>:
+                  <link
+                  linkend="ref_builtin_remove_ending">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?ensure_starts_with(<replaceable>substring</replaceable>[,
+                  <replaceable>substitution</replaceable>[,
+                  <replaceable>flags</replaceable>]])</literal>: <link
+                  linkend="ref_builtin_ensure_starts_with">More...</link></para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?ensure_ends_with(<replaceable>substring</replaceable>)</literal>:
+                  <link
+                  linkend="ref_builtin_ensure_ends_with">More...</link></para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
-              The result of <literal>?matches</literal> wasn't
+              The result value of <literal>?matches</literal> wasn't
               <quote>reentrant</quote>. For example, you couldn't list the
               matches inside another listing where you are also listing
-              exactly the same result value, as they would consume from the
-              same iterator. Most importantly, even accessing the
-              <literal>?size</literal> of the same result value has terminated
-              the outer listing of the same value.</para>
+              exactly the same result value (stored in a common variable), as
+              they would consume from the same iterator. Most importantly,
+              even accessing the <literal>?size</literal> of the same result
+              value has terminated the outer listing of the same value.</para>
             </listitem>
 
             <listitem>
@@ -21305,7 +21586,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>The <literal>getResult()</literal> method of builder
-              classes was renamed to <literal>build()</literal>.</para>
+              classes was renamed to <literal>build()</literal>, as that's a
+              more popular choice.</para>
+            </listitem>
+
+            <listitem>
+              <para>OSGi execution environment header was tweaked again, now
+              it's <literal>Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+              J2SE-1.4</literal>. That is, we prefer (and compile against)
+              1.5, but only require 1.4.</para>
             </listitem>
 
             <listitem>
@@ -21325,7 +21614,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bugs found in R1 fixed:</para>
+              <para>Bugs introduced with RC1 fixed:</para>
 
               <itemizedlist>
                 <listitem>
@@ -21337,6 +21626,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               </itemizedlist>
             </listitem>
           </itemizedlist>
+        </section>
+
+        <section>
+          <title>Reminder</title>
+
+          <para>Check out <link linkend="versions_2_3_21_rc1">the RC1
+          changes</link> too, as they aren't included in this section!</para>
         </section>
       </section>
 
@@ -21383,6 +21679,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Note that the minimum required Java version was increased from
         1.2 to 1.4.</para>
+
+        <para>Please give feedback if you find any problems!</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -30058,7 +30356,7 @@ Dekany, and Jonathan Revusky.</programlisting>
         familiar with them. But if you are interested in regular expressions,
         you can find several Web pages and books about them. FreeMarker uses
         the variation of regular expressions described at: <link
-        xlink:href="http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html">http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html</link></para>
+        xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html</link></para>
       </glossdef>
     </glossentry>
 

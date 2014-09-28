@@ -134,6 +134,7 @@
    <testcase name="existence-operators" nooutput="true" />
    <testcase name="string-builtins1" />
    <testcase name="string-builtins2" />
+   <testcase name="string-builtins3" nooutput="true" />
    <testcase name="string-builtins-regexps" />
    <testcase name="string-builtins-regexps-matches" />
    <testcase name="stringbimethods" />
