@@ -21440,15 +21440,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_21_rc2">
-        <title>2.3.21 RC2</title>
+        <title>2.3.21 RC2 (compared to RC1)</title>
 
-        <para>Date of release for release: 2014-09-FIXME</para>
+        <para>Date of release for release: 2014-09-28</para>
 
         <para>Date of release for the final release: Planned for
         2014-10-12.</para>
 
-        <para>See also <link linkend="versions_2_3_21_rc1">the RC1
-        changes</link> below!</para>
+        <para>Also, check out <link linkend="versions_2_3_21_rc1">the RC1
+        changes here</link>!</para>
+
+        <para>Please give feedback if you find any problems, or you have any
+        comments on the new features! This is the last chance before things
+        get graved into stone, in October the 12th!</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -21550,7 +21554,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>The <literal>getResult()</literal> method of builder
-              classes was renamed to <literal>build()</literal>.</para>
+              classes was renamed to <literal>build()</literal>, as that's a
+              more popular choice.</para>
             </listitem>
 
             <listitem>
@@ -21577,7 +21582,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bugs found in R1 fixed:</para>
+              <para>Bugs introduced with RC1 fixed:</para>
 
               <itemizedlist>
                 <listitem>
@@ -21589,6 +21594,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               </itemizedlist>
             </listitem>
           </itemizedlist>
+        </section>
+
+        <section>
+          <title>Reminder</title>
+
+          <para>Check out <link linkend="versions_2_3_21_rc1">the RC1
+          changes</link> too, as they aren't included in this section!</para>
         </section>
       </section>
 
@@ -21635,6 +21647,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Note that the minimum required Java version was increased from
         1.2 to 1.4.</para>
+
+        <para>Please give feedback if you find any problems!</para>
 
         <section>
           <title>Changes on the FTL side</title>
