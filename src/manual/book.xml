@@ -2768,7 +2768,7 @@ J</programlisting>
                 instead of an error. (It should be an error as it's a
                 decreasing range.) Currently this bug is emulated for backward
                 compatibility, but you shouldn't utilize it, as in the future
-                it will be certainly disabled.</para>
+                it will be certainly an error.</para>
               </listitem>
             </itemizedlist>
 
@@ -2788,6 +2788,18 @@ CD
 CDE
 CDEF
 CDEF</programlisting>
+
+            <note>
+              <para>Some of the typical use-cases of string slicing is covered
+              by convenient built-ins: <link
+              linkend="ref_builtin_remove_beginning"><literal>remove_beginning</literal></link>,
+              <link
+              linkend="ref_builtin_remove_ending"><literal>remove_ending</literal></link>,
+              <link
+              linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
+              <link
+              linkend="ref_builtin_keep_after"><literal>keep_after</literal></link></para>
+            </note>
           </section>
         </section>
 
@@ -2934,6 +2946,13 @@ Slicing with right-unlimited ranges:
             <para>Note above that slicing with length limited and right
             unbounded ranges allow the starting index to be past the last item
             <emphasis>by one</emphasis> (but no more).</para>
+
+            <note>
+              <para>To split a sequence to slices of a given size, you should
+              use the <link
+              linkend="ref_builtin_chunk"><literal>chunk</literal></link>
+              built-in.</para>
+            </note>
           </section>
         </section>
 
