@@ -12801,7 +12801,7 @@ Matching sub-strings:
           <programlisting role="template">${"abcdef"?remove_beginning("abc")}
 ${"foobar"?remove_beginning("abc")}</programlisting>
 
-          <para>will return:</para>
+          <para>will print:</para>
 
           <programlisting role="output">def
 foobar</programlisting>
@@ -12821,7 +12821,7 @@ foobar</programlisting>
           <programlisting role="template">${"abcdef"?remove_ending("def")}
 ${"foobar"?remove_ending("def")}</programlisting>
 
-          <para>will return:</para>
+          <para>will print:</para>
 
           <programlisting role="output">abc
 foobar</programlisting>
@@ -30356,7 +30356,7 @@ Dekany, and Jonathan Revusky.</programlisting>
         familiar with them. But if you are interested in regular expressions,
         you can find several Web pages and books about them. FreeMarker uses
         the variation of regular expressions described at: <link
-        xlink:href="http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html">http://java.sun.com/j2se/1.4.1/docs/api/java/util/regex/Pattern.html</link></para>
+        xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html</link></para>
       </glossdef>
     </glossentry>
 
