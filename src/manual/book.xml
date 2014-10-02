@@ -2273,7 +2273,7 @@ autumn
             specifying their items one by one. For example,
             <literal>0..&lt;m</literal>, assuming the <literal>m</literal>
             variable stores 5, will give a sequence that contains <literal>[0,
-            1, 2, 3, 4]</literal>. Ranges are primarily used for for iterating
+            1, 2, 3, 4]</literal>. Ranges are primarily used for iterating
             over a range of numbers with <literal>&lt;#list
             <replaceable>...</replaceable>&gt;</literal> and for <link
             linkend="dgui_template_exp_seqenceop_slice">slicing
@@ -2326,7 +2326,7 @@ autumn
                 sliced sequence or string is reached before the specified
                 range length was reached; see <link
                 linkend="dgui_template_exp_seqenceop_slice">slicing
-                sequences</link> for more..</para>
+                sequences</link> for more.</para>
 
                 <note>
                   <para>Length limited ranges were introduced in FreeMarker
@@ -2393,7 +2393,7 @@ autumn
               </listitem>
 
               <listitem>
-                <para>Ranges doesn't really store the numbers they consist of,
+                <para>Ranges don't really store the numbers they consist of,
                 thus for example <literal>0..1</literal> and
                 <literal>0..100000000</literal> is equally fast to create and
                 takes the same amount of memory.</para>
