@@ -21,7 +21,7 @@ externalBookmarks: {
 validation: {
   programlistingsRequireRole
   // programlistingsRequireLanguage
-  // maximumProgramlistingWidth: 79
+  maximumProgramlistingWidth: 100
 }
 
 generateEclipseTOC

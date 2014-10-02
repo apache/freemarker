@@ -19045,7 +19045,7 @@ Done.</programlisting>
 
             <programlisting role="template">&lt;#macro x&gt;
   n2.x
-  &lt;#-- This will call n1.y, becuase it inherits the "using [n1, n2]" from the pending visit call: --&gt;
+  &lt;#-- This callc n1.y as it inherits the "using [n1, n2]" from the pending visit call: --&gt;
   &lt;#visit nodeWithNameY&gt;
   &lt;#-- This will call n2.y: --&gt;
   &lt;#visit nodeWithNameY using .namespace&gt;
