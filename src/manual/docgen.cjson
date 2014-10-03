@@ -13,11 +13,6 @@ internalBookmarks: {
   "FAQ": app_faq
 }
 
-externalBookmarks: {
-  "API": "api/index.html"
-  "Home": "../index.html"
-}
-
 validation: {
   programlistingsRequireRole
   // programlistingsRequireLanguage
@@ -28,5 +23,17 @@ generateEclipseTOC
 // eclipse: {
 //  link_to: "freemarker-toc.xml#ManualLink"
 // }
+
+logo: {
+  href: "http://freemarker.org"
+  src: logo.png,
+  alt: "FreeMarker"
+}
+
+tabs: {
+  "Home": "http://freemarker.org"
+  "Manual": ""  // Empty => We are here
+  "Java API": "../api/index.html"
+}
 
 showXXELogo
