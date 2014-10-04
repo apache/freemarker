@@ -36,4 +36,6 @@ tabs: {
   "Java API": "../api/index.html"
 }
 
+onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+
 showXXELogo
