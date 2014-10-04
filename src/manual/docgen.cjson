@@ -29,4 +29,6 @@ generateEclipseTOC
 //  link_to: "freemarker-toc.xml#ManualLink"
 // }
 
+onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
+
 showXXELogo
