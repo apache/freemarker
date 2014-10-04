@@ -29,10 +29,12 @@ import java.util.TreeSet;
  */ 
 public class _CoreAPI {
     
+    public static final String FTL_STACK_CALLER_BULLET = "  Called by: ";
+    public static final String FTL_STACK_TOP_BULLET = "  Failed at: ";
+    public static final String ERROR_MESSAGE_HR = "----";
+
     // Can't be instantiated
     private _CoreAPI() { }
-
-    public static final String STACK_SECTION_SEPARATOR = Environment.STACK_SECTION_SEPARATOR;
     
     public static final Set/*<String>*/ BUILT_IN_DIRECTIVE_NAMES;
     static {
@@ -86,8 +88,8 @@ public class _CoreAPI {
         return Collections.unmodifiableSet(BuiltIn.builtins.keySet());
     }
     
-    public static String instructionStackItemToString(TemplateElement stackEl) {
-        return Environment.instructionStackItemToString(stackEl);
+    public static void appendInstructionStackItem(TemplateElement stackEl, StringBuffer sb) {
+        Environment.appendInstructionStackItem(stackEl, sb);
     }
     
     public static TemplateElement[] getInstructionStackSnapshot(Environment env) {

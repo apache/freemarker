@@ -21,12 +21,14 @@ externalBookmarks: {
 validation: {
   programlistingsRequireRole
   // programlistingsRequireLanguage
-  // maximumProgramlistingWidth: 79
+  maximumProgramlistingWidth: 100
 }
 
 generateEclipseTOC
 // eclipse: {
 //  link_to: "freemarker-toc.xml#ManualLink"
 // }
+
+onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 
 showXXELogo

@@ -2273,7 +2273,7 @@ autumn
             specifying their items one by one. For example,
             <literal>0..&lt;m</literal>, assuming the <literal>m</literal>
             variable stores 5, will give a sequence that contains <literal>[0,
-            1, 2, 3, 4]</literal>. Ranges are primarily used for for iterating
+            1, 2, 3, 4]</literal>. Ranges are primarily used for iterating
             over a range of numbers with <literal>&lt;#list
             <replaceable>...</replaceable>&gt;</literal> and for <link
             linkend="dgui_template_exp_seqenceop_slice">slicing
@@ -2326,7 +2326,7 @@ autumn
                 sliced sequence or string is reached before the specified
                 range length was reached; see <link
                 linkend="dgui_template_exp_seqenceop_slice">slicing
-                sequences</link> for more..</para>
+                sequences</link> for more.</para>
 
                 <note>
                   <para>Length limited ranges were introduced in FreeMarker
@@ -2393,7 +2393,7 @@ autumn
               </listitem>
 
               <listitem>
-                <para>Ranges doesn't really store the numbers they consist of,
+                <para>Ranges don't really store the numbers they consist of,
                 thus for example <literal>0..1</literal> and
                 <literal>0..100000000</literal> is equally fast to create and
                 takes the same amount of memory.</para>
@@ -19045,7 +19045,7 @@ Done.</programlisting>
 
             <programlisting role="template">&lt;#macro x&gt;
   n2.x
-  &lt;#-- This will call n1.y, becuase it inherits the "using [n1, n2]" from the pending visit call: --&gt;
+  &lt;#-- This callc n1.y as it inherits the "using [n1, n2]" from the pending visit call: --&gt;
   &lt;#visit nodeWithNameY&gt;
   &lt;#-- This will call n2.y: --&gt;
   &lt;#visit nodeWithNameY using .namespace&gt;
@@ -21470,6 +21470,58 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="version_2_3_21">
+        <title>2.3.21</title>
+
+        <para>Date of release for release: 2014-10-12</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para/>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Improved <literal>TemplateException</literal> error
+              messages:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>TemplateException</literal> error messages
+                  are now much more readable when rendered in environments
+                  that don't obey to line-breaks. (This often happens in
+                  inproperly implemented HTML error pages and logs
+                  viewers.)</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>TemplateException</literal> error messages
+                  are now contain up to 6 lines of FTL stack trace, because
+                  otherwise this information wasn't printed when the exception
+                  was a cause exception in a stack trace, of when only the
+                  value of <literal>getMessage()</literal> was printed instead
+                  of a stack trace.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The meaning of the lines in the FTL stack trace is now
+                  self explanatory (lines start with "Failed at" and "Called
+                  by" instead of arrow and nothing).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_21_rc2">
         <title>2.3.21 RC2 (compared to RC1)</title>

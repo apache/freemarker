@@ -517,16 +517,32 @@
     --></fail>
   </target>
 
-  <target name="manual" depends="init" description="Build the Manual" >
-    <ivy:cachepath conf="manual" pathid="ivy.dep" />
-    <taskdef resource="org/freemarker/docgen/antlib.properties"
-      uri="http://freemarker.org/docgen"
-      classpathref="ivy.dep"
-    />
-    
-    <docgen:transform
-      srcdir="src/manual" destdir="build/manual"
-    />
+  <!-- ====================== -->
+  <!-- Manual                 -->
+  <!-- ====================== -->
+  
+  <macrodef name="manual" uri="http://freemarker.org/util">
+    <attribute name="offline" />
+    <sequential>
+      <ivy:cachepath conf="manual" pathid="ivy.dep" />
+      <taskdef resource="org/freemarker/docgen/antlib.properties"
+        uri="http://freemarker.org/docgen"
+        classpathref="ivy.dep"
+      />
+      
+      <docgen:transform
+        srcdir="src/manual" destdir="build/manual"
+        offline="@{offline}"
+      />
+    </sequential>
+  </macrodef>
+  
+  <target name="manualOffline" depends="init" description="Build the Manual for offline use" >
+    <u:manual offline="true" />
+  </target>
+
+  <target name="manualOnline" depends="init" description="Build the Manual for online use" >
+    <u:manual offline="false" />
   </target>
 
   <!-- ====================== -->
@@ -609,7 +625,7 @@
   </target>
 
   <target name="_dist"
-    depends="jar, javadoc, manual"
+    depends="jar, javadoc, manualOffline"
     description="(Used internally; don't call it)"
   >
     <!-- Copy jars and sources and such into the distro -->
