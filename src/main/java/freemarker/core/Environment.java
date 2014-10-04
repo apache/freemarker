@@ -83,8 +83,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
  */
 public final class Environment extends Configurable {
 
-    static final String STACK_SECTION_SEPARATOR = "----------";
-
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
     private static final Logger LOGGER = Logger.getLogger("freemarker.runtime");
@@ -1509,17 +1507,15 @@ public final class Environment extends Configurable {
      */
     static void outputInstructionStack(
             TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
-        pw.println(STACK_SECTION_SEPARATOR);
         if (instructionStackSnapshot != null) {
             for (int i = 0; i < instructionStackSnapshot.length; i++) {
                 TemplateElement stackEl = instructionStackSnapshot[i];
-                pw.print(i == 0 ? "==> " : "    ");
+                pw.print(i == 0 ? _CoreAPI.FTL_STACK_TOP_BULLET : _CoreAPI.FTL_STACK_CALLER_BULLET);
                 pw.println(instructionStackItemToString(stackEl));
             }
         } else {
             pw.println("[the stack was empty]");
         }
-        pw.println(STACK_SECTION_SEPARATOR);
     }
     
     /**
@@ -1550,9 +1546,14 @@ public final class Environment extends Configurable {
         
         return result;
     }
-    
+
     static String instructionStackItemToString(TemplateElement stackEl) {
-        StringBuffer sb = new StringBuffer(); 
+        StringBuffer sb = new StringBuffer();
+        appendInstructionStackItem(stackEl, sb);
+        return sb.toString();
+    }
+    
+    static void appendInstructionStackItem(TemplateElement stackEl, StringBuffer sb) {
         sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
         
         sb.append("  [");
@@ -1565,8 +1566,6 @@ public final class Environment extends Configurable {
                     stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
         }
         sb.append("]");
-        
-        return sb.toString();
     }
 
     static private Macro getEnclosingMacro(TemplateElement stackEl) {

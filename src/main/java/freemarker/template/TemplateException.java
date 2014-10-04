@@ -40,9 +40,9 @@ import freemarker.template.utility.CollectionUtils;
  */
 public class TemplateException extends Exception {
 
-    private static final String THE_FAILING_INSTRUCTION = "The failing instruction";
-    private static final String THE_FAILING_INSTRUCTION_FTL_STACK_TRACE
-            = THE_FAILING_INSTRUCTION + " (FTL stack trace):";
+    private static final int FTL_STACK_TOP_FEW_MAX_LINES = 6;
+    private static final String THE_FAILING_INSTRUCTION_WITH_FTL_STACK_TRACE
+            = "FTL stack trace:";
 
     // Set in constructor:
     private transient _ErrorDescriptionBuilder descriptionBuilder;
@@ -174,10 +174,14 @@ public class TemplateException extends Exception {
             messageWithoutStackTop = "[No error description was available.]";
         }
         
-        String stackTop = getFTLInstructionStackTop();
-        if (stackTop != null) {
-            message = messageWithoutStackTop + "\n\n" + THE_FAILING_INSTRUCTION + stackTop;
-            messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse the backing char[]
+        String stackTopFew = getFTLInstructionStackTopFew();
+        if (stackTopFew != null) {
+            message = messageWithoutStackTop + "\n\n"
+                    + _CoreAPI.ERROR_MESSAGE_HR + "\n"
+                    + THE_FAILING_INSTRUCTION_WITH_FTL_STACK_TRACE + "\n"
+                    + stackTopFew
+                    + _CoreAPI.ERROR_MESSAGE_HR;
+            messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse backing char[]
         } else {
             message = messageWithoutStackTop;
         }
@@ -240,7 +244,7 @@ public class TemplateException extends Exception {
         }
     }
     
-    private String getFTLInstructionStackTop() {
+    private String getFTLInstructionStackTopFew() {
         synchronized (lock) {
             if (ftlInstructionStackSnapshot != null || renderedFtlInstructionStackSnapshotTop != null) {
                 if (renderedFtlInstructionStackSnapshotTop == null) {
@@ -249,16 +253,29 @@ public class TemplateException extends Exception {
                     if (stackSize == 0) {
                         s = "";
                     } else {
-                        s = (stackSize > 1 ? " (print stack trace for " + (stackSize - 1) + " more)" : "")
-                            + ":\n==> "
-                            + _CoreAPI.instructionStackItemToString(ftlInstructionStackSnapshot[0]);
+                        StringBuffer sb = new StringBuffer();
+                        int stackLinesPrinted = stackSize <= FTL_STACK_TOP_FEW_MAX_LINES
+                                ? stackSize : FTL_STACK_TOP_FEW_MAX_LINES -1; 
+                        for (int i = 0; i < stackLinesPrinted; i++) {
+                            sb.append(i == 0 ? _CoreAPI.FTL_STACK_TOP_BULLET : _CoreAPI.FTL_STACK_CALLER_BULLET);
+                            _CoreAPI.appendInstructionStackItem(ftlInstructionStackSnapshot[i], sb);
+                            sb.append('\n');
+                        }
+                        if (stackSize > stackLinesPrinted) {
+                            sb.append(_CoreAPI.FTL_STACK_CALLER_BULLET);
+                            sb.append("... (Print stack trace for ");
+                            sb.append(stackSize - stackLinesPrinted);
+                            sb.append(" more)\n");
+                        }
+                        s = sb.toString();
                     }
                     if (renderedFtlInstructionStackSnapshotTop == null) {
                         renderedFtlInstructionStackSnapshotTop = s;
                         deleteFTLInstructionStackSnapshotIfNotNeeded();
                     }
                 }
-                return renderedFtlInstructionStackSnapshotTop.length() != 0 ? renderedFtlInstructionStackSnapshotTop : null;
+                return renderedFtlInstructionStackSnapshotTop.length() != 0
+                        ? renderedFtlInstructionStackSnapshotTop : null;
             } else {
                 return null;
             }
@@ -351,9 +368,11 @@ public class TemplateException extends Exception {
                 String stackTrace = getFTLInstructionStack();
                 if (stackTrace != null) {
                     out.println(getMessageWithoutStackTop());  // Not getMessage()!
-                    out.println("");
-                    out.println(THE_FAILING_INSTRUCTION_FTL_STACK_TRACE);
+                    out.println();
+                    out.println(_CoreAPI.ERROR_MESSAGE_HR);
+                    out.println(THE_FAILING_INSTRUCTION_WITH_FTL_STACK_TRACE);
                     out.print(stackTrace);
+                    out.println(_CoreAPI.ERROR_MESSAGE_HR);
                 } else {
                     ftlStackTrace = false;
                     javaStackTrace = true;
@@ -364,7 +383,7 @@ public class TemplateException extends Exception {
                 if (ftlStackTrace) {  // We are after an FTL stack trace
                     out.println();
                     out.println("Java stack trace (for programmers):");
-                    out.println(_CoreAPI.STACK_SECTION_SEPARATOR);
+                    out.println(_CoreAPI.ERROR_MESSAGE_HR);
                     synchronized (lock) {
                         if (messageWasAlreadyPrintedForThisTrace == null) {
                             messageWasAlreadyPrintedForThisTrace = new ThreadLocal();
@@ -538,7 +557,7 @@ public class TemplateException extends Exception {
     private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
         // These are calculated from transient fields, so this is the last chance to calculate them: 
         getFTLInstructionStack();
-        getFTLInstructionStackTop();
+        getFTLInstructionStackTopFew();
         getDescription();
         calculatePosition();
         getBlamedExpressionString();

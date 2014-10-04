@@ -147,6 +147,7 @@ public class _ErrorDescriptionBuilder {
                 sb.append("\n\n");
                 for (int i = 0; i < allTips.length; i++) {
                     if (i != 0) sb.append('\n');
+                    sb.append(_CoreAPI.ERROR_MESSAGE_HR).append('\n');
                     sb.append("Tip: ");
                     Object tip = allTips[i];
                     if (!(tip instanceof Object[])) {
@@ -155,6 +156,7 @@ public class _ErrorDescriptionBuilder {
                         appendParts(sb, (Object[]) tip);
                     }
                 }
+                sb.append('\n').append(_CoreAPI.ERROR_MESSAGE_HR);
             }
         }
         
