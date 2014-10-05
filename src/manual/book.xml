@@ -12119,6 +12119,10 @@ Green Mouse</programlisting>
             <primary>ensure_ends_with built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
+
           <para>If the string doesn't end with the substring specified as the
           1st parameter, it adds it after the string, otherwise it returns the
           original string. For example, both
@@ -12133,6 +12137,10 @@ Green Mouse</programlisting>
           <indexterm>
             <primary>ensure_ends_with built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
 
           <para>If the string doesn't start with the substring specified as
           the 1st parameter, it adds it before the string, otherwise it
@@ -12365,6 +12373,10 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
             <primary>keep_after built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
+
           <para>Removes the part of the string that is not after the first
           occurrence of the given substring. For example:</para>
 
@@ -12395,6 +12407,10 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <indexterm>
             <primary>keep_before built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
 
           <para>Removes the part of the string that starts with the given
           substring. For example:</para>
@@ -12458,8 +12474,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           </indexterm>
 
           <note>
-            <para>This built-in is available since FreeMarker 2.3.1. It
-            doesn't exist in 2.3.</para>
+            <para>This built-in is available since FreeMarker 2.3.1.</para>
           </note>
 
           <para>If it's used with 1 parameter, then it inserts spaces on the
@@ -12794,6 +12809,10 @@ Matching sub-strings:
             <primary>remove_beginning built-in</primary>
           </indexterm>
 
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
+
           <para>Removes the parameter substring from the beginning of the
           string, or returns the original string if it doesn't start with the
           parameter substring. For example:</para>
@@ -12813,6 +12832,10 @@ foobar</programlisting>
           <indexterm>
             <primary>remove_ending built-in</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
 
           <para>Removes the parameter substring from the beginning of the
           string, or returns the original string if it doesn't start with the
@@ -13219,6 +13242,10 @@ ${x?url}</programlisting>
           <indexterm>
             <primary>URL encoding</primary>
           </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.21.</para>
+          </note>
 
           <para>This is the same as <link linkend="ref_builtin_url">the
           <literal>url</literal> built-in</link>, except that it doesn't
