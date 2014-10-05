@@ -86,14 +86,21 @@ If later you change the dependencies in ivy.xml, or otherwise want to
 re-download some of them, it will not happen automatically anymore.
 You have to issue "ant update-deps" for that.
 
-For development under Eclipse, you will need IvyDE installed. You are
-advised to use the Eclipse project files included (otherwise set up
-IvyDE to use the "IDE" configuration and the included
-ivysettings.xml). Note that IvyDE will not find the dependencies until
-"ant update-deps" has run once, because it uses the mini-repository
-built by that Ant task. If you change the dependencies in ivy.xml, you
-will have to run "ant update-deps" again, and only after that tell
-IvyDE to resolve the dependencies.
+
+Eclipse and other IDE-s
+-----------------------
+
+Run "ant ide-dependencies"; This will create an "ide-dependencies" library
+that contains all the jars that you have to add to the classpath in the IDE.
+Note that here we assume that you have run the build or at least
+"ant update-deps" earlier. 
+
+Known issue with workaround: An old org.jaxen is included in dom4j-*.jar,
+which conflicts with jaxen-*.jar. If dom4j wins, your IDE will show some
+errors in the XML related parts. To fix that, always add dom4j-*.jar last.
+
+You could also use IvyDE instead, with configuration "IDE", but as the
+dependencies hardly ever change, it might not worth the trouble.
 
 
 Change log
