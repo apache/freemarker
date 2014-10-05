@@ -3,5 +3,7 @@
 /build/
 /build.properties
 /archive/
+/ide-dependencies/
 
 src/manual/book.xml~
+

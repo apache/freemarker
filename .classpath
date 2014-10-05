@@ -9,7 +9,24 @@
 			<attribute name="ignore_optional_problems" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=FreeMarker-master&amp;ivyXmlPath=ivy.xml&amp;confs=IDE&amp;ivySettingsPath=%24%7Bworkspace_loc%3AFreeMarker-master%2Fivysettings.xml%7D&amp;loadSettingsOnDemand=false&amp;propertyFiles="/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="lib" path="ide-dependencies/annotations-3.0.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/ant-1.6.5.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/avalon-logkit-2.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/javarebel-sdk-1.2.2.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jaxen-1.0-FCS.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jdom-1.0-beta8-dev.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/js-1.6R1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jsp-api-2.1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jython-2.5.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/log4j-1.2.6.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/saxpath-1.0-FCS.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/servlet-api-2.5.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/xalan-2.7.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/dom4j-1.3.jar"/>
 	<classpathentry kind="output" path=".bin/"/>
 </classpath>
