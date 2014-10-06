@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -206,8 +205,6 @@ public class TagSyntaxVariationsTest extends TestCase {
     /**
      * @param expected the expected output or <tt>null</tt> if we expect
      * a parsing error.
-     * @throws IOException 
-     * @throws TemplateException 
      */
     private static final void test(
             Configuration cfg, String template, String expected)

@@ -88,7 +88,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      * This constructor calls its super class with the empty string
      * to force the "toString" method of parent class "Throwable" to
      * print the error message in the form:
-     *     ParseException: <result of getMessage>
+     *     ParseException: &lt;result of getMessage&gt;
      */
     public ParseException(Token currentTokenVal,
             int[][] expectedTokenSequencesVal,
@@ -115,7 +115,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      * relevant information.  The JavaCC generated code does not use
      * these constructors.
      * 
-     * @deprecated
+     * @deprecated Use a constructor to which you pass description, template, and positions.
      */
     protected ParseException() {
         super();

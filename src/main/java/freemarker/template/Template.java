@@ -406,8 +406,8 @@ public class Template extends Configurable {
      * 
      * <ul>
      *   <li><p>Relative paths to other templates in this template will be resolved relatively to the directory part of
-     *       this. Like if the template name is {@link "foo/this.ftl"}, then {@code <#include "other.ftl">} gets
-     *       the template with name {@link "foo/other.ftl"}.
+     *       this. Like if the template name is {@code "foo/this.ftl"}, then {@code <#include "other.ftl">} gets
+     *       the template with name {@code "foo/other.ftl"}.
      *   <li><p>It's shown in error messages. So it should be something based on which the user can find the template.
      *   <li><p>Some tools, like an IDE plugin, uses this to identify (and find) templates.
      * </ul>

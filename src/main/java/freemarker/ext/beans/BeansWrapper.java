@@ -825,8 +825,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @deprecated override {@link #getModelFactory(Class)} instead. Using this
      * method will now bypass wrapper caching (if it's enabled) and always 
      * result in creation of a new wrapper. This method will be removed in 2.4
-     * @param object
-     * @param factory
+     * @param object The object to wrap
+     * @param factory The factory that wraps the object
      */
     protected TemplateModel getInstance(Object object, ModelFactory factory)
     {

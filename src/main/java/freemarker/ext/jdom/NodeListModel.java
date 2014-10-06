@@ -66,7 +66,7 @@ import freemarker.template.TemplateSequenceModel;
  * See individual method documentation for exact details on how the class works. In
  * short:
  * <ul>
- * <li>{@link #getAsString()} will render all contained nodes as XML fragment,</tt>
+ * <li>{@link #getAsString()} will render all contained nodes as XML fragment,
  * <li>{@link #exec(List)} provides full XPath functionality implemented on top of
  * the <a href="http://www.jaxen.org">Jaxen</a> library,</li>
  * <li>{@link #get(String)} provides node traversal, copying and filtering - somewhat

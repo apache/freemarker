@@ -32,7 +32,7 @@ import freemarker.template.utility.SecurityUtilities;
 /**
  * A {@link TemplateLoader} that uses files in a specified directory as the
  * source of templates. If contains security checks that will prevent it
- * serving templates outside the template directory (like <code>&lt;include /etc/passwd></code>.
+ * serving templates outside the template directory (like <code>&lt;include /etc/passwd&gt;</code>.
  * It compares canonical paths for this, so templates that are symbolically
  * linked into the template directory from outside of it won't work either.
  */

@@ -34,7 +34,7 @@ import freemarker.ext.beans.BeansWrapper;
  * after you have made the object available for multiple threads. Those methods aren't called by FreeMarker, so it's
  * usually not a concern.
  *
- * <p><b>Note:</b><br />
+ * <p><b>Note:</b><br>
  * As of 2.0, this class is unsynchronized by default.
  * To obtain a synchronized wrapper, call the {@link #synchronizedWrapper} method.</p>
  *

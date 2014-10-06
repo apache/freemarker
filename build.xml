@@ -508,12 +508,9 @@
     />
     <delete dir="build/javadoc-sources" />
     
-    <available file="build/api/resources/titlebar.gif" property="titlebar.found"/>
-    <fail unless="titlebar.found"><!--
-    -->build/api/resources/titlebar.gif doesn't exist, which probably means <!--
-    -->that the API documentaton was generated with JDK 6 or earlier. Ensure <!--
-    -->that Ant uses JDK 7 or later (you may need to set JAVA_HOME), as the <!--
-    -->HTML output was significantly improved with JDK 7.<!--
+    <available property="atLeastJDK7" classname="java.util.Objects"/>
+    <fail unless="atLeastJDK7"><!--
+    -->The JavaDoc should be generted with JDK 7 or later (you may need to set JAVA_HOME)<!--
     --></fail>
   </target>
 

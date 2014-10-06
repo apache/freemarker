@@ -268,8 +268,8 @@ public class Configuration extends Configurable implements Cloneable {
      *   <li><p>
      *     2.3.20 (or higher): {@code ?html} will escape apostrophe-quotes just like {@code ?xhtml} does. Utilizing
      *     this is highly recommended, because otherwise if interpolations are used inside attribute values that use
-     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'></tt>) instead of plain quotation mark
-     *     (<tt>&lt;foo bar="${val}"></tt>), they might produce HTML/XML that's not well-formed. Note that
+     *     apostrophe-quotation (<tt>&lt;foo bar='${val}'&gt;</tt>) instead of plain quotation mark
+     *     (<tt>&lt;foo bar="${val}"&gt;</tt>), they might produce HTML/XML that's not well-formed. Note that
      *     {@code ?html} didn't do this because long ago there was no cross-browser way of doing this, but it's not a
      *     concern anymore.
      *   </li>
@@ -407,7 +407,7 @@ public class Configuration extends Configurable implements Cloneable {
      * The previous content of the encoding map will be lost.
      * This default map currently contains the following mappings:
      * 
-     * <table style="width: auto; border-collapse: collapse" border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1" summary="preset language to encoding mapping">
      *   <tr><td>ar</td><td>ISO-8859-6</td></tr>
      *   <tr><td>be</td><td>ISO-8859-5</td></tr>
      *   <tr><td>bg</td><td>ISO-8859-5</td></tr>
@@ -698,8 +698,8 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>When this is {@code true},
      * any tag not starting with &lt;# or &lt;/# or &lt;@ or &lt;/@ is considered as plain text
-     * and will go to the output as is. Tag starting with &lt# or &lt/# must
-     * be valid FTL tag, or else the template is invalid (i.e. &lt;#noSuchDirective>
+     * and will go to the output as is. Tag starting with &lt;# or &lt;/# must
+     * be valid FTL tag, or else the template is invalid (i.e. &lt;#noSuchDirective&gt;
      * is an error).
      * 
      * @deprecated Only {@code true} (the default) value will be supported sometimes in the future.
@@ -999,7 +999,7 @@ public class Configuration extends Configurable implements Cloneable {
      * {@code "UTF-8"} is usually a good choice.
      * 
      * <p>Note that individual templates may specify their own charset by starting with
-     * <tt>&lt;#ftl encoding="..."></tt>
+     * <tt>&lt;#ftl encoding="..."&gt;</tt>
      * 
      * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
@@ -1559,7 +1559,7 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
-     * <tt>&lt;#directiveName ...></tt>.
+     * <tt>&lt;#directiveName ...&gt;</tt>.
      * 
      * @return {@link Set} of {@link String}-s.
      * 

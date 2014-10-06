@@ -128,7 +128,7 @@ public class DateUtil {
      * if it doesn't recognize the name, while this throws an
      * {@link UnrecognizedTimeZoneException}.
      * 
-     * @throws UnrecognizedTimeZoneException 
+     * @throws UnrecognizedTimeZoneException If the time zone name wasn't understood
      */
     public static TimeZone getTimeZone(String name)
     throws UnrecognizedTimeZoneException {

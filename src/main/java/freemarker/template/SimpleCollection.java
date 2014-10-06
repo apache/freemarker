@@ -23,7 +23,7 @@ import java.util.Iterator;
 /**
  * A simple implementation of {@link TemplateCollectionModel}.
  * It's able to wrap <tt>java.util.Iterator</tt>-s and <tt>java.util.Collection</tt>-s.
- * If you wrap an <tt>Iterator</tt>, the variable can be &lt;list>-ed (&lt;forach>-ed) only once!
+ * If you wrap an <tt>Iterator</tt>, the variable can be &lt;#list&gt;-ed only once!
  *
  * <p>Consider using {@link SimpleSequence} instead of this class if you want to wrap <tt>Iterator</tt>s.
  * <tt>SimpleSequence</tt> will read all elements of the <tt>Iterator</tt>, and store them in a <tt>List</tt>

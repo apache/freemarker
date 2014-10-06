@@ -39,7 +39,7 @@ import freemarker.template.TemplateTransformModel;
  *
  * <p><b>Note:</b> The compress tag is implemented using this filter</p>
  * 
- * <p>Usage:<br />
+ * <p>Usage:<br>
  * From java:</p>
  * <pre>
  * SimpleHash root = new SimpleHash();
