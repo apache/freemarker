@@ -505,6 +505,7 @@
       windowtitle="FreeMarker ${version} API"
       classpath="build/classes"
       classpathref="ivy.dep"
+      failonerror="true"
     />
     <delete dir="build/javadoc-sources" />
     
