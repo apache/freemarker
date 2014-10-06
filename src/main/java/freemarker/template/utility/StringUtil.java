@@ -150,7 +150,7 @@ public class StringUtil {
     }
 
     /**
-     *  XML encoding for attributes valies quoted with <tt>"</tt> (not with <tt>'</tt>!).
+     *  XML encoding for attributes values quoted with <tt>"</tt> (not with <tt>'</tt>!).
      *  Also can be used for HTML attributes that are quoted with <tt>"</tt>.
      *  @see #XMLEnc(String)
      */
