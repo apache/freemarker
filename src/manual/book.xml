@@ -12127,7 +12127,7 @@ Green Mouse</programlisting>
           1st parameter, it adds it after the string, otherwise it returns the
           original string. For example, both
           <literal>"foo"?ensure_ends_with("/")</literal> and
-          <literal>"foo"?ensure_ends_with("/")</literal> returns
+          <literal>"foo/"?ensure_ends_with("/")</literal> returns
           <literal>"foo/"</literal>.</para>
         </section>
 
@@ -12380,7 +12380,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <para>Removes the part of the string that is not after the first
           occurrence of the given substring. For example:</para>
 
-          <programlisting role="template">${"abcdefgh"?keep_until("de")}</programlisting>
+          <programlisting role="template">${"abcdefgh"?keep_after("de")}</programlisting>
 
           <para>will print</para>
 
@@ -12394,7 +12394,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           linkend="ref_builtin_string_flags">flags parameter</link>, as its
           2nd parameter:</para>
 
-          <programlisting role="template">${"foo : bar"?keep_until(r"\s*:\s*", "r")}</programlisting>
+          <programlisting role="template">${"foo : bar"?keep_after(r"\s*:\s*", "r")}</programlisting>
 
           <para>will print</para>
 
