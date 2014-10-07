@@ -87,7 +87,7 @@ import freemarker.template.utility.XmlEscape;
  * 
  * <pre>
  *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
- *  Configuration cfg = new Configuration(new Version(X, Y, Z));
+ *  Configuration cfg = new Configuration(VERSION_<i>X</i>_<i>Y</i>_<i>Z</i>));
  *  // Where X, Y, Z enables the not-100%-backward-compatible fixes introduced in
  *  // FreeMarker version X.Y.Z  and earlier (see {@link #Configuration(Version)}).
  *  cfg.set<i>SomeSetting</i>(...);
@@ -101,8 +101,8 @@ import freemarker.template.utility.XmlEscape;
  * <p>A couple of settings that you should not leave on its default value are:
  * <ul>
  *   <li>{@link #setTemplateLoader(TemplateLoader) template_loader}: The default value is deprecated and in fact quite
- *       useless. (Most user can use the convenience methods {@link #setDirectoryForTemplateLoading(File)},
- *       {@link #setClassForTemplateLoading(Class, String)} too.)
+ *       useless. (For the most common cases you can use the convenience methods,
+ *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} too.)
  *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
@@ -115,7 +115,7 @@ import freemarker.template.utility.XmlEscape;
  * and you have <b>safely published</b> it (see JSR 133 and related literature) to other threads. Generally, you set
  * everything directly after you have instantiated the {@link Configuration} object, then you don't change the settings
  * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
- * The methods that aren't about modifying setting, like {@link #getTemplate(String)}, are thread-safe.
+ * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
 public class Configuration extends Configurable implements Cloneable {
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
