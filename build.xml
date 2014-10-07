@@ -509,7 +509,7 @@
       charset="UTF-8"
       docencoding="UTF-8"
       locale="en_US"
-      stylesheetfile="src/javadoc/stylesheet.css"
+      stylesheetfile="src/javadoc/modified-jdk8-stylesheet.css"
     />
     <delete dir="build/javadoc-sources" />
     
