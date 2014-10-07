@@ -506,12 +506,16 @@
       classpath="build/classes"
       classpathref="ivy.dep"
       failonerror="true"
+      charset="UTF-8"
+      docencoding="UTF-8"
+      locale="en_US"
+      stylesheetfile="src/javadoc/stylesheet.css"
     />
     <delete dir="build/javadoc-sources" />
     
-    <available property="atLeastJDK7" classname="java.util.Objects"/>
-    <fail unless="atLeastJDK7"><!--
-    -->The JavaDoc should be generted with JDK 7 or later (you may need to set JAVA_HOME)<!--
+    <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
+    <fail unless="atLeastJDK8"><!--
+    -->The JavaDoc should be generated with JDK 8 (you may need to set JAVA_HOME)<!--
     --></fail>
   </target>
 
