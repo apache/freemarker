@@ -496,6 +496,7 @@
         <exclude name="**/log/CommonsLoggingLoggerFactory.java" />
       </fileset>
     </copy>
+    
     <!-- conf="IDE": as that has to contain all depedencies -->
     <ivy:cachepath conf="IDE" pathid="ivy.dep" />
     <javadoc
@@ -516,7 +517,9 @@
       charset="UTF-8"
       docencoding="UTF-8"
       locale="en_US"
-    />
+    >
+      <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistloc="src/javadoc/resources/javase-8" />
+    </javadoc>
     <delete dir="build/javadoc-sources" />
   </target>
 
@@ -555,7 +558,7 @@
     />
     <replaceregexp
         file="${file}" flags="gsi" encoding="utf-8"
-        match="['&quot;]Times New Roman['&quot;]" replace=""
+        match="['&quot;]Times New Roman['&quot;],\s*" replace=""
     />
     <replaceregexp
         file="${file}" flags="gsi" encoding="utf-8"
