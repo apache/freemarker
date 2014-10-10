@@ -10122,7 +10122,7 @@ root.put(
       </indexterm>
 
       <section xml:id="xgui_imperative_learn">
-        <title>Learning by example</title>
+        <title>Basics</title>
 
         <note>
           <para>This section uses the DOM tree and the variable made in the
@@ -10652,7 +10652,7 @@ Test Book</programlisting>
       </section>
 
       <section xml:id="xgui_imperative_formal">
-        <title>Formal description</title>
+        <title>Details</title>
 
         <para>Every variable that corresponds to a single node in the DOM tree
         is a multi-type variable of type node and type hash (for programmers:
@@ -11083,7 +11083,7 @@ Test Book</programlisting>
     </chapter>
 
     <chapter xml:id="xgui_declarative">
-      <title>Declarative XML Processing</title>
+      <title>Declarative XML processing</title>
 
       <indexterm>
         <primary>XML</primary>
@@ -11441,7 +11441,7 @@ End book</programlisting>
   </part>
 
   <part xml:id="ref">
-    <title>Reference</title>
+    <title>Template Language Reference</title>
 
     <chapter xml:id="ref_builtins">
       <title>Built-in Reference</title>
