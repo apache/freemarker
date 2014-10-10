@@ -34,9 +34,9 @@ import freemarker.template.TemplateTransformModel;
  * access it from the templates:</p>
  *
  * <pre>
- * &lt;@capture_output var="captured">
+ * &lt;@capture_output var="captured"&gt;
  *   ...
- * &lt;/@capture_output>
+ * &lt;/@capture_output&gt;
  * </pre>
  *
  * <p>And later in the template you can use the captured output:</p>
@@ -45,15 +45,15 @@ import freemarker.template.TemplateTransformModel;
  *
  * <p>This transform requires one of three parameters: <code>var</code>, <code>local</code>, or <code>global</code>.
  * Each of them specifies the name of the variable that stores the captured output, but the first creates a
- * variable in a name-space (as &lt;#assign>), the second creates a macro-local variable (as &lt;#local>),
- * and the last creates a global variable (as &lt;#global>).
+ * variable in a name-space (as &lt;#assign&gt;), the second creates a macro-local variable (as &lt;#local&gt;),
+ * and the last creates a global variable (as &lt;#global&gt;).
  * </p>
  * <p>In the case of an assignment within a namespace, there is an optional parameter
  * <code>namespace</code> that indicates in which namespace to do the assignment.
  * if this is omitted, the current namespace is used, and this will be, by far, the most
  * common usage pattern.</p>
  *
- * @deprecated Use block-assignments instead, as <code>&lt;assign x>...&lt;/assign></code>.
+ * @deprecated Use block-assignments instead, like <code>&lt;assign x&gt;...&lt;/assign&gt;</code>.
  */
 public class CaptureOutput implements TemplateTransformModel {
 

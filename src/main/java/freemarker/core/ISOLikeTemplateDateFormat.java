@@ -44,7 +44,6 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
      * @param settingValue The value of the ..._format setting, like "iso nz".
      * @param parsingStart The index of the char in the {@code settingValue} that directly after the prefix that has
      *     indicated the exact formatter class (like "iso" or "xs") 
-     * @param factory 
      */
     public ISOLikeTemplateDateFormat(
             String settingValue, int parsingStart,

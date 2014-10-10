@@ -69,18 +69,18 @@ import freemarker.template.utility.StringUtil;
  * 
  * <li>It creates a variable with name <code>JspTaglibs</code>, that can be used
  * to load JSP taglibs. For example:<br>
- * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]></code>
+ * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>
  * 
  * <li>A custom directive named <code>include_page</code> allows you to 
  * include the output of another servlet resource from your servlet container,
  * just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/></code>. You can also
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/&gt;</code>. You can also
  * pass parameters to the newly included page by passing a hash named 'params':
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/></code>.
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/&gt;</code>.
  * By default, the request parameters of the original request (the one being
  * processed by FreemarkerServlet) are also inherited by the include. You can
  * explicitly control this inheritance using the 'inherit_params' parameter:
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"} inherit_params=false/></code>.
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"} inherit_params=false/&gt;</code>.
  * </ul>
  * 
  * <p>The servlet will rethrow the errors occurring during template processing,
@@ -120,7 +120,7 @@ import freemarker.template.utility.StringUtil;
  * and for encoding the output stream). Note that this setting can be overridden
  * on a per-template basis by specifying a custom attribute named 
  * <tt>content_type</tt> in the <tt>attributes</tt> parameter of the 
- * <tt>&lt;#ftl></tt> directive. 
+ * <tt>&lt;#ftl&gt;</tt> directive. 
  * </li>
  * 
  * <li>The following init-params are supported only for backward compatibility, and
@@ -337,7 +337,6 @@ public class FreemarkerServlet extends HttpServlet
      * and a {@link WebappTemplateLoader} otherwise.
      * @param templatePath the template path to create a loader for
      * @return a newly created template loader
-     * @throws IOException
      */
     protected TemplateLoader createTemplateLoader(String templatePath) throws IOException
     {

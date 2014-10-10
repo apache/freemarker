@@ -9875,1573 +9875,8 @@ grant codeBase "file:/path/to/freemarker.jar"
     </chapter>
   </part>
 
-  <part xml:id="xgui">
-    <title>XML Processing Guide</title>
-
-    <preface xml:id="xgui_preface">
-      <title>Preface</title>
-
-      <para>Although FreeMarker was originally designed as a web page template
-      engine, as of version 2.3 it also targets another application domain:
-      transforming XML into arbitrary textual output (e.g. HTML files). Thus,
-      in many cases, FreeMarker is an XSLT alternative.</para>
-
-      <para>Technically, there is nothing special in transforming XML
-      documents. It's just like when you do anything else with FreeMarker: you
-      drop the XML document into the data-model (and possibly other
-      variables), and then you merge the data-model with the FTL template(s)
-      that generate the output text. The extra features introduced for better
-      XML processing are the node FTL variable type (symbolizes a node in
-      generic tree structures, usable not only for XML) and the built-ins and
-      directives dealing with them, and the XML wrapper you get out-of-the-box
-      that exposes XML documents as FTL variables for the templates.</para>
-
-      <para>What's the difference between using FreeMarker or XSLT? The FTL
-      language has the usual imperative/procedural logic. On the other hand,
-      XSLT is a language with declarative style, designed by "too clever"
-      people, so it's not easy to adopt its logic, nor to use it in many
-      cases. Also its syntax is terribly verbose. However, XSLT's
-      "apply-templates" method can be very handy when you process XML
-      documents, thus FreeMarker supports something similar called the
-      ``visitor pattern''. So in many applications, it is much easier to write
-      FTL stylesheets than XSLT style-sheets. Another fundamental difference
-      is that FTL "transforms" the node tree to text, while XSLT transforms
-      the tree to another tree. So you cannot always use FreeMarker where you
-      can use XSLT.</para>
-    </preface>
-
-    <chapter xml:id="xgui_expose">
-      <title>Exposing XML documents</title>
-
-      <indexterm>
-        <primary>XML</primary>
-
-        <secondary>exposing</secondary>
-      </indexterm>
-
-      <section xml:id="xgui_expose_dom">
-        <title>The DOM tree</title>
-
-        <para>We will use this XML document for the examples:</para>
-
-        <anchor xml:id="misc.example.bookXml"/>
-
-        <programlisting role="unspecified">&lt;book&gt;
-  &lt;title&gt;Test Book&lt;/title&gt;
-  &lt;chapter&gt;
-    &lt;title&gt;Ch1&lt;/title&gt;
-    &lt;para&gt;p1.1&lt;/para&gt;
-    &lt;para&gt;p1.2&lt;/para&gt;
-    &lt;para&gt;p1.3&lt;/para&gt;
-  &lt;/chapter&gt;
-  &lt;chapter&gt;
-    &lt;title&gt;Ch2&lt;/title&gt;
-    &lt;para&gt;p2.1&lt;/para&gt;
-    &lt;para&gt;p2.2&lt;/para&gt;
-  &lt;/chapter&gt;
-&lt;/book&gt;</programlisting>
-
-        <para>W3C DOM models an XML document as a tree of nodes. The node tree
-        of the above XML can be visualized as:</para>
-
-        <programlisting role="unspecified">document
- |
- +- element book
-     |
-     +- text "\n  "
-     |
-     +- element title
-     |   |
-     |   +- text "Test Book"
-     |
-     +- text "\n  "
-     |
-     +- element chapter
-     |   |
-     |   +- text "\n    "
-     |   |
-     |   +- element title
-     |   |   |
-     |   |   +- text "Ch1"
-     |   |
-     |   +- text "\n    "
-     |   |
-     |   +- element para     
-     |   |   |
-     |   |   +- text "p1.1"
-     |   |
-     |   +- text "\n    "
-     |   |
-     |   +- element para     
-     |   |   |
-     |   |   +- text "p1.2"
-     |   |
-     |   +- text "\n    "
-     |   |
-     |   +- element para     
-     |      |
-     |      +- text "p1.3"
-     |
-     +- element
-         |
-         +- text "\n    "
-         |
-         +- element title
-         |   |
-         |   +- text "Ch2"
-         |
-         +- text "\n    "
-         |
-         +- element para     
-         |   |
-         |   +- text "p2.1"
-         |
-         +- text "\n    "
-         |
-         +- element para     
-             |
-             +- text "p2.2"</programlisting>
-
-        <para>Note that the disturbing <literal>"\n  "</literal>-s are the
-        line-breaks (indicated here with <literal>\n</literal>, an escape
-        sequence used in FTL string literals) and the indentation spaces
-        between the tags.</para>
-
-        <para>Notes on the DOM related terminology:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>The topmost node of a tree is called the <emphasis
-            role="term">root</emphasis>. In the case of XML documents, it is
-            always the ``document'' node, and not the top-most element
-            (<literal>book</literal> in this example).</para>
-          </listitem>
-
-          <listitem>
-            <para>We say that node B is the <emphasis
-            role="term">child</emphasis> of node A, if B is the
-            <emphasis>immediate</emphasis> descendant of A. For example, the
-            two <literal>chapter</literal> element nodes are the children of
-            the <literal>book</literal> element node, but the
-            <literal>para</literal> element nodes are not.</para>
-          </listitem>
-
-          <listitem>
-            <para>We say that node A is the <emphasis
-            role="term">parent</emphasis> of node B, if A is the
-            <emphasis>immediate</emphasis> ascendant of node B, that is, if B
-            is the children of A. For example, the <literal>book</literal>
-            element node is the parent of the two <literal>chapter</literal>
-            element nodes, but it is not the parent of the
-            <literal>para</literal> element nodes.</para>
-          </listitem>
-
-          <listitem>
-            <para>There are several kind of components that can occur in XML
-            documents, such as elements, text, comments, processing
-            instructions, etc. All such components are nodes in the DOM tree,
-            so there are element nodes, text nodes, comment nodes, etc. In
-            principle, the attributes of elements are also nodes in the tree
-            -- they are the children of the element --, but still, usually we
-            (and other XML related technologies) exclude them of element
-            children. So basically they don't count as children nodes.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>The programmer drops the document node of the DOM tree into the
-        FreeMarker data-model, and then the template author can walk the DOM
-        tree using that variable as the starting-point.</para>
-
-        <para>The DOM nodes in FTL correspond to <emphasis role="term">node
-        variables</emphasis>. This is a variable type, similarly to type
-        string, number, hash, etc. Node variable type makes it possible for
-        FreeMarker to get the parent node and the child nodes of a node. This
-        is technically required to allow the template author to navigate
-        between the nodes, say, to use the <link
-        linkend="ref_builtins_node">node built-ins</link> or the <link
-        linkend="ref.directive.visit"><literal>visit</literal></link> and
-        <link
-        linkend="ref.directive.recurse"><literal>recurse</literal></link>
-        directives; we will show the usage of these in the further
-        chapters.</para>
-      </section>
-
-      <section xml:id="xgui_expose_put">
-        <title>Putting the XML into the data-model</title>
-
-        <note>
-          <para>This section is for programmers.</para>
-        </note>
-
-        <para>It's easy to create a simple program to try the examples. Just
-        replace the ``Create a data-model'' part of <link
-        linkend="pgui_quickstart_all">the example of Programmer's Guide
-        Quickstart</link> with this:</para>
-
-        <programlisting role="unspecified">/* Create a data-model */
-Map root = new HashMap();
-root.put(
-        "doc",
-        freemarker.ext.dom.NodeModel.parse(new File("<replaceable>the/path/of/the.xml</replaceable>")));</programlisting>
-
-        <para>and then you have a program that outputs the result of the XML
-        transformation to the standard output (usually the terminal
-        screen).</para>
-
-        <para>Notes:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>The <literal>parse</literal> method removes comment and
-            processing instruction nodes by default. See the API for more
-            details.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>NodeModel</literal> also allows you to wrap
-            <literal>org.w3c.dom.Node</literal>-s directly. You may want to
-            clean up the DOM tree first with the static utility methods, such
-            as <literal>NodeModel.simplify</literal> or your own custom
-            cleanup routines.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>Note that there are tools available that you can use to generate
-        files from XML documents, so you don't have to write your own for this
-        common task. <link linkend="pgui_misc_ant">See here...</link></para>
-      </section>
-    </chapter>
-
-    <chapter xml:id="xgui_imperative">
-      <title>Imperative XML processing</title>
-
-      <indexterm>
-        <primary>XML</primary>
-
-        <secondary>imperative processing</secondary>
-      </indexterm>
-
-      <section xml:id="xgui_imperative_learn">
-        <title>Learning by example</title>
-
-        <note>
-          <para>This section uses the DOM tree and the variable made in the
-          <link linkend="xgui_expose">previous chapter</link>.</para>
-        </note>
-
-        <para>Assume that the programmer has put the XML document into the
-        data-model as variable <literal>doc</literal>. This variable
-        corresponds to the root of the <link linkend="xgui_expose_dom">DOM
-        tree</link>, the ``document''. The actual variable structure behind
-        <literal>doc</literal> is wily enough, and only roughly resembles the
-        DOM tree. So instead of getting lost in the details, let's see how to
-        use it by example.</para>
-
-        <section>
-          <title>Accessing elements by name</title>
-
-          <para>This FTL prints the title of the book:</para>
-
-          <programlisting role="template">&lt;h1&gt;${doc.book.title}&lt;/h1&gt;</programlisting>
-
-          <para>The output will be:</para>
-
-          <programlisting role="output">&lt;h1&gt;Test Book&lt;/h1&gt;</programlisting>
-
-          <para>As you see, both <literal>doc</literal> and
-          <literal>book</literal> can be used as hashes; you get their child
-          nodes as subvariables. Basically, you describe the path by which you
-          reach the target (element <literal>title</literal>) in the DOM tree.
-          You may notice that there was some swindle above: with
-          <literal>${doc.book.title}</literal>, it seems that we instruct
-          FreeMarker to print the <literal>title</literal> element itself, but
-          we should print its child text node (check the <link
-          linkend="xgui_expose_dom">DOM tree</link>). It still works, because
-          elements are not only hash variables, but string variables as well.
-          The scalar value of an element node is the string resulting from the
-          concatenation of all its text child nodes. However, trying to use an
-          element as scalar will cause error if the element has child
-          elements. For example <literal>${doc.book}</literal> would stop with
-          error.</para>
-
-          <para>This FTL prints the titles of the two chapters:</para>
-
-          <programlisting role="template">&lt;h2&gt;${doc.book.chapter[0].title}&lt;/h2&gt;
-&lt;h2&gt;${doc.book.chapter[1].title}&lt;/h2&gt;</programlisting>
-
-          <para>Here, as <literal>book</literal> has 2
-          <literal>chapter</literal> element children,
-          <literal>doc.book.chapter</literal> is a sequence that stores the
-          two element nodes. Thus, we can generalize the above FTL, so it
-          works with any number of chapters:</para>
-
-          <programlisting role="template">&lt;#list doc.book.chapter as ch&gt;
-  &lt;h2&gt;${ch.title}&lt;/h2&gt;
-&lt;/#list&gt;</programlisting>
-
-          <para>But what's if there is only one chapter? Actually, when you
-          access an element as hash subvariable, it is
-          <emphasis>always</emphasis> a sequence as well (not only hash and
-          string), but if the sequence contains exactly 1 item, then the
-          variable also acts as that item itself. So, returning to the first
-          example, this would print the book title as well:</para>
-
-          <programlisting role="template">&lt;h1&gt;${doc.book[0].title[0]}&lt;/h1&gt;</programlisting>
-
-          <para>But you know that there is exactly 1 <literal>book</literal>
-          element, and that a book has exactly 1 title, so you can omit the
-          <literal>[0]</literal>-s.
-          <literal>${doc.book.chapter.title}</literal> would work too, if the
-          book happen to have only 1 <literal>chapter</literal>-s (otherwise
-          it is ambiguous: how is it to know if the <literal>title</literal>
-          of which <literal>chapter</literal> you want? So it stops with an
-          error.). But since a book can have multiple chapters, you don't use
-          this form. If the element <literal>book</literal> has no
-          <literal>chapter</literal> child, then
-          <literal>doc.book.chapter</literal> will be a 0 length sequence, so
-          the FTL with <literal>&lt;#list ...&gt;</literal> will still
-          work.</para>
-
-          <para>It is important to realize the consequence that, for example,
-          if <literal>book</literal> has no <literal>chapter</literal>-s then
-          <literal>book.chapter</literal> is an empty sequence, so
-          <literal>doc.book.chapter??</literal> will <emphasis>not</emphasis>
-          be <literal>false</literal>, it will be always
-          <literal>true</literal>! Similarly,
-          <literal>doc.book.somethingTotallyNonsense??</literal> will not be
-          <literal>false</literal> either. To check if there was no children
-          found, use <literal>doc.book.chapter[0]??</literal> (or
-          <literal>doc.book.chapter?size == 0</literal>). Of course you can
-          use similarly all the <link
-          linkend="dgui_template_exp_missing">missing value handler
-          operators</link> (e.g.
-          <literal>doc.book.author[0]!"Anonymous"</literal>), just don't
-          forget that <literal>[0]</literal>.</para>
-
-          <note>
-            <para>The rule with sequences of size 1 is a convenience feature
-            of the XML wrapper (implemented via multi-type FTL variables). It
-            will not work with other sequences in general.</para>
-          </note>
-
-          <para>Now we finish the example by printing all the
-          <literal>para</literal>-s of each chapter:</para>
-
-          <programlisting role="template">&lt;h1&gt;${doc.book.title}&lt;/h1&gt;
-&lt;#list doc.book.chapter as ch&gt;
-  &lt;h2&gt;${ch.title}&lt;/h2&gt;
-  &lt;#list ch.para as p&gt;
-    &lt;p&gt;${p}
-  &lt;/#list&gt;
-&lt;/#list&gt;</programlisting>
-
-          <para>this will print:</para>
-
-          <programlisting role="output">&lt;h1&gt;Test&lt;/h1&gt;
-  &lt;h2&gt;Ch1&lt;/h2&gt;
-    &lt;p&gt;p1.1
-    &lt;p&gt;p1.2
-    &lt;p&gt;p1.3
-  &lt;h2&gt;Ch2&lt;/h2&gt;
-    &lt;p&gt;p2.1
-    &lt;p&gt;p2.2</programlisting>
-
-          <para>The above FTL could be written more nicely as:</para>
-
-          <programlisting role="template">&lt;#assign book = doc.book&gt;
-&lt;h1&gt;${book.title}&lt;/h1&gt;
-&lt;#list book.chapter as ch&gt;
-  &lt;h2&gt;${ch.title}&lt;/h2&gt;
-  &lt;#list ch.para as p&gt;
-    &lt;p&gt;${p}
-  &lt;/#list&gt;
-&lt;/#list&gt;</programlisting>
-
-          <para>Finally, a ``generalized`` usage of the child selector
-          mechanism: this template lists all <literal>para</literal>-s of the
-          example XML document:</para>
-
-          <programlisting role="template">&lt;#list doc.book.chapter.para as p&gt;
-  &lt;p&gt;${p}
-&lt;/#list&gt;</programlisting>
-
-          <para>The output will be:</para>
-
-          <programlisting role="output">  &lt;p&gt;p1.1
-  &lt;p&gt;p1.2
-  &lt;p&gt;p1.3
-  &lt;p&gt;p2.1
-  &lt;p&gt;p2.2
-  </programlisting>
-
-          <para>This example shows that hash subvariables select the children
-          of a sequence of notes (just in the earlier examples that sequence
-          happened to be of size 1). In this concrete case, subvariable
-          <literal>chapter</literal> returns a sequence of size 2 (since there
-          are two <literal>chapter</literal>-s), and then subvariable
-          <literal>para</literal> selects the <literal>para</literal> child
-          nodes of all nodes in that sequence.</para>
-
-          <para>A negative consequence of this mechanism is that things like
-          <literal>doc.somethingNonsense.otherNonsesne.totalNonsense</literal>
-          will just evaluate to an empty sequence, and you don't get any error
-          messages.</para>
-        </section>
-
-        <section>
-          <title>Accessing attributes</title>
-
-          <para>This XML is the same as the original, except that it uses
-          attributes for the titles, instead of elements:</para>
-
-          <programlisting role="unspecified">&lt;!-- THIS XML IS USED FOR THE "Accessing attributes" CHAPTER ONLY! --&gt;
-&lt;!-- Outside this chapter examples use the XML from earlier.       --&gt;
-
-&lt;book title="Test"&gt;
-  &lt;chapter title="Ch1"&gt;
-    &lt;para&gt;p1.1&lt;/para&gt;
-    &lt;para&gt;p1.2&lt;/para&gt;
-    &lt;para&gt;p1.3&lt;/para&gt;
-  &lt;/chapter&gt;
-  &lt;chapter title="Ch2"&gt;
-    &lt;para&gt;p2.1&lt;/para&gt;
-    &lt;para&gt;p2.2&lt;/para&gt;
-  &lt;/chapter&gt;
-&lt;/book&gt;</programlisting>
-
-          <para>The attributes of an element can be accessed in the same way
-          as the child elements of the element, except that you put an at-sign
-          (@) before the name of the attribute:</para>
-
-          <programlisting role="template">&lt;#assign book = doc.book&gt;
-&lt;h1&gt;${book.@title}&lt;/h1&gt;
-&lt;#list book.chapter as ch&gt;
-  &lt;h2&gt;${ch.@title}&lt;/h2&gt;
-  &lt;#list ch.para as p&gt;
-    &lt;p&gt;${p}
-  &lt;/#list&gt;
-&lt;/#list&gt;</programlisting>
-
-          <para>This will print exactly the same as the previous
-          example.</para>
-
-          <para>Getting attributes follows the same logic as getting child
-          elements, so the result of <literal>ch.@title</literal> above is a
-          sequence of size 1. If there were no <literal>title</literal>
-          attribute, then the result would be a sequence of size 0. So be
-          ware, using existence built-ins is tricky here too: if you are
-          curious if <literal>foo</literal> has attribute
-          <literal>bar</literal> then you have to write
-          <literal>foo.@bar[0]??</literal>. (<literal>foo.@bar??</literal> is
-          wrong, because it always returns <literal>true</literal>.)
-          Similarly, if you want a default value for the
-          <literal>bar</literal> attribute, then you have to write
-          <literal>foo.@bar[0]!"theDefaultValue"</literal>.</para>
-
-          <para>As with child elements, you can select the attributes of
-          multiple nodes. For example, this template prints the titles of all
-          chapters:</para>
-
-          <programlisting role="template">&lt;#list doc.book.chapter.@title as t&gt;
-  ${t}
-&lt;/#list&gt;</programlisting>
-        </section>
-
-        <section>
-          <title>Exploring the tree</title>
-
-          <para>This FTL will enumerate all child nodes of the book
-          element:</para>
-
-          <programlisting role="template">&lt;#list doc.book?children as c&gt;
-- ${c?node_type} &lt;#if c?node_type = 'element'&gt;${c?node_name}&lt;/#if&gt;
-&lt;/#list&gt;</programlisting>
-
-          <para>this will print:</para>
-
-          <programlisting role="output">- text
-- element title
-- text
-- element chapter
-- text
-- element chapter
-- text</programlisting>
-
-          <para>The meaning of <literal>?node_type</literal> is probably clear
-          without explanation. There are several node types that can occur in
-          a DOM tree, such as <literal>"element"</literal>,
-          <literal>"text"</literal>, <literal>"comment"</literal>,
-          <literal>"pi"</literal>, ...etc.</para>
-
-          <para>The <literal>?node_name</literal> returns the name of element
-          for element nodes. For other node types, it also returns something,
-          but that's mainly useful for declarative XML processing, which will
-          be discussed in a <link linkend="xgui_declarative">later
-          chapter</link>.</para>
-
-          <para>If the book element had attributes, they would
-          <emphasis>not</emphasis> appear in the above list, for practical
-          reasons. But you can get a list that contains all attributes of the
-          element, with subvariable <literal>@@</literal> of the element
-          variable. If you modify the first line of the XML to this:</para>
-
-          <programlisting role="unspecified">&lt;book foo="Foo" bar="Bar" baaz="Baaz"&gt;</programlisting>
-
-          <para>and run this FTL:</para>
-
-          <programlisting role="template">&lt;#list doc.book.@@ as attr&gt;
-- ${attr?node_name} = ${attr}
-&lt;/#list&gt;</programlisting>
-
-          <para>then you get this output (or something similar):</para>
-
-          <programlisting role="output">- baaz = Baaz
-- bar = Bar
-- foo = Foo</programlisting>
-
-          <para>Returning to the listing of children, there is a convenience
-          subvariable to list only the element children of an element:</para>
-
-          <programlisting role="template">&lt;#list doc.book.* as c&gt;
-- ${c?node_name}
-&lt;/#list&gt;</programlisting>
-
-          <para>This will print:</para>
-
-          <programlisting role="output">- title
-- chapter
-- chapter</programlisting>
-
-          <para>You get the parent of an element with the
-          <literal>parent</literal> built-in:</para>
-
-          <programlisting role="template">&lt;#assign e = doc.book.chapter[0].para[0]&gt;
-&lt;#-- Now e is the first para of the first chapter --&gt;
-${e?node_name}
-${e?parent?node_name}
-${e?parent?parent?node_name}
-${e?parent?parent?parent?node_name}</programlisting>
-
-          <para>This will print:</para>
-
-          <programlisting role="output">para
-chapter
-book
-@document</programlisting>
-
-          <para>In the last line you have reached the root of the DOM tree,
-          the document node. It's not an element, and this is why it has that
-          strange name; don't deal with it now. Obviously, the document node
-          has no parent.</para>
-
-          <para>You can quickly go back to the document node using the
-          <literal>root</literal> built-in:</para>
-
-          <programlisting role="template">&lt;#assign e = doc.book.chapter[0].para[0]&gt;
-${e?root?node_name}
-${e?root.book.title}</programlisting>
-
-          <para>This will print:</para>
-
-          <programlisting role="output">@document
-Test Book</programlisting>
-
-          <para>For the complete list of built-ins you can use to navigate in
-          the DOM tree, read the <link linkend="ref_builtins_node">reference
-          of node built-ins</link>.</para>
-        </section>
-
-        <section>
-          <title>Using XPath expressions</title>
-
-          <note>
-            <para>XPath expressions work only if <link
-            xlink:href="http://jaxen.org/">Jaxen</link> (recommended, but use
-            at least Jaxen 1.1-beta-8, not older) or <link
-            xlink:href="http://xml.apache.org/xalan/">Apache Xalan</link>
-            classes are available. (Apache Xalan classes are included in Sun
-            J2SE 1.4, 1.5 and 1.6 (and maybe later too); no separate Xalan jar
-            is needed.)</para>
-          </note>
-
-          <note>
-            <para>Don't use the sample XML from the previous section, where
-            <literal>title</literal> is an attribute; that applies only to
-            that section.</para>
-          </note>
-
-          <para>If a hash key used with a node variable can't be interpreted
-          otherwise (see the <link linkend="xgui_imperative_formal">next
-          section</link> for the precise definition), then it will by
-          interpreted as an XPath expression. For more information on XPath,
-          please visit <link
-          xlink:href="http://www.w3.org/TR/xpath">http://www.w3.org/TR/xpath</link>.</para>
-
-          <para>For example, here we list the <literal>para</literal> elements
-          of the chapter with <literal>title</literal> element (not
-          attribute!) content "Ch1'':</para>
-
-          <programlisting role="template">&lt;#list doc["book/chapter[title='Ch1']/para"] as p&gt;
-  &lt;p&gt;${p}
-&lt;/#list&gt;</programlisting>
-
-          <para>It will print:</para>
-
-          <programlisting role="output">  &lt;p&gt;p1.1
-  &lt;p&gt;p1.2
-  &lt;p&gt;p1.3</programlisting>
-
-          <para>The rule with sequences of length 1 (explained in earlier
-          sections) stands for XPath results as well. That is, if the
-          resulting sequence contains exactly 1 node, it also acts as the node
-          itself. For example, print the first paragraph of chapter
-          ``Ch1'':</para>
-
-          <programlisting role="template">${doc["book/chapter[title='Ch1']/para[1]"]}</programlisting>
-
-          <para>which prints the same as:</para>
-
-          <programlisting role="template">${doc["book/chapter[title='Ch1']/para[1]"][0]}</programlisting>
-
-          <para>The context node of the XPath expression is the node (or
-          sequence of nodes) whose hash subvariable is used to issue the XPath
-          expression. Thus, this prints the same as the previous
-          example:</para>
-
-          <programlisting role="template">${doc.book["chapter[title='Ch1']/para[1]"]}</programlisting>
-
-          <para>Note that currently you can use a sequence of 0 or multiple
-          (more than 1) nodes as context only if the programmer has set up
-          FreeMarker to use Jaxen instead of Xalan.</para>
-
-          <para>Also note that XPath indexes sequence items from 1, while FTL
-          indexes sequence items from 0. Thus, to select the first chapter,
-          the XPath expression is <literal>"/book/chapter[1]"</literal>, while
-          the FTL expression is <literal>book.chapter[0]</literal>.</para>
-
-          <para>If the programmer has set up FreeMarker to use Jaxen instead
-          of Xalan, then FreeMarker variables are visible with XPath variable
-          references:</para>
-
-          <programlisting role="template">&lt;#assign <emphasis>currentTitle</emphasis> = "Ch1"&gt;
-&lt;#list doc["book/chapter[title=<emphasis>$currentTitle</emphasis>]/para"] as p&gt;
-<replaceable>...</replaceable></programlisting>
-
-          <para>Note that <literal>$currentTitle</literal> is not a FreeMarker
-          interpolation, as there are no <literal>{</literal> and
-          <literal>}</literal> there. That's an XPath expression.</para>
-
-          <para>The result of some XPath expressions is not a node-set, but a
-          string, a number, or a boolean. For those XPath expressions, the
-          result is an FTL string, number, or boolean variable respectively.
-          For example, the following will count the total number of
-          <literal>para</literal> elements in the XML document, so the result
-          is a number:</para>
-
-          <programlisting role="template">${x["count(//para)"]}</programlisting>
-
-          <para>The output will be:</para>
-
-          <programlisting role="output">5</programlisting>
-        </section>
-
-        <section>
-          <title>XML namespaces</title>
-
-          <indexterm>
-            <primary>XML namespace</primary>
-
-            <secondary>in imperative processing</secondary>
-          </indexterm>
-
-          <para>Be default, when you write something like
-          <literal>doc.book</literal>, then it will select the element with
-          name <literal>book</literal> that does not belongs to any XML
-          namespace (similarly to XPath). If you want to select an element
-          that is inside an XML namespace, you must register a prefix and use
-          that. For example, if element <literal>book</literal> is in XML
-          namespace <literal>http://example.com/ebook</literal>, then you have
-          to associate a prefix with it at the top of the template with the
-          <literal>ns_prefixes</literal> parameter of the <link
-          linkend="ref.directive.ftl"><literal>ftl</literal>
-          directive</link>:</para>
-
-          <programlisting role="template">&lt;#ftl ns_prefixes={"e":"http://example.com/ebook"}&gt;
-</programlisting>
-
-          <para>And now you can write expressions as
-          <literal>doc["e:book"]</literal>. (The usage of square bracket
-          syntax was required because the colon would confuse FreeMarker
-          otherwise.)</para>
-
-          <para>As the value of <literal>ns_prefixes</literal> is a hash, you
-          can register multiple prefixes:</para>
-
-          <programlisting role="template">&lt;#ftl ns_prefixes={
-    "e":"http://example.com/ebook",
-    "f":"http://example.com/form",
-    "vg":"http://example.com/vectorGraphics"}
-&gt;</programlisting>
-
-          <para>The <literal>ns_prefixes</literal> parameter affects the whole
-          <link linkend="dgui_misc_namespace">FTL namespace</link>. This means
-          in practice that the prefixes you have registered in the main page
-          template will be visible in all <literal>&lt;#include
-          ...&gt;</literal>-d templates, but not in <literal>&lt;#imported
-          ...&gt;</literal>-d templates (often referred as FTL libraries). Or
-          from another point of view, an FTL library can register XML
-          namespace prefixes for it's own use, without interfering with the
-          prefix registrations of the main template and other
-          libraries.</para>
-
-          <para>Note that, if an input document is dominated by a given XML
-          namespace, you can set that as the default namespace for
-          convenience. This means that if you don't use prefix, as in
-          <literal>doc.book</literal>, then it selects element that belongs to
-          the default namespace. The setting of the default namespace happens
-          with reserved prefix <literal>D</literal>, for example:</para>
-
-          <programlisting role="template">&lt;#ftl ns_prefixes={"D":"http://example.com/ebook"}&gt;
-</programlisting>
-
-          <para>Now expression <literal>doc.book</literal> select the
-          <literal>book</literal> element that belongs to XML namespace
-          <literal>http://example.com/ebook</literal>. Unfortunately, XPath
-          does not support this idea of a default namespace. Thus, in XPath
-          expressions, element names without prefixes always select the
-          elements that does not belong to any XML namespace. However, to
-          access elements in the default namespace you can directly use prefix
-          <literal>D</literal>, for example:
-          <literal>doc["D:book/D:chapter[title='Ch1']"]</literal>.</para>
-
-          <para>Note that when you use a default namespace, then you can
-          select elements that does not belong to any node namespace with
-          reserved prefix <literal>N</literal>, for example
-          <literal>doc.book["N:foo"]</literal>. It doesn't go for XPath
-          expressions, where the above can be witten as
-          <literal>doc["D:book/foo"]</literal>.</para>
-        </section>
-
-        <section>
-          <title>Don't forget escaping!</title>
-
-          <para>We have made a big mistake in all examples. We generate output
-          of HTML format, and HTML format reserves characters as
-          <literal>&lt;</literal>, <literal>&amp;</literal>, etc. So when we
-          print plain text (as the titles and paragraphs), we have to escape
-          it. Thus, the correct version of the example is:</para>
-
-          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
-&lt;#assign book = doc.book&gt;
-&lt;h1&gt;${book.title}&lt;/h1&gt;
-&lt;#list book.chapter as ch&gt;
-  &lt;h2&gt;${ch.title}&lt;/h2&gt;
-  &lt;#list ch.para as p&gt;
-    &lt;p&gt;${p}
-  &lt;/#list&gt;
-&lt;/#list&gt;
-<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
-
-          <para>So if the book title is "Romeo &amp; Julia", the resulting
-          HTML output will be correctly:</para>
-
-          <programlisting role="output"><replaceable>...</replaceable>
-&lt;h1&gt;Romeo &amp;amp; Julia&lt;/h1&gt;
-<replaceable>...</replaceable></programlisting>
-        </section>
-      </section>
-
-      <section xml:id="xgui_imperative_formal">
-        <title>Formal description</title>
-
-        <para>Every variable that corresponds to a single node in the DOM tree
-        is a multi-type variable of type node and type hash (for programmers:
-        implements both <literal>TemplateNodeModel</literal> and
-        <literal>TemplateHashModel</literal>). Thus, you can use the <link
-        linkend="ref_builtins_node">node built-ins</link> with them. Hash keys
-        are interpreted as XPath expressions, except the special keys shown in
-        the table below. Some of the node variables also have string type, so
-        you can use them as string variables (for programmers: they implement
-        <literal>TemplateScalarModel</literal>).</para>
-
-        <anchor xml:id="misc.xguiTable"/>
-
-        <informaltable border="1">
-          <thead>
-            <tr>
-              <th>Node type (<literal>?node_type</literal>)</th>
-
-              <th>Node name (<literal>?node_name</literal>)</th>
-
-              <th>String value (e.g. <literal>&lt;p&gt;${node}</literal>)</th>
-
-              <th>Special hash keys</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td><literal>"document"</literal></td>
-
-              <td><literal>"@document"</literal></td>
-
-              <td>No string value. (Error when you try to use it as
-              string.)</td>
-
-              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
-              <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
-              <literal>"*"</literal>, <literal>"**"</literal>,
-              <literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
-            </tr>
-
-            <tr>
-              <td><literal>"element"</literal></td>
-
-              <td><literal>"<replaceable>name</replaceable>"</literal>: the
-              name of the element. This is the local name (i.e. name without
-              namespace prefix).</td>
-
-              <td>If it has no element children, the text of all text node
-              children concatenated together. Error otherwise, when you try to
-              use it as string.</td>
-
-              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
-              <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
-              <literal>"*"</literal>, <literal>"**"</literal>,
-              <literal>"@<replaceable>attrName</replaceable>"</literal>,
-              <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>,
-              <literal>"@@"</literal>, <literal>"@*"</literal>,
-              <literal>"@@start_tag"</literal>,
-              <literal>"@@end_tag"</literal>,
-              <literal>"@@attributes_markup"</literal>,
-              <literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
-            </tr>
-
-            <tr>
-              <td><literal>"text"</literal></td>
-
-              <td><literal>"@text"</literal></td>
-
-              <td>The text itself.</td>
-
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
-            </tr>
-
-            <tr>
-              <td><literal>"pi"</literal></td>
-
-              <td><literal>"@pi$<replaceable>target</replaceable>"</literal></td>
-
-              <td>The part between the target name and the
-              <literal>?&gt;</literal>.</td>
-
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
-            </tr>
-
-            <tr>
-              <td><literal>"comment"</literal></td>
-
-              <td><literal>"@comment"</literal></td>
-
-              <td>The text of the comment, without the delimiters
-              <literal>&lt;!--</literal> and <literal>--&gt;</literal>.</td>
-
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
-            </tr>
-
-            <tr>
-              <td><literal>"attribute"</literal></td>
-
-              <td><literal>"<replaceable>name</replaceable>"</literal>: the
-              name of the attribute. This is the local name (i.e. name without
-              namespace prefix).</td>
-
-              <td>The value of the attribute.</td>
-
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
-            </tr>
-
-            <tr>
-              <td><literal>"document_type"</literal></td>
-
-              <td><literal>"@document_type$<replaceable>name</replaceable>"</literal>:
-              <literal><replaceable>name</replaceable></literal> is the name
-              of the document element.</td>
-
-              <td>No string value. (Error when you try to use it as
-              string.)</td>
-
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
-            </tr>
-          </tbody>
-        </informaltable>
-
-        <para>Notes:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>There is no CDATA type. CDATA nodes are transparently
-            considered as text nodes.</para>
-          </listitem>
-
-          <listitem>
-            <para>Variables do <emphasis>not</emphasis> support
-            <literal>?keys</literal> and <literal>?values</literal>.</para>
-          </listitem>
-
-          <listitem>
-            <para>Element and attribute node names are local names, that is,
-            they do not contain the namespace prefix. The URI of the namespace
-            the node belongs to can be queried with the
-            <literal>?node_namespace</literal> built-in.</para>
-          </listitem>
-
-          <listitem>
-            <para>XPath expression needs Jaxen (recommended, but please use
-            1.1-beta-8 or later; <link xlink:href="http://jaxen.org/">download
-            it here</link>) or Apache Xalan classes available, or an error
-            will stop template execution. Note, however, that as some special
-            hash keys hide the XPath expressions of the same meaning, those
-            XPath expressions will work even if there is no XPath
-            implementation available. <phrase role="forProgrammers">If both
-            Xalan and Jaxen is available, FreeMarker will use Xalan, unless
-            you choose Jaxen by calling
-            <literal>freemarker.ext.dom.NodeModel.useJaxenXPathSupport()</literal>
-            from Java.</phrase></para>
-          </listitem>
-
-          <listitem>
-            <para>If Jaxen is used for the XPath support (not Xalan), then
-            FreeMarker variables are visible with XPath variable references
-            (e.g.
-            <literal>doc["book/chapter[title=$currentTitle]"]</literal>).</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>Meaning of special hash keys:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para><literal>"<replaceable>elementName</replaceable>"</literal>,
-            <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>:
-            Returns the sequence of child nodes that are elements of name
-            <literal><replaceable>elementName</replaceable></literal>. (Note
-            that the term ``child'' means <emphasis>immediate</emphasis>
-            descendant.) The selection is XML name-space aware, unless the XML
-            document was persed with an XML parser that was not in namespace
-            aware mode. In XML name-space aware mode, names without prefix
-            (<replaceable>elementName</replaceable>) selects only elements
-            that doesn't belong to any XML name-space (unless you have
-            registered a default XML namespace), and names with prefix
-            (<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>)
-            selects only elements that are belonging to the XML namespace
-            denoted by the prefix. The registration of prefixes and the
-            setting of the default XML namespace is done with the
-            <literal>ns_prefixes</literal> parameter of the <link
-            linkend="ref.directive.ftl"><literal>ftl</literal>
-            directive</link>.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"*"</literal>: Returns the sequence of all child
-            (direct descedant) <emphasis>element</emphasis> nodes. The
-            sequence will contain the elements in the ``document order'', that
-            is, in the order in which the first character of the XML
-            representation of each node occurs (after expansion of general
-            entities).</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"**"</literal>: Returns the sequence of all
-            descendant <emphasis>element</emphasis> nodes. The sequence will
-            contain the elements in the document order.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@<replaceable>attName</replaceable>"</literal>,
-            <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>:
-            Returns the attribute
-            <literal><replaceable>attName</replaceable></literal> of the
-            element as a sequence of size 1 that contains the attribute node,
-            or as an empty sequence if the attribute does not exist (so to
-            check if an attribute exists use
-            <literal>foo.@<replaceable>attName</replaceable>[0]??</literal>,
-            <emphasis>not</emphasis>
-            <literal>foo.@<replaceable>attName</replaceable>??</literal>). As
-            with special key
-            <literal>"<replaceable>elementName</replaceable>"</literal>, if
-            the length of the sequence is 1, then it also acts as its first
-            subvariable. If no
-            <literal><replaceable>prefix</replaceable></literal> is used, then
-            it returns only attribute that does not use XML namespace (even if
-            you have set a default XML namespace). If a
-            <literal><replaceable>prefix</replaceable></literal> is used, it
-            returns only the attribute that belongs to the XML namespace
-            associated with the
-            <literal><replaceable>prefix</replaceable></literal>. The
-            registration of prefixes is done with the
-            <literal>ns_prefixes</literal> parameter of the <link
-            linkend="ref.directive.ftl"><literal>ftl</literal>
-            directive</link>.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@"</literal> or <literal>"@*"</literal>: Returns
-            the sequence of attribute nodes belonging to the parent element.
-            This is the same as XPath <literal>@*</literal>.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@qname"</literal>: Returns the full-qualified
-            name of the element (such as <literal>e:book</literal>, in
-            contrast to the local name returned by
-            <literal>?node_name</literal> that is <literal>book</literal>) .
-            The prefix used (as <literal>e</literal>) is chosen based on the
-            prefix registered in the current namespace with the
-            <literal>ns_prefixes</literal> parameter of the
-            <literal>ftl</literal> directive, and not influenced by the prefix
-            used in the source XML document. If you have set a default XML
-            namespace, then for nodes that use that, prefix
-            <literal>D</literal> will be used. For nodes that does not belong
-            to an XML namespace, no prefix is used (even if you have set a
-            default namespace). If there is no prefix registered for the
-            namespace of the node, the result is a non-existent variable
-            (<literal>node.@@qname??</literal> is
-            <literal>false</literal>).</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@markup"</literal>: This returns the full XML
-            markup of a node, as a string. (Full XML markup means that it also
-            contains the markup of the child nodes, and the markup of the
-            children of the child nodes, and so on.) The markup you get is not
-            necessary the same as the markup in the source XML file, it's just
-            semantically identical. Especially, note that CDATA sections will
-            become to plain text. Also note that depending on how did you
-            wrapped the original XML document with FreeMarker, comment or
-            processing instruction nodes may were removed, and then they will
-            be missing from the output of course. The first outputted start
-            tag will contain
-            <literal>xmlns:<replaceable>prefix</replaceable></literal>
-            attributes for each XML name-spaces used in the outputted XML
-            fragment, and those prefixes will be used in the outputted element
-            and attribute names. These prefixes will be the same as the
-            prefixes registered with the <literal>ns_prefixes</literal>
-            parameter of the <literal>ftl</literal> directive (no prefix will
-            be used for <literal>D</literal>, as it will be registered as the
-            default name-space with an <literal>xmlns</literal> attribute), or
-            if no prefix was assigned for a XML name-space with that, then an
-            arbitrary chosen unused prefix is used.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@nested_markup"</literal>: This is similar to
-            <literal>"@@markup"</literal>, but it returns the XML markup of an
-            element without its opening and closing tags. For the document
-            node, it returns the same as <literal>"@@markup"</literal>. For
-            other node types (text, processing instruction, etc.), it returns
-            an empty string. Unlike with <literal>"@@markup"</literal>, no
-            <literal>xmlns:<replaceable>prefix</replaceable></literal>
-            attributes will be placed into the ouput, but regarding the
-            prefixes used in element and attribute names the rules are the
-            same.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@text"</literal>: This returns the value of all
-            text nodes that occur within the node (all descendant text nodes,
-            not just direct children), concatenated together into a single
-            string. If the node has no text node children, then the result is
-            an empty string.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@start_tag"</literal>: Returns the markup of the
-            <link linkend="gloss.startTag">start-tag</link> of the element
-            node. As with <literal>@@markup</literal>, the output is not
-            necessary the same as in the original XML document, but it is
-            semantically equivalent with that. Regarding the XML name-spaces
-            (<literal>xmlns:<replaceable>prefix</replaceable></literal>
-            attributes in the output, etc.) the rules are the same as with
-            <literal>"@@markup"</literal></para>
-          </listitem>
-
-          <listitem>
-            <para><literal>"@@end_tag"</literal>: Returns the markup of the
-            <link linkend="gloss.endTag">end-tag</link> of the element node.
-            As with <literal>@@markup</literal>, the output is not necessary
-            the same as in the original XML document, but it is semantically
-            equivalent with that.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal>@@attributes_markup</literal>: Returns the markup
-            of the <link linkend="gloss.attribute">attributes</link> of the
-            element node. As with <literal>@@markup</literal>, the output is
-            not necessary the same as in the original XML document, but it is
-            semantically equivalent with that.</para>
-          </listitem>
-        </itemizedlist>
-
-        <section>
-          <title>Node sequences</title>
-
-          <para>Many of the special hash keys (indicated in the above list),
-          and XPath expressions that result in node-sets (see the <link
-          xlink:href="http://www.w3.org/TR/xpath">XPath recommendation</link>)
-          return a sequence of nodes.</para>
-
-          <para>These node sequences, if they store exactly 1 subvariable,
-          will also act as the subvariable itself. For example,
-          <literal>${book.title[0]}</literal> will do the same as
-          <literal>${book.title}</literal>, if there is only one
-          <literal>title</literal> element child of element
-          <literal>book</literal>.</para>
-
-          <para>Returning an empty node sequence is a normal situation. For
-          example, if in a concrete XML document, element
-          <literal>book</literal> has no child element
-          <literal>chapter</literal>, then <literal>book.chapter</literal>
-          results in an empty node sequence. Beware! This also means, that
-          <literal>book.chaptre</literal> (note the typo) will also return
-          empty node sequence, and will not stop with error. Also,
-          <literal>book.chaptre??</literal> (note the typo) will return
-          <literal>true</literal> because the empty sequence exists, so you
-          have to use <literal>book.chaptre[0]??</literal> for the
-          check.</para>
-
-          <para>Node sequences that store not 1 nodes (but 0 or more than 1
-          nodes) also support some of the hash keys described above. Namely,
-          the following special keys are supported:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para><literal>"<replaceable>elementName</replaceable>"</literal>,
-              <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal></para>
-            </listitem>
-
-            <listitem>
-              <para><literal>"@<replaceable>attrName</replaceable>"</literal>,
-              <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal></para>
-            </listitem>
-
-            <listitem>
-              <para><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal></para>
-            </listitem>
-
-            <listitem>
-              <para><literal>"@@text"</literal></para>
-            </listitem>
-
-            <listitem>
-              <para><literal>"*"</literal>, <literal>"**"</literal></para>
-            </listitem>
-
-            <listitem>
-              <para><literal>"@@"</literal>, <literal>"@*"</literal></para>
-            </listitem>
-          </itemizedlist>
-
-          <para>When you apply one of the above special keys on a node
-          sequence that contains more than 1 or 0 nodes, then for each node in
-          the sequence (where the special key does make sense, e.g. text nodes
-          will be skipped for key <literal>*</literal> or
-          <literal>@foo</literal>), the special key will be applied as it was
-          explained for single nodes, and the results will be concatenated to
-          form the final result. The results will be concatenated in the order
-          as the corresponding nodes occur in the node sequence. The
-          concatenation means string or sequence concatenation depending on
-          the type of the results. If the special key would result in a string
-          for a single node, then for multiple nodes the result is a single
-          string too (the results for the single nodes concatenated), and if
-          the special key would return a sequence for a single node, then for
-          multiple nodes the result is a single sequence too. If there are 0
-          nodes in the sequence you apply the special key on, the string
-          result is an empty string or an empty sequence respectively.</para>
-
-          <para>XPath expressions can be used with node sequences. However,
-          for 0 or more than 1 nodes it will work only if you use Jaxen
-          instead of Xalan, because of the limitations of the Xalan XPath
-          implementation.</para>
-        </section>
-      </section>
-    </chapter>
-
-    <chapter xml:id="xgui_declarative">
-      <title>Declarative XML Processing</title>
-
-      <indexterm>
-        <primary>XML</primary>
-
-        <secondary>declarative processing</secondary>
-      </indexterm>
-
-      <indexterm>
-        <primary>XSLT</primary>
-      </indexterm>
-
-      <section xml:id="xgui_declarative_basics">
-        <title>Basics</title>
-
-        <note>
-          <para>This section uses the DOM tree and the variable made in <link
-          linkend="xgui_expose">a previous chapter</link>.</para>
-        </note>
-
-        <para>With the imperative approach of XML processing -- this was shown
-        in the previous chapter -- you write an FTL program that walks the
-        tree to find the different kind of nodes. With the declarative
-        approach, you rather define how to handle the different kind of nodes,
-        and then let FreeMarker walk the tree an call the handlers you have
-        defined. This approach is useful for complex XML schemas, where the
-        same element can occur as the child of many other elements. Examples
-        of such schemas are XHTML and XDocBook.</para>
-
-        <para>The directive you most often use with the declarative approach
-        is the <link
-        linkend="ref.directive.recurse"><literal>recurse</literal>
-        directive</link>. This directive gets a node variable as parameter,
-        and ``visits'' all its children nodes, one after the other, starting
-        with the first child. ``Visiting'' a node means that it calls a
-        user-defined directive (like a macro) that has the same name as the
-        name of the child node (<literal>?node_name</literal>). We say on
-        this, that the user-defined directive <emphasis>handles</emphasis> the
-        node. The node that the user-defined directive just handles is
-        available as special variable <literal>.node</literal>. For example,
-        this FTL:</para>
-
-        <programlisting role="template">&lt;#recurse doc&gt;
-
-&lt;#macro book&gt;
-  I'm the book element handler, and the title is: ${.node.title}
-&lt;/#macro&gt;</programlisting>
-
-        <para>will print (I have removed some disturbing white-space form the
-        output):</para>
-
-        <programlisting role="output">I'm the book element handler, and the title is: Test Book
-</programlisting>
-
-        <para>If you call <literal>recurse</literal> without parameter, then
-        it uses <literal>.node</literal>, that is, it visits all children
-        nodes of the node being handled currently. So this FTL:</para>
-
-        <programlisting role="template">&lt;#recurse doc&gt;
-
-&lt;#macro book&gt;
-  Book element with title ${.node.title}
-    &lt;#recurse&gt;
-  End book
-&lt;/#macro&gt;
-
-&lt;#macro title&gt;
-  Title element
-&lt;/#macro&gt;
-
-&lt;#macro chapter&gt;
-  Chapter element with title: ${.node.title}
-&lt;/#macro&gt;</programlisting>
-
-        <para>will print (I have removed disturbing white-space form the
-        output):</para>
-
-        <programlisting role="output">Book element with title Test Book
-Title element
-Chapter element with title: Ch1
-Chapter element with title: Ch2
-End book</programlisting>
-
-        <para>You have seen how to define handlers for element nodes, but not
-        how to define handler for the text nodes. Since the name of the
-        handler is the same as the node-name of nodes it handles, and as the
-        node-name of all text nodes is <literal>@text</literal> (see <link
-        linkend="misc.xguiTable">the table</link>), you define handler for the
-        text nodes like this:</para>
-
-        <programlisting role="template">
-&lt;#macro @text&gt;${.node?html}&lt;/#macro&gt;
-</programlisting>
-
-        <para>Note the <literal>?html</literal>. You have to HTML-escape the
-        text, since you generate output of HTML format.</para>
-
-        <para>Here it is the template that transforms the XML to complete
-        HTML:</para>
-
-        <anchor xml:id="misc.example.declarativeBookProcessor"/>
-
-        <programlisting role="template">&lt;#recurse doc&gt;
-
-&lt;#macro book&gt;
-  &lt;html&gt;
-    &lt;head&gt;
-      &lt;title&gt;&lt;#recurse .node.title&gt;&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-      &lt;h1&gt;&lt;#recurse .node.title&gt;&lt;/h1&gt;
-      &lt;#recurse&gt;
-    &lt;/body&gt;
-  &lt;/html&gt;
-&lt;/#macro&gt;
-
-&lt;#macro chapter&gt;
-  &lt;h2&gt;&lt;#recurse .node.title&gt;&lt;/h2&gt;
-  &lt;#recurse&gt;
-&lt;/#macro&gt;
-
-&lt;#macro para&gt;
-  &lt;p&gt;&lt;#recurse&gt;
-&lt;/#macro&gt;
-
-&lt;#macro title&gt;
-  &lt;#--
-    We have handled this element imperatively,
-    so we do nothing here.
-  --&gt;
-&lt;/#macro&gt;
-
-&lt;#macro @text&gt;${.node?html}&lt;/#macro&gt;</programlisting>
-
-        <para>and the output will be (now I will honestly include the annoying
-        white-space...):</para>
-
-        <programlisting role="output">  &lt;html&gt;
-    &lt;head&gt;
-      &lt;title&gt;Test Book&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-      &lt;h1&gt;Test Book&lt;/h1&gt;
-
-  
-    &lt;h2&gt;Ch1&lt;/h2&gt;
-
-    
-      &lt;p&gt;p1.1
-
-      &lt;p&gt;p1.2
-
-      &lt;p&gt;p1.3
-
-  
-    &lt;h2&gt;Ch2&lt;/h2&gt;
-
-    
-      &lt;p&gt;p2.1
-
-      &lt;p&gt;p2.2
-
-  
-    &lt;/body&gt;
-  &lt;/html&gt;
-
-  </programlisting>
-
-        <para>Note that you can reduce substantially the amount of superfluous
-        whitespace in the output by using the <link
-        linkend="ref_directive_t">trim directives</link>, as
-        <literal>&lt;#t&gt;</literal>. See also: <xref
-        linkend="dgui_misc_whitespace"/></para>
-
-        <para>You may say that the FTL that did it with imperative approach
-        was much shorter. That's true, but the example XML uses a very simple
-        schema, and as I said, the declarative approach brings its form with
-        XML schemas that are not that firm about what element can occur where.
-        Say, introduce element <literal>mark</literal>, that should color text
-        to red, does not mater where do you use it; in a
-        <literal>title</literal>, or in a <literal>para</literal>. For this,
-        with the declarative approach, you just add a macro:</para>
-
-        <programlisting role="template">&lt;#macro mark&gt;&lt;font color=red&gt;&lt;#recurse&gt;&lt;/font&gt;&lt;/#macro&gt;</programlisting>
-
-        <para>And then <literal>&lt;mark&gt;...&lt;/mark&gt;</literal> will
-        automatically work everywhere. So for certain XML schemas, declarative
-        XML processing will actually result in shorter, and what is even more
-        important, much clearer FTL-s, than imperative XML processing. It's up
-        to you to decide which approach to use when; don't forget that you can
-        mix the two approaches freely. Say, in an element handler, you can use
-        imperative approach to process the contents of that element.</para>
-      </section>
-
-      <section xml:id="xgui_declarative_details">
-        <title>Details</title>
-
-        <section>
-          <title>Default handlers</title>
-
-          <para>For some XML node types, there is a default handler, which
-          will handle the node if you haven't defined a handler for the node
-          (i.e. if there is no user-defined directive available with name
-          identical to the node name). Here are these node types, and what the
-          default handler does:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Text node: prints the text as it. Note, that in most
-              applications, this will not be good for you, because you should
-              escape the text before you send it to the output (with
-              <literal>?html</literal> or <literal>?xml</literal> or
-              <literal>?rtf</literal>, ...etc. depends on the output
-              format).</para>
-            </listitem>
-
-            <listitem>
-              <para>Processing instruction node: call handler called
-              <literal>@pi</literal> if you have created such user-defined
-              directive, otherwise do nothing (ignore the node).</para>
-            </listitem>
-
-            <listitem>
-              <para>Comment node, document type node: Do nothing (ignore the
-              node).</para>
-            </listitem>
-
-            <listitem>
-              <para>Document node: Call <literal>recurse</literal>, that is,
-              visit all children of the document node.</para>
-            </listitem>
-          </itemizedlist>
-
-          <para>Element and attribute nodes will be handled according to the
-          usual, XML independent mechanism. That is,
-          <literal>@<replaceable>node_type</replaceable></literal> will be
-          called as handler, and if that's not defined, then an error stops
-          template processing.</para>
-
-          <para>In the case of element nodes, this means that if you define a
-          macro (or other kind of user-defined directive) called
-          <literal>@element</literal>, that will catch all element nodes,
-          which has no more specific handler. If you have no
-          <literal>@element</literal> handler, then you
-          <emphasis>must</emphasis> define a handler for all possible
-          elements.</para>
-
-          <para>Attribute nodes are not visited by the
-          <literal>recurse</literal> directive, so you don't need to write
-          handlers for them.</para>
-        </section>
-
-        <section>
-          <title>Visiting a single node</title>
-
-          <para>With the <link
-          linkend="ref.directive.visit"><literal>visit</literal>
-          directive</link> you can visit a single node, instead of the
-          children of the node:
-          <literal>&lt;#visit <replaceable>nodeToVisist</replaceable>&gt;</literal>.
-          This can be useful sometimes.</para>
-        </section>
-
-        <section>
-          <title>XML namespaces</title>
-
-          <indexterm>
-            <primary>XML namespaces</primary>
-
-            <secondary>in declarative processing</secondary>
-          </indexterm>
-
-          <para>We said that the name of the handler user-defined directive
-          (like a macro) for an element is the name of the element. In fact,
-          it is the full-qualified name of the element:
-          <literal><replaceable>prefix</replaceable>:<replaceable>elementName</replaceable></literal>.
-          The rules regarding the usage of
-          <literal><replaceable>prefix</replaceable></literal>-es is the same
-          as with imperative processing. Thus, the user-defined
-          <literal>book</literal> directive handles only element
-          <literal>book</literal> that does not belong to any XML namespace
-          (unless you have specified a default XML namespace). So if the
-          example XML would use XML namespace
-          <literal>http://example.com/ebook</literal>:</para>
-
-          <programlisting role="unspecified">&lt;book xmlns="http://example.com/ebook"&gt;
-<replaceable>...</replaceable></programlisting>
-
-          <para>Then the FTL should look as this:</para>
-
-          <programlisting role="template"><emphasis>&lt;#ftl ns_prefixes={"e":"http://example.com/ebook"}&gt;</emphasis>
-
-&lt;#recurse doc&gt;
-
-&lt;#macro "<emphasis>e:</emphasis>book"&gt;
-  &lt;html&gt;
-    &lt;head&gt;
-      &lt;title&gt;&lt;#recurse .node["<emphasis>e:</emphasis>title"]&gt;&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-      &lt;h1&gt;&lt;#recurse .node["<emphasis>e:</emphasis>title"]&gt;&lt;/h1&gt;
-      &lt;#recurse&gt;
-    &lt;/body&gt;
-  &lt;/html&gt;
-&lt;/#macro&gt;
-
-&lt;#macro "<emphasis>e:</emphasis>chapter"&gt;
-  &lt;h2&gt;&lt;#recurse .node["<emphasis>e:</emphasis>title"]&gt;&lt;/h2&gt;
-  &lt;#recurse&gt;
-&lt;/#macro&gt;
-
-&lt;#macro "<emphasis>e:</emphasis>para"&gt;
-  &lt;p&gt;&lt;#recurse&gt;
-&lt;/#macro&gt;
-
-&lt;#macro "<emphasis>e:</emphasis>title"&gt;
-  &lt;#--
-    We have handled this element imperatively,
-    so we do nothing here.
-  --&gt;
-&lt;/#macro&gt;
-
-&lt;#macro @text&gt;${.node?html}&lt;/#macro&gt;</programlisting>
-
-          <para>Or, you can define a default XML namespace, and then the
-          further part of the template remains the same as in the original XML
-          namespace free example:</para>
-
-          <programlisting role="template">&lt;#ftl ns_prefixes={"<emphasis>D</emphasis>":"http://example.com/ebook"}&gt;
-
-&lt;#recurse doc&gt;
-
-&lt;#macro book&gt;
-<replaceable>...</replaceable></programlisting>
-
-          <para>But in this case don't forge that in XPath expressions (we
-          didn't used any in the example) the default XML namespace must be
-          accessed with an explicit <literal>D:</literal> since names without
-          prefix always refer to nodes with no XML namespace in XPath. Also
-          note that with the same logic as with imperative XML processing, the
-          name of handlers for elements that has no XML namespace is
-          <literal>N:<replaceable>elementName</replaceable></literal> if (and
-          only if) there is a default XML namespace. However, for nodes that
-          are not of type element (such as text nodes), you never use the
-          <literal>N</literal> prefix in the handler name, because those nodes
-          are free of the idea of XML namespaces. So for example, the handler
-          for text nodes is always just <literal>@text</literal>.</para>
-
-          <para>For more detailed information, please read <link
-          linkend="ref_directive_visit">the reference of
-          <literal>recurse</literal> and <literal>visit</literal></link>
-          directives.</para>
-        </section>
-      </section>
-    </chapter>
-  </part>
-
   <part xml:id="ref">
-    <title>Reference</title>
+    <title>Template Language Reference</title>
 
     <chapter xml:id="ref_builtins">
       <title>Built-in Reference</title>
@@ -12127,7 +10562,7 @@ Green Mouse</programlisting>
           1st parameter, it adds it after the string, otherwise it returns the
           original string. For example, both
           <literal>"foo"?ensure_ends_with("/")</literal> and
-          <literal>"foo"?ensure_ends_with("/")</literal> returns
+          <literal>"foo/"?ensure_ends_with("/")</literal> returns
           <literal>"foo/"</literal>.</para>
         </section>
 
@@ -12380,7 +10815,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <para>Removes the part of the string that is not after the first
           occurrence of the given substring. For example:</para>
 
-          <programlisting role="template">${"abcdefgh"?keep_until("de")}</programlisting>
+          <programlisting role="template">${"abcdefgh"?keep_after("de")}</programlisting>
 
           <para>will print</para>
 
@@ -12394,7 +10829,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           linkend="ref_builtin_string_flags">flags parameter</link>, as its
           2nd parameter:</para>
 
-          <programlisting role="template">${"foo : bar"?keep_until(r"\s*:\s*", "r")}</programlisting>
+          <programlisting role="template">${"foo : bar"?keep_after(r"\s*:\s*", "r")}</programlisting>
 
           <para>will print</para>
 
@@ -19994,6 +18429,1571 @@ or
     </chapter>
   </part>
 
+  <part xml:id="xgui">
+    <title>XML Processing Guide</title>
+
+    <preface xml:id="xgui_preface">
+      <title>Preface</title>
+
+      <para>Although FreeMarker was originally designed as a web page template
+      engine, as of version 2.3 it also targets another application domain:
+      transforming XML into arbitrary textual output (e.g. HTML files). Thus,
+      in many cases, FreeMarker is an XSLT alternative.</para>
+
+      <para>Technically, there is nothing special in transforming XML
+      documents. It's just like when you do anything else with FreeMarker: you
+      drop the XML document into the data-model (and possibly other
+      variables), and then you merge the data-model with the FTL template(s)
+      that generate the output text. The extra features introduced for better
+      XML processing are the node FTL variable type (symbolizes a node in
+      generic tree structures, usable not only for XML) and the built-ins and
+      directives dealing with them, and the XML wrapper you get out-of-the-box
+      that exposes XML documents as FTL variables for the templates.</para>
+
+      <para>What's the difference between using FreeMarker or XSLT? The FTL
+      language has the usual imperative/procedural logic. On the other hand,
+      XSLT is a language with declarative style, designed by "too clever"
+      people, so it's not easy to adopt its logic, nor to use it in many
+      cases. Also its syntax is terribly verbose. However, XSLT's
+      "apply-templates" method can be very handy when you process XML
+      documents, thus FreeMarker supports something similar called the
+      ``visitor pattern''. So in many applications, it is much easier to write
+      FTL stylesheets than XSLT style-sheets. Another fundamental difference
+      is that FTL "transforms" the node tree to text, while XSLT transforms
+      the tree to another tree. So you cannot always use FreeMarker where you
+      can use XSLT.</para>
+    </preface>
+
+    <chapter xml:id="xgui_expose">
+      <title>Exposing XML documents</title>
+
+      <indexterm>
+        <primary>XML</primary>
+
+        <secondary>exposing</secondary>
+      </indexterm>
+
+      <section xml:id="xgui_expose_dom">
+        <title>The DOM tree</title>
+
+        <para>We will use this XML document for the examples:</para>
+
+        <anchor xml:id="misc.example.bookXml"/>
+
+        <programlisting role="unspecified">&lt;book&gt;
+  &lt;title&gt;Test Book&lt;/title&gt;
+  &lt;chapter&gt;
+    &lt;title&gt;Ch1&lt;/title&gt;
+    &lt;para&gt;p1.1&lt;/para&gt;
+    &lt;para&gt;p1.2&lt;/para&gt;
+    &lt;para&gt;p1.3&lt;/para&gt;
+  &lt;/chapter&gt;
+  &lt;chapter&gt;
+    &lt;title&gt;Ch2&lt;/title&gt;
+    &lt;para&gt;p2.1&lt;/para&gt;
+    &lt;para&gt;p2.2&lt;/para&gt;
+  &lt;/chapter&gt;
+&lt;/book&gt;</programlisting>
+
+        <para>W3C DOM models an XML document as a tree of nodes. The node tree
+        of the above XML can be visualized as:</para>
+
+        <programlisting role="unspecified">document
+ |
+ +- element book
+     |
+     +- text "\n  "
+     |
+     +- element title
+     |   |
+     |   +- text "Test Book"
+     |
+     +- text "\n  "
+     |
+     +- element chapter
+     |   |
+     |   +- text "\n    "
+     |   |
+     |   +- element title
+     |   |   |
+     |   |   +- text "Ch1"
+     |   |
+     |   +- text "\n    "
+     |   |
+     |   +- element para     
+     |   |   |
+     |   |   +- text "p1.1"
+     |   |
+     |   +- text "\n    "
+     |   |
+     |   +- element para     
+     |   |   |
+     |   |   +- text "p1.2"
+     |   |
+     |   +- text "\n    "
+     |   |
+     |   +- element para     
+     |      |
+     |      +- text "p1.3"
+     |
+     +- element
+         |
+         +- text "\n    "
+         |
+         +- element title
+         |   |
+         |   +- text "Ch2"
+         |
+         +- text "\n    "
+         |
+         +- element para     
+         |   |
+         |   +- text "p2.1"
+         |
+         +- text "\n    "
+         |
+         +- element para     
+             |
+             +- text "p2.2"</programlisting>
+
+        <para>Note that the disturbing <literal>"\n  "</literal>-s are the
+        line-breaks (indicated here with <literal>\n</literal>, an escape
+        sequence used in FTL string literals) and the indentation spaces
+        between the tags.</para>
+
+        <para>Notes on the DOM related terminology:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The topmost node of a tree is called the <emphasis
+            role="term">root</emphasis>. In the case of XML documents, it is
+            always the ``document'' node, and not the top-most element
+            (<literal>book</literal> in this example).</para>
+          </listitem>
+
+          <listitem>
+            <para>We say that node B is the <emphasis
+            role="term">child</emphasis> of node A, if B is the
+            <emphasis>immediate</emphasis> descendant of A. For example, the
+            two <literal>chapter</literal> element nodes are the children of
+            the <literal>book</literal> element node, but the
+            <literal>para</literal> element nodes are not.</para>
+          </listitem>
+
+          <listitem>
+            <para>We say that node A is the <emphasis
+            role="term">parent</emphasis> of node B, if A is the
+            <emphasis>immediate</emphasis> ascendant of node B, that is, if B
+            is the children of A. For example, the <literal>book</literal>
+            element node is the parent of the two <literal>chapter</literal>
+            element nodes, but it is not the parent of the
+            <literal>para</literal> element nodes.</para>
+          </listitem>
+
+          <listitem>
+            <para>There are several kind of components that can occur in XML
+            documents, such as elements, text, comments, processing
+            instructions, etc. All such components are nodes in the DOM tree,
+            so there are element nodes, text nodes, comment nodes, etc. In
+            principle, the attributes of elements are also nodes in the tree
+            -- they are the children of the element --, but still, usually we
+            (and other XML related technologies) exclude them of element
+            children. So basically they don't count as children nodes.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The programmer drops the document node of the DOM tree into the
+        FreeMarker data-model, and then the template author can walk the DOM
+        tree using that variable as the starting-point.</para>
+
+        <para>The DOM nodes in FTL correspond to <emphasis role="term">node
+        variables</emphasis>. This is a variable type, similarly to type
+        string, number, hash, etc. Node variable type makes it possible for
+        FreeMarker to get the parent node and the child nodes of a node. This
+        is technically required to allow the template author to navigate
+        between the nodes, say, to use the <link
+        linkend="ref_builtins_node">node built-ins</link> or the <link
+        linkend="ref.directive.visit"><literal>visit</literal></link> and
+        <link
+        linkend="ref.directive.recurse"><literal>recurse</literal></link>
+        directives; we will show the usage of these in the further
+        chapters.</para>
+      </section>
+
+      <section xml:id="xgui_expose_put">
+        <title>Putting the XML into the data-model</title>
+
+        <note>
+          <para>This section is for programmers.</para>
+        </note>
+
+        <para>It's easy to create a simple program to try the examples. Just
+        replace the ``Create a data-model'' part of <link
+        linkend="pgui_quickstart_all">the example of Programmer's Guide
+        Quickstart</link> with this:</para>
+
+        <programlisting role="unspecified">/* Create a data-model */
+Map root = new HashMap();
+root.put(
+        "doc",
+        freemarker.ext.dom.NodeModel.parse(new File("<replaceable>the/path/of/the.xml</replaceable>")));</programlisting>
+
+        <para>and then you have a program that outputs the result of the XML
+        transformation to the standard output (usually the terminal
+        screen).</para>
+
+        <para>Notes:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The <literal>parse</literal> method removes comment and
+            processing instruction nodes by default. See the API for more
+            details.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>NodeModel</literal> also allows you to wrap
+            <literal>org.w3c.dom.Node</literal>-s directly. You may want to
+            clean up the DOM tree first with the static utility methods, such
+            as <literal>NodeModel.simplify</literal> or your own custom
+            cleanup routines.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Note that there are tools available that you can use to generate
+        files from XML documents, so you don't have to write your own for this
+        common task. <link linkend="pgui_misc_ant">See here...</link></para>
+      </section>
+    </chapter>
+
+    <chapter xml:id="xgui_imperative">
+      <title>Imperative XML processing</title>
+
+      <indexterm>
+        <primary>XML</primary>
+
+        <secondary>imperative processing</secondary>
+      </indexterm>
+
+      <section xml:id="xgui_imperative_learn">
+        <title>Basics</title>
+
+        <note>
+          <para>This section uses the DOM tree and the variable made in the
+          <link linkend="xgui_expose">previous chapter</link>.</para>
+        </note>
+
+        <para>Assume that the programmer has put the XML document into the
+        data-model as variable <literal>doc</literal>. This variable
+        corresponds to the root of the <link linkend="xgui_expose_dom">DOM
+        tree</link>, the ``document''. The actual variable structure behind
+        <literal>doc</literal> is wily enough, and only roughly resembles the
+        DOM tree. So instead of getting lost in the details, let's see how to
+        use it by example.</para>
+
+        <section>
+          <title>Accessing elements by name</title>
+
+          <para>This FTL prints the title of the book:</para>
+
+          <programlisting role="template">&lt;h1&gt;${doc.book.title}&lt;/h1&gt;</programlisting>
+
+          <para>The output will be:</para>
+
+          <programlisting role="output">&lt;h1&gt;Test Book&lt;/h1&gt;</programlisting>
+
+          <para>As you see, both <literal>doc</literal> and
+          <literal>book</literal> can be used as hashes; you get their child
+          nodes as subvariables. Basically, you describe the path by which you
+          reach the target (element <literal>title</literal>) in the DOM tree.
+          You may notice that there was some swindle above: with
+          <literal>${doc.book.title}</literal>, it seems that we instruct
+          FreeMarker to print the <literal>title</literal> element itself, but
+          we should print its child text node (check the <link
+          linkend="xgui_expose_dom">DOM tree</link>). It still works, because
+          elements are not only hash variables, but string variables as well.
+          The scalar value of an element node is the string resulting from the
+          concatenation of all its text child nodes. However, trying to use an
+          element as scalar will cause error if the element has child
+          elements. For example <literal>${doc.book}</literal> would stop with
+          error.</para>
+
+          <para>This FTL prints the titles of the two chapters:</para>
+
+          <programlisting role="template">&lt;h2&gt;${doc.book.chapter[0].title}&lt;/h2&gt;
+&lt;h2&gt;${doc.book.chapter[1].title}&lt;/h2&gt;</programlisting>
+
+          <para>Here, as <literal>book</literal> has 2
+          <literal>chapter</literal> element children,
+          <literal>doc.book.chapter</literal> is a sequence that stores the
+          two element nodes. Thus, we can generalize the above FTL, so it
+          works with any number of chapters:</para>
+
+          <programlisting role="template">&lt;#list doc.book.chapter as ch&gt;
+  &lt;h2&gt;${ch.title}&lt;/h2&gt;
+&lt;/#list&gt;</programlisting>
+
+          <para>But what's if there is only one chapter? Actually, when you
+          access an element as hash subvariable, it is
+          <emphasis>always</emphasis> a sequence as well (not only hash and
+          string), but if the sequence contains exactly 1 item, then the
+          variable also acts as that item itself. So, returning to the first
+          example, this would print the book title as well:</para>
+
+          <programlisting role="template">&lt;h1&gt;${doc.book[0].title[0]}&lt;/h1&gt;</programlisting>
+
+          <para>But you know that there is exactly 1 <literal>book</literal>
+          element, and that a book has exactly 1 title, so you can omit the
+          <literal>[0]</literal>-s.
+          <literal>${doc.book.chapter.title}</literal> would work too, if the
+          book happen to have only 1 <literal>chapter</literal>-s (otherwise
+          it is ambiguous: how is it to know if the <literal>title</literal>
+          of which <literal>chapter</literal> you want? So it stops with an
+          error.). But since a book can have multiple chapters, you don't use
+          this form. If the element <literal>book</literal> has no
+          <literal>chapter</literal> child, then
+          <literal>doc.book.chapter</literal> will be a 0 length sequence, so
+          the FTL with <literal>&lt;#list ...&gt;</literal> will still
+          work.</para>
+
+          <para>It is important to realize the consequence that, for example,
+          if <literal>book</literal> has no <literal>chapter</literal>-s then
+          <literal>book.chapter</literal> is an empty sequence, so
+          <literal>doc.book.chapter??</literal> will <emphasis>not</emphasis>
+          be <literal>false</literal>, it will be always
+          <literal>true</literal>! Similarly,
+          <literal>doc.book.somethingTotallyNonsense??</literal> will not be
+          <literal>false</literal> either. To check if there was no children
+          found, use <literal>doc.book.chapter[0]??</literal> (or
+          <literal>doc.book.chapter?size == 0</literal>). Of course you can
+          use similarly all the <link
+          linkend="dgui_template_exp_missing">missing value handler
+          operators</link> (e.g.
+          <literal>doc.book.author[0]!"Anonymous"</literal>), just don't
+          forget that <literal>[0]</literal>.</para>
+
+          <note>
+            <para>The rule with sequences of size 1 is a convenience feature
+            of the XML wrapper (implemented via multi-type FTL variables). It
+            will not work with other sequences in general.</para>
+          </note>
+
+          <para>Now we finish the example by printing all the
+          <literal>para</literal>-s of each chapter:</para>
+
+          <programlisting role="template">&lt;h1&gt;${doc.book.title}&lt;/h1&gt;
+&lt;#list doc.book.chapter as ch&gt;
+  &lt;h2&gt;${ch.title}&lt;/h2&gt;
+  &lt;#list ch.para as p&gt;
+    &lt;p&gt;${p}
+  &lt;/#list&gt;
+&lt;/#list&gt;</programlisting>
+
+          <para>this will print:</para>
+
+          <programlisting role="output">&lt;h1&gt;Test&lt;/h1&gt;
+  &lt;h2&gt;Ch1&lt;/h2&gt;
+    &lt;p&gt;p1.1
+    &lt;p&gt;p1.2
+    &lt;p&gt;p1.3
+  &lt;h2&gt;Ch2&lt;/h2&gt;
+    &lt;p&gt;p2.1
+    &lt;p&gt;p2.2</programlisting>
+
+          <para>The above FTL could be written more nicely as:</para>
+
+          <programlisting role="template">&lt;#assign book = doc.book&gt;
+&lt;h1&gt;${book.title}&lt;/h1&gt;
+&lt;#list book.chapter as ch&gt;
+  &lt;h2&gt;${ch.title}&lt;/h2&gt;
+  &lt;#list ch.para as p&gt;
+    &lt;p&gt;${p}
+  &lt;/#list&gt;
+&lt;/#list&gt;</programlisting>
+
+          <para>Finally, a ``generalized`` usage of the child selector
+          mechanism: this template lists all <literal>para</literal>-s of the
+          example XML document:</para>
+
+          <programlisting role="template">&lt;#list doc.book.chapter.para as p&gt;
+  &lt;p&gt;${p}
+&lt;/#list&gt;</programlisting>
+
+          <para>The output will be:</para>
+
+          <programlisting role="output">  &lt;p&gt;p1.1
+  &lt;p&gt;p1.2
+  &lt;p&gt;p1.3
+  &lt;p&gt;p2.1
+  &lt;p&gt;p2.2
+  </programlisting>
+
+          <para>This example shows that hash subvariables select the children
+          of a sequence of notes (just in the earlier examples that sequence
+          happened to be of size 1). In this concrete case, subvariable
+          <literal>chapter</literal> returns a sequence of size 2 (since there
+          are two <literal>chapter</literal>-s), and then subvariable
+          <literal>para</literal> selects the <literal>para</literal> child
+          nodes of all nodes in that sequence.</para>
+
+          <para>A negative consequence of this mechanism is that things like
+          <literal>doc.somethingNonsense.otherNonsesne.totalNonsense</literal>
+          will just evaluate to an empty sequence, and you don't get any error
+          messages.</para>
+        </section>
+
+        <section>
+          <title>Accessing attributes</title>
+
+          <para>This XML is the same as the original, except that it uses
+          attributes for the titles, instead of elements:</para>
+
+          <programlisting role="unspecified">&lt;!-- THIS XML IS USED FOR THE "Accessing attributes" CHAPTER ONLY! --&gt;
+&lt;!-- Outside this chapter examples use the XML from earlier.       --&gt;
+
+&lt;book title="Test"&gt;
+  &lt;chapter title="Ch1"&gt;
+    &lt;para&gt;p1.1&lt;/para&gt;
+    &lt;para&gt;p1.2&lt;/para&gt;
+    &lt;para&gt;p1.3&lt;/para&gt;
+  &lt;/chapter&gt;
+  &lt;chapter title="Ch2"&gt;
+    &lt;para&gt;p2.1&lt;/para&gt;
+    &lt;para&gt;p2.2&lt;/para&gt;
+  &lt;/chapter&gt;
+&lt;/book&gt;</programlisting>
+
+          <para>The attributes of an element can be accessed in the same way
+          as the child elements of the element, except that you put an at-sign
+          (@) before the name of the attribute:</para>
+
+          <programlisting role="template">&lt;#assign book = doc.book&gt;
+&lt;h1&gt;${book.@title}&lt;/h1&gt;
+&lt;#list book.chapter as ch&gt;
+  &lt;h2&gt;${ch.@title}&lt;/h2&gt;
+  &lt;#list ch.para as p&gt;
+    &lt;p&gt;${p}
+  &lt;/#list&gt;
+&lt;/#list&gt;</programlisting>
+
+          <para>This will print exactly the same as the previous
+          example.</para>
+
+          <para>Getting attributes follows the same logic as getting child
+          elements, so the result of <literal>ch.@title</literal> above is a
+          sequence of size 1. If there were no <literal>title</literal>
+          attribute, then the result would be a sequence of size 0. So be
+          ware, using existence built-ins is tricky here too: if you are
+          curious if <literal>foo</literal> has attribute
+          <literal>bar</literal> then you have to write
+          <literal>foo.@bar[0]??</literal>. (<literal>foo.@bar??</literal> is
+          wrong, because it always returns <literal>true</literal>.)
+          Similarly, if you want a default value for the
+          <literal>bar</literal> attribute, then you have to write
+          <literal>foo.@bar[0]!"theDefaultValue"</literal>.</para>
+
+          <para>As with child elements, you can select the attributes of
+          multiple nodes. For example, this template prints the titles of all
+          chapters:</para>
+
+          <programlisting role="template">&lt;#list doc.book.chapter.@title as t&gt;
+  ${t}
+&lt;/#list&gt;</programlisting>
+        </section>
+
+        <section>
+          <title>Exploring the tree</title>
+
+          <para>This FTL will enumerate all child nodes of the book
+          element:</para>
+
+          <programlisting role="template">&lt;#list doc.book?children as c&gt;
+- ${c?node_type} &lt;#if c?node_type = 'element'&gt;${c?node_name}&lt;/#if&gt;
+&lt;/#list&gt;</programlisting>
+
+          <para>this will print:</para>
+
+          <programlisting role="output">- text
+- element title
+- text
+- element chapter
+- text
+- element chapter
+- text</programlisting>
+
+          <para>The meaning of <literal>?node_type</literal> is probably clear
+          without explanation. There are several node types that can occur in
+          a DOM tree, such as <literal>"element"</literal>,
+          <literal>"text"</literal>, <literal>"comment"</literal>,
+          <literal>"pi"</literal>, ...etc.</para>
+
+          <para>The <literal>?node_name</literal> returns the name of element
+          for element nodes. For other node types, it also returns something,
+          but that's mainly useful for declarative XML processing, which will
+          be discussed in a <link linkend="xgui_declarative">later
+          chapter</link>.</para>
+
+          <para>If the book element had attributes, they would
+          <emphasis>not</emphasis> appear in the above list, for practical
+          reasons. But you can get a list that contains all attributes of the
+          element, with subvariable <literal>@@</literal> of the element
+          variable. If you modify the first line of the XML to this:</para>
+
+          <programlisting role="unspecified">&lt;book foo="Foo" bar="Bar" baaz="Baaz"&gt;</programlisting>
+
+          <para>and run this FTL:</para>
+
+          <programlisting role="template">&lt;#list doc.book.@@ as attr&gt;
+- ${attr?node_name} = ${attr}
+&lt;/#list&gt;</programlisting>
+
+          <para>then you get this output (or something similar):</para>
+
+          <programlisting role="output">- baaz = Baaz
+- bar = Bar
+- foo = Foo</programlisting>
+
+          <para>Returning to the listing of children, there is a convenience
+          subvariable to list only the element children of an element:</para>
+
+          <programlisting role="template">&lt;#list doc.book.* as c&gt;
+- ${c?node_name}
+&lt;/#list&gt;</programlisting>
+
+          <para>This will print:</para>
+
+          <programlisting role="output">- title
+- chapter
+- chapter</programlisting>
+
+          <para>You get the parent of an element with the
+          <literal>parent</literal> built-in:</para>
+
+          <programlisting role="template">&lt;#assign e = doc.book.chapter[0].para[0]&gt;
+&lt;#-- Now e is the first para of the first chapter --&gt;
+${e?node_name}
+${e?parent?node_name}
+${e?parent?parent?node_name}
+${e?parent?parent?parent?node_name}</programlisting>
+
+          <para>This will print:</para>
+
+          <programlisting role="output">para
+chapter
+book
+@document</programlisting>
+
+          <para>In the last line you have reached the root of the DOM tree,
+          the document node. It's not an element, and this is why it has that
+          strange name; don't deal with it now. Obviously, the document node
+          has no parent.</para>
+
+          <para>You can quickly go back to the document node using the
+          <literal>root</literal> built-in:</para>
+
+          <programlisting role="template">&lt;#assign e = doc.book.chapter[0].para[0]&gt;
+${e?root?node_name}
+${e?root.book.title}</programlisting>
+
+          <para>This will print:</para>
+
+          <programlisting role="output">@document
+Test Book</programlisting>
+
+          <para>For the complete list of built-ins you can use to navigate in
+          the DOM tree, read the <link linkend="ref_builtins_node">reference
+          of node built-ins</link>.</para>
+        </section>
+
+        <section>
+          <title>Using XPath expressions</title>
+
+          <note>
+            <para>XPath expressions work only if <link
+            xlink:href="http://jaxen.org/">Jaxen</link> (recommended, but use
+            at least Jaxen 1.1-beta-8, not older) or <link
+            xlink:href="http://xml.apache.org/xalan/">Apache Xalan</link>
+            classes are available. (Apache Xalan classes are included in Sun
+            J2SE 1.4, 1.5 and 1.6 (and maybe later too); no separate Xalan jar
+            is needed.)</para>
+          </note>
+
+          <note>
+            <para>Don't use the sample XML from the previous section, where
+            <literal>title</literal> is an attribute; that applies only to
+            that section.</para>
+          </note>
+
+          <para>If a hash key used with a node variable can't be interpreted
+          otherwise (see the <link linkend="xgui_imperative_formal">next
+          section</link> for the precise definition), then it will by
+          interpreted as an XPath expression. For more information on XPath,
+          please visit <link
+          xlink:href="http://www.w3.org/TR/xpath">http://www.w3.org/TR/xpath</link>.</para>
+
+          <para>For example, here we list the <literal>para</literal> elements
+          of the chapter with <literal>title</literal> element (not
+          attribute!) content "Ch1'':</para>
+
+          <programlisting role="template">&lt;#list doc["book/chapter[title='Ch1']/para"] as p&gt;
+  &lt;p&gt;${p}
+&lt;/#list&gt;</programlisting>
+
+          <para>It will print:</para>
+
+          <programlisting role="output">  &lt;p&gt;p1.1
+  &lt;p&gt;p1.2
+  &lt;p&gt;p1.3</programlisting>
+
+          <para>The rule with sequences of length 1 (explained in earlier
+          sections) stands for XPath results as well. That is, if the
+          resulting sequence contains exactly 1 node, it also acts as the node
+          itself. For example, print the first paragraph of chapter
+          ``Ch1'':</para>
+
+          <programlisting role="template">${doc["book/chapter[title='Ch1']/para[1]"]}</programlisting>
+
+          <para>which prints the same as:</para>
+
+          <programlisting role="template">${doc["book/chapter[title='Ch1']/para[1]"][0]}</programlisting>
+
+          <para>The context node of the XPath expression is the node (or
+          sequence of nodes) whose hash subvariable is used to issue the XPath
+          expression. Thus, this prints the same as the previous
+          example:</para>
+
+          <programlisting role="template">${doc.book["chapter[title='Ch1']/para[1]"]}</programlisting>
+
+          <para>Note that currently you can use a sequence of 0 or multiple
+          (more than 1) nodes as context only if the programmer has set up
+          FreeMarker to use Jaxen instead of Xalan.</para>
+
+          <para>Also note that XPath indexes sequence items from 1, while FTL
+          indexes sequence items from 0. Thus, to select the first chapter,
+          the XPath expression is <literal>"/book/chapter[1]"</literal>, while
+          the FTL expression is <literal>book.chapter[0]</literal>.</para>
+
+          <para>If the programmer has set up FreeMarker to use Jaxen instead
+          of Xalan, then FreeMarker variables are visible with XPath variable
+          references:</para>
+
+          <programlisting role="template">&lt;#assign <emphasis>currentTitle</emphasis> = "Ch1"&gt;
+&lt;#list doc["book/chapter[title=<emphasis>$currentTitle</emphasis>]/para"] as p&gt;
+<replaceable>...</replaceable></programlisting>
+
+          <para>Note that <literal>$currentTitle</literal> is not a FreeMarker
+          interpolation, as there are no <literal>{</literal> and
+          <literal>}</literal> there. That's an XPath expression.</para>
+
+          <para>The result of some XPath expressions is not a node-set, but a
+          string, a number, or a boolean. For those XPath expressions, the
+          result is an FTL string, number, or boolean variable respectively.
+          For example, the following will count the total number of
+          <literal>para</literal> elements in the XML document, so the result
+          is a number:</para>
+
+          <programlisting role="template">${x["count(//para)"]}</programlisting>
+
+          <para>The output will be:</para>
+
+          <programlisting role="output">5</programlisting>
+        </section>
+
+        <section>
+          <title>XML namespaces</title>
+
+          <indexterm>
+            <primary>XML namespace</primary>
+
+            <secondary>in imperative processing</secondary>
+          </indexterm>
+
+          <para>Be default, when you write something like
+          <literal>doc.book</literal>, then it will select the element with
+          name <literal>book</literal> that does not belongs to any XML
+          namespace (similarly to XPath). If you want to select an element
+          that is inside an XML namespace, you must register a prefix and use
+          that. For example, if element <literal>book</literal> is in XML
+          namespace <literal>http://example.com/ebook</literal>, then you have
+          to associate a prefix with it at the top of the template with the
+          <literal>ns_prefixes</literal> parameter of the <link
+          linkend="ref.directive.ftl"><literal>ftl</literal>
+          directive</link>:</para>
+
+          <programlisting role="template">&lt;#ftl ns_prefixes={"e":"http://example.com/ebook"}&gt;
+</programlisting>
+
+          <para>And now you can write expressions as
+          <literal>doc["e:book"]</literal>. (The usage of square bracket
+          syntax was required because the colon would confuse FreeMarker
+          otherwise.)</para>
+
+          <para>As the value of <literal>ns_prefixes</literal> is a hash, you
+          can register multiple prefixes:</para>
+
+          <programlisting role="template">&lt;#ftl ns_prefixes={
+    "e":"http://example.com/ebook",
+    "f":"http://example.com/form",
+    "vg":"http://example.com/vectorGraphics"}
+&gt;</programlisting>
+
+          <para>The <literal>ns_prefixes</literal> parameter affects the whole
+          <link linkend="dgui_misc_namespace">FTL namespace</link>. This means
+          in practice that the prefixes you have registered in the main page
+          template will be visible in all <literal>&lt;#include
+          ...&gt;</literal>-d templates, but not in <literal>&lt;#imported
+          ...&gt;</literal>-d templates (often referred as FTL libraries). Or
+          from another point of view, an FTL library can register XML
+          namespace prefixes for it's own use, without interfering with the
+          prefix registrations of the main template and other
+          libraries.</para>
+
+          <para>Note that, if an input document is dominated by a given XML
+          namespace, you can set that as the default namespace for
+          convenience. This means that if you don't use prefix, as in
+          <literal>doc.book</literal>, then it selects element that belongs to
+          the default namespace. The setting of the default namespace happens
+          with reserved prefix <literal>D</literal>, for example:</para>
+
+          <programlisting role="template">&lt;#ftl ns_prefixes={"D":"http://example.com/ebook"}&gt;
+</programlisting>
+
+          <para>Now expression <literal>doc.book</literal> select the
+          <literal>book</literal> element that belongs to XML namespace
+          <literal>http://example.com/ebook</literal>. Unfortunately, XPath
+          does not support this idea of a default namespace. Thus, in XPath
+          expressions, element names without prefixes always select the
+          elements that does not belong to any XML namespace. However, to
+          access elements in the default namespace you can directly use prefix
+          <literal>D</literal>, for example:
+          <literal>doc["D:book/D:chapter[title='Ch1']"]</literal>.</para>
+
+          <para>Note that when you use a default namespace, then you can
+          select elements that does not belong to any node namespace with
+          reserved prefix <literal>N</literal>, for example
+          <literal>doc.book["N:foo"]</literal>. It doesn't go for XPath
+          expressions, where the above can be witten as
+          <literal>doc["D:book/foo"]</literal>.</para>
+        </section>
+
+        <section>
+          <title>Don't forget escaping!</title>
+
+          <para>We have made a big mistake in all examples. We generate output
+          of HTML format, and HTML format reserves characters as
+          <literal>&lt;</literal>, <literal>&amp;</literal>, etc. So when we
+          print plain text (as the titles and paragraphs), we have to escape
+          it. Thus, the correct version of the example is:</para>
+
+          <programlisting role="template"><emphasis>&lt;#escape x as x?html&gt;</emphasis>
+&lt;#assign book = doc.book&gt;
+&lt;h1&gt;${book.title}&lt;/h1&gt;
+&lt;#list book.chapter as ch&gt;
+  &lt;h2&gt;${ch.title}&lt;/h2&gt;
+  &lt;#list ch.para as p&gt;
+    &lt;p&gt;${p}
+  &lt;/#list&gt;
+&lt;/#list&gt;
+<emphasis>&lt;/#escape&gt;</emphasis></programlisting>
+
+          <para>So if the book title is "Romeo &amp; Julia", the resulting
+          HTML output will be correctly:</para>
+
+          <programlisting role="output"><replaceable>...</replaceable>
+&lt;h1&gt;Romeo &amp;amp; Julia&lt;/h1&gt;
+<replaceable>...</replaceable></programlisting>
+        </section>
+      </section>
+
+      <section xml:id="xgui_imperative_formal">
+        <title>Details</title>
+
+        <para>Every variable that corresponds to a single node in the DOM tree
+        is a multi-type variable of type node and type hash (for programmers:
+        implements both <literal>TemplateNodeModel</literal> and
+        <literal>TemplateHashModel</literal>). Thus, you can use the <link
+        linkend="ref_builtins_node">node built-ins</link> with them. Hash keys
+        are interpreted as XPath expressions, except the special keys shown in
+        the table below. Some of the node variables also have string type, so
+        you can use them as string variables (for programmers: they implement
+        <literal>TemplateScalarModel</literal>).</para>
+
+        <anchor xml:id="misc.xguiTable"/>
+
+        <informaltable border="1">
+          <thead>
+            <tr>
+              <th>Node type (<literal>?node_type</literal>)</th>
+
+              <th>Node name (<literal>?node_name</literal>)</th>
+
+              <th>String value (e.g. <literal>&lt;p&gt;${node}</literal>)</th>
+
+              <th>Special hash keys</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td><literal>"document"</literal></td>
+
+              <td><literal>"@document"</literal></td>
+
+              <td>No string value. (Error when you try to use it as
+              string.)</td>
+
+              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
+              <literal>"*"</literal>, <literal>"**"</literal>,
+              <literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal></td>
+            </tr>
+
+            <tr>
+              <td><literal>"element"</literal></td>
+
+              <td><literal>"<replaceable>name</replaceable>"</literal>: the
+              name of the element. This is the local name (i.e. name without
+              namespace prefix).</td>
+
+              <td>If it has no element children, the text of all text node
+              children concatenated together. Error otherwise, when you try to
+              use it as string.</td>
+
+              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
+              <literal>"*"</literal>, <literal>"**"</literal>,
+              <literal>"@<replaceable>attrName</replaceable>"</literal>,
+              <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>,
+              <literal>"@@"</literal>, <literal>"@*"</literal>,
+              <literal>"@@start_tag"</literal>,
+              <literal>"@@end_tag"</literal>,
+              <literal>"@@attributes_markup"</literal>,
+              <literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
+            </tr>
+
+            <tr>
+              <td><literal>"text"</literal></td>
+
+              <td><literal>"@text"</literal></td>
+
+              <td>The text itself.</td>
+
+              <td><literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal></td>
+            </tr>
+
+            <tr>
+              <td><literal>"pi"</literal></td>
+
+              <td><literal>"@pi$<replaceable>target</replaceable>"</literal></td>
+
+              <td>The part between the target name and the
+              <literal>?&gt;</literal>.</td>
+
+              <td><literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal></td>
+            </tr>
+
+            <tr>
+              <td><literal>"comment"</literal></td>
+
+              <td><literal>"@comment"</literal></td>
+
+              <td>The text of the comment, without the delimiters
+              <literal>&lt;!--</literal> and <literal>--&gt;</literal>.</td>
+
+              <td><literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal></td>
+            </tr>
+
+            <tr>
+              <td><literal>"attribute"</literal></td>
+
+              <td><literal>"<replaceable>name</replaceable>"</literal>: the
+              name of the attribute. This is the local name (i.e. name without
+              namespace prefix).</td>
+
+              <td>The value of the attribute.</td>
+
+              <td><literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
+            </tr>
+
+            <tr>
+              <td><literal>"document_type"</literal></td>
+
+              <td><literal>"@document_type$<replaceable>name</replaceable>"</literal>:
+              <literal><replaceable>name</replaceable></literal> is the name
+              of the document element.</td>
+
+              <td>No string value. (Error when you try to use it as
+              string.)</td>
+
+              <td><literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal>,
+              <literal>"@@text"</literal></td>
+            </tr>
+          </tbody>
+        </informaltable>
+
+        <para>Notes:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>There is no CDATA type. CDATA nodes are transparently
+            considered as text nodes.</para>
+          </listitem>
+
+          <listitem>
+            <para>Variables do <emphasis>not</emphasis> support
+            <literal>?keys</literal> and <literal>?values</literal>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Element and attribute node names are local names, that is,
+            they do not contain the namespace prefix. The URI of the namespace
+            the node belongs to can be queried with the
+            <literal>?node_namespace</literal> built-in.</para>
+          </listitem>
+
+          <listitem>
+            <para>XPath expression needs Jaxen (recommended, but please use
+            1.1-beta-8 or later; <link xlink:href="http://jaxen.org/">download
+            it here</link>) or Apache Xalan classes available, or an error
+            will stop template execution. Note, however, that as some special
+            hash keys hide the XPath expressions of the same meaning, those
+            XPath expressions will work even if there is no XPath
+            implementation available. <phrase role="forProgrammers">If both
+            Xalan and Jaxen is available, FreeMarker will use Xalan, unless
+            you choose Jaxen by calling
+            <literal>freemarker.ext.dom.NodeModel.useJaxenXPathSupport()</literal>
+            from Java.</phrase></para>
+          </listitem>
+
+          <listitem>
+            <para>If Jaxen is used for the XPath support (not Xalan), then
+            FreeMarker variables are visible with XPath variable references
+            (e.g.
+            <literal>doc["book/chapter[title=$currentTitle]"]</literal>).</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Meaning of special hash keys:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>"<replaceable>elementName</replaceable>"</literal>,
+            <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>:
+            Returns the sequence of child nodes that are elements of name
+            <literal><replaceable>elementName</replaceable></literal>. (Note
+            that the term ``child'' means <emphasis>immediate</emphasis>
+            descendant.) The selection is XML name-space aware, unless the XML
+            document was persed with an XML parser that was not in namespace
+            aware mode. In XML name-space aware mode, names without prefix
+            (<replaceable>elementName</replaceable>) selects only elements
+            that doesn't belong to any XML name-space (unless you have
+            registered a default XML namespace), and names with prefix
+            (<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>)
+            selects only elements that are belonging to the XML namespace
+            denoted by the prefix. The registration of prefixes and the
+            setting of the default XML namespace is done with the
+            <literal>ns_prefixes</literal> parameter of the <link
+            linkend="ref.directive.ftl"><literal>ftl</literal>
+            directive</link>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"*"</literal>: Returns the sequence of all child
+            (direct descedant) <emphasis>element</emphasis> nodes. The
+            sequence will contain the elements in the ``document order'', that
+            is, in the order in which the first character of the XML
+            representation of each node occurs (after expansion of general
+            entities).</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"**"</literal>: Returns the sequence of all
+            descendant <emphasis>element</emphasis> nodes. The sequence will
+            contain the elements in the document order.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@<replaceable>attName</replaceable>"</literal>,
+            <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>:
+            Returns the attribute
+            <literal><replaceable>attName</replaceable></literal> of the
+            element as a sequence of size 1 that contains the attribute node,
+            or as an empty sequence if the attribute does not exist (so to
+            check if an attribute exists use
+            <literal>foo.@<replaceable>attName</replaceable>[0]??</literal>,
+            <emphasis>not</emphasis>
+            <literal>foo.@<replaceable>attName</replaceable>??</literal>). As
+            with special key
+            <literal>"<replaceable>elementName</replaceable>"</literal>, if
+            the length of the sequence is 1, then it also acts as its first
+            subvariable. If no
+            <literal><replaceable>prefix</replaceable></literal> is used, then
+            it returns only attribute that does not use XML namespace (even if
+            you have set a default XML namespace). If a
+            <literal><replaceable>prefix</replaceable></literal> is used, it
+            returns only the attribute that belongs to the XML namespace
+            associated with the
+            <literal><replaceable>prefix</replaceable></literal>. The
+            registration of prefixes is done with the
+            <literal>ns_prefixes</literal> parameter of the <link
+            linkend="ref.directive.ftl"><literal>ftl</literal>
+            directive</link>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@"</literal> or <literal>"@*"</literal>: Returns
+            the sequence of attribute nodes belonging to the parent element.
+            This is the same as XPath <literal>@*</literal>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@qname"</literal>: Returns the full-qualified
+            name of the element (such as <literal>e:book</literal>, in
+            contrast to the local name returned by
+            <literal>?node_name</literal> that is <literal>book</literal>) .
+            The prefix used (as <literal>e</literal>) is chosen based on the
+            prefix registered in the current namespace with the
+            <literal>ns_prefixes</literal> parameter of the
+            <literal>ftl</literal> directive, and not influenced by the prefix
+            used in the source XML document. If you have set a default XML
+            namespace, then for nodes that use that, prefix
+            <literal>D</literal> will be used. For nodes that does not belong
+            to an XML namespace, no prefix is used (even if you have set a
+            default namespace). If there is no prefix registered for the
+            namespace of the node, the result is a non-existent variable
+            (<literal>node.@@qname??</literal> is
+            <literal>false</literal>).</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@markup"</literal>: This returns the full XML
+            markup of a node, as a string. (Full XML markup means that it also
+            contains the markup of the child nodes, and the markup of the
+            children of the child nodes, and so on.) The markup you get is not
+            necessary the same as the markup in the source XML file, it's just
+            semantically identical. Especially, note that CDATA sections will
+            become to plain text. Also note that depending on how did you
+            wrapped the original XML document with FreeMarker, comment or
+            processing instruction nodes may were removed, and then they will
+            be missing from the output of course. The first outputted start
+            tag will contain
+            <literal>xmlns:<replaceable>prefix</replaceable></literal>
+            attributes for each XML name-spaces used in the outputted XML
+            fragment, and those prefixes will be used in the outputted element
+            and attribute names. These prefixes will be the same as the
+            prefixes registered with the <literal>ns_prefixes</literal>
+            parameter of the <literal>ftl</literal> directive (no prefix will
+            be used for <literal>D</literal>, as it will be registered as the
+            default name-space with an <literal>xmlns</literal> attribute), or
+            if no prefix was assigned for a XML name-space with that, then an
+            arbitrary chosen unused prefix is used.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@nested_markup"</literal>: This is similar to
+            <literal>"@@markup"</literal>, but it returns the XML markup of an
+            element without its opening and closing tags. For the document
+            node, it returns the same as <literal>"@@markup"</literal>. For
+            other node types (text, processing instruction, etc.), it returns
+            an empty string. Unlike with <literal>"@@markup"</literal>, no
+            <literal>xmlns:<replaceable>prefix</replaceable></literal>
+            attributes will be placed into the ouput, but regarding the
+            prefixes used in element and attribute names the rules are the
+            same.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@text"</literal>: This returns the value of all
+            text nodes that occur within the node (all descendant text nodes,
+            not just direct children), concatenated together into a single
+            string. If the node has no text node children, then the result is
+            an empty string.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@start_tag"</literal>: Returns the markup of the
+            <link linkend="gloss.startTag">start-tag</link> of the element
+            node. As with <literal>@@markup</literal>, the output is not
+            necessary the same as in the original XML document, but it is
+            semantically equivalent with that. Regarding the XML name-spaces
+            (<literal>xmlns:<replaceable>prefix</replaceable></literal>
+            attributes in the output, etc.) the rules are the same as with
+            <literal>"@@markup"</literal></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>"@@end_tag"</literal>: Returns the markup of the
+            <link linkend="gloss.endTag">end-tag</link> of the element node.
+            As with <literal>@@markup</literal>, the output is not necessary
+            the same as in the original XML document, but it is semantically
+            equivalent with that.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@attributes_markup</literal>: Returns the markup
+            of the <link linkend="gloss.attribute">attributes</link> of the
+            element node. As with <literal>@@markup</literal>, the output is
+            not necessary the same as in the original XML document, but it is
+            semantically equivalent with that.</para>
+          </listitem>
+        </itemizedlist>
+
+        <section>
+          <title>Node sequences</title>
+
+          <para>Many of the special hash keys (indicated in the above list),
+          and XPath expressions that result in node-sets (see the <link
+          xlink:href="http://www.w3.org/TR/xpath">XPath recommendation</link>)
+          return a sequence of nodes.</para>
+
+          <para>These node sequences, if they store exactly 1 subvariable,
+          will also act as the subvariable itself. For example,
+          <literal>${book.title[0]}</literal> will do the same as
+          <literal>${book.title}</literal>, if there is only one
+          <literal>title</literal> element child of element
+          <literal>book</literal>.</para>
+
+          <para>Returning an empty node sequence is a normal situation. For
+          example, if in a concrete XML document, element
+          <literal>book</literal> has no child element
+          <literal>chapter</literal>, then <literal>book.chapter</literal>
+          results in an empty node sequence. Beware! This also means, that
+          <literal>book.chaptre</literal> (note the typo) will also return
+          empty node sequence, and will not stop with error. Also,
+          <literal>book.chaptre??</literal> (note the typo) will return
+          <literal>true</literal> because the empty sequence exists, so you
+          have to use <literal>book.chaptre[0]??</literal> for the
+          check.</para>
+
+          <para>Node sequences that store not 1 nodes (but 0 or more than 1
+          nodes) also support some of the hash keys described above. Namely,
+          the following special keys are supported:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>"@<replaceable>attrName</replaceable>"</literal>,
+              <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>"@@markup"</literal>,
+              <literal>"@@nested_markup"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>"@@text"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>"*"</literal>, <literal>"**"</literal></para>
+            </listitem>
+
+            <listitem>
+              <para><literal>"@@"</literal>, <literal>"@*"</literal></para>
+            </listitem>
+          </itemizedlist>
+
+          <para>When you apply one of the above special keys on a node
+          sequence that contains more than 1 or 0 nodes, then for each node in
+          the sequence (where the special key does make sense, e.g. text nodes
+          will be skipped for key <literal>*</literal> or
+          <literal>@foo</literal>), the special key will be applied as it was
+          explained for single nodes, and the results will be concatenated to
+          form the final result. The results will be concatenated in the order
+          as the corresponding nodes occur in the node sequence. The
+          concatenation means string or sequence concatenation depending on
+          the type of the results. If the special key would result in a string
+          for a single node, then for multiple nodes the result is a single
+          string too (the results for the single nodes concatenated), and if
+          the special key would return a sequence for a single node, then for
+          multiple nodes the result is a single sequence too. If there are 0
+          nodes in the sequence you apply the special key on, the string
+          result is an empty string or an empty sequence respectively.</para>
+
+          <para>XPath expressions can be used with node sequences. However,
+          for 0 or more than 1 nodes it will work only if you use Jaxen
+          instead of Xalan, because of the limitations of the Xalan XPath
+          implementation.</para>
+        </section>
+      </section>
+    </chapter>
+
+    <chapter xml:id="xgui_declarative">
+      <title>Declarative XML processing</title>
+
+      <indexterm>
+        <primary>XML</primary>
+
+        <secondary>declarative processing</secondary>
+      </indexterm>
+
+      <indexterm>
+        <primary>XSLT</primary>
+      </indexterm>
+
+      <section xml:id="xgui_declarative_basics">
+        <title>Basics</title>
+
+        <note>
+          <para>This section uses the DOM tree and the variable made in <link
+          linkend="xgui_expose">a previous chapter</link>.</para>
+        </note>
+
+        <para>With the imperative approach of XML processing -- this was shown
+        in the previous chapter -- you write an FTL program that walks the
+        tree to find the different kind of nodes. With the declarative
+        approach, you rather define how to handle the different kind of nodes,
+        and then let FreeMarker walk the tree an call the handlers you have
+        defined. This approach is useful for complex XML schemas, where the
+        same element can occur as the child of many other elements. Examples
+        of such schemas are XHTML and XDocBook.</para>
+
+        <para>The directive you most often use with the declarative approach
+        is the <link
+        linkend="ref.directive.recurse"><literal>recurse</literal>
+        directive</link>. This directive gets a node variable as parameter,
+        and ``visits'' all its children nodes, one after the other, starting
+        with the first child. ``Visiting'' a node means that it calls a
+        user-defined directive (like a macro) that has the same name as the
+        name of the child node (<literal>?node_name</literal>). We say on
+        this, that the user-defined directive <emphasis>handles</emphasis> the
+        node. The node that the user-defined directive just handles is
+        available as special variable <literal>.node</literal>. For example,
+        this FTL:</para>
+
+        <programlisting role="template">&lt;#recurse doc&gt;
+
+&lt;#macro book&gt;
+  I'm the book element handler, and the title is: ${.node.title}
+&lt;/#macro&gt;</programlisting>
+
+        <para>will print (I have removed some disturbing white-space form the
+        output):</para>
+
+        <programlisting role="output">I'm the book element handler, and the title is: Test Book
+</programlisting>
+
+        <para>If you call <literal>recurse</literal> without parameter, then
+        it uses <literal>.node</literal>, that is, it visits all children
+        nodes of the node being handled currently. So this FTL:</para>
+
+        <programlisting role="template">&lt;#recurse doc&gt;
+
+&lt;#macro book&gt;
+  Book element with title ${.node.title}
+    &lt;#recurse&gt;
+  End book
+&lt;/#macro&gt;
+
+&lt;#macro title&gt;
+  Title element
+&lt;/#macro&gt;
+
+&lt;#macro chapter&gt;
+  Chapter element with title: ${.node.title}
+&lt;/#macro&gt;</programlisting>
+
+        <para>will print (I have removed disturbing white-space form the
+        output):</para>
+
+        <programlisting role="output">Book element with title Test Book
+Title element
+Chapter element with title: Ch1
+Chapter element with title: Ch2
+End book</programlisting>
+
+        <para>You have seen how to define handlers for element nodes, but not
+        how to define handler for the text nodes. Since the name of the
+        handler is the same as the node-name of nodes it handles, and as the
+        node-name of all text nodes is <literal>@text</literal> (see <link
+        linkend="misc.xguiTable">the table</link>), you define handler for the
+        text nodes like this:</para>
+
+        <programlisting role="template">
+&lt;#macro @text&gt;${.node?html}&lt;/#macro&gt;
+</programlisting>
+
+        <para>Note the <literal>?html</literal>. You have to HTML-escape the
+        text, since you generate output of HTML format.</para>
+
+        <para>Here it is the template that transforms the XML to complete
+        HTML:</para>
+
+        <anchor xml:id="misc.example.declarativeBookProcessor"/>
+
+        <programlisting role="template">&lt;#recurse doc&gt;
+
+&lt;#macro book&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;&lt;#recurse .node.title&gt;&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;h1&gt;&lt;#recurse .node.title&gt;&lt;/h1&gt;
+      &lt;#recurse&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+&lt;/#macro&gt;
+
+&lt;#macro chapter&gt;
+  &lt;h2&gt;&lt;#recurse .node.title&gt;&lt;/h2&gt;
+  &lt;#recurse&gt;
+&lt;/#macro&gt;
+
+&lt;#macro para&gt;
+  &lt;p&gt;&lt;#recurse&gt;
+&lt;/#macro&gt;
+
+&lt;#macro title&gt;
+  &lt;#--
+    We have handled this element imperatively,
+    so we do nothing here.
+  --&gt;
+&lt;/#macro&gt;
+
+&lt;#macro @text&gt;${.node?html}&lt;/#macro&gt;</programlisting>
+
+        <para>and the output will be (now I will honestly include the annoying
+        white-space...):</para>
+
+        <programlisting role="output">  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;Test Book&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;h1&gt;Test Book&lt;/h1&gt;
+
+  
+    &lt;h2&gt;Ch1&lt;/h2&gt;
+
+    
+      &lt;p&gt;p1.1
+
+      &lt;p&gt;p1.2
+
+      &lt;p&gt;p1.3
+
+  
+    &lt;h2&gt;Ch2&lt;/h2&gt;
+
+    
+      &lt;p&gt;p2.1
+
+      &lt;p&gt;p2.2
+
+  
+    &lt;/body&gt;
+  &lt;/html&gt;
+
+  </programlisting>
+
+        <para>Note that you can reduce substantially the amount of superfluous
+        whitespace in the output by using the <link
+        linkend="ref_directive_t">trim directives</link>, as
+        <literal>&lt;#t&gt;</literal>. See also: <xref
+        linkend="dgui_misc_whitespace"/></para>
+
+        <para>You may say that the FTL that did it with imperative approach
+        was much shorter. That's true, but the example XML uses a very simple
+        schema, and as I said, the declarative approach brings its form with
+        XML schemas that are not that firm about what element can occur where.
+        Say, introduce element <literal>mark</literal>, that should color text
+        to red, does not mater where do you use it; in a
+        <literal>title</literal>, or in a <literal>para</literal>. For this,
+        with the declarative approach, you just add a macro:</para>
+
+        <programlisting role="template">&lt;#macro mark&gt;&lt;font color=red&gt;&lt;#recurse&gt;&lt;/font&gt;&lt;/#macro&gt;</programlisting>
+
+        <para>And then <literal>&lt;mark&gt;...&lt;/mark&gt;</literal> will
+        automatically work everywhere. So for certain XML schemas, declarative
+        XML processing will actually result in shorter, and what is even more
+        important, much clearer FTL-s, than imperative XML processing. It's up
+        to you to decide which approach to use when; don't forget that you can
+        mix the two approaches freely. Say, in an element handler, you can use
+        imperative approach to process the contents of that element.</para>
+      </section>
+
+      <section xml:id="xgui_declarative_details">
+        <title>Details</title>
+
+        <section>
+          <title>Default handlers</title>
+
+          <para>For some XML node types, there is a default handler, which
+          will handle the node if you haven't defined a handler for the node
+          (i.e. if there is no user-defined directive available with name
+          identical to the node name). Here are these node types, and what the
+          default handler does:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Text node: prints the text as it. Note, that in most
+              applications, this will not be good for you, because you should
+              escape the text before you send it to the output (with
+              <literal>?html</literal> or <literal>?xml</literal> or
+              <literal>?rtf</literal>, ...etc. depends on the output
+              format).</para>
+            </listitem>
+
+            <listitem>
+              <para>Processing instruction node: call handler called
+              <literal>@pi</literal> if you have created such user-defined
+              directive, otherwise do nothing (ignore the node).</para>
+            </listitem>
+
+            <listitem>
+              <para>Comment node, document type node: Do nothing (ignore the
+              node).</para>
+            </listitem>
+
+            <listitem>
+              <para>Document node: Call <literal>recurse</literal>, that is,
+              visit all children of the document node.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Element and attribute nodes will be handled according to the
+          usual, XML independent mechanism. That is,
+          <literal>@<replaceable>node_type</replaceable></literal> will be
+          called as handler, and if that's not defined, then an error stops
+          template processing.</para>
+
+          <para>In the case of element nodes, this means that if you define a
+          macro (or other kind of user-defined directive) called
+          <literal>@element</literal>, that will catch all element nodes,
+          which has no more specific handler. If you have no
+          <literal>@element</literal> handler, then you
+          <emphasis>must</emphasis> define a handler for all possible
+          elements.</para>
+
+          <para>Attribute nodes are not visited by the
+          <literal>recurse</literal> directive, so you don't need to write
+          handlers for them.</para>
+        </section>
+
+        <section>
+          <title>Visiting a single node</title>
+
+          <para>With the <link
+          linkend="ref.directive.visit"><literal>visit</literal>
+          directive</link> you can visit a single node, instead of the
+          children of the node:
+          <literal>&lt;#visit <replaceable>nodeToVisist</replaceable>&gt;</literal>.
+          This can be useful sometimes.</para>
+        </section>
+
+        <section>
+          <title>XML namespaces</title>
+
+          <indexterm>
+            <primary>XML namespaces</primary>
+
+            <secondary>in declarative processing</secondary>
+          </indexterm>
+
+          <para>We said that the name of the handler user-defined directive
+          (like a macro) for an element is the name of the element. In fact,
+          it is the full-qualified name of the element:
+          <literal><replaceable>prefix</replaceable>:<replaceable>elementName</replaceable></literal>.
+          The rules regarding the usage of
+          <literal><replaceable>prefix</replaceable></literal>-es is the same
+          as with imperative processing. Thus, the user-defined
+          <literal>book</literal> directive handles only element
+          <literal>book</literal> that does not belong to any XML namespace
+          (unless you have specified a default XML namespace). So if the
+          example XML would use XML namespace
+          <literal>http://example.com/ebook</literal>:</para>
+
+          <programlisting role="unspecified">&lt;book xmlns="http://example.com/ebook"&gt;
+<replaceable>...</replaceable></programlisting>
+
+          <para>Then the FTL should look as this:</para>
+
+          <programlisting role="template"><emphasis>&lt;#ftl ns_prefixes={"e":"http://example.com/ebook"}&gt;</emphasis>
+
+&lt;#recurse doc&gt;
+
+&lt;#macro "<emphasis>e:</emphasis>book"&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;&lt;#recurse .node["<emphasis>e:</emphasis>title"]&gt;&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;h1&gt;&lt;#recurse .node["<emphasis>e:</emphasis>title"]&gt;&lt;/h1&gt;
+      &lt;#recurse&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+&lt;/#macro&gt;
+
+&lt;#macro "<emphasis>e:</emphasis>chapter"&gt;
+  &lt;h2&gt;&lt;#recurse .node["<emphasis>e:</emphasis>title"]&gt;&lt;/h2&gt;
+  &lt;#recurse&gt;
+&lt;/#macro&gt;
+
+&lt;#macro "<emphasis>e:</emphasis>para"&gt;
+  &lt;p&gt;&lt;#recurse&gt;
+&lt;/#macro&gt;
+
+&lt;#macro "<emphasis>e:</emphasis>title"&gt;
+  &lt;#--
+    We have handled this element imperatively,
+    so we do nothing here.
+  --&gt;
+&lt;/#macro&gt;
+
+&lt;#macro @text&gt;${.node?html}&lt;/#macro&gt;</programlisting>
+
+          <para>Or, you can define a default XML namespace, and then the
+          further part of the template remains the same as in the original XML
+          namespace free example:</para>
+
+          <programlisting role="template">&lt;#ftl ns_prefixes={"<emphasis>D</emphasis>":"http://example.com/ebook"}&gt;
+
+&lt;#recurse doc&gt;
+
+&lt;#macro book&gt;
+<replaceable>...</replaceable></programlisting>
+
+          <para>But in this case don't forge that in XPath expressions (we
+          didn't used any in the example) the default XML namespace must be
+          accessed with an explicit <literal>D:</literal> since names without
+          prefix always refer to nodes with no XML namespace in XPath. Also
+          note that with the same logic as with imperative XML processing, the
+          name of handlers for elements that has no XML namespace is
+          <literal>N:<replaceable>elementName</replaceable></literal> if (and
+          only if) there is a default XML namespace. However, for nodes that
+          are not of type element (such as text nodes), you never use the
+          <literal>N</literal> prefix in the handler name, because those nodes
+          are free of the idea of XML namespaces. So for example, the handler
+          for text nodes is always just <literal>@text</literal>.</para>
+
+          <para>For more detailed information, please read <link
+          linkend="ref_directive_visit">the reference of
+          <literal>recurse</literal> and <literal>visit</literal></link>
+          directives.</para>
+        </section>
+      </section>
+    </chapter>
+  </part>
+
   <part xml:id="app">
     <title>Appendixes</title>
 
@@ -21384,115 +21384,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
       </qandaset>
-    </appendix>
-
-    <appendix xml:id="app_install">
-      <title>Installing FreeMarker</title>
-
-      <indexterm>
-        <primary>install</primary>
-      </indexterm>
-
-      <para>No real installation needed. Simply copy
-      <literal>lib/freemarker.jar</literal> to a location where your Java
-      application's class-loader will find it. For example, if you use
-      FreeMarker in a web application, you probably want to put
-      <literal>freemarker.jar</literal> into the
-      <literal>WEB-INF/lib</literal> directory of your web application.</para>
-
-      <para>No real installation needed. Simply copy
-      <literal>lib/freemarker.jar</literal> to a location where your Java
-      application's ClassLoader will find it. For example, if you use
-      FreeMarker in a web application, you probably want to put
-      <literal>freemarker.jar</literal> into the
-      <literal>WEB-INF/lib</literal> directory of your web application. (If
-      you want to use FreeMarker with JSP Model-2 style (which also means that
-      you can use custom JSP taglibs in the templates), some extra steps
-      needed. For more information please see <link
-      linkend="pgui_misc_servlet">the chapter about servlets</link>.)</para>
-
-      <para>However, some third party libraries have also be available for the
-      class-loader, if you want to enable certain
-      <emphasis>optional</emphasis> FreeMarker features:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>At least J2SE 1.4 is required for regular expression
-          built-ins.</para>
-        </listitem>
-
-        <listitem>
-          <para>At least J2SE 1.4 or a JAXP + DOM implementation + SAX
-          implementation is needed for the XML wrapping.</para>
-        </listitem>
-
-        <listitem>
-          <para>Jaxen (recommended, <link
-          xlink:href="http://jaxen.org/">download here</link>) or Apache Xalan
-          is needed for XML XPath support. Please use at least Jaxen
-          1.1-beta-8, not older versions! Apache Xalan classes are included in
-          Sun J2SE 1.4, 1.5 and 1.6 (and maybe later too), so no separate
-          Xalan jar is needed with those versions.</para>
-        </listitem>
-
-        <listitem>
-          <para>Obviously, <literal>javax.servlet</literal> classes are needed
-          for <literal>FreemarkerServlet</literal>. Servlet version 2.2 or
-          later is needed.</para>
-        </listitem>
-
-        <listitem>
-          <para>For the custom JSP taglib support, you will need JSP 1.2 API
-          classes. No JSP implementation needed, just the API. For more
-          information please see <link linkend="pgui_misc_servlet">the chapter
-          about servlets</link>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Obviously, Jython classes are needed for the Jython
-          wrapper.</para>
-        </listitem>
-
-        <listitem>
-          <para>JDOM is needed for the deprecated freemarker.ext.jdom
-          package.</para>
-        </listitem>
-      </itemizedlist>
-    </appendix>
-
-    <appendix xml:id="app_build">
-      <title>Building FreeMarker</title>
-
-      <indexterm>
-        <primary>build</primary>
-      </indexterm>
-
-      <para>You need Apache Ant and Ivy be installed. (As of this writing it
-      was tested with Ant 1.8.1 and Ivy 2.3.0.)</para>
-
-      <para>If you need to ensure compliance with certain J2SE versions, copy
-      <literal>build.properties.sample</literal> into
-      <literal>build.properties</literal>, and edit it accordingly.</para>
-
-      <para>To build <literal>freemarker.jar</literal>, just issue
-      <literal>ant</literal> in the project root directory, and it should
-      download all dependencies automatically and build
-      <literal>freemarker.jar</literal>.</para>
-
-      <para>If later you change the dependencies in
-      <literal>ivy.xml</literal>, or otherwise want to re-download some of
-      them, it will not happen automatically anymore. You have to issue
-      <literal>ant update-deps</literal> for that.</para>
-
-      <para>For development under Eclipse, you will need IvyDE installed. You
-      are advised to use the Eclipse project files included (otherwise set up
-      IvyDE to use the "IDE" configuration and the included
-      <literal>ivysettings.xml</literal>). Note that IvyDE will not find the
-      dependencies until ant <literal>update-deps</literal> has run once,
-      because it uses the mini-repository built by that Ant task. If you
-      change the dependencies in <literal>ivy.xml</literal>, you will have to
-      run <literal>ant update-deps</literal> again, and only after that tell
-      IvyDE to resolve the dependencies.</para>
     </appendix>
 
     <appendix xml:id="app_versions">
@@ -30012,14 +29903,77 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </section>
     </appendix>
 
-    <appendix xml:id="app_license">
-      <title>License</title>
+    <appendix xml:id="app_install">
+      <title>Installing FreeMarker</title>
 
       <indexterm>
-        <primary>license</primary>
+        <primary>install</primary>
       </indexterm>
 
-      <programlisting role="unspecified">Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+      <para>No real installation is needed. Simply ensure that
+      <literal>freemarker.jar</literal> is somewhere where your Java
+      application's class-loader will find it. In web application this usually
+      means putting <literal>freemarker.jar</literal> into the
+      <literal>WEB-INF/lib</literal> directory of your web application. (If
+      you want to use FreeMarker with JSP Model-2 style (which also means that
+      you can use custom JSP taglibs in the templates), some extra steps
+      needed. For more information please see <link
+      linkend="pgui_misc_servlet">the chapter about servlets</link>.)</para>
+
+      <para>FreeMarker has no required dependencies. But to use certain
+      <emphasis>optional</emphasis> FreeMarker features, the related party
+      libraries have to be available for the class-loader:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Jaxen (recommended, <link
+          xlink:href="http://jaxen.org/">download here</link>) or Apache Xalan
+          is needed for XML XPath support. Please use at least Jaxen
+          1.1-beta-8, not older versions! Apache Xalan classes are included in
+          a package-relocated form in Sun/Oracle J2SE 1.4-1.8 (maybe later
+          too), and FreeMarker will use those if it doesn't find Jaxen or
+          Xalan elsewhere. But as Oracle can change these internal packages
+          anytime, it's still recommended to use an external Jaxen or
+          Xalan.</para>
+        </listitem>
+
+        <listitem>
+          <para>Obviously, <literal>javax.servlet</literal> classes are needed
+          for <literal>FreemarkerServlet</literal>. Servlet version 2.2 or
+          later is needed.</para>
+        </listitem>
+
+        <listitem>
+          <para>For the custom JSP taglib support, you will need JSP 1.2 API
+          or later avilable. No JSP implementation is needed, just the API.
+          This is already present in pretty much every servlet container. For
+          more information please see <link linkend="pgui_misc_servlet">the
+          chapter about servlets</link>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Jython classes are needed for the Jython wrapper.</para>
+        </listitem>
+
+        <listitem>
+          <para>Pre-1.0 JDOM is needed for the long deprecated
+          <literal>freemarker.ext.jdom</literal> package. (When it was
+          created, there was no JDOM 1.0 yet.)</para>
+        </listitem>
+      </itemizedlist>
+    </appendix>
+
+    <appendix xml:id="app_legal">
+      <title>Legal</title>
+
+      <section xml:id="app_license">
+        <title>License</title>
+
+        <indexterm>
+          <primary>license</primary>
+        </indexterm>
+
+        <programlisting role="unspecified">Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30068,6 +30022,19 @@ With FreeMarker 2.3.21 the license has changed to Apache License,
 Version 2.0, and the owner has changed from Visigoth Software Society
 to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
 Dekany, and Jonathan Revusky.</programlisting>
+      </section>
+
+      <section xml:id="app_eccn">
+        <title>Export Control</title>
+
+        <para>The FreeMarker source code doesn't include cryptography.
+        Furthermore it's binary (downloadable) forms don't include any
+        cryptography software. Hence, FreeMarker has no Export Control
+        Classification Number (ECCN). Where an ECCN should be filled, the
+        label "not subject to EAR" could be used.</para>
+
+        <para>FreeMarker itself doesn't add any exporting limitations.</para>
+      </section>
     </appendix>
   </part>
 

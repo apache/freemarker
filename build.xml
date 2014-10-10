@@ -34,6 +34,7 @@
       <isset property="has.explicit.boot.classpath.j2se1.5"/>
     </and>
   </condition>
+  <available property="atLeastJDK8" classname="java.util.function.Predicate"/>
 
   <!-- When boot.classpath.j2se* is missing, these will be the defaults: -->
   <!-- Note: Target "dist" doesn't allow using these. -->
@@ -458,7 +459,13 @@
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <target depends="javacc" name="javadoc" description="Build the JavaDocs" >
+  <macrodef name="manual" uri="http://freemarker.org/util">
+    <attribute name="offline" />
+    <sequential>
+    </sequential>
+  </macrodef>
+  
+  <target depends="javacc" name="_rawJavadoc" description="Build the JavaDocs" >
     <!-- depends="javacc" is needed as its output is referred in the docs. -->
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
@@ -489,6 +496,7 @@
         <exclude name="**/log/CommonsLoggingLoggerFactory.java" />
       </fileset>
     </copy>
+    
     <!-- conf="IDE": as that has to contain all depedencies -->
     <ivy:cachepath conf="IDE" pathid="ivy.dep" />
     <javadoc
@@ -505,18 +513,77 @@
       windowtitle="FreeMarker ${version} API"
       classpath="build/classes"
       classpathref="ivy.dep"
-    />
+      failonerror="true"
+      charset="UTF-8"
+      docencoding="UTF-8"
+      locale="en_US"
+    >
+      <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistloc="src/javadoc/resources/javase-8" />
+    </javadoc>
     <delete dir="build/javadoc-sources" />
-    
-    <available file="build/api/resources/titlebar.gif" property="titlebar.found"/>
-    <fail unless="titlebar.found"><!--
-    -->build/api/resources/titlebar.gif doesn't exist, which probably means <!--
-    -->that the API documentaton was generated with JDK 6 or earlier. Ensure <!--
-    -->that Ant uses JDK 7 or later (you may need to set JAVA_HOME), as the <!--
-    -->HTML output was significantly improved with JDK 7.<!--
-    --></fail>
   </target>
 
+  <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" />
+  
+  <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
+    <property name="file" value="build/api/stylesheet.css" />
+    <echo>Fixing JDK 8 CSS in ${file}</echo>
+    
+    <!-- Tell that it's modified: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="/\* (Javadoc style sheet) \*/" replace="/\* \1 - JDK 8 usability fix regexp substitutions applied \*/"
+    />
+    
+    <!-- Font family fixes: -->
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]DejaVu Sans['&quot;]" replace="Arial"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]DejaVu Sans Mono['&quot;]" replace="'Courier New'"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]DejaVu Serif['&quot;]" replace="Arial"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])serif\b" replace="sans-serif"
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])Georgia,\s*" replace=""
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="['&quot;]Times New Roman['&quot;],\s*" replace=""
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])Times,\s*" replace=""
+    />
+    <replaceregexp
+        file="${file}" flags="gsi" encoding="utf-8"
+        match="(?&lt;=[\s,:])Arial\s*,\s*Arial\b" replace="Arial"
+    />
+    
+    <!-- "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes: -->
+    <property name="ddSelectorStart" value="(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b" />
+    <property name="ddPropertyEnd" value="\b.+?;" />
+    <!-- - Put back description (dd) indentation: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="(${ddSelectorStart})margin${ddPropertyEnd}" replace="\1margin: 5px 0 10px 20px;"
+    />
+    <!-- - No monospace font for the description (dd) part: -->
+    <replaceregexp
+        file="${file}" flags="gs" encoding="utf-8"
+        match="(${ddSelectorStart})font-family${ddPropertyEnd}" replace="\1"
+    />
+  </target>
+  
   <!-- ====================== -->
   <!-- Manual                 -->
   <!-- ====================== -->
@@ -620,6 +687,7 @@
       unless="has.all.explicit.boot.classpaths"
       message="All boot.classpath properties must be set in build.properties for dist!"
     />
+    <fail unless="atLeastJDK8" message="The release should be built with JDK 8+ (you may need to set JAVA_HOME)" />
     <antcall target="clean" />  <!-- To improve the reliability -->
     <antcall target="_dist" />
   </target>

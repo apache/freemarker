@@ -36,7 +36,7 @@ import freemarker.template.TemplateModelException;
  * submissions to be used as the command string in the
  * exec tag.</p>
  *
- * <p>Usage:<br />
+ * <p>Usage:<br>
  * From java:</p>
  * <pre>
  * SimpleHash root = new SimpleHash();

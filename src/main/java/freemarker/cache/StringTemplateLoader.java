@@ -46,8 +46,8 @@ import freemarker.template.utility.StringUtil;
  * it:
  * <pre>
  *   StringTemplateLoader stringLoader = new StringTemplateLoader();
- *   stringLoader.putTemplate("greetTemplate", "<#macro greet>Hello</#macro>");
- *   stringLoader.putTemplate("myTemplate", "<#include \"greetTemplate\"><@greet/> World!");
+ *   stringLoader.putTemplate("greetTemplate", "&lt;#macro greet&gt;Hello&lt;/#macro&gt;");
+ *   stringLoader.putTemplate("myTemplate", "&lt;#include \"greetTemplate\"&gt;&lt;@greet/&gt; World!");
  * </pre>
  * Then you tell your Configuration object to use it:
  * <pre>

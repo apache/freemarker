@@ -925,7 +925,7 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "&lt;" operator.
      * 
      * @since 2.3.20
      */
@@ -935,7 +935,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Compares two {@link TemplateModel}-s according the rules of the FTL "<" operator.
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "&lt;" operator.
      * 
      * @since 2.3.20
      */
@@ -945,7 +945,7 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Compares two {@link TemplateModel}-s according the rules of the FTL ">" operator.
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "&gt;" operator.
      * 
      * @since 2.3.20
      */
@@ -955,7 +955,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Compares two {@link TemplateModel}-s according the rules of the FTL ">=" operator.
+     * Compares two {@link TemplateModel}-s according the rules of the FTL "&gt;=" operator.
      * 
      * @since 2.3.20
      */
@@ -1184,7 +1184,7 @@ public final class Environment extends Configurable {
     /**
      * @param dateType {@link TemplateDateModel#UNKNOWN} is accepted or not depending on the {@code formatDescriptor}
      *     value. When it isn't, a {@link TemplateModelException} will be thrown.
-     * @param dateClass
+     * @param dateClass The exact class of the date object, such as {@link java.sql.Timestamp}. 
      * @param formatDescriptor Like "iso m" or "dd.MM.yyyy HH:mm" 
      */
     TemplateDateFormat getTemplateDateFormat(
@@ -1410,7 +1410,7 @@ public final class Environment extends Configurable {
 
     /**
      * Sets a variable that is visible globally.
-     * This is correspondent to FTL <code><#global <i>name</i>=<i>model</i>></code>.
+     * This is correspondent to FTL <code>&lt;#global <i>name</i>=<i>model</i>&gt;</code>.
      * This can be considered a convenient shorthand for:
      * getGlobalNamespace().put(name, model)
      */
@@ -1420,7 +1420,7 @@ public final class Environment extends Configurable {
 
     /**
      * Sets a variable in the current namespace.
-     * This is correspondent to FTL <code><#assign <i>name</i>=<i>model</i>></code>.
+     * This is correspondent to FTL <code>&lt;#assign <i>name</i>=<i>model</i>&gt;</code>.
      * This can be considered a convenient shorthand for:
      * getCurrentNamespace().put(name, model)
      */
@@ -1430,7 +1430,7 @@ public final class Environment extends Configurable {
 
     /**
      * Sets a local variable (one effective only during a macro invocation).
-     * This is correspondent to FTL <code><#local <i>name</i>=<i>model</i>></code>.
+     * This is correspondent to FTL <code>&lt;#local <i>name</i>=<i>model</i>&gt;</code>.
      * @param name the identifier of the variable
      * @param model the value of the variable.
      * @throws IllegalStateException if the environment is not executing a
@@ -1680,7 +1680,7 @@ public final class Environment extends Configurable {
      * Returns the read-only hash of globally visible variables.
      * This is the correspondent of FTL <code>.globals</code> hash.
      * That is, you see the variables created with
-     * <code>&lt;#global ...></code>, and the variables of the data-model.
+     * <code>&lt;#global ...&gt;</code>, and the variables of the data-model.
      * To create new global variables, use {@link #setGlobalVariable setGlobalVariable}.
      */
     public TemplateHashModel getGlobalVariables() {

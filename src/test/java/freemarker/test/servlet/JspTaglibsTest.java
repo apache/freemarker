@@ -170,7 +170,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated No mock implementation exists for this.
          */
         public Servlet getServlet(String arg0) {
             throw new UnsupportedOperationException();
@@ -181,21 +181,21 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated No mock implementation exists for this.
          */
         public Enumeration getServletNames() {
             throw new UnsupportedOperationException();
         }
 
         /**
-         * @deprecated
+         * @deprecated No mock implementation exists for this.
          */
         public Enumeration getServlets() {
             throw new UnsupportedOperationException();
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public void log(Exception arg0, String arg1) {
         }
@@ -328,7 +328,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public boolean isRequestedSessionIdFromUrl() {
             return false;
@@ -403,7 +403,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public String getRealPath(String arg0) {
             return null;
@@ -479,7 +479,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public String encodeRedirectUrl(String arg0) {
             return null;
@@ -490,7 +490,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public String encodeUrl(String arg0) {
             return null;
@@ -519,7 +519,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public void setStatus(int arg0, String arg1) {
         }
@@ -609,21 +609,21 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public HttpSessionContext getSessionContext() {
             return null;
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public Object getValue(String arg0) {
             return null;
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public String[] getValueNames() {
             return null;
@@ -637,7 +637,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public void putValue(String arg0, Object arg1) {
         }
@@ -646,7 +646,7 @@ public class JspTaglibsTest extends FileTestCase {
         }
 
         /**
-         * @deprecated
+         * @deprecated Deprecated in the overidden API.
          */
         public void removeValue(String arg0) {
         }

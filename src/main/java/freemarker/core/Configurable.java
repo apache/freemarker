@@ -264,7 +264,7 @@ public class Configurable
      *   "expr" evaluates to null:
      *   <ul>
      *     <li>
-     *       in <tt>&lt;assign varname=expr></tt> directive, 
+     *       in <tt>&lt;assign varname=expr&gt;</tt> directive, 
      *       or in <tt>${expr}</tt> directive,
      *       or in <tt>otherexpr == expr</tt>,
      *       or in <tt>otherexpr != expr</tt>, 
@@ -273,16 +273,16 @@ public class Configurable
      *       or in <tt>expr.key</tt> (since 2.3.20),
      *       then it's treated as empty string.
      *     </li>
-     *     <li>as argument of <tt>&lt;list expr as item></tt> or 
-     *       <tt>&lt;foreach item in expr></tt>, the loop body is not executed
+     *     <li>as argument of <tt>&lt;list expr as item&gt;</tt> or 
+     *       <tt>&lt;foreach item in expr&gt;</tt>, the loop body is not executed
      *       (as if it were a 0-length list)
      *     </li>
-     *     <li>as argument of <tt>&lt;if></tt> directive, or on other places where a
+     *     <li>as argument of <tt>&lt;if&gt;</tt> directive, or on other places where a
      *       boolean expression is expected, it's treated as false
      *     </li>
      *   </ul>
      * </li>
-     * <li>Non-boolean models are accepted in <tt>&lt;if></tt> directive,
+     * <li>Non-boolean models are accepted in <tt>&lt;if&gt;</tt> directive,
      *   or as operands of logical operators. "Empty" models (zero-length string,
      * empty sequence or hash) are evaluated as false, all others are evaluated as
      * true.</li>
@@ -293,11 +293,11 @@ public class Configurable
      * formatted according the <tt>boolean_format</tt> setting, just like in
      * 2.3.20 and later.
      * </li>
-     * <li>Scalar models supplied to <tt>&lt;list></tt> and 
-     *   <tt>&lt;foreach></tt> are treated as a one-element list consisting
+     * <li>Scalar models supplied to <tt>&lt;list&gt;</tt> and 
+     *   <tt>&lt;foreach&gt;</tt> are treated as a one-element list consisting
      *   of the passed model.
      * </li>
-     * <li>Paths parameter of <tt>&lt;include></tt> will be interpreted as
+     * <li>Paths parameter of <tt>&lt;include&gt;</tt> will be interpreted as
      * absolute path.
      * </li>
      * </ul>
@@ -572,7 +572,7 @@ public class Configurable
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
      */
     public void setTimeFormat(String timeFormat) {
         NullArgumentException.check("timeFormat", timeFormat);
@@ -593,7 +593,7 @@ public class Configurable
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
      */
     public void setDateFormat(String dateFormat) {
         NullArgumentException.check("dateFormat", dateFormat);
@@ -625,32 +625,32 @@ public class Configurable
      *       {@code lastModified?string.iso_m_nz}). The options and their meanings are:
      *       
      *       <ul>
-     *         <li><p>Accuracy options:<br/>
+     *         <li><p>Accuracy options:<br>
      *             {@code ms} = Milliseconds, always shown with all 3 digits, even if it's all 0-s.
-     *                     Example: {@code 13:45:05.800}<br/>
-     *             {@code s} = Seconds (fraction seconds are dropped even if non-0), like {@code 13:45:05}<br/>
-     *             {@code m} = Minutes, like {@code 13:45}. This isn't allowed for "xs".<br/>
-     *             {@code h} = Hours, like {@code 13}. This isn't allowed for "xs".<br/>
+     *                     Example: {@code 13:45:05.800}<br>
+     *             {@code s} = Seconds (fraction seconds are dropped even if non-0), like {@code 13:45:05}<br>
+     *             {@code m} = Minutes, like {@code 13:45}. This isn't allowed for "xs".<br>
+     *             {@code h} = Hours, like {@code 13}. This isn't allowed for "xs".<br>
      *             Neither = Up to millisecond accuracy, but trailing millisecond 0-s are removed, also the whole
      *                     milliseconds part if it would be 0 otherwise. Example: {@code 13:45:05.8}
      *                     
-     *         <li><p>Time zone offset visibility options:<br/>
+     *         <li><p>Time zone offset visibility options:<br>
      *             {@code fz} = "Force Zone", always show time zone offset (even for for
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values).
      *                     But, because ISO 8601 doesn't allow for dates (means date without time of the day) to
      *                     show the zone offset, this option will have no effect in the case of {@code "iso"} with
-     *                     dates.<br/>
-     *             {@code nz} = "No Zone", never show time zone offset<br/>
+     *                     dates.<br>
+     *             {@code nz} = "No Zone", never show time zone offset<br>
      *             Neither = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
      *                     and {@link java.sql.Time java.sql.Time}, and for {@code "iso"} date values.
      *                     
-     *         <li><p>Time zone options:<br/>
+     *         <li><p>Time zone options:<br>
      *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't affected
-     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br/>
+     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br>
      *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br/>
+     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br>
      *             Neither = Use the time zone suggested by the {@code time_zone} or the
      *                     {@code sql_date_and_time_time_zone} configuration setting ({@link #setTimeZone(TimeZone)} and
      *                     {@link #setSQLDateAndTimeTimeZone(TimeZone)}).
@@ -684,7 +684,7 @@ public class Configurable
      *       {@code "medium_medium"} for date-time values.)
      * </ul> 
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@link "medium"}.
+     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "code"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -1009,7 +1009,8 @@ public class Configurable
      *             with {@code "allowed_classes:"} and/or
      *             {@code "trusted_templates:"}. Examples of valid values:
      *             
-     *             <table style="width: auto; border-collapse: collapse" border="1">
+     *             <table style="width: auto; border-collapse: collapse" border="1"
+     *                  summary="trusted_template value examples">
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
@@ -1094,7 +1095,7 @@ public class Configurable
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table style="width: auto; border-collapse: collapse" border="1">
+     *       <table style="width: auto; border-collapse: collapse" border="1" summary="cache_storage value examples">
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
      *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}
@@ -1552,7 +1553,7 @@ public class Configurable
      * @param name the name of the custom attribute
      *
      * @return the value of the custom attribute. Note that if the custom attribute
-     * was created with <tt>&lt;#ftl&nbsp;attributes={...}></tt>, then this value is already
+     * was created with <tt>&lt;#ftl&nbsp;attributes={...}&gt;</tt>, then this value is already
      * unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a
      * <code>Map</code>, ...etc., not a FreeMarker specific class).
      */

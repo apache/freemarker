@@ -57,7 +57,7 @@ implements
     }
 
     /**
-     * This allows the enumeration to be used in a <tt>&lt;foreach></tt> block.
+     * This allows the enumeration to be used in a <tt>&lt;#list&gt;</tt> block.
      * @return "this"
      */
     public TemplateModelIterator iterator() throws TemplateModelException

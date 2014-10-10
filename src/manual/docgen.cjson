@@ -5,12 +5,12 @@
 
 internalBookmarks: {
   "Alpha. index": alphaidx
-  "Glossary": gloss
   "Expressions": exp_cheatsheet 
   "?builtins": ref_builtins_alphaidx
   "#directives": ref_directive_alphaidx
   ".spec_vars": ref_specvar
   "FAQ": app_faq
+  "Glossary": gloss
 }
 
 externalBookmarks: {

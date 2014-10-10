@@ -150,7 +150,7 @@ public class StringUtil {
     }
 
     /**
-     *  XML encoding for attributes valies quoted with <tt>"</tt> (not with <tt>'</tt>!).
+     *  XML encoding for attributes values quoted with <tt>"</tt> (not with <tt>'</tt>!).
      *  Also can be used for HTML attributes that are quoted with <tt>"</tt>.
      *  @see #XMLEnc(String)
      */
@@ -444,7 +444,7 @@ public class StringUtil {
      *
      * \\, \", \', \n, \t, \r, \b and \f will be replaced according to
      * Java rules. In additional, it knows \g, \l, \a and \{ which are
-     * replaced with &lt;, >, &amp; and { respectively.
+     * replaced with &lt;, &gt;, &amp; and { respectively.
      * \x works as hexadecimal character code escape. The character
      * codes are interpreted according to UCS basic plane (Unicode).
      * "f\x006Fo", "f\x06Fo" and "f\x6Fo" will be "foo".
@@ -820,7 +820,7 @@ public class StringUtil {
     
     /**
      * Same as {@link #jQuoteNoXSS(String)} but also escapes <code>'&lt;'</code>
-     * as <code>\u003C</code>. This is used for log messages to prevent XSS
+     * as <code>\</code><code>u003C</code>. This is used for log messages to prevent XSS
      * on poorly written Web-based log viewers. 
      */
     public static String jQuoteNoXSS(String s) {
@@ -956,7 +956,7 @@ public class StringUtil {
      * 
      * The escaped characters are:
      * 
-     * <table style="width: auto; border-collapse: collapse" border="1">
+     * <table style="width: auto; border-collapse: collapse" border="1" summary="Characters escaped by jsStringEnc">
      * <tr>
      *   <th>Input
      *   <th>Output
@@ -973,8 +973,8 @@ public class StringUtil {
      *   <td><tt>/</tt> if the method can't know that it won't be directly after <tt>&lt;</tt>
      *   <td><tt>\/</tt>
      * <tr>
-     *   <td><tt>></tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
-     *   <td>JavaScript: <tt>\></tt>; JSON: <tt>\<tt>u</tt>003E</tt>
+     *   <td><tt>&gt;</tt> if the method can't know that it won't be directly after <tt>]]</tt> or <tt>--</tt>
+     *   <td>JavaScript: <tt>\&gt;</tt>; JSON: <tt>\</tt><tt>u003E</tt>
      * <tr>
      *   <td><tt>&lt;</tt> if the method can't know that it won't be directly followed by <tt>!</tt> or <tt>?</tt> 
      *   <td><tt><tt>\</tt>u003C</tt>
