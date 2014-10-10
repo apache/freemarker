@@ -21386,115 +21386,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </qandaset>
     </appendix>
 
-    <appendix xml:id="app_install">
-      <title>Installing FreeMarker</title>
-
-      <indexterm>
-        <primary>install</primary>
-      </indexterm>
-
-      <para>No real installation needed. Simply copy
-      <literal>lib/freemarker.jar</literal> to a location where your Java
-      application's class-loader will find it. For example, if you use
-      FreeMarker in a web application, you probably want to put
-      <literal>freemarker.jar</literal> into the
-      <literal>WEB-INF/lib</literal> directory of your web application.</para>
-
-      <para>No real installation needed. Simply copy
-      <literal>lib/freemarker.jar</literal> to a location where your Java
-      application's ClassLoader will find it. For example, if you use
-      FreeMarker in a web application, you probably want to put
-      <literal>freemarker.jar</literal> into the
-      <literal>WEB-INF/lib</literal> directory of your web application. (If
-      you want to use FreeMarker with JSP Model-2 style (which also means that
-      you can use custom JSP taglibs in the templates), some extra steps
-      needed. For more information please see <link
-      linkend="pgui_misc_servlet">the chapter about servlets</link>.)</para>
-
-      <para>However, some third party libraries have also be available for the
-      class-loader, if you want to enable certain
-      <emphasis>optional</emphasis> FreeMarker features:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>At least J2SE 1.4 is required for regular expression
-          built-ins.</para>
-        </listitem>
-
-        <listitem>
-          <para>At least J2SE 1.4 or a JAXP + DOM implementation + SAX
-          implementation is needed for the XML wrapping.</para>
-        </listitem>
-
-        <listitem>
-          <para>Jaxen (recommended, <link
-          xlink:href="http://jaxen.org/">download here</link>) or Apache Xalan
-          is needed for XML XPath support. Please use at least Jaxen
-          1.1-beta-8, not older versions! Apache Xalan classes are included in
-          Sun J2SE 1.4, 1.5 and 1.6 (and maybe later too), so no separate
-          Xalan jar is needed with those versions.</para>
-        </listitem>
-
-        <listitem>
-          <para>Obviously, <literal>javax.servlet</literal> classes are needed
-          for <literal>FreemarkerServlet</literal>. Servlet version 2.2 or
-          later is needed.</para>
-        </listitem>
-
-        <listitem>
-          <para>For the custom JSP taglib support, you will need JSP 1.2 API
-          classes. No JSP implementation needed, just the API. For more
-          information please see <link linkend="pgui_misc_servlet">the chapter
-          about servlets</link>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Obviously, Jython classes are needed for the Jython
-          wrapper.</para>
-        </listitem>
-
-        <listitem>
-          <para>JDOM is needed for the deprecated freemarker.ext.jdom
-          package.</para>
-        </listitem>
-      </itemizedlist>
-    </appendix>
-
-    <appendix xml:id="app_build">
-      <title>Building FreeMarker</title>
-
-      <indexterm>
-        <primary>build</primary>
-      </indexterm>
-
-      <para>You need Apache Ant and Ivy be installed. (As of this writing it
-      was tested with Ant 1.8.1 and Ivy 2.3.0.)</para>
-
-      <para>If you need to ensure compliance with certain J2SE versions, copy
-      <literal>build.properties.sample</literal> into
-      <literal>build.properties</literal>, and edit it accordingly.</para>
-
-      <para>To build <literal>freemarker.jar</literal>, just issue
-      <literal>ant</literal> in the project root directory, and it should
-      download all dependencies automatically and build
-      <literal>freemarker.jar</literal>.</para>
-
-      <para>If later you change the dependencies in
-      <literal>ivy.xml</literal>, or otherwise want to re-download some of
-      them, it will not happen automatically anymore. You have to issue
-      <literal>ant update-deps</literal> for that.</para>
-
-      <para>For development under Eclipse, you will need IvyDE installed. You
-      are advised to use the Eclipse project files included (otherwise set up
-      IvyDE to use the "IDE" configuration and the included
-      <literal>ivysettings.xml</literal>). Note that IvyDE will not find the
-      dependencies until ant <literal>update-deps</literal> has run once,
-      because it uses the mini-repository built by that Ant task. If you
-      change the dependencies in <literal>ivy.xml</literal>, you will have to
-      run <literal>ant update-deps</literal> again, and only after that tell
-      IvyDE to resolve the dependencies.</para>
-    </appendix>
-
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
@@ -30012,14 +29903,77 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       </section>
     </appendix>
 
-    <appendix xml:id="app_license">
-      <title>License</title>
+    <appendix xml:id="app_install">
+      <title>Installing FreeMarker</title>
 
       <indexterm>
-        <primary>license</primary>
+        <primary>install</primary>
       </indexterm>
 
-      <programlisting role="unspecified">Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+      <para>No real installation is needed. Simply ensure that
+      <literal>freemarker.jar</literal> is somewhere where your Java
+      application's class-loader will find it. In web application this usually
+      means putting <literal>freemarker.jar</literal> into the
+      <literal>WEB-INF/lib</literal> directory of your web application. (If
+      you want to use FreeMarker with JSP Model-2 style (which also means that
+      you can use custom JSP taglibs in the templates), some extra steps
+      needed. For more information please see <link
+      linkend="pgui_misc_servlet">the chapter about servlets</link>.)</para>
+
+      <para>FreeMarker has no required dependencies. But to use certain
+      <emphasis>optional</emphasis> FreeMarker features, the related party
+      libraries have to be available for the class-loader:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Jaxen (recommended, <link
+          xlink:href="http://jaxen.org/">download here</link>) or Apache Xalan
+          is needed for XML XPath support. Please use at least Jaxen
+          1.1-beta-8, not older versions! Apache Xalan classes are included in
+          a package-relocated form in Sun/Oracle J2SE 1.4-1.8 (maybe later
+          too), and FreeMarker will use those if it doesn't find Jaxen or
+          Xalan elsewhere. But as Oracle can change these internal packages
+          anytime, it's still recommended to use an external Jaxen or
+          Xalan.</para>
+        </listitem>
+
+        <listitem>
+          <para>Obviously, <literal>javax.servlet</literal> classes are needed
+          for <literal>FreemarkerServlet</literal>. Servlet version 2.2 or
+          later is needed.</para>
+        </listitem>
+
+        <listitem>
+          <para>For the custom JSP taglib support, you will need JSP 1.2 API
+          or later avilable. No JSP implementation is needed, just the API.
+          This is already present in pretty much every servlet container. For
+          more information please see <link linkend="pgui_misc_servlet">the
+          chapter about servlets</link>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Jython classes are needed for the Jython wrapper.</para>
+        </listitem>
+
+        <listitem>
+          <para>Pre-1.0 JDOM is needed for the long deprecated
+          <literal>freemarker.ext.jdom</literal> package. (When it was
+          created, there was no JDOM 1.0 yet.)</para>
+        </listitem>
+      </itemizedlist>
+    </appendix>
+
+    <appendix xml:id="app_legal">
+      <title>Legal</title>
+
+      <section xml:id="app_license">
+        <title>License</title>
+
+        <indexterm>
+          <primary>license</primary>
+        </indexterm>
+
+        <programlisting role="unspecified">Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30068,6 +30022,19 @@ With FreeMarker 2.3.21 the license has changed to Apache License,
 Version 2.0, and the owner has changed from Visigoth Software Society
 to three of the FreeMarker 2.X developers, Attila Szegedi, Daniel
 Dekany, and Jonathan Revusky.</programlisting>
+      </section>
+
+      <section xml:id="app_eccn">
+        <title>Export Control</title>
+
+        <para>The FreeMarker source code doesn't include cryptography.
+        Furthermore it's binary (downloadable) forms don't include any
+        cryptography software. Hence, FreeMarker has no Export Control
+        Classification Number (ECCN). Where an ECCN should be filled, the
+        label "not subject to EAR" could be used.</para>
+
+        <para>FreeMarker itself doesn't add any exporting limitations.</para>
+      </section>
     </appendix>
   </part>
 
