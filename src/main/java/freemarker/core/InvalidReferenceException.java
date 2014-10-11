@@ -34,7 +34,7 @@ public class InvalidReferenceException extends TemplateException {
         + "default value like myOptionalVar!myDefault, or use ",
         "<#if myOptionalVar??>", "when-present", "<#else>", "when-missing", "</#if>",
         ". (These only cover the last step of the expression; to cover the whole expression, "
-        + "use parenthessis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??"
+        + "use parenthesis: (myOptionalVar.foo)!myDefault, (myOptionalVar.foo)??"
     };
 
     private static final String TIP_NO_DOLAR =
