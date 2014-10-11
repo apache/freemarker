@@ -641,8 +641,8 @@
             <programlisting role="template">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>&lt;#list animals as being&gt;</emphasis>
-  &lt;tr&gt;&lt;td&gt;${<emphasis>being</emphasis>.name}&lt;td&gt;${<emphasis>being</emphasis>.price} Euros
+  <emphasis>&lt;#list animals as animal&gt;</emphasis>
+  &lt;tr&gt;&lt;td&gt;${<emphasis>animal</emphasis>.name}&lt;td&gt;${<emphasis>animal</emphasis>.price} Euros
   <emphasis>&lt;/#list&gt;</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -756,13 +756,13 @@ All Rights Reserved.
           <programlisting role="template">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>&lt;#list animals as being&gt;</emphasis>
+  <emphasis>&lt;#list animals as animal&gt;</emphasis>
   &lt;tr&gt;
     &lt;td&gt;
-      <emphasis>&lt;#if being.size == "large"&gt;</emphasis>&lt;font size="+1"&gt;<emphasis>&lt;/#if&gt;</emphasis>
-      ${being.name}
-      <emphasis>&lt;#if being.size == "large"&gt;</emphasis>&lt;/font&gt;<emphasis>&lt;/#if&gt;</emphasis>
-    &lt;td&gt;${being.price} Euros
+      <emphasis>&lt;#if animal.size == "large"&gt;</emphasis>&lt;font size="+1"&gt;<emphasis>&lt;/#if&gt;</emphasis>
+      ${animal.name}
+      <emphasis>&lt;#if animal.size == "large"&gt;</emphasis>&lt;/font&gt;<emphasis>&lt;/#if&gt;</emphasis>
+    &lt;td&gt;${animal.price} Euros
   <emphasis>&lt;/#list&gt;</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -1533,10 +1533,10 @@ The average of the price of a python and an elephant is:
               role="markedInvisibleText">[BR]</phrase>
   &lt;p&gt;We have these animals:<phrase role="markedInvisibleText">[BR]</phrase>
   &lt;ul&gt;<phrase role="markedInvisibleText">[BR]</phrase>
-  <phrase role="markedFTLTag">&lt;#list animals as being&gt;</phrase><phrase
+  <phrase role="markedFTLTag">&lt;#list animals as animal&gt;</phrase><phrase
               role="markedInvisibleText">[BR]</phrase>
-    &lt;li&gt;<phrase role="markedInterpolation">${being.name}</phrase> for <phrase
-              role="markedInterpolation">${being.price}</phrase> Euros<phrase
+    &lt;li&gt;<phrase role="markedInterpolation">${animal.name}</phrase> for <phrase
+              role="markedInterpolation">${animal.price}</phrase> Euros<phrase
               role="markedInvisibleText">[BR]</phrase>
   <phrase role="markedFTLTag">&lt;/#list&gt;</phrase><phrase
               role="markedInvisibleText">[BR]</phrase>
@@ -1574,7 +1574,7 @@ The average of the price of a python and an elephant is:
 &lt;p&gt;We have these animals:<phrase role="markedInvisibleText">[BR]</phrase>
 &lt;ul&gt;<phrase role="markedInvisibleText">[BR]</phrase>
 <phrase role="markedFTLTag">&lt;#list <phrase role="markedComment">&lt;#-- some comment... --&gt;</phrase> animals as <phrase
-                role="markedComment">&lt;#-- again... --&gt;</phrase> being&gt;</phrase><phrase
+                role="markedComment">&lt;#-- again... --&gt;</phrase> animal&gt;</phrase><phrase
               role="markedInvisibleText">[BR]</phrase></phrase>
 <replaceable>...</replaceable></programlisting>
 
@@ -1612,7 +1612,7 @@ The average of the price of a python and an elephant is:
           </indexterm>You use FTL tags to call <emphasis
         role="term">directives</emphasis>. In the example you have called the
         <literal>list</literal> directive. Syntactically you have done it with
-        two tags: <literal>&lt;#list animals as being&gt;</literal> and
+        two tags: <literal>&lt;#list animals as animal&gt;</literal> and
         <literal>&lt;/#list&gt;</literal>.</para>
 
         <para><indexterm>
@@ -1668,8 +1668,8 @@ The average of the price of a python and an elephant is:
         directive:</para>
 
         <programlisting role="template">&lt;ul&gt;
-<emphasis>&lt;#list animals as being&gt;</emphasis>
-  &lt;li&gt;${being.name} for ${being.price} Euros
+<emphasis>&lt;#list animals as animal&gt;</emphasis>
+  &lt;li&gt;${animal.name} for ${animal.price} Euros
   <emphasis>&lt;#if user == "Big Joe"&gt;</emphasis>
      (except for you)
 <emphasis>&lt;/#list&gt;</emphasis> &lt;#-- WRONG! The "if" has to be closed first. --&gt;
@@ -1691,10 +1691,10 @@ The average of the price of a python and an elephant is:
         <programlisting role="template"><phrase role="markedText"><phrase
               role="markedFTLTag">&lt;#list<phrase role="markedInvisibleText">[BR]</phrase>
   animals       as<phrase role="markedInvisibleText">[BR]</phrase>
-     being<phrase role="markedInvisibleText">[BR]</phrase>
+     animal<phrase role="markedInvisibleText">[BR]</phrase>
 &gt;</phrase><phrase role="markedInvisibleText">[BR]</phrase>
-<phrase role="markedInterpolation">${being.name}</phrase> for <phrase
-              role="markedInterpolation">${being.price}</phrase> Euros<phrase
+<phrase role="markedInterpolation">${animal.name}</phrase> for <phrase
+              role="markedInterpolation">${animal.price}</phrase> Euros<phrase
               role="markedInvisibleText">[BR]</phrase>
 <phrase role="markedFTLTag">&lt;/#list    &gt;</phrase></phrase></programlisting>
 
@@ -4632,9 +4632,8 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         and replaced using FTL directives. Note that each <link
         linkend="gloss.templateProcessingJob">template processing job</link>
         has its own private set of these variables that exists while the given
-        page is being rendered. This variable set is initially empty, and will
-        be thrown away when the template processing job has been
-        finished.</para>
+        page is rendered. This variable set is initially empty, and will be
+        thrown away when the template processing job has been finished.</para>
 
         <para>You access a variable that you have defined in the template
         exactly as if it were a variable in the data-model root. The variable
@@ -5024,11 +5023,11 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           <para>Each <link linkend="gloss.templateProcessingJob">template
           processing job</link> has its own private set of namespaces. Each
           template-processing job is a separated cosmos that exists only for
-          the short period of time while the given page is being rendered, and
-          then it vanishes with all its populated namespaces. Thus, whenever
-          we say that ``<literal>import</literal> is called for the first
-          time'' and such, we are always talking in the context of a single
-          template processing job.</para>
+          the short period of time while the given page is rendered, and then
+          it vanishes with all its populated namespaces. Thus, whenever we say
+          that ``<literal>import</literal> is called for the first time'' and
+          such, we are always talking in the context of a single template
+          processing job.</para>
         </section>
 
         <section>
@@ -5388,7 +5387,7 @@ That's all.</programlisting>
         <itemizedlist spacing="compact">
           <listitem>
             <para>Calling predefined directive: <literal>[#list animals as
-            being]<replaceable>...</replaceable>[/#list]</literal></para>
+            animal]<replaceable>...</replaceable>[/#list]</literal></para>
           </listitem>
 
           <listitem>
@@ -5418,13 +5417,13 @@ That's all.</programlisting>
 &lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>[#list animals as being]</emphasis>
+  <emphasis>[#list animals as animal]</emphasis>
   &lt;tr&gt;
     &lt;td&gt;
-      <emphasis>[#if being.size = "large"]</emphasis>&lt;b&gt;<emphasis>[/#if]</emphasis>
-      ${being.name}
-      <emphasis>[#if being.size = "large"]</emphasis>&lt;/b&gt;<emphasis>[/#if]</emphasis>
-    &lt;td&gt;${being.price} Euros
+      <emphasis>[#if animal.size = "large"]</emphasis>&lt;b&gt;<emphasis>[/#if]</emphasis>
+      ${animal.name}
+      <emphasis>[#if animal.size = "large"]</emphasis>&lt;/b&gt;<emphasis>[/#if]</emphasis>
+    &lt;td&gt;${animal.price} Euros
   <emphasis>[/#list]</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -9757,9 +9756,9 @@ grant codeBase "file:/path/to/freemarker.jar"
         <literal>freemarker.ext.ant.FreemarkerXmlTask</literal> inside your
         Ant buildfile, then call the task. Suppose you want to transform
         several XML documents to HTML using the hypothetical "xml2html.ftl"
-        template, with XML documents being located in the directory "xml" and
-        HTML documents generated into directory "html". You would write
-        something like:</para>
+        template, with XML documents located in the directory "xml" and HTML
+        documents generated into directory "html". You would write something
+        like:</para>
 
         <programlisting role="unspecified">&lt;taskdef name="freemarker" classname="freemarker.ext.ant.FreemarkerXmlTask"&gt;
   &lt;classpath&gt;
@@ -14221,6 +14220,10 @@ May 16, 2011
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_directive_noparse">noparse</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref.directive.nt">nt</link></para>
           </listitem>
 
@@ -15722,9 +15725,8 @@ All rights reserved.</emphasis></programlisting>
               </listitem>
             </itemizedlist>
 
-            <para>However, there can be at most one asterisk in the path.
-            Specifying more than one asterisk will result in a template not
-            being found.</para>
+            <para>However, there can be at most one asterisk in the path. If
+            you specifying more asterisks, the template won't be found.</para>
           </section>
 
           <section xml:id="ref_directive_include_localized">
@@ -15885,13 +15887,13 @@ All rights reserved.</emphasis></programlisting>
           <itemizedlist>
             <listitem>
               <para><literal><replaceable>item</replaceable>_index</literal>:
-              This is a numerical value that contains the index of the current
-              item being stepped over in the loop.</para>
+              The index (0-based number) of the current item in the
+              loop.</para>
             </listitem>
 
             <listitem>
               <para><literal><replaceable>item</replaceable>_has_next</literal>:
-              Boolean value that tells if the current item the last in the
+              Boolean value that tells if the current item is the last in the
               sequence or not.</para>
             </listitem>
           </itemizedlist>
@@ -16352,8 +16354,8 @@ or
 --------
 
 <emphasis>&lt;#noparse&gt;</emphasis>
-  &lt;#list animals as being&gt;
-  &lt;tr&gt;&lt;td&gt;${being.name}&lt;td&gt;${being.price} Euros
+  &lt;#list animals as animal&gt;
+  &lt;tr&gt;&lt;td&gt;${animal.name}&lt;td&gt;${animal.price} Euros
   &lt;/#list&gt;
 <emphasis>&lt;/#noparse&gt;</emphasis></programlisting>
 
@@ -16362,8 +16364,8 @@ or
           <programlisting role="output">Example:
 --------
 
-  &lt;#list animals as being&gt;
-  &lt;tr&gt;&lt;td&gt;${being.name}&lt;td&gt;${being.price} Euros
+  &lt;#list animals as animal&gt;
+  &lt;tr&gt;&lt;td&gt;${animal.name}&lt;td&gt;${animal.price} Euros
   &lt;/#list&gt;
  </programlisting>
         </section>
@@ -16942,7 +16944,7 @@ or
           <para>Switch is used to choose a fragment of template depending on
           the value of an expression:</para>
 
-          <programlisting role="template">&lt;#switch being.size&gt;
+          <programlisting role="template">&lt;#switch animal.size&gt;
   &lt;#case "small"&gt;
      This will be processed if it is small
      &lt;#break&gt;
@@ -18280,8 +18282,8 @@ some test
   &lt;h1&gt;Welcome ${user}!&lt;/h1&gt;
   &lt;p&gt;We have there animals:
   &lt;ul&gt;
-  <emphasis>&lt;list animals as being&gt;</emphasis>
-    &lt;li&gt;${being.name} for ${being.price} Euros
+  <emphasis>&lt;list animals as animal&gt;</emphasis>
+    &lt;li&gt;${animal.name} for ${animal.price} Euros
   <emphasis>&lt;/list&gt;</emphasis>
   &lt;/ul&gt;
   <emphasis>&lt;include "common_footer.html"&gt;</emphasis>
@@ -19709,7 +19711,7 @@ Test Book</programlisting>
 
         <para>If you call <literal>recurse</literal> without parameter, then
         it uses <literal>.node</literal>, that is, it visits all children
-        nodes of the node being handled currently. So this FTL:</para>
+        nodes of the node currently handled. So this FTL:</para>
 
         <programlisting role="template">&lt;#recurse doc&gt;
 
@@ -20177,8 +20179,8 @@ End book</programlisting>
                 a variable name, or when the template author refers to a
                 variable that the programmer doesn't put into the data-model
                 for that template, or for which the programmer uses a
-                different name. Human beings are prone to do such mistakes,
-                while computers are not, so missing this opportunity that the
+                different name. Humans are prone to do such mistakes, while
+                computers are not, so missing this opportunity that the
                 template engine can show these errors is a bad business. Even
                 if you very carefully check the output of the templates during
                 development, it is easy to look over mistakes like
