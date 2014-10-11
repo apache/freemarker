@@ -57,5 +57,38 @@ public class BeanTestClass extends BeanTestSuperclass implements BeanTestInterfa
 	{
 	    return "static-overloaded-String-" + s;
 	}
+	
+	public PrivateInner getPrivateInner() {
+	    return new PrivateInner();
+	}
+
+        public PublicInner getPublicInner() {
+            return new PublicInner();
+        }
+	
+        public class PublicInner {
+            
+            public int getX() {
+                return 1;
+            }
+            
+            public String m() {
+                return "m";
+            }
+            
+        }
+        
+        @SuppressWarnings("unused")
+	private class PrivateInner {
+	    
+            public int getX() {
+	        return 2;
+	    }
+	    
+	    public String m() {
+	        return "M";
+	    }
+	    
+	}
 
 }
