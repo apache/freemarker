@@ -21405,92 +21405,143 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
-      <section xml:id="version_2_3_21">
+      <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
 
-        <para>Date of release for release: 2014-10-12</para>
+        <para>Date of release: 2014-10-12</para>
+
+        <para>Note that since 2.3.21 is designed to be backward compatible
+        with the previous 2.3.x releases, <emphasis>some of the improvements
+        and fixes described below are only activated when you specifically ask
+        for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
+        because they could, with very small chance, break existing
+        applications. If the dependent project is still actively developed,
+        allowing 2.3.21 "incompatible improvements" is highly recommended.
+        That can be achieved on various ways:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Create the
+            <literal>freemarker.template.Configuration</literal> object like
+            <literal>new
+            Configuration(Configuration.VERSION_2_3_21)</literal></para>
+          </listitem>
+
+          <listitem>
+            <para>Or alter the <literal>Configuration</literal> where you
+            initialize its other settings like
+            <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21)</literal></para>
+          </listitem>
+
+          <listitem>
+            <para>Or if you are configuring FreeMarker with properties
+            (<literal>*.properties</literal> file or
+            <literal>java.util.Properties</literal> object), add
+            <literal>incompatible_improvements=2.3.21</literal> to
+            them.</para>
+          </listitem>
+
+          <listitem>
+            <para>Or if you are configuring FreeMarker through
+            <literal>FreemarkerServlet</literal>, add this
+            <literal>init-param</literal> to it in the
+            <literal>web.xml</literal>:</para>
+
+            <programlisting role="unspecified">&lt;init-param&gt;
+    &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
+    &lt;param-value&gt;2.3.21&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+          </listitem>
+        </itemizedlist>
+
+        <para>Note that we have changed our proprietary BSD-style license to
+        Apache License, Version 2.0. See the <link linkend="app_license">new
+        license here</link>.</para>
+
+        <para>Note that the minimum required Java version was increased from
+        1.2 to 1.4.</para>
 
         <section>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
             <listitem>
-              <para>New special variable: <literal>.local_object</literal>.
-              This is like <literal>.locale</literal>, except that it's a
-              <literal>java.util.Locale</literal> object, not a string. This
-              is useful if you want to pass the current locale to Java
-              methods.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Changes on the Java side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Improved <literal>TemplateException</literal> error
-              messages:</para>
+              <para>Improved ranges:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>TemplateException</literal> error messages
-                  are now much more readable when rendered in environments
-                  that don't obey to line-breaks. (This often happens in
-                  inproperly implemented HTML error pages and logs
-                  viewers.)</para>
+                  <para>Added ranges with exclusive end:
+                  <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
+                  (also can be written as
+                  <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
+                  <link
+                  linkend="dgui_template_exp_direct_ranges">More...</link></para>
                 </listitem>
 
                 <listitem>
-                  <para><literal>TemplateException</literal> error messages
-                  are now contain up to 6 lines of FTL stack trace, because
-                  otherwise this information wasn't printed when the exception
-                  was a cause exception in a stack trace, of when only the
-                  value of <literal>getMessage()</literal> was printed instead
-                  of a stack trace.</para>
+                  <para>Added length limited ranges:
+                  <literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>:
+                  For example, <literal>10..*4</literal> gives <literal>[10,
+                  11, 12, 13]</literal>, <literal>10..*-4</literal> gives
+                  <literal>[10, 9, 8, 7]</literal>, and
+                  <literal>10..*0</literal> gives <literal>[]</literal>. When
+                  these kind of ranges are used for slicing, the slice will
+                  end without error if the end of the sliced sequence or
+                  string is reached before the specified range length was
+                  reached. Thus, for example, to take the first 10 characters
+                  from the string <literal>s</literal>, or less if
+                  <literal>s</literal> is shorter than 10 characters, you can
+                  use <literal>s[0..*10]</literal>. <link
+                  linkend="dgui_template_exp_seqenceop_slice">More...</link></para>
                 </listitem>
 
                 <listitem>
-                  <para>The meaning of the lines in the FTL stack trace is now
-                  self explanatory (lines start with "Failed at" and "Called
-                  by" instead of arrow and nothing).</para>
+                  <para>Square bracket now accepts range values from any
+                  source, like <literal>&lt;#assign r = 1..3&gt;
+                  ${'foobar'[r]}</literal> will print
+                  <literal>"oob"</literal>. Earlier it has only supported
+                  ranges that were specified directly inside the square
+                  brackets, like <literal>'foobar'[1..3]</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When slicing a sequence with a right-unbounded range,
+                  it's now allowed to have a range start index that's one
+                  higher than the last index of the sliced sequence. For
+                  example, <literal>['x', 'y'][2..]</literal> is not an error
+                  anymore, but an empty sequence. (Of course, <literal>['x',
+                  'y'][3..]</literal> is still an error.)</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>,
+                  <replaceable>toExclusive</replaceable>)</literal> and
+                  <literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>)</literal>
+                  are now deprecated; use this slicing expression instead:
+                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
+                  and
+                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..]</literal>.
+                  A warning if you are processing XML: Since slicing
+                  expressions work both for sequences and strings, and XML
+                  nodes in FTL are typically both sequences and strings at the
+                  same time, there the equivalent expression is
+                  <literal><replaceable>someXmlNode</replaceable>?string[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
+                  and
+                  <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
+                  because without the <literal>?string</literal> it would
+                  slice the node sequence instead of the text value of the
+                  node.</para>
+                </listitem>
+
+                <listitem>
+                  <para>If the <literal>incompatible_improvements</literal> in
+                  the FreeMarker configuration is set to at least 2.3.21,
+                  right-unbounded ranges become readable (like
+                  <literal>#list</literal>-able). Earlier they could only be
+                  used for slicing, and behaved like empty sequences
+                  otherwise.</para>
                 </listitem>
               </itemizedlist>
-            </listitem>
-          </itemizedlist>
-        </section>
-      </section>
-
-      <section xml:id="versions_2_3_21_rc2">
-        <title>2.3.21 RC2 (compared to RC1)</title>
-
-        <para>Date of release for release: 2014-09-28</para>
-
-        <para>Date of release for the final release: Planned for
-        2014-10-12.</para>
-
-        <para>Also, check out <link linkend="versions_2_3_21_rc1">the RC1
-        changes here</link>!</para>
-
-        <para>Please give feedback if you find any problems, or you have any
-        comments on the new features! This is the last chance before things
-        get graved into stone, in October the 12th!</para>
-
-        <section>
-          <title>Changes on the FTL side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>New <literal>include</literal> directive option,
-              <literal>ignore_missing=<replaceable>boolean</replaceable></literal>.
-              When this is set to <literal>true</literal>, and the template to
-              include is missing, the error will be silently ignored, and
-              nothing will be included.</para>
-            </listitem>
-
-            <listitem>
-              <para>The <literal>setting</literal> directive now can set the
-              <literal>output_encoding</literal> setting.</para>
             </listitem>
 
             <listitem>
@@ -21500,7 +21551,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               escape slash (<literal>/</literal>) characters. This meant to be
               used for converting paths (like paths coming from the OS or some
               content repository) that use slash (not backslash!) to a path
-              the can be inserted into an URL.</para>
+              the can be inserted into the path part of an URL.</para>
             </listitem>
 
             <listitem>
@@ -21547,220 +21598,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
-              The result value of <literal>?matches</literal> wasn't
-              <quote>reentrant</quote>. For example, you couldn't list the
-              matches inside another listing where you are also listing
-              exactly the same result value (stored in a common variable), as
-              they would consume from the same iterator. Most importantly,
-              even accessing the <literal>?size</literal> of the same result
-              value has terminated the outer listing of the same value.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/229/">229</link>]:
-              If you set <literal>incompatible_improvements</literal> to
-              2.3.21 (or higher), unclosed comments and
-              <literal>#noparse</literal>-s won't be silently closed at the
-              end of template anymore, but cause a parsing error
-              instead.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Changes on the Java side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>The <literal>getResult()</literal> method of builder
-              classes was renamed to <literal>build()</literal>, as that's a
-              more popular choice.</para>
-            </listitem>
-
-            <listitem>
-              <para>OSGi execution environment header was tweaked again, now
-              it's <literal>Bundle-RequiredExecutionEnvironment: J2SE-1.5,
-              J2SE-1.4</literal>. That is, we prefer (and compile against)
-              1.5, but only require 1.4.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
-              Poor quality error message when
-              <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
-              fails with string index out of bounds.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/27/">27</link>]:
-              Not very good quality error messages when
-              <literal>#import</literal>-ing a template whose parsing
-              fails.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bugs introduced with RC1 fixed:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Legacy (deprecated) <literal>Template</literal>
-                  constructors without <literal>Configuration</literal>
-                  parameter have failed with
-                  <literal>NullPointerException</literal></para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Reminder</title>
-
-          <para>Check out <link linkend="versions_2_3_21_rc1">the RC1
-          changes</link> too, as they aren't included in this section!</para>
-        </section>
-      </section>
-
-      <section xml:id="versions_2_3_21_rc1">
-        <title>2.3.21 RC1</title>
-
-        <para>Date of release: 2014-08-31</para>
-
-        <para>Note that since 2.3.21 is designed to be backward compatible
-        with the previous 2.3.x releases, <emphasis>some of the improvements
-        and fixes described below are only activated when you specifically ask
-        for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
-        because they can, with a very small chance, break existing
-        applications. But if the dependent project is still actively
-        developed, allowing 2.3.21 "incompatible improvements" is highly
-        recommended. That can be done like this:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>create the
-            <literal>freemarker.template.Configuration</literal> object like
-            <literal>new
-            Configuration(Configuration.VERSION_2_3_21)</literal></para>
-          </listitem>
-
-          <listitem>
-            <para>or alter the <literal>Configuration</literal> where you
-            initialize its other settings like
-            <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21)</literal></para>
-          </listitem>
-
-          <listitem>
-            <para>or if you are configuring FreeMarker with properties
-            (<literal>*.properties</literal> file or
-            <literal>java.util.Properties</literal> object), add
-            <literal>incompatible_improvements=2.3.21</literal> to
-            them.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>Note that we have changed our proprietary BSD-style license to
-        Apache License, Version 2.0. See the <link linkend="app_license">new
-        license here</link>.</para>
-
-        <para>Note that the minimum required Java version was increased from
-        1.2 to 1.4.</para>
-
-        <para>Please give feedback if you find any problems!</para>
-
-        <section>
-          <title>Changes on the FTL side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Improved ranges:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Ranges with exclusive end:
-                  <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
-                  (also can be written as
-                  <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
-                  <link
-                  linkend="dgui_template_exp_direct_ranges">More...</link></para>
-                </listitem>
-
-                <listitem>
-                  <para>Length limited ranges:
-                  <literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>:
-                  For example, <literal>10..*4</literal> gives <literal>[10,
-                  11, 12, 13]</literal>, <literal>10..*-4</literal> gives
-                  <literal>[10, 9, 8, 7]</literal>, and
-                  <literal>10..*0</literal> gives <literal>[]</literal>. When
-                  these kind of ranges are used for slicing, the slice will
-                  end without error if the end of the sliced sequence or
-                  string is reached before the specified range length was
-                  reached. Thus, for example, to take the first 10 characters
-                  from the string <literal>s</literal>, or less if
-                  <literal>s</literal> is shorter than 10 characters, you can
-                  use <literal>s[0..*10]</literal>. <link
-                  linkend="dgui_template_exp_seqenceop_slice">More...</link></para>
-                </listitem>
-
-                <listitem>
-                  <para>Square bracket now accepts range values from any
-                  source, like <literal>&lt;#assign
-                  r=1..3&gt;${'foobar'[r]}</literal> will print
-                  <literal>"oob"</literal>. Earlier it has only supported
-                  ranges that were specified inside the square brackets, like
-                  <literal>'foobar'[1..3]</literal>.</para>
-                </listitem>
-
-                <listitem>
-                  <para>When slicing a sequence with a right-unbounded range,
-                  it's now allowed to have a range start index that's one
-                  higher than the last index of the sliced sequence. For
-                  example, <literal>['x', 'y'][2..]</literal> is not an error
-                  anymore, but an empty sequence. (Of course, <literal>['x',
-                  'y'][3..]</literal> is still an error.)</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>,
-                  <replaceable>toExclusive</replaceable>)</literal> and
-                  <literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>)</literal>
-                  are now deprecated; use this slicing expression instead:
-                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
-                  and
-                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..]</literal>.
-                  A warning if you are processing XML: Since slicing
-                  expressions work both for sequences and strings, and since
-                  XML nodes are typically both sequences and strings at the
-                  same time, there the equivalent expression is
-                  <literal><replaceable>someXmlNode</replaceable>?string[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
-                  and
-                  <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
-                  as without <literal>?string</literal> it would slice the
-                  node sequence instead of the text value of the node.</para>
-                </listitem>
-
-                <listitem>
-                  <para>If the <literal>incompatible_improvements</literal> in
-                  the FreeMarker configuration is set to at least 2.3.21,
-                  right-unbounded ranges become readable (like listable).
-                  Earlier they could only be used for slicing.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>New built-in:
-              <literal><replaceable>someString</replaceable>?boolean</literal>.
-              This is for example useful for converting "true" and "false"
-              strings coming from XML to real boolean values. <link
-              linkend="ref_builtin_boolean">More...</link></para>
-            </listitem>
-
-            <listitem>
               <para><literal><replaceable>someString</replaceable>?number</literal>
               now recognizes all XML Schema number formats, like
               <literal>NaN</literal>, <literal>INF</literal>,
@@ -21781,6 +21618,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>java.text.DecimalFormat</literal> did with US locale,
               none of which was understood by any (common) computer
               language.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in:
+              <literal><replaceable>someString</replaceable>?boolean</literal>.
+              This is for example useful for converting "true" and "false"
+              strings coming from XML to real boolean values. <link
+              linkend="ref_builtin_boolean">More...</link></para>
             </listitem>
 
             <listitem>
@@ -21978,6 +21823,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Messages are now much more readable when rendered in
+                  environments that don't obey to line-breaks. (This often
+                  happens in improperly implemented HTML error pages and logs
+                  viewers.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Error messages now contain up to 6 lines of FTL stack
+                  trace (unless it's on the top of a full FTL stack trace),
+                  because the FTL stack trace wasn't printed at all when the
+                  exception was a cause exception in a Java stack trace, or
+                  when only the value of <literal>getMessage()</literal> was
+                  printed instead of a stack trace.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The meaning of the lines in the FTL stack trace is now
+                  more self explanatory (lines start with "Failed at" and
+                  "Called by" instead of arrow and indentation).</para>
+                </listitem>
+
+                <listitem>
                   <para>Bug fixed: <literal>?substring</literal> has thrown
                   low level
                   <literal>java.lang.IndexOutOfBoundsException</literal>-s
@@ -21994,7 +21861,53 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateModelException</literal>-s with FTL stack
                   trace.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
+                  Fixed misleading parser error message when a directive
+                  called without its required parameters (like
+                  <literal>&lt;#list&gt;</literal>) was reported as unknown
+                  directive.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
+                  Poor quality error message when
+                  <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
+                  fails with string index out of bounds.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/27/">27</link>]:
+                  Not very good quality error messages when
+                  <literal>#import</literal>-ing a template whose parsing
+                  fails.</para>
+                </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>New <literal>include</literal> directive option,
+              <literal>ignore_missing=<replaceable>boolean</replaceable></literal>.
+              When this is set to <literal>true</literal>, and the template to
+              include is missing, the error will be silently ignored, and
+              nothing will be included.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>setting</literal> directive can now set the
+              <literal>output_encoding</literal> setting.</para>
+            </listitem>
+
+            <listitem>
+              <para>New special variable: <literal>.locale_object</literal>.
+              This is like <literal>.locale</literal>, except that it's a
+              <literal>java.util.Locale</literal> object, not a string. This
+              is handy if you want to pass the current locale to Java
+              methods.</para>
             </listitem>
 
             <listitem>
@@ -22017,6 +21930,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>?is_enumerable</literal>, but now
               <literal>?is_enumerable</literal> is aware of this exceptional
               case.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
+              The result value of <literal>?matches</literal> wasn't
+              <quote>reentrant</quote>. For example, you couldn't list the
+              matches inside another listing where you are also listing
+              exactly the same result value (stored in a common variable), as
+              they would consume from the same iterator. Most importantly,
+              even accessing the <literal>?size</literal> of the same result
+              value has terminated the outer listing of the same value.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/229/">229</link>]:
+              If you set <literal>incompatible_improvements</literal> to
+              2.3.21 (or higher), unclosed comments (<literal>&lt;#--
+              <replaceable>...</replaceable></literal>) and
+              <literal>#noparse</literal>-s won't be silently closed at the
+              end of template anymore, but cause a parsing error
+              instead.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -22377,7 +22313,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Required Java version has changed from 1.2 to 1.4.</para>
+              <para>FreeMarker now requires Java version has changed from 1.2
+              to 1.4.</para>
             </listitem>
 
             <listitem>
@@ -22729,20 +22666,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/411/">411</link>]:
-              Invalid execution environment names in the OSGi bundle manifest
-              were fixed: J2SE-1.6 to Java2SE-1.6, J2SE-1.7 to JavaSE-1.7.
-              Also, J2SE-1.8 was removed for now, as we don't utilize any
-              features in it dynamically (to prevent misunderstandings, Java 8
-              is still supported).</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
-              Fixed misleading parser error message when a directive called
-              without its required parameters (like
-              <literal>&lt;#list&gt;</literal>) was reported as unknown
-              directive.</para>
+              Invalid and redundant execution environment names from the OSGi
+              bundle manifest were removed. It looks like this now:
+              <literal>Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+              J2SE-1.4</literal>. That is, we prefer (and compile against)
+              1.5, but only require 1.4.</para>
             </listitem>
 
             <listitem>
