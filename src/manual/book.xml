@@ -21830,18 +21830,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Error messages now contain up to 6 lines of FTL stack
-                  trace (unless it's on the top of a full FTL stack trace),
-                  because the FTL stack trace wasn't printed at all when the
-                  exception was a cause exception in a Java stack trace, or
-                  when only the value of <literal>getMessage()</literal> was
-                  printed instead of a stack trace.</para>
-                </listitem>
+                  <para>Better FTL instruction stack traces:</para>
 
-                <listitem>
-                  <para>The meaning of the lines in the FTL stack trace is now
-                  more self explanatory (lines start with "Failed at" and
-                  "Called by" instead of arrow and indentation).</para>
+                  <itemizedlist>
+                    <listitem>
+                      <para>Error messages now contain up to 10 lines of FTL
+                      stack trace (unless it's on the top of a full FTL stack
+                      trace), because the FTL stack trace wasn't printed at
+                      all when the exception was a cause exception in a Java
+                      stack trace, or when only the value of
+                      <literal>getMessage()</literal> was printed instead of a
+                      stack trace.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>The FTL stack trace is now more self explanatory
+                      as it contains more text labels.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Stack frames that belong to nestings are now
+                      marked differently, and are filtered out when the stack
+                      trace wouldn't fit into the error message otherwise.
+                      </para>
+                    </listitem>
+                  </itemizedlist>
                 </listitem>
 
                 <listitem>

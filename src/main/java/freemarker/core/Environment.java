@@ -1496,25 +1496,81 @@ public final class Environment extends Configurable {
      * {@link TemplateException}s incorporate this information in their stack traces.
      */
     public void outputInstructionStack(PrintWriter pw) {
-        outputInstructionStack(getInstructionStackSnapshot(), pw);
+        outputInstructionStack(getInstructionStackSnapshot(), false,  pw);
         pw.flush();
     }
 
+    private static final int TERSE_MODE_INSTRUCTION_STACK_TRACE_LIMIT = 10;
+    
     /**
      * Prints an FTL stack trace based on a stack trace snapshot.
+     * @param w If it's a {@link PrintWriter}, {@link PrintWriter#println()} will be used for line-breaks.
      * @see #getInstructionStackSnapshot()
-     * @since 2.3.20
+     * @since 2.3.21
      */
     static void outputInstructionStack(
-            TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
-        if (instructionStackSnapshot != null) {
-            for (int i = 0; i < instructionStackSnapshot.length; i++) {
-                TemplateElement stackEl = instructionStackSnapshot[i];
-                pw.print(i == 0 ? _CoreAPI.FTL_STACK_TOP_BULLET : _CoreAPI.FTL_STACK_CALLER_BULLET);
-                pw.println(instructionStackItemToString(stackEl));
+            TemplateElement[] instructionStackSnapshot, boolean terseMode, Writer w) {
+        final PrintWriter pw = (PrintWriter) (w instanceof PrintWriter ? w : null);
+        try {
+            if (instructionStackSnapshot != null) {
+                final int totalFrames = instructionStackSnapshot.length;
+                int framesToPrint = terseMode
+                        ? (totalFrames <= TERSE_MODE_INSTRUCTION_STACK_TRACE_LIMIT
+                                ? totalFrames
+                                : TERSE_MODE_INSTRUCTION_STACK_TRACE_LIMIT - 1)
+                        : totalFrames;
+                boolean hideNestringRelatedFrames = terseMode && framesToPrint < totalFrames; 
+                int nestingRelatedFramesHidden = 0;
+                int trailingFramesHidden = 0;
+                int framesPrinted = 0;
+                for (int frameIdx = 0; frameIdx < totalFrames; frameIdx++) {
+                    TemplateElement stackEl = instructionStackSnapshot[frameIdx];
+                    final boolean nestingRelatedElement = (frameIdx > 0 && stackEl instanceof BodyInstruction)
+                            || (frameIdx > 1 && instructionStackSnapshot[frameIdx - 1] instanceof BodyInstruction);
+                    if (framesPrinted < framesToPrint) {
+                        if (!nestingRelatedElement || !hideNestringRelatedFrames) {
+                            w.write(frameIdx == 0
+                                    ? "\t- Failed at: "
+                                    : (nestingRelatedElement
+                                            ? "\t~ Reached through: "
+                                            : "\t- Reached through: "));
+                            w.write(instructionStackItemToString(stackEl));
+                            if (pw != null) pw.println(); else w.write('\n');
+                            framesPrinted++;
+                        } else {
+                            nestingRelatedFramesHidden++;
+                        }
+                    } else {
+                        trailingFramesHidden++;
+                    }
+                }
+                
+                boolean hadClosingNotes = false;
+                if (trailingFramesHidden > 0) {
+                    w.write("\t... (Had ");
+                    w.write(String.valueOf(trailingFramesHidden + nestingRelatedFramesHidden));
+                    w.write(" more, hidden for tersenes)");
+                    hadClosingNotes = true;
+                }
+                if (nestingRelatedFramesHidden > 0) {
+                    if (hadClosingNotes) {
+                        w.write(' ');
+                    } else {
+                        w.write('\t');
+                    }
+                    w.write("(Hidden " + nestingRelatedFramesHidden + " \"~\" lines for terseness)");
+                    if (pw != null) pw.println(); else w.write('\n');
+                    hadClosingNotes = true;
+                }
+                if (hadClosingNotes) {
+                    if (pw != null) pw.println(); else w.write('\n');
+                }
+            } else {
+                w.write("(The stack was empty)");
+                if (pw != null) pw.println(); else w.write('\n');
             }
-        } else {
-            pw.println("[the stack was empty]");
+        } catch (IOException e) {
+            LOGGER.error("Failed to print FTL stack trace", e);
         }
     }
     

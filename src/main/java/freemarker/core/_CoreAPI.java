@@ -16,7 +16,7 @@
 
 package freemarker.core;
 
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,8 +29,6 @@ import java.util.TreeSet;
  */ 
 public class _CoreAPI {
     
-    public static final String FTL_STACK_CALLER_BULLET = "  Called by: ";
-    public static final String FTL_STACK_TOP_BULLET = "  Failed at: ";
     public static final String ERROR_MESSAGE_HR = "----";
 
     // Can't be instantiated
@@ -97,8 +95,8 @@ public class _CoreAPI {
     }
     
     public static void outputInstructionStack(
-            TemplateElement[] instructionStackSnapshot, PrintWriter pw) {
-        Environment.outputInstructionStack(instructionStackSnapshot, pw);
+            TemplateElement[] instructionStackSnapshot, boolean terseMode, Writer pw) {
+        Environment.outputInstructionStack(instructionStackSnapshot, terseMode, pw);
     }
     
 }

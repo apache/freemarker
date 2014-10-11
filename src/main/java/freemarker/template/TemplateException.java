@@ -41,8 +41,8 @@ import freemarker.template.utility.CollectionUtils;
 public class TemplateException extends Exception {
 
     private static final int FTL_STACK_TOP_FEW_MAX_LINES = 6;
-    private static final String THE_FAILING_INSTRUCTION_WITH_FTL_STACK_TRACE
-            = "FTL stack trace:";
+    private static final String FTL_INSTRUCTION_STACK_TRACE_TITLE
+            = "FTL stack trace (\"~\" means nesting-related):";
 
     // Set in constructor:
     private transient _ErrorDescriptionBuilder descriptionBuilder;
@@ -178,7 +178,7 @@ public class TemplateException extends Exception {
         if (stackTopFew != null) {
             message = messageWithoutStackTop + "\n\n"
                     + _CoreAPI.ERROR_MESSAGE_HR + "\n"
-                    + THE_FAILING_INSTRUCTION_WITH_FTL_STACK_TRACE + "\n"
+                    + FTL_INSTRUCTION_STACK_TRACE_TITLE + "\n"
                     + stackTopFew
                     + _CoreAPI.ERROR_MESSAGE_HR;
             messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse backing char[]
@@ -222,7 +222,7 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Returns the snapshot of the FTL stack strace at the time this exception was created.
+     * Returns the snapshot of the FTL stack trace at the time this exception was created.
      */
     public String getFTLInstructionStack() {
         synchronized (lock) {
@@ -230,7 +230,7 @@ public class TemplateException extends Exception {
                 if (renderedFtlInstructionStackSnapshot == null) {
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
-                    _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, pw);
+                    _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, false, pw);
                     pw.close();
                     if (renderedFtlInstructionStackSnapshot == null) {
                         renderedFtlInstructionStackSnapshot = sw.toString();
@@ -253,21 +253,9 @@ public class TemplateException extends Exception {
                     if (stackSize == 0) {
                         s = "";
                     } else {
-                        StringBuffer sb = new StringBuffer();
-                        int stackLinesPrinted = stackSize <= FTL_STACK_TOP_FEW_MAX_LINES
-                                ? stackSize : FTL_STACK_TOP_FEW_MAX_LINES -1; 
-                        for (int i = 0; i < stackLinesPrinted; i++) {
-                            sb.append(i == 0 ? _CoreAPI.FTL_STACK_TOP_BULLET : _CoreAPI.FTL_STACK_CALLER_BULLET);
-                            _CoreAPI.appendInstructionStackItem(ftlInstructionStackSnapshot[i], sb);
-                            sb.append('\n');
-                        }
-                        if (stackSize > stackLinesPrinted) {
-                            sb.append(_CoreAPI.FTL_STACK_CALLER_BULLET);
-                            sb.append("... (Print stack trace for ");
-                            sb.append(stackSize - stackLinesPrinted);
-                            sb.append(" more)\n");
-                        }
-                        s = sb.toString();
+                        StringWriter sw = new StringWriter();
+                        _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, true, sw);
+                        s = sw.toString();
                     }
                     if (renderedFtlInstructionStackSnapshotTop == null) {
                         renderedFtlInstructionStackSnapshotTop = s;
@@ -370,7 +358,7 @@ public class TemplateException extends Exception {
                     out.println(getMessageWithoutStackTop());  // Not getMessage()!
                     out.println();
                     out.println(_CoreAPI.ERROR_MESSAGE_HR);
-                    out.println(THE_FAILING_INSTRUCTION_WITH_FTL_STACK_TRACE);
+                    out.println(FTL_INSTRUCTION_STACK_TRACE_TITLE);
                     out.print(stackTrace);
                     out.println(_CoreAPI.ERROR_MESSAGE_HR);
                 } else {
