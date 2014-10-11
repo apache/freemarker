@@ -686,7 +686,10 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Sets the time in seconds that must elapse before checking whether there is a newer version of a template file
      * than the cached one.
-     * This method is thread-safe and can be called while the engine works.
+     * 
+     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
+     * While it works well on most hardware, it's not guaranteed that FreeMarker will see the update in all threads,
+     * and theoretically it's also possible that it will see a value that's a binary mixture of the new and the old one.
      */
     public void setTemplateUpdateDelay(int seconds) {
         cache.setDelay(1000L * seconds);
@@ -1288,7 +1291,9 @@ public class Configuration extends Configurable implements Cloneable {
      * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the template
      * under names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}.
      * 
-     * <p>This method is thread-safe and can be called while the engine works.
+     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
+     * While setting it can't cause any serious problems, and in fact it works well on most hardware, it's not
+     * guaranteed that FreeMarker will see the update in all threads.
      */
     public void setLocalizedLookup(boolean localizedLookup) {
         this.localizedLookup = localizedLookup;
