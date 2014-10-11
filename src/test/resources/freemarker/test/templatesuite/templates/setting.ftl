@@ -1,6 +1,7 @@
 <#setting locale='de_DE'>
 <@assertEquals expected='de_DE' actual=.locale />
 <@assertEquals expected='de' actual=.lang />
+<@assertEquals expected='java.util.Locale "de_DE"' actual=javaObjectInfo.info(.locale_object) />
 
 <#setting number_format="'f'#">
 <@assertEquals expected='f1' actual=1?string />

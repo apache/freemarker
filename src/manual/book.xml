@@ -17704,6 +17704,22 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><indexterm>
+              <primary>locale_object</primary>
+            </indexterm><literal>locale_object</literal> (available since
+          FreeMarker 2.3.21): Returns the current value of the locale setting
+          as a <literal>java.util.Locale</literal> object, rather than as a
+          string. This meant to be used instead of <literal>.locale</literal>
+          when you want to pass it as a <literal>java.util.Locale</literal>
+          object to a Java method. (The <literal>Locale</literal> object will
+          be wrapped according the <literal>object_wrapper</literal> setting
+          value. Whether you can actually pass this value to a Java methods as
+          a <literal>Locale</literal> object depends on the object wrapper,
+          but an object wrapper that let you call Java methods directly is
+          very unlikely to not support that.)</para>
+        </listitem>
+
+        <listitem>
           <para><literal>locals</literal>: A hash that you can use to access
           the local variables (the variables created with the
           <literal>local</literal> directive, and the parameters of
@@ -21399,7 +21415,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para/>
+              <para>New special variable: <literal>.local_object</literal>.
+              This is like <literal>.locale</literal>, except that it's a
+              <literal>java.util.Locale</literal> object, not a string. This
+              is useful if you want to pass the current locale to Java
+              methods.</para>
             </listitem>
           </itemizedlist>
         </section>
