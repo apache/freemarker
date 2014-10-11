@@ -22,9 +22,9 @@ import org.junit.Test;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import freemarker.template.Version;
+import freemarker.test.TemplateTest;
 
-public class HeaderParsingTest extends TemplateOutputTest {
+public class HeaderParsingTest extends TemplateTest {
 
     private final Configuration cfgStripWS = new Configuration(Configuration.VERSION_2_3_21);
     private final Configuration cfgNoStripWS = new Configuration(Configuration.VERSION_2_3_21);
@@ -52,8 +52,10 @@ public class HeaderParsingTest extends TemplateOutputTest {
                 ftlPermutation = ftlPermutation.replace('<', '[').replace('>', ']');
             }
             
-            assertOutput(ftlPermutation, expectedOutStripped, cfgStripWS);
-            assertOutput(ftlPermutation, expectedOutNonStripped, cfgNoStripWS);
+            setConfiguration(cfgStripWS);
+            assertOutput(ftlPermutation, expectedOutStripped);
+            setConfiguration(cfgNoStripWS);
+            assertOutput(ftlPermutation, expectedOutNonStripped);
         }
     }
     
