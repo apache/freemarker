@@ -32,12 +32,14 @@ import freemarker.template._TemplateAPI;
  * {@link BeansWrapper} itself. (Because, the default values influence the lookup key, and the singleton needs to be
  * looked up without creating a {@link BeansWrapper} instance.) However, because instances are mutable, you should
  * deep-clone it with {@link #clone(boolean)} before using it as cache key.
+ * 
+ * @since 2.3.21
  */
 public abstract class BeansWrapperConfiguration implements Cloneable {
 
     private final Version incompatibleImprovements;
     
-    ClassIntrospectorBuilder classIntrospectorFactory;
+    protected ClassIntrospectorBuilder classIntrospectorFactory;
     
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;

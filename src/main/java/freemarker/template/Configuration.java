@@ -358,16 +358,16 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     private void createTemplateCache() {
-        cache = new TemplateCache(getDefaultTemplateLoader());
-        cache.setConfiguration(this);
+        cache = new TemplateCache(getDefaultTemplateLoader(), this);
+        cache.clear(); // for fully BC behavior
         cache.setDelay(5000);
     }
     
     private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage);
+        cache = new TemplateCache(loader, storage, this);
+        cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
-        cache.setConfiguration(this);
         cache.setLocalizedLookup(localizedLookup);
     }
     

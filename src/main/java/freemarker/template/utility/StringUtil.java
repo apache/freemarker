@@ -293,7 +293,10 @@ public class StringUtil {
     /**
      * Like {@link #URLEnc(String, String)} but doesn't escape the slash character ({@code /}).
      * This can be used to encode a path only if you know that no folder or file name will contain {@code /}
-     * character.
+     * character (not in the path, but in the name itself), which usually stands, as the commonly used OS-es don't
+     * allow that.
+     * 
+     * @since 2.3.21
      */
     public static String URLPathEnc(String s, String charset) throws UnsupportedEncodingException {
         return URLEnc(s, charset, true);

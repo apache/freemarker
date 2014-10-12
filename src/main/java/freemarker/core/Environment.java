@@ -1909,8 +1909,6 @@ public final class Environment extends Configurable {
      * The advantage over simply using <code>config.getTemplate(...)</code> is that it chooses
      * the default encoding exactly as the <code>include</code> directive does, although that
      * encoding selection mechanism is a historical baggage and considered to be harmful.
-     * 
-     * @since 2.3.21
      *
      * @param name the name of the template, relatively to the template root directory
      *          (not the to the directory of the currently executing template file).
@@ -1935,6 +1933,8 @@ public final class Environment extends Configurable {
      * @return Same as {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * @throws IOException Same as exceptions thrown by
      *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * 
+     * @since 2.3.21
      */
     public Template getTemplateForInclusion(String name, String encoding, boolean parse, boolean ignoreMissing)
     throws IOException

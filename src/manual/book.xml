@@ -7459,15 +7459,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
 
           <para>When you create a new <literal>Configuration</literal> object,
           initially it uses an <literal>MruCacheStorage</literal> where
-          <literal>maxStrongSize</literal> is 0, and
-          <literal>maxSoftSize</literal> is
+          <literal>strongSizeLimit</literal> is 0, and
+          <literal>softSizeLimit</literal> is
           <literal>Integer.MAX_VALUE</literal> (that is, in practice,
-          infinite). But using non-0 <literal>maxStrongSize</literal> is maybe
-          a better strategy for high load servers, since it seems that, with
-          only softly referenced items, JVM tends to cause just higher
+          infinite). But using non-0 <literal>strongSizeLimit</literal> is
+          maybe a better strategy for high load servers, since it seems that,
+          with only softly referenced items, JVM tends to cause just higher
           resource consumption if the resource consumption was already high,
           because it constantly throws frequently used templates from the
-          cache, which then have to be re-loaded and and re-parsed.</para>
+          cache, which then have to be re-loaded and re-parsed.</para>
         </section>
       </section>
 

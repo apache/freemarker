@@ -424,7 +424,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(1, ((DummyArithmeticEngine) cfg.getArithmeticEngine()).getX());
             assertEquals(1, ((DummyTemplateExceptionHandler) cfg.getTemplateExceptionHandler()).getX());
             assertEquals(Configuration.VERSION_2_3_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
-            assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getMaxSoftSize());
+            assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.SAFER_RESOLVER, cfg.getNewBuiltinClassResolver());
             assertEquals("utf-8", cfg.getDefaultEncoding());
         }

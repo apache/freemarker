@@ -34,9 +34,10 @@ import freemarker.template.Configuration;
  * <p>Implementations of this interface should be thread-safe.
  * 
  * <p>Implementations should override {@link Object#toString()} to show information about from where the
- * {@link TemplateLoader} loads the templates. For example, a template loader that loads template from database table
- * could show something like {@code "MyDatabaseTemplateLoader(user=\"cms\", table=\"mail_templates\")"}.
- * This string will be shown in template-not-found exception messages.
+ * {@link TemplateLoader} loads the templates. For example, for a template loader that loads template from database
+ * table {@code toString} could return something like
+ * {@code "MyDatabaseTemplateLoader(user=\"cms\", table=\"mail_templates\")"}. This string will be shown in
+ * template-not-found exception messages, next to the template name.
  * 
  * <p>For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
  * the {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly
