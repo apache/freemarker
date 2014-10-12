@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.21 RC2</subtitle>
+  <subtitle>For FreeMarker 2.3.21</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -22350,9 +22350,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that ambiguity errors will arise where earlier they didn't
               (although the opposite is far more frequent), hence the fixes
               aren't automatically activated. But the fix mostly only effect
-              calls that were failing or has chosen then wrong method earlier,
-              so it's recommended to activate it for projects that are still
-              actively developed. This fix includes numerous changes:</para>
+              calls that were failing or have chosen then wrong method
+              earlier, so it's recommended to activate it for projects that
+              are still actively developed. This fix includes numerous
+              changes:</para>
 
               <itemizedlist>
                 <listitem>
