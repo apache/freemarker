@@ -902,9 +902,11 @@ public class DateUtilTest extends TestCase {
         
         // Hour 24
         assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59");
-        assertJavaxAndFTLXSDateTimesSame("2014-01-01T24:00:00");
+        if (isAtLeastJava6()) { // Java 5 has broken parser that doesn't allow 24.
+            assertJavaxAndFTLXSDateTimesSame("2014-01-31T24:00:00");
+            assertJavaxAndFTLXSDateTimesSame("2014-01-01T24:00:00");
+        }
         assertJavaxAndFTLXSDateTimesSame("2014-01-02T00:00:00");  // same as the previous
-        assertJavaxAndFTLXSDateTimesSame("2014-01-31T24:00:00");
         assertJavaxAndFTLXSDateTimesSame("2014-02-01T00:00:00");  // same as the previous
         
         // Under ms
@@ -912,6 +914,15 @@ public class DateUtilTest extends TestCase {
         assertJavaxAndFTLXSDateTimesSame("2014-01-01T23:59:59.1235");
     }
     
+    private boolean isAtLeastJava6() {
+        try {
+            Class.forName("java.lang.management.LockInfo");
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
     private final DatatypeFactory datetypeFactory;
     {
         try {
