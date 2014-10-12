@@ -689,6 +689,9 @@ public class Template extends Configurable {
     }
     
     /**
+     * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
+     * don't use it.
+     * 
      * @return an array of the elements containing the given column and line numbers.
      * @param column the column
      * @param line the line

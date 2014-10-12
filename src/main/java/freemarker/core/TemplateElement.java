@@ -137,6 +137,9 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         return !isLeaf();
     }
 
+    /**
+     * @deprecated Starting from 2.4, we won't use {@link TreeNode} API, as it requires Swing.
+     */
     public int getIndex(TreeNode node) {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getIndex(node);
@@ -178,6 +181,10 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         return Collections.enumeration(Collections.EMPTY_LIST);
     }
 
+    /**
+     * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
+     * don't use it.
+     */
     public TreeNode getChildAt(int index) {
         if (nestedBlock instanceof MixedContent) {
             return nestedBlock.getChildAt(index);
@@ -216,6 +223,10 @@ abstract public class TemplateElement extends TemplateObject implements TreeNode
         }
     }
     
+    /**
+     * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
+     * don't use it.
+     */
     public TreeNode getParent() {
         return parent;
     }
