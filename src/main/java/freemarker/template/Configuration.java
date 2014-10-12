@@ -244,21 +244,23 @@ public class Configuration extends Configurable implements Cloneable {
      * implemented (but possibly wasn't active by default, as that would break backward-compatibility).
      * 
      * <p>The default value is 2.3.0 for maximum backward-compatibility when upgrading {@code freemkarer.jar} under an
-     * existing application. But if you develop a new application with, say, 2.3.21, it's probably a good idea to set
-     * this from 2.3.0 to 2.3.21. As far as the 1st and 2nd version number remains, these changes are always very
-     * low-risk changes, so usually they don't break anything in older applications either.
+     * existing application. For actively developed applications usually you should set this to the highest possible
+     * value where the 1st or 2nd version is still the same as in the version where you have started development.
+     * As far as the 1st and 2nd version number remains, these changes are always very low-risk, so usually they don't
+     * break anything. Of course, you are still encouraged to read the list of changes below.
      * 
-     * <p>This setting doesn't affect some important non-backward compatible security fixes; they are always
-     * enabled, regardless of what you set here.
+     * <p>Note that at FreeMarker minor (2nd) or major (1st) version number increments, it's possible that emulating
+     * some of the old bugs will become unsupported, that is, even if you set this setting to a low value, it silently
+     * wont bring back the old behavior anymore.
      * 
-     * <p>Incrementing this setting is a good way of preparing for the next minor (2nd) or major (1st) version number
-     * increases. When that happens, it's possible that some old behavior become unsupported, that is, even if you
-     * set this setting to a low value, it might wont bring back the old behavior anymore.
+     * <p>This setting doesn't affect important not-fully-backward compatible security fixes; they are always enabled,
+     * regardless of what you set here.
      * 
      * <p>Currently the effects of this setting are:
      * <ul>
      *   <li><p>
-     *     2.3.0: This is the lowest supported value, the version used in older projects.
+     *     2.3.0: This is the lowest supported value, the version used in older projects. This is the default in the
+     *     FreeMarker 2.3.x series.
      *   </li>
      *   <li><p>
      *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of
@@ -338,6 +340,10 @@ public class Configuration extends Configurable implements Cloneable {
      *          is in theory backward compatible, as the API only promises to give something that implements
      *          {@link TemplateSequenceModel}.
      *       </li>
+     *       <li><p>
+     *          Unclosed comments ({@code <#-- ...}) and {@code #noparse}-s won't be silently closed at the end of
+     *          template anymore, but cause a parsing error instead.
+     *       </li>
      *     </ul>
      *   </li>
      * </ul>
@@ -358,16 +364,16 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     private void createTemplateCache() {
-        cache = new TemplateCache(getDefaultTemplateLoader());
-        cache.setConfiguration(this);
+        cache = new TemplateCache(getDefaultTemplateLoader(), this);
+        cache.clear(); // for fully BC behavior
         cache.setDelay(5000);
     }
     
     private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage);
+        cache = new TemplateCache(loader, storage, this);
+        cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
-        cache.setConfiguration(this);
         cache.setLocalizedLookup(localizedLookup);
     }
     
@@ -686,7 +692,10 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Sets the time in seconds that must elapse before checking whether there is a newer version of a template file
      * than the cached one.
-     * This method is thread-safe and can be called while the engine works.
+     * 
+     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
+     * While it works well on most hardware, it's not guaranteed that FreeMarker will see the update in all threads,
+     * and theoretically it's also possible that it will see a value that's a binary mixture of the new and the old one.
      */
     public void setTemplateUpdateDelay(int seconds) {
         cache.setDelay(1000L * seconds);
@@ -1288,7 +1297,9 @@ public class Configuration extends Configurable implements Cloneable {
      * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the template
      * under names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}.
      * 
-     * <p>This method is thread-safe and can be called while the engine works.
+     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
+     * While setting it can't cause any serious problems, and in fact it works well on most hardware, it's not
+     * guaranteed that FreeMarker will see the update in all threads.
      */
     public void setLocalizedLookup(boolean localizedLookup) {
         this.localizedLookup = localizedLookup;

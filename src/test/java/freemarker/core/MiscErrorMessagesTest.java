@@ -2,7 +2,9 @@ package freemarker.core;
 
 import org.junit.Test;
 
-public class MiscErrorMessagesTest extends TemplateErrorMessageTest {
+import freemarker.test.TemplateTest;
+
+public class MiscErrorMessagesTest extends TemplateTest {
 
     @Test
     public void stringIndexOutOfBounds() {

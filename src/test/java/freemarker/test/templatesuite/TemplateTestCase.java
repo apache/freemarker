@@ -68,6 +68,7 @@ import freemarker.test.templatesuite.models.BooleanHash2;
 import freemarker.test.templatesuite.models.BooleanList1;
 import freemarker.test.templatesuite.models.BooleanList2;
 import freemarker.test.templatesuite.models.BooleanVsStringMethods;
+import freemarker.test.templatesuite.models.JavaObjectInfo;
 import freemarker.test.templatesuite.models.MultiModel1;
 import freemarker.test.templatesuite.models.OverloadedMethods;
 import freemarker.test.templatesuite.models.OverloadedMethods2;
@@ -150,6 +151,7 @@ public class TemplateTestCase extends FileTestCase {
         dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
         dataModel.put("noOutput", NoOutputDirective.INSTANCE);
 
+        dataModel.put("javaObjectInfo", JavaObjectInfo.INSTANCE);
         dataModel.put("testName", getName());
         
         dataModel.put("message", "Hello, world!");

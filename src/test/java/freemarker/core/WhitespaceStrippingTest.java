@@ -22,9 +22,9 @@ import org.junit.Test;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import freemarker.template.Version;
+import freemarker.test.TemplateTest;
 
-public class WhitespaceStrippingTest extends TemplateOutputTest {
+public class WhitespaceStrippingTest extends TemplateTest {
 
     private final Configuration cfgStripWS = new Configuration(Configuration.VERSION_2_3_21);
     private final Configuration cfgNoStripWS = new Configuration(Configuration.VERSION_2_3_21);
@@ -58,8 +58,11 @@ public class WhitespaceStrippingTest extends TemplateOutputTest {
     
     private void assertOutput(String ftl, String expectedOutStripped, String expectedOutNonStripped)
             throws IOException, TemplateException {
-        assertOutput(ftl, expectedOutStripped, cfgStripWS);
-        assertOutput(ftl, expectedOutNonStripped, cfgNoStripWS);
+        setConfiguration(cfgStripWS);
+        assertOutput(ftl, expectedOutStripped);
+        
+        setConfiguration(cfgNoStripWS);
+        assertOutput(ftl, expectedOutNonStripped);
     }
 
 }

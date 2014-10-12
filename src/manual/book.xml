@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.21 RC2</subtitle>
+  <subtitle>For FreeMarker 2.3.21</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -641,8 +641,8 @@
             <programlisting role="template">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>&lt;#list animals as being&gt;</emphasis>
-  &lt;tr&gt;&lt;td&gt;${<emphasis>being</emphasis>.name}&lt;td&gt;${<emphasis>being</emphasis>.price} Euros
+  <emphasis>&lt;#list animals as animal&gt;</emphasis>
+  &lt;tr&gt;&lt;td&gt;${<emphasis>animal</emphasis>.name}&lt;td&gt;${<emphasis>animal</emphasis>.price} Euros
   <emphasis>&lt;/#list&gt;</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -756,13 +756,13 @@ All Rights Reserved.
           <programlisting role="template">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>&lt;#list animals as being&gt;</emphasis>
+  <emphasis>&lt;#list animals as animal&gt;</emphasis>
   &lt;tr&gt;
     &lt;td&gt;
-      <emphasis>&lt;#if being.size == "large"&gt;</emphasis>&lt;font size="+1"&gt;<emphasis>&lt;/#if&gt;</emphasis>
-      ${being.name}
-      <emphasis>&lt;#if being.size == "large"&gt;</emphasis>&lt;/font&gt;<emphasis>&lt;/#if&gt;</emphasis>
-    &lt;td&gt;${being.price} Euros
+      <emphasis>&lt;#if animal.size == "large"&gt;</emphasis>&lt;font size="+1"&gt;<emphasis>&lt;/#if&gt;</emphasis>
+      ${animal.name}
+      <emphasis>&lt;#if animal.size == "large"&gt;</emphasis>&lt;/font&gt;<emphasis>&lt;/#if&gt;</emphasis>
+    &lt;td&gt;${animal.price} Euros
   <emphasis>&lt;/#list&gt;</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -1533,10 +1533,10 @@ The average of the price of a python and an elephant is:
               role="markedInvisibleText">[BR]</phrase>
   &lt;p&gt;We have these animals:<phrase role="markedInvisibleText">[BR]</phrase>
   &lt;ul&gt;<phrase role="markedInvisibleText">[BR]</phrase>
-  <phrase role="markedFTLTag">&lt;#list animals as being&gt;</phrase><phrase
+  <phrase role="markedFTLTag">&lt;#list animals as animal&gt;</phrase><phrase
               role="markedInvisibleText">[BR]</phrase>
-    &lt;li&gt;<phrase role="markedInterpolation">${being.name}</phrase> for <phrase
-              role="markedInterpolation">${being.price}</phrase> Euros<phrase
+    &lt;li&gt;<phrase role="markedInterpolation">${animal.name}</phrase> for <phrase
+              role="markedInterpolation">${animal.price}</phrase> Euros<phrase
               role="markedInvisibleText">[BR]</phrase>
   <phrase role="markedFTLTag">&lt;/#list&gt;</phrase><phrase
               role="markedInvisibleText">[BR]</phrase>
@@ -1574,7 +1574,7 @@ The average of the price of a python and an elephant is:
 &lt;p&gt;We have these animals:<phrase role="markedInvisibleText">[BR]</phrase>
 &lt;ul&gt;<phrase role="markedInvisibleText">[BR]</phrase>
 <phrase role="markedFTLTag">&lt;#list <phrase role="markedComment">&lt;#-- some comment... --&gt;</phrase> animals as <phrase
-                role="markedComment">&lt;#-- again... --&gt;</phrase> being&gt;</phrase><phrase
+                role="markedComment">&lt;#-- again... --&gt;</phrase> animal&gt;</phrase><phrase
               role="markedInvisibleText">[BR]</phrase></phrase>
 <replaceable>...</replaceable></programlisting>
 
@@ -1612,7 +1612,7 @@ The average of the price of a python and an elephant is:
           </indexterm>You use FTL tags to call <emphasis
         role="term">directives</emphasis>. In the example you have called the
         <literal>list</literal> directive. Syntactically you have done it with
-        two tags: <literal>&lt;#list animals as being&gt;</literal> and
+        two tags: <literal>&lt;#list animals as animal&gt;</literal> and
         <literal>&lt;/#list&gt;</literal>.</para>
 
         <para><indexterm>
@@ -1668,8 +1668,8 @@ The average of the price of a python and an elephant is:
         directive:</para>
 
         <programlisting role="template">&lt;ul&gt;
-<emphasis>&lt;#list animals as being&gt;</emphasis>
-  &lt;li&gt;${being.name} for ${being.price} Euros
+<emphasis>&lt;#list animals as animal&gt;</emphasis>
+  &lt;li&gt;${animal.name} for ${animal.price} Euros
   <emphasis>&lt;#if user == "Big Joe"&gt;</emphasis>
      (except for you)
 <emphasis>&lt;/#list&gt;</emphasis> &lt;#-- WRONG! The "if" has to be closed first. --&gt;
@@ -1691,10 +1691,10 @@ The average of the price of a python and an elephant is:
         <programlisting role="template"><phrase role="markedText"><phrase
               role="markedFTLTag">&lt;#list<phrase role="markedInvisibleText">[BR]</phrase>
   animals       as<phrase role="markedInvisibleText">[BR]</phrase>
-     being<phrase role="markedInvisibleText">[BR]</phrase>
+     animal<phrase role="markedInvisibleText">[BR]</phrase>
 &gt;</phrase><phrase role="markedInvisibleText">[BR]</phrase>
-<phrase role="markedInterpolation">${being.name}</phrase> for <phrase
-              role="markedInterpolation">${being.price}</phrase> Euros<phrase
+<phrase role="markedInterpolation">${animal.name}</phrase> for <phrase
+              role="markedInterpolation">${animal.price}</phrase> Euros<phrase
               role="markedInvisibleText">[BR]</phrase>
 <phrase role="markedFTLTag">&lt;/#list    &gt;</phrase></phrase></programlisting>
 
@@ -4632,9 +4632,8 @@ ${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
         and replaced using FTL directives. Note that each <link
         linkend="gloss.templateProcessingJob">template processing job</link>
         has its own private set of these variables that exists while the given
-        page is being rendered. This variable set is initially empty, and will
-        be thrown away when the template processing job has been
-        finished.</para>
+        page is rendered. This variable set is initially empty, and will be
+        thrown away when the template processing job has been finished.</para>
 
         <para>You access a variable that you have defined in the template
         exactly as if it were a variable in the data-model root. The variable
@@ -5024,11 +5023,11 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
           <para>Each <link linkend="gloss.templateProcessingJob">template
           processing job</link> has its own private set of namespaces. Each
           template-processing job is a separated cosmos that exists only for
-          the short period of time while the given page is being rendered, and
-          then it vanishes with all its populated namespaces. Thus, whenever
-          we say that ``<literal>import</literal> is called for the first
-          time'' and such, we are always talking in the context of a single
-          template processing job.</para>
+          the short period of time while the given page is rendered, and then
+          it vanishes with all its populated namespaces. Thus, whenever we say
+          that ``<literal>import</literal> is called for the first time'' and
+          such, we are always talking in the context of a single template
+          processing job.</para>
         </section>
 
         <section>
@@ -5388,7 +5387,7 @@ That's all.</programlisting>
         <itemizedlist spacing="compact">
           <listitem>
             <para>Calling predefined directive: <literal>[#list animals as
-            being]<replaceable>...</replaceable>[/#list]</literal></para>
+            animal]<replaceable>...</replaceable>[/#list]</literal></para>
           </listitem>
 
           <listitem>
@@ -5418,13 +5417,13 @@ That's all.</programlisting>
 &lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
-  <emphasis>[#list animals as being]</emphasis>
+  <emphasis>[#list animals as animal]</emphasis>
   &lt;tr&gt;
     &lt;td&gt;
-      <emphasis>[#if being.size = "large"]</emphasis>&lt;b&gt;<emphasis>[/#if]</emphasis>
-      ${being.name}
-      <emphasis>[#if being.size = "large"]</emphasis>&lt;/b&gt;<emphasis>[/#if]</emphasis>
-    &lt;td&gt;${being.price} Euros
+      <emphasis>[#if animal.size = "large"]</emphasis>&lt;b&gt;<emphasis>[/#if]</emphasis>
+      ${animal.name}
+      <emphasis>[#if animal.size = "large"]</emphasis>&lt;/b&gt;<emphasis>[/#if]</emphasis>
+    &lt;td&gt;${animal.price} Euros
   <emphasis>[/#list]</emphasis>
 &lt;/table&gt;</programlisting>
 
@@ -7460,15 +7459,15 @@ cfg.setTemplateLoader(mtl);</programlisting>
 
           <para>When you create a new <literal>Configuration</literal> object,
           initially it uses an <literal>MruCacheStorage</literal> where
-          <literal>maxStrongSize</literal> is 0, and
-          <literal>maxSoftSize</literal> is
+          <literal>strongSizeLimit</literal> is 0, and
+          <literal>softSizeLimit</literal> is
           <literal>Integer.MAX_VALUE</literal> (that is, in practice,
-          infinite). But using non-0 <literal>maxStrongSize</literal> is maybe
-          a better strategy for high load servers, since it seems that, with
-          only softly referenced items, JVM tends to cause just higher
+          infinite). But using non-0 <literal>strongSizeLimit</literal> is
+          maybe a better strategy for high load servers, since it seems that,
+          with only softly referenced items, JVM tends to cause just higher
           resource consumption if the resource consumption was already high,
           because it constantly throws frequently used templates from the
-          cache, which then have to be re-loaded and and re-parsed.</para>
+          cache, which then have to be re-loaded and re-parsed.</para>
         </section>
       </section>
 
@@ -9757,9 +9756,9 @@ grant codeBase "file:/path/to/freemarker.jar"
         <literal>freemarker.ext.ant.FreemarkerXmlTask</literal> inside your
         Ant buildfile, then call the task. Suppose you want to transform
         several XML documents to HTML using the hypothetical "xml2html.ftl"
-        template, with XML documents being located in the directory "xml" and
-        HTML documents generated into directory "html". You would write
-        something like:</para>
+        template, with XML documents located in the directory "xml" and HTML
+        documents generated into directory "html". You would write something
+        like:</para>
 
         <programlisting role="unspecified">&lt;taskdef name="freemarker" classname="freemarker.ext.ant.FreemarkerXmlTask"&gt;
   &lt;classpath&gt;
@@ -14221,6 +14220,10 @@ May 16, 2011
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_directive_noparse">noparse</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref.directive.nt">nt</link></para>
           </listitem>
 
@@ -15722,9 +15725,8 @@ All rights reserved.</emphasis></programlisting>
               </listitem>
             </itemizedlist>
 
-            <para>However, there can be at most one asterisk in the path.
-            Specifying more than one asterisk will result in a template not
-            being found.</para>
+            <para>However, there can be at most one asterisk in the path. If
+            you specifying more asterisks, the template won't be found.</para>
           </section>
 
           <section xml:id="ref_directive_include_localized">
@@ -15885,13 +15887,13 @@ All rights reserved.</emphasis></programlisting>
           <itemizedlist>
             <listitem>
               <para><literal><replaceable>item</replaceable>_index</literal>:
-              This is a numerical value that contains the index of the current
-              item being stepped over in the loop.</para>
+              The index (0-based number) of the current item in the
+              loop.</para>
             </listitem>
 
             <listitem>
               <para><literal><replaceable>item</replaceable>_has_next</literal>:
-              Boolean value that tells if the current item the last in the
+              Boolean value that tells if the current item is the last in the
               sequence or not.</para>
             </listitem>
           </itemizedlist>
@@ -16352,8 +16354,8 @@ or
 --------
 
 <emphasis>&lt;#noparse&gt;</emphasis>
-  &lt;#list animals as being&gt;
-  &lt;tr&gt;&lt;td&gt;${being.name}&lt;td&gt;${being.price} Euros
+  &lt;#list animals as animal&gt;
+  &lt;tr&gt;&lt;td&gt;${animal.name}&lt;td&gt;${animal.price} Euros
   &lt;/#list&gt;
 <emphasis>&lt;/#noparse&gt;</emphasis></programlisting>
 
@@ -16362,8 +16364,8 @@ or
           <programlisting role="output">Example:
 --------
 
-  &lt;#list animals as being&gt;
-  &lt;tr&gt;&lt;td&gt;${being.name}&lt;td&gt;${being.price} Euros
+  &lt;#list animals as animal&gt;
+  &lt;tr&gt;&lt;td&gt;${animal.name}&lt;td&gt;${animal.price} Euros
   &lt;/#list&gt;
  </programlisting>
         </section>
@@ -16942,7 +16944,7 @@ or
           <para>Switch is used to choose a fragment of template depending on
           the value of an expression:</para>
 
-          <programlisting role="template">&lt;#switch being.size&gt;
+          <programlisting role="template">&lt;#switch animal.size&gt;
   &lt;#case "small"&gt;
      This will be processed if it is small
      &lt;#break&gt;
@@ -17704,6 +17706,22 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><indexterm>
+              <primary>locale_object</primary>
+            </indexterm><literal>locale_object</literal> (available since
+          FreeMarker 2.3.21): Returns the current value of the locale setting
+          as a <literal>java.util.Locale</literal> object, rather than as a
+          string. This meant to be used instead of <literal>.locale</literal>
+          when you want to pass it as a <literal>java.util.Locale</literal>
+          object to a Java method. (The <literal>Locale</literal> object will
+          be wrapped according the <literal>object_wrapper</literal> setting
+          value. Whether you can actually pass this value to a Java methods as
+          a <literal>Locale</literal> object depends on the object wrapper,
+          but an object wrapper that let you call Java methods directly is
+          very unlikely to not support that.)</para>
+        </listitem>
+
+        <listitem>
           <para><literal>locals</literal>: A hash that you can use to access
           the local variables (the variables created with the
           <literal>local</literal> directive, and the parameters of
@@ -18264,8 +18282,8 @@ some test
   &lt;h1&gt;Welcome ${user}!&lt;/h1&gt;
   &lt;p&gt;We have there animals:
   &lt;ul&gt;
-  <emphasis>&lt;list animals as being&gt;</emphasis>
-    &lt;li&gt;${being.name} for ${being.price} Euros
+  <emphasis>&lt;list animals as animal&gt;</emphasis>
+    &lt;li&gt;${animal.name} for ${animal.price} Euros
   <emphasis>&lt;/list&gt;</emphasis>
   &lt;/ul&gt;
   <emphasis>&lt;include "common_footer.html"&gt;</emphasis>
@@ -19693,7 +19711,7 @@ Test Book</programlisting>
 
         <para>If you call <literal>recurse</literal> without parameter, then
         it uses <literal>.node</literal>, that is, it visits all children
-        nodes of the node being handled currently. So this FTL:</para>
+        nodes of the node currently handled. So this FTL:</para>
 
         <programlisting role="template">&lt;#recurse doc&gt;
 
@@ -20161,8 +20179,8 @@ End book</programlisting>
                 a variable name, or when the template author refers to a
                 variable that the programmer doesn't put into the data-model
                 for that template, or for which the programmer uses a
-                different name. Human beings are prone to do such mistakes,
-                while computers are not, so missing this opportunity that the
+                different name. Humans are prone to do such mistakes, while
+                computers are not, so missing this opportunity that the
                 template engine can show these errors is a bad business. Even
                 if you very carefully check the output of the templates during
                 development, it is easy to look over mistakes like
@@ -21389,88 +21407,143 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
-      <section xml:id="version_2_3_21">
+      <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
 
-        <para>Date of release for release: 2014-10-12</para>
+        <para>Date of release: 2014-10-12</para>
+
+        <para>Note that since 2.3.21 is designed to be backward compatible
+        with the previous 2.3.x releases, <emphasis>some of the improvements
+        and fixes described below are only activated when you specifically ask
+        for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
+        because they could, with very small chance, break existing
+        applications. If the dependent project is still actively developed,
+        allowing 2.3.21 "incompatible improvements" is highly recommended.
+        That can be achieved on various ways:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Create the
+            <literal>freemarker.template.Configuration</literal> object like
+            <literal>new
+            Configuration(Configuration.VERSION_2_3_21)</literal></para>
+          </listitem>
+
+          <listitem>
+            <para>Or alter the <literal>Configuration</literal> where you
+            initialize its other settings like
+            <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21)</literal></para>
+          </listitem>
+
+          <listitem>
+            <para>Or if you are configuring FreeMarker with properties
+            (<literal>*.properties</literal> file or
+            <literal>java.util.Properties</literal> object), add
+            <literal>incompatible_improvements=2.3.21</literal> to
+            them.</para>
+          </listitem>
+
+          <listitem>
+            <para>Or if you are configuring FreeMarker through
+            <literal>FreemarkerServlet</literal>, add this
+            <literal>init-param</literal> to it in the
+            <literal>web.xml</literal>:</para>
+
+            <programlisting role="unspecified">&lt;init-param&gt;
+    &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
+    &lt;param-value&gt;2.3.21&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+          </listitem>
+        </itemizedlist>
+
+        <para>Note that we have changed our proprietary BSD-style license to
+        Apache License, Version 2.0. See the <link linkend="app_license">new
+        license here</link>.</para>
+
+        <para>Note that the minimum required Java version was increased from
+        1.2 to 1.4.</para>
 
         <section>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
             <listitem>
-              <para/>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Changes on the Java side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Improved <literal>TemplateException</literal> error
-              messages:</para>
+              <para>Improved ranges:</para>
 
               <itemizedlist>
                 <listitem>
-                  <para><literal>TemplateException</literal> error messages
-                  are now much more readable when rendered in environments
-                  that don't obey to line-breaks. (This often happens in
-                  inproperly implemented HTML error pages and logs
-                  viewers.)</para>
+                  <para>Added ranges with exclusive end:
+                  <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
+                  (also can be written as
+                  <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
+                  <link
+                  linkend="dgui_template_exp_direct_ranges">More...</link></para>
                 </listitem>
 
                 <listitem>
-                  <para><literal>TemplateException</literal> error messages
-                  are now contain up to 6 lines of FTL stack trace, because
-                  otherwise this information wasn't printed when the exception
-                  was a cause exception in a stack trace, of when only the
-                  value of <literal>getMessage()</literal> was printed instead
-                  of a stack trace.</para>
+                  <para>Added length limited ranges:
+                  <literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>:
+                  For example, <literal>10..*4</literal> gives <literal>[10,
+                  11, 12, 13]</literal>, <literal>10..*-4</literal> gives
+                  <literal>[10, 9, 8, 7]</literal>, and
+                  <literal>10..*0</literal> gives <literal>[]</literal>. When
+                  these kind of ranges are used for slicing, the slice will
+                  end without error if the end of the sliced sequence or
+                  string is reached before the specified range length was
+                  reached. Thus, for example, to take the first 10 characters
+                  from the string <literal>s</literal>, or less if
+                  <literal>s</literal> is shorter than 10 characters, you can
+                  use <literal>s[0..*10]</literal>. <link
+                  linkend="dgui_template_exp_seqenceop_slice">More...</link></para>
                 </listitem>
 
                 <listitem>
-                  <para>The meaning of the lines in the FTL stack trace is now
-                  self explanatory (lines start with "Failed at" and "Called
-                  by" instead of arrow and nothing).</para>
+                  <para>Square bracket now accepts range values from any
+                  source, like <literal>&lt;#assign r = 1..3&gt;
+                  ${'foobar'[r]}</literal> will print
+                  <literal>"oob"</literal>. Earlier it has only supported
+                  ranges that were specified directly inside the square
+                  brackets, like <literal>'foobar'[1..3]</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When slicing a sequence with a right-unbounded range,
+                  it's now allowed to have a range start index that's one
+                  higher than the last index of the sliced sequence. For
+                  example, <literal>['x', 'y'][2..]</literal> is not an error
+                  anymore, but an empty sequence. (Of course, <literal>['x',
+                  'y'][3..]</literal> is still an error.)</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>,
+                  <replaceable>toExclusive</replaceable>)</literal> and
+                  <literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>)</literal>
+                  are now deprecated; use this slicing expression instead:
+                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
+                  and
+                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..]</literal>.
+                  A warning if you are processing XML: Since slicing
+                  expressions work both for sequences and strings, and XML
+                  nodes in FTL are typically both sequences and strings at the
+                  same time, there the equivalent expression is
+                  <literal><replaceable>someXmlNode</replaceable>?string[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
+                  and
+                  <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
+                  because without the <literal>?string</literal> it would
+                  slice the node sequence instead of the text value of the
+                  node.</para>
+                </listitem>
+
+                <listitem>
+                  <para>If the <literal>incompatible_improvements</literal> in
+                  the FreeMarker configuration is set to at least 2.3.21,
+                  right-unbounded ranges become readable (like
+                  <literal>#list</literal>-able). Earlier they could only be
+                  used for slicing, and behaved like empty sequences
+                  otherwise.</para>
                 </listitem>
               </itemizedlist>
-            </listitem>
-          </itemizedlist>
-        </section>
-      </section>
-
-      <section xml:id="versions_2_3_21_rc2">
-        <title>2.3.21 RC2 (compared to RC1)</title>
-
-        <para>Date of release for release: 2014-09-28</para>
-
-        <para>Date of release for the final release: Planned for
-        2014-10-12.</para>
-
-        <para>Also, check out <link linkend="versions_2_3_21_rc1">the RC1
-        changes here</link>!</para>
-
-        <para>Please give feedback if you find any problems, or you have any
-        comments on the new features! This is the last chance before things
-        get graved into stone, in October the 12th!</para>
-
-        <section>
-          <title>Changes on the FTL side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>New <literal>include</literal> directive option,
-              <literal>ignore_missing=<replaceable>boolean</replaceable></literal>.
-              When this is set to <literal>true</literal>, and the template to
-              include is missing, the error will be silently ignored, and
-              nothing will be included.</para>
-            </listitem>
-
-            <listitem>
-              <para>The <literal>setting</literal> directive now can set the
-              <literal>output_encoding</literal> setting.</para>
             </listitem>
 
             <listitem>
@@ -21480,7 +21553,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               escape slash (<literal>/</literal>) characters. This meant to be
               used for converting paths (like paths coming from the OS or some
               content repository) that use slash (not backslash!) to a path
-              the can be inserted into an URL.</para>
+              the can be inserted into the path part of an URL.</para>
             </listitem>
 
             <listitem>
@@ -21527,220 +21600,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
-              The result value of <literal>?matches</literal> wasn't
-              <quote>reentrant</quote>. For example, you couldn't list the
-              matches inside another listing where you are also listing
-              exactly the same result value (stored in a common variable), as
-              they would consume from the same iterator. Most importantly,
-              even accessing the <literal>?size</literal> of the same result
-              value has terminated the outer listing of the same value.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/229/">229</link>]:
-              If you set <literal>incompatible_improvements</literal> to
-              2.3.21 (or higher), unclosed comments and
-              <literal>#noparse</literal>-s won't be silently closed at the
-              end of template anymore, but cause a parsing error
-              instead.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Changes on the Java side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>The <literal>getResult()</literal> method of builder
-              classes was renamed to <literal>build()</literal>, as that's a
-              more popular choice.</para>
-            </listitem>
-
-            <listitem>
-              <para>OSGi execution environment header was tweaked again, now
-              it's <literal>Bundle-RequiredExecutionEnvironment: J2SE-1.5,
-              J2SE-1.4</literal>. That is, we prefer (and compile against)
-              1.5, but only require 1.4.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
-              Poor quality error message when
-              <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
-              fails with string index out of bounds.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="http://sourceforge.net/p/freemarker/bugs/27/">27</link>]:
-              Not very good quality error messages when
-              <literal>#import</literal>-ing a template whose parsing
-              fails.</para>
-            </listitem>
-
-            <listitem>
-              <para>Bugs introduced with RC1 fixed:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Legacy (deprecated) <literal>Template</literal>
-                  constructors without <literal>Configuration</literal>
-                  parameter have failed with
-                  <literal>NullPointerException</literal></para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Reminder</title>
-
-          <para>Check out <link linkend="versions_2_3_21_rc1">the RC1
-          changes</link> too, as they aren't included in this section!</para>
-        </section>
-      </section>
-
-      <section xml:id="versions_2_3_21_rc1">
-        <title>2.3.21 RC1</title>
-
-        <para>Date of release: 2014-08-31</para>
-
-        <para>Note that since 2.3.21 is designed to be backward compatible
-        with the previous 2.3.x releases, <emphasis>some of the improvements
-        and fixes described below are only activated when you specifically ask
-        for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
-        because they can, with a very small chance, break existing
-        applications. But if the dependent project is still actively
-        developed, allowing 2.3.21 "incompatible improvements" is highly
-        recommended. That can be done like this:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>create the
-            <literal>freemarker.template.Configuration</literal> object like
-            <literal>new
-            Configuration(Configuration.VERSION_2_3_21)</literal></para>
-          </listitem>
-
-          <listitem>
-            <para>or alter the <literal>Configuration</literal> where you
-            initialize its other settings like
-            <literal>cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21)</literal></para>
-          </listitem>
-
-          <listitem>
-            <para>or if you are configuring FreeMarker with properties
-            (<literal>*.properties</literal> file or
-            <literal>java.util.Properties</literal> object), add
-            <literal>incompatible_improvements=2.3.21</literal> to
-            them.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>Note that we have changed our proprietary BSD-style license to
-        Apache License, Version 2.0. See the <link linkend="app_license">new
-        license here</link>.</para>
-
-        <para>Note that the minimum required Java version was increased from
-        1.2 to 1.4.</para>
-
-        <para>Please give feedback if you find any problems!</para>
-
-        <section>
-          <title>Changes on the FTL side</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Improved ranges:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para>Ranges with exclusive end:
-                  <literal><replaceable>start</replaceable>..&lt;<replaceable>end</replaceable></literal>
-                  (also can be written as
-                  <literal><replaceable>start</replaceable>..!<replaceable>end</replaceable></literal>).
-                  <link
-                  linkend="dgui_template_exp_direct_ranges">More...</link></para>
-                </listitem>
-
-                <listitem>
-                  <para>Length limited ranges:
-                  <literal><replaceable>start</replaceable>..*<replaceable>length</replaceable></literal>:
-                  For example, <literal>10..*4</literal> gives <literal>[10,
-                  11, 12, 13]</literal>, <literal>10..*-4</literal> gives
-                  <literal>[10, 9, 8, 7]</literal>, and
-                  <literal>10..*0</literal> gives <literal>[]</literal>. When
-                  these kind of ranges are used for slicing, the slice will
-                  end without error if the end of the sliced sequence or
-                  string is reached before the specified range length was
-                  reached. Thus, for example, to take the first 10 characters
-                  from the string <literal>s</literal>, or less if
-                  <literal>s</literal> is shorter than 10 characters, you can
-                  use <literal>s[0..*10]</literal>. <link
-                  linkend="dgui_template_exp_seqenceop_slice">More...</link></para>
-                </listitem>
-
-                <listitem>
-                  <para>Square bracket now accepts range values from any
-                  source, like <literal>&lt;#assign
-                  r=1..3&gt;${'foobar'[r]}</literal> will print
-                  <literal>"oob"</literal>. Earlier it has only supported
-                  ranges that were specified inside the square brackets, like
-                  <literal>'foobar'[1..3]</literal>.</para>
-                </listitem>
-
-                <listitem>
-                  <para>When slicing a sequence with a right-unbounded range,
-                  it's now allowed to have a range start index that's one
-                  higher than the last index of the sliced sequence. For
-                  example, <literal>['x', 'y'][2..]</literal> is not an error
-                  anymore, but an empty sequence. (Of course, <literal>['x',
-                  'y'][3..]</literal> is still an error.)</para>
-                </listitem>
-
-                <listitem>
-                  <para><literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>,
-                  <replaceable>toExclusive</replaceable>)</literal> and
-                  <literal><replaceable>someString</replaceable>?substring(<replaceable>from</replaceable>)</literal>
-                  are now deprecated; use this slicing expression instead:
-                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
-                  and
-                  <literal><replaceable>someString</replaceable>[<replaceable>from</replaceable>..]</literal>.
-                  A warning if you are processing XML: Since slicing
-                  expressions work both for sequences and strings, and since
-                  XML nodes are typically both sequences and strings at the
-                  same time, there the equivalent expression is
-                  <literal><replaceable>someXmlNode</replaceable>?string[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
-                  and
-                  <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
-                  as without <literal>?string</literal> it would slice the
-                  node sequence instead of the text value of the node.</para>
-                </listitem>
-
-                <listitem>
-                  <para>If the <literal>incompatible_improvements</literal> in
-                  the FreeMarker configuration is set to at least 2.3.21,
-                  right-unbounded ranges become readable (like listable).
-                  Earlier they could only be used for slicing.</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>New built-in:
-              <literal><replaceable>someString</replaceable>?boolean</literal>.
-              This is for example useful for converting "true" and "false"
-              strings coming from XML to real boolean values. <link
-              linkend="ref_builtin_boolean">More...</link></para>
-            </listitem>
-
-            <listitem>
               <para><literal><replaceable>someString</replaceable>?number</literal>
               now recognizes all XML Schema number formats, like
               <literal>NaN</literal>, <literal>INF</literal>,
@@ -21761,6 +21620,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>java.text.DecimalFormat</literal> did with US locale,
               none of which was understood by any (common) computer
               language.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in:
+              <literal><replaceable>someString</replaceable>?boolean</literal>.
+              This is for example useful for converting "true" and "false"
+              strings coming from XML to real boolean values. <link
+              linkend="ref_builtin_boolean">More...</link></para>
             </listitem>
 
             <listitem>
@@ -21958,6 +21825,41 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Messages are now much more readable when rendered in
+                  environments that don't obey to line-breaks. (This often
+                  happens in improperly implemented HTML error pages and logs
+                  viewers.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Better FTL instruction stack traces:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Error messages now contain up to 10 lines of FTL
+                      stack trace (unless it's on the top of a full FTL stack
+                      trace), because the FTL stack trace wasn't printed at
+                      all when the exception was a cause exception in a Java
+                      stack trace, or when only the value of
+                      <literal>getMessage()</literal> was printed instead of a
+                      stack trace.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>The FTL stack trace is now more self explanatory
+                      as it contains more text labels.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Stack frames that belong to nestings are now
+                      marked differently, and are filtered out when the stack
+                      trace wouldn't fit into the error message otherwise.
+                      </para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
                   <para>Bug fixed: <literal>?substring</literal> has thrown
                   low level
                   <literal>java.lang.IndexOutOfBoundsException</literal>-s
@@ -21974,7 +21876,53 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateModelException</literal>-s with FTL stack
                   trace.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
+                  Fixed misleading parser error message when a directive
+                  called without its required parameters (like
+                  <literal>&lt;#list&gt;</literal>) was reported as unknown
+                  directive.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/222/">222</link>]:
+                  Poor quality error message when
+                  <literal><replaceable>someString</replaceable>[<replaceable>someIndex</replaceable>]</literal>
+                  fails with string index out of bounds.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/27/">27</link>]:
+                  Not very good quality error messages when
+                  <literal>#import</literal>-ing a template whose parsing
+                  fails.</para>
+                </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>New <literal>include</literal> directive option,
+              <literal>ignore_missing=<replaceable>boolean</replaceable></literal>.
+              When this is set to <literal>true</literal>, and the template to
+              include is missing, the error will be silently ignored, and
+              nothing will be included.</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>setting</literal> directive can now set the
+              <literal>output_encoding</literal> setting.</para>
+            </listitem>
+
+            <listitem>
+              <para>New special variable: <literal>.locale_object</literal>.
+              This is like <literal>.locale</literal>, except that it's a
+              <literal>java.util.Locale</literal> object, not a string. This
+              is handy if you want to pass the current locale to Java
+              methods.</para>
             </listitem>
 
             <listitem>
@@ -21997,6 +21945,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>?is_enumerable</literal>, but now
               <literal>?is_enumerable</literal> is aware of this exceptional
               case.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/257/">257</link>]:
+              The result value of <literal>?matches</literal> wasn't
+              <quote>reentrant</quote>. For example, you couldn't list the
+              matches inside another listing where you are also listing
+              exactly the same result value (stored in a common variable), as
+              they would consume from the same iterator. Most importantly,
+              even accessing the <literal>?size</literal> of the same result
+              value has terminated the outer listing of the same value.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/229/">229</link>]:
+              If you set <literal>incompatible_improvements</literal> to
+              2.3.21 (or higher), unclosed comments (<literal>&lt;#--
+              <replaceable>...</replaceable></literal>) and
+              <literal>#noparse</literal>-s won't be silently closed at the
+              end of template anymore, but cause a parsing error
+              instead.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -22357,7 +22328,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Required Java version has changed from 1.2 to 1.4.</para>
+              <para>FreeMarker now requires Java version has changed from 1.2
+              to 1.4.</para>
             </listitem>
 
             <listitem>
@@ -22378,9 +22350,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               that ambiguity errors will arise where earlier they didn't
               (although the opposite is far more frequent), hence the fixes
               aren't automatically activated. But the fix mostly only effect
-              calls that were failing or has chosen then wrong method earlier,
-              so it's recommended to activate it for projects that are still
-              actively developed. This fix includes numerous changes:</para>
+              calls that were failing or have chosen then wrong method
+              earlier, so it's recommended to activate it for projects that
+              are still actively developed. This fix includes numerous
+              changes:</para>
 
               <itemizedlist>
                 <listitem>
@@ -22709,20 +22682,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bug fixed [<link
               xlink:href="http://sourceforge.net/p/freemarker/bugs/411/">411</link>]:
-              Invalid execution environment names in the OSGi bundle manifest
-              were fixed: J2SE-1.6 to Java2SE-1.6, J2SE-1.7 to JavaSE-1.7.
-              Also, J2SE-1.8 was removed for now, as we don't utilize any
-              features in it dynamically (to prevent misunderstandings, Java 8
-              is still supported).</para>
-            </listitem>
-
-            <listitem>
-              <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/402/">402</link>]:
-              Fixed misleading parser error message when a directive called
-              without its required parameters (like
-              <literal>&lt;#list&gt;</literal>) was reported as unknown
-              directive.</para>
+              Invalid and redundant execution environment names from the OSGi
+              bundle manifest were removed. It looks like this now:
+              <literal>Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+              J2SE-1.4</literal>. That is, we prefer (and compile against)
+              1.5, but only require 1.4.</para>
             </listitem>
 
             <listitem>

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package freemarker.test.parser;
+package freemarker.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import freemarker.core.ASTPrinter;
 import freemarker.test.utility.FileTestCase;
 
 public class ASTTest extends FileTestCase {
@@ -33,7 +32,7 @@ public class ASTTest extends FileTestCase {
     }
 
     public void testRange() throws Exception {
-        testAST("range");
+        testAST("ast-range");
     }
     
     private void testAST(String testName) throws FileNotFoundException, IOException {

@@ -40,6 +40,7 @@ final class BuiltinVariable extends Expression {
     static final String DATA_MODEL = "data_model";
     static final String LANG = "lang";
     static final String LOCALE = "locale";
+    static final String LOCALE_OBJECT = "locale_object";
     static final String CURRENT_NODE = "current_node";
     static final String NODE = "node";
     static final String PASS = "pass";
@@ -62,6 +63,7 @@ final class BuiltinVariable extends Expression {
             && name != LOCALS
             && name != LANG
             && name != LOCALE
+            && name != LOCALE_OBJECT
             && name != DATA_MODEL
             && name != CURRENT_NODE
             && name != NODE
@@ -99,6 +101,9 @@ final class BuiltinVariable extends Expression {
         }
         if (name == LOCALE) {
             return new SimpleScalar(env.getLocale().toString());
+        }
+        if (name == LOCALE_OBJECT) {
+            return env.getObjectWrapper().wrap(env.getLocale());
         }
         if (name == LANG) {
             return new SimpleScalar(env.getLocale().getLanguage());

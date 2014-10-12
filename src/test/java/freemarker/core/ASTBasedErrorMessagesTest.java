@@ -20,7 +20,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class ASTBasedErrorMessagesTest extends TemplateErrorMessageTest {
+import freemarker.test.TemplateTest;
+
+public class ASTBasedErrorMessagesTest extends TemplateTest {
     
     @Test
     public void testOverloadSelectionError() {
@@ -56,9 +58,10 @@ public class ASTBasedErrorMessagesTest extends TemplateErrorMessageTest {
     }
 
     @Override
-    protected void buildDataModel(Map<String, Object> dataModel) {
-        super.buildDataModel(dataModel);
+    protected Object createDataModel() {
+        Map<String, Object> dataModel = createCommonTestValuesDataModel();
         dataModel.put("overloads", new Overloads());
+        return dataModel;
     }
     
     public static class Overloads {

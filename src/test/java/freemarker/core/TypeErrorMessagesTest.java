@@ -26,7 +26,9 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-public class TypeErrorMessagesTest extends TemplateErrorMessageTest {
+import freemarker.test.TemplateTest;
+
+public class TypeErrorMessagesTest extends TemplateTest {
 
     static final Document doc;
     static {
@@ -87,9 +89,10 @@ public class TypeErrorMessagesTest extends TemplateErrorMessageTest {
     }
 
     @Override
-    protected void buildDataModel(Map<String, Object> dataModel) {
-        super.buildDataModel(dataModel);
+    protected Object createDataModel() {
+        Map<String, Object> dataModel = createCommonTestValuesDataModel();
         dataModel.put("doc", doc);
+        return dataModel;
     }
 
 }

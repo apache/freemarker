@@ -107,7 +107,7 @@
   </condition>
   
   <target name="init" depends="_autoget-deps"
-    description="fetch dependencies if any are missing and create the build directory if necessary"
+    description="Fetch dependencies if any are missing and create the build directory if necessary"
   >
     <mkdir dir="build"/>
   </target>
@@ -459,13 +459,7 @@
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <macrodef name="manual" uri="http://freemarker.org/util">
-    <attribute name="offline" />
-    <sequential>
-    </sequential>
-  </macrodef>
-  
-  <target depends="javacc" name="_rawJavadoc" description="Build the JavaDocs" >
+  <target depends="javacc" name="_rawJavadoc">
     <!-- depends="javacc" is needed as its output is referred in the docs. -->
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
@@ -523,7 +517,7 @@
     <delete dir="build/javadoc-sources" />
   </target>
 
-  <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" />
+  <target name="javadoc" depends="_rawJavadoc, _fixJDK8JavadocCSS" description="Build the JavaDocs" />
   
   <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
     <property name="file" value="build/api/stylesheet.css" />
@@ -608,7 +602,7 @@
     <u:manual offline="true" />
   </target>
 
-  <target name="manualOnline" depends="init" description="Build the Manual for online use" >
+  <target name="manualFreemarkerOrg" depends="init" description="Build the Manual to be upload to freemarker.org" >
     <u:manual offline="false" />
   </target>
 
@@ -647,15 +641,15 @@
     </sequential>
   </macrodef>
   
-  <target name="example-webapp1" depends="jar">
+  <target name="example-webapp1" depends="jar" description="Build example webapp 1">
     <u:buildExampleWebapp examplename="webapp1" />
   </target>
 
-  <target name="example-webapp2" depends="jar">
+  <target name="example-webapp2" depends="jar" description="Build example webapp 2">
     <u:buildExampleWebapp examplename="webapp2" />
   </target>
 
-  <target name="example-struts-webapp" depends="jar">
+  <target name="example-struts-webapp" depends="jar" description="Build example Struts 1 webapp">
     <fail unless="struts.available"><!--
       -->You have to copy the Struts 1.1 jar-s to <!--
       -->&lt;freemarker_project>/lib/struts to build this example!<!--
@@ -666,7 +660,7 @@
     <u:buildExampleWebapp examplename="struts-webapp" />
   </target>
   
-  <target name="example-ant" depends="jar">
+  <target name="example-ant" depends="jar" description="Build Ant example">
     <mkdir dir="build/examples/ant" />
     <copy toDir="build/examples/ant">
       <fileset dir="src/examples/ant" />
@@ -694,7 +688,6 @@
 
   <target name="_dist"
     depends="jar, javadoc, manualOffline"
-    description="(Used internally; don't call it)"
   >
     <!-- Copy jars and sources and such into the distro -->
     <delete dir="${dist.dir}" />

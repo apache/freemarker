@@ -36,3 +36,7 @@ ${(enum.ONE == enum.ONE)?string("true", "false")}
 ${(enum.ONE == enum.TWO)?string("true", "false")}
 ${enums["freemarker.test.templatesuite.models.BeanTestClass"]?exists?string("true", "false")}
 ${obj.something}
+${obj.publicInner.x}
+${obj.publicInner.m()}
+<@assertFails message="obj.privateInner.x">${obj.privateInner.x}</@>
+<@assertFails message="obj.privateInner.m">${obj.privateInner.m()}</@>

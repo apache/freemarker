@@ -104,7 +104,7 @@ public class NumberUtilTest extends TestCase {
         };
         
         for (BigDecimal n : ns) {
-            assertEquals(n.doubleValue() == n.longValue(), NumberUtil.isBigDecimalInteger(n));
+            assertEquals(n.doubleValue() == n.longValue(), NumberUtil.isIntegerBigDecimal(n));
         }
         
     }

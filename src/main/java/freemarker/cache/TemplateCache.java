@@ -443,9 +443,12 @@ public class TemplateCache
      * template source.
      * @return the current value of the delay
      */
-    public synchronized long getDelay()
+    public long getDelay()
     {
-        return delay;
+        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
+        synchronized (this) {
+            return delay;
+        }
     }
 
     /**
@@ -453,25 +456,34 @@ public class TemplateCache
      * template sources.
      * @param delay the new value of the delay
      */
-    public synchronized void setDelay(long delay)
+    public void setDelay(long delay)
     {
-        this.delay = delay;
+        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
+        synchronized (this) {
+            this.delay = delay;
+        }
     }
 
     /**
      * Returns if localized template lookup is enabled or not.
      */
-    public synchronized boolean getLocalizedLookup()
+    public boolean getLocalizedLookup()
     {
-        return localizedLookup;
+        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
+        synchronized (this) {
+            return localizedLookup;
+        }
     }
 
     /**
      * Setis if localized template lookup is enabled or not.
      */
-    public synchronized void setLocalizedLookup(boolean localizedLookup)
+    public void setLocalizedLookup(boolean localizedLookup)
     {
-        this.localizedLookup = localizedLookup;
+        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
+        synchronized (this) {
+            this.localizedLookup = localizedLookup;
+        }
     }
 
     /**

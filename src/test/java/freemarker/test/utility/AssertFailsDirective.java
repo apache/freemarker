@@ -94,9 +94,11 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                                 env);
                     }
                     if (message != null) {
-                        if (e.getMessage().toLowerCase().indexOf(message.toLowerCase()) == -1) {
+                        String actualMessage = e instanceof TemplateException
+                                ? ((TemplateException) e).getMessageWithoutStackTop() : e.getMessage();
+                        if (actualMessage.toLowerCase().indexOf(message.toLowerCase()) == -1) {
                             throw new AssertationFailedInTemplateException(
-                                    "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(e.getMessage())
+                                    "Failure is not like expected. The exception message:\n" + StringUtil.jQuote(actualMessage)
                                     + "\ndoesn't contain:\n" + StringUtil.jQuote(message) + ".",
                                     env);
                         }
