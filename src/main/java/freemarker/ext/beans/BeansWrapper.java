@@ -812,7 +812,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * <li>if the object is an Iterator, returns a {@link IteratorModel} for it
      * <li>if the object is an Enumeration, returns a {@link EnumerationModel} for it
      * <li>if the object is a String, returns a {@link StringModel} for it
-     * <li>otherwise, returns a generic {@link BeanModel} for it.
+     * <li>otherwise, returns a generic {@link StringModel} for it.
      * </ul>
      */
     public TemplateModel wrap(Object object) throws TemplateModelException
