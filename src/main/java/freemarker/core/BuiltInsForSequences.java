@@ -822,7 +822,7 @@ class BuiltInsForSequences {
                     env);
         } catch (TemplateException ex) {
             throw new _TemplateModelException(ex, new Object[] {
-                    "This error has occured when comparing sequence item at 0-based index ", new Integer(seqItemIndex),
+                    "This error has occurred when comparing sequence item at 0-based index ", new Integer(seqItemIndex),
                     " to the searched item:\n", new _DelayedGetMessage(ex) });
         }
     }
