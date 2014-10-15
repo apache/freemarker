@@ -60,6 +60,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
@@ -462,6 +463,9 @@ public final class Environment extends Configurable {
      }
 
 
+    /**
+     * Used for {@code #nested}.
+     */
     void visit(BodyInstruction.Context bctxt) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         ArrayList prevLocalContextStack = localContextStack;
@@ -469,8 +473,17 @@ public final class Environment extends Configurable {
         if (body != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.bodyNamespace;
-            Configurable prevParent = getParent();
-            setParent(currentNamespace.getTemplate());
+            
+            final Configurable prevParent;
+            final boolean parentReplacementOn
+                    = getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+            if (parentReplacementOn) {
+                prevParent = getParent();
+                setParent(currentNamespace.getTemplate());
+            } else {
+                prevParent = null;
+            }
+            
             this.localContextStack = invokingMacroContext.prevLocalContextStack;
             if (invokingMacroContext.bodyParameterNames != null) {
                 pushLocalContext(bctxt);
@@ -484,7 +497,9 @@ public final class Environment extends Configurable {
                 }
                 this.currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
-                setParent(prevParent);
+                if (parentReplacementOn) {
+                    setParent(prevParent);
+                }
                 this.localContextStack = prevLocalContextStack;
             }
         }
@@ -679,9 +694,20 @@ public final class Environment extends Configurable {
             ArrayList prevLocalContextStack = localContextStack;
             localContextStack = null;
             Namespace prevNamespace = currentNamespace;
-            Configurable prevParent = getParent();
             currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
             currentMacroContext = mc;
+            
+            final Configurable prevParent;
+            final boolean parentReplacementOn
+                    = getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+            if (parentReplacementOn) {
+                prevParent = getParent();
+                // This line is historically missing from here (a bug), but for BC we leave it so:
+                //setParent(currentNamespace.getTemplate());
+            } else {
+                prevParent = null;
+            }
+            
             try {
                 mc.runMacro(this);
             }
@@ -693,7 +719,9 @@ public final class Environment extends Configurable {
                 currentMacroContext = previousMacroContext;
                 localContextStack = prevLocalContextStack;
                 currentNamespace = prevNamespace;
-                setParent(prevParent);
+                if (parentReplacementOn) {
+                    setParent(prevParent);
+                }
             }
         } finally {
             popElement();
@@ -1960,14 +1988,24 @@ public final class Environment extends Configurable {
     public void include(Template includedTemplate)
     throws TemplateException, IOException
     {
-        Template prevTemplate = getTemplate();
-        setParent(includedTemplate);
+        final Template prevTemplate;
+        final boolean parentReplacementOn
+                = getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+        if (parentReplacementOn) {
+            prevTemplate = getTemplate();
+            setParent(includedTemplate);
+        } else {
+            prevTemplate = null;
+        }
+        
         importMacros(includedTemplate);
         try {
             visit(includedTemplate.getRootTreeNode());
         }
         finally {
-            setParent(prevTemplate);
+            if (parentReplacementOn) {
+                setParent(prevTemplate);
+            }
         }
     }
     

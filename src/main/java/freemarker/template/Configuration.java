@@ -349,6 +349,22 @@ public class Configuration extends Configurable implements Cloneable {
      *       </li>
      *     </ul>
      *   </li>
+     *   <li><p>
+     *     2.3.22 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
+     *          {@link Configurable#getParent()}) of the {@link Environment} anymore to the {@link Template} that's
+     *          included or where {@code #nested} "returns" to. Thus, the parent of {@link Environment} will be now
+     *          always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
+     *          {@code process} or {@code createProcessingEnvironment} method was called to initiate the output
+     *          generation.)
+     *          Note all this only matters if you have set settings directly on {@link Template} objects, and almost
+     *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
+     *          {@link Template} that contains the macro definition, so there's no change there.   
+     *       </li>
+     *     </ul>
+     *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
