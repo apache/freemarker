@@ -30,6 +30,7 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_19 = Configuration.VERSION_2_3_19.intValue();
     public static final int VERSION_INT_2_3_20 = Configuration.VERSION_2_3_20.intValue();
     public static final int VERSION_INT_2_3_21 = Configuration.VERSION_2_3_21.intValue();
+    public static final int VERSION_INT_2_3_22 = Configuration.VERSION_2_3_22.intValue();
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
