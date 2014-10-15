@@ -59,6 +59,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.Version;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
@@ -93,7 +94,11 @@ public class TemplateTestCase extends FileTestCase {
     private final String expectedFileName;
     private final boolean noOutput;
     
-    private Configuration conf = new Configuration();
+    private final Configuration conf;
+    {
+        final String defIcI = System.getProperty(TemplateTestSuite.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        conf = defIcI == null ? new Configuration() : new Configuration(new Version(defIcI));
+    }
 
     public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
         super(name);

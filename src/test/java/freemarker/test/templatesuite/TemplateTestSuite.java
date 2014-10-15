@@ -17,7 +17,6 @@
 package freemarker.test.templatesuite;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -55,6 +54,9 @@ public class TemplateTestSuite extends TestSuite {
      * given regular expression will be executed.
      */
     public static final String TEST_FILTER_PROPERTY_NAME = "freemareker.templateTestSuite.testFilter";
+    
+    public static final String DEFAULT_INCOMPATIBLE_IMPROVEMENTS
+            = "freemareker.templateTestSuite.defaultIncompatibleImprovements";
     
     private Map configParams = new LinkedHashMap();
     

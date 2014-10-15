@@ -49,7 +49,9 @@
    <testcase name="compress" />
    <testcase name="dateformat-java" />
    <testcase name="dateformat-iso-like" nooutput="true" />
-   <testcase name="dateformat-iso-bi" nooutput="true" />
+   <testcase name="dateformat-iso-bi" nooutput="true">
+      <config incompatible_improvements="2.3.0" /> 
+   </testcase>   
    <testcase name="dateformat-iso-bi-ici-2.3.21" nooutput="true">
       <config incompatible_improvements="2.3.21" /> 
    </testcase>   
@@ -58,9 +60,17 @@
    <testcase name="default-xmlns">
       <config object_wrapper="freemarker.ext.beans.BeansWrapper"/>
    </testcase>
-   <testcase name="encoding-builtins" />
+   <testcase name="encoding-builtins">
+      <config incompatible_improvements="2.3.0" /> 
+   </testcase>
+   <testcase name="encoding-builtins-ici.2.3.20"
+            template="encoding-builtins.ftl" expected="encoding-builtins-ici-2.3.20.txt">
+      <config incompatible_improvements="2.3.20" /> 
+   </testcase>
    <testcase name="escapes" />
-   <testcase name="hashliteral" />
+   <testcase name="hashliteral">
+      <config incompatible_improvements="2.3.0" /> 
+   </testcase>
    <testcase name="hashliteral-ici-2.3.20" template="hashliteral.ftl" expected="hashliteral.txt">
       <config incompatible_improvements="2.3.20"/>
    </testcase>
@@ -93,7 +103,9 @@
    <testcase name="newlines1" />
    <testcase name="newlines2" />
    <testcase name="noparse" />
-   <testcase name="number-format" />
+   <testcase name="number-format">
+      <config incompatible_improvements="2.3.0" /> 
+   </testcase>
    <testcase name="number-format-ici-2.3.21" template="number-format.ftl" expected="number-format.txt">
    	  <config incompatible_improvements="2.3.21"/>
    </testcase>
@@ -132,7 +144,12 @@
       <config strict_syntax="N"/>
    </testcase>
    <testcase name="existence-operators" nooutput="true" />
-   <testcase name="string-builtins1" />
+   <testcase name="string-builtins1">
+      <config incompatible_improvements="2.3.0"/>
+   </testcase>
+   <testcase name="string-builtins1-ici-2.3.20" template="string-builtins1.ftl" expected="string-builtins1.txt">
+      <config incompatible_improvements="2.3.20"/>
+   </testcase>
    <testcase name="string-builtins2" />
    <testcase name="string-builtins3" nooutput="true" />
    <testcase name="string-builtins-regexps" />
@@ -142,7 +159,9 @@
    <testcase name="if" />
    <testcase name="switch" />
    <testcase name="transforms"/>
-   <testcase name="type-builtins"/>
+   <testcase name="type-builtins">
+      <config incompatible_improvements="2.3.0"/>
+   </testcase>
    <testcase name="type-builtins-ici-2.3.21" template="type-builtins.ftl" expected="type-builtins-ici-2.3.21.txt">
    	  <config incompatible_improvements="2.3.21"/>
    </testcase>
@@ -192,7 +211,6 @@
    </testcase>   
    <testcase name="number-to-date" />
    <testcase name="varargs" />
-   <testcase name="overloaded-methods-23bc" nooutput="true" />
    <testcase name="classic-compatible">
       <config classic_compatible="Y"/>
    </testcase>   
@@ -207,6 +225,10 @@
    </testcase>
    <testcase name="string-builtins-ici-2.3.19" nooutput="true">
       <config incompatible_improvements="2.3.19"/>
+   </testcase>
+   
+   <testcase name="overloaded-methods-23bc" nooutput="true">
+      <config incompatible_improvements="2.3.0"/>
    </testcase>
    <testcase name="overloaded-methods-2-inc-ici-2.3.20" nooutput="true">
       <config object_wrapper="freemarker.ext.beans.BeansWrapperInc2003020"/>
