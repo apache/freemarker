@@ -95,21 +95,24 @@ public class TemplateTestCase extends FileTestCase {
     private final boolean noOutput;
     
     private final Configuration conf;
-    {
-        final String defIcI = System.getProperty(TemplateTestSuite.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
-        conf = defIcI == null ? new Configuration() : new Configuration(new Version(defIcI));
-    }
 
-    public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
+    public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput,
+            Version incompatibleImprovements) {
         super(name);
-        
         NullArgumentException.check("name", name);
-        this.templateName = templateName != null ? templateName : name + ".ftl";
-        this.expectedFileName = expectedFileName != null ? expectedFileName : name + ".txt";
+        
+        NullArgumentException.check("templateName", templateName);
+        this.templateName = templateName;
+        
+        NullArgumentException.check("expectedFileName", expectedFileName);
+        this.expectedFileName = expectedFileName;
+        
         this.noOutput = noOutput;
+        
+        conf = new Configuration(incompatibleImprovements);
     }
     
-    public void setConfigParam(String param, String value) throws IOException {
+    public void setSetting(String param, String value) throws IOException {
         if ("auto_import".equals(param)) {
             StringTokenizer st = new StringTokenizer(value);
             if (!st.hasMoreTokens()) fail("Expecting libname");
@@ -161,7 +164,8 @@ public class TemplateTestCase extends FileTestCase {
         
         dataModel.put("message", "Hello, world!");
         
-        final String testName = getName();
+        String testName = getOriginalName(getName());
+        
         if (testName.equals("bean-maps")) {
             BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
@@ -434,6 +438,11 @@ public class TemplateTestCase extends FileTestCase {
       }
     }
     
+    private String getOriginalName(String name) {
+        int postfixSepIdx = name.indexOf("(");
+        return postfixSepIdx == -1 ? name : name.substring(0, postfixSepIdx);
+    }
+
     public void runTest() {
         try {
             template = conf.getTemplate(templateName);
