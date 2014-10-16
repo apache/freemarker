@@ -50,11 +50,11 @@ import freemarker.template.utility.StringUtil;
  */
 public class TemplateTestSuite extends TestSuite {
     
-    private static final String ELEM_TEST_CASE = "testcase";
+    private static final String ELEM_TEST_CASE = "testCase";
 
-    private static final String ELEM_CONFIG = "config";
+    private static final String ELEM_SETTING = "setting";
 
-    private static final String ATTR_NO_OUTPUT = "nooutput";
+    private static final String ATTR_NO_OUTPUT = "noOutput";
 
     private static final String ATTR_EXPECTED = "expected";
 
@@ -128,7 +128,7 @@ public class TemplateTestSuite extends TestSuite {
             Node n = children.item(childIdx);
             if (n.getNodeType() == Node.ELEMENT_NODE) {
                 final String nodeName = n.getNodeName();
-                if (nodeName.equals(ELEM_CONFIG)) {
+                if (nodeName.equals(ELEM_SETTING)) {
                     NamedNodeMap attrs = n.getAttributes();
                     for (int attrIdx = 0; attrIdx < attrs.getLength(); attrIdx++) {
                         Attr attr = (Attr) attrs.item(attrIdx);
@@ -229,7 +229,7 @@ public class TemplateTestSuite extends TestSuite {
     private Map<String, String> getCaseFMSettings(Element e) {
         final Map<String, String> caseFMSettings;
         caseFMSettings = new LinkedHashMap<String, String>();
-        NodeList settingElems = e.getElementsByTagName(ELEM_CONFIG);
+        NodeList settingElems = e.getElementsByTagName(ELEM_SETTING);
         for (int elemIdx = 0; elemIdx < settingElems.getLength(); elemIdx++) {
             NamedNodeMap attrs = settingElems.item(elemIdx).getAttributes();
             for (int attrIdx = 0; attrIdx < attrs.getLength(); attrIdx++) {
