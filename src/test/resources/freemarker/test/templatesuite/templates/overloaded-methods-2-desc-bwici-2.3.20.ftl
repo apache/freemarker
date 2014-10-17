@@ -22,4 +22,4 @@
 <@assertFails message="no compatible overloaded">${obj.mCharOrCharacterOverloaded('c')}</@>
 <@assertFails message="no compatible overloaded">${obj.mCharOrCharacterOverloaded(obj.javaString)}</@>
 
-<#include 'overloaded-methods-2-ici-2.3.20.ftl'>
+<#include 'overloaded-methods-2-bwici-2.3.20.ftl'>

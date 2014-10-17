@@ -16,7 +16,7 @@ ${double3?c}
 ${double4?c}
 ${bigDecimal?c}
 ${bigDecimal2?c}
-<#if testName?ends_with("2.3.21")>
+<#if iciIntValue gte 2003021>
   <@assertEquals expected="INF" actual="INF"?number?c />
   <@assertEquals expected="INF" actual="INF"?number?c />
   <@assertEquals expected="-INF" actual="-INF"?number?c />

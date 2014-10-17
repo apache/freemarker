@@ -8,10 +8,10 @@
                template CDATA #IMPLIED
                expected CDATA #IMPLIED
                noOutput CDATA #IMPLIED
-               class CDATA #IMPLIED
      >
-     <!-- The default of "template" is "${name}.ftl" -->
-     <!-- The default of "expected" is "${name}.txt" -->
+     <!-- The default of `template` is "${name?keep_before('[#endTN]')}.ftl" -->
+     <!-- The default of `expected` is "${name}.txt" -->
+     <!-- The default of `noOutput` is false -->
      
  <!ELEMENT setting EMPTY>
      <!ATTLIST setting 
@@ -49,10 +49,10 @@
    <testCase name="dateformat-java" />
    <testCase name="dateformat-iso-like" noOutput="true" />
    <testCase name="dateformat-iso-bi" noOutput="true">
-      <setting incompatible_improvements="2.3.0" /> 
-   </testCase>   
+      <setting incompatible_improvements="min, 2.3.20" /> 
+   </testCase>
    <testCase name="dateformat-iso-bi-ici-2.3.21" noOutput="true">
-      <setting incompatible_improvements="2.3.21" /> 
+      <setting incompatible_improvements="2.3.21, max" /> 
    </testCase>   
    <testCase name="dateparsing" noOutput="true" />
    <testCase name="default"/>
@@ -60,21 +60,14 @@
       <setting object_wrapper="freemarker.ext.beans.BeansWrapper"/>
    </testCase>
    <testCase name="encoding-builtins">
-      <setting incompatible_improvements="2.3.0" /> 
+      <setting incompatible_improvements="min, 2.3.19" /> 
    </testCase>
-   <testCase name="encoding-builtins-ici.2.3.20"
-            template="encoding-builtins.ftl" expected="encoding-builtins-ici-2.3.20.txt">
-      <setting incompatible_improvements="2.3.20" /> 
+   <testCase name="encoding-builtins[#endTN]-ici-2.3.20">
+      <setting incompatible_improvements="2.3.20, max" /> 
    </testCase>
    <testCase name="escapes" />
    <testCase name="hashliteral">
-      <setting incompatible_improvements="2.3.0" /> 
-   </testCase>
-   <testCase name="hashliteral-ici-2.3.20" template="hashliteral.ftl" expected="hashliteral.txt">
-      <setting incompatible_improvements="2.3.20"/>
-   </testCase>
-   <testCase name="hashliteral-ici-2.3.21"  template="hashliteral.ftl" expected="hashliteral.txt">
-      <setting incompatible_improvements="2.3.21" />
+      <setting incompatible_improvements="min, 2.3.20, 2.3.21, max" /> 
    </testCase>
    <testCase name="identifier" >
       <setting strict_syntax="N" />
@@ -103,10 +96,7 @@
    <testCase name="newlines2" />
    <testCase name="noparse" />
    <testCase name="number-format">
-      <setting incompatible_improvements="2.3.0" /> 
-   </testCase>
-   <testCase name="number-format-ici-2.3.21" template="number-format.ftl" expected="number-format.txt">
-   	  <setting incompatible_improvements="2.3.21"/>
+      <setting incompatible_improvements="min, 2.3.21, max" /> 
    </testCase>
    <testCase name="number-literal" >
       <setting locale="fr_FR"/>
@@ -121,21 +111,21 @@
    </testCase>
    <testCase name="precedence"/>
    <testCase name="range-ici-2.3.20" noOutput="true">
-   	  <setting incompatible_improvements="2.3.20"/>
+   	  <setting incompatible_improvements="min, 2.3.20"/>
    </testCase>
    <testCase name="range-ici-2.3.21" noOutput="true">
-   	  <setting incompatible_improvements="2.3.21"/>
+      <setting incompatible_improvements="2.3.21, max"/>
    </testCase>
    <testCase name="recover" />
    <testCase name="root" />
    <testCase name="setting" noOutput="true" />
-   <testCase name="sequence-builtins-with-BeansWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
+   <testCase name="sequence-builtins[#endTN]-with-BeansWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapper"/> 
    </testCase>
-   <testCase name="sequence-builtins-with-DefaultObjectWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
+   <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.DefaultObjectWrapper"/> 
    </testCase>
-   <testCase name="sequence-builtins-with-SimpleObjectWrapper" template="sequence-builtins.ftl" expected="sequence-builtins.txt">
+   <testCase name="sequence-builtins[#endTN]-with-SimpleObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
    </testCase>
    <testCase name="simplehash-char-key" noOutput="true" />
@@ -144,10 +134,7 @@
    </testCase>
    <testCase name="existence-operators" noOutput="true" />
    <testCase name="string-builtins1">
-      <setting incompatible_improvements="2.3.0"/>
-   </testCase>
-   <testCase name="string-builtins1-ici-2.3.20" template="string-builtins1.ftl" expected="string-builtins1.txt">
-      <setting incompatible_improvements="2.3.20"/>
+      <setting incompatible_improvements="min, 2.3.20, max"/>
    </testCase>
    <testCase name="string-builtins2" />
    <testCase name="string-builtins3" noOutput="true" />
@@ -159,10 +146,10 @@
    <testCase name="switch" />
    <testCase name="transforms"/>
    <testCase name="type-builtins">
-      <setting incompatible_improvements="2.3.0"/>
+      <setting incompatible_improvements="min, 2.3.20"/>
    </testCase>
-   <testCase name="type-builtins-ici-2.3.21" template="type-builtins.ftl" expected="type-builtins-ici-2.3.21.txt">
-   	  <setting incompatible_improvements="2.3.21"/>
+   <testCase name="type-builtins[#endTN]-ici-2.3.21">
+   	  <setting incompatible_improvements="2.3.21, max"/>
    </testCase>
    <testCase name="date-type-builtins" noOutput="true" />
    <testCase name="url" noOutput="true" />
@@ -225,30 +212,30 @@
    </testCase>
    
    <testCase name="overloaded-methods-23bc" noOutput="true">
-      <setting incompatible_improvements="2.3.0"/>
+      <setting incompatible_improvements="2.3.0, 2.3.19"/>
    </testCase>
-   <testCase name="overloaded-methods-2-inc-ici-2.3.20" noOutput="true">
+   <testCase name="overloaded-methods-2-inc-bwici-2.3.20" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapperInc2003020"/>
    </testCase>
-   <testCase name="overloaded-methods-2-desc-ici-2.3.20" noOutput="true">
+   <testCase name="overloaded-methods-2-desc-bwici-2.3.20" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapperDesc2003020"/>
    </testCase>
-   <testCase name="overloaded-methods-2-inc-ici-2.3.21" template="overloaded-methods-2-ici-2.3.21.ftl" noOutput="true">
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapperInc2003021"/>
    </testCase>
-   <testCase name="overloaded-methods-2-desc-ici-2.3.21" template="overloaded-methods-2-ici-2.3.21.ftl" noOutput="true">
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapperDesc2003021"/>
    </testCase>
-   <testCase name="overloaded-methods-2-inc-ici-2.3.20-dow" template="overloaded-methods-2-inc-ici-2.3.20.ftl" noOutput="true">
+   <testCase name="overloaded-methods-2-inc-bwici-2.3.20[#endTN]-dow" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperInc2003020"/>
    </testCase>
-   <testCase name="overloaded-methods-2-desc-ici-2.3.20-dow" template="overloaded-methods-2-desc-ici-2.3.20.ftl" noOutput="true">
+   <testCase name="overloaded-methods-2-desc-bwici-2.3.20[#endTN]-dow" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003020"/>
    </testCase>
-   <testCase name="overloaded-methods-2-inc-ici-2.3.21-dow" template="overloaded-methods-2-ici-2.3.21.ftl" noOutput="true">
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc-dow" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperInc2003021"/>
    </testCase>
-   <testCase name="overloaded-methods-2-desc-ici-2.3.21-dow" template="overloaded-methods-2-ici-2.3.21.ftl" noOutput="true">
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003021"/>
    </testCase>
 </testCases>
