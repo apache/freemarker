@@ -466,12 +466,8 @@ public class TemplateTestCase extends FileTestCase {
         }
         
         if (out != null) {
-            assertExpectedFileEqualsString(testCaseNameToFileName(getName()), out.toString());
+            assertExpectedFileEqualsString(getName(), out.toString());
         }
-    }
-    
-    private String testCaseNameToFileName(String name) {
-        return name.replace("|", "__");
     }
 
     private String getStackTrace(Throwable e) {
@@ -482,7 +478,7 @@ public class TemplateTestCase extends FileTestCase {
 
     @Override
     protected File getExpectedFileDirectory() throws IOException {
-        return new File(super.getExpectedFileDirectory(), "references");
+        return new File(super.getExpectedFileDirectory(), "expected");
     }
 
     @Override
