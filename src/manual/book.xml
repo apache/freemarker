@@ -16512,8 +16512,19 @@ or
                 </indexterm><literal>boolean_format</literal>: The
               comma-separated pair of strings for representing true and false
               values respectively that is used to convert booleans to strings
-              when no explicit format is specified. Default value is
-              <literal>"true,false"</literal>. See also:<link
+              when no explicit format is specified (like in
+              <literal>${<replaceable>booleanValue</replaceable>}</literal>).
+              Note that currently white space isn't removed from this string,
+              so don't put space after the comma. Default value is
+              <literal>"true,false"</literal>, but FreeMarker will deny using
+              that particular value for
+              <literal>${<replaceable>booleanValue</replaceable>}</literal>,
+              and requires using
+              <literal>${<replaceable>booleanValue</replaceable>?c}</literal>
+              instead (this works since 2.3.21). For any other value, like
+              <literal>"Y,N"</literal>,
+              <literal>${<replaceable>booleanValue</replaceable>}</literal>
+              will work. See also:<link
               linkend="ref_builtin_string_for_boolean"><literal>string</literal>
               built-in</link>.</para>
             </listitem>
