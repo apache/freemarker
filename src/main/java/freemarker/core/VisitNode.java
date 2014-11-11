@@ -66,7 +66,7 @@ final class VisitNode extends TemplateElement {
                 }
             }
         }
-        env.visit((TemplateNodeModel) node, (TemplateSequenceModel) nss);
+        env.invokeNodeHandlerFor((TemplateNodeModel) node, (TemplateSequenceModel) nss);
     }
 
     protected String dump(boolean canonical) {

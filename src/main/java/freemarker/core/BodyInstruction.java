@@ -53,7 +53,7 @@ final class BodyInstruction extends TemplateElement {
      */
     void accept(Environment env) throws IOException, TemplateException {
         Context bodyContext = new Context(env);
-        env.visit(bodyContext);
+        env.invokeNestedContent(bodyContext);
     }
 
     protected String dump(boolean canonical) {
@@ -110,7 +110,7 @@ final class BodyInstruction extends TemplateElement {
         
         Context(Environment env) throws TemplateException {
             invokingMacroContext = env.getCurrentMacroContext();
-            List bodyParameterNames = invokingMacroContext.bodyParameterNames;
+            List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
             if (bodyParameters != null) {
                 for (int i=0; i<bodyParameters.size(); i++) {
                     Expression exp = (Expression) bodyParameters.get(i);
@@ -131,7 +131,7 @@ final class BodyInstruction extends TemplateElement {
         }
         
         public Collection getLocalVariableNames() {
-            List bodyParameterNames = invokingMacroContext.bodyParameterNames;
+            List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
             return bodyParameterNames == null ? Collections.EMPTY_LIST : bodyParameterNames;
         }
     }

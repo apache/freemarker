@@ -31,29 +31,38 @@ import freemarker.template.TemplateModelIterator;
 
 /**
  * An element representing a macro declaration.
+ * 
+ * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */
 public final class Macro extends TemplateElement implements TemplateModel {
-    
-    final int TYPE_MACRO = 0;
-    final int TYPE_FUNCTION = 1;
-    
-    private final String name;
-    private final String[] paramNames;
-    private Map paramDefaults;
-    private String catchAllParamName;
-    boolean isFunction;
+
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
             Collections.EMPTY_LIST, 
             Collections.EMPTY_MAP,
+            null, false,
             TextBlock.EMPTY_BLOCK);
     
+    final static int TYPE_MACRO = 0;
+    final static int TYPE_FUNCTION = 1;
+    
+    private final String name;
+    private final String[] paramNames;
+    private final Map paramDefaults;
+    private final String catchAllParamName;
+    private final boolean function;
+
     Macro(String name, List argumentNames, Map args, 
+            String catchAllParamName, boolean function,
             TemplateElement nestedBlock) 
     {
         this.name = name;
         this.paramNames = (String[])argumentNames.toArray(
                 new String[argumentNames.size()]);
         this.paramDefaults = args;
+        
+        this.function = function;
+        this.catchAllParamName = catchAllParamName; 
+        
         this.nestedBlock = nestedBlock;
     }
 
@@ -61,10 +70,6 @@ public final class Macro extends TemplateElement implements TemplateModel {
         return catchAllParamName;
     }
     
-    public void setCatchAll(String value) {
-        catchAllParamName = value;
-    }
-
     public String[] getArgumentNames() {
         return (String[])paramNames.clone();
     }
@@ -76,7 +81,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     boolean hasArgNamed(String name) {
         return paramDefaults.containsKey(name);
     }
-
+    
     public String getName() {
         return name;
     }
@@ -91,11 +96,11 @@ public final class Macro extends TemplateElement implements TemplateModel {
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
         sb.append(name);
-        sb.append(isFunction ? '(' : ' ');
+        sb.append(function ? '(' : ' ');
         int argCnt = paramNames.length;
         for (int i = 0; i < argCnt; i++) {
             if (i != 0) {
-                if (isFunction) {
+                if (function) {
                     sb.append(", ");
                 } else {
                     sb.append(' ');
@@ -106,7 +111,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             if (paramDefaults != null && paramDefaults.get(argName) != null) {
                 sb.append('=');
                 Expression defaultExpr = (Expression) paramDefaults.get(argName);
-                if (isFunction) {
+                if (function) {
                     sb.append(defaultExpr.getCanonicalForm());
                 } else {
                     MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
@@ -118,7 +123,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             sb.append(catchAllParamName);
             sb.append("...");
         }
-        if (isFunction) sb.append(')');
+        if (function) sb.append(')');
         if (canonical) {
             sb.append('>');
             if (nestedBlock != null) {
@@ -130,7 +135,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
     
     String getNodeTypeSymbol() {
-        return isFunction ? "#function" : "#macro";
+        return function ? "#function" : "#macro";
     }
     
     boolean isShownInStackTrace() {
@@ -138,27 +143,27 @@ public final class Macro extends TemplateElement implements TemplateModel {
     }
     
     public boolean isFunction() {
-        return isFunction;
+        return function;
     }
 
     class Context implements LocalContext {
-        Environment.Namespace localVars; 
-        TemplateElement body;
-        Environment.Namespace bodyNamespace;
-        List bodyParameterNames;
-        Context prevMacroContext;
-        ArrayList prevLocalContextStack;
+        final Environment.Namespace localVars; 
+        final TemplateElement nestedContent;
+        final Environment.Namespace nestedContentNamespace;
+        final List nestedContentParameterNames;
+        final ArrayList prevLocalContextStack;
+        final Context prevMacroContext;
         
         Context(Environment env, 
-                TemplateElement body,
-                List bodyParameterNames) 
+                TemplateElement nestedContent,
+                List nestedContentParameterNames) 
         {
             this.localVars = env.new Namespace();
-            this.prevMacroContext = env.getCurrentMacroContext();
-            this.bodyNamespace = env.getCurrentNamespace();
+            this.nestedContent = nestedContent;
+            this.nestedContentNamespace = env.getCurrentNamespace();
+            this.nestedContentParameterNames = nestedContentParameterNames;
             this.prevLocalContextStack = env.getLocalContextStack();
-            this.body = body;
-            this.bodyParameterNames = bodyParameterNames;
+            this.prevMacroContext = env.getCurrentMacroContext();
         }
                 
         
@@ -290,7 +295,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
             } else if (idx == argDescsEnd) {
                 return catchAllParamName;
             } else if (idx == argDescsEnd + 1) {
-                return new Integer(isFunction ? TYPE_FUNCTION : TYPE_MACRO);
+                return new Integer(function ? TYPE_FUNCTION : TYPE_MACRO);
             } else {
                 throw new IndexOutOfBoundsException();
             }

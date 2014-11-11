@@ -2355,9 +2355,7 @@ Macro Macro() :
     )
     {
         inMacro = inFunction = false;
-        Macro result = new Macro(name, argNames, args, block);
-        result.setCatchAll(catchAll);
-        result.isFunction = isFunction;
+        Macro result = new Macro(name, argNames, args, catchAll, isFunction, block);
         result.setLocation(template, start, end);
         template.addMacro(result);
         return result;

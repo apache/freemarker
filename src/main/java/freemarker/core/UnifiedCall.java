@@ -71,13 +71,13 @@ final class UnifiedCall extends TemplateElement {
         if (tm == Macro.DO_NOTHING_MACRO) return; // shortcut here.
         if (tm instanceof Macro) {
             Macro macro = (Macro) tm;
-            if (macro.isFunction && !legacySyntax) {
+            if (macro.isFunction() && !legacySyntax) {
                 throw new _MiscTemplateException(env, new Object[] {
                         "Routine ", new _DelayedJQuote(macro.getName()), " is a function, not a directive. "
                         + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
                         "<@someDirective someParam=f() />", "." });
             }    
-            env.visit(macro, namedArgs, positionalArgs, bodyParameterNames,
+            env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames,
                     nestedBlock);
         }
         else {

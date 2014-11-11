@@ -64,7 +64,6 @@ import freemarker.template._TemplateAPI;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
-import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -466,17 +465,17 @@ public final class Environment extends Configurable {
     /**
      * Used for {@code #nested}.
      */
-    void visit(BodyInstruction.Context bctxt) throws TemplateException, IOException {
+    void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         ArrayList prevLocalContextStack = localContextStack;
-        TemplateElement body = invokingMacroContext.body;
-        if (body != null) {
+        TemplateElement nestedContent = invokingMacroContext.nestedContent;
+        if (nestedContent != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
-            currentNamespace = invokingMacroContext.bodyNamespace;
+            currentNamespace = invokingMacroContext.nestedContentNamespace;
             
             final Configurable prevParent;
             final boolean parentReplacementOn
-                    = getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+                    = isIcI2322OrLater();
             if (parentReplacementOn) {
                 prevParent = getParent();
                 setParent(currentNamespace.getTemplate());
@@ -485,14 +484,14 @@ public final class Environment extends Configurable {
             }
             
             this.localContextStack = invokingMacroContext.prevLocalContextStack;
-            if (invokingMacroContext.bodyParameterNames != null) {
-                pushLocalContext(bctxt);
+            if (invokingMacroContext.nestedContentParameterNames != null) {
+                pushLocalContext(bodyCtx);
             }
             try {
-                visit(body);
+                visit(nestedContent);
             }
             finally {
-                if (invokingMacroContext.bodyParameterNames != null) {
+                if (invokingMacroContext.nestedContentParameterNames != null) {
                     popLocalContext();
                 }
                 this.currentMacroContext = invokingMacroContext;
@@ -526,10 +525,9 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * "Visit" A TemplateNodeModel
+     * Used for {@code #visit} and {@code #recurse}.
      */
-    
-    void visit(TemplateNodeModel node, TemplateSequenceModel namespaces) 
+    void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces) 
     throws TemplateException, IOException 
     {
         if (nodeNamespaces == null) {
@@ -549,7 +547,7 @@ public final class Environment extends Configurable {
         try {
             TemplateModel macroOrTransform = getNodeProcessor(node);
             if (macroOrTransform instanceof Macro) {
-                visit((Macro) macroOrTransform, null, null, null, null);
+                invoke((Macro) macroOrTransform, null, null, null, null);
             }
             else if (macroOrTransform instanceof TemplateTransformModel) {
                 visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
@@ -612,7 +610,7 @@ public final class Environment extends Configurable {
     void fallback() throws TemplateException, IOException {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (macroOrTransform instanceof Macro) {
-            visit((Macro) macroOrTransform, null, null, null, null);
+            invoke((Macro) macroOrTransform, null, null, null, null);
         }
         else if (macroOrTransform instanceof TemplateTransformModel) {
             visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
@@ -620,86 +618,32 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * "visit" a macro.
+     * Calls the macro or function with the given arguments and nested block.
      */
-    
-    void visit(Macro macro, 
-               Map namedArgs, 
-               List positionalArgs, 
-               List bodyParameterNames,
-               TemplateElement nestedBlock) 
-       throws TemplateException, IOException 
-    {
+    void invoke(Macro macro, 
+               Map namedArgs, List positionalArgs, 
+               List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
         if (macro == Macro.DO_NOTHING_MACRO) {
             return;
         }
+        
         pushElement(macro);
         try {
-            Macro.Context previousMacroContext = currentMacroContext;
-            Macro.Context mc = macro.new Context(this, nestedBlock, bodyParameterNames);
-
-            String catchAll = macro.getCatchAll();
-            TemplateModel unknownVars = null;
+            final Macro.Context macroCtx = macro.new Context(this, nestedBlock, bodyParameterNames);
+            setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
             
-            if (namedArgs != null) {
-                if (catchAll != null)
-                    unknownVars = new SimpleHash();
-                for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    String varName = (String) entry.getKey();
-                    boolean hasVar = macro.hasArgNamed(varName);
-                    if (hasVar || catchAll != null) {
-                        Expression arg = (Expression) entry.getValue();
-                        TemplateModel value = arg.eval(this);
-                        if (hasVar) {
-                            mc.setLocalVar(varName, value);
-                        } else {
-                            ((SimpleHash)unknownVars).put(varName, value);
-                        }
-                    } else {
-                        throw new _MiscTemplateException(this, new Object[] {
-                                "Macro ", new _DelayedJQuote(macro.getName()), " has no such argument: ",
-                                varName });
-                    }
-                }
-            }
-            else if (positionalArgs != null) {
-                if (catchAll != null)
-                    unknownVars = new SimpleSequence();
-                String[] argumentNames = macro.getArgumentNamesInternal();
-                int size = positionalArgs.size();
-                if (argumentNames.length < size && catchAll == null) {
-                    throw new _MiscTemplateException(this, new Object[] { 
-                            "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
-                            + argumentNames.length + " parameters." });
-                }
-                for (int i = 0; i < size; i++) {
-                    Expression argExp = (Expression) positionalArgs.get(i);
-                    TemplateModel argModel = argExp.eval(this);
-                    try {
-                        if (i < argumentNames.length) {
-                            String argName = argumentNames[i];
-                            mc.setLocalVar(argName, argModel);
-                        } else {
-                            ((SimpleSequence)unknownVars).add(argModel);
-                        }
-                    } catch (RuntimeException re) {
-                        throw new _MiscTemplateException(re, this);
-                    }
-                }
-            }
-            if (catchAll != null) {
-                mc.setLocalVar(catchAll, unknownVars);
-            }
-            ArrayList prevLocalContextStack = localContextStack;
+            final Macro.Context prevMacroCtx = currentMacroContext;
+            currentMacroContext = macroCtx;
+            
+            final ArrayList prevLocalContextStack = localContextStack;
             localContextStack = null;
-            Namespace prevNamespace = currentNamespace;
+            
+            final Namespace prevNamespace = currentNamespace;
             currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
-            currentMacroContext = mc;
             
             final Configurable prevParent;
             final boolean parentReplacementOn
-                    = getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+                    = isIcI2322OrLater();
             if (parentReplacementOn) {
                 prevParent = getParent();
                 // This line is historically missing from here (a bug), but for BC we leave it so:
@@ -709,14 +653,13 @@ public final class Environment extends Configurable {
             }
             
             try {
-                mc.runMacro(this);
-            }
-            catch (ReturnInstruction.Return re) {
-            }
-            catch (TemplateException te) {
+                macroCtx.runMacro(this);
+            } catch (ReturnInstruction.Return re) {
+                // Not an error, just a <#return>
+            } catch (TemplateException te) {
                 handleTemplateException(te);
             } finally {
-                currentMacroContext = previousMacroContext;
+                currentMacroContext = prevMacroCtx;
                 localContextStack = prevLocalContextStack;
                 currentNamespace = prevNamespace;
                 if (parentReplacementOn) {
@@ -727,7 +670,79 @@ public final class Environment extends Configurable {
             popElement();
         }
     }
+
+    /**
+     * Sets the local variables corresponding to the macro call arguments in the macro context.
+     */
+    private void setMacroContextLocalsFromArguments(
+            final Macro.Context macroCtx,
+            final Macro macro,
+            final Map namedArgs, final List positionalArgs) throws TemplateException, _MiscTemplateException {
+        String catchAllParamName = macro.getCatchAll();
+        if (namedArgs != null) {
+            final SimpleHash catchAllParamValue;
+            if (catchAllParamName != null) {
+                catchAllParamValue = new SimpleHash((ObjectWrapper) null);
+                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
+            } else {
+                catchAllParamValue = null;
+            }
+            
+            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
+                final Map.Entry argNameAndValExp = (Map.Entry) it.next();
+                final String argName = (String) argNameAndValExp.getKey();
+                final boolean isArgNameDeclared = macro.hasArgNamed(argName);
+                if (isArgNameDeclared || catchAllParamName != null) {
+                    Expression argValueExp = (Expression) argNameAndValExp.getValue();
+                    TemplateModel argValue = argValueExp.eval(this);
+                    if (isArgNameDeclared) {
+                        macroCtx.setLocalVar(argName, argValue);
+                    } else {
+                        catchAllParamValue.put(argName, argValue);
+                    }
+                } else {
+                    throw new _MiscTemplateException(this, new Object[] {
+                            (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                            " has no parameter with name ", new _DelayedJQuote(argName), "." });
+                }
+            }
+        } else if (positionalArgs != null) {
+            final SimpleSequence catchAllParamValue;
+            if (catchAllParamName != null) {
+                catchAllParamValue = new SimpleSequence((ObjectWrapper) null);
+                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
+            } else {
+                catchAllParamValue = null;
+            }
+            
+            String[] argNames = macro.getArgumentNamesInternal();
+            final int argsCnt = positionalArgs.size();
+            if (argNames.length < argsCnt && catchAllParamName == null) {
+                throw new _MiscTemplateException(this, new Object[] { 
+                        (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                        " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
+                        new _DelayedToString(argsCnt), "."});
+            }
+            for (int i = 0; i < argsCnt; i++) {
+                Expression argValueExp = (Expression) positionalArgs.get(i);
+                TemplateModel argValue = argValueExp.eval(this);
+                try {
+                    if (i < argNames.length) {
+                        String argName = argNames[i];
+                        macroCtx.setLocalVar(argName, argValue);
+                    } else {
+                        catchAllParamValue.add(argValue);
+                    }
+                } catch (RuntimeException re) {
+                    throw new _MiscTemplateException(re, this);
+                }
+            }
+        }
+    }
     
+    /**
+     * Defines the given macro in the current namespace (doesn't call it).
+     */
     void visitMacroDef(Macro macro) {
         macroToNamespaceLookup.put(macro, currentNamespace);
         currentNamespace.put(macro.getName(), macro);
@@ -752,7 +767,7 @@ public final class Environment extends Configurable {
         for (int i=0; i<children.size(); i++) {
             TemplateNodeModel child = (TemplateNodeModel) children.get(i);
             if (child != null) {
-                visit(child, namespaces);
+                invokeNodeHandlerFor(child, namespaces);
             }
         }
     }
@@ -1989,8 +2004,7 @@ public final class Environment extends Configurable {
     throws TemplateException, IOException
     {
         final Template prevTemplate;
-        final boolean parentReplacementOn
-                = getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+        final boolean parentReplacementOn = isIcI2322OrLater();
         if (parentReplacementOn) {
             prevTemplate = getTemplate();
             setParent(includedTemplate);
@@ -2008,7 +2022,7 @@ public final class Environment extends Configurable {
             }
         }
     }
-    
+
     /**
      * Emulates <code>import</code> directive, except that <code>name</code> must be tempate
      * root relative.
@@ -2198,6 +2212,10 @@ public final class Environment extends Configurable {
         }
     };
     
+    private boolean isIcI2322OrLater() {
+        return getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+    }
+
     /**
      * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
      */

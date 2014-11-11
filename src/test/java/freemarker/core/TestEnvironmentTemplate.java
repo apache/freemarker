@@ -21,21 +21,68 @@ public class TestEnvironmentTemplate extends TemplateTest {
     private static final StringTemplateLoader TEMPLATES = new StringTemplateLoader();
     static {
         TEMPLATES.putTemplate("main",
-                "<@tNames /> "
-                + "[imp: <#import 'imp' as i>${i.ini}] "
-                + "<@i.m><@tNames /></@> "
-                + "[inc: <#include 'inc'>] "
-                + "<@incM><@tNames /></@>");
-        TEMPLATES.putTemplate("inc", "<@tNames />"
-                + "<#if !included!false> [incInc: <#assign included=true><#include 'inc'>]</#if>"
-                + "<#macro incM>[incM: <@tNames /> {<#nested>}]</#macro>");
-        TEMPLATES.putTemplate("imp", "<#assign ini><@tNames /></#assign> "
-                + "<#macro m>[m: <@tNames /> {<#nested>} [inc: <#include 'inc'>] <@incM><@tNames /></@>]</#macro>");
+                "<@tNames />\n"
+                + "---1---\n"
+                + "[imp: <#import 'imp' as i>${i.impIni}]\n"
+                + "---2---\n"
+                + "<@i.impM>"
+                    + "<@tNames />"
+                + "</@>\n"
+                + "---3---\n"
+                + "[inc: <#include 'inc'>]\n"
+                + "---4---\n"
+                + "<@incM>"
+                    + "<@tNames />"
+                + "</@>\n");
+        TEMPLATES.putTemplate("inc",
+                "<@tNames />\n"
+                + "<#macro incM>"
+                    + "[incM: <@tNames /> {<#nested>}]"
+                + "</#macro>"
+                + "<@incM><@tNames /></@>\n"
+                + "<#if !included!false>[incInc: <#assign included=true><#include 'inc'>]\n</#if>"
+                );
+        TEMPLATES.putTemplate("imp",
+                "<#assign impIni><@tNames /></#assign>\n"
+                + "<#macro impM>"
+                    + "[impM: <@tNames />\n"
+                        + "{<#nested>}\n"
+                        + "[inc: <#include 'inc'>]\n"
+                        + "<@incM><@tNames /></@>\n"
+                    + "]"
+                + "</#macro>");
         // TODO call mInc from inc
         // TODO call mImp from inc
         // TODO i2.macro call from imp macro
     }
-    
+
+    @Test
+    public void test2321() throws IOException, TemplateException {
+        setConfiguration(cfg2321);
+        assertOutputForNamed("main",
+                "<t=main>\n"
+                + "---1---\n"
+                + "[imp: <t=imp>]\n"
+                + "---2---\n"
+                + "[impM: <t=main>\n"
+                    + "{<t=main>}\n"
+                    + "[inc: <t=inc>\n"
+                        + "[incM: <t=inc> {<t=inc>}]\n"
+                        + "[incInc: <t=inc>\n"
+                            + "[incM: <t=inc> {<t=inc>}]\n"
+                        + "]\n"
+                    + "]\n"
+                    + "[incM: <t=main> {<t=imp>}]\n"
+                + "]\n"
+                + "---3---\n"
+                + "[inc: <t=inc>\n"
+                + "[incM: <t=inc> {<t=inc>}]\n"
+                + "[incInc: <t=inc>\n"
+                    + "[incM: <t=inc> {<t=inc>}]\n"
+                + "]\n"
+                + "---4---\n"
+                + "[incM: <t=main> {<t=main>}]\n");
+    }
     
     private final Configuration cfg2321 = createConfiguration(Configuration.VERSION_2_3_21);
     private final Configuration cfg2322 = createConfiguration(Configuration.VERSION_2_3_22);
@@ -43,6 +90,7 @@ public class TestEnvironmentTemplate extends TemplateTest {
     private Configuration createConfiguration(Version version2321) {
         Configuration cfg = new Configuration(version2321);
         cfg.setTemplateLoader(TEMPLATES);
+        cfg.setWhitespaceStripping(false);
         return cfg;
     }
 
@@ -57,17 +105,6 @@ public class TestEnvironmentTemplate extends TemplateTest {
             }
             
         });
-    }
-    
-    @Test
-    public void test2321() throws IOException, TemplateException {
-        setConfiguration(cfg2321);
-        assertOutputForNamed("main",
-                "<t=main> "
-                + "[imp: <t=imp>] "
-                + "[m: <t=main> {<t=main>} [inc: <t=inc> [incInc: <t=inc>]] [incM: <t=main> {<t=imp>}]] "
-                + "[inc: <t=inc> [incInc: <t=inc>]] "
-                + "[incM: <t=main> {<t=main>}]");
     }
 
 }
