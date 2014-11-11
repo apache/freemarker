@@ -52,11 +52,19 @@ public abstract class TemplateTest {
 
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
         Template t = new Template(null, ftl, configuration);
+        assertOutput(t, expectedOut);
+    }
+
+    protected void assertOutputForNamed(String name, String expectedOut) throws IOException, TemplateException {
+        assertOutput(configuration.getTemplate(name), expectedOut);
+    }
+    
+    private void assertOutput(Template t, String expectedOut) throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         t.process(createDataModel(), out);
         assertEquals(expectedOut, out.toString());
     }
-
+    
     protected Object createDataModel() {
         return null;
     }
