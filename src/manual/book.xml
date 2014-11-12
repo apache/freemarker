@@ -16074,15 +16074,22 @@ or
             </listitem>
 
             <listitem>
-              <para><literal><replaceable>paramN</replaceable></literal>, the
-              last parameter, may optionally include a trailing ellipsis
+              <para><indexterm>
+                  <primary>catch-all parameter</primary>
+                </indexterm><indexterm>
+                  <primary>variable number of parameters</primary>
+                </indexterm><literal><replaceable>paramN</replaceable></literal>,
+              the last parameter may optionally has 3 trailing dots
               (<literal>...</literal>), which indicates the macro takes a
-              variable number of parameters. If called using named parameters,
+              variable number of parameters and the parameters that doesn't
+              match any other parameters will be collected in this last
+              parameter (also called the catch-all parameter). When the macro
+              is called with named parameters,
               <literal><replaceable>paramN</replaceable></literal> will be a
               hash containing all of the undeclared key/value pairs passed to
-              the macro. If called using positional parameters,
-              <literal><replaceable>paramN</replaceable></literal> will be a
-              sequence of the extra parameters.</para>
+              the macro. When the macro is called using positional parameters,
+              <literal><replaceable>paramN</replaceable></literal> will be the
+              sequence of the extra parameter values.</para>
             </listitem>
 
             <listitem>
@@ -16229,6 +16236,42 @@ or
     height="50"
     width="100"
   &gt;</programlisting>
+
+          <para>Example: A macro with that supports a variable number of
+          positional parameters, regardless if it uses named or positional
+          parameter passing:</para>
+
+          <programlisting role="template">&lt;#macro m a b ext...&gt;
+  a = ${a}
+  b = ${b}
+  &lt;#if ext?is_enumerable&gt;
+    &lt;#list ext as e&gt;
+      ${e_index} = ${e}
+    &lt;/#list&gt;
+  &lt;#else&gt;
+    &lt;#list ext?keys as k&gt;
+      ${k} = ${ext[k]}
+    &lt;/#list&gt;
+  &lt;/#if&gt;
+&lt;/#macro&gt;
+
+&lt;@m 1 2 3 4 5 /&gt;
+
+&lt;@m a=1 b=2 c=3 d=4 e=5 /&gt;</programlisting>
+
+          <para>Output:</para>
+
+          <programlisting role="output">  a = 1
+  b = 2
+      0 = 3
+      1 = 4
+      2 = 5
+
+  a = 1
+  b = 2
+      d = 4
+      e = 5
+      c = 3</programlisting>
 
           <section>
             <title>nested</title>
