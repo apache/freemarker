@@ -331,7 +331,6 @@ public class _MethodUtil {
      * @param clazz Class having the method.
      * @param signature Java Server Page (TM) Specification compliant function signature string.
      * @return method if found.
-     * @throws UndeclaredThrowableException
      */
     public static Method getMethodByFunctionSignature(Class clazz, String signature) {
         Matcher m1 = FUNCTION_SIGNATURE_PATTERN.matcher(signature);

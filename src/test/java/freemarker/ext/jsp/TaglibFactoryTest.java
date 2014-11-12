@@ -50,7 +50,7 @@ public class TaglibFactoryTest {
     @Before
     public void before() throws Exception {
         BeansWrapperBuilder builder = new BeansWrapperBuilder(new Version("2.3"));
-        wrapper = builder.getResult();
+        wrapper = builder.build();
     }
 
     @Test
