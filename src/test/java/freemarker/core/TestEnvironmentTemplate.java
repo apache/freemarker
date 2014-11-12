@@ -33,7 +33,20 @@ public class TestEnvironmentTemplate extends TemplateTest {
                 + "---4---\n"
                 + "<@incM>"
                     + "<@tNames />"
-                + "</@>\n");
+                + "</@>\n"
+                + "---5---\n"
+                + "[inc2: <#include 'inc2'>]\n"
+                + "---6---\n"
+                + "<#import 'imp2' as i2>"
+                + "<@i.impM2><@tNames /></@>\n"
+                + "---7---\n"
+                + "<#macro mainM>"
+                    + "[mainM: <@tNames /> {<#nested>} <@tNames />]"
+                + "</#macro>"
+                + "[inc3: <#include 'inc3'>]\n"
+                + "<@mainM><@tNames /> <#include 'inc4'> <@tNames /></@>\n"
+                + "<@tNames />\n"
+                );
         TEMPLATES.putTemplate("inc",
                 "<@tNames />\n"
                 + "<#macro incM>"
@@ -50,44 +63,89 @@ public class TestEnvironmentTemplate extends TemplateTest {
                         + "[inc: <#include 'inc'>]\n"
                         + "<@incM><@tNames /></@>\n"
                     + "]"
+                + "</#macro>"
+                + "<#macro impM2>"
+                    + "[impM2: <@tNames />\n"
+                    + "{<#nested>}\n"
+                    + "<@i2.imp2M><@tNames /></@>\n"
+                    + "]"
+                + "</#macro>"
+                );
+        TEMPLATES.putTemplate("inc2",
+                "<@tNames />\n"
+                + "<@i.impM><@tNames /></@>\n"
+                );
+        TEMPLATES.putTemplate("imp2",
+                "<#macro imp2M>"
+                    + "[imp2M: <@tNames /> {<#nested>}]"
                 + "</#macro>");
-        // TODO call mInc from inc
-        // TODO call mImp from inc
-        // TODO i2.macro call from imp macro
+        TEMPLATES.putTemplate("inc3",
+                "<@tNames />\n"
+                + "<@mainM><@tNames /></@>\n"
+                );
+        TEMPLATES.putTemplate("inc4",
+                "<@tNames />"
+                );
     }
-
-    @Test
-    public void test2321() throws IOException, TemplateException {
-        setConfiguration(cfg2321);
-        assertOutputForNamed("main",
-                "<t=main>\n"
-                + "---1---\n"
-                + "[imp: <t=imp>]\n"
-                + "---2---\n"
-                + "[impM: <t=main>\n"
+    
+    private final static String EXPECTED_2_3_21 =
+            "<t=main>\n"
+            + "---1---\n"
+            + "[imp: <t=imp>]\n"
+            + "---2---\n"
+            + "[impM: <t=main>\n"
+                + "{<t=main>}\n"
+                + "[inc: <t=inc>\n"
+                    + "[incM: <t=inc> {<t=imp>}]\n"
+                    + "[incInc: <t=inc>\n"
+                        + "[incM: <t=inc> {<t=imp>}]\n"
+                    + "]\n"
+                + "]\n"
+                + "[incM: <t=main> {<t=imp>}]\n"
+            + "]\n"
+            + "---3---\n"
+            + "[inc: <t=inc>\n"
+                + "[incM: <t=inc> {<t=main>}]\n"
+                + "[incInc: <t=inc>\n"
+                    + "[incM: <t=inc> {<t=main>}]\n"
+                + "]\n"
+            + "]\n"
+            + "---4---\n"
+            + "[incM: <t=main> {<t=main>}]\n"
+            + "---5---\n"
+            + "[inc2: <t=inc2>\n"
+                + "[impM: <t=inc2>\n"
                     + "{<t=main>}\n"
                     + "[inc: <t=inc>\n"
                         + "[incM: <t=inc> {<t=imp>}]\n"
-                        + "[incInc: <t=inc>\n"
-                            + "[incM: <t=inc> {<t=imp>}]\n"
-                        + "]\n"
                     + "]\n"
-                    + "[incM: <t=main> {<t=imp>}]\n"
+                    + "[incM: <t=inc2> {<t=imp>}]\n"
                 + "]\n"
-                + "---3---\n"
-                + "[inc: <t=inc>\n"
-                    + "[incM: <t=inc> {<t=main>}]\n"
-                    + "[incInc: <t=inc>\n"
-                        + "[incM: <t=inc> {<t=main>}]\n"
-                    + "]\n"
-                + "]\n"
-                + "---4---\n"
-                + "[incM: <t=main> {<t=main>}]\n");
+            + "]\n"
+            + "---6---\n"
+            + "[impM2: <t=main>\n"
+                + "{<t=main>}\n"
+                + "[imp2M: <t=main> {<t=imp>}]\n"
+            + "]\n"
+            + "---7---\n"
+            + "[inc3: <t=inc3>\n"
+                + "[mainM: <t=inc3> {<t=main>} <t=inc3>]\n"
+            + "]\n"
+            + "[mainM: <t=main> {<t=main> <t=inc4> <t=main>} <t=main>]\n"
+            + "<t=main>\n";            
+
+    @Test
+    public void test2321() throws IOException, TemplateException {
+        setConfiguration(createConfiguration(Configuration.VERSION_2_3_21));
+        assertOutputForNamed("main", EXPECTED_2_3_21);
+    }
+
+    @Test
+    public void test2322() throws IOException, TemplateException {
+        setConfiguration(createConfiguration(Configuration.VERSION_2_3_22));
+        assertOutputForNamed("main", EXPECTED_2_3_21.replaceAll("<t=\\w+", "<t=main"));
     }
     
-    private final Configuration cfg2321 = createConfiguration(Configuration.VERSION_2_3_21);
-    private final Configuration cfg2322 = createConfiguration(Configuration.VERSION_2_3_22);
-
     private Configuration createConfiguration(Version version2321) {
         Configuration cfg = new Configuration(version2321);
         cfg.setTemplateLoader(TEMPLATES);
