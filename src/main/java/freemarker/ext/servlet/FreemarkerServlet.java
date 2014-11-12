@@ -471,7 +471,7 @@ public class FreemarkerServlet extends HttpServlet
                 servletContext.setAttribute(
                     ATTR_APPLICATION_MODEL,
                     servletContextModel);
-                TaglibFactory taglibs = new TaglibFactory(servletContext);
+                TaglibFactory taglibs = new TaglibFactory(servletContext, wrapper);
                 servletContext.setAttribute(
                     ATTR_JSP_TAGLIBS_MODEL,
                     taglibs);

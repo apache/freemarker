@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import freemarker.core.BugException;
 import freemarker.core._DelayedConversionToString;
@@ -29,6 +31,7 @@ import freemarker.core._DelayedJQuote;
 import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -41,7 +44,12 @@ public class _MethodUtil {
     // Get rid of these on Java 5
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
-    
+
+    private static final Pattern FUNCTION_SIGNATURE_PATTERN = 
+            Pattern.compile("^([\\w\\.]+(\\s*\\[\\s*\\])?)\\s+([\\w]+)\\s*\\((.*)\\)$");
+    private static final Pattern FUNCTION_PARAMETER_PATTERN = 
+            Pattern.compile("^([\\w\\.]+)(\\s*\\[\\s*\\])?$");
+
     /**
      * Determines whether the type given as the 1st argument is convertible to the type given as the 2nd argument
      * for method call argument conversion. This follows the rules of the Java reflection-based method call, except
@@ -309,5 +317,102 @@ public class _MethodUtil {
                 "; see cause exception in the Java stack trace."
         });
     }
-    
+
+    /**
+     * Finds method by function signature string which is compliant with
+     * Tag Library function signature in Java Server Page (TM) Specification.
+     * <P>
+     * A function signature example is as follows:
+     * </P>
+     * <PRE>
+     *       java.lang.String nickName( java.lang.String, int )
+     * </PRE>
+     * 
+     * @param clazz Class having the method.
+     * @param signature Java Server Page (TM) Specification compliant function signature string.
+     * @return method if found.
+     * @throws UndeclaredThrowableException
+     */
+    public static Method getMethodByFunctionSignature(Class clazz, String signature) {
+        Matcher m1 = FUNCTION_SIGNATURE_PATTERN.matcher(signature);
+
+        if (!m1.matches()) {
+            throw new IllegalArgumentException("Invalid function signature.");
+        }
+
+        try {
+            String methodName = m1.group(3);
+            String params = m1.group(4).trim();
+            Class [] paramTypes = null;
+
+            if ("".equals(params)) {
+                paramTypes = new Class[0];
+            }
+            else {
+                String [] paramsArray = StringUtil.split(params, ',');
+                paramTypes = new Class[paramsArray.length];
+                String token = null;
+                String paramType = null;
+                boolean isPrimitive = false;
+                boolean isArrayType = false;
+                Matcher m2 = null;
+
+                for (int i = 0; i < paramsArray.length; i++) {
+                    token = paramsArray[i].trim();
+                    m2 = FUNCTION_PARAMETER_PATTERN.matcher(token);
+
+                    if (!m2.matches()) {
+                        throw new IllegalArgumentException("Invalid argument signature: '" + token + "'.");
+                    }
+
+                    paramType = m2.group(1);
+                    isPrimitive = (paramType.indexOf('.') == -1);
+                    isArrayType = (m2.group(2) != null);
+
+                    if (isPrimitive) {
+                        if ("byte".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? byte[].class : byte.class);
+                        }
+                        else if ("short".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? short[].class : short.class);
+                        }
+                        else if ("int".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? int[].class : int.class);
+                        }
+                        else if ("long".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? long[].class : long.class);
+                        }
+                        else if ("float".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? float[].class : float.class);
+                        }
+                        else if ("double".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? double[].class : double.class);
+                        }
+                        else if ("boolean".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? boolean[].class : boolean.class);
+                        }
+                        else if ("char".equals(paramType)) {
+                            paramTypes[i] = (isArrayType ? char[].class : char.class);
+                        }
+                        else {
+                            throw new IllegalArgumentException("Invalid primitive type: '" + paramType + "'.");
+                        }
+                    }
+                    else {
+                        if (isArrayType) {
+                            paramTypes[i] = ClassUtil.forName("[L" + paramType + ";");
+                        }
+                        else {
+                            paramTypes[i] = ClassUtil.forName(paramType);
+                        }
+                    }
+                }
+            }
+
+            return clazz.getMethod(methodName, paramTypes);
+        }
+        catch (Exception e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
 }

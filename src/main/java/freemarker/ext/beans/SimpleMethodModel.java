@@ -50,7 +50,7 @@ public final class SimpleMethodModel extends SimpleMethod
      * <tt>null</tt> for static methods.
      * @param method the method that will be invoked.
      */
-    SimpleMethodModel(Object object, Method method, Class[] argTypes, 
+    public SimpleMethodModel(Object object, Method method, Class[] argTypes, 
             BeansWrapper wrapper)
     {
         super(method, argTypes);
