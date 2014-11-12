@@ -21474,7 +21474,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para/>
+              <para>Added <literal>Environment.getMainTemplate()</literal> and
+              <literal>Environment.getCurrentTemplate()</literal>, deprecated
+              <literal>Environment.getTemplate()</literal>. These can be
+              useful for directives and methods that are called from templates
+              to find out which template they were called from.</para>
             </listitem>
           </itemizedlist>
         </section>

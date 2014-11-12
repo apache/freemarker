@@ -1,5 +1,7 @@
 package freemarker.core;
 
+import static org.junit.Assert.assertSame;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
@@ -9,6 +11,8 @@ import org.junit.Test;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -16,7 +20,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
-public class TestEnvironmentTemplate extends TemplateTest {
+public class TestEnvironmentGetTemplateVariants extends TemplateTest {
 
     private static final StringTemplateLoader TEMPLATES = new StringTemplateLoader();
     static {
@@ -46,12 +50,22 @@ public class TestEnvironmentTemplate extends TemplateTest {
                 + "[inc3: <#include 'inc3'>]\n"
                 + "<@mainM><@tNames /> <#include 'inc4'> <@tNames /></@>\n"
                 + "<@tNames />\n"
+                + "---8---\n"
+                + "<#function mainF>"
+                    + "<@tNames />"
+                    + "<#return lastTNamesResult>"
+                + "</#function>"
+                + "mainF: ${mainF()}, impF: ${i.impF()}, incF: ${incF()}\n"
                 );
         TEMPLATES.putTemplate("inc",
                 "<@tNames />\n"
                 + "<#macro incM>"
                     + "[incM: <@tNames /> {<#nested>}]"
                 + "</#macro>"
+                + "<#function incF>"
+                    + "<@tNames />"
+                    + "<#return lastTNamesResult>"
+                + "</#function>"
                 + "<@incM><@tNames /></@>\n"
                 + "<#if !included!false>[incInc: <#assign included=true><#include 'inc'>]\n</#if>"
                 );
@@ -70,6 +84,10 @@ public class TestEnvironmentTemplate extends TemplateTest {
                     + "<@i2.imp2M><@tNames /></@>\n"
                     + "]"
                 + "</#macro>"
+                + "<#function impF>"
+                    + "<@tNames />"
+                    + "<#return lastTNamesResult>"
+                + "</#function>"
                 );
         TEMPLATES.putTemplate("inc2",
                 "<@tNames />\n"
@@ -89,50 +107,57 @@ public class TestEnvironmentTemplate extends TemplateTest {
     }
     
     private final static String EXPECTED_2_3_21 =
-            "<t=main>\n"
+            "<t=main ct=main mt=main>\n"
             + "---1---\n"
-            + "[imp: <t=imp>]\n"
+            + "[imp: <t=imp ct=imp mt=main>]\n"
             + "---2---\n"
-            + "[impM: <t=main>\n"
-                + "{<t=main>}\n"
-                + "[inc: <t=inc>\n"
-                    + "[incM: <t=inc> {<t=imp>}]\n"
-                    + "[incInc: <t=inc>\n"
-                        + "[incM: <t=inc> {<t=imp>}]\n"
+            + "[impM: <t=main ct=imp mt=main>\n"
+                + "{<t=main ct=main mt=main>}\n"
+                + "[inc: <t=inc ct=inc mt=main>\n"
+                    + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
+                    + "[incInc: <t=inc ct=inc mt=main>\n"
+                        + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
                     + "]\n"
                 + "]\n"
-                + "[incM: <t=main> {<t=imp>}]\n"
+                + "[incM: <t=main ct=inc mt=main> {<t=imp ct=imp mt=main>}]\n"
             + "]\n"
             + "---3---\n"
-            + "[inc: <t=inc>\n"
-                + "[incM: <t=inc> {<t=main>}]\n"
-                + "[incInc: <t=inc>\n"
-                    + "[incM: <t=inc> {<t=main>}]\n"
+            + "[inc: <t=inc ct=inc mt=main>\n"
+                + "[incM: <t=inc ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
+                + "[incInc: <t=inc ct=inc mt=main>\n"
+                    + "[incM: <t=inc ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
                 + "]\n"
             + "]\n"
             + "---4---\n"
-            + "[incM: <t=main> {<t=main>}]\n"
+            + "[incM: <t=main ct=inc mt=main> {<t=main ct=main mt=main>}]\n"
             + "---5---\n"
-            + "[inc2: <t=inc2>\n"
-                + "[impM: <t=inc2>\n"
-                    + "{<t=main>}\n"
-                    + "[inc: <t=inc>\n"
-                        + "[incM: <t=inc> {<t=imp>}]\n"
+            + "[inc2: <t=inc2 ct=inc2 mt=main>\n"
+                + "[impM: <t=inc2 ct=imp mt=main>\n"
+                    + "{<t=main ct=inc2 mt=main>}\n"
+                    + "[inc: <t=inc ct=inc mt=main>\n"
+                        + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
                     + "]\n"
-                    + "[incM: <t=inc2> {<t=imp>}]\n"
+                    + "[incM: <t=inc2 ct=inc mt=main> {<t=imp ct=imp mt=main>}]\n"
                 + "]\n"
             + "]\n"
             + "---6---\n"
-            + "[impM2: <t=main>\n"
-                + "{<t=main>}\n"
-                + "[imp2M: <t=main> {<t=imp>}]\n"
+            + "[impM2: <t=main ct=imp mt=main>\n"
+                + "{<t=main ct=main mt=main>}\n"
+                + "[imp2M: <t=main ct=imp2 mt=main> {<t=imp ct=imp mt=main>}]\n"
             + "]\n"
             + "---7---\n"
-            + "[inc3: <t=inc3>\n"
-                + "[mainM: <t=inc3> {<t=main>} <t=inc3>]\n"
+            + "[inc3: <t=inc3 ct=inc3 mt=main>\n"
+                + "[mainM: <t=inc3 ct=main mt=main> {<t=main ct=inc3 mt=main>} <t=inc3 ct=main mt=main>]\n"
             + "]\n"
-            + "[mainM: <t=main> {<t=main> <t=inc4> <t=main>} <t=main>]\n"
-            + "<t=main>\n";            
+            + "[mainM: "
+                + "<t=main ct=main mt=main> "
+                + "{<t=main ct=main mt=main> <t=inc4 ct=inc4 mt=main> <t=main ct=main mt=main>} "
+                + "<t=main ct=main mt=main>"
+            + "]\n"
+            + "<t=main ct=main mt=main>\n"
+            + "---8---\n"
+            + "mainF: <t=main ct=main mt=main>, impF: <t=main ct=imp mt=main>, incF: <t=main ct=inc mt=main>\n"
+            ;
 
     @Test
     public void test2321() throws IOException, TemplateException {
@@ -144,6 +169,14 @@ public class TestEnvironmentTemplate extends TemplateTest {
     public void test2322() throws IOException, TemplateException {
         setConfiguration(createConfiguration(Configuration.VERSION_2_3_22));
         assertOutputForNamed("main", EXPECTED_2_3_21.replaceAll("<t=\\w+", "<t=main"));
+    }
+
+    @Test
+    public void testNotStarted() throws IOException, TemplateException {
+        Template t = new Template("foo", "", createConfiguration(Configuration.VERSION_2_3_21));
+        final Environment env = t.createProcessingEnvironment(null, null);
+        assertSame(t, env.getMainTemplate());
+        assertSame(t, env.getCurrentTemplate());
     }
     
     private Configuration createConfiguration(Version version2321) {
@@ -160,7 +193,10 @@ public class TestEnvironmentTemplate extends TemplateTest {
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 Writer out = env.getOut();
-                out.write("<t=" + env.getTemplate().getName() + ">");
+                final String r = "<t=" + env.getTemplate().getName() + " ct=" + env.getCurrentTemplate().getName() + " mt="
+                        + env.getMainTemplate().getName() + ">";
+                out.write(r);
+                env.setGlobalVariable("lastTNamesResult", new SimpleScalar(r));
             }
             
         });
