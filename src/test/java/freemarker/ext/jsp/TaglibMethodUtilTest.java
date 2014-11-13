@@ -1,66 +1,47 @@
-/*
- * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package freemarker.ext.beans;
+package freemarker.ext.jsp;
 
 import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Method;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-
-@RunWith(JUnit4.class)
-public class _MethodUtilTest {
+public class TaglibMethodUtilTest {
 
     @Test
     public void testGetMethodByFunctionSignature() throws Exception {
         Method expected = Functions.class.getMethod("plus", new Class [] { int.class, int.class });
         String signature = "int plus(int, int)";
-        Method method = _MethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        Method method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", new Class [] { double.class, double.class });
         signature = "double  plus ( double , double )";
-        method = _MethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", new Class [] { String.class, String.class });
         signature = "java.lang.String plus ( java.lang.String  ,java.lang.String  )";
-        method = _MethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", new Class [] { double[].class, double[].class });
         signature = "double[] plus ( double[]  ,double []  )";
-        method = _MethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", new Class [] { String[].class, String[].class });
         signature = "java.lang.String [] plus ( java.lang.String[]  ,java.lang.String []  )";
-        method = _MethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("sum", new Class [] { double[].class });
         signature = "double sum ( double[]  )";
-        method = _MethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
     }
 
+    @SuppressWarnings("unused")
     private static class Functions {
 
         public static int plus(int a, int b) {
@@ -103,4 +84,5 @@ public class _MethodUtilTest {
             return sum;
         }
     }
+    
 }

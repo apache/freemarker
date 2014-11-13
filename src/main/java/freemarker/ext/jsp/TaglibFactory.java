@@ -49,7 +49,6 @@ import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.SimpleMethodModel;
-import freemarker.ext.beans._MethodUtil;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.log.Logger;
@@ -719,22 +718,34 @@ public class TaglibFactory implements TemplateHashModel {
                     }
                 }
                 else if ("function".equals(qName)) {
-                    try {
-                        Class functionClass = ClassUtil.forName(functionClassName);
-                        Method functionMethod = _MethodUtil.getMethodByFunctionSignature(functionClass, functionSignature);
+                        Class functionClass;
+                        try {
+                            functionClass = ClassUtil.forName(functionClassName);
+                        } catch (ClassNotFoundException e) {
+                            throw new SAXParseException(
+                                    "Can't find class " + StringUtil.jQuote(functionClassName)
+                                    + " for tag library function " + StringUtil.jQuote(functionName) + ".",
+                                    locator,
+                                    e);
+                        }
+                        Method functionMethod;
+                        try {
+                            functionMethod = TaglibMethodUtil.getMethodByFunctionSignature(functionClass, functionSignature);
+                        } catch (Exception e) {
+                            throw new SAXParseException(
+                                    "Error while trying to resovle signature " + StringUtil.jQuote(functionSignature)
+                                    + " on class " + StringUtil.jQuote(functionClass.getName())
+                                    + " for tag library function " + StringUtil.jQuote(functionName) + ".",
+                                    locator,
+                                    e);
+                        }
                         int modifiers =  functionMethod.getModifiers ();
                         if (!Modifier.isPublic (modifiers) || !Modifier.isStatic (modifiers)) {
                             throw new IllegalArgumentException("The function method is non-public or non-static.");
                         }
-                        TemplateModel impl = new SimpleMethodModel(functionClass, functionMethod, functionMethod.getParameterTypes(), beansWrapper);
+                        TemplateModel impl = new SimpleMethodModel(
+                                functionClass, functionMethod, functionMethod.getParameterTypes(), beansWrapper);
                         tagsAndFunctions.put(functionName, impl);
-                    }
-                    catch(Exception e) {
-                        throw new SAXParseException(
-                            "Can't find function method " + functionSignature + " from " + functionClassName,
-                            locator,
-                            e);
-                    }
                 }
             }
 
