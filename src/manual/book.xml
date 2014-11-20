@@ -11271,8 +11271,8 @@ foobar</programlisting>
             <para>This built-in is available since FreeMarker 2.3.21.</para>
           </note>
 
-          <para>Removes the parameter substring from the beginning of the
-          string, or returns the original string if it doesn't start with the
+          <para>Removes the parameter substring from the ending of the string,
+          or returns the original string if it doesn't start with the
           parameter substring. For example:</para>
 
           <programlisting role="template">${"abcdef"?remove_ending("def")}
