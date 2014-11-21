@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freemarker.test.servlet;
+package freemarker.ext.jsp.mocked;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

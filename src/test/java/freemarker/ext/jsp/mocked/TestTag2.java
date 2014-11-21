@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-package freemarker.ext.jsp;
+package freemarker.ext.jsp.mocked;
+
+import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
 /**
  */
-public class SetStringAttributeTag extends TagSupport {
-
-    private String name;
-    private String value;
-
-    public SetStringAttributeTag() {
-        super();
-    }
-
+public class TestTag2 extends TagSupport
+{
     public int doStartTag() throws JspException {
-        pageContext.setAttribute(name, value);
-        return SKIP_BODY;
+        try {
+            pageContext.getOut().println("TestTag2.doStartTag() called here");
+            return Tag.EVAL_BODY_INCLUDE;
+        }
+        catch(IOException e) {
+            throw new JspException(e);
+        }
     }
 
     public int doEndTag() throws JspException {
-        name = null;
-        value = null;
-        return SKIP_BODY;
+        try {
+            pageContext.getOut().println("TestTag2.doEndTag() called here");
+            return Tag.EVAL_PAGE;
+        }
+        catch(IOException e) {
+            throw new JspException(e);
+        }
     }
 }

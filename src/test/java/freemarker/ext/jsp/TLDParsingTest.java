@@ -25,6 +25,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.junit.Before;
@@ -43,7 +47,7 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.Version;
 
 @RunWith(JUnit4.class)
-public class TaglibFactoryTest {
+public class TLDParsingTest {
 
     private BeansWrapper wrapper;
 
@@ -55,7 +59,7 @@ public class TaglibFactoryTest {
 
     @Test
     public void testTldParser() throws Exception {
-        URL url = getClass().getResource("test.tld");
+        URL url = getClass().getResource("TLDParsingTest.tld");
         TaglibFactory.TldParser tldParser = new TaglibFactory.TldParser(wrapper);
         InputSource is = new InputSource();
         InputStream input = url.openStream();
@@ -91,4 +95,40 @@ public class TaglibFactoryTest {
         assertEquals("ABC", result.getAsString());
     }
 
+    public static class StringFunctions {
+
+        private StringFunctions() {
+        }
+
+        public static String toUpperCase(String source) {
+            return source.toUpperCase();
+        }
+    }
+    
+    public static class SetStringAttributeTag extends TagSupport {
+
+        private String name;
+        private String value;
+
+        public SetStringAttributeTag() {
+            super();
+        }
+
+        public int doStartTag() throws JspException {
+            pageContext.setAttribute(name, value);
+            return SKIP_BODY;
+        }
+
+        public int doEndTag() throws JspException {
+            name = null;
+            value = null;
+            return SKIP_BODY;
+        }
+    }
+    
+    public static class ExampleContextListener implements ServletContextListener {
+        public void contextInitialized(ServletContextEvent event) { }
+        public void contextDestroyed(ServletContextEvent event) { }
+    }    
+    
 }

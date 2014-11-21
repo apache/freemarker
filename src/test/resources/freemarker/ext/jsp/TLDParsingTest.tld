@@ -24,13 +24,13 @@
   <uri>http://www.example.org/jsp/test</uri>
 
   <listener>
-    <listener-class>freemarker.ext.jsp.ExampleContextListener</listener-class>
+    <listener-class>freemarker.ext.jsp.TLDParsingTest$ExampleContextListener</listener-class>
   </listener>
 
   <tag>
     <description>Set a String attribute</description>
     <name>setStringAttributeTag</name>
-    <tag-class>freemarker.ext.jsp.SetStringAttributeTag</tag-class>
+    <tag-class>freemarker.ext.jsp.TLDParsingTest$SetStringAttributeTag</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <description>The attribute name</description>
@@ -51,7 +51,7 @@
   <tag>
     <description>Set a String attribute2</description>
     <name>setStringAttributeTag2</name>
-    <tag-class>freemarker.ext.jsp.SetStringAttributeTag</tag-class>
+    <tag-class>freemarker.ext.jsp.TLDParsingTest$SetStringAttributeTag</tag-class>
     <body-content>empty</body-content>
     <attribute>
       <description>The attribute name</description>
@@ -72,14 +72,14 @@
   <function>
     <description>toUpperCase</description>
     <name>toUpperCase</name>
-    <function-class>freemarker.ext.jsp.StringFunctions</function-class>
+    <function-class>freemarker.ext.jsp.TLDParsingTest$StringFunctions</function-class>
     <function-signature>String toUpperCase(java.lang.String)</function-signature>
   </function>
 
   <function>
     <description>toUpperCase2</description>
     <name>toUpperCase2</name>
-    <function-class>freemarker.ext.jsp.StringFunctions</function-class>
+    <function-class>freemarker.ext.jsp.TLDParsingTest$StringFunctions</function-class>
     <function-signature>String toUpperCase(java.lang.String)</function-signature>
   </function>
 

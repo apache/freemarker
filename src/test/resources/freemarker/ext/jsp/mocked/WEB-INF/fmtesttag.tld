@@ -8,10 +8,10 @@
   <shortname>FreeMarker JUnit Test Support</shortname>
   <tag>
     <name>testtag</name>
-    <tagclass>freemarker.test.servlet.TestTag</tagclass>
+    <tagclass>freemarker.ext.jsp.mocked.TestTag</tagclass>
   </tag>
   <tag>
   	<name>simpletag</name>
-  	<tagclass>freemarker.test.servlet.TestSimpleTag</tagclass>
+  	<tagclass>freemarker.ext.jsp.mocked.TestSimpleTag</tagclass>
   </tag>
 </taglib>
