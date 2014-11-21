@@ -1,17 +1,40 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE taglib
-        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
-        "http://java.sun.com/j2ee/dtds/web-jsptaglib_1_1.dtd">
-<taglib>
-  <tlibversion>2.0</tlibversion>
-  <jspversion>1.2</jspversion>
-  <shortname>FreeMarker JUnit Test Support</shortname>
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+  <tlib-version>3.0</tlib-version>
+  <short-name>FreeMarker-test-taglib</short-name>
+  
   <tag>
     <name>testtag</name>
-    <tagclass>freemarker.ext.jsp.mocked.TestTag</tagclass>
+    <tag-class>freemarker.ext.jsp.mocked.TestTag</tag-class>
+    <body-content>JSP</body-content>
   </tag>
+  
   <tag>
   	<name>simpletag</name>
-  	<tagclass>freemarker.ext.jsp.mocked.TestSimpleTag</tagclass>
+  	<tag-class>freemarker.ext.jsp.mocked.TestSimpleTag</tag-class>
+    <body-content>JSP</body-content>
   </tag>
+  
+  <function>
+    <description>Reverses a string</description>
+    <name>reverse</name>
+    <function-class>freemarker.ext.jsp.mocked.TestFunctions</function-class>
+    <function-signature>java.lang.String reverse(java.lang.String)</function-signature>
+  </function>
+  
+  <function>
+    <description>Reverses an int (assuming radix 10)</description>
+    <name>reverseInt</name>
+    <function-class>freemarker.ext.jsp.mocked.TestFunctions</function-class>
+    <function-signature>int reverse(int)</function-signature>
+  </function>  
+    
+  <function>
+    <description>Reverses an int assuming the given radix</description>
+    <name>reverseIntRadix</name>
+    <function-class>freemarker.ext.jsp.mocked.TestFunctions</function-class>
+    <function-signature>int reverse(int, int)</function-signature>
+  </function>  
 </taglib>
