@@ -126,7 +126,7 @@ import freemarker.template.utility.StringUtil;
  * <li>The following init-params are supported only for backward compatibility, and
  * their usage is discouraged: TemplateUpdateInterval, DefaultEncoding,
  * ObjectWrapper, TemplateExceptionHandler. Use setting init-params such as
- * object_wrapper instead. 
+ * {@code object_wrapper} instead. 
  * 
  * <li>Any other init-param will be interpreted as <code>Configuration</code>
  * level setting. See {@link Configuration#setSetting}</li>

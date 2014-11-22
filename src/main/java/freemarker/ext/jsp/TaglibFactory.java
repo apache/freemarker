@@ -311,7 +311,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
-        public void endElement(String nsuri, String localName, String qName) throws SAXParseException {
+        public void endElement(String nsuri, String localName, String qName) throws TLDParsingException {
             if ("taglib-uri".equals(qName)) {
                 uri = buf.toString().trim();
                 buf = null;
@@ -324,7 +324,7 @@ public class TaglibFactory implements TemplateHashModel {
                     }
                 }
                 catch(TemplateModelException e) {
-                    throw new SAXParseException(e.getMessage(), locator, e);
+                    throw new TLDParsingException(e.getMessage(), locator, e);
                 }
                 buf = null;
             }
@@ -654,9 +654,9 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         public void endElement(String nsuri, String localName, String qName)
-            throws SAXParseException {
+            throws TLDParsingException {
             if(!stack.peek().equals(qName)) {
-                throw new SAXParseException("Invalid element nesting.", locator);
+                throw new TLDParsingException("Invalid element nesting.", locator);
             }
 
             if (stack.size() == 3) {
@@ -703,13 +703,13 @@ public class TaglibFactory implements TemplateHashModel {
                         tagClassName = null;
                     }
                     catch (IntrospectionException e) {
-                        throw new SAXParseException(
+                        throw new TLDParsingException(
                             "Can't introspect tag class " + tagClassName,
                             locator,
                             e);
                     }
                     catch (ClassNotFoundException e) {
-                        throw new SAXParseException(
+                        throw new TLDParsingException(
                             "Can't find tag class " + tagClassName,
                             locator,
                             e);
@@ -720,7 +720,7 @@ public class TaglibFactory implements TemplateHashModel {
                         listeners.add(ClassUtil.forName(listenerClassName).newInstance());
                     }
                     catch(Exception e) {
-                        throw new SAXParseException(
+                        throw new TLDParsingException(
                             "Can't instantiate listener class " + listenerClassName,
                             locator,
                             e);
@@ -731,9 +731,9 @@ public class TaglibFactory implements TemplateHashModel {
                         try {
                             functionClass = ClassUtil.forName(functionClassName);
                         } catch (ClassNotFoundException e) {
-                            throw new SAXParseException(
+                            throw new TLDParsingException(
                                     "Can't find class " + StringUtil.jQuote(functionClassName)
-                                    + " for tag library function " + StringUtil.jQuote(functionName) + ".",
+                                    + " for custom EL function " + StringUtil.jQuote(functionName) + ".",
                                     locator,
                                     e);
                         }
@@ -741,10 +741,10 @@ public class TaglibFactory implements TemplateHashModel {
                         try {
                             functionMethod = TaglibMethodUtil.getMethodByFunctionSignature(functionClass, functionSignature);
                         } catch (Exception e) {
-                            throw new SAXParseException(
-                                    "Error while trying to resovle signature " + StringUtil.jQuote(functionSignature)
+                            throw new TLDParsingException(
+                                    "Error while trying to resolve signature " + StringUtil.jQuote(functionSignature)
                                     + " on class " + StringUtil.jQuote(functionClass.getName())
-                                    + " for tag library function " + StringUtil.jQuote(functionName) + ".",
+                                    + " for custom EL function " + StringUtil.jQuote(functionName) + ".",
                                     locator,
                                     e);
                         }
@@ -809,4 +809,74 @@ public class TaglibFactory implements TemplateHashModel {
             return is;
         }
     }
+    
+    /**
+     *  Redefines {@code SAXParseException#toString()} and {@code SAXParseException#getCause()} because it's broken on
+     *  Java 1.6 and earlier.
+     */
+    private static class TLDParsingException extends SAXParseException {
+
+        TLDParsingException(String message, Locator locator) {
+            this(message, locator, null);
+        }
+        
+        TLDParsingException(String message, Locator locator, Exception e) {
+            super(message, locator, e);
+        }
+
+        @Override
+        public String toString() {
+            StringBuffer sb = new StringBuffer(getClass().getName());
+            sb.append(": ");
+            int startLn = sb.length();
+            
+            String systemId = getSystemId();
+            String publicId = getPublicId();
+            if (systemId != null || publicId != null) {
+                sb.append("In ");
+                if (systemId != null) {
+                    sb.append(systemId);
+                }
+                if (publicId != null) {
+                    if (systemId != null) {
+                        sb.append (" (public ID: ");
+                    }
+                    sb.append(publicId);
+                    if (systemId != null) {
+                        sb.append (')');
+                    }
+                }
+            }
+            
+            int line = getLineNumber();
+            if (line != -1) {
+                sb.append(sb.length() != startLn ? ", at " : "At ");
+                sb.append("line ");
+                sb.append(line);
+                int col = getColumnNumber();
+                if (col != -1) {
+                    sb.append(", column ");
+                    sb.append(col);
+                }
+            }
+            
+            String message = getLocalizedMessage();
+            if (message!=null) {
+                if (sb.length() != startLn) {
+                    sb.append(":\n");
+                }
+                sb.append(message);
+            }
+            
+            return sb.toString();
+        }
+
+        @Override
+        public Throwable getCause() {
+            Throwable cause = super.getCause();
+            return cause == null ? getException() : cause;
+        }
+        
+    }
+    
 }
