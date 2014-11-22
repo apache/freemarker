@@ -21508,9 +21508,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               without going through overloaded method selection on invocation
               time.</para>
             </listitem>
+
+            <listitem>
+              <para>Added <literal>Environment.getMainTemplate()</literal> and
+              <literal>Environment.getCurrentTemplate()</literal>. Deprecated
+              the ambiguous (and often broken: [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>])
+              <literal>Environment.getTemplate()</literal>. These can be
+              useful for directives and methods that are called from templates
+              to find out which template they were called from.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>]:
-              Active only with <literal>incompatible_improvements</literal>
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
+              active only with <literal>incompatible_improvements</literal>
               set to 2.3.22 (or higher): <literal>#include</literal> and
               <literal>#nested</literal> doesn't change the parent
               <literal>Template</literal> (see
@@ -21523,20 +21535,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Template</literal> is the <literal>Template</literal>
               whose <literal>process</literal> or
               <literal>createProcessingEnvironment</literal> method was called
-              to initiate the output generation.) Note all this only matters
+              to initiate the output generation.) Note that this only matters
               if you have set settings directly on <literal>Template</literal>
               objects, and almost nobody does that. Also note that macro calls
               have never changed the <literal>Environment</literal> parent to
               the <literal>Template</literal> that contains the macro
               definition, so there's no change there now.</para>
-            </listitem>
-
-            <listitem>
-              <para>Added <literal>Environment.getMainTemplate()</literal> and
-              <literal>Environment.getCurrentTemplate()</literal>, deprecated
-              <literal>Environment.getTemplate()</literal>. These can be
-              useful for directives and methods that are called from templates
-              to find out which template they were called from.</para>
             </listitem>
           </itemizedlist>
         </section>
