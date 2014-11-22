@@ -9166,44 +9166,101 @@ TemplateHashModel roundingModeEnums =
             <primary>taglib</primary>
           </indexterm>
 
-          <para><literal>FreemarkerServlet</literal> puts a hash
-          <literal>JspTaglibs</literal> into the data-model, what you can use
-          to access JSP taglibs. The JSP custom tags will be accessible as
-          plain user-defined directives. For example, this is a JSP file that
-          uses some Struts tags:</para>
+          <para><literal>FreemarkerServlet</literal> puts the
+          <literal>JspTaglibs</literal> hash into the data-model, which you
+          can use to access JSP taglibs. The JSP custom tags will be
+          accessible as plain user-defined directives, and the custom
+          functions as methods. (Note: custom functions are supported since
+          FreeMarker 2.3.22.) For example, for this JSP file:</para>
 
-          <programlisting role="template">&lt;%@page contentType="text/html;charset=ISO-8859-2" language="java"%&gt;
-&lt;%@taglib uri="/WEB-INF/struts-html.tld" prefix="html"%&gt;
-&lt;%@taglib uri="/WEB-INF/struts-bean.tld" prefix="bean"%&gt;
+          <programlisting role="template">&lt;%@ page contentType="text/html;charset=ISO-8859-2" language="java"%&gt;
+&lt;%@ taglib prefix="e" uri="/WEB-INF/example.tld" %&gt;
+&lt;%@ taglib prefix="oe" uri="/WEB-INF/other-example.tld" %&gt;
+&lt;%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %&gt;
+&lt;%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %&gt;
 
-&lt;html&gt;
-  &lt;body&gt;
-    &lt;h1&gt;&lt;bean:message key="welcome.title"/&gt;&lt;/h1&gt;
-    &lt;html:errors/&gt;
-    &lt;html:form action="/query"&gt;
-      Keyword: &lt;html:text property="keyword"/&gt;&lt;br&gt;
-      Exclude: &lt;html:text property="exclude"/&gt;&lt;br&gt;
-      &lt;html:submit value="Send"/&gt;
-    &lt;/html:form&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</programlisting>
+&lt;%-- Custom JSP tags and functions: --%&gt;
 
-          <para>And this is the (near) equivalent FTL:</para>
+&lt;e:someTag numParam="123" boolParam="true" strParam="Example" anotherParam="${someVar}"&gt;
+  ...
+&lt;/e:someTag&gt;
 
-          <programlisting role="template">&lt;#assign html=JspTaglibs["/WEB-INF/struts-html.tld"]&gt;
-&lt;#assign bean=JspTaglibs["/WEB-INF/struts-bean.tld"]&gt;
+&lt;oe:otherTag /&gt;
 
-&lt;html&gt;
-  &lt;body&gt;
-    &lt;h1&gt;&lt;@bean.message key="welcome.title"/&gt;&lt;/h1&gt;
-    &lt;@html.errors/&gt;
-    &lt;@html.form action="/query"&gt;
-      Keyword: &lt;@html.text property="keyword"/&gt;&lt;br&gt;
-      Exclude: &lt;@html.text property="exclude"/&gt;&lt;br&gt;
-      &lt;@html.submit value="Send"/&gt;
-    &lt;/@html.form&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</programlisting>
+${e:someFunction(1, 2)}
+
+
+&lt;%-- JSTL: --%&gt;
+
+&lt;c:if test="${foo}"&gt;
+  Do this
+&lt;/c:if&gt;
+
+&lt;c:choose&gt;
+  &lt;c:when test="${x == 1}"&gt;
+      Do this
+  &lt;/c:when&gt;
+  &lt;c:otherwise&gt;
+      Do that
+  &lt;/c:otherwise&gt;
+&lt;/c:choose&gt;
+
+&lt;c:forEach var="person" items="${persons}"&gt;
+  ${person.name}
+&lt;/c:forEach&gt;
+
+${fn:trim(bar)}</programlisting>
+
+          <para>the about equivalent FTL is:</para>
+
+          <programlisting role="template">&lt;#assign e=JspTaglibs["/WEB-INF/example.tld"]&gt;
+&lt;#assign oe=JspTaglibs["/WEB-INF/other-example.tld"]&gt;
+
+&lt;#-- Custom JSP tags and functions: --#&gt;
+
+&lt;@e.someTag numParam=123 boolParam=true strParam="Example" anotherParam=someVar&gt;
+  ...
+&lt;/@e.someTag&gt;
+
+&lt;@oe.otherTag /&gt;
+
+${e.someFunction(1, 2)}
+
+
+&lt;#-- JSTL - Instead, use native FTL constructs: --&gt;
+
+&lt;#if foo&gt;
+  Do this
+&lt;/#if&gt;
+
+&lt;#if x == 1&gt;
+  Do this
+&lt;#else&gt;
+  Do that
+&lt;/#if&gt;
+
+&lt;#list persons as person&gt;
+  ${person.name}
+&lt;/#list&gt;
+
+${bar?trim}</programlisting>
+
+          <note>
+            <para>Parameter values don't use quotation and
+            <literal>"${<replaceable>...</replaceable>}"</literal> like in
+            JSP. See more explanation later.</para>
+          </note>
+
+          <note>
+            <para><literal>JspTaglibs</literal> is not a core FreeMarker
+            feature; it only exists when the template is called through the
+            <literal>FreemarkerServlet</literal>. That's because JSP
+            tags/functions assume a servlet environment (FreeMarker doesn't),
+            plus some Servlet concepts have to be emulated in the special
+            FreeMarker data-model that <literal>FreemarkerServlet</literal>
+            builds. Many modern frameworks use FreeMarker on a pure way, not
+            through <literal>FreemarkerServlet</literal>.</para>
+          </note>
 
           <para>Since JSP custom tags are written to operate in JSP
           environment, they assume that variables (often referred as ``beans''
@@ -9243,7 +9300,7 @@ TemplateHashModel roundingModeEnums =
           page="/layout.ftl" flush=true/&gt;</literal>), or they are
           interpreted as string values, and this will cause a type mismatch
           error when FreeMarker tries to pass the value to the custom tag that
-          expects non-string value. Also note, that naturally, you can use any
+          expects non-string value. Also note that, naturally, you can use any
           FTL expression as attribute value, such as variables, calculated
           values, etc. (e.g. <literal>&lt;@tiles.insert page=layoutName
           flush=foo &amp;&amp; bar/&gt;</literal>).</para>
