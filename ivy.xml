@@ -14,7 +14,7 @@
     <conf name="default" extends="runtime" />
     
     <conf name="runtime"
-        description="for using FreeMarker under J2SE 1.4+ (no optional dependecies included)"
+        description="for using FreeMarker under J2SE 1.4+ (no optional dependencies included)"
     />
 
     <conf name="build.base" extends="default" visibility="private"
@@ -48,15 +48,18 @@
         description="for building FreeMarker with Jython 2.5 support"
     />
     
-    <conf name="build.test" extends="build.jsp2.1, build.jython2.5"
-        description="for building FreeMarker testsuite"
-    />
     <conf name="test" extends="build.jsp2.1, build.jython2.5"
-        description="for running FreeMarker testsuite"
+        description="commons for both building and running the FreeMarker test suite"
+    />
+    <conf name="build.test" extends="test"
+        description="for building FreeMarker test suite"
+    />
+    <conf name="run.test" extends="test"
+        description="for running FreeMarker test suite"
     />
 
     <conf name="IDE" extends="build.test"
-        description="to be used in IDE-s with Ivy plugin"
+        description="to be used in IDE-s (maybe with the Ivy plugin)"
     />
     
     <conf name="retrotranslate" description="for retro-translation" />
@@ -122,8 +125,8 @@
     
     <!-- test -->
     
-    <!-- Note: Ant doesn't contain junit.jar anymore, so we add it to conf "test" too. -->
-    <dependency org="junit" name="junit" rev="4.11" conf="build.test->default; test->default" />
+    <!-- Note: Ant doesn't contain junit.jar anymore -->
+    <dependency org="junit" name="junit" rev="4.11" conf="test->default" />
     
     <!-- docs -->
     
@@ -142,9 +145,8 @@
     
     <dependency org="biz.aQute" name="bnd" rev="1.50.0" conf="bnd->default" />
     
-    <!-- As the tests surely run on Ant, it's a provided dependency. -->
-    
-    <exclude org="ant" module="ant" conf="test" />
+    <!-- As the tests *run* on Ant, so it's a provided dependency there. -->
+    <exclude org="ant" module="ant" conf="run.test" />
     <exclude org="ant" module="ant" conf="emma" />
     
     <!-- Ensure that JSP versions don't accidentally hide each-other -->

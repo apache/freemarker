@@ -340,12 +340,12 @@
   <target name="compileTest" depends="compile">
     <mkdir dir="build/test-classes" />
   
-    <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
+    <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
-      classpathref="ivy.dep.test"
+      classpathref="ivy.dep.build.test"
       bootclasspath="${boot.classpath.j2se1.5}"
     />
     <copy toDir="build/test-classes">
@@ -413,13 +413,13 @@
     <property name="coverage.outfile" location="${coverage.dir}/coverage" />
    
     <mkdir dir="build/junit-reports" />
-    <ivy:cachepath conf="test" pathid="ivy.dep.test" />
+    <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
     <junit haltonfailure="on" fork="true" forkmode="once">
       <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
       <classpath>
         <pathelement path="${coverage.classes.dir}" />
         <path refid="ivy.dep.emma" />
-        <path refid="ivy.dep.test" />
+        <path refid="ivy.dep.run.test" />
       </classpath>
       <formatter type="plain" />
       <formatter type="xml" />
