@@ -48,7 +48,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.SimpleMethodModel;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.log.Logger;
@@ -743,9 +742,7 @@ public class TaglibFactory implements TemplateHashModel {
                         if (!Modifier.isPublic (modifiers) || !Modifier.isStatic (modifiers)) {
                             throw new IllegalArgumentException("The function method is non-public or non-static.");
                         }
-                        TemplateModel impl = new SimpleMethodModel(
-                                functionClass, functionMethod, functionMethod.getParameterTypes(), beansWrapper);
-                        tagsAndFunctions.put(functionName, impl);
+                        tagsAndFunctions.put(functionName, beansWrapper.wrap(null, functionMethod));
                 }
             }
 

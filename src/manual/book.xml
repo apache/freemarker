@@ -21493,6 +21493,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><literal>FreemarkerServlet</literal> now supports JSP
+              custom taglib functions (defined in the TLD via the
+              <literal>function</literal> XML element). Earlier it has ignored
+              them. The function can be called like Java method, for example:
+              <literal>&lt;#assign u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ...
+              ${u.truncate(title, 25)}</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>TemplateMethodModelEx
+              BeansWrapper.wrap(Object object, Method method)</literal> for
+              wrapping methods without wrapping their parent object and
+              without going through overloaded method selection on invocation
+              time.</para>
+            </listitem>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>]:
               Active only with <literal>incompatible_improvements</literal>

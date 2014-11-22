@@ -52,7 +52,9 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelAdapter;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
@@ -819,6 +821,24 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     {
         if(object == null) return nullModel;
         return modelCache.getInstance(object);
+    }
+    
+    /**
+     * Wraps a Java method so that it can be called from templates, without wrapping its parent ("this") object. The
+     * result is almost the same as that you would get by wrapping the parent object then getting the method from the
+     * resulting {@link TemplateHashModel} by name. Except, if the wrapped method is overloaded, with this method you
+     * explicitly select a an overload, while otherwise you would get a {@link TemplateMethodModelEx} that selects an
+     * overload each time it's called based on the argument values.
+     * 
+     * @param object The object whose method will be called, or {@code null} if {@code method} is a static method.
+     *          This object will be used "as is", like without unwrapping it if it's a {@link TemplateModelAdapter}.
+     * @param method The method to call, which must be an (inherited) member of the class of {@code object}, as
+     *          described by {@link Method#invoke(Object, Object...)}
+     * 
+     * @since 2.3.22
+     */
+    public TemplateMethodModelEx wrap(Object object, Method method) {
+        return new SimpleMethodModel(object, method, method.getParameterTypes(), this);
     }
 
     /**
