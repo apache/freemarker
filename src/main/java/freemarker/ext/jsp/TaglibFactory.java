@@ -135,11 +135,11 @@ public class TaglibFactory implements TemplateHashModel {
      * name, and custom servlets that want to integrate JSP taglib support
      * should do the same.
      * 
-     * @return a hash representing the JSP taglib. Each element of this
-     * hash model represents a single custom tag or function from the library, implemented
+     * @return a {@link TemplateHashModel} representing the JSP taglib. Each element of this
+     * hash represents a single custom tag or function from the library, implemented
      * as a {@link TemplateTransformModel} or {@link TemplateMethodModelEx}, respectively.
      */
-    public TemplateHashModel get(String uri) throws TemplateModelException {
+    public TemplateModel get(String uri) throws TemplateModelException {
         synchronized (taglibs) {
             final Taglib taglib = (Taglib) taglibs.get(uri);
             if(taglib != null) {
@@ -585,24 +585,34 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     static final class TldParser extends DefaultHandler {
+        private static final String TAG = "tag";
+        private static final String NAME = "name";
+        private static final String TAG_CLASS = "tag-class";
+        private static final String TAG_CLASS_LEGACY = "tagclass";
+        
+        private static final String FUNCTION = "function";
+        private static final String FUNCTION_CLASS = "function-class";
+        private static final String FUNCTION_SIGNATURE = "function-signature";
+        
+        private static final String LISTENER = "listener";
+        private static final String LISTENER_CLASS = "listener-class";
+
         private final BeansWrapper beansWrapper;
 
         private final Map tagsAndFunctions = new HashMap();
         private final List listeners = new ArrayList();
 
         private Locator locator;
-        private StringBuffer buf;
+        private StringBuffer cDataCollector;
 
         private Stack stack = new Stack();
 
-        private String tagName;
-        private String tagClassName;
-
-        private String listenerClassName;
-
-        private String functionName;
-        private String functionClassName;
-        private String functionSignature;
+        private String tagNameCData;
+        private String tagClassCData;
+        private String functionNameCData;
+        private String functionClassCData;
+        private String functionSignatureCData;
+        private String listenerClassCData;
 
         TldParser(ObjectWrapper wrapper) {
             if (wrapper instanceof BeansWrapper) {
@@ -632,132 +642,188 @@ public class TaglibFactory implements TemplateHashModel {
             this.locator = locator;
         }
 
-        public void startElement(
-            String nsuri,
-            String localName,
-            String qName,
-            Attributes atts) {
+        public void startElement(String nsUri, String localName, String qName, Attributes atts) {
             stack.push(qName);
             if (stack.size() == 3) {
-                if ("name".equals(qName) || "tagclass".equals(qName) || "tag-class".equals(qName)
-                        || "listener-class".equals(qName) || "function-class".equals(qName)
-                        || "function-signature".equals(qName)) {
-                    buf = new StringBuffer();
+                if (NAME.equals(qName) || TAG_CLASS_LEGACY.equals(qName) || TAG_CLASS.equals(qName)
+                        || LISTENER_CLASS.equals(qName) || FUNCTION_CLASS.equals(qName)
+                        || FUNCTION_SIGNATURE.equals(qName)) {
+                    cDataCollector = new StringBuffer();
                 }
             }
         }
 
         public void characters(char[] chars, int off, int len) {
-            if (buf != null) {
-                buf.append(chars, off, len);
+            if (cDataCollector != null) {
+                cDataCollector.append(chars, off, len);
             }
         }
 
-        public void endElement(String nsuri, String localName, String qName)
-            throws TLDParsingException {
+        public void endElement(String nsuri, String localName, String qName) throws TLDParsingException {
             if(!stack.peek().equals(qName)) {
-                throw new TLDParsingException("Invalid element nesting.", locator);
+                throw new TLDParsingException("Unbalanced tag nesting at \"" + qName + "\" end-tag.", locator);
             }
 
             if (stack.size() == 3) {
-                if ("name".equals(qName)) {
-                    if ("tag".equals(stack.get(1))) {
-                        tagName = buf.toString();
-                        buf = null;
+                if (NAME.equals(qName)) {
+                    if (TAG.equals(stack.get(1))) {
+                        tagNameCData = cDataCollector.toString();
+                        cDataCollector = null;
                     }
-                    else if ("function".equals(stack.get(1))) {
-                        functionName = buf.toString();
-                        buf = null;
+                    else if (FUNCTION.equals(stack.get(1))) {
+                        functionNameCData = cDataCollector.toString();
+                        cDataCollector = null;
                     }
                 }
-                else if ("tagclass".equals(qName) || "tag-class".equals(qName)) {
-                    tagClassName = buf.toString();
-                    buf = null;
+                else if (TAG_CLASS_LEGACY.equals(qName) || TAG_CLASS.equals(qName)) {
+                    tagClassCData = cDataCollector.toString();
+                    cDataCollector = null;
                 }
-                else if ("listener-class".equals(qName)) {
-                    listenerClassName = buf.toString();
-                    buf = null;
+                else if (LISTENER_CLASS.equals(qName)) {
+                    listenerClassCData = cDataCollector.toString();
+                    cDataCollector = null;
                 }
-                else if ("function-class".equals(qName)) {
-                    functionClassName = buf.toString();
-                    buf = null;
+                else if (FUNCTION_CLASS.equals(qName)) {
+                    functionClassCData = cDataCollector.toString();
+                    cDataCollector = null;
                 }
-                else if ("function-signature".equals(qName)) {
-                    functionSignature = buf.toString();
-                    buf = null;
+                else if (FUNCTION_SIGNATURE.equals(qName)) {
+                    functionSignatureCData = cDataCollector.toString();
+                    cDataCollector = null;
                 }
-            }
-            else if (stack.size() == 2) {
-                if ("tag".equals(qName)) {
+            } else if (stack.size() == 2) {
+                if (TAG.equals(qName)) {
+                    checkChildElementNotNull(qName, NAME, tagNameCData);
+                    checkChildElementNotNull(qName, TAG_CLASS, tagClassCData);
+                    
+                    final Class tagClass = resoveClassFromTLD(tagClassCData, "custom tag", tagNameCData);
+                    
+                    final TemplateModel impl;
                     try {
-                        Class tagClass = ClassUtil.forName(tagClassName);
-                        TemplateModel impl;
                         if (Tag.class.isAssignableFrom(tagClass)) {
-                            impl = new TagTransformModel(tagClass); 
+                            impl = new TagTransformModel(tagClass);
                         }
                         else {
-                            impl = new SimpleTagDirectiveModel(tagClass); 
+                            impl = new SimpleTagDirectiveModel(tagClass);
                         }
-                        tagsAndFunctions.put(tagName, impl);
-                        tagName = null;
-                        tagClassName = null;
-                    }
-                    catch (IntrospectionException e) {
+                    } catch (IntrospectionException e) {
                         throw new TLDParsingException(
-                            "Can't introspect tag class " + tagClassName,
-                            locator,
-                            e);
+                                "JavaBean introspection failed on custom tag class " + tagClassCData,
+                                locator,
+                                e);
                     }
-                    catch (ClassNotFoundException e) {
-                        throw new TLDParsingException(
-                            "Can't find tag class " + tagClassName,
-                            locator,
-                            e);
-                    }
-                }
-                else if ("listener".equals(qName)) {
+                    
+                    tagsAndFunctions.put(tagNameCData, impl);
+                    
+                    tagNameCData = null;
+                    tagClassCData = null;
+                } else if (FUNCTION.equals(qName) && beansWrapper != null) {
+                    checkChildElementNotNull(qName, FUNCTION_CLASS, functionClassCData);
+                    checkChildElementNotNull(qName, FUNCTION_SIGNATURE, functionSignatureCData);
+                    checkChildElementNotNull(qName, NAME, functionNameCData);
+                    
+                    final Class functionClass = resoveClassFromTLD(
+                            functionClassCData, "custom EL function", functionNameCData);
+                    
+                    final Method functionMethod;
                     try {
-                        listeners.add(ClassUtil.forName(listenerClassName).newInstance());
-                    }
-                    catch(Exception e) {
+                        functionMethod = TaglibMethodUtil.getMethodByFunctionSignature(
+                                functionClass, functionSignatureCData);
+                    } catch (Exception e) {
                         throw new TLDParsingException(
-                            "Can't instantiate listener class " + listenerClassName,
+                                "Error while trying to resolve signature " + StringUtil.jQuote(functionSignatureCData)
+                                + " on class " + StringUtil.jQuote(functionClass.getName())
+                                + " for custom EL function " + StringUtil.jQuote(functionNameCData) + ".",
+                                locator,
+                                e);
+                    }
+                    
+                    final int modifiers =  functionMethod.getModifiers ();
+                    if (!Modifier.isPublic (modifiers) || !Modifier.isStatic (modifiers)) {
+                        throw new TLDParsingException(
+                                "The custom EL function method must be public and static: " + functionMethod,
+                                locator);
+                    }
+                    
+                    final TemplateMethodModelEx methodModel;
+                    try {
+                        methodModel = beansWrapper.wrap(null, functionMethod);
+                    } catch (Exception e) {
+                        throw new TLDParsingException(
+                                "FreeMarker object wrapping failed on method : " + functionMethod,
+                                locator);
+                    }
+                    
+                    tagsAndFunctions.put(functionNameCData, methodModel);
+                    
+                    functionNameCData = null;
+                    functionClassCData = null;
+                    functionSignatureCData = null;
+                } else if (LISTENER.equals(qName)) {
+                    checkChildElementNotNull(qName, LISTENER_CLASS, listenerClassCData);
+                    
+                    final Class listenerClass = resoveClassFromTLD(listenerClassCData, LISTENER, null);
+                    
+                    final Object listener;
+                    try {
+                        listener = listenerClass.newInstance();
+                    } catch (Exception e) {
+                        throw new TLDParsingException(
+                            "Failed to create new instantiate from listener class " + listenerClassCData,
                             locator,
                             e);
                     }
-                }
-                else if ("function".equals(qName) && beansWrapper != null) {
-                        Class functionClass;
-                        try {
-                            functionClass = ClassUtil.forName(functionClassName);
-                        } catch (ClassNotFoundException e) {
-                            throw new TLDParsingException(
-                                    "Can't find class " + StringUtil.jQuote(functionClassName)
-                                    + " for custom EL function " + StringUtil.jQuote(functionName) + ".",
-                                    locator,
-                                    e);
-                        }
-                        Method functionMethod;
-                        try {
-                            functionMethod = TaglibMethodUtil.getMethodByFunctionSignature(functionClass, functionSignature);
-                        } catch (Exception e) {
-                            throw new TLDParsingException(
-                                    "Error while trying to resolve signature " + StringUtil.jQuote(functionSignature)
-                                    + " on class " + StringUtil.jQuote(functionClass.getName())
-                                    + " for custom EL function " + StringUtil.jQuote(functionName) + ".",
-                                    locator,
-                                    e);
-                        }
-                        int modifiers =  functionMethod.getModifiers ();
-                        if (!Modifier.isPublic (modifiers) || !Modifier.isStatic (modifiers)) {
-                            throw new IllegalArgumentException("The function method is non-public or non-static.");
-                        }
-                        tagsAndFunctions.put(functionName, beansWrapper.wrap(null, functionMethod));
+                    
+                    listeners.add(listener);
+                    
+                    listenerClassCData = null;
                 }
             }
 
             stack.pop();
         }
+
+        private void checkChildElementNotNull(String parentElementName, String childElementName, String value)
+                throws TLDParsingException {
+            if (value == null) {
+                throw new TLDParsingException(
+                        "Missing required \"" + childElementName + "\" element inside the \""
+                        + parentElementName + "\" element.", locator);
+            }
+        }
+
+        private Class resoveClassFromTLD(String className, String entryType, String entryName)
+                throws TLDParsingException {
+            try {
+                return ClassUtil.forName(className);
+            } catch (LinkageError e) {
+                throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
+            } catch (ClassNotFoundException e) {
+                throw newTLDEntryClassLoadingException(e, className, entryType, entryName);
+            }            
+        }
+        
+        private TLDParsingException newTLDEntryClassLoadingException(Throwable e, String className,
+                String entryType, String entryName)
+                throws TLDParsingException {
+            int dotIdx = className.lastIndexOf('.');
+            if (dotIdx != -1) {
+                dotIdx = className.lastIndexOf('.', dotIdx - 1);
+            }
+            boolean looksLikeNestedClass =
+                    dotIdx != -1 && className.length() > dotIdx + 1
+                    && Character.isUpperCase(className.charAt(dotIdx + 1));
+            return new TLDParsingException(
+                    (e instanceof ClassNotFoundException ? "Not found class " : "Can't load class ")
+                    + StringUtil.jQuote(className) + " for " + entryType
+                    + (entryName != null ? " " + StringUtil.jQuote(entryName) : "") + "."
+                    + (looksLikeNestedClass
+                            ? " Hint: Before nested classes, use \"$\", not \".\"."
+                            : ""),
+                    locator,
+                    e);
+        }
+        
     }
 
     private static final Map dtds = new HashMap();
@@ -815,16 +881,18 @@ public class TaglibFactory implements TemplateHashModel {
      *  Java 1.6 and earlier.
      */
     private static class TLDParsingException extends SAXParseException {
+        
+        private final Throwable cause;
 
         TLDParsingException(String message, Locator locator) {
             this(message, locator, null);
         }
         
-        TLDParsingException(String message, Locator locator, Exception e) {
-            super(message, locator, e);
+        TLDParsingException(String message, Locator locator, Throwable e) {
+            super(message, locator, e instanceof Exception ? (Exception) e : new Exception("Unchecked exception; see cause", e));
+            cause = e;
         }
 
-        @Override
         public String toString() {
             StringBuffer sb = new StringBuffer(getClass().getName());
             sb.append(": ");
@@ -871,10 +939,9 @@ public class TaglibFactory implements TemplateHashModel {
             return sb.toString();
         }
 
-        @Override
         public Throwable getCause() {
-            Throwable cause = super.getCause();
-            return cause == null ? getException() : cause;
+            Throwable superCause = super.getCause();
+            return superCause == null ? this.cause : superCause;
         }
         
     }

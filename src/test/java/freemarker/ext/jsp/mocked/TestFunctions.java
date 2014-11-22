@@ -1,7 +1,7 @@
 package freemarker.ext.jsp.mocked;
 
 public final class TestFunctions {
-
+    
     private TestFunctions() {
         // Not meant to be instantiated
     }

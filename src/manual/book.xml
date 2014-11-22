@@ -21551,12 +21551,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para><literal>FreemarkerServlet</literal> now supports custom
-              EL functions defined in the TLD-s (via the
+              JSP EL functions defined in TLD-s (via the
               <literal>function</literal> XML element). Earlier it has ignored
               them. The custom EL function can be called like a Java method,
               for example: <literal>&lt;#assign
               u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ... ${u.truncate(title,
               25)}</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved JSP TLD parsing error message quality.</para>
             </listitem>
 
             <listitem>
