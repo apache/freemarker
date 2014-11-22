@@ -726,7 +726,7 @@ public class TaglibFactory implements TemplateHashModel {
                             e);
                     }
                 }
-                else if ("function".equals(qName)) {
+                else if ("function".equals(qName) && beansWrapper != null) {
                         Class functionClass;
                         try {
                             functionClass = ClassUtil.forName(functionClassName);
