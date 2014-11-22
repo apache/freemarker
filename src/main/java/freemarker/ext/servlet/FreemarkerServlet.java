@@ -136,7 +136,7 @@ import freemarker.template.utility.StringUtil;
 
 public class FreemarkerServlet extends HttpServlet
 {
-    private static final Logger logger = Logger.getLogger("freemarker.servlet");
+    private static final Logger LOG = Logger.getLogger("freemarker.servlet");
     
     public static final long serialVersionUID = -2440216393145762479L;
 
@@ -216,8 +216,8 @@ public class FreemarkerServlet extends HttpServlet
             
             // Process object_wrapper init-param out of order: 
             wrapper = createObjectWrapper();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Using object wrapper: " + wrapper);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Using object wrapper: " + wrapper);
             }
             config.setObjectWrapper(wrapper);
             
@@ -594,16 +594,16 @@ public class FreemarkerServlet extends HttpServlet
     }
     
     /**
-     * This method is called from {@link #init()} to create the
-     * FreeMarker object wrapper object that this servlet will use
-     * for adapting request, session, and servlet context attributes into 
-     * template models.. This is a hook that allows you
-     * to custom-configure the wrapper object in a subclass.
-     * The default implementation returns a wrapper that depends on the value
-     * of <code>ObjectWrapper</code> init parameter. If <code>simple</code> is
-     * specified, {@link ObjectWrapper#SIMPLE_WRAPPER} is used; if <code>jython</code>
-     * is specified, {@link freemarker.ext.jython.JythonWrapper} is used. In
-     * every other case {@link ObjectWrapper#DEFAULT_WRAPPER} is used.
+     * Called from {@link #init()} to create the FreeMarker object wrapper that this servlet will use for adapting
+     * request, session, and servlet context attributes to {@link TemplateModel}-s. This is a hook that allows you
+     * customize the object wrapper creation in a subclass. You should call {@link #getInitParameter(String)}
+     * with {@link Configurable#OBJECT_WRAPPER_KEY} as argument, and see if it returns {@code null} or some other
+     * value that you want to interpret yourself. If it wasn't {@code null} and you don't want to interpret the value,
+     * fall back to the super method.
+     * 
+     * <p>The default implementation interprets the {@value Configurable#OBJECT_WRAPPER_KEY} servlet init-param
+     * with {@link Configurable#setSetting(String, String)} (see valid values there), or if there's no such servlet
+     * init-param, then calls {@link Configuration#getDefaultObjectWrapper(freemarker.template.Version)}. 
      */
     protected ObjectWrapper createObjectWrapper() {
         String wrapper = getServletConfig().getInitParameter(DEPR_INITPARAM_OBJECT_WRAPPER);
@@ -648,6 +648,10 @@ public class FreemarkerServlet extends HttpServlet
         }
     }
     
+    /**
+     * Should be final; don't override it. Override {@link #createObjectWrapper()} instead.
+     */
+    // [2.4] Make it final
     protected ObjectWrapper getObjectWrapper() {
         return wrapper;
     }

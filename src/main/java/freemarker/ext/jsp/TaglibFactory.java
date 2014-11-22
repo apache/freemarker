@@ -95,12 +95,8 @@ public class TaglibFactory implements TemplateHashModel {
     private int lookupPhase = LOOKUP_NONE;
 
     /**
-     * Creates a new JSP taglib factory that will be used to load JSP taglibs
-     * for the web application represented by the passed servlet context.
-     * @param ctx the servlet context whose JSP tag libraries will this factory
-     * load.
      * @deprecated Use {@link TaglibFactory#TaglibFactory(ServletContext, ObjectWrapper)}
-     * instead.
+     * instead, otherwise custom EL functions defined in the TLD will be ignored.
      */
     public TaglibFactory(ServletContext ctx) {
         this(ctx, null);
@@ -110,11 +106,15 @@ public class TaglibFactory implements TemplateHashModel {
      * Creates a new JSP taglib factory that will be used to load JSP tag libraries
      * and functions for the web application represented by the passed servlet
      * context, using the object wrapper when invoking JSTL functions.
-     * @param ctx the servlet context whose JSP tag libraries will this factory
-     * load.
-     * @param wrapper the object wrapper which can be used to unwrap template
-     * models to Java objects (if it supports unwrapping). For example, when
-     * invoking a JSTL function, Template models should be unwrapped.
+     * 
+     * @param ctx The servlet context whose JSP tag libraries this factory will load.
+     *          
+     * @param wrapper The {@link ObjectWrapper} used when building the tag libraries {@link TemplateHashModel}-s from
+     *          the TLD-s. It should be non-{@code null} (though {@code null} is supported for backward compatibility)
+     *          and preferably an instance of {@link BeansWrapper} (or its subclass). For custom EL functions to be
+     *          exposed, it must be an {@link BeansWrapper} (or its subclass).
+     *          
+     * @since 2.3.22
      */
     public TaglibFactory(ServletContext ctx, ObjectWrapper wrapper) {
         this.ctx = ctx;
