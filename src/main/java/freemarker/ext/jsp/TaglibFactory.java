@@ -53,8 +53,10 @@ import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.log.Logger;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateTransformModel;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.StringUtil;
 
@@ -63,18 +65,22 @@ import freemarker.template.utility.StringUtil;
  * libraries associated with that servlet context. An instance of this class is
  * made available in the root data model of templates executed by 
  * {@link freemarker.ext.servlet.FreemarkerServlet} under key
- * <tt>JspTaglibs</tt>. It can be added to custom servlets as well to enable JSP
+ * {@code JspTaglibs}. It can be added to custom servlets as well to enable JSP
  * taglib integration in them as well.
  */
 public class TaglibFactory implements TemplateHashModel {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
+    
     private static final String DEFAULT_JAR_TLD = "META-INF/taglib.tld";
 
-    // No TLDs have been looked up yet
+    /** No TLDs have been looked up yet */
     private static final int LOOKUP_NONE = 0;
-    // Only taglibs defined in web.xml have been looked up
+    
+    /** Only taglibs defined in web.xml have been looked up */
     private static final int LOOKUP_WEB_XML = 1;
-    // Both taglibs in web.xml and those in JARs and TLD files have been looked up
+    
+    /** Both taglibs in web.xml and those in JARs and TLD files have been looked up */
     private static final int LOOKUP_WEB_APP = 2;
 
     private static final int ABS_URI = 0;
@@ -83,6 +89,7 @@ public class TaglibFactory implements TemplateHashModel {
 
     private final ServletContext ctx;
     private final ObjectWrapper wrapper;
+    
     private final Map taglibs = new HashMap();
     private final Map locations = new HashMap();
     private int lookupPhase = LOOKUP_NONE;
@@ -100,7 +107,7 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * Creates a new JSP taglib factory that will be used to load JSP tag libaries
+     * Creates a new JSP taglib factory that will be used to load JSP tag libraries
      * and functions for the web application represented by the passed servlet
      * context, using the object wrapper when invoking JSTL functions.
      * @param ctx the servlet context whose JSP tag libraries will this factory
@@ -117,20 +124,22 @@ public class TaglibFactory implements TemplateHashModel {
     /**
      * Retrieves a JSP tag library identified by an URI. The matching of the URI
      * to a JSP taglib is done as described in the JSP 1.2 FCS specification.
+     * 
      * @param uri the URI that describes the JSP taglib. It can be any of the
      * three forms allowed by the JSP specification: absolute URI, root relative
      * URI and non-root relative URI. Note that if a non-root relative URI is
      * used it's resolved relative to the URL of the current request. In this
      * case, the current request is obtained by looking up a
      * {@link HttpRequestHashModel} object named <tt>Request</tt> in the root
-     * data model. FreemarkerServlet provides this object under the expected
+     * data model. {@link FreemarkerServlet} provides this object under the expected
      * name, and custom servlets that want to integrate JSP taglib support
      * should do the same.
-     * @return a hash model representing the JSP taglib. Each element of this
-     * hash model represents a single custom tag from the library, implemented
-     * as a {@link freemarker.template.TemplateTransformModel}.
+     * 
+     * @return a hash representing the JSP taglib. Each element of this
+     * hash model represents a single custom tag or function from the library, implemented
+     * as a {@link TemplateTransformModel} or {@link TemplateMethodModelEx}, respectively.
      */
-    public TemplateModel get(String uri) throws TemplateModelException {
+    public TemplateHashModel get(String uri) throws TemplateModelException {
         synchronized (taglibs) {
             final Taglib taglib = (Taglib) taglibs.get(uri);
             if(taglib != null) {
@@ -186,9 +195,6 @@ public class TaglibFactory implements TemplateHashModel {
             catch(TemplateModelException e) {
                 throw e;
             }
-            catch(RuntimeException e) {
-                throw e;
-            }
             catch(Exception e) {
                 throw new TemplateModelException("Could not load taglib information for " + uri, e);
             }
@@ -216,9 +222,9 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private TemplateModel loadTaglib(TldPath tldPath, String uri) throws Exception {
-        if(logger.isDebugEnabled()) {
-            logger.debug("Loading taglib " + StringUtil.jQuoteNoXSS(uri) + 
+    private TemplateHashModel loadTaglib(TldPath tldPath, String uri) throws Exception {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Loading taglib " + StringUtil.jQuoteNoXSS(uri) + 
                 " from location " + StringUtil.jQuoteNoXSS(tldPath));
         }
         final Taglib taglib = new Taglib(ctx, tldPath, uri, wrapper);
@@ -408,12 +414,12 @@ public class TaglibFactory implements TemplateHashModel {
     private void addLocation(String source, String filePath, String jarItemPath, String uri) {
         final TldPath tldPath = new TldPath(filePath, jarItemPath);
         if(locations.containsKey(uri)) {
-            logger.debug("Ignored duplicate URI " + StringUtil.jQuoteNoXSS(uri) +
+            LOG.debug("Ignored duplicate URI " + StringUtil.jQuoteNoXSS(uri) +
                     " in " + source + " " + StringUtil.jQuoteNoXSS(tldPath));
         } else {
             locations.put(uri, tldPath);
-            if(logger.isDebugEnabled()) {
-                logger.debug(source + " assigned URI " + StringUtil.jQuoteNoXSS(uri) +
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(source + " assigned URI " + StringUtil.jQuoteNoXSS(uri) +
                         " to location " + StringUtil.jQuoteNoXSS(tldPath));
             }
         }
@@ -604,8 +610,12 @@ public class TaglibFactory implements TemplateHashModel {
             }
             else {
                 beansWrapper = null;
-                if (logger.isWarnEnabled()) {
-                    logger.warn("JSTL functions can't be loaded because the wrapper doesn't support unwrapping.");
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Custom EL functions won't be loaded because "
+                            + (wrapper == null
+                                    ? "no ObjectWarpper was specified "
+                                    : "the ObjectWrapper wasn't instance of " + BeansWrapper.class.getName())
+                            + ".");
                 }
             }
         }

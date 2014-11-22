@@ -9169,9 +9169,9 @@ TemplateHashModel roundingModeEnums =
           <para><literal>FreemarkerServlet</literal> puts the
           <literal>JspTaglibs</literal> hash into the data-model, which you
           can use to access JSP taglibs. The JSP custom tags will be
-          accessible as plain user-defined directives, and the custom
-          functions as methods. (Note: custom functions are supported since
-          FreeMarker 2.3.22.) For example, for this JSP file:</para>
+          accessible as plain user-defined directives, and the custom EL
+          functions (since FreeMarker 2.3.22) as methods. For example, for
+          this JSP file:</para>
 
           <programlisting role="template">&lt;%@ page contentType="text/html;charset=ISO-8859-2" language="java"%&gt;
 &lt;%@ taglib prefix="e" uri="/WEB-INF/example.tld" %&gt;
@@ -9187,7 +9187,7 @@ TemplateHashModel roundingModeEnums =
 
 &lt;oe:otherTag /&gt;
 
-${e:someFunction(1, 2)}
+${e:someELFunction(1, 2)}
 
 
 &lt;%-- JSTL: --%&gt;
@@ -9224,7 +9224,7 @@ ${fn:trim(bar)}</programlisting>
 
 &lt;@oe.otherTag /&gt;
 
-${e.someFunction(1, 2)}
+${e.someELFunction(1, 2)}
 
 
 &lt;#-- JSTL - Instead, use native FTL constructs: --&gt;
@@ -21550,12 +21550,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><literal>FreemarkerServlet</literal> now supports JSP
-              custom taglib functions (defined in the TLD via the
+              <para><literal>FreemarkerServlet</literal> now supports custom
+              EL functions defined in the TLD-s (via the
               <literal>function</literal> XML element). Earlier it has ignored
-              them. The function can be called like Java method, for example:
-              <literal>&lt;#assign u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ...
-              ${u.truncate(title, 25)}</literal>.</para>
+              them. The custom EL function can be called like a Java method,
+              for example: <literal>&lt;#assign
+              u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ... ${u.truncate(title,
+              25)}</literal>.</para>
             </listitem>
 
             <listitem>
