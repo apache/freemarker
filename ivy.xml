@@ -1,6 +1,9 @@
 <!--
   AFTER CHANGING THIS FILE don't forget to issue: ant update-deps
 -->
+<!DOCTYPE ivy-module [
+    <!ENTITY jetty.version "7.6.16.v20140903">
+]>
 <ivy-module version="2.0">
   <info organisation="org.freemarker" module="freemarker">
     <license name="Apache License, Version 2.0" url="http://freemarker.org/docs/app_license.html" />
@@ -48,7 +51,7 @@
         description="for building FreeMarker with Jython 2.5 support"
     />
     
-    <conf name="test" extends="build.jsp2.1, build.jython2.5"
+    <conf name="test" extends="build.jython2.5"
         description="commons for both building and running the FreeMarker test suite"
     />
     <conf name="build.test" extends="test"
@@ -127,6 +130,15 @@
     
     <!-- Note: Ant doesn't contain junit.jar anymore -->
     <dependency org="junit" name="junit" rev="4.11" conf="test->default" />
+
+    <dependency org="ch.qos.logback" name="logback-classic" rev="1.1.2" conf="test->default" />
+
+    <dependency org="commons-io" name="commons-io" rev="2.2" conf="test->default" />
+
+    <dependency org="org.eclipse.jetty" name="jetty-server" rev="&jetty.version;" conf="test->default" />
+    <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="&jetty.version;" conf="test->default" />
+    <dependency org="org.eclipse.jetty" name="jetty-jsp" rev="&jetty.version;" conf="test->default" />
+    <dependency org="org.eclipse.jetty" name="jetty-util" rev="&jetty.version;" conf="test->default" />
     
     <!-- docs -->
     

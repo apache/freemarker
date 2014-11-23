@@ -13,20 +13,39 @@
 	<classpathentry kind="lib" path="ide-dependencies/annotations-3.0.0.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/ant-1.6.5.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/avalon-logkit-2.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/com.sun.el-1.0.0.v201105211818.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/javarebel-sdk-1.2.2.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/javax.el-2.1.0.v201105211819.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/javax.servlet-2.5.0.v201103041518.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/javax.servlet.jsp-2.1.0.v201105211820.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/jaxen-1.0-FCS.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/jdom-1.0-beta8-dev.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-continuation-7.6.16.v20140903.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-http-7.6.16.v20140903.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-io-7.6.16.v20140903.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-jsp-7.6.16.v20140903.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-security-7.6.16.v20140903.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-server-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-server-7.6.16.v20140903-sources.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-servlet-7.6.16.v20140903.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-util-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-util-7.6.16.v20140903-sources.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-webapp-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-webapp-7.6.16.v20140903-sources.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jetty-xml-7.6.16.v20140903.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/js-1.6R1.jar"/>
-	<classpathentry kind="lib" path="ide-dependencies/jsp-api-2.1.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/jython-2.5.0.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/log4j-1.2.6.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/org.apache.jasper.glassfish-2.1.0.v201110031002.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/org.eclipse.jdt.core-3.7.1.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/saxpath-1.0-FCS.jar"/>
-	<classpathentry kind="lib" path="ide-dependencies/servlet-api-2.5.jar"/>
-	<classpathentry kind="lib" path="ide-dependencies/slf4j-api-1.6.1.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/xalan-2.7.0.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/dom4j-1.3.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/logback-classic-1.1.2.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/logback-core-1.1.2.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/slf4j-api-1.7.6.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/commons-io-2.2.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/commons-io-2.2-sources.jar"/>
 	<classpathentry kind="output" path=".bin/"/>
 </classpath>
