@@ -11,7 +11,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
@@ -33,6 +32,9 @@ public class WebAppTestCase {
     
     @BeforeClass
     public static void beforeClass() throws Exception {
+        // Work around Java 5 bug(?) that causes Jasper to fail with "zip file closed" when it reads the JSTL jar:
+        org.eclipse.jetty.util.resource.Resource.setDefaultUseCaches(false);
+        
         LOG.info("Starting embedded Jetty...");
         
         server = new Server(0);
@@ -98,13 +100,14 @@ public class WebAppTestCase {
         assertEquals(jspOutput, ftlOutput);
     }
 
-    private Pattern TRIM_NL = Pattern.compile("^[\\n\\r]*+(.*?)[\\n\\r]*$", Pattern.DOTALL); 
+    private Pattern MULTI_LINE_WS = Pattern.compile("[\t ]*[\r\n][\t \r\n]*", Pattern.DOTALL); 
+    private Pattern SAME_LINE_WS = Pattern.compile("[\t ]+", Pattern.DOTALL); 
     
     private String normalizeWS(String s) {
-        Matcher m = TRIM_NL.matcher(s);
-        m.matches();
-        s = m.group(1);
-        return s;
+        return SAME_LINE_WS.matcher(
+                MULTI_LINE_WS.matcher(s).replaceAll("\n"))
+                .replaceAll(" ")
+                .trim();
     }
 
     private synchronized void ensureWebAppIsDeployed(String webAppName) throws Exception {
