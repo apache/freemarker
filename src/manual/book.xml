@@ -8659,29 +8659,20 @@ TemplateHashModel roundingModeEnums =
         By default, FreeMarker will look for the following logging packages in
         this order, and will automatically use the first package it finds:
         <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
-        </remark>Log4J, Avalon, <literal>java.util.logging</literal>. However,
-        if you call the static <literal>selectLoggerLibrary</literal> method
-        on the <literal>freemarker.log.Logger</literal> class with appropriate
-        parameter and <emphasis>before using any FreeMarker classes that log
-        messages</emphasis>, you can explicitly select a logger package, or
-        even disable the logging. See the API documentation for more
-        details.</para>
+        </remark>Log4J, Avalon, <literal>java.util.logging</literal>. Prior to
+        FreeMarker 2.4, SLF4J and Apache Commons Logging aren't searched
+        automatically due to backward compatibility constraints. However, you
+        can set the <literal>org.freemarker.loggerLibrary</literal> system
+        property to select a logger library explicitly, like:</para>
 
-        <note>
-          <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging
-          aren't searched automatically due to backward compatibility
-          constraints, so to use one of them you must do this:</para>
+        <programlisting>java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
 
-          <programlisting role="unspecified">import freemarker.log.Logger;
-...
-    // IMPORTANT: This should be executed before using other FreeMarker classes!
-    Logger.selectLoggerLibrary(Logger.LIBRARY_SLF4J);  // or Logger.LIBRARY_COMMONS
-...</programlisting>
+        <para>Note that for reliable operation, the system property should be
+        set when the JVM starts (like above), not later from Java code.</para>
 
-          <para>Doing this is recommended, because starting from 2.4 SLF4J
-          will be used by default if present, otherwise Apache Commons Logging
-          if present, otherwise Log4J if present, etc.</para>
-        </note>
+        <para>Using SLF4J is recommended, as it works best with FreeMarker,
+        and also because it will be the highest priority auto detected logger
+        starting from FreeMarker 2.4 anyway.</para>
 
         <para>All log messages produced by FreeMarker are logged into the
         logger hierarchy whose top-level logger is named
@@ -8690,7 +8681,7 @@ TemplateHashModel roundingModeEnums =
         <informaltable border="1">
           <thead>
             <tr>
-              <th>Logger name</th>
+              <th>Log category name</th>
 
               <th>Purpose</th>
             </tr>
@@ -8741,17 +8732,6 @@ TemplateHashModel roundingModeEnums =
             </tr>
           </tbody>
         </informaltable>
-
-        <para>You can call the static <literal>selectLoggerLibrary</literal>
-        method on the <literal>freemarker.log.Logger</literal> class and pass
-        it a string that will be used to prefix the above mentioned logger
-        names. This is useful if you want to have separate loggers on a
-        per-web-application basis (assuming the application uses its own local
-        <literal>freemarker.jar</literal>). Also, you can disable logging with
-        <literal>Logger.selectLoggerLibrary(Logger.LIBRARY_NONE)</literal>. In
-        any case, <literal>selectLoggerLibrary</literal> must be called early,
-        before FreeMarker could log anything, or else it will not have
-        (consistent) effect.</para>
       </section>
 
       <section xml:id="pgui_misc_servlet">
@@ -21565,6 +21545,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Improved JSP TLD parsing error message quality.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>org.freemarker.loggerLibrary</literal>
+              system property that can be used to specify what logger library
+              will FreeMarker use, like <literal>java
+              <replaceable>...</replaceable> -D
+              org.freemarker.loggerLibrary=slf4j</literal>. Deprecated
+              <literal>Logger.selectLoggerLibrary(int)</literal>, as it
+              inherently wasn't reliable. The system property has precedence
+              over it. Improved <literal>Logger</literal> implementation
+              quality (like better warning and error messages).</para>
             </listitem>
 
             <listitem>

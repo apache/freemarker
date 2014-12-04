@@ -22,7 +22,7 @@ import org.apache.log4j.Level;
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
-public class _Log4JLoggerFactory implements LoggerFactory
+public class _Log4jLoggerFactory implements LoggerFactory
 {
     public Logger getLogger(String category)
     {

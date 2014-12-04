@@ -22,20 +22,20 @@ import java.util.logging.Level;
  * Don't use this class; it's only public to work around Google App Engine Java
  * compliance issues. FreeMarker developers only: treat this class as package-visible.
  */
-public class _JDK14LoggerFactory implements LoggerFactory
+public class _JULLoggerFactory implements LoggerFactory
 {
     public Logger getLogger(String category)
     {
-        return new JDK14Logger(java.util.logging.Logger.getLogger(category));
+        return new JULLogger(java.util.logging.Logger.getLogger(category));
     }
 
-    private static class JDK14Logger
+    private static class JULLogger
     extends
         Logger
     {
         private final java.util.logging.Logger logger;
         
-        JDK14Logger(java.util.logging.Logger logger)
+        JULLogger(java.util.logging.Logger logger)
         {
             this.logger = logger;
         }
