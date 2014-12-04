@@ -230,12 +230,10 @@ public class TaglibFactory implements TemplateHashModel {
             return "servletContext:" + filePath + (zipEntryPath != null ? "!" + zipEntryPath : "");
         }
 
-        @Override
         public InputStream getInputStream() {
             return ctx.getResourceAsStream(filePath);
         }
 
-        @Override
         public URL getURL() throws MalformedURLException {
             return ctx.getResource(filePath);
         }
@@ -256,13 +254,11 @@ public class TaglibFactory implements TemplateHashModel {
             return "classpath:" + filePath + (zipEntryPath != null ? "!" + zipEntryPath : "");
         }
 
-        @Override
         public InputStream getInputStream() {
             // TODO TCTL
             return this.getClass().getResourceAsStream(filePath);
         }
 
-        @Override
         public URL getURL() throws MalformedURLException {
             // TODO TCTL
             return this.getClass().getResource(filePath);

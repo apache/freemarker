@@ -1,5 +1,6 @@
 package freemarker.ext.jsp;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import freemarker.ext.servlet.FreemarkerServlet;
@@ -15,6 +16,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         assertJSPAndFTLOutputEquals("basic", "tester?view=1");
     }
     
+    @Ignore
     @Test
     public void test2() throws Exception {
         assertOutputsEqual("basic", "tester?view=1.jsp", "tester?view=1-jstl.ftl");        
