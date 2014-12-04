@@ -122,7 +122,7 @@ public class WebAppTestCase {
         // Pattern of jar file names scanned for META-INF/*.tld:
         context.setAttribute(
                 "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-                ".*taglib.*standard.*\\.jar$");
+                ".*taglib.*\\.jar$");
 
         contextHandlers.addHandler(context);
         // As we add this after the Server was started, it has to be started manually:
