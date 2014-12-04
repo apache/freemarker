@@ -8877,6 +8877,10 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;UTF-8&lt;/param-value&gt; &lt;!-- The encoding of the template files. --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
+    &lt;param-name&gt;locale&lt;/param-name&gt;
+    &lt;param-value&gt;en_US&lt;/param-value&gt; &lt;!-- Influences number and date/time formatting, etc. --&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
     &lt;param-name&gt;number_format&lt;/param-name&gt;
     &lt;param-value&gt;0.##########&lt;/param-value&gt;
   &lt;/init-param&gt;
