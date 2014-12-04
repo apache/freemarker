@@ -39,7 +39,7 @@ public abstract class DebuggerService
         // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
         return 
-            SecurityUtilities.getSystemProperty("freemarker.debug.password") == null
+            SecurityUtilities.getSystemProperty("freemarker.debug.password", null) == null
             ? (DebuggerService)new NoOpDebuggerService()
             : (DebuggerService)new RmiDebuggerService();
     }

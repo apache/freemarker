@@ -21608,6 +21608,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               the <literal>Template</literal> that contains the macro
               definition, so there's no change there now.</para>
             </listitem>
+
+            <listitem>
+              <para>FreeMarker doesn't fail anymore when it's unable to read
+              certain Java system properties, it just logs a warning and goes
+              on with a fixed default. For example, if it has no access to the
+              <literal>file.encoding</literal> system property, it will log a
+              warning then assume <literal>"utf-8"</literal>. Reading system
+              properties is very rarely and issue, but can happen in security
+              restricted environment. TODO: bug #129 (applets) will still
+              fail.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

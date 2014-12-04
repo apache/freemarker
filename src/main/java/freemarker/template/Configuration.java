@@ -221,7 +221,7 @@ public class Configuration extends Configurable implements Cloneable {
      */
     private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
-    private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
+    private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private Map localeToCharsetMap = _ConcurrentMapFactory.newThreadSafeMap();
     
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
