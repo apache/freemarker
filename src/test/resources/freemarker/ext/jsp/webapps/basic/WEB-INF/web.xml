@@ -31,6 +31,10 @@
 			<param-name>ContentType</param-name>
 			<param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
 		</init-param>
+        <init-param>
+            <param-name>ClasspathTaglibJarsPattern</param-name>
+            <param-value>.*taglib.*\.jar</param-value>
+        </init-param>
 
 		<!-- FreeMarker settings: -->
 		<init-param>
@@ -50,6 +54,10 @@
 			<param-name>default_encoding</param-name>
 			<param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
 		</init-param>
+        <init-param>
+            <param-name>locale</param-name>
+            <param-value>en_US</param-value>
+        </init-param>
 		<init-param>
 			<param-name>number_format</param-name>
 			<param-value>0.##########</param-value>
@@ -70,6 +78,7 @@
 		<web-resource-collection>
 			<web-resource-name>FreeMarker MVC Views</web-resource-name>
 			<url-pattern>*.ftl</url-pattern>
+			<url-pattern>*.jsp</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<!-- Nobody is allowed to visit these -->

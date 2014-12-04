@@ -95,11 +95,16 @@ public class WebAppTestCase {
      *          URL-s will be compared.
      */
     protected void assertJSPAndFTLOutputEquals(String webAppName, String webAppRelURLWithoutExt) throws Exception {
-        String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURLWithoutExt + ".jsp"));
-        String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURLWithoutExt + ".ftl"));
-        assertEquals(jspOutput, ftlOutput);
+        assertOutputsEqual(webAppName, webAppRelURLWithoutExt + ".jsp", webAppRelURLWithoutExt + ".ftl");
     }
 
+    protected void assertOutputsEqual(String webAppName, String webAppRelURL1, final String webAppRelURL2)
+            throws Exception {
+        String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL1));
+        String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL2));
+        assertEquals(jspOutput, ftlOutput);
+    }
+    
     private Pattern MULTI_LINE_WS = Pattern.compile("[\t ]*[\r\n][\t \r\n]*", Pattern.DOTALL); 
     private Pattern SAME_LINE_WS = Pattern.compile("[\t ]+", Pattern.DOTALL); 
     

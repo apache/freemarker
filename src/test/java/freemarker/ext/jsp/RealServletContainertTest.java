@@ -14,5 +14,10 @@ public class RealServletContainertTest extends WebAppTestCase {
     public void test1() throws Exception {
         assertJSPAndFTLOutputEquals("basic", "tester?view=1");
     }
+    
+    @Test
+    public void test2() throws Exception {
+        assertOutputsEqual("basic", "tester?view=1.jsp", "tester?view=1-jstl.ftl");        
+    }
 
 }

@@ -36,7 +36,6 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/js-1.6R1.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/junit-4.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jython-2.5.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="ide-dependencies/log4j-1.2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/org.apache.jasper.glassfish-2.1.0.v201110031002.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/org.eclipse.jdt.core-3.7.1.jar"/>
@@ -48,5 +47,6 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/slf4j-api-1.7.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/commons-io-2.2.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/commons-io-2.2-sources.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/guava-jdk5-17.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/log4j-over-slf4j-1.6.1.jar"/>
 	<classpathentry kind="output" path=".bin/"/>
 </classpath>

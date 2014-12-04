@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,6 +39,7 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.ext.jsp.TaglibFactory;
+import freemarker.ext.jsp.TaglibFactoryConfiguration;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
@@ -123,6 +125,8 @@ import freemarker.template.utility.StringUtil;
  * <tt>&lt;#ftl&gt;</tt> directive. 
  * </li>
  * 
+ * <li><strong>ClasspathTaglibJarsPattern</strong> TODO documentation</li>
+ * 
  * <li>The following init-params are supported only for backward compatibility, and
  * their usage is discouraged: TemplateUpdateInterval, DefaultEncoding,
  * ObjectWrapper, TemplateExceptionHandler. Use setting init-params such as
@@ -143,6 +147,9 @@ public class FreemarkerServlet extends HttpServlet
     private static final String INITPARAM_TEMPLATE_PATH = "TemplatePath";
     private static final String INITPARAM_NOCACHE = "NoCache";
     private static final String INITPARAM_CONTENT_TYPE = "ContentType";
+    /** @since 2.3.22 */
+    private static final String CLASSPATH_TAGLIB_JARS_PATTERN = "ClasspathTaglibJarsPattern";
+    
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String INITPARAM_DEBUG = "Debug";
     
@@ -199,6 +206,7 @@ public class FreemarkerServlet extends HttpServlet
     private ObjectWrapper wrapper;
     private String contentType;
     private boolean noCharsetInContentType;
+    private Pattern additionalTaglibJarsPattern;
     
     public void init() throws ServletException {
         try {
@@ -304,6 +312,8 @@ public class FreemarkerServlet extends HttpServlet
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INITPARAM_CONTENT_TYPE)) {
                     contentType = value;
+                } else if (name.equals(CLASSPATH_TAGLIB_JARS_PATTERN)) {;
+                    additionalTaglibJarsPattern = Pattern.compile(value); 
                 } else {
                     config.setSetting(name, value);
                 }
@@ -326,7 +336,7 @@ public class FreemarkerServlet extends HttpServlet
         } catch (ServletException e) {
             throw e;
         } catch (Exception e) {
-            throw new ServletException(e);
+            throw new ServletException("Error during servlet initialization", e);
         }
     }
 
@@ -463,18 +473,19 @@ public class FreemarkerServlet extends HttpServlet
     
             // Create hash model wrapper for servlet context (the application)
             ServletContextHashModel servletContextModel =
-                (ServletContextHashModel) servletContext.getAttribute(
-                    ATTR_APPLICATION_MODEL);
+                    (ServletContextHashModel) servletContext.getAttribute(ATTR_APPLICATION_MODEL);
             if (servletContextModel == null)
             {
                 servletContextModel = new ServletContextHashModel(this, wrapper);
-                servletContext.setAttribute(
-                    ATTR_APPLICATION_MODEL,
-                    servletContextModel);
-                TaglibFactory taglibs = new TaglibFactory(servletContext, wrapper);
-                servletContext.setAttribute(
-                    ATTR_JSP_TAGLIBS_MODEL,
-                    taglibs);
+                servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
+                
+                TaglibFactoryConfiguration taglibFactoryCfg = new TaglibFactoryConfiguration();
+                taglibFactoryCfg.setObjectWrapper(wrapper);
+                taglibFactoryCfg.setAdditionalTaglibJarsPattern(additionalTaglibJarsPattern);
+                
+                TaglibFactory taglibs = new TaglibFactory(servletContext, taglibFactoryCfg);
+                servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibs);
+                
                 initializeServletContext(request, response);
             }
             params.putUnlistedModel(KEY_APPLICATION, servletContextModel);
