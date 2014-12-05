@@ -60,7 +60,7 @@ public class TLDParsingTest {
     @Test
     public void testTldParser() throws Exception {
         URL url = getClass().getResource("TLDParsingTest.tld");
-        TaglibFactory.TldParser tldParser = new TaglibFactory.TldParser(wrapper);
+        TaglibFactory.TldParserForTaglibBuilding tldParser = new TaglibFactory.TldParserForTaglibBuilding(wrapper);
         InputSource is = new InputSource();
         InputStream input = url.openStream();
         is.setByteStream(input);

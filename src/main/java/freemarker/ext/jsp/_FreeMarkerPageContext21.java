@@ -39,13 +39,13 @@ import freemarker.template.TemplateModelException;
  * methods.
  */
 public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
 
     static {
         if(JspFactory.getDefaultFactory() == null) {
             JspFactory.setDefaultFactory(new FreeMarkerJspFactory21());
         }
-        logger.debug("Using JspFactory implementation class " + 
+        LOG.debug("Using JspFactory implementation class " + 
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 
