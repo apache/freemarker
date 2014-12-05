@@ -9,7 +9,7 @@
 			<attribute name="ignore_optional_problems" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/annotations-3.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/ant-1.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/avalon-logkit-2.0.jar"/>
@@ -46,7 +46,7 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/logback-core-1.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/slf4j-api-1.7.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/commons-io-2.2.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/commons-io-2.2-sources.jar"/>
-	<classpathentry kind="lib" path="ide-dependencies/guava-jdk5-17.0.jar"/>
-	<classpathentry kind="lib" path="ide-dependencies/log4j-over-slf4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="ide-dependencies/guava-jdk5-17.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="ide-dependencies/log4j-over-slf4j-1.6.1.jar"/>
 	<classpathentry kind="output" path=".bin/"/>
 </classpath>

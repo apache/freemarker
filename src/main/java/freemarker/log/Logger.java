@@ -22,34 +22,40 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Delegate logger creation to whatever logging library is available on the system. It looks for logger libraries in
- * this order (in FreeMarker 2.3.x): Log4J, Avalon LogKit, JUL (i.e., <tt>java.util.logging</tt>).
+ * Delegates logger creation to an actual logging library. By default it looks for logger libraries in this order (in
+ * FreeMarker 2.3.x): Log4J, Avalon LogKit, JUL (i.e., <tt>java.util.logging</tt>). Prior to FreeMarker 2.4, SLF4J and
+ * Apache Commons Logging aren't searched automatically due to backward compatibility constraints. But if you have
+ * {@code log4j-over-slf4j} properly installed (means, you have no real Log4j in your class path, and SLF4J has a
+ * backing implementation like {@code logback-classic}), then FreeMarker will use SLF4J directly instead of Log4j (since
+ * FreeMarker 2.3.22).
  * 
  * <p>
- * In FreeMarker 2.3.x, SLF4J and commons-logging is not searched by the auto detection for backward compatibility. It's
- * very likely that starting from FreeMarker 2.4.x first SLF4J and then commons-logging will be searched. Until that,
- * you can use the {@value #PROPERTY_NAME_LOGGER_LIBRARY} system property to select SLF4J, like
- * {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}. (Don't set this system property from Java code; it's not
- * reliable that way, also it can cause confusion if you override the value set by others by {@code -D}.)
+ * If the auto detection sequence describet above doesn't give you the result that you want, see
+ * {@link #PROPERTY_NAME_LOGGER_LIBRARY}.
  */
 public abstract class Logger {
 
     /**
-     * System property that tells which logger library to use for logging. This system property should be set when
-     * starting Java (like {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}), not later from Java
-     * code. If the requested logging library is not available, an error will be printed to the stderr, then the logging
-     * will be disabled.
+     * The {@value #PROPERTY_NAME_LOGGER_LIBRARY} system property is used to select a logger library explicitly, rather
+     * than relying on automatic selection. You meant to set this system property where the JVM is started, like
+     * {@code java ... -Dorg.freemarker.loggerLibrary=SLF4j}. Setting it from Java code isn't reliable, also it can
+     * cause confusion if you override the value set by others with {@code -D}.
      * 
-     * <p>The supported values are:
+     * <p>
+     * If the requested logging library is not available, an error will be printed to the stderr, then logging will be
+     * disabled.
+     * 
+     * <p>
+     * The supported values are:
      * <ul>
-     *   <li>{@value #LIBRARY_NAME_SLF4J}: Use SLF4J. This is the recommended value.</li>
-     *   <li>{@value #LIBRARY_NAME_COMMONS_LOGGING}: Use Apache commons-logging.</li>
-     *   <li>{@value #LIBRARY_NAME_LOG4J}: Use Log4j.</li>
-     *   <li>{@value #LIBRARY_NAME_JUL}: Use {@code java.util.logging}.</li>
-     *   <li>{@value #LIBRARY_NAME_AVALON}: Use Avalon LogKit. deprecated!</li>
-     *   <li>{@value #LIBRARY_NAME_AUTO}: Use auto-detection. This is the default behavior. See {@link Logger} class
-     *       documentation for more.</li>
-     *   <li>{@value #LIBRARY_NAME_NONE}: Don't log.</li>
+     * <li>{@value #LIBRARY_NAME_SLF4J}: Use SLF4J (recommended)</li>
+     * <li>{@value #LIBRARY_NAME_COMMONS_LOGGING}: Use Apache Commons Logging.</li>
+     * <li>{@value #LIBRARY_NAME_LOG4J}: Use Log4j.</li>
+     * <li>{@value #LIBRARY_NAME_JUL}: Use {@code java.util.logging}.</li>
+     * <li>{@value #LIBRARY_NAME_AVALON}: Use Avalon LogKit (deprecated)</li>
+     * <li>{@value #LIBRARY_NAME_AUTO}: Use automatic selection (default behavior). See {@link Logger} class
+     * documentation for more.</li>
+     * <li>{@value #LIBRARY_NAME_NONE}: Don't log.</li>
      * </ul>
      */
     public static final String PROPERTY_NAME_LOGGER_LIBRARY = "org.freemarker.loggerLibrary";
@@ -90,14 +96,17 @@ public abstract class Logger {
 
     /**
      * Enum value used for {@link #selectLoggerLibrary(int)}; indicates that Avalon LogKit should be used.
+     * 
      * @deprecated Avalon LogKit support will be removed sometimes in the future.
      */
     public static final int LIBRARY_AVALON = 2;
 
     /**
      * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Avalon LogKit should be used. @since 2.3.22
+     * 
      * @deprecated Avalon LogKit support will be removed sometimes in the future.
      */
+    // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_AVALON = "Avalon";
 
     /**
@@ -108,6 +117,7 @@ public abstract class Logger {
     /**
      * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Log4J should be used. @since 2.3.22
      */
+    // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_LOG4J = "Log4j";
 
     /**
@@ -119,6 +129,7 @@ public abstract class Logger {
      * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Apache commons-logging should be used. @since
      * 2.3.22
      */
+    // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_COMMONS_LOGGING = "CommonsLogging";
 
     /**
@@ -129,21 +140,25 @@ public abstract class Logger {
     /**
      * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that SLF4J should be used. @since 2.3.22
      */
+    // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_SLF4J = "SLF4J";
     private static final int MAX_LIBRARY_ENUM = LIBRARY_SLF4J;
-    
+
+    private static final String REAL_LOG4J_PRESENCE_CLASS = "org.apache.log4j.FileAppender";
+    private static final String LOG4J_OVER_SLF4J_TESTER_CLASS = "freemarker.log._Log4jOverSLF4JTester";
+
     /**
      * Order matters! Starts with the lowest priority.
      */
     private static final String[] LIBRARIES_BY_PRIORITY = {
-            "java.util.logging.Logger", LIBRARY_NAME_JUL,
+            null, LIBRARY_NAME_JUL,
             "org.apache.log.Logger", LIBRARY_NAME_AVALON,
             "org.apache.log4j.Logger", LIBRARY_NAME_LOG4J,
             /* In 2.3.x this two is skipped by LIBRARY_AUTO: */
             "org.apache.commons.logging.Log", LIBRARY_NAME_COMMONS_LOGGING,
             "org.slf4j.Logger", LIBRARY_NAME_SLF4J,
     };
-    
+
     private static String getAvailabilityCheckClassName(int libraryEnum) {
         if (libraryEnum == LIBRARY_AUTO || libraryEnum == LIBRARY_NONE) {
             // Statically linked
@@ -151,6 +166,7 @@ public abstract class Logger {
         }
         return LIBRARIES_BY_PRIORITY[(libraryEnum - 1) * 2];
     }
+
     static {
         if (LIBRARIES_BY_PRIORITY.length / 2 != MAX_LIBRARY_ENUM) {
             throw new AssertionError();
@@ -189,40 +205,43 @@ public abstract class Logger {
      * 
      * @param libraryEnum
      *            One of <tt>LIBRARY_...</tt> constants. By default, {@link #LIBRARY_AUTO} is used.
-     *            
+     * 
      * @throws ClassNotFoundException
-     *             if an explicit logging library is asked for (that is, not {@value #LIBRARY_AUTO}
-     *             or {@value #LIBRARY_NONE}) and it's not found in the classpath.
+     *             if an explicit logging library is asked for (that is, not {@value #LIBRARY_AUTO} or
+     *             {@value #LIBRARY_NONE}) and it's not found in the classpath.
      * 
      * @deprecated This method isn't reliable, unless you can somehow ensure that you access the FreeMarker classes
      *             first; use the {@value #PROPERTY_NAME_LOGGER_LIBRARY} Java system property instead, like
-     *             {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}. See
-     *             {@link #PROPERTY_NAME_LOGGER_LIBRARY} for more.
+     *             {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}. See {@link #PROPERTY_NAME_LOGGER_LIBRARY} for
+     *             more.
      */
     public static void selectLoggerLibrary(int libraryEnum) throws ClassNotFoundException {
         if (libraryEnum < MIN_LIBRARY_ENUM || libraryEnum > MAX_LIBRARY_ENUM) {
             throw new IllegalArgumentException("Library enum value out of range");
         }
-        
+
         synchronized (Logger.class) {
-            final boolean loggerFactoryAlreadySet = loggerFactory != null;
-            if (!loggerFactoryAlreadySet || libraryEnum != Logger.libraryEnum) {
+            final boolean loggerFactoryWasAlreadySet = loggerFactory != null;
+            if (!loggerFactoryWasAlreadySet || libraryEnum != Logger.libraryEnum) {
                 // Creates the factory only if it can be done based on system property:
                 ensureLoggerFactorySet(true);
-    
+
                 // The system property has precedence because this method was deprecated by it:
                 if (!initializedFromSystemProperty || loggerFactory == null) {
+                    int replacedLibraryEnum = Logger.libraryEnum;
                     setLibrary(libraryEnum);
                     loggersByCategory.clear();
-                    if (loggerFactoryAlreadySet) {
-                        logWarnInLogger("Logger libraray was already set earlier; "
+                    if (loggerFactoryWasAlreadySet) {
+                        logWarnInLogger("Logger libraray was already set earlier to \""
+                                + getLibraryName(replacedLibraryEnum) + "\"; "
                                 + "change to \"" + getLibraryName(libraryEnum) + "\" won't effect loggers created "
                                 + "earlier.");
                     }
-                } else {
-                    logWarnInLogger(
-                            "Ignored " + Logger.class.getName() + ".selectLoggerLibrary(int) call, because the "
-                            + PROPERTY_NAME_LOGGER_LIBRARY + " system property is set.");
+                } else if (libraryEnum != Logger.libraryEnum) {
+                    logWarnInLogger("Ignored " + Logger.class.getName() + ".selectLoggerLibrary(\""
+                            + getLibraryName(libraryEnum)
+                            + "\") call, because the \"" + PROPERTY_NAME_LOGGER_LIBRARY + "\" system property is set "
+                            + "to \"" + getLibraryName(Logger.libraryEnum) + "\".");
                 }
             }
         }
@@ -343,12 +362,8 @@ public abstract class Logger {
             if (loggerFactory != null) return;
 
             String sysPropVal = getSystemProperty(PROPERTY_NAME_LOGGER_LIBRARY);
-            if (onlyIfCanBeSetFromSysProp && sysPropVal == null) {
-                return;
-            }
 
             final int libraryEnum;
-            final boolean invalidSysPropValWarning;
             if (sysPropVal != null) {
                 sysPropVal = sysPropVal.trim();
 
@@ -361,31 +376,36 @@ public abstract class Logger {
                         matchedEnum++;
                     }
                 } while (matchedEnum <= MAX_LIBRARY_ENUM && !foundMatch);
-                
+
+                if (!foundMatch) {
+                    logWarnInLogger("Ignored invalid \"" + PROPERTY_NAME_LOGGER_LIBRARY
+                            + "\" system property value: \"" + sysPropVal + "\"");
+                    if (onlyIfCanBeSetFromSysProp) return;
+                }
+
                 libraryEnum = foundMatch ? matchedEnum : LIBRARY_AUTO;
-                invalidSysPropValWarning = !foundMatch;
             } else {
+                if (onlyIfCanBeSetFromSysProp) return;
                 libraryEnum = LIBRARY_AUTO;
-                invalidSysPropValWarning = false;
             }
-            
+
             try {
                 setLibrary(libraryEnum);
-            } catch (Throwable e) {
-                logErrorInLogger(
-                        "Couldn't set up logger for \"" + getLibraryName(libraryEnum) + "\"; logging disabled", e);
-                try {
-                    setLibrary(LIBRARY_NONE);
-                } catch (ClassNotFoundException e2) {
-                    throw new RuntimeException("Bug", e2);
+                if (sysPropVal != null) {
+                    initializedFromSystemProperty = true;
                 }
-            }
-            
-            if (invalidSysPropValWarning) {
-                logWarnInLogger("Ignored invalid " + PROPERTY_NAME_LOGGER_LIBRARY
-                        + " system property value: " + sysPropVal);
-            } else if (sysPropVal != null) {
-                initializedFromSystemProperty = true;
+            } catch (Throwable e) {
+                final boolean disableLogging = !(onlyIfCanBeSetFromSysProp && sysPropVal != null);
+                logErrorInLogger(
+                        "Couldn't set up logger for \"" + getLibraryName(libraryEnum) + "\""
+                                + (disableLogging ? "; logging disabled" : "."), e);
+                if (disableLogging) {
+                    try {
+                        setLibrary(LIBRARY_NONE);
+                    } catch (ClassNotFoundException e2) {
+                        throw new RuntimeException("Bug", e2);
+                    }
+                }
             }
         }
     }
@@ -398,7 +418,10 @@ public abstract class Logger {
         if (libraryEnum == LIBRARY_AUTO) {
             for (int libraryEnumToTry = MAX_LIBRARY_ENUM; libraryEnumToTry >= MIN_LIBRARY_ENUM; libraryEnumToTry--) {
                 if (!isAutoDetected(libraryEnumToTry)) continue;
-                
+                if (libraryEnumToTry == LIBRARY_LOG4J && hasLog4LibraryThatDelegatesToWorkingSLF4J()) {
+                    libraryEnumToTry = LIBRARY_SLF4J;
+                }
+
                 try {
                     return createLoggerFactoryForNonAuto(libraryEnumToTry);
                 } catch (ClassNotFoundException e) {
@@ -406,11 +429,11 @@ public abstract class Logger {
                 } catch (Throwable e) {
                     logErrorInLogger(
                             "Unexpected error when initializing logging for \""
-                            + getLibraryName(libraryEnumToTry) + "\".",
+                                    + getLibraryName(libraryEnumToTry) + "\".",
                             e);
                 }
             }
-            logWarnInLogger("Auto detecton haven't found any logger libraries; FreeMarker logging suppressed.");
+            logWarnInLogger("Auto detecton couldn't set up any logger libraries; FreeMarker logging suppressed.");
             return new _NullLoggerFactory();
         } else {
             return createLoggerFactoryForNonAuto(libraryEnum);
@@ -418,26 +441,49 @@ public abstract class Logger {
     }
 
     /**
-     * @throws ClassNotFoundException If the required logger library is not available. 
+     * @throws ClassNotFoundException
+     *             If the required logger library is not available.
      */
     private static LoggerFactory createLoggerFactoryForNonAuto(int libraryEnum) throws ClassNotFoundException {
         final String availabilityCheckClassName = getAvailabilityCheckClassName(libraryEnum);
-        if (availabilityCheckClassName != null) {  // Dynamically created factory
+        if (availabilityCheckClassName != null) { // Dynamically created factory
             Class.forName(availabilityCheckClassName);
             String libraryName = getLibraryName(libraryEnum);
             try {
                 return (LoggerFactory) Class.forName(
                         "freemarker.log._" + libraryName + "LoggerFactory").newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to create logger factory for " + libraryName, e);
+                throw new RuntimeException(
+                        "Unexpected error when creating logger factory for \"" + libraryName + "\".", e);
             }
-        } else {  // Non-dynamically created factory
+        } else { // Non-dynamically created factory
             if (libraryEnum == LIBRARY_JAVA) {
                 return new _JULLoggerFactory();
             } else if (libraryEnum == LIBRARY_NONE) {
                 return new _NullLoggerFactory();
             } else {
                 throw new RuntimeException("Bug");
+            }
+        }
+    }
+
+    private static boolean hasLog4LibraryThatDelegatesToWorkingSLF4J() {
+        try {
+            Class.forName(getAvailabilityCheckClassName(LIBRARY_LOG4J));
+            Class.forName(getAvailabilityCheckClassName(LIBRARY_SLF4J));
+        } catch (Throwable e) {
+            return false;
+        }
+        try {
+            Class.forName(REAL_LOG4J_PRESENCE_CLASS);
+            return false;
+        } catch (ClassNotFoundException e) {
+            try {
+                Object r = Class.forName(LOG4J_OVER_SLF4J_TESTER_CLASS)
+                        .getMethod("test", new Class[] {}).invoke(null, new Object[] {});
+                return ((Boolean) r).booleanValue();
+            } catch (Throwable e2) {
+                return false;
             }
         }
     }
@@ -460,7 +506,7 @@ public abstract class Logger {
         synchronized (Logger.class) {
             canUseRealLogger = loggerFactory != null && !(loggerFactory instanceof _NullLoggerFactory);
         }
-    
+
         if (canUseRealLogger) {
             try {
                 final Logger logger = Logger.getLogger("freemarker.logger");
@@ -473,20 +519,20 @@ public abstract class Logger {
                 canUseRealLogger = false;
             }
         }
-    
+
         if (!canUseRealLogger) {
-            System.err.println("*** " + (error ? "ERROR" : "WARN") + " "
+            System.err.println((error ? "ERROR" : "WARN") + " "
                     + LoggerFactory.class.getName() + ": " + message);
             if (exception != null) {
-                System.err.println("*** \tException: " + tryToString(exception));
+                System.err.println("\tException: " + tryToString(exception));
                 while (exception.getCause() != null) {
                     exception = exception.getCause();
-                    System.err.println("*** \tCaused by: " + tryToString(exception));
+                    System.err.println("\tCaused by: " + tryToString(exception));
                 }
             }
         }
     }
-    
+
     /**
      * Don't use {@link freemarker.template.utility.SecurityUtilities#getSystemProperty(String, String)} here, as it
      * (might) depends on the logger, hence interfering with the initialization.
@@ -494,20 +540,20 @@ public abstract class Logger {
     public static String getSystemProperty(final String key) {
         try {
             return (String) AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
-                        return System.getProperty(key, null);
-                    }
-                });
-        } catch(Throwable e) {
+                    new PrivilegedAction() {
+                        public Object run() {
+                            return System.getProperty(key, null);
+                        }
+                    });
+        } catch (Throwable e) {
             logErrorInLogger("Failed to read system property: " + key, e);
             return null;
         }
     }
-    
+
     /**
-     * Don't use {@link freemarker.template.utility.StringUtil#tryToString(Object)} here, as it
-     * might depends on the logger, hence interfering with the initialization.
+     * Don't use {@link freemarker.template.utility.StringUtil#tryToString(Object)} here, as it might depends on the
+     * logger, hence interfering with the initialization.
      */
     public static String tryToString(Object object) {
         if (object == null) return null;
@@ -517,5 +563,5 @@ public abstract class Logger {
             return object.getClass().getName();
         }
     }
-    
+
 }

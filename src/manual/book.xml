@@ -8648,24 +8648,40 @@ TemplateHashModel roundingModeEnums =
           <primary>logging</primary>
         </indexterm>
 
-        <para>FreeMarker integrates with the following logging packages: <link
-        xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
+        <para>FreeMarker integrates with the following logging libraries:
+        <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
         xlink:href="http://commons.apache.org/logging/">Apache Commons
         Logging</link>, <link
-        xlink:href="http://jakarta.apache.org/log4j">Log4J</link>, <link
+        xlink:href="http://jakarta.apache.org/log4j">Log4J</link> 1.x, <link
         xlink:href="http://jakarta.apache.org/avalon/logkit">Avalon
         LogKit</link>, and <link
         xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
-        By default, FreeMarker will look for the following logging packages in
-        this order, and will automatically use the first package it finds:
-        <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
-        </remark>Log4J, Avalon, <literal>java.util.logging</literal>. Prior to
-        FreeMarker 2.4, SLF4J and Apache Commons Logging aren't searched
-        automatically due to backward compatibility constraints. However, you
-        can set the <literal>org.freemarker.loggerLibrary</literal> system
+        By default, FreeMarker will look for the these logging libraries in
+        the following order, and will automatically use the first one it
+        finds: <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
+        </remark>Log4J (will use SLF4J instead if it's a properly installed
+        <literal>log4j-over-slf4j</literal>), Apache Avalon LogKit,
+        <literal>java.util.logging</literal>.</para>
+
+        <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging aren't
+        searched automatically due to backward compatibility constraints. But
+        if you have <literal>log4j-over-slf4j</literal> properly installed
+        (means, you have no real Log4j in your class path, and SLF4J has a
+        backing implementation like <literal>logback-classic</literal>), then
+        FreeMarker will use SLF4J directly instead of Log4j (since FreeMarker
+        2.3.22).</para>
+
+        <para>If the auto detection doesn't give you the result that you want,
+        you can set the <literal>org.freemarker.loggerLibrary</literal> system
         property to select a logger library explicitly, like:</para>
 
         <programlisting>java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
+
+        <para>The supported system property values are:
+        <literal>SLF4J</literal>, <literal>CommonsLogging</literal>,
+        <literal>JUL</literal> (for <literal>java.util.logging</literal>),
+        <literal>Avalon</literal>, <literal>auto</literal> (the default
+        behavior), <literal>none</literal> (disables logging).</para>
 
         <para>Note that for reliable operation, the system property should be
         set when the JVM starts (like above), not later from Java code.</para>
@@ -21548,15 +21564,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added <literal>org.freemarker.loggerLibrary</literal>
-              system property that can be used to specify what logger library
-              will FreeMarker use, like <literal>java
-              <replaceable>...</replaceable> -D
-              org.freemarker.loggerLibrary=slf4j</literal>. Deprecated
-              <literal>Logger.selectLoggerLibrary(int)</literal>, as it
-              inherently wasn't reliable. The system property has precedence
-              over it. Improved <literal>Logger</literal> implementation
-              quality (like better warning and error messages).</para>
+              <para>Logging facility improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Just like earlier, when auto-selecting the logger
+                  library (the default behavior), FreeMarker choses Log4j if
+                  it's available. But now, if that turns out to be
+                  <literal>log4j-over-slf4j</literal>, FreeMarker will use
+                  SLF4J directly instead. (This fixes the issue where the
+                  logged location points to FreeMarker's log adapter class
+                  instead of the real call place.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>FreeMarker now recognizes the
+                  <literal>org.freemarker.loggerLibrary</literal> system
+                  property, which specifies which logger to use, like
+                  <literal>java <replaceable>...</replaceable>
+                  -Dorg.freemarker.loggerLibrary=SLF4J</literal>. This option
+                  deprecates
+                  <literal>Logger.selectLoggerLibrary(int)</literal> as that
+                  was inherently unreliable. The system property has
+                  precedence over
+                  <literal>selectLoggerLibrary</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Generally improved implementation quality (more info
+                  printed when something fails, etc.).</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -21607,7 +21645,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               on with a fixed default. For example, if it has no access to the
               <literal>file.encoding</literal> system property, it will log a
               warning then assume <literal>"utf-8"</literal>. Reading system
-              properties is very rarely and issue, but can happen in security
+              properties is very rarely an issue, but can happen in security
               restricted environment. TODO: bug #129 (applets) will still
               fail.</para>
             </listitem>

@@ -26,16 +26,16 @@ public class _Log4jLoggerFactory implements LoggerFactory
 {
     public Logger getLogger(String category)
     {
-        return new Log4JLogger(org.apache.log4j.Logger.getLogger(category));
+        return new Log4jLogger(org.apache.log4j.Logger.getLogger(category));
     }
 
-    private static class Log4JLogger
+    private static class Log4jLogger
     extends
         Logger
     {
         private final org.apache.log4j.Logger logger;
         
-        Log4JLogger(org.apache.log4j.Logger logger)
+        Log4jLogger(org.apache.log4j.Logger logger)
         {
             this.logger = logger;
         }
