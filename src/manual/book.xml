@@ -8648,6 +8648,10 @@ TemplateHashModel roundingModeEnums =
           <primary>logging</primary>
         </indexterm>
 
+        <indexterm>
+          <primary>SLF4J</primary>
+        </indexterm>
+
         <para>FreeMarker integrates with the following logging libraries:
         <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
         xlink:href="http://commons.apache.org/logging/">Apache Commons
@@ -8660,8 +8664,8 @@ TemplateHashModel roundingModeEnums =
         the following order, and will automatically use the first one it
         finds: <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
         </remark>Log4J (will use SLF4J instead if it's a properly installed
-        <literal>log4j-over-slf4j</literal>), Apache Avalon LogKit,
-        <literal>java.util.logging</literal>.</para>
+        <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache Avalon
+        LogKit, <literal>java.util.logging</literal>.</para>
 
         <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging aren't
         searched automatically due to backward compatibility constraints. But
@@ -8673,7 +8677,8 @@ TemplateHashModel roundingModeEnums =
 
         <para>If the auto detection doesn't give you the result that you want,
         you can set the <literal>org.freemarker.loggerLibrary</literal> system
-        property to select a logger library explicitly, like:</para>
+        property to select a logger library explicitly (since 2.3.22),
+        like:</para>
 
         <programlisting>java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
 

@@ -58,6 +58,8 @@ public abstract class Logger {
      * documentation for more.</li>
      * <li>{@value #LIBRARY_NAME_NONE}: Don't log.</li>
      * </ul>
+     * 
+     * @since 2.3.22
      */
     public static final String PROPERTY_NAME_LOGGER_LIBRARY = "org.freemarker.loggerLibrary";
 
