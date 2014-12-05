@@ -43,11 +43,12 @@ public class FileTemplateLoader implements TemplateLoader
     private final String canonicalPath;
 
     /**
-     * Creates a new file template cache that will use the current directory
-     * (the value of the system property <code>user.dir</code> as the base
-     * directory for loading templates. It will not allow access to template
-     * files that are accessible through symlinks that point outside the
-     * base directory.
+     * Creates a new file template cache that will use the current directory (the value of the system property
+     * <code>user.dir</code> as the base directory for loading templates. It will not allow access to template files
+     * that are accessible through symlinks that point outside the base directory.
+     * 
+     * @deprecated Relying on what the current directory is is a bad practice; use
+     *             {@link FileTemplateLoader#FileTemplateLoader(File)} instead.
      */
     public FileTemplateLoader()
     throws

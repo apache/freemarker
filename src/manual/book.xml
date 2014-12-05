@@ -21640,14 +21640,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>FreeMarker doesn't fail anymore when it's unable to read
-              certain Java system properties, it just logs a warning and goes
-              on with a fixed default. For example, if it has no access to the
-              <literal>file.encoding</literal> system property, it will log a
-              warning then assume <literal>"utf-8"</literal>. Reading system
-              properties is very rarely an issue, but can happen in security
-              restricted environment. TODO: bug #129 (applets) will still
-              fail.</para>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/129/">129</link>]:
+              FreeMarker doesn't fail anymore when it has no permission to
+              read Java system properties, like when used in applets. It just
+              logs some a warnings.</para>
             </listitem>
           </itemizedlist>
         </section>

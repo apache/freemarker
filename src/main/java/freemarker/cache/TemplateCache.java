@@ -94,7 +94,8 @@ public class TemplateCache
         try {
             return new FileTemplateLoader();
         } catch(Exception e) {
-            logger.warn("Could not create a file template loader for current directory", e);
+            logger.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
+                    + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
             return null;
         }
     }

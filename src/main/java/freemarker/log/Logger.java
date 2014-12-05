@@ -16,6 +16,7 @@
 
 package freemarker.log;
 
+import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
@@ -537,7 +538,7 @@ public abstract class Logger {
      * Don't use {@link freemarker.template.utility.SecurityUtilities#getSystemProperty(String, String)} here, as it
      * (might) depends on the logger, hence interfering with the initialization.
      */
-    public static String getSystemProperty(final String key) {
+    private static String getSystemProperty(final String key) {
         try {
             return (String) AccessController.doPrivileged(
                     new PrivilegedAction() {
@@ -545,8 +546,11 @@ public abstract class Logger {
                             return System.getProperty(key, null);
                         }
                     });
+        } catch(AccessControlException e) {
+            logWarnInLogger("Insufficient permissions to read system property \"" + key + "\".");
+            return null;
         } catch (Throwable e) {
-            logErrorInLogger("Failed to read system property: " + key, e);
+            logErrorInLogger("Failed to read system property \"" + key + "\".", e);
             return null;
         }
     }
