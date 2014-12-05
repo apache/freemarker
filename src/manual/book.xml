@@ -21641,10 +21641,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/129/">129</link>]:
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/419/">419</link>]:
               FreeMarker doesn't fail anymore when it has no permission to
-              read Java system properties, like when used in applets. It just
-              logs some a warnings.</para>
+              read Java system properties, like when used in unsigned applets.
+              It just logs some warnings.</para>
             </listitem>
           </itemizedlist>
         </section>
