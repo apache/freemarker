@@ -8680,7 +8680,7 @@ TemplateHashModel roundingModeEnums =
         property to select a logger library explicitly (since 2.3.22),
         like:</para>
 
-        <programlisting>java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
+        <programlisting role="unspecified">java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
 
         <para>The supported system property values are:
         <literal>SLF4J</literal>, <literal>CommonsLogging</literal>,
