@@ -1,5 +1,6 @@
 package freemarker.ext.jsp;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -14,11 +15,13 @@ import freemarker.template.TemplateHashModel;
  * 
  * @since 2.3.22
  */
-public class TaglibFactoryConfiguration {
+public final class TaglibFactoryConfiguration {
 
     private ObjectWrapper objectWrapper;
-    private Pattern additionalTaglibJarsPattern;
+    private List/*<Pattern>*/ classpathTaglibJarPatterns;
+    private List/*<String>*/ classpathTlds;
 
+    /** See {@link #setObjectWrapper(ObjectWrapper)}. */
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper;
     }
@@ -34,13 +37,57 @@ public class TaglibFactoryConfiguration {
         this.objectWrapper = objectWrapper;
     }
 
-    public Pattern getAdditionalTaglibJarsPattern() {
-        return additionalTaglibJarsPattern;
+    /** See {@link #setClasspathTaglibJarPatterns(List)}. */
+    public List/*<Pattern>*/ getClasspathTaglibJarPatterns() {
+        return classpathTaglibJarPatterns;
     }
 
-    // TODO javadoc
-    public void setAdditionalTaglibJarsPattern(Pattern additionalTaglibJarsPattern) {
-        this.additionalTaglibJarsPattern = additionalTaglibJarsPattern;
+    /**
+     * Set the URL patterns of jar-s that aren't inside the web application at standard locations, yet you want
+     * {@code META-INF/*.tld}-s to be discovered in them. The jar-s whose name will be matched will come from the URL
+     * lists returned by the {@code URLClassLoader}-s in the class loader hierarchy. Inside those jars, we list
+     * {@code META-INF/*.tld} to find the TLD-s. Note that this TLD discovery mechanism is not part of the JSP
+     * specification, and is only meant to be used in development setups and in some embedded servlet setups, where you
+     * just want to pick up TLD-s from the dependency jar-s, without placing them into the WAR.
+     * 
+     * <p>
+     * TODO: Note that {@link FreemarkerServlet} will set this value automatically if finds
+     * {@code org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern} context attribute.
+     * 
+     * @param classpathTaglibJarPatterns
+     *            The list of {@link Pattern}-s (not {@link String}-s) against which the URL of the jars will be
+     *            matched. Maybe {@code null}. A typical example of a such pattern is {@code ".*taglib*.\.jar"}. The
+     *            pattern must match the whole jar URL, not just part of it. It's enough if one of the listed patterns
+     *            match, that is, they are in logical "or" relation. The order of the patterns normally doesn't mater,
+     *            however, if multiple TLD-s belong to the same taglib URI then the TLD that's inside the jar that was
+     *            matched by the earlier pattern wins.
+     *            
+     * @see #setClasspathTlds(List)
+     */
+    public void setClasspathTaglibJarPatterns(List/*<Pattern>*/ classpathTaglibJarPatterns) {
+        this.classpathTaglibJarPatterns = classpathTaglibJarPatterns;
+    }
+
+    /** See {@link #setClasspathTlds(List)}. */
+    public List/*<String>*/ getClasspathTlds() {
+        return classpathTlds;
+    }
+
+    /**
+     * Sets the list of TLD resource paths for TLD-s that aren't inside the web application at standard locations, yet
+     * you want them to be discovered. They will be loaded with the class loader provided by the servlet container. Note
+     * that this TLD discovery mechanism is not part of the JSP specification, and is only meant to be used in
+     * development setups and in some embedded servlet setups, where you just want to pick up TLD-s that are directly
+     * included in your project or are in dependency jar-s, and you want that without placing them into the WAR.
+     * 
+     * @param classpathTlds
+     *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like
+     *            {@code "/META-INF/my.tld"}. Relative resource paths will be interpreted as root-relative.
+     *            
+     * @see #setClasspathTaglibJarPatterns(List)
+     */
+    public void setClasspathTlds(List/*<String>*/ classpathTlds) {
+        this.classpathTlds = classpathTlds;
     }
 
 }

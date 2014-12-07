@@ -16,7 +16,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         assertJSPAndFTLOutputEquals("basic", "tester?view=1");
     }
     
-    @Ignore
+    @Ignore  // c:forEach fails because of EL context issues
     @Test
     public void test2() throws Exception {
         assertOutputsEqual("basic", "tester?view=1.jsp", "tester?view=1-jstl.ftl");        

@@ -19,10 +19,14 @@ package freemarker.ext.servlet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -51,89 +55,83 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * <p>This is a general-purpose FreeMarker view servlet.</p>
+ * <p>
+ * This is a general-purpose FreeMarker view servlet.
+ * </p>
  * 
- * <p>The main features are:
+ * <p>
+ * The main features are:
  * 
  * <ul>
  * 
- * <li>It makes all request, request parameters, session, and servlet
- * context attributes available to templates through <code>Request</code>,
- * <code>RequestParameters</code>, <code>Session</code>, and <code>Application</code>
- * variables.
+ * <li>It makes all request, request parameters, session, and servlet context attributes available to templates through
+ * <code>Request</code>, <code>RequestParameters</code>, <code>Session</code>, and <code>Application</code> variables.
  * 
- * <li>The scope variables are also available via automatic scope discovery. That is,
- * writing <code>Application.attrName</code>, <code>Session.attrName</code>,
- * <code>Request.attrName</code> is not mandatory; it's enough to write <code>attrName</code>,
- * and if no such variable was created in the template, it will search the
- * variable in <code>Request</code>, and then in <code>Session</code>,
- * and finally in <code>Application</code>.  
+ * <li>The scope variables are also available via automatic scope discovery. That is, writing
+ * <code>Application.attrName</code>, <code>Session.attrName</code>, <code>Request.attrName</code> is not mandatory;
+ * it's enough to write <code>attrName</code>, and if no such variable was created in the template, it will search the
+ * variable in <code>Request</code>, and then in <code>Session</code>, and finally in <code>Application</code>.
  * 
- * <li>It creates a variable with name <code>JspTaglibs</code>, that can be used
- * to load JSP taglibs. For example:<br>
+ * <li>It creates a variable with name <code>JspTaglibs</code>, that can be used to load JSP taglibs. For example:<br>
  * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>
  * 
- * <li>A custom directive named <code>include_page</code> allows you to 
- * include the output of another servlet resource from your servlet container,
- * just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/&gt;</code>. You can also
- * pass parameters to the newly included page by passing a hash named 'params':
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/&gt;</code>.
- * By default, the request parameters of the original request (the one being
- * processed by FreemarkerServlet) are also inherited by the include. You can
- * explicitly control this inheritance using the 'inherit_params' parameter:
+ * <li>A custom directive named <code>include_page</code> allows you to include the output of another servlet resource
+ * from your servlet container, just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/&gt;</code>. You can also pass parameters to the newly included
+ * page by passing a hash named 'params':
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/&gt;</code>. By default, the request
+ * parameters of the original request (the one being processed by FreemarkerServlet) are also inherited by the include.
+ * You can explicitly control this inheritance using the 'inherit_params' parameter:
  * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"} inherit_params=false/&gt;</code>.
  * </ul>
  * 
- * <p>The servlet will rethrow the errors occurring during template processing,
- * wrapped into <code>ServletException</code>, except if the class name of the
- * class set by the <code>template_exception_handler</code> contains the
- * substring <code>"Debug"</code>. If it contains <code>"Debug"</code>, then it
- * is assumed that the template exception handler prints the error message to the
- * page, thus <code>FreemarkerServlet</code> will suppress the  exception, and
- * logs the problem with the servlet logger
- * (<code>javax.servlet.GenericServlet.log(...)</code>). 
+ * <p>
+ * The servlet will rethrow the errors occurring during template processing, wrapped into <code>ServletException</code>,
+ * except if the class name of the class set by the <code>template_exception_handler</code> contains the substring
+ * <code>"Debug"</code>. If it contains <code>"Debug"</code>, then it is assumed that the template exception handler
+ * prints the error message to the page, thus <code>FreemarkerServlet</code> will suppress the exception, and logs the
+ * problem with the servlet logger (<code>javax.servlet.GenericServlet.log(...)</code>).
  * 
- * <p>Supported init-params are:</p>
+ * <p>
+ * Supported init-params are:
+ * </p>
  * 
  * <ul>
  * 
- * <li><strong>TemplatePath</strong> specifies the location of the templates.
- * By default, this is interpreted as web application directory relative URI.<br>
- * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal
- * path in the file system (i.e. <tt>file:///var/www/project/templates/</tt>). 
- * Note that three slashes were used to specify an absolute path.<br>
- * Also, you can prepend it with <tt>class://path/to/template/package</tt> to
- * indicate that you want to load templates from the specified package
- * accessible through the classloader of the servlet.<br>
- * Default value is <tt>class://</tt> (that is, the root of the class hierarchy).
- * <i>Note that this default is different than the default in FreeMarker 1.x, when
- * it defaulted <tt>/</tt>, that is to loading from the webapp root directory.</i></li>
+ * <li><strong>TemplatePath</strong>: Specifies the location of the templates. By default, this is interpreted as web
+ * application directory relative URI.<br>
+ * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
+ * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
+ * Also, you can prepend it with <tt>class://path/to/template/package</tt> to indicate that you want to load templates
+ * from the specified package accessible through the classloader of the servlet.<br>
+ * Default value is <tt>class://</tt> (that is, the root of the class hierarchy). <i>Note that this default is different
+ * than the default in FreeMarker 1.x, when it defaulted <tt>/</tt>, that is to loading from the webapp root
+ * directory.</i></li>
  * 
- * <li><strong>NoCache</strong> if set to true, generates headers in the response
- * that advise the HTTP client not to cache the returned page.
- * The default is <tt>false</tt>.</li>
+ * <li><strong>NoCache</strong>: If set to true, generates headers in the response that advise the HTTP client not to
+ * cache the returned page. The default is <tt>false</tt>.</li>
  * 
- * <li><strong>ContentType</strong> if specified, response uses the specified
- * Content-type HTTP header. The value may include the charset (e.g.
- * <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified, <tt>"text/html"</tt>
- * is used. If the charset is not specified in this init-param, then the charset
- * (encoding) of the actual template file will be used (in the response HTTP header
- * and for encoding the output stream). Note that this setting can be overridden
- * on a per-template basis by specifying a custom attribute named 
- * <tt>content_type</tt> in the <tt>attributes</tt> parameter of the 
- * <tt>&lt;#ftl&gt;</tt> directive. 
- * </li>
+ * <li><strong>ContentType</strong>: If specified, response uses the specified Content-type HTTP header. The value may
+ * include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified, <tt>"text/html"</tt> is used.
+ * If the charset is not specified in this init-param, then the charset (encoding) of the actual template file will be
+ * used (in the response HTTP header and for encoding the output stream). Note that this setting can be overridden on a
+ * per-template basis by specifying a custom attribute named <tt>content_type</tt> in the <tt>attributes</tt> parameter
+ * of the <tt>&lt;#ftl&gt;</tt> directive.</li>
  * 
- * <li><strong>ClasspathTaglibJarsPattern</strong> TODO documentation</li>
+ * <li><strong>ClasspathTaglibJarPatterns</strong>: Comma separated list of regular expression patterns; see
+ * {@link TaglibFactoryConfiguration#setClasspathTaglibJarPatterns(List)}. Whitespace around the list items will be
+ * ignored. Defaults to no patterns. Since 2.3.22.</li>
  * 
- * <li>The following init-params are supported only for backward compatibility, and
- * their usage is discouraged: TemplateUpdateInterval, DefaultEncoding,
- * ObjectWrapper, TemplateExceptionHandler. Use setting init-params such as
- * {@code object_wrapper} instead. 
+ * <li><strong>ClasspathTlds</strong>: Comma separated list of paths; see
+ * {@link TaglibFactoryConfiguration#setClasspathTlds(List)}. Whitespace around the list items will be
+ * ignored. Defaults to no paths. Since 2.3.22.</li>
  * 
- * <li>Any other init-param will be interpreted as <code>Configuration</code>
- * level setting. See {@link Configuration#setSetting}</li>
+ * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
+ * TemplateUpdateInterval, DefaultEncoding, ObjectWrapper, TemplateExceptionHandler. Use setting init-params such as
+ * {@code object_wrapper} instead.
+ * 
+ * <li>Any other init-param will be interpreted as <code>Configuration</code> level setting. See
+ * {@link Configuration#setSetting}</li>
  * 
  * </ul>
  */
@@ -148,7 +146,9 @@ public class FreemarkerServlet extends HttpServlet
     private static final String INITPARAM_NOCACHE = "NoCache";
     private static final String INITPARAM_CONTENT_TYPE = "ContentType";
     /** @since 2.3.22 */
-    private static final String CLASSPATH_TAGLIB_JARS_PATTERN = "ClasspathTaglibJarsPattern";
+    private static final String INITPARAM_CLASSPATH_TAGLIB_JAR_PATTERNS = "ClasspathTaglibJarPatterns";
+    /** @since 2.3.22 */
+    private static final String INITPARAM_CLASSPATH_TLDS = "ClasspathTlds";
     
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
     private static final String INITPARAM_DEBUG = "Debug";
@@ -206,7 +206,8 @@ public class FreemarkerServlet extends HttpServlet
     private ObjectWrapper wrapper;
     private String contentType;
     private boolean noCharsetInContentType;
-    private Pattern additionalTaglibJarsPattern;
+    private List/*<Pattern>*/ classpathTaglibJarPatterns;
+    private List/*<String>*/ classpathTlds;
     
     public void init() throws ServletException {
         try {
@@ -312,8 +313,15 @@ public class FreemarkerServlet extends HttpServlet
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INITPARAM_CONTENT_TYPE)) {
                     contentType = value;
-                } else if (name.equals(CLASSPATH_TAGLIB_JARS_PATTERN)) {;
-                    additionalTaglibJarsPattern = Pattern.compile(value); 
+                } else if (name.equals(INITPARAM_CLASSPATH_TAGLIB_JAR_PATTERNS)) {;
+                    String[] values = toList(value);
+                    List/*<Pattern>*/ patterns = new ArrayList(values.length);
+                    for (int i = 0; i < values.length; i++) {
+                        patterns.add(Pattern.compile(values[i]));
+                    }
+                    classpathTaglibJarPatterns = patterns; 
+                } else if (name.equals(INITPARAM_CLASSPATH_TLDS)) {;
+                    classpathTlds = Arrays.asList(toList(value));
                 } else {
                     config.setSetting(name, value);
                 }
@@ -464,24 +472,25 @@ public class FreemarkerServlet extends HttpServlet
         return config.getLocale();
     }
 
-    protected TemplateModel createModel(ObjectWrapper wrapper,
+    protected TemplateModel createModel(ObjectWrapper objectWrapper,
                                         ServletContext servletContext,
                                         final HttpServletRequest request,
                                         final HttpServletResponse response) throws TemplateModelException {
         try {
-            AllHttpScopesHashModel params = new AllHttpScopesHashModel(wrapper, servletContext, request);
+            AllHttpScopesHashModel params = new AllHttpScopesHashModel(objectWrapper, servletContext, request);
     
             // Create hash model wrapper for servlet context (the application)
             ServletContextHashModel servletContextModel =
                     (ServletContextHashModel) servletContext.getAttribute(ATTR_APPLICATION_MODEL);
             if (servletContextModel == null)
             {
-                servletContextModel = new ServletContextHashModel(this, wrapper);
+                servletContextModel = new ServletContextHashModel(this, objectWrapper);
                 servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
                 
                 TaglibFactoryConfiguration taglibFactoryCfg = new TaglibFactoryConfiguration();
-                taglibFactoryCfg.setObjectWrapper(wrapper);
-                taglibFactoryCfg.setAdditionalTaglibJarsPattern(additionalTaglibJarsPattern);
+                taglibFactoryCfg.setObjectWrapper(objectWrapper);
+                taglibFactoryCfg.setClasspathTlds(classpathTlds);
+                taglibFactoryCfg.setClasspathTaglibJarPatterns(classpathTaglibJarPatterns);
                 
                 TaglibFactory taglibs = new TaglibFactory(servletContext, taglibFactoryCfg);
                 servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibs);
@@ -497,13 +506,13 @@ public class FreemarkerServlet extends HttpServlet
             if(session != null) {
                 sessionModel = (HttpSessionHashModel) session.getAttribute(ATTR_SESSION_MODEL);
                 if (sessionModel == null || sessionModel.isOrphaned(session)) {
-                    sessionModel = new HttpSessionHashModel(session, wrapper);
+                    sessionModel = new HttpSessionHashModel(session, objectWrapper);
                     initializeSessionAndInstallModel(request, response, 
                             sessionModel, session);
                 }
             }
             else {
-                sessionModel = new HttpSessionHashModel(this, request, response, wrapper);
+                sessionModel = new HttpSessionHashModel(this, request, response, objectWrapper);
             }
             params.putUnlistedModel(KEY_SESSION, sessionModel);
     
@@ -512,7 +521,7 @@ public class FreemarkerServlet extends HttpServlet
                 (HttpRequestHashModel) request.getAttribute(ATTR_REQUEST_MODEL);
             if (requestModel == null || requestModel.getRequest() != request)
             {
-                requestModel = new HttpRequestHashModel(request, response, wrapper);
+                requestModel = new HttpRequestHashModel(request, response, objectWrapper);
                 request.setAttribute(ATTR_REQUEST_MODEL, requestModel);
                 request.setAttribute(
                     ATTR_REQUEST_PARAMETERS_MODEL,
@@ -785,5 +794,18 @@ public class FreemarkerServlet extends HttpServlet
             // Last resort for those that ignore all of the above
             res.setHeader("Expires", EXPIRATION_DATE);
         }
+    }
+
+    private String[] toList(String value) throws ParseException {
+        String[] values = StringUtil.split(value, ',');
+        for (int i = 0; i < values.length; i++) {
+            final String s = values[i].trim();
+            if (s.length() != 0) {
+                values[i] = s;
+            } else if (i != values.length - 1) {
+                throw new ParseException("Missing list item at index " + i, -1);
+            }
+        }
+        return values;
     }
 }
