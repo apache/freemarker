@@ -7,34 +7,34 @@
   
   <tag>
     <name>testtag</name>
-    <tag-class>freemarker.ext.jsp.mocked.TestTag</tag-class>
+    <tag-class>freemarker.ext.jsp.taglibmembers.TestTag</tag-class>
     <body-content>JSP</body-content>
   </tag>
   
   <tag>
   	<name>simpletag</name>
-  	<tag-class>freemarker.ext.jsp.mocked.TestSimpleTag</tag-class>
+  	<tag-class>freemarker.ext.jsp.taglibmembers.TestSimpleTag</tag-class>
     <body-content>JSP</body-content>
   </tag>
   
   <function>
     <description>Reverses a string</description>
     <name>reverse</name>
-    <function-class>freemarker.ext.jsp.mocked.TestFunctions</function-class>
+    <function-class>freemarker.ext.jsp.taglibmembers.TestFunctions</function-class>
     <function-signature>java.lang.String reverse(java.lang.String)</function-signature>
   </function>
   
   <function>
     <description>Reverses an int (assuming radix 10)</description>
     <name>reverseInt</name>
-    <function-class>freemarker.ext.jsp.mocked.TestFunctions</function-class>
+    <function-class>freemarker.ext.jsp.taglibmembers.TestFunctions</function-class>
     <function-signature>int reverse(int)</function-signature>
   </function>  
     
   <function>
     <description>Reverses an int assuming the given radix</description>
     <name>reverseIntRadix</name>
-    <function-class>freemarker.ext.jsp.mocked.TestFunctions</function-class>
+    <function-class>freemarker.ext.jsp.taglibmembers.TestFunctions</function-class>
     <function-signature>int reverse(int, int)</function-signature>
   </function>  
 </taglib>

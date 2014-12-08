@@ -1,4 +1,4 @@
-package freemarker.ext.jsp.mocked;
+package freemarker.ext.jsp.taglibmembers;
 
 public final class TestFunctions {
     

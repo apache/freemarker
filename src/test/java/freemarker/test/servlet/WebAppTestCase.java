@@ -26,6 +26,8 @@ public class WebAppTestCase {
     
     private static final Logger LOG = LoggerFactory.getLogger(WebAppTestCase.class);
 
+    private static final String EXPECTED_DIR = "/WEB-INF/expected/";
+
     private static Server server;
     private static ContextHandlerCollection contextHandlers;
     private static Set<String> deployedWebApps = new HashSet<String>(); 
@@ -103,6 +105,26 @@ public class WebAppTestCase {
         String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL1));
         String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL2));
         assertEquals(jspOutput, ftlOutput);
+    }
+    
+    /**
+     * @param expectedFileName
+     *            The name of the file that stores the expected content, relatively to
+     *            {@code servketContext:/WEB-INF/expected}.
+     */
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL)
+            throws Exception {
+        final String actual = normalizeWS(getResponseContent(webAppName, webAppRelURL));
+        final String expected;
+        {
+            final InputStream in = new URL(getWebAppDirURL(webAppName) + EXPECTED_DIR + expectedFileName).openStream();
+            try {
+                expected = normalizeWS(IOUtils.toString(in, "utf-8"));
+            } finally {
+                in.close();
+            }
+        }
+        assertEquals(expected, actual);
     }
     
     private Pattern MULTI_LINE_WS = Pattern.compile("[\t ]*[\r\n][\t \r\n]*", Pattern.DOTALL); 

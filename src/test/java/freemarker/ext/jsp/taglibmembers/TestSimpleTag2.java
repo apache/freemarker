@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freemarker.ext.jsp.mocked;
+package freemarker.ext.jsp.taglibmembers;
 
 import java.io.IOException;
 
