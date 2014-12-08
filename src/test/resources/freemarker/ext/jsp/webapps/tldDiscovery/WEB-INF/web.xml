@@ -28,7 +28,10 @@
     </init-param>
     <init-param>
       <param-name>ClasspathTlds</param-name>
-      <param-value>META-INF/c.tld, META-INF/fn.tld</param-value>
+      <param-value>
+        /freemarker/ext/jsp/tldDiscovery-ClassPathTlds-1.tld,
+        freemarker/ext/jsp/tldDiscovery-ClassPathTlds-2.tld
+      </param-value>
     </init-param>
     <init-param>
       <param-name>ClasspathTaglibJarPatterns</param-name>

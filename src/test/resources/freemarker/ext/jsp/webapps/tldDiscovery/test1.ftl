@@ -55,6 +55,11 @@ bar
 <!-- Test loading from autodeployed .tld -->
 <#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld"]>
 <@tl6.simpletag/>
+<!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
+<@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-1"].simpletag/>
+<@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-2"].simpletag/>
+<!-- Test loading from FreemarkerServlet "ClasspathTaglibJarPatterns" -->
+${JspTaglibs["http://java.sun.com/jsp/jstl/functions"].join(['a', 'b'], '+')}
 
 ${tl.reverse("abc")}
 ${tl.reverseInt(123)}

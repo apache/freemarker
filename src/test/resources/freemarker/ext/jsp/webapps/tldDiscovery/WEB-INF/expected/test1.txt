@@ -101,6 +101,11 @@ TestTag2.doStartTag() called here
 TestTag2.doEndTag() called here
 <!-- Test loading from autodeployed .tld -->
 Executed TestSimpleTag2
+<!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
+Executed TestSimpleTag2
+Executed TestSimpleTag3
+<!-- Test loading from FreemarkerServlet "ClasspathTaglibJarPatterns" -->
+a+b
 
 cba
 321
