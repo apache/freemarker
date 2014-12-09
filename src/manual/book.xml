@@ -9027,8 +9027,8 @@ TemplateHashModel roundingModeEnums =
           <para><literal>FreemarkerServlet</literal> has various init-params.
           It can be set up to load templates from an arbitrary directory, from
           the classpath, or relative to the Web application directory. You can
-          set the charset used for templates. You can set up what object
-          wrapper do you want to use. Etc.</para>
+          set the charset used for templates, the default locale used by
+          templates, what object wrapper do you want to use, etc.</para>
 
           <para><literal>FreemarkerServlet</literal> is easily tailored to
           special needs through subclassing. Say, if you need to have
@@ -9347,6 +9347,29 @@ ${bar?trim}</programlisting>
           JSP tags <emphasis>implemented</emphasis> in JSP language). The tag
           files had to be compiled to Java classes to be usable under
           FreeMarker.</para>
+
+          <para><literal>JspTaglibs[<replaceable>uri</replaceable>]</literal>
+          will have to find the TLD for the URI specified, just like JSP's
+          <literal>@taglib</literal> directive has to. For this, it implements
+          the TLD discovery mechanism described in the JSP specification
+          (2.2). Please check full details there, but in a nutshell, it
+          searches TLD-s in <literal>WEB-INF/web.xml</literal>
+          <literal>taglib</literal> elements, at
+          <literal>WEB-INF/lib/*.tld</literal>, at
+          <literal>WEB-INF/lib/*.{jar,zip}/META-INF/*.tld</literal>, and at
+          <literal>WEB-INF/*.tld</literal>. In additionally, it can discover
+          TLD-s that are visible for the class loader even if they are outside
+          the WAR structure, when you set that up with the
+          <literal>ClasspathTaglibJarPatterns</literal> and/or
+          <literal>ClasspathTlds</literal>
+          <literal>FreemarkerServlet</literal> init-params (since 2.3.22) (see
+          the Java API documentation of <literal>FreemarkerServlet</literal>
+          for the description of these). <literal>FreemarkerServlet</literal>
+          also recognizes the
+          <literal>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</literal>
+          servlet context attribute, and uses it like
+          <literal>ClasspathTaglibJarPatterns</literal> above (concatenating
+          the two if necessary).</para>
         </section>
 
         <section>
@@ -21555,17 +21578,60 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><literal>FreemarkerServlet</literal> now supports custom
-              JSP EL functions defined in TLD-s (via the
-              <literal>function</literal> XML element). Earlier it has ignored
-              them. The custom EL function can be called like a Java method,
-              for example: <literal>&lt;#assign
-              u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ... ${u.truncate(title,
-              25)}</literal>.</para>
-            </listitem>
+              <para><literal>FreemarkerServlet</literal> improvements:</para>
 
-            <listitem>
-              <para>Improved JSP TLD parsing error message quality.</para>
+              <itemizedlist>
+                <listitem>
+                  <para><literal>FreemarkerServlet</literal> now supports
+                  custom JSP EL functions (defined in TLD-s with
+                  <literal>function</literal> XML elements). Earlier it has
+                  ignored them. The custom EL function can be called like a
+                  Java method, for example: <literal>&lt;#assign
+                  u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ...
+                  ${u.truncate(title, 25)}</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>RFE resolved [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/339/">339</link>]:
+                  <literal>FreemarkerServlet</literal> can now discover TLD-s
+                  that are visible for the class loader but are outside the
+                  WAR structure prescribed by the JSP specification. For this
+                  feature to be active, you must setup this extra TLD lookup
+                  with the <literal>ClasspathTaglibJarPatterns</literal>
+                  and/or <literal>ClasspathTlds</literal>
+                  <literal>FreemarkerServlet</literal> init-params (see the
+                  Java API documentation of
+                  <literal>FreemarkerServlet</literal> for the description of
+                  these). For example, if you ran your application with
+                  embedded Jetty from Eclipse, and it has a plain dependency
+                  on <literal>Displaytag</literal>, you could add</para>
+
+                  <programlisting role="unspecified">&lt;init-param&gt;
+  &lt;param-name&gt;ClasspathTaglibJarPatterns&lt;/param-name&gt;
+  &lt;param-value&gt;.*displaytag.*\.jar$&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+
+                  <para>or just
+                  <literal>&lt;param-value&gt;.*\.jar$&lt;/param-value&gt;</literal>
+                  for scanning the dependency jar-s that aren't inside
+                  <literal>WEB-INF/lib</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>FreemarkerServlet</literal> now recognizes
+                  the
+                  <literal>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</literal>
+                  servlet context attribute, and uses it like
+                  <literal>ClasspathTaglibJarPatterns</literal> above
+                  (concatenating the two if necessary).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Improved code quality (including some error messages
+                  and performance glitches) and test coverage.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
