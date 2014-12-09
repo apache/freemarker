@@ -165,7 +165,7 @@ public class TaglibFactory implements TemplateHashModel {
                     try {
                         urlType = getUriType(taglibUri);
                     } catch (MalformedURLException e) {
-                        throw new TemplateModelException("Malformed taglib URI: " + StringUtil.jQuote(taglibUri), e);
+                        throw new TaglibCreationException("Malformed taglib URI: " + StringUtil.jQuote(taglibUri), e);
                     }
                     if (urlType == RELATIVE_URL_PATH) {
                         // TODO Shouldn't this be done before looking up explicit mappings? Check specs.
@@ -174,7 +174,7 @@ public class TaglibFactory implements TemplateHashModel {
                         normalizedTaglibUri = taglibUri;
                     } else if (urlType == FULL_URI) {
                         // Per spec., absolute URI-s can only be resolved through explicit mapping
-                        throw new TemplateModelException("No mapping to TLD was found for this JSP taglib URI: "
+                        throw new TaglibCreationException("No mapping to TLD was found for this JSP taglib URI: "
                                 + taglibUri);
                     } else {
                         throw new BugException();
@@ -192,20 +192,19 @@ public class TaglibFactory implements TemplateHashModel {
                             normalizedTaglibUri,
                             isJarPath(normalizedTaglibUri) ? STANDARD_TLD_JAR_ENTRY_PATH : null);
                 }
-            } catch (TemplateModelException e) {
-                throw e;
             } catch (Exception e) {
                 throw new TemplateModelException(
-                        "Error while looking for TLD file for " + StringUtil.jQuoteNoXSS(taglibUri) + ".",
+                        "Error while looking for TLD file for " + StringUtil.jQuoteNoXSS(taglibUri)
+                        + "; see cause exception.",
                         e);
             }
 
             try {
                 return loadTaglib(tldLocation, normalizedTaglibUri);
             } catch (Exception e) {
-                throw new TemplateModelException("Error while loading taglib for URI "
-                        + StringUtil.jQuoteNoXSS(normalizedTaglibUri) + " using TLD location "
-                        + StringUtil.jQuoteNoXSS(tldLocation) + ".",
+                throw new TemplateModelException("Error while loading tag library for URI "
+                        + StringUtil.jQuoteNoXSS(normalizedTaglibUri) + " from TLD location "
+                        + StringUtil.jQuoteNoXSS(tldLocation) + "; see cause exception.",
                         e);
             }
         }
@@ -592,13 +591,15 @@ public class TaglibFactory implements TemplateHashModel {
         reader.parse(inSrc);
     }
 
-    private static String resolveRelativeUri(String uri)
-            throws
-            TemplateModelException
+    private static String resolveRelativeUri(String uri) throws TaglibCreationException
     {
-        TemplateModel reqHash =
-                Environment.getCurrentEnvironment().getVariable(
-                        FreemarkerServlet.KEY_REQUEST_PRIVATE);
+        TemplateModel reqHash;
+        try {
+            reqHash = Environment.getCurrentEnvironment().getVariable(
+                    FreemarkerServlet.KEY_REQUEST_PRIVATE);
+        } catch (TemplateModelException e) {
+            throw new TaglibCreationException("Failed to get FreemarkerServlet request information", e);
+        }
         if (reqHash instanceof HttpRequestHashModel) {
             HttpServletRequest req =
                     ((HttpRequestHashModel) reqHash).getRequest();
@@ -618,9 +619,8 @@ public class TaglibFactory implements TemplateHashModel {
                 return '/' + uri;
             }
         }
-        throw new TemplateModelException(
-                "Can't resolve relative URI " + uri +
-                        " as request URL information is unavailable.");
+        throw new TaglibCreationException(
+                "Can't resolve relative URI " + uri + " as request URL information is unavailable.");
     }
 
     private static FilterInputStream toCloseIgnoring(InputStream in) {
@@ -870,7 +870,7 @@ public class TaglibFactory implements TemplateHashModel {
             if (eventForwarding != null) {
                 eventForwarding.addListeners(tldParser.getListeners());
             } else if (tldParser.getListeners().size() > 0) {
-                throw new TldParsingException(
+                throw new TldParsingSAXException(
                         "Event listeners specified in the TLD could not be " +
                                 " registered since the web application doesn't have a" +
                                 " listener of class " + EventForwarding.class.getName() +
@@ -913,14 +913,14 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
-        public void endElement(String nsUri, String localName, String qName) throws TldParsingException {
+        public void endElement(String nsUri, String localName, String qName) throws TldParsingSAXException {
             if (E_TAGLIB_URI.equals(qName)) {
                 taglibUriCData = cDataCollector.toString().trim();
                 cDataCollector = null;
             } else if (E_TAGLIB_LOCATION.equals(qName)) {
                 taglibLocationCData = cDataCollector.toString().trim();
                 if (taglibLocationCData.length() == 0) {
-                    throw new TldParsingException("Required \"" + E_TAGLIB_URI + "\" element was missing or empty",
+                    throw new TldParsingSAXException("Required \"" + E_TAGLIB_URI + "\" element was missing or empty",
                             locator);
                 }
                 try {
@@ -928,7 +928,7 @@ public class TaglibFactory implements TemplateHashModel {
                         taglibLocationCData = "/WEB-INF/" + taglibLocationCData;
                     }
                 } catch (MalformedURLException e) {
-                    throw new TldParsingException("Failed to detect URI type for: " + taglibLocationCData, locator, e);
+                    throw new TldParsingSAXException("Failed to detect URI type for: " + taglibLocationCData, locator, e);
                 }
                 cDataCollector = null;
             } else if (E_TAGLIB.equals(qName)) {
@@ -1050,9 +1050,9 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
-        public void endElement(String nsuri, String localName, String qName) throws TldParsingException {
+        public void endElement(String nsuri, String localName, String qName) throws TldParsingSAXException {
             if (!stack.peek().equals(qName)) {
-                throw new TldParsingException("Unbalanced tag nesting at \"" + qName + "\" end-tag.", locator);
+                throw new TldParsingSAXException("Unbalanced tag nesting at \"" + qName + "\" end-tag.", locator);
             }
 
             if (stack.size() == 3) {
@@ -1098,7 +1098,7 @@ public class TaglibFactory implements TemplateHashModel {
                             impl = new SimpleTagDirectiveModel(tagClass);
                         }
                     } catch (IntrospectionException e) {
-                        throw new TldParsingException(
+                        throw new TldParsingSAXException(
                                 "JavaBean introspection failed on custom tag class " + tagClassCData,
                                 locator,
                                 e);
@@ -1121,7 +1121,7 @@ public class TaglibFactory implements TemplateHashModel {
                         functionMethod = TaglibMethodUtil.getMethodByFunctionSignature(
                                 functionClass, functionSignatureCData);
                     } catch (Exception e) {
-                        throw new TldParsingException(
+                        throw new TldParsingSAXException(
                                 "Error while trying to resolve signature " + StringUtil.jQuote(functionSignatureCData)
                                         + " on class " + StringUtil.jQuote(functionClass.getName())
                                         + " for custom EL function " + StringUtil.jQuote(functionNameCData) + ".",
@@ -1131,7 +1131,7 @@ public class TaglibFactory implements TemplateHashModel {
 
                     final int modifiers = functionMethod.getModifiers();
                     if (!Modifier.isPublic(modifiers) || !Modifier.isStatic(modifiers)) {
-                        throw new TldParsingException(
+                        throw new TldParsingSAXException(
                                 "The custom EL function method must be public and static: " + functionMethod,
                                 locator);
                     }
@@ -1140,7 +1140,7 @@ public class TaglibFactory implements TemplateHashModel {
                     try {
                         methodModel = beansWrapper.wrap(null, functionMethod);
                     } catch (Exception e) {
-                        throw new TldParsingException(
+                        throw new TldParsingSAXException(
                                 "FreeMarker object wrapping failed on method : " + functionMethod,
                                 locator);
                     }
@@ -1159,7 +1159,7 @@ public class TaglibFactory implements TemplateHashModel {
                     try {
                         listener = listenerClass.newInstance();
                     } catch (Exception e) {
-                        throw new TldParsingException(
+                        throw new TldParsingSAXException(
                                 "Failed to create new instantiate from listener class " + listenerClassCData,
                                 locator,
                                 e);
@@ -1175,16 +1175,16 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         private void checkChildElementNotNull(String parentElementName, String childElementName, String value)
-                throws TldParsingException {
+                throws TldParsingSAXException {
             if (value == null) {
-                throw new TldParsingException(
+                throw new TldParsingSAXException(
                         "Missing required \"" + childElementName + "\" element inside the \""
                                 + parentElementName + "\" element.", locator);
             }
         }
 
         private Class resoveClassFromTLD(String className, String entryType, String entryName)
-                throws TldParsingException {
+                throws TldParsingSAXException {
             try {
                 return ClassUtil.forName(className);
             } catch (LinkageError e) {
@@ -1194,9 +1194,9 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
 
-        private TldParsingException newTLDEntryClassLoadingException(Throwable e, String className,
+        private TldParsingSAXException newTLDEntryClassLoadingException(Throwable e, String className,
                 String entryType, String entryName)
-                throws TldParsingException {
+                throws TldParsingSAXException {
             int dotIdx = className.lastIndexOf('.');
             if (dotIdx != -1) {
                 dotIdx = className.lastIndexOf('.', dotIdx - 1);
@@ -1204,7 +1204,7 @@ public class TaglibFactory implements TemplateHashModel {
             boolean looksLikeNestedClass =
                     dotIdx != -1 && className.length() > dotIdx + 1
                             && Character.isUpperCase(className.charAt(dotIdx + 1));
-            return new TldParsingException(
+            return new TldParsingSAXException(
                     (e instanceof ClassNotFoundException ? "Not found class " : "Can't load class ")
                             + StringUtil.jQuote(className) + " for " + entryType
                             + (entryName != null ? " " + StringUtil.jQuote(entryName) : "") + "."
@@ -1213,77 +1213,6 @@ public class TaglibFactory implements TemplateHashModel {
                                     : ""),
                     locator,
                     e);
-        }
-
-    }
-
-    /**
-     * Redefines {@code SAXParseException#toString()} and {@code SAXParseException#getCause()} because it's broken on
-     * Java 1.6 and earlier.
-     */
-    private static class TldParsingException extends SAXParseException {
-
-        private final Throwable cause;
-
-        TldParsingException(String message, Locator locator) {
-            this(message, locator, null);
-        }
-
-        TldParsingException(String message, Locator locator, Throwable e) {
-            super(message, locator, e instanceof Exception ? (Exception) e : new Exception(
-                    "Unchecked exception; see cause", e));
-            cause = e;
-        }
-
-        public String toString() {
-            StringBuffer sb = new StringBuffer(getClass().getName());
-            sb.append(": ");
-            int startLn = sb.length();
-
-            String systemId = getSystemId();
-            String publicId = getPublicId();
-            if (systemId != null || publicId != null) {
-                sb.append("In ");
-                if (systemId != null) {
-                    sb.append(systemId);
-                }
-                if (publicId != null) {
-                    if (systemId != null) {
-                        sb.append(" (public ID: ");
-                    }
-                    sb.append(publicId);
-                    if (systemId != null) {
-                        sb.append(')');
-                    }
-                }
-            }
-
-            int line = getLineNumber();
-            if (line != -1) {
-                sb.append(sb.length() != startLn ? ", at " : "At ");
-                sb.append("line ");
-                sb.append(line);
-                int col = getColumnNumber();
-                if (col != -1) {
-                    sb.append(", column ");
-                    sb.append(col);
-                }
-            }
-
-            String message = getLocalizedMessage();
-            if (message != null) {
-                if (sb.length() != startLn) {
-                    sb.append(":\n");
-                }
-                sb.append(message);
-            }
-
-            return sb.toString();
-        }
-
-        public Throwable getCause() {
-            Throwable superCause = super.getCause();
-            return superCause == null ? this.cause : superCause;
         }
 
     }
@@ -1337,6 +1266,89 @@ public class TaglibFactory implements TemplateHashModel {
             is.setSystemId(systemId);
             return is;
         }
+    }
+
+    /**
+     * Redefines {@code SAXParseException#toString()} and {@code SAXParseException#getCause()} because it's broken on
+     * Java 1.6 and earlier.
+     */
+    private static class TldParsingSAXException extends SAXParseException {
+    
+        private final Throwable cause;
+    
+        TldParsingSAXException(String message, Locator locator) {
+            this(message, locator, null);
+        }
+    
+        TldParsingSAXException(String message, Locator locator, Throwable e) {
+            super(message, locator, e instanceof Exception ? (Exception) e : new Exception(
+                    "Unchecked exception; see cause", e));
+            cause = e;
+        }
+    
+        public String toString() {
+            StringBuffer sb = new StringBuffer(getClass().getName());
+            sb.append(": ");
+            int startLn = sb.length();
+    
+            String systemId = getSystemId();
+            String publicId = getPublicId();
+            if (systemId != null || publicId != null) {
+                sb.append("In ");
+                if (systemId != null) {
+                    sb.append(systemId);
+                }
+                if (publicId != null) {
+                    if (systemId != null) {
+                        sb.append(" (public ID: ");
+                    }
+                    sb.append(publicId);
+                    if (systemId != null) {
+                        sb.append(')');
+                    }
+                }
+            }
+    
+            int line = getLineNumber();
+            if (line != -1) {
+                sb.append(sb.length() != startLn ? ", at " : "At ");
+                sb.append("line ");
+                sb.append(line);
+                int col = getColumnNumber();
+                if (col != -1) {
+                    sb.append(", column ");
+                    sb.append(col);
+                }
+            }
+    
+            String message = getLocalizedMessage();
+            if (message != null) {
+                if (sb.length() != startLn) {
+                    sb.append(":\n");
+                }
+                sb.append(message);
+            }
+    
+            return sb.toString();
+        }
+    
+        public Throwable getCause() {
+            Throwable superCause = super.getCause();
+            return superCause == null ? this.cause : superCause;
+        }
+    
+    }
+    
+    public static class TaglibCreationException extends Exception {
+
+        public TaglibCreationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public TaglibCreationException(String message) {
+            super(message);
+        }
+        
     }
 
 }
