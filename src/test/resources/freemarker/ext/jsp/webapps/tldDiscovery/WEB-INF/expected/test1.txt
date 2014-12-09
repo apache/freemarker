@@ -104,8 +104,28 @@ Executed TestSimpleTag2
 <!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
 Executed TestSimpleTag2
 Executed TestSimpleTag3
-<!-- Test loading from FreemarkerServlet "ClasspathTaglibJarPatterns" -->
+<!-- Test loading from "ClasspathTaglibJarPatterns", inherited from Jetty -->
 a+b
+<!-- Test loading from "ClasspathTaglibJarPatterns", set via init-param -->
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>Maried</th>
+<th>Name</th></tr></thead>
+<tbody>
+<tr class="odd">
+<td>30</td>
+<td>true</td>
+<td>Joe</td></tr>
+<tr class="even">
+<td>25</td>
+<td>false</td>
+<td>Fred</td></tr>
+<tr class="odd">
+<td>28</td>
+<td>true</td>
+<td>Emma</td></tr></tbody></table>
 
 cba
 321

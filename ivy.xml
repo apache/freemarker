@@ -118,6 +118,7 @@
     <dependency org="avalon-logkit" name="avalon-logkit" rev="2.0" conf="build.base->default" />
     <dependency org="org.slf4j" name="slf4j-api" rev="&slf4j.version;" conf="build.base->default" />
     <dependency org="org.slf4j" name="log4j-over-slf4j" rev="&slf4j.version;" conf="build.base->default" />
+    <dependency org="org.slf4j" name="jcl-over-slf4j" rev="&slf4j.version;" conf="build.base->default" />
     <dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="build.base->default" />
     
     <dependency org="org.zeroturnaround" name="javarebel-sdk" rev="1.2.2" conf="build.base->default" />
@@ -141,6 +142,13 @@
     <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="&jetty.version;" conf="test->default" />
     <dependency org="org.eclipse.jetty" name="jetty-jsp" rev="&jetty.version;" conf="test->default" />
     <dependency org="org.eclipse.jetty" name="jetty-util" rev="&jetty.version;" conf="test->default" />
+    
+    <dependency org="displaytag" name="displaytag" rev="1.2" conf="test->default">
+      <exclude org="com.lowagie" name="itext" />
+      <exclude org="org.slf4j" name="slf4j-log4j12" />
+      <exclude org="org.slf4j" name="jcl104-over-slf4j" />
+      <exclude org="log4j" name="log4j" />
+    </dependency>
     
     <!-- docs -->
     

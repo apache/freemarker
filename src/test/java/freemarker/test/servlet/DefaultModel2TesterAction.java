@@ -26,37 +26,45 @@ public final class DefaultModel2TesterAction implements Model2Action {
         req.setAttribute("f", false);
         req.setAttribute("ls", Arrays.asList("a", "b", "c"));
         req.setAttribute("m", ImmutableMap.<String, Integer>builder().put("a", 11).put("b", 22).put("c", 33).build());
-        req.setAttribute("b", new TestBean(1, 2));
+        req.setAttribute("b", new TestBean("Joe", 30, true));
+        req.setAttribute("lsob", Arrays.asList(
+                new TestBean("Joe", 30, true), new TestBean("Fred", 25, false), new TestBean("Emma", 28, true)));
         return null;
     }
     
     public static class TestBean {
-        private int x;
-        private int y;
+        private String name;
+        private int age;
+        private boolean maried;
         
-        public TestBean(int x, int y) {
-            this.x = x;
-            this.y = y;
+        public TestBean(String name, int age, boolean maried) {
+            this.name = name;
+            this.age = age;
+            this.maried = maried;
         }
 
-        public int getX() {
-            return x;
+        public String getName() {
+            return name;
         }
-        
-        public void setX(int x) {
-            this.x = x;
+
+        public void setName(String name) {
+            this.name = name;
         }
-        
-        public int getY() {
-            return y;
+
+        public int getAge() {
+            return age;
         }
-        
-        public void setY(int y) {
-            this.y = y;
+
+        public void setAge(int age) {
+            this.age = age;
         }
-        
-        public int sum(int z) {
-            return x + y + z;
+
+        public boolean isMaried() {
+            return maried;
+        }
+
+        public void setMaried(boolean maried) {
+            this.maried = maried;
         }
         
     }

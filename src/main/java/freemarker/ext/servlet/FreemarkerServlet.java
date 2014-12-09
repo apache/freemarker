@@ -186,6 +186,9 @@ public class FreemarkerServlet extends HttpServlet
     private static final String ATTR_JSP_TAGLIBS_MODEL =
         ".freemarker.JspTaglibs";
 
+    private static final String ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
+            = "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern";
+    
     private static final String EXPIRATION_DATE;
 
     static {
@@ -314,12 +317,7 @@ public class FreemarkerServlet extends HttpServlet
                 } else if (name.equals(INITPARAM_CONTENT_TYPE)) {
                     contentType = value;
                 } else if (name.equals(INITPARAM_CLASSPATH_TAGLIB_JAR_PATTERNS)) {;
-                    String[] values = toList(value);
-                    List/*<Pattern>*/ patterns = new ArrayList(values.length);
-                    for (int i = 0; i < values.length; i++) {
-                        patterns.add(Pattern.compile(values[i]));
-                    }
-                    classpathTaglibJarPatterns = patterns; 
+                    classpathTaglibJarPatterns = toPatterns(value); 
                 } else if (name.equals(INITPARAM_CLASSPATH_TLDS)) {;
                     classpathTlds = Arrays.asList(toList(value));
                 } else {
@@ -490,8 +488,20 @@ public class FreemarkerServlet extends HttpServlet
                 TaglibFactoryConfiguration taglibFactoryCfg = new TaglibFactoryConfiguration();
                 taglibFactoryCfg.setObjectWrapper(objectWrapper);
                 taglibFactoryCfg.setClasspathTlds(classpathTlds);
-                taglibFactoryCfg.setClasspathTaglibJarPatterns(classpathTaglibJarPatterns);
-                
+                {
+                    List/*<Pattern>*/ jettyTaglibJarPatterns = null;
+                    try {
+                        final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
+                        jettyTaglibJarPatterns = attrVal != null ? toPatterns(attrVal) : null;
+                    } catch (Exception e) {
+                        LOG.error("Failed to parse application context attribute \""
+                                + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
+                    }
+                    List/*<Pattern>*/ allTaglibJarPatterns = new ArrayList();
+                    if (classpathTaglibJarPatterns != null) allTaglibJarPatterns.addAll(classpathTaglibJarPatterns);
+                    if (jettyTaglibJarPatterns != null) allTaglibJarPatterns.addAll(jettyTaglibJarPatterns);
+                    taglibFactoryCfg.setClasspathTaglibJarPatterns(allTaglibJarPatterns);
+                }
                 TaglibFactory taglibs = new TaglibFactory(servletContext, taglibFactoryCfg);
                 servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibs);
                 
@@ -807,5 +817,14 @@ public class FreemarkerServlet extends HttpServlet
             }
         }
         return values;
+    }
+
+    private List toPatterns(String value) throws ParseException {
+        String[] values = toList(value);
+        List/*<Pattern>*/ patterns = new ArrayList(values.length);
+        for (int i = 0; i < values.length; i++) {
+            patterns.add(Pattern.compile(values[i]));
+        }
+        return patterns;
     }
 }

@@ -58,8 +58,10 @@ bar
 <!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-1"].simpletag/>
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-2"].simpletag/>
-<!-- Test loading from FreemarkerServlet "ClasspathTaglibJarPatterns" -->
+<!-- Test loading from "ClasspathTaglibJarPatterns", inherited from Jetty -->
 ${JspTaglibs["http://java.sun.com/jsp/jstl/functions"].join(['a', 'b'], '+')}
+<!-- Test loading from "ClasspathTaglibJarPatterns", set via init-param -->
+<@JspTaglibs["http://displaytag.sf.net"].table name="lsob" />
 
 ${tl.reverse("abc")}
 ${tl.reverseInt(123)}

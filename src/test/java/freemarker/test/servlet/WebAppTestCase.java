@@ -26,6 +26,9 @@ public class WebAppTestCase {
     
     private static final Logger LOG = LoggerFactory.getLogger(WebAppTestCase.class);
 
+    private static final String ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN
+            = "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern";
+
     private static final String EXPECTED_DIR = "/WEB-INF/expected/";
 
     private static Server server;
@@ -148,7 +151,7 @@ public class WebAppTestCase {
         context.setParentLoaderPriority(true);
         // Pattern of jar file names scanned for META-INF/*.tld:
         context.setAttribute(
-                "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
+                ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN,
                 ".*taglib.*\\.jar$");
 
         contextHandlers.addHandler(context);

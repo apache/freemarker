@@ -50,13 +50,13 @@ public final class TaglibFactoryConfiguration {
      * specification, and is only meant to be used in development setups and in some embedded servlet setups, where you
      * just want to pick up TLD-s from the dependency jar-s, without placing them into the WAR.
      * 
-     * <p>
-     * TODO: Note that {@link FreemarkerServlet} will set this value automatically if finds
-     * {@code org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern} context attribute.
+     * <p>Note that {@link FreemarkerServlet} will set this value automatically if finds
+     * {@code org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern} context attribute. If this is still set here,
+     * the two will be concatenated, with the Jetty attributes last.
      * 
      * @param classpathTaglibJarPatterns
      *            The list of {@link Pattern}-s (not {@link String}-s) against which the URL of the jars will be
-     *            matched. Maybe {@code null}. A typical example of a such pattern is {@code ".*taglib*.\.jar"}. The
+     *            matched. Maybe {@code null}. A typical example of a such pattern is {@code ".*taglib*.\.jar$"}. The
      *            pattern must match the whole jar URL, not just part of it. It's enough if one of the listed patterns
      *            match, that is, they are in logical "or" relation. The order of the patterns normally doesn't mater,
      *            however, if multiple TLD-s belong to the same taglib URI then the TLD that's inside the jar that was

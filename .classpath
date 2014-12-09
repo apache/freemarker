@@ -48,5 +48,10 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/commons-io-2.2.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/commons-io-2.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/guava-jdk5-17.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/log4j-over-slf4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/commons-beanutils-1.7.0.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/commons-lang-2.3.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/displaytag-1.2.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/jcl-over-slf4j-1.6.1.jar"/>
 	<classpathentry kind="output" path=".bin/"/>
 </classpath>
