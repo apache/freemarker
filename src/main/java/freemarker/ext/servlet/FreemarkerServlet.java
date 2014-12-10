@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -43,7 +43,10 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.ext.jsp.TaglibFactory;
-import freemarker.ext.jsp.TaglibFactoryConfiguration;
+import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
+import freemarker.ext.jsp.TaglibFactory.ClearMetaInfTldSource;
+import freemarker.ext.jsp.TaglibFactory.MetaInfTldSource;
+import freemarker.ext.jsp.TaglibFactory.WebInfPerLibJarMetaInfTldSource;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
@@ -52,6 +55,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -72,8 +76,9 @@ import freemarker.template.utility.StringUtil;
  * it's enough to write <code>attrName</code>, and if no such variable was created in the template, it will search the
  * variable in <code>Request</code>, and then in <code>Session</code>, and finally in <code>Application</code>.
  * 
- * <li>It creates a variable with name <code>JspTaglibs</code>, that can be used to load JSP taglibs. For example:<br>
- * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>
+ * <li>It creates a variable with name <code>JspTaglibs</code> that can be used to load JSP taglibs. For example:<br>
+ * <code>&lt;#assign dt=JspTaglibs["http://displaytag.sf.net"]&gt;</code> or
+ * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>.
  * 
  * <li>A custom directive named <code>include_page</code> allows you to include the output of another servlet resource
  * from your servlet container, just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
@@ -98,8 +103,8 @@ import freemarker.template.utility.StringUtil;
  * 
  * <ul>
  * 
- * <li><strong>TemplatePath</strong>: Specifies the location of the templates. By default, this is interpreted as web
- * application directory relative URI.<br>
+ * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the templates. By default, this is
+ * interpreted as web application directory relative URI.<br>
  * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
  * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
  * Also, you can prepend it with <tt>class://path/to/template/package</tt> to indicate that you want to load templates
@@ -108,30 +113,43 @@ import freemarker.template.utility.StringUtil;
  * than the default in FreeMarker 1.x, when it defaulted <tt>/</tt>, that is to loading from the webapp root
  * directory.</i></li>
  * 
- * <li><strong>NoCache</strong>: If set to true, generates headers in the response that advise the HTTP client not to
- * cache the returned page. The default is <tt>false</tt>.</li>
+ * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to true, generates headers in the response that advise the
+ * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
  * 
- * <li><strong>ContentType</strong>: If specified, response uses the specified Content-type HTTP header. The value may
- * include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified, <tt>"text/html"</tt> is used.
- * If the charset is not specified in this init-param, then the charset (encoding) of the actual template file will be
- * used (in the response HTTP header and for encoding the output stream). Note that this setting can be overridden on a
- * per-template basis by specifying a custom attribute named <tt>content_type</tt> in the <tt>attributes</tt> parameter
- * of the <tt>&lt;#ftl&gt;</tt> directive.</li>
+ * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: If specified, response uses the specified Content-type HTTP
+ * header. The value may include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified,
+ * <tt>"text/html"</tt> is used. If the charset is not specified in this init-param, then the charset (encoding) of the
+ * actual template file will be used (in the response HTTP header and for encoding the output stream). Note that this
+ * setting can be overridden on a per-template basis by specifying a custom attribute named <tt>content_type</tt> in the
+ * <tt>attributes</tt> parameter of the <tt>&lt;#ftl&gt;</tt> directive.</li>
  * 
- * <li><strong>ClasspathTaglibJarPatterns</strong>: Comma separated list of regular expression patterns; see
- * {@link TaglibFactoryConfiguration#setClasspathTaglibJarPatterns(List)}. Whitespace around the list items will be
- * ignored. Defaults to no patterns. Since 2.3.22.</li>
+ * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items which
+ * are either: {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, {@value #META_INF_TLD_LOCATION_CLASSPATH}
+ * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example
+ * {@code <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or
+ * {@code <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
+ * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to not set, in which case
+ * {@link TaglibFactory} will behave as if it was {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}. Note that this
+ * can be also specified with the {@value #SYSTEM_PROPERTY_META_INF_TLD_SOURCES} system property. If both the init-param
+ * and the system property exists, the sources listed in system property will be added after those specified by the
+ * init-param. This is where the special item, {@value #META_INF_TLD_LOCATION_CLEAR} comes handy, as it will remove all
+ * previous list items. (An intended usage of the system property is setting it to {@code clear, classpath} in the
+ * Eclipse run configuration if you are running the application without making a WAR out of it.) Also, note that further
+ * {@code classpath:<pattern>} items are added automatically at the end of this list based on Jetty's
+ * {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context attribute.</li>
  * 
- * <li><strong>ClasspathTlds</strong>: Comma separated list of paths; see
- * {@link TaglibFactoryConfiguration#setClasspathTlds(List)}. Whitespace around the list items will be
- * ignored. Defaults to no paths. Since 2.3.22.</li>
+ * <li><strong>{@value #INIT_PARAM_CLASSPATH_TLDS}</strong> (since 2.3.22): Comma separated list of paths; see
+ * {@link TaglibFactory#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to no paths.
+ * Note that this can be also specified with the {@value #SYSTEM_PROPERTY_CLASSPATH_TLDS} system property. If both the
+ * init-param and the system property exists, the items listed in system property will be added after those specified by
+ * the init-param.</li>
  * 
  * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
- * TemplateUpdateInterval, DefaultEncoding, ObjectWrapper, TemplateExceptionHandler. Use setting init-params such as
- * {@code object_wrapper} instead.
+ * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}. Use
+ * setting init-params such as {@code object_wrapper} instead.
  * 
- * <li>Any other init-param will be interpreted as <code>Configuration</code> level setting. See
- * {@link Configuration#setSetting}</li>
+ * <li>Any other init-param will be interpreted as {@link Configuration}-level setting. See the possible names and
+ * values at {@link Configuration#setSetting(String, String)}</li>
  * 
  * </ul>
  */
@@ -142,17 +160,38 @@ public class FreemarkerServlet extends HttpServlet
     
     public static final long serialVersionUID = -2440216393145762479L;
 
-    private static final String INITPARAM_TEMPLATE_PATH = "TemplatePath";
-    private static final String INITPARAM_NOCACHE = "NoCache";
-    private static final String INITPARAM_CONTENT_TYPE = "ContentType";
-    /** @since 2.3.22 */
-    private static final String INITPARAM_CLASSPATH_TAGLIB_JAR_PATTERNS = "ClasspathTaglibJarPatterns";
-    /** @since 2.3.22 */
-    private static final String INITPARAM_CLASSPATH_TLDS = "ClasspathTlds";
+    /**
+     * The name of the servlet init-param with similar name. (This init-param has existed long before 2.3.22, but this
+     * constant was only added then.)
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_TEMPLATE_PATH = "TemplatePath";
     
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
-    private static final String INITPARAM_DEBUG = "Debug";
+    /**
+     * The name of the servlet init-param with similar name. (This init-param has existed long before 2.3.22, but this
+     * constant was only added then.)
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_NO_CACHE = "NoCache";
     
+    /**
+     * The name of the servlet init-param with similar name. (This init-param has existed long before 2.3.22, but this
+     * constant was only added then.)
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_CONTENT_TYPE = "ContentType";
+
+    /** @since 2.3.22 */
+    public static final String INIT_PARAM_META_INF_TLD_LOCATIONS = "MetaInfTldSources";
+    
+    /** @since 2.3.22 */
+    public static final String INIT_PARAM_CLASSPATH_TLDS = "ClasspathTlds";
+    
+    private static final String INIT_PARAM_DEBUG = "Debug";
+
     private static final String DEPR_INITPARAM_TEMPLATE_DELAY = "TemplateDelay";
     private static final String DEPR_INITPARAM_ENCODING = "DefaultEncoding";
     private static final String DEPR_INITPARAM_OBJECT_WRAPPER = "ObjectWrapper";
@@ -165,6 +204,46 @@ public class FreemarkerServlet extends HttpServlet
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG = "htmlDebug";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE = "ignore";
     private static final String DEPR_INITPARAM_DEBUG = "debug";
+    
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+
+    /**
+     * When set, the items defined in it will be add after those come from the
+     * {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param. The value syntax is the same as of the init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String SYSTEM_PROPERTY_META_INF_TLD_SOURCES = "org.freemarker.jsp.metaInfTldSources";
+
+    /**
+     * When set, the items defined in it will be add after those come from the
+     * {@value #INIT_PARAM_CLASSPATH_TLDS} init-param. The value syntax is the same as of the init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String SYSTEM_PROPERTY_CLASSPATH_TLDS = "org.freemarker.jsp.classpathTlds";
+    
+    /**
+     * Used as part of the value of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS = "webInfPerLibJars";
+    
+    /**
+     * Used as part of the value of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String META_INF_TLD_LOCATION_CLASSPATH = "classpath";
+    
+    /**
+     * Used as part of the value of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String META_INF_TLD_LOCATION_CLEAR = "clear";
+    
 
     public static final String KEY_REQUEST = "Request";
     public static final String KEY_INCLUDE = "include_page";
@@ -209,7 +288,7 @@ public class FreemarkerServlet extends HttpServlet
     private ObjectWrapper wrapper;
     private String contentType;
     private boolean noCharsetInContentType;
-    private List/*<Pattern>*/ classpathTaglibJarPatterns;
+    private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
     
     public void init() throws ServletException {
@@ -234,7 +313,7 @@ public class FreemarkerServlet extends HttpServlet
             config.setObjectWrapper(wrapper);
             
             // Process TemplatePath init-param out of order:
-            templatePath = getInitParameter(INITPARAM_TEMPLATE_PATH);
+            templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
             if (templatePath == null)
                 templatePath = "class://";
             config.setTemplateLoader(createTemplateLoader(templatePath));
@@ -258,7 +337,7 @@ public class FreemarkerServlet extends HttpServlet
                 
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(Configurable.OBJECT_WRAPPER_KEY)
-                        || name.equals(INITPARAM_TEMPLATE_PATH)
+                        || name.equals(INIT_PARAM_TEMPLATE_PATH)
                         || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
@@ -302,24 +381,24 @@ public class FreemarkerServlet extends HttpServlet
                                 "Invalid value for servlet init-param "
                                 + DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER + ": " + value);
                     }
-                } else if (name.equals(INITPARAM_NOCACHE)) {
+                } else if (name.equals(INIT_PARAM_NO_CACHE)) {
                     nocache = StringUtil.getYesNo(value);
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
-                    if (getInitParameter(INITPARAM_DEBUG) != null) {
+                    if (getInitParameter(INIT_PARAM_DEBUG) != null) {
                         throw new ServletException(
                                 "Conflicting init-params: "
-                                + INITPARAM_DEBUG + " and "
+                                + INIT_PARAM_DEBUG + " and "
                                 + DEPR_INITPARAM_DEBUG);
                     }
                     debug = StringUtil.getYesNo(value);
-                } else if (name.equals(INITPARAM_DEBUG)) {
+                } else if (name.equals(INIT_PARAM_DEBUG)) {
                     debug = StringUtil.getYesNo(value);
-                } else if (name.equals(INITPARAM_CONTENT_TYPE)) {
+                } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
                     contentType = value;
-                } else if (name.equals(INITPARAM_CLASSPATH_TAGLIB_JAR_PATTERNS)) {;
-                    classpathTaglibJarPatterns = toPatterns(value); 
-                } else if (name.equals(INITPARAM_CLASSPATH_TLDS)) {;
-                    classpathTlds = Arrays.asList(toList(value));
+                } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
+                    metaInfTldSources = parseAsMetaInfTldLocations(value);
+                } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {;
+                    classpathTlds = parseCommaSeparatedList(value);
                 } else {
                     config.setSetting(name, value);
                 }
@@ -344,6 +423,44 @@ public class FreemarkerServlet extends HttpServlet
         } catch (Exception e) {
             throw new ServletException("Error during servlet initialization", e);
         }
+    }
+
+    private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
+        List/*<MetaInfTldSource>*/ metaInfTldSources = null;
+        
+        List/*<String>*/ values = parseCommaSeparatedList(value);
+        for (Iterator it = values.iterator(); it.hasNext();) {
+            final String itemStr = (String) it.next();
+            final MetaInfTldSource metaInfTldSource;
+            if (itemStr.equals(META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
+                metaInfTldSource = WebInfPerLibJarMetaInfTldSource.INSTANCE;
+            } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLASSPATH)) {
+                String itemRightSide = itemStr.substring(META_INF_TLD_LOCATION_CLASSPATH.length()).trim();
+                if (itemRightSide.length() == 0) {
+                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(".*", Pattern.DOTALL));
+                } else if (itemRightSide.startsWith(":")) {
+                    final String regexpStr = itemRightSide.substring(1).trim();
+                    if (regexpStr.length() == 0) {
+                        throw new ParseException("Empty regular expression after \""
+                                + META_INF_TLD_LOCATION_CLASSPATH + ":\"", -1);
+                    }
+                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(regexpStr));   
+                } else {
+                    throw new ParseException("Invalid \"" + META_INF_TLD_LOCATION_CLASSPATH
+                            + "\" value syntax: " + value, -1);
+                }
+            } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLEAR)) {
+                metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
+            } else {
+                throw new ParseException("Item has no recognized source type prefix: " + value, -1);
+            }
+            if (metaInfTldSources == null) {
+                metaInfTldSources = new ArrayList();
+            }
+            metaInfTldSources.add(metaInfTldSource);
+        }
+        
+        return metaInfTldSources;
     }
 
     /**
@@ -485,25 +602,8 @@ public class FreemarkerServlet extends HttpServlet
                 servletContextModel = new ServletContextHashModel(this, objectWrapper);
                 servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
                 
-                TaglibFactoryConfiguration taglibFactoryCfg = new TaglibFactoryConfiguration();
-                taglibFactoryCfg.setObjectWrapper(objectWrapper);
-                taglibFactoryCfg.setClasspathTlds(classpathTlds);
-                {
-                    List/*<Pattern>*/ jettyTaglibJarPatterns = null;
-                    try {
-                        final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
-                        jettyTaglibJarPatterns = attrVal != null ? toPatterns(attrVal) : null;
-                    } catch (Exception e) {
-                        LOG.error("Failed to parse application context attribute \""
-                                + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
-                    }
-                    List/*<Pattern>*/ allTaglibJarPatterns = new ArrayList();
-                    if (classpathTaglibJarPatterns != null) allTaglibJarPatterns.addAll(classpathTaglibJarPatterns);
-                    if (jettyTaglibJarPatterns != null) allTaglibJarPatterns.addAll(jettyTaglibJarPatterns);
-                    taglibFactoryCfg.setClasspathTaglibJarPatterns(allTaglibJarPatterns);
-                }
-                TaglibFactory taglibs = new TaglibFactory(servletContext, taglibFactoryCfg);
-                servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibs);
+                TaglibFactory taglibFactory = createTaglibFactory(objectWrapper, servletContext);
+                servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibFactory);
                 
                 initializeServletContext(request, response);
             }
@@ -552,6 +652,85 @@ public class FreemarkerServlet extends HttpServlet
         } catch (IOException e) {
             throw new TemplateModelException(e);
         }
+    }
+
+    /**
+     * Called to create the {@link TaglibFactory} once per servlet context.
+     * The default implementation configures it based on the servlet-init parameters and various other environmental
+     * settings, so if you override this method, you should call super, then adjust the result.
+     * 
+     * @since 2.3.22
+     */
+    protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper,
+            ServletContext servletContext) throws TemplateModelException {
+        TaglibFactory taglibFactory = new TaglibFactory(servletContext);
+        
+        taglibFactory.setObjectWrapper(objectWrapper);
+        
+        {
+            List/*<MetaInfTldSources>*/ mergedMetaInfTldSources = new ArrayList();
+
+            if (metaInfTldSources != null) {
+                mergedMetaInfTldSources.addAll(metaInfTldSources);
+            } else {
+                // Needed so that if we will merge in Jetty stuff, the source list will contain this.
+                mergedMetaInfTldSources.add(WebInfPerLibJarMetaInfTldSource.INSTANCE);
+            }
+            
+            String sysPropVal = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
+            if (sysPropVal != null) {
+                try {
+                    List metaInfTldSourcesSysProp = parseAsMetaInfTldLocations(sysPropVal);
+                    if (metaInfTldSourcesSysProp != null) {
+                        mergedMetaInfTldSources.addAll(metaInfTldSourcesSysProp);
+                    }
+                } catch (ParseException e) {
+                    throw new TemplateModelException("Failed to parse system property \""
+                            + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
+                }
+            }
+
+            List/*<Pattern>*/ jettyTaglibJarPatterns = null;
+            try {
+                final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
+                jettyTaglibJarPatterns = attrVal != null ? parseCommaSeparatedPatterns(attrVal) : null;
+            } catch (Exception e) {
+                LOG.error("Failed to parse application context attribute \""
+                        + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
+            }
+            if (jettyTaglibJarPatterns != null) {
+                for (Iterator/*<Pattern>*/ it = jettyTaglibJarPatterns.iterator(); it.hasNext();) {
+                    Pattern pattern = (Pattern) it.next();
+                    mergedMetaInfTldSources.add(new ClasspathMetaInfTldSource(pattern));
+                }
+            }
+            
+            taglibFactory.setMetaInfTldSources(mergedMetaInfTldSources);
+        }
+        
+        {
+            List/*<String>*/ mergedClassPathTlds = new ArrayList();
+            if (classpathTlds != null) {
+                mergedClassPathTlds.addAll(classpathTlds);
+            }
+            
+            String sysPropVal = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
+            if (sysPropVal != null) {
+                try {
+                    List/*<String>*/ classpathTldsSysProp = parseCommaSeparatedList(sysPropVal);
+                    if (classpathTldsSysProp != null) {
+                        mergedClassPathTlds.addAll(classpathTldsSysProp);
+                    }
+                } catch (ParseException e) {
+                    throw new TemplateModelException("Failed to parse system property \""
+                            + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
+                }
+            }
+            
+            taglibFactory.setClasspathTlds(mergedClassPathTlds);
+        }
+        
+        return taglibFactory;        
     }
 
     void initializeSessionAndInstallModel(HttpServletRequest request,
@@ -806,24 +985,25 @@ public class FreemarkerServlet extends HttpServlet
         }
     }
 
-    private String[] toList(String value) throws ParseException {
+    private List/*<String>*/ parseCommaSeparatedList(String value) throws ParseException {
+        List/*<String>*/ valuesList = new ArrayList();
         String[] values = StringUtil.split(value, ',');
         for (int i = 0; i < values.length; i++) {
             final String s = values[i].trim();
             if (s.length() != 0) {
-                values[i] = s;
+                valuesList.add(s);
             } else if (i != values.length - 1) {
                 throw new ParseException("Missing list item at index " + i, -1);
             }
         }
-        return values;
+        return valuesList;
     }
 
-    private List toPatterns(String value) throws ParseException {
-        String[] values = toList(value);
-        List/*<Pattern>*/ patterns = new ArrayList(values.length);
-        for (int i = 0; i < values.length; i++) {
-            patterns.add(Pattern.compile(values[i]));
+    private List parseCommaSeparatedPatterns(String value) throws ParseException {
+        List/*<String>*/ values = parseCommaSeparatedList(value);
+        List/*<Pattern>*/ patterns = new ArrayList(values.size());
+        for (int i = 0; i < values.size(); i++) {
+            patterns.add(Pattern.compile((String) values.get(i)));
         }
         return patterns;
     }

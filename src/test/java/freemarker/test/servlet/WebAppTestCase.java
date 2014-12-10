@@ -9,8 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
@@ -33,7 +33,7 @@ public class WebAppTestCase {
 
     private static Server server;
     private static ContextHandlerCollection contextHandlers;
-    private static Set<String> deployedWebApps = new HashSet<String>(); 
+    private static Map<String, WebAppContext> deployedWebApps = new HashMap<String, WebAppContext>(); 
     
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -130,6 +130,14 @@ public class WebAppTestCase {
         assertEquals(expected, actual);
     }
     
+    protected synchronized void restartWebAppIfStarted(String webAppName) throws Exception {
+        WebAppContext context = deployedWebApps.get(webAppName);
+        if (context != null) {
+            context.stop();
+            context.start();
+        }
+    }
+    
     private Pattern MULTI_LINE_WS = Pattern.compile("[\t ]*[\r\n][\t \r\n]*", Pattern.DOTALL); 
     private Pattern SAME_LINE_WS = Pattern.compile("[\t ]+", Pattern.DOTALL); 
     
@@ -141,7 +149,7 @@ public class WebAppTestCase {
     }
 
     private synchronized void ensureWebAppIsDeployed(String webAppName) throws Exception {
-        if (deployedWebApps.contains(webAppName)) {
+        if (deployedWebApps.containsKey(webAppName)) {
             return;
         }
         
@@ -158,7 +166,7 @@ public class WebAppTestCase {
         // As we add this after the Server was started, it has to be started manually:
         context.start();
         
-        deployedWebApps.add(webAppName);
+        deployedWebApps.put(webAppName, context);
         LOG.info("Deployed web app.: {}", webAppName);
     }
 

@@ -31,16 +31,6 @@
 			<param-name>ContentType</param-name>
 			<param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
 		</init-param>
-        <!-- 
-        <init-param>
-            <param-name>ClasspathTlds</param-name>
-            <param-value>META-INF/c.tld, META-INF/fn.tld</param-value>
-        </init-param>
-         -->
-        <init-param>
-            <param-name>ClasspathTaglibJarPatterns</param-name>
-            <param-value>.*taglib.*\.jar</param-value>
-        </init-param>
 
 		<!-- FreeMarker settings: -->
 		<init-param>

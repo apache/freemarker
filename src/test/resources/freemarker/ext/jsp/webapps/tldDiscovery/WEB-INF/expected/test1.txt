@@ -101,8 +101,10 @@ TestTag2.doStartTag() called here
 TestTag2.doEndTag() called here
 <!-- Test loading from autodeployed .tld -->
 Executed TestSimpleTag2
+Executed TestSimpleTag3
 <!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
 Executed TestSimpleTag2
+Executed TestSimpleTag3
 Executed TestSimpleTag3
 <!-- Test loading from "ClasspathTaglibJarPatterns", inherited from Jetty -->
 a+b
@@ -110,22 +112,22 @@ a+b
 <table>
 <thead>
 <tr>
+<th>Name</th>
 <th>Age</th>
-<th>Maried</th>
-<th>Name</th></tr></thead>
+<th>Maried</th></tr></thead>
 <tbody>
 <tr class="odd">
+<td>Joe</td>
 <td>30</td>
-<td>true</td>
-<td>Joe</td></tr>
+<td>true</td></tr>
 <tr class="even">
+<td>Fred</td>
 <td>25</td>
-<td>false</td>
-<td>Fred</td></tr>
+<td>false</td></tr>
 <tr class="odd">
+<td>Emma</td>
 <td>28</td>
-<td>true</td>
-<td>Emma</td></tr></tbody></table>
+<td>true</td></tr></tbody></table>
 
 cba
 321

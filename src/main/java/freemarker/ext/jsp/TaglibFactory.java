@@ -18,22 +18,36 @@ package freemarker.ext.jsp;
 
 import java.beans.IntrospectionException;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -59,6 +73,7 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.log.Logger;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
@@ -66,6 +81,8 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.NullArgumentException;
+import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -78,46 +95,47 @@ public class TaglibFactory implements TemplateHashModel {
 
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
 
-    private static final int FULL_URI = 0;
-    private static final int ABSOLUTE_URL_PATH = 1;
-    private static final int RELATIVE_URL_PATH = 2;
+    private static final int URL_TYPE_FULL = 0;
+    private static final int URL_TYPE_ABSOLUTE = 1;
+    private static final int URL_TYPE_RELATIVE = 2;
 
-    private static final String STANDARD_TLD_JAR_ENTRY_PATH = "META-INF/taglib.tld";
+    private static final String META_INF_REL_PATH = "META-INF/";
+    private static final String META_INF_ABS_PATH = "/META-INF/";
+    private static final String DEFAULT_TLD_RESOURCE_PATH = META_INF_ABS_PATH + "taglib.tld";
+    private static final String JAR_URL_ENTRY_PATH_START = "!/";
+
+    private static final String PLATFORM_FILE_ENCODING = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
 
     private final ServletContext servletContext;
-    private final ObjectWrapper objectWrapper;
-    private final List/*<String>*/ classpathTlds;
-    private final List/*<Pattern>*/ classpathTaglibJarPatterns;
 
+    private ObjectWrapper objectWrapper;
+    private List/*<MetaInfTldSource>*/ metaInfTldSources
+            = Collections.singletonList(WebInfPerLibJarMetaInfTldSource.INSTANCE);
+    private List/*<String>*/ classpathTlds = Collections.EMPTY_LIST;
+    
+    boolean test_emulateNoUrlToFileConversions = false; // !!T
+    boolean test_emulateNoJarURLConnections = false; // !!T
+    boolean test_emulateJarEntryUrlOpenStreamFails = false; // !!T    
+
+    private final Object lock = new Object(); 
     private final Map taglibs = new HashMap();
     private final Map tldLocations = new HashMap();
     private int nextTldLocationLookupPhase = 0;
 
     /**
-     * @deprecated Use {@link TaglibFactory#TaglibFactory(ServletContext, TaglibFactoryConfiguration)} instead,
-     *             otherwise custom EL functions defined in the TLD will be ignored.
-     */
-    public TaglibFactory(ServletContext ctx) {
-        this(ctx, null);
-    }
-
     /**
      * Creates a new JSP taglib factory that will be used to load JSP tag libraries and functions for the web
-     * application represented by the passed servlet context, using the object wrapper when invoking JSTL functions.
+     * application represented by the passed in {@link ServletContext}.
+     * You should at least call {@link #setObjectWrapper(ObjectWrapper)} before start using this object.
+     * 
+     * <p>This object is only thread-safe after you have stopped calling its setter methods (and it was properly
+     * published to the other threads; see JSR 133 (Java Memory Model)).
      * 
      * @param ctx
      *            The servlet context whose JSP tag libraries this factory will load.
-     * 
-     * @param cfg
-     *            The configuration settings of this taglib factory. Can be {@code null} for backward compatibility.
-     * 
-     * @since 2.3.22
      */
-    public TaglibFactory(ServletContext ctx, TaglibFactoryConfiguration cfg) {
+    public TaglibFactory(ServletContext ctx) {
         this.servletContext = ctx;
-        this.objectWrapper = cfg != null ? cfg.getObjectWrapper() : null;
-        this.classpathTlds = cfg != null ? cfg.getClasspathTlds() : null;
-        this.classpathTaglibJarPatterns = cfg != null ? cfg.getClasspathTaglibJarPatterns() : null;
     }
 
     /**
@@ -139,7 +157,7 @@ public class TaglibFactory implements TemplateHashModel {
      *         {@link TemplateMethodModelEx}, respectively.
      */
     public TemplateModel get(final String taglibUri) throws TemplateModelException {
-        synchronized (taglibs) {
+        synchronized (lock) {
             {
                 final Taglib taglib = (Taglib) taglibs.get(taglibUri);
                 if (taglib != null) {
@@ -167,15 +185,20 @@ public class TaglibFactory implements TemplateHashModel {
                     } catch (MalformedURLException e) {
                         throw new TaglibCreationException("Malformed taglib URI: " + StringUtil.jQuote(taglibUri), e);
                     }
-                    if (urlType == RELATIVE_URL_PATH) {
+                    if (urlType == URL_TYPE_RELATIVE) {
                         // TODO Shouldn't this be done before looking up explicit mappings? Check specs.
                         normalizedTaglibUri = resolveRelativeUri(taglibUri);
-                    } else if (urlType == ABSOLUTE_URL_PATH) {
+                    } else if (urlType == URL_TYPE_ABSOLUTE) {
                         normalizedTaglibUri = taglibUri;
-                    } else if (urlType == FULL_URI) {
+                    } else if (urlType == URL_TYPE_FULL) {
                         // Per spec., absolute URI-s can only be resolved through explicit mapping
-                        throw new TaglibCreationException("No mapping to TLD was found for this JSP taglib URI: "
-                                + taglibUri);
+                        throw new TaglibCreationException("No TLD was found for the "
+                                + StringUtil.jQuoteNoXSS(taglibUri) + " JSP taglib URI. (TLD-s are searched according "
+                                + "the JSP 2.2 specification. In development environments you may want to use the "
+                                + "\"" + FreemarkerServlet.INIT_PARAM_META_INF_TLD_LOCATIONS + "\" and "
+                                + "\"" + FreemarkerServlet.INIT_PARAM_CLASSPATH_TLDS + "\" "
+                                + FreemarkerServlet.class.getName() + " init-params or the similar system "
+                                + "properites.)");
                     } else {
                         throw new BugException();
                     }
@@ -188,9 +211,10 @@ public class TaglibFactory implements TemplateHashModel {
                         }
                     }
 
-                    tldLocation = new ServletContextTldLocation(
-                            normalizedTaglibUri,
-                            isJarPath(normalizedTaglibUri) ? STANDARD_TLD_JAR_ENTRY_PATH : null);
+                    tldLocation = isJarPath(normalizedTaglibUri)
+                                ? (TldLocation) new ServletContextJarEntryTldLocation(
+                                        normalizedTaglibUri, DEFAULT_TLD_RESOURCE_PATH)
+                                : (TldLocation) new ServletContextTldLocation(normalizedTaglibUri);
                 }
             } catch (Exception e) {
                 throw new TemplateModelException(
@@ -210,7 +234,99 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private TldLocation getExplicitlyMappedTldLocation(final String uri) throws SAXException, IOException {
+    /**
+     * Returns false.
+     */
+    public boolean isEmpty() {
+        return false;
+    }
+    
+    /** See {@link #setObjectWrapper(ObjectWrapper)}. */
+    public ObjectWrapper getObjectWrapper() {
+        return objectWrapper;
+    }
+
+    /**
+     * Sets the {@link ObjectWrapper} used when building the tag libraries {@link TemplateHashModel}-s from the TLD-s.
+     * Usually, it should be the same {@link ObjectWrapper} that was created by
+     * {@link FreemarkerServlet#createObjectWrapper} to be used inside the templates. {@code null} value is only
+     * supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null} and an
+     * {@code intanceof} {@link BeansWrapper} (like a {@link DefaultObjectWrapper}).
+     */
+    public void setObjectWrapper(ObjectWrapper objectWrapper) {
+        checkNotStarted();
+        this.objectWrapper = objectWrapper;
+    }
+
+    /** See {@link #setMetaInfTldSources(List)}. */
+    public List/*<Pattern>*/ getMetaInfTldSources() {
+        return metaInfTldSources;
+    }
+
+    /**
+     * The list of places where we will look for {@code META-INF/*.tld} files. By default this is a
+     * list that contains {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}. This corresponds to the behavior that the
+     * JSP specification describes. 
+     * 
+     * Set the URL patterns of jar-s that aren't inside the web application at standard locations, yet you want
+     * {@code META-INF/*.tld}-s to be discovered in them. The jar-s whose name will be matched will come from the URL
+     * lists returned by the {@code URLClassLoader}-s in the class loader hierarchy. Inside those jars, we list
+     * {@code META-INF/*.tld} to find the TLD-s. Note that this TLD discovery mechanism is not part of the JSP
+     * specification, and is only meant to be used in development setups and in some embedded servlet setups, where you
+     * just want to pick up TLD-s from the dependency jar-s, without placing them under {@code WEB-INF/lib}.
+     * 
+     * <p>Note that {@link FreemarkerServlet} will set this value automatically if finds
+     * {@code org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern} context attribute. If this is still set here,
+     * the two will be concatenated, with the Jetty attributes last.
+     * 
+     * @param metaInfTldSources
+     *            The list of {@link Pattern}-s (not {@link String}-s) against which the URL of the jars will be
+     *            matched. Maybe {@code null}. A typical example of a such pattern is {@code ".*taglib*.\.jar$"}. The
+     *            pattern must match the whole jar URL, not just part of it. It's enough if one of the listed patterns
+     *            match, that is, they are in logical "or" relation. The order of the patterns normally doesn't mater,
+     *            however, if multiple TLD-s belong to the same taglib URI then the TLD that's inside the jar that was
+     *            matched by the earlier pattern wins.
+     *            
+     * @see #setClasspathTlds(List)
+     */
+    public void setMetaInfTldSources(List/*<MetaInfTldSource>*/ metaInfTldSources) {
+        checkNotStarted();
+        this.metaInfTldSources = metaInfTldSources;
+    }
+
+    /** See {@link #setClasspathTlds(List)}. */
+    public List/*<String>*/ getClasspathTlds() {
+        return classpathTlds;
+    }
+
+    /**
+     * Sets the list of TLD resource paths for TLD-s that aren't inside the web application at standard locations, yet
+     * you want them to be discovered. They will be loaded with the class loader provided by the servlet container. Note
+     * that this TLD discovery mechanism is not part of the JSP specification, and is only meant to be used in
+     * development setups and in some embedded servlet setups, where you just want to pick up TLD-s that are directly
+     * included in your project or are in dependency jar-s, and you want that without placing them into the WAR.
+     * 
+     * @param classpathTlds
+     *            List of {@code String}-s, not maybe {@code null}. Each item is a resource path, like
+     *            {@code "/META-INF/my.tld"}. Relative resource paths will be interpreted as root-relative.
+     *            
+     * @see #setMetaInfTldSources(List)
+     */
+    public void setClasspathTlds(List/*<String>*/ classpathTlds) {
+        checkNotStarted();
+        this.classpathTlds = classpathTlds;
+    }
+
+    private void checkNotStarted() {
+        synchronized (lock) {
+            if (nextTldLocationLookupPhase != 0) {
+                throw new IllegalStateException(TaglibFactory.class.getName() + " object was already in use.");
+            }
+        }
+    }
+
+    private TldLocation getExplicitlyMappedTldLocation(final String uri) throws SAXException, IOException,
+            TaglibCreationException {
         while (true) {
             final TldLocation tldLocation = (TldLocation) tldLocations.get(uri);
             if (tldLocation != null) {
@@ -219,19 +335,19 @@ public class TaglibFactory implements TemplateHashModel {
 
             switch (nextTldLocationLookupPhase) {
             case 0:
-                addTldLocationsFromWebXml();
-                break;
-            case 1:
-                addTldLocationsFromWebinfPerLib();
-                break;
-            case 2:
-                addTldLocationsFromWebinf();
-                break;
-            case 3:
                 addTldLocationsFromClasspathTlds();
                 break;
+            case 1:
+                addTldLocationsFromWebXml();
+                break;
+            case 2:
+                addTldLocationsFromWebInfPerLibTlds();
+                break;
+            case 3:
+                addTldLocationsFromMetaInfTlds();
+                break;
             case 4:
-                addTldLocationsFromClasspathJars();
+                addTldLocationsFromWebInfTlds();
                 break;
             case 5:
                 return null;
@@ -240,59 +356,6 @@ public class TaglibFactory implements TemplateHashModel {
             }
             nextTldLocationLookupPhase++;
         }
-    }
-
-    /**
-     * @param tldLocation
-     *            The physical location of the TLD file
-     * @param taglibUri
-     *            The URI used in templates to refer to the taglib (like {@code <%@ taglib uri="..." ... %>} in JSP).
-     */
-    private TemplateHashModel loadTaglib(TldLocation tldLocation, String taglibUri) throws IOException, SAXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Loading taglib for URI " + StringUtil.jQuoteNoXSS(taglibUri)
-                    + " from TLD location " + StringUtil.jQuoteNoXSS(tldLocation));
-        }
-        final Taglib taglib = new Taglib(servletContext, tldLocation, objectWrapper);
-        taglibs.put(taglibUri, taglib);
-        tldLocations.remove(taglibUri);  // TODO Why?
-        return taglib;
-    }
-
-    private static int getUriType(String uri) throws MalformedURLException {
-        if (uri == null) {
-            throw new IllegalArgumentException("null is not a valid URI");
-        }
-        if (uri.length() == 0) {
-            throw new MalformedURLException("empty string is not a valid URI");
-        }
-        final char c0 = uri.charAt(0);
-        if (c0 == '/') {
-            return ABSOLUTE_URL_PATH;
-        }
-        // Check if it conforms to RFC 3986 3.1 in order to qualify as ABS_URI
-        if (c0 < 'a' || c0 > 'z') { // First char of scheme must be alpha
-            return RELATIVE_URL_PATH;
-        }
-        final int colon = uri.indexOf(':');
-        if (colon == -1) { // Must have a colon
-            return RELATIVE_URL_PATH;
-        }
-        // Subsequent chars must be [a-z,0-9,+,-,.]
-        for (int i = 1; i < colon; ++i) {
-            final char c = uri.charAt(i);
-            if ((c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '+' && c != '-' && c != '.') {
-                return RELATIVE_URL_PATH;
-            }
-        }
-        return FULL_URI;
-    }
-
-    /**
-     * Returns false.
-     */
-    public boolean isEmpty() {
-        return false;
     }
 
     private void addTldLocationsFromWebXml() throws SAXException, IOException {
@@ -311,49 +374,117 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private void addTldLocationsFromWebinf() throws IOException, SAXException {
+    private void addTldLocationsFromWebInfTlds() throws IOException, SAXException {
         LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/*.tld");
 
         Set webinfEntryPaths = servletContext.getResourcePaths("/WEB-INF");
         if (webinfEntryPaths != null) {
             for (Iterator it = webinfEntryPaths.iterator(); it.hasNext();) {
-                String webinfEntryPath = (String) it.next();
-                if (webinfEntryPath.endsWith(".tld")) {
-                    addTldLocationFromTld(new ServletContextTldLocation(webinfEntryPath, null));
+                String webInfEntryPath = (String) it.next();
+                if (webInfEntryPath.endsWith(".tld")) {
+                    addTldLocationFromTld(new ServletContextTldLocation(webInfEntryPath));
                 }
             }
         }
     }
 
-    private void addTldLocationsFromWebinfPerLib() throws IOException, SAXException {
-        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.{jar,zip,tld}");
+    private void addTldLocationsFromWebInfPerLibTlds() throws IOException, SAXException {
+        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.tld");
+
+        Set libEntPaths = servletContext.getResourcePaths("/WEB-INF/lib");
+        if (libEntPaths != null) {
+            for (Iterator iter = libEntPaths.iterator(); iter.hasNext();) {
+                final String libEntryPath = (String) iter.next();
+                if (libEntryPath.endsWith(".tld")) {
+                    addTldLocationFromTld(new ServletContextTldLocation(libEntryPath));
+                }
+            }
+        }
+    }
+
+    private void addTldLocationsFromMetaInfTlds() throws IOException, SAXException {
+        if (metaInfTldSources == null || metaInfTldSources.isEmpty()) {
+            return;
+        }
+
+        Set/*<URLWithExternalForm>*/ cpMetaInfDirUrlsWithEF = null;
+        
+        int srcIdxStart = 0;
+        for (int i = metaInfTldSources.size() - 1; i >= 0; i--) {
+            if (metaInfTldSources.get(i) instanceof ClearMetaInfTldSource) {
+                srcIdxStart = i + 1;
+                break;
+            }
+        }
+        for (int srcIdx = srcIdxStart; srcIdx < metaInfTldSources.size(); srcIdx++) {
+            MetaInfTldSource miTldSource = (MetaInfTldSource) metaInfTldSources.get(srcIdx);
+            
+            if (miTldSource == WebInfPerLibJarMetaInfTldSource.INSTANCE) {
+                addTldLocationsFromWebInfPerLibJarMetaInfTlds();
+            } else if (miTldSource instanceof ClasspathMetaInfTldSource) {
+                ClasspathMetaInfTldSource cpMiTldLocation = (ClasspathMetaInfTldSource) miTldSource;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Looking for TLD-s in "
+                            + "classpathRoots[" + cpMiTldLocation.getRootContainerPattern() + "]"
+                            + META_INF_ABS_PATH + "**/*.tld");
+                }
+                
+                if (cpMetaInfDirUrlsWithEF == null) {
+                    cpMetaInfDirUrlsWithEF = collectMetaInfUrlsFromClassLoaders();
+                }
+
+                for (Iterator iterator = cpMetaInfDirUrlsWithEF.iterator(); iterator.hasNext();) {
+                    URLWithExternalForm urlWithEF = (URLWithExternalForm) iterator.next();
+                    final URL url = urlWithEF.getUrl();
+                    final boolean isJarUrl = isJarUrl(url);
+                    final String urlEF = urlWithEF.externalForm;
+                    
+                    final String rootContainerUrl;
+                    if (isJarUrl) {
+                        int sep = urlEF.indexOf(JAR_URL_ENTRY_PATH_START);
+                        rootContainerUrl = sep != -1 ? urlEF.substring(0, sep) : urlEF;
+                    } else {
+                        rootContainerUrl = urlEF.endsWith(META_INF_ABS_PATH)
+                                ? urlEF.substring(0, urlEF.length() - META_INF_REL_PATH.length())
+                                : urlEF;
+                    }
+                    
+                    if (cpMiTldLocation.getRootContainerPattern().matcher(rootContainerUrl).matches()) {
+                        final File urlAsFile = urlToFileOrNull(url);
+                        if (urlAsFile != null) {
+                            addTldLocationsFromFileDirectory(urlAsFile);
+                        } else if (isJarUrl) {
+                            addTldLocationsFromJarDirectoryEntryURL(url, true);
+                        } else {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.warn("Can't list entries under this URL; TLD-s won't be discovered here: "
+                                        + urlWithEF.getExternalForm());
+                            }
+                        }
+                    }
+                }
+            } else {
+                throw new BugException();
+            }
+        }
+    }
+    
+    private void addTldLocationsFromWebInfPerLibJarMetaInfTlds() throws IOException, SAXException {
+        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.{jar,zip}" + META_INF_ABS_PATH + "*.tld");
 
         Set libEntPaths = servletContext.getResourcePaths("/WEB-INF/lib");
         if (libEntPaths != null) {
             for (Iterator iter = libEntPaths.iterator(); iter.hasNext();) {
                 final String libEntryPath = (String) iter.next();
                 if (isJarPath(libEntryPath)) {
-                    InputStream in = servletContext.getResourceAsStream(libEntryPath);
-                    try {
-                        addTldLocationsFromJarMetaInf(in, new JarEntryTldLocationFactory() {
-
-                            public TldLocation create(String jarEntryPath) throws IOException {
-                                return new ServletContextTldLocation(libEntryPath, jarEntryPath);
-                            }
-                            
-                        });
-                    } finally {
-                        in.close();
-                    }
-                } else if (libEntryPath.endsWith(".tld")) {
-                    addTldLocationFromTld(new ServletContextTldLocation(libEntryPath, null));
+                    addTldLocationsFromServletContextJar(libEntryPath, true);
                 }
             }
         }
     }
 
-    private void addTldLocationsFromClasspathTlds() throws SAXException, IOException {
-        if (classpathTlds == null) {
+    private void addTldLocationsFromClasspathTlds() throws SAXException, IOException, TaglibCreationException {
+        if (classpathTlds == null || classpathTlds.size() == 0) {
             return;
         }
         
@@ -361,9 +492,17 @@ public class TaglibFactory implements TemplateHashModel {
         
         for (Iterator it = classpathTlds.iterator(); it.hasNext();) {
             String tldResourcePath = (String) it.next();
+            if (tldResourcePath.trim().length() == 0) {
+                throw new TaglibCreationException("classpathTlds can't contain empty item"); 
+            }
+            
             if (!tldResourcePath.startsWith("/")) {
                 tldResourcePath = "/" + tldResourcePath;
             }
+            if (tldResourcePath.endsWith("/")) {
+                throw new TaglibCreationException("classpathTlds can't specify a directory: " + tldResourcePath); 
+            }
+            
             ClasspathTldLocation tldLocation = new ClasspathTldLocation(tldResourcePath);
             InputStream in;
             try {
@@ -384,143 +523,200 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
     }
-    
-    private void addTldLocationsFromClasspathJars() throws IOException, SAXException {
-        if (classpathTaglibJarPatterns == null) {
-            return;
-        }
-        
-        LOG.debug("Looking for TLD locations in classpath jar-s matching cfg.classpathTaglibJarPatterns");
-        
-        Map/*<String,UrlWithPriority>*/ jarUrlsWithPriorityByUrlStr = new HashMap();
-        ClassLoader tccl = tryGetThreadContextClassLoader();
-        if (tccl != null) {
-            collectJarsFromClassLoader(tccl, classpathTaglibJarPatterns, jarUrlsWithPriorityByUrlStr);
-        }
-        ClassLoader defCl = TaglibFactory.class.getClassLoader();
-        if (!isDescendantOfOrSameAs(tccl, defCl)) {
-            collectJarsFromClassLoader(defCl, classpathTaglibJarPatterns, jarUrlsWithPriorityByUrlStr);
-        }
-        
-        ArrayList jarUrlsWithPriority = new ArrayList/*<UrlWithPriority>*/(jarUrlsWithPriorityByUrlStr.values());
-        Collections.sort(jarUrlsWithPriority);
-        for (Iterator/*<UrlWithPriority>*/ it = jarUrlsWithPriority.iterator(); it.hasNext();) {
-            final UrlWithPriority urlWithPriority = (UrlWithPriority) it.next();
-            
-            InputStream in;
-            try {
-                in = urlWithPriority.url.openStream();
-            } catch (Exception e) {
-                LOG.error("Failed to open " + StringUtil.jQuoteNoXSS(urlWithPriority.urlStr)
-                        + ". Skipped TLD collecting from there.",
-                        e);
-                in = null;
-            }
-            
-            if (in != null) {
-                addTldLocationsFromJarMetaInf(in, new JarEntryTldLocationFactory() {
-                    
-                    public TldLocation create(String jarEntryPath) throws IOException {
-                        return new ClasspathJarEntryTldLocation(urlWithPriority.url, jarEntryPath);
-                    }
-                });
-            }
-        }
-    }
 
-    private boolean isDescendantOfOrSameAs(ClassLoader descendant, ClassLoader parent) {
-        while (true) {
-            if (descendant == null) {
-                return false;
+    /**
+     * Finds and processes *.tld inside a jar in the servet context.
+     */
+    private void addTldLocationsFromServletContextJar(
+            final String jarResourcePath, boolean skipWrongTLDs)
+            throws IOException, MalformedURLException, SAXException {
+        final String metaInfEntryPath = normalizeJarEntryPath(META_INF_ABS_PATH, true);
+        
+        // Null for non-random-access backing resource:
+        final JarFile jarFile = servletContextResourceToFileOrNull(jarResourcePath);
+        if (jarFile != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Scanning for " + META_INF_ABS_PATH + "*.tld-s in JarFile: servletContext:"
+                        + jarResourcePath);
             }
-            if (descendant == parent) {
-                return true;
-            }
-            descendant = descendant.getParent();
-        }
-    }
-
-    private void collectJarsFromClassLoader(ClassLoader cl, List/*<Pattern>*/ patterns,
-            Map jarUrlsWithPriorityByUrlStr) {
-        while (cl != null) {
-            if (cl instanceof URLClassLoader) {
-                URL[] urls = ((URLClassLoader) cl).getURLs();
-                if (urls != null) {
-                    for (int urlIdx = 0; urlIdx < urls.length; urlIdx++) {
-                        final URL url = urls[urlIdx];
-                        // Using String instead of URL as Map key prevents DNS lookups.
-                        final String urlStr = url.toExternalForm();
-                        for (int patternIdx = 0; patternIdx < patterns.size(); patternIdx++) {
-                            if (((Pattern) patterns.get(patternIdx)).matcher(urlStr).matches()) {
-                                if (!jarUrlsWithPriorityByUrlStr.containsKey(urlStr)) {
-                                    jarUrlsWithPriorityByUrlStr.put(
-                                            urlStr, new UrlWithPriority(url, urlStr, -patternIdx));
-                                }
-                            }
+            for (Enumeration/*<JarEntry>*/ entries = jarFile.entries(); entries.hasMoreElements();) {
+                final JarEntry curEntry = (JarEntry) entries.nextElement();
+                final String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
+                if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
+                    try {
+                        addTldLocationFromTld(new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath));
+                    } catch (SAXException e) {
+                        if (skipWrongTLDs) {
+                            LOG.error("Error while parsing TLD - skipping: servletContext:" + jarResourcePath, e);
+                        } else {
+                            throw e;
                         }
                     }
                 }
             }
-            
-            cl = cl.getParent();
+        } else {  // jarFile == null => fall back to streamed access
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Scanning for " + META_INF_ABS_PATH
+                        + "*.tld-s in ZipInputStream (slow): servletContext:" + jarResourcePath);
+            }
+    
+            final InputStream in = servletContext.getResourceAsStream(jarResourcePath);
+            if (in == null) {
+                throw new IOException("ServletContext resource not found: " + jarResourcePath);
+            }
+            try {
+                ZipInputStream zipIn = new ZipInputStream(in);
+                try {
+                    while (true) {
+                        ZipEntry curEntry = zipIn.getNextEntry();
+                        if (curEntry == null) break;
+        
+                        String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
+                        if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
+                            try {
+                                addTldLocationFromTld(zipIn,
+                                        new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath)); 
+                            } catch (SAXException e) {
+                                if (skipWrongTLDs) {
+                                    LOG.error("Error while parsing TLD - skipping: servletContext:"
+                                            + jarResourcePath, e);
+                                } else {
+                                    throw e;
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    zipIn.close();
+                }
+            } finally {
+                in.close();
+            }
+        }
+    }
+
+    /**
+     * Finds and processes *.tld inside a directory in a jar.
+     * 
+     * @param jarBaseEntryUrl
+     *            Something like "jar:file:/C:/foo%20bar/baaz.jar!/META-INF/". If this is not a jar(-like) URL, the
+     *            behavior is undefined.
+     */
+    private void addTldLocationsFromJarDirectoryEntryURL(final URL jarBaseEntryUrl, boolean skipWrongTLDs)
+            throws IOException, MalformedURLException, SAXException {
+        // Null for non-random-access backing resource:
+        final JarFile jarFile;
+        // Not null; the path of the directory *inside* the JAR where we will search
+        // (like "/META-INF/" in "jar:file:/C:/foo%20bar/baaz.jar!/META-INF/"):
+        final String baseEntryPath;
+        // Null when URLConnection is used
+        // (like "file:/C:/foo%20bar/baaz.jar" in "jar:file:/C:/foo%20bar/baaz.jar!/META-INF/"):
+        final String rawJarContentUrlEF;
+        {
+            final URLConnection urlCon = jarBaseEntryUrl.openConnection();
+            if (!test_emulateNoJarURLConnections && urlCon instanceof JarURLConnection) {
+                final JarURLConnection jarCon = (JarURLConnection) urlCon;
+                jarFile = jarCon.getJarFile();
+                rawJarContentUrlEF = null; // Not used as we have a JarURLConnection
+                baseEntryPath = normalizeJarEntryPath(jarCon.getEntryName(), true);
+                if (baseEntryPath == null) {
+                    throw newFailedToExtractEntryPathException(jarBaseEntryUrl);
+                }
+            } else {
+                final String jarBaseEntryUrlEF = jarBaseEntryUrl.toExternalForm();
+                final int jarEntrySepIdx = jarBaseEntryUrlEF.indexOf(JAR_URL_ENTRY_PATH_START);
+                if (jarEntrySepIdx == -1) {
+                    throw newFailedToExtractEntryPathException(jarBaseEntryUrl);
+                }
+                rawJarContentUrlEF = jarBaseEntryUrlEF.substring(jarBaseEntryUrlEF.indexOf(':') + 1, jarEntrySepIdx);
+                baseEntryPath = normalizeJarEntryPath(
+                        jarBaseEntryUrlEF.substring(jarEntrySepIdx + JAR_URL_ENTRY_PATH_START.length()), true);
+    
+                File rawJarContentAsFile = urlToFileOrNull(new URL(rawJarContentUrlEF));
+                jarFile = rawJarContentAsFile != null ? new JarFile(rawJarContentAsFile) : null;
+            }
+        }
+        if (jarFile != null) {  // jarFile == null => fall back to streamed access
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Scanning for " + META_INF_ABS_PATH + "**/*.tld-s in random access mode: "
+                        + jarBaseEntryUrl);
+            }
+            for (Enumeration/*<JarEntry>*/ entries = jarFile.entries(); entries.hasMoreElements();) {
+                final JarEntry curEntry = (JarEntry) entries.nextElement();
+                final String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
+                if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
+                    final String curEntryBaseRelativePath = curEntryPath.substring(baseEntryPath.length());
+                    final URL tldUrl = createJarEntryUrl(jarBaseEntryUrl, curEntryBaseRelativePath);
+                    try {
+                        addTldLocationFromTld(new JarEntryUrlTldLocation(tldUrl, null));
+                    } catch (SAXException e) {
+                        if (skipWrongTLDs) {
+                            LOG.error("Error while parsing TLD - skipping: " + tldUrl, e);
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+            }
+        } else {
+            // Not a random-access file, so we fall back to the slower ZipInputStream approach.
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Scanning for " + META_INF_ABS_PATH + "**/*.tld-s in stream mode (slow): "
+                        + rawJarContentUrlEF);
+            }
+        
+            final InputStream in = new URL(rawJarContentUrlEF).openStream();
+            try {
+                ZipInputStream zipIn = new ZipInputStream(in);
+                try {
+                    while (true) {
+                        ZipEntry curEntry = zipIn.getNextEntry();
+                        if (curEntry == null) break;
+        
+                        String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
+                        if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
+                            final String curEntryBaseRelativePath = curEntryPath.substring(baseEntryPath.length());
+                            final URL tldUrl = createJarEntryUrl(jarBaseEntryUrl, curEntryBaseRelativePath);
+                            try {
+                                addTldLocationFromTld(zipIn, new JarEntryUrlTldLocation(tldUrl, null));
+                            } catch (SAXException e) {
+                                if (skipWrongTLDs) {
+                                    LOG.error("Error while parsing TLD - skipping: " + tldUrl, e);
+                                } else {
+                                    throw e;
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    zipIn.close();
+                }
+            } finally {
+                in.close();
+            }
+        }
+    }
+
+    private void addTldLocationsFromFileDirectory(final File dir) throws IOException, SAXException {
+        if (dir.isDirectory()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Scanning for *.tld-s in File directory: " + StringUtil.jQuoteNoXSS(dir));
+            }
+            File[] tldFiles = dir.listFiles(new FilenameFilter() {
+    
+                public boolean accept(File urlAsFile, String name) {
+                    return isTldFileNameIgnoreCase(name);
+                }
+    
+            });
+            for (int i = 0; i < tldFiles.length; i++) {
+                addTldLocationFromTld(new FileTldLocation(tldFiles[i]));
+            }
+        } else {
+            LOG.warn("Skipped scanning for *.tld for non-existent directory: " + StringUtil.jQuoteNoXSS(dir));
         }
     }
     
-    private static class UrlWithPriority implements Comparable {
-        private final URL url;
-        private final String urlStr;
-        private final int priority;
-        
-        private UrlWithPriority(URL url, String urlStr, int priority) {
-            this.url = url;
-            this.urlStr = urlStr;
-            this.priority = priority;
-        }
-
-        public int compareTo(Object thatObj) {
-            UrlWithPriority that = (UrlWithPriority) thatObj;
-            if (priority == that.priority) {
-                return urlStr.compareTo(that.urlStr); 
-            } else if (priority < that.priority) {
-                return -1;
-            } else {
-                return 1;
-            }
-        }
-
-        public int hashCode() {
-            return priority * 31 + urlStr.hashCode();
-        }
-
-        public boolean equals(Object thatObj) {
-            if (this == thatObj) return true;
-            if (thatObj == null) return false;
-            if (this.getClass() != thatObj.getClass()) return false;
-            UrlWithPriority that = (UrlWithPriority) thatObj;
-            if (priority != that.priority) return false;
-            return urlStr.equals(that.urlStr);
-        }
-        
-    }
-
-    private void addTldLocationsFromJarMetaInf(InputStream jarResourceIn, JarEntryTldLocationFactory locFact)
-            throws IOException, SAXException {
-        ZipInputStream zipIn = new ZipInputStream(toCloseIgnoring(jarResourceIn));
-        try {
-            while (true) {
-                ZipEntry jarEntry = zipIn.getNextEntry();
-                if (jarEntry == null) break;
-
-                String jarEntryPath = jarEntry.getName();
-                if (jarEntryPath.startsWith("META-INF/") && jarEntryPath.endsWith(".tld")) {
-                    addTldLocationFromTld(zipIn, locFact.create(jarEntryPath));                                
-                }
-            }
-        } finally {
-            zipIn.close();
-        }
-    }
-
     /**
      * Adds the TLD location mapping from the TLD itself.
      */
@@ -541,7 +737,7 @@ public class TaglibFactory implements TemplateHashModel {
      *            The stream that we already had (so we don't have to open a new one from the {@code tldLocation}).
      */
     private void addTldLocationFromTld(InputStream reusedIn, TldLocation tldLocation) throws SAXException, IOException {
-        String taglibUri = getTaglibUriFromTld(reusedIn, tldLocation.getURL());
+        String taglibUri = getTaglibUriFromTld(reusedIn, tldLocation.getXmlSystemId());
         if (taglibUri != null) {
             addTldLocation(tldLocation, taglibUri);
         }
@@ -562,10 +758,52 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private String getTaglibUriFromTld(InputStream tldFileIn, String tldFileUrl) throws SAXException, IOException {
-        TldParserForTaglibUriExtration tldParser = new TldParserForTaglibUriExtration();
-        parseXml(tldFileIn, tldFileUrl, tldParser);
+    private static Set/*<URLWithExternalForm>*/ collectMetaInfUrlsFromClassLoaders() throws IOException {
+        final Set/*<URLWithExternalForm>*/ metainfDirUrls = new TreeSet();
+    
+        final ClassLoader tccl = tryGetThreadContextClassLoader();
+        if (tccl != null) {
+            collectMetaInfUrlsFromClassLoader(tccl, metainfDirUrls);
+        }
+    
+        final ClassLoader cccl = TaglibFactory.class.getClassLoader();
+        if (!isDescendantOfOrSameAs(tccl, cccl)) {
+            collectMetaInfUrlsFromClassLoader(cccl, metainfDirUrls);
+        }
+        return metainfDirUrls;
+    }
+
+    private static void collectMetaInfUrlsFromClassLoader(ClassLoader cl, Set/* <URLWithExternalForm> */metainfDirUrls)
+            throws IOException {
+        Enumeration/*<URL>*/ urls = cl.getResources(META_INF_REL_PATH);
+        if (urls != null) {
+            while (urls.hasMoreElements()) {
+                metainfDirUrls.add(new URLWithExternalForm((URL) urls.nextElement()));
+            }
+        }
+    }
+
+    private String getTaglibUriFromTld(InputStream tldFileIn, String tldFileXmlSystemId) throws SAXException, IOException {
+        TldParserForTaglibUriExtraction tldParser = new TldParserForTaglibUriExtraction();
+        parseXml(tldFileIn, tldFileXmlSystemId, tldParser);
         return tldParser.getTaglibUri();
+    }
+
+    /**
+     * @param tldLocation
+     *            The physical location of the TLD file
+     * @param taglibUri
+     *            The URI used in templates to refer to the taglib (like {@code <%@ taglib uri="..." ... %>} in JSP).
+     */
+    private TemplateHashModel loadTaglib(TldLocation tldLocation, String taglibUri) throws IOException, SAXException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Loading taglib for URI " + StringUtil.jQuoteNoXSS(taglibUri)
+                    + " from TLD location " + StringUtil.jQuoteNoXSS(tldLocation));
+        }
+        final Taglib taglib = new Taglib(servletContext, tldLocation, objectWrapper);
+        taglibs.put(taglibUri, taglib);
+        tldLocations.remove(taglibUri);  // TODO Why?
+        return taglib;
     }
 
     private static void parseXml(InputStream in, String systemId, DefaultHandler handler)
@@ -623,18 +861,207 @@ public class TaglibFactory implements TemplateHashModel {
                 "Can't resolve relative URI " + uri + " as request URL information is unavailable.");
     }
 
+    /**
+     * Ignores attempts to close the stream.
+     */
     private static FilterInputStream toCloseIgnoring(InputStream in) {
         return new FilterInputStream(in) {
             public void close() {
-                // Ignores attempts to close the stream.
+                // Do nothing 
             }
         };
     }
     
+    private static int getUriType(String uri) throws MalformedURLException {
+        if (uri == null) {
+            throw new IllegalArgumentException("null is not a valid URI");
+        }
+        if (uri.length() == 0) {
+            throw new MalformedURLException("empty string is not a valid URI");
+        }
+        final char c0 = uri.charAt(0);
+        if (c0 == '/') {
+            return URL_TYPE_ABSOLUTE;
+        }
+        // Check if it conforms to RFC 3986 3.1 in order to qualify as ABS_URI
+        if (c0 < 'a' || c0 > 'z') { // First char of scheme must be alpha
+            return URL_TYPE_RELATIVE;
+        }
+        final int colon = uri.indexOf(':');
+        if (colon == -1) { // Must have a colon
+            return URL_TYPE_RELATIVE;
+        }
+        // Subsequent chars must be [a-z,0-9,+,-,.]
+        for (int i = 1; i < colon; ++i) {
+            final char c = uri.charAt(i);
+            if ((c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '+' && c != '-' && c != '.') {
+                return URL_TYPE_RELATIVE;
+            }
+        }
+        return URL_TYPE_FULL;
+    }
+
     private static boolean isJarPath(final String uriPath) {
         return uriPath.endsWith(".jar") || uriPath.endsWith(".zip");
     }
     
+    private static boolean isJarUrl(URL url) {
+        final String scheme = url.getProtocol();
+        return "jar".equals(scheme) || "zip".equals(scheme)
+                || "vfszip".equals(scheme) // JBoss AS
+                || "wsjar".equals(scheme); // WebSphere
+    }
+
+    private static URL createJarEntryUrl(final URL jarBaseEntryUrl, String relativeEntryPath)
+            throws MalformedURLException {
+        if (relativeEntryPath.startsWith("/")) {
+            relativeEntryPath = relativeEntryPath.substring(1);
+        }
+        try {
+            return new URL(jarBaseEntryUrl, StringUtil.URLPathEnc(relativeEntryPath, PLATFORM_FILE_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            throw new BugException();
+        }
+    }
+
+    /**
+     * Trying to hide any JarFile implementation inconsistencies.
+     */
+    private static String normalizeJarEntryPath(String jarEntryDirPath, boolean directory) {
+        // Not know to be a problem, but to be in the safe side:
+        if (!jarEntryDirPath.startsWith("/")) {
+            jarEntryDirPath = "/" + jarEntryDirPath;
+        }
+    
+        // Known to be a problem:
+        if (directory && !jarEntryDirPath.endsWith("/")) {
+            jarEntryDirPath = jarEntryDirPath + "/";
+        }
+    
+        return jarEntryDirPath;
+    }
+
+    private static MalformedURLException newFailedToExtractEntryPathException(final URL url) {
+        return new MalformedURLException("Failed to extract jar entry path from: " + url);
+    }
+
+    /**
+     * Converts an URL to a {@code File} object, if the URL format (scheme) makes is possible.
+     */
+    private File urlToFileOrNull(URL url) {
+        if (test_emulateNoUrlToFileConversions) {
+            return null;
+        }
+        
+        if (!"file".equals(url.getProtocol())) {
+            return null;
+        }
+    
+        String filePath;
+        try {
+            // Using URI instead of URL, so we get an URL-decoded path.
+            filePath = toUri(url).getSchemeSpecificPart();
+        } catch (URISyntaxException e) { // Can happen, as URI-s are stricter than legacy URL-s.
+            // URL.getFile() doesn't decode %XX-s (used for spaces and non-US-ASCII letters usually), so we do.
+            // As it was originally created for a file somewhere, we hope that it uses the platform default encoding.
+            try {
+                filePath = URLDecoder.decode(url.getFile(), PLATFORM_FILE_ENCODING);
+            } catch (UnsupportedEncodingException e2) {
+                throw new BugException(e2);
+            }
+        }
+        return new File(filePath);
+    }
+
+    private static final Method toURIMethod;
+    static {
+        Method m;
+        try {
+            m = URL.class.getMethod("toURI", new Class[] { });
+        } catch (Exception e) {
+            m = null;
+        }
+        toURIMethod = m;
+    }
+    
+    // Java 5: remove
+    /**
+     * Calls Java 5 URL.toURI() on Java 1.4. 
+     */
+    private static URI toUri(URL url) throws URISyntaxException {
+        if (toURIMethod != null) {
+            try {
+                return (URI) toURIMethod.invoke(url, new Object[] { });
+            } catch (InvocationTargetException e) {
+                final Throwable targetE = e.getTargetException();
+                if (targetE instanceof URISyntaxException) {
+                    throw (URISyntaxException) targetE;
+                }
+                if (targetE instanceof RuntimeException) {
+                    throw (RuntimeException) targetE;
+                }
+                throw new RuntimeException("toURI() call failed", e);
+            } catch (Exception e) {
+                throw new RuntimeException("toURI() call failed", e);
+            }
+        } else {
+            return new URI(url.toString());
+        }
+    }
+
+    /**
+     * Gets a servlet context resource as a {@link JarFile} if possible, return {@code null} otherwise.
+     * For BC only, we try to get over errors during URL/JarFile construction, so then the caller can fall back to the
+     * legacy ZipInputStream-based approach.
+     */
+    private JarFile servletContextResourceToFileOrNull(final String jarResourcePath) throws MalformedURLException,
+            IOException {
+        URL jarResourceUrl = servletContext.getResource(jarResourcePath);
+        if (jarResourceUrl == null) {
+            LOG.error("ServletContext resource URL was null (missing resource?): " + jarResourcePath);
+            return null;
+        }
+
+        File jarResourceAsFile = urlToFileOrNull(jarResourceUrl);
+        if (jarResourceAsFile == null) {
+            // Expected - it's just not File
+            return null;
+        }
+
+        if (!jarResourceAsFile.isFile()) {
+            LOG.error("Jar file doesn't exist - falling back to stream mode: " + jarResourceAsFile);
+            return null;
+        }
+
+        return new JarFile(jarResourceAsFile);
+    }
+
+    private static URL tryCreateServletContextJarEntryUrl(
+            ServletContext servletContext, final String servletContextJarFilePath, final String entryPath) {
+        try {
+            return new URL(
+                    "jar:"
+                    + toUri(servletContext.getResource(servletContextJarFilePath))
+                    + JAR_URL_ENTRY_PATH_START
+                    + URLEncoder.encode(
+                            entryPath.startsWith("/") ? entryPath.substring(1) : entryPath,
+                            PLATFORM_FILE_ENCODING));
+        } catch (Exception e) {
+            LOG.error("Couldn't get URL for serlvetContext resource "
+                        + StringUtil.jQuoteNoXSS(servletContextJarFilePath)
+                        + " / jar entry " + StringUtil.jQuoteNoXSS(entryPath),
+                    e);
+            return null;
+        }
+    }
+
+    private static boolean isTldFileNameIgnoreCase(String name) {
+        final int dotIdx = name.lastIndexOf('.');
+        if (dotIdx < 0) return false;
+        final String extension = name.substring(dotIdx + 1).toLowerCase();
+        return extension.equalsIgnoreCase("tld");
+    }
+
     private static ClassLoader tryGetThreadContextClassLoader() {
         ClassLoader tccl;
         try {
@@ -645,6 +1072,59 @@ public class TaglibFactory implements TemplateHashModel {
             LOG.warn("Can't access Thread Context ClassLoader", e);
         }
         return tccl;
+    }
+    
+    private static boolean isDescendantOfOrSameAs(ClassLoader descendant, ClassLoader parent) {
+        while (true) {
+            if (descendant == null) {
+                return false;
+            }
+            if (descendant == parent) {
+                return true;
+            }
+            descendant = descendant.getParent();
+        }
+    }
+    
+    /**
+     * Used in parameter to {@link #setMetaInfTldSources}.
+     */
+    public static abstract class MetaInfTldSource {
+        private MetaInfTldSource() { }
+    }
+
+    /**
+     * To search TLD-s under <tt>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/*.tld</tt>, as requested by the JSP
+     * specification. Note that these also used to be in the classpath, so it's redundant to use this together with a
+     * sufficiently permissive {@link ClasspathMetaInfTldSource}.
+     */
+    public static final class WebInfPerLibJarMetaInfTldSource extends MetaInfTldSource {
+        public final static WebInfPerLibJarMetaInfTldSource INSTANCE = new WebInfPerLibJarMetaInfTldSource();
+        private WebInfPerLibJarMetaInfTldSource() { }; 
+    }
+
+    /**
+     * To search TLD-s under <tt>classpath:/META-INF/*.tld</tt> in the classpath root containers (like a "classes"
+     * directory or a jar) that have an URL that matches the specified pattern. Note that this TLD discovery mechanism is
+     * not part of the JSP specification. 
+     */
+    public static final class ClasspathMetaInfTldSource extends MetaInfTldSource {
+        
+        private final Pattern rootContainerPattern; 
+        
+        public ClasspathMetaInfTldSource(Pattern rootContainerPattern) {
+            this.rootContainerPattern = rootContainerPattern;
+        }
+
+        public Pattern getRootContainerPattern() {
+            return rootContainerPattern;
+        };
+        
+    }
+
+    public static final class ClearMetaInfTldSource extends MetaInfTldSource {
+        public final static ClearMetaInfTldSource INSTANCE = new ClearMetaInfTldSource();
+        private ClearMetaInfTldSource() { }; 
     }
     
     private interface TldLocation {
@@ -659,90 +1139,23 @@ public class TaglibFactory implements TemplateHashModel {
          * The absolute URL of the TLD file.
          * @return Not {@code null}
          */
-        public abstract String getURL() throws IOException;
+        public abstract String getXmlSystemId() throws IOException;
     }
 
-    private interface JarEntryTldLocationFactory {
-        public abstract TldLocation create(String jarEntryPath) throws IOException;
+    private interface InputStreamFactory {
+        InputStream getInputStream();
+    
     }
-    
-    /**
-     * A {@link TldLocation} that can read the TLD file even if it's inside a jar. 
-     */
-    private static abstract class JarAwareTldLocation implements TldLocation {
-        final String jarEntryPath;
-    
-        /**
-         * @param jarEntryPath {@code null} if the TLD is not inside a jar, otherwise the path inside the jar.
-         */
-        JarAwareTldLocation(String jarEntryPath) {
-            this.jarEntryPath = jarEntryPath;
-        }
-    
-        public final InputStream getInputStream() throws IOException {
-            final InputStream outerIn = getJarUnawareInputStream();
-            if (jarEntryPath != null) {
-                final ZipInputStream zipIn = new ZipInputStream(outerIn);
-                while (true) {
-                    final ZipEntry macthedJarEntry = zipIn.getNextEntry();
-                    if (macthedJarEntry == null) {
-                        throw new IOException(
-                                "Could not find JAR entry " + StringUtil.jQuoteNoXSS(jarEntryPath)
-                                + " inside " + StringUtil.jQuoteNoXSS(getOuterURLExternalForm()) + ".");
-                    }
-                    if (jarEntryPath.equals(macthedJarEntry.getName())) {
-                        return zipIn;
-                    }
-                }
-            } else {
-                return outerIn;
-            }
-        }
 
-        private String getOuterURLExternalForm() throws IOException {
-            return getJarUnawareURL().toExternalForm();
-        }
-
-        private String getURLExternalForm(String outerExternalForm) throws IOException {
-            return jarEntryPath != null ? "jar:" + outerExternalForm + "!" + jarEntryPath : outerExternalForm;
-        }
-
-        public String getURL() throws IOException {
-            return getURLExternalForm(getOuterURLExternalForm());
-        }
-
-        public final String toString() {
-            return (jarEntryPath != null ? "jar:" : "") + jarUnawareToString() + (jarEntryPath != null ? "!" + jarEntryPath : "");
-        }
-
-        /**
-         * @return Not {@code null}; reads the whole jar if the resource is a jar, otherwise reads the TLD itself.
-         */
-        protected abstract InputStream getJarUnawareInputStream() throws IOException;
-        
-        /**
-         * @return Not {@code null}; the URL of the whole jar if the resource is a jar, otherwise of the TLD itself.
-         */
-        protected abstract URL getJarUnawareURL() throws IOException;
-    
-        protected abstract String jarUnawareToString();
-
-    }
-    
-    private class ServletContextTldLocation extends JarAwareTldLocation {
+    private class ServletContextTldLocation implements TldLocation {
         
         private final String fileResourcePath;
     
-        public ServletContextTldLocation(String fileResourcePath, String jarEntryPath) {
-            super(jarEntryPath);
+        public ServletContextTldLocation(String fileResourcePath) {
             this.fileResourcePath = fileResourcePath;
         }
     
-        protected String jarUnawareToString() {
-            return "servletContext:" + fileResourcePath;
-        }
-    
-        protected InputStream getJarUnawareInputStream() throws IOException {
+        public InputStream getInputStream() throws IOException {
             final InputStream in = servletContext.getResourceAsStream(fileResourcePath);
             if (in == null) {
                 throw newResourceNotFoundException();
@@ -750,43 +1163,25 @@ public class TaglibFactory implements TemplateHashModel {
             return in;
         }
     
-        protected URL getJarUnawareURL() throws IOException {
+        public String getXmlSystemId() throws IOException {
             final URL url = servletContext.getResource(fileResourcePath);
-            if (url == null) {
-                throw newResourceNotFoundException();
-            }
-            return url;
+            return url != null ? url.toExternalForm() : null;
         }
         
         private IOException newResourceNotFoundException() {
             return new IOException("Resource not found: servletContext:" + fileResourcePath);
         }
+        
+        public final String toString() {
+            return "servletContext:" + fileResourcePath;
+        }
     
     }
-
-    private static class ClasspathJarEntryTldLocation extends JarAwareTldLocation {
-        
-        private final URL jarURL;
-
-        public ClasspathJarEntryTldLocation(URL jarURL, String jarEntryPath) {
-            super(jarEntryPath);
-            this.jarURL = jarURL;
-        }
-
-        protected InputStream getJarUnawareInputStream() throws IOException {
-            return jarURL.openStream();
-        }
-
-        protected URL getJarUnawareURL() throws IOException {
-            return jarURL;
-        }
-
-        protected String jarUnawareToString() {
-            return jarURL.toExternalForm();
-        }
-        
-    }
     
+
+    /**
+     * Points to plain class loader resource (regardless of if in what classpath root container it's in).
+     */
     private static class ClasspathTldLocation implements TldLocation {
         
         private final String resourcePath;
@@ -818,7 +1213,7 @@ public class TaglibFactory implements TemplateHashModel {
             return in;
         }
 
-        public String getURL() throws IOException {
+        public String getXmlSystemId() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
                 final URL url = getClass().getResource(resourcePath);
@@ -828,10 +1223,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
             
             final URL url = getClass().getResource(resourcePath);
-            if (url == null) {
-                throw newResourceNotFoundException();
-            }
-            return url.toExternalForm();
+            return url == null ? null : url.toExternalForm();
         }
         
         private IOException newResourceNotFoundException() {
@@ -840,6 +1232,179 @@ public class TaglibFactory implements TemplateHashModel {
     
     }
 
+    private abstract class JarEntryTldLocation implements TldLocation {
+
+        /**
+         * Can be {@code null} if there was some technical problem, but then
+         * {@link #fallbackRawJarContentInputStreamFactory} and {@link #entryPath} will be non-{@code null}
+         */
+        private final URL entryUrl;
+        private final InputStreamFactory fallbackRawJarContentInputStreamFactory;
+        private final String entryPath;
+        
+        public JarEntryTldLocation(URL entryUrl, InputStreamFactory fallbackRawJarContentInputStreamFactory,
+                String entryPath) {
+            if (entryUrl == null) {
+                NullArgumentException.check(fallbackRawJarContentInputStreamFactory);
+                NullArgumentException.check(entryPath);
+            }
+            
+            this.entryUrl = entryUrl;
+            this.fallbackRawJarContentInputStreamFactory = fallbackRawJarContentInputStreamFactory;
+            this.entryPath = entryPath != null ? normalizeJarEntryPath(entryPath, false) : null;
+        }
+
+        public InputStream getInputStream() throws IOException {
+            if (entryUrl != null) {
+                try {
+                    if (test_emulateJarEntryUrlOpenStreamFails) {
+                        throw new RuntimeException("Test only");
+                    }
+                    return entryUrl.openStream();
+                } catch (Exception e) {
+                    if (fallbackRawJarContentInputStreamFactory == null) {
+                        // Java 7 (Java 6?): We could just re-throw `e`
+                        if (e instanceof IOException) {
+                            throw (IOException) e;
+                        }
+                        if (e instanceof RuntimeException) {
+                            throw (RuntimeException) e;
+                        }
+                        throw new RuntimeException(e);
+                    }
+                    LOG.error("Failed to open InputStream for URL (will try fallback stream): " + entryUrl);
+                }
+                // Retry with the fallbackRawJarContentInputStreamFactory comes.
+            }
+            
+            final String entryPath;
+            if (this.entryPath != null) {
+                entryPath = this.entryPath;
+            } else {
+                if (entryUrl == null) {
+                    throw new IOException("Nothing to deduce jar entry path from.");
+                }
+                String urlEF = entryUrl.toExternalForm();
+                int sepIdx = urlEF.indexOf(JAR_URL_ENTRY_PATH_START);
+                if (sepIdx == -1) {
+                    throw new IOException("Couldn't extract jar entry path from: " + urlEF);
+                }
+                entryPath = normalizeJarEntryPath(
+                        URLDecoder.decode(
+                                urlEF.substring(sepIdx + JAR_URL_ENTRY_PATH_START.length()),
+                                PLATFORM_FILE_ENCODING),
+                        false);
+            }
+            
+            InputStream rawIn = null;
+            ZipInputStream zipIn = null;
+            boolean returnedZipIn = false;
+            try {
+                rawIn = fallbackRawJarContentInputStreamFactory.getInputStream();
+                if (rawIn == null) {
+                    throw new IOException("Raw jar's InputStreamFactory has returned null.");
+                }
+                zipIn = new ZipInputStream(rawIn);
+                while (true) {
+                    final ZipEntry macthedJarEntry = zipIn.getNextEntry();
+                    if (macthedJarEntry == null) {
+                        throw new IOException("Could not find JAR entry " + StringUtil.jQuoteNoXSS(entryPath) + ".");
+                    }
+                    if (entryPath.equals(normalizeJarEntryPath(macthedJarEntry.getName(), false))) {
+                        returnedZipIn = true;
+                        return zipIn;
+                    }
+                }
+            } finally {
+                if (!returnedZipIn) {
+                    if (zipIn != null) {
+                        zipIn.close();
+                    }
+                    if (rawIn != null) {
+                        rawIn.close();
+                    }
+                }
+            }
+        }
+    
+        public String getXmlSystemId() {
+            return entryUrl != null ? entryUrl.toExternalForm() : null;
+        }
+    
+        public String toString() {
+            return entryUrl != null
+                    ? entryUrl.toExternalForm()
+                    : "jar:{" + fallbackRawJarContentInputStreamFactory + "}!" + entryPath;
+        }
+        
+    }
+    
+    private class JarEntryUrlTldLocation extends JarEntryTldLocation {
+        
+        private JarEntryUrlTldLocation(URL entryUrl, InputStreamFactory fallbackRawJarContentInputStreamFactory) {
+            super(entryUrl, fallbackRawJarContentInputStreamFactory, null);
+        }
+        
+    }
+
+    /**
+     * Points to a file entry inside a jar, with optional {@link ZipInputStream} fallback.
+     */
+    private class ServletContextJarEntryTldLocation extends JarEntryTldLocation {
+        
+        /**
+         * For creating instance based on the servlet context resource path of a jar.
+         * While it tries to construct and use an URL that points directly to the target entry inside the jar, it will
+         * operate even if these URL-related operations fail. 
+         */
+        private ServletContextJarEntryTldLocation(final String servletContextJarFilePath, final String entryPath) {
+            super(
+                    tryCreateServletContextJarEntryUrl(servletContext, servletContextJarFilePath, entryPath),
+                    new SerlvetContextInputStreamFactory(servletContextJarFilePath),
+                    entryPath);
+        }
+        
+    }
+    
+    // Java 5: Make it an anonymous class 
+    private final class SerlvetContextInputStreamFactory implements InputStreamFactory {
+        private final String servletContextJarFilePath;
+
+        private SerlvetContextInputStreamFactory(String servletContextJarFilePath) {
+            this.servletContextJarFilePath = servletContextJarFilePath;
+        }
+
+        public InputStream getInputStream() {
+            return servletContext.getResourceAsStream(servletContextJarFilePath);
+        }
+
+        public String toString() {
+            return "servletContext:" + servletContextJarFilePath;
+        }
+    }
+
+    private static class FileTldLocation implements TldLocation {
+
+        private final File file;
+
+        public FileTldLocation(File file) {
+            this.file = file;
+        }
+
+        public InputStream getInputStream() throws IOException {
+            return new FileInputStream(file);
+        }
+
+        public String getXmlSystemId() throws IOException {
+            return file.toURI().toURL().toExternalForm();
+        }
+
+        public String toString() {
+            return file.toString();
+        }
+
+    }
+    
     private static final class Taglib implements TemplateHashModel {
         private final Map tagsAndFunctions;
 
@@ -861,7 +1426,7 @@ public class TaglibFactory implements TemplateHashModel {
             
             InputStream in = tldLocation.getInputStream();
             try {
-                parseXml(in, tldLocation.getURL(), tldParser);
+                parseXml(in, tldLocation.getXmlSystemId(), tldParser);
             } finally {
                 in.close();
             }
@@ -924,7 +1489,7 @@ public class TaglibFactory implements TemplateHashModel {
                             locator);
                 }
                 try {
-                    if (getUriType(taglibLocationCData) == RELATIVE_URL_PATH) {
+                    if (getUriType(taglibLocationCData) == URL_TYPE_RELATIVE) {
                         taglibLocationCData = "/WEB-INF/" + taglibLocationCData;
                     }
                 } catch (MalformedURLException e) {
@@ -932,19 +1497,23 @@ public class TaglibFactory implements TemplateHashModel {
                 }
                 cDataCollector = null;
             } else if (E_TAGLIB.equals(qName)) {
-                final String jarEntryPath = isJarPath(taglibLocationCData) ? STANDARD_TLD_JAR_ENTRY_PATH : null;
-                addTldLocation(new ServletContextTldLocation(taglibLocationCData, jarEntryPath), taglibUriCData);
+                addTldLocation(
+                        isJarPath(taglibLocationCData)
+                                ? (TldLocation) new ServletContextJarEntryTldLocation(
+                                        taglibLocationCData, DEFAULT_TLD_RESOURCE_PATH)
+                                : (TldLocation) new ServletContextTldLocation(taglibLocationCData),
+                        taglibUriCData);
             }
         }
     }
 
-    private static class TldParserForTaglibUriExtration extends DefaultHandler {
+    private static class TldParserForTaglibUriExtraction extends DefaultHandler {
         private static final String E_URI = "uri";
 
         private StringBuffer cDataCollector;
         private String uri;
 
-        TldParserForTaglibUriExtration() {
+        TldParserForTaglibUriExtraction() {
         }
 
         String getTaglibUri() {
@@ -1337,6 +1906,45 @@ public class TaglibFactory implements TemplateHashModel {
             return superCause == null ? this.cause : superCause;
         }
     
+    }
+    
+    private static class URLWithExternalForm implements Comparable {
+
+        private final URL url;
+        private final String externalForm;
+
+        public URLWithExternalForm(URL url) {
+            this.url = url;
+            this.externalForm = url.toExternalForm();
+        }
+
+        public URL getUrl() {
+            return url;
+        }
+
+        public String getExternalForm() {
+            return externalForm;
+        }
+
+        public int hashCode() {
+            return externalForm.hashCode();
+        }
+
+        public boolean equals(Object that) {
+            if (this == that) return true;
+            if (that == null) return false;
+            if (getClass() != that.getClass()) return false;
+            return !externalForm.equals(((URLWithExternalForm) that).externalForm);
+        }
+
+        public String toString() {
+            return "URLWithExternalForm(" + externalForm + ")";
+        }
+
+        public int compareTo(Object that) {
+            return this.getExternalForm().compareTo(((URLWithExternalForm) that).getExternalForm());
+        }
+
     }
     
     public static class TaglibCreationException extends Exception {

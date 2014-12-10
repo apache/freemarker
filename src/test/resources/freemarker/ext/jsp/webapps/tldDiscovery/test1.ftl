@@ -53,15 +53,23 @@ bar
 <#assign tl5 = JspTaglibs["WEB-INF/taglib2.jar"]>
 <@tl5.testtag></@>
 <!-- Test loading from autodeployed .tld -->
-<#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld"]>
+<#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld-2"]>
 <@tl6.simpletag/>
+<#assign tl7 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld-3"]>
+<@tl7.simpletag/>
 <!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-1"].simpletag/>
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-2"].simpletag/>
+<@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-3"].simpletag/>
 <!-- Test loading from "ClasspathTaglibJarPatterns", inherited from Jetty -->
 ${JspTaglibs["http://java.sun.com/jsp/jstl/functions"].join(['a', 'b'], '+')}
 <!-- Test loading from "ClasspathTaglibJarPatterns", set via init-param -->
-<@JspTaglibs["http://displaytag.sf.net"].table name="lsob" />
+<#assign display = JspTaglibs["http://displaytag.sf.net"]>
+<@display.table name="lsob">
+  <@display.column property="name" />
+  <@display.column property="age" />
+  <@display.column property="maried" />
+</@display.table>
 
 ${tl.reverse("abc")}
 ${tl.reverseInt(123)}
