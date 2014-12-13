@@ -21608,10 +21608,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>FreemarkerServlet</literal> init-params (see the
                   Java API documentation of
                   <literal>FreemarkerServlet</literal> for the description of
-                  these). For example, if you ran your application from
-                  Eclipse with an embedded servlet container, and thus the tag
+                  these). For example, if you run your application from
+                  Eclipse with an embedded Servlet container, and thus the tag
                   library jar-s aren't on the standard locations but are in
-                  the classpath like any other dependency, now you can just
+                  the classpath like any other dependencies, now you can just
                   write:</para>
 
                   <programlisting role="unspecified">&lt;init-param&gt;
