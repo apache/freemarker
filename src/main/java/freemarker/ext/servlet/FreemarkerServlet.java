@@ -98,7 +98,7 @@ import freemarker.template.utility.StringUtil;
  * problem with the servlet logger (<code>javax.servlet.GenericServlet.log(...)</code>).
  * 
  * <p>
- * Supported init-params are:
+ * <b>Supported init-params are:</b>
  * </p>
  * 
  * <ul>
@@ -131,12 +131,13 @@ import freemarker.template.utility.StringUtil;
  * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to not set, in which case
  * {@link TaglibFactory} will behave as if it was {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}. Note that this
  * can be also specified with the {@value #SYSTEM_PROPERTY_META_INF_TLD_SOURCES} system property. If both the init-param
- * and the system property exists, the sources listed in system property will be added after those specified by the
- * init-param. This is where the special item, {@value #META_INF_TLD_LOCATION_CLEAR} comes handy, as it will remove all
+ * and the system property exists, the sources listed in the system property will be added after those specified by the
+ * init-param. This is where the special entry, {@value #META_INF_TLD_LOCATION_CLEAR} comes handy, as it will remove all
  * previous list items. (An intended usage of the system property is setting it to {@code clear, classpath} in the
- * Eclipse run configuration if you are running the application without making a WAR out of it.) Also, note that further
- * {@code classpath:<pattern>} items are added automatically at the end of this list based on Jetty's
- * {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context attribute.</li>
+ * Eclipse run configuration if you are running the application without putting the dependency jar-s into
+ * {@code WEB-INF/lib}.) Also, note that further {@code classpath:<pattern>} items are added automatically at the end of
+ * this list based on Jetty's {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context
+ * attribute.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_CLASSPATH_TLDS}</strong> (since 2.3.22): Comma separated list of paths; see
  * {@link TaglibFactory#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to no paths.
@@ -145,11 +146,12 @@ import freemarker.template.utility.StringUtil;
  * the init-param.</li>
  * 
  * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
- * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}. Use
- * setting init-params such as {@code object_wrapper} instead.
+ * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}.
+ * Instead, use init-params with the setting names documented at {@link Configuration#setSetting(String, String)}, such
+ * as {@code object_wrapper}.
  * 
- * <li>Any other init-param will be interpreted as {@link Configuration}-level setting. See the possible names and
- * values at {@link Configuration#setSetting(String, String)}</li>
+ * <li>Any other init-params will be interpreted as {@link Configuration}-level setting. See the possible names and
+ * values at {@link Configuration#setSetting(String, String)}.</li>
  * 
  * </ul>
  */
@@ -161,33 +163,41 @@ public class FreemarkerServlet extends HttpServlet
     public static final long serialVersionUID = -2440216393145762479L;
 
     /**
-     * The name of the servlet init-param with similar name. (This init-param has existed long before 2.3.22, but this
-     * constant was only added then.)
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
+     * has existed long before 2.3.22, but this constant was only added then.)
      * 
      * @since 2.3.22
      */
     public static final String INIT_PARAM_TEMPLATE_PATH = "TemplatePath";
     
     /**
-     * The name of the servlet init-param with similar name. (This init-param has existed long before 2.3.22, but this
-     * constant was only added then.)
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
+     * has existed long before 2.3.22, but this constant was only added then.)
      * 
      * @since 2.3.22
      */
     public static final String INIT_PARAM_NO_CACHE = "NoCache";
-    
+
     /**
-     * The name of the servlet init-param with similar name. (This init-param has existed long before 2.3.22, but this
-     * constant was only added then.)
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
+     * has existed long before 2.3.22, but this constant was only added then.)
      * 
      * @since 2.3.22
      */
     public static final String INIT_PARAM_CONTENT_TYPE = "ContentType";
 
-    /** @since 2.3.22 */
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     * 
+     * @since 2.3.22
+     */
     public static final String INIT_PARAM_META_INF_TLD_LOCATIONS = "MetaInfTldSources";
     
-    /** @since 2.3.22 */
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     * 
+     * @since 2.3.22
+     */
     public static final String INIT_PARAM_CLASSPATH_TLDS = "ClasspathTlds";
     
     private static final String INIT_PARAM_DEBUG = "Debug";
@@ -208,15 +218,16 @@ public class FreemarkerServlet extends HttpServlet
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     /**
-     * When set, the items defined in it will be add after those come from the
-     * {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param. The value syntax is the same as of the init-param.
+     * When set, the items defined in it will be added after those coming from the
+     * {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param. The value syntax is the same as of the init-param. Note
+     * that {@value #META_INF_TLD_LOCATION_CLEAR} can be used to re-start the list, rather than continue it.
      * 
      * @since 2.3.22
      */
     public static final String SYSTEM_PROPERTY_META_INF_TLD_SOURCES = "org.freemarker.jsp.metaInfTldSources";
 
     /**
-     * When set, the items defined in it will be add after those come from the
+     * When set, the items defined in it will be added after those coming from the
      * {@value #INIT_PARAM_CLASSPATH_TLDS} init-param. The value syntax is the same as of the init-param.
      * 
      * @since 2.3.22
@@ -224,21 +235,21 @@ public class FreemarkerServlet extends HttpServlet
     public static final String SYSTEM_PROPERTY_CLASSPATH_TLDS = "org.freemarker.jsp.classpathTlds";
     
     /**
-     * Used as part of the value of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param.
+     * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
      * 
      * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS = "webInfPerLibJars";
     
     /**
-     * Used as part of the value of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param.
+     * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
      * 
      * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_CLASSPATH = "classpath";
     
     /**
-     * Used as part of the value of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param.
+     * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
      * 
      * @since 2.3.22
      */

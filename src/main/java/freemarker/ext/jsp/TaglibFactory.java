@@ -241,76 +241,85 @@ public class TaglibFactory implements TemplateHashModel {
         return false;
     }
     
-    /** See {@link #setObjectWrapper(ObjectWrapper)}. */
+    /**
+     * See {@link #setObjectWrapper(ObjectWrapper)}.
+     * 
+     * @since 2.3.22
+     */
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper;
     }
 
     /**
-     * Sets the {@link ObjectWrapper} used when building the tag libraries {@link TemplateHashModel}-s from the TLD-s.
+     * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
      * Usually, it should be the same {@link ObjectWrapper} that was created by
      * {@link FreemarkerServlet#createObjectWrapper} to be used inside the templates. {@code null} value is only
      * supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null} and an
      * {@code intanceof} {@link BeansWrapper} (like a {@link DefaultObjectWrapper}).
+     * 
+     * @since 2.3.22
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         checkNotStarted();
         this.objectWrapper = objectWrapper;
     }
 
-    /** See {@link #setMetaInfTldSources(List)}. */
+    /**
+     * See {@link #setMetaInfTldSources(List)}.
+     * 
+     * @since 2.3.22
+     */
     public List/*<Pattern>*/ getMetaInfTldSources() {
         return metaInfTldSources;
     }
 
     /**
-     * The list of places where we will look for {@code META-INF/*.tld} files. By default this is a
-     * list that contains {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}. This corresponds to the behavior that the
-     * JSP specification describes. 
+     * Sets the list of places where we will look for {@code META-INF/**}{@code /*.tld} files. By default this is a list
+     * that only contains {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}. This corresponds to the behavior that the
+     * JSP specification describes. See the {@link MetaInfTldSource} subclasses for the possible values and their
+     * meanings.
      * 
-     * Set the URL patterns of jar-s that aren't inside the web application at standard locations, yet you want
-     * {@code META-INF/*.tld}-s to be discovered in them. The jar-s whose name will be matched will come from the URL
-     * lists returned by the {@code URLClassLoader}-s in the class loader hierarchy. Inside those jars, we list
-     * {@code META-INF/*.tld} to find the TLD-s. Note that this TLD discovery mechanism is not part of the JSP
-     * specification, and is only meant to be used in development setups and in some embedded servlet setups, where you
-     * just want to pick up TLD-s from the dependency jar-s, without placing them under {@code WEB-INF/lib}.
-     * 
-     * <p>Note that {@link FreemarkerServlet} will set this value automatically if finds
-     * {@code org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern} context attribute. If this is still set here,
-     * the two will be concatenated, with the Jetty attributes last.
+     * <p>
+     * This is usually set via the init-params of {@link FreemarkerServlet}.
      * 
      * @param metaInfTldSources
-     *            The list of {@link Pattern}-s (not {@link String}-s) against which the URL of the jars will be
-     *            matched. Maybe {@code null}. A typical example of a such pattern is {@code ".*taglib*.\.jar$"}. The
-     *            pattern must match the whole jar URL, not just part of it. It's enough if one of the listed patterns
-     *            match, that is, they are in logical "or" relation. The order of the patterns normally doesn't mater,
-     *            however, if multiple TLD-s belong to the same taglib URI then the TLD that's inside the jar that was
-     *            matched by the earlier pattern wins.
-     *            
+     *            The list of {@link MetaInfTldSource} subclass instances. Their order matters if multiple TLD-s define
+     *            a taglib with the same {@code taglib-uri}. In that case, the one found by the earlier
+     *            {@link MetaInfTldSource} wins.
+     * 
      * @see #setClasspathTlds(List)
+     * 
+     * @since 2.3.22
      */
     public void setMetaInfTldSources(List/*<MetaInfTldSource>*/ metaInfTldSources) {
         checkNotStarted();
         this.metaInfTldSources = metaInfTldSources;
     }
 
-    /** See {@link #setClasspathTlds(List)}. */
+    /**
+     * See {@link #setClasspathTlds(List)}.
+     * 
+     * @since 2.3.22
+     */
     public List/*<String>*/ getClasspathTlds() {
         return classpathTlds;
     }
 
     /**
-     * Sets the list of TLD resource paths for TLD-s that aren't inside the web application at standard locations, yet
-     * you want them to be discovered. They will be loaded with the class loader provided by the servlet container. Note
-     * that this TLD discovery mechanism is not part of the JSP specification, and is only meant to be used in
-     * development setups and in some embedded servlet setups, where you just want to pick up TLD-s that are directly
-     * included in your project or are in dependency jar-s, and you want that without placing them into the WAR.
+     * Sets the class-loader resource paths of the TLD-s that aren't inside the locations covered by
+     * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered. They will be loaded with the class
+     * loader provided by the servlet container.
+     * 
+     * <p>
+     * This is usually set via the init-params of {@link FreemarkerServlet}.
      * 
      * @param classpathTlds
-     *            List of {@code String}-s, not maybe {@code null}. Each item is a resource path, like
-     *            {@code "/META-INF/my.tld"}. Relative resource paths will be interpreted as root-relative.
-     *            
+     *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like
+     *            {@code "/META-INF/my.tld"}. (Relative resource paths will be interpreted as root-relative.)
+     * 
      * @see #setMetaInfTldSources(List)
+     * 
+     * @since 2.3.22
      */
     public void setClasspathTlds(List/*<String>*/ classpathTlds) {
         checkNotStarted();
@@ -1087,16 +1096,21 @@ public class TaglibFactory implements TemplateHashModel {
     }
     
     /**
-     * Used in parameter to {@link #setMetaInfTldSources}.
+     * A location within which we will look for {@code META-INF/**}{@code /*.tld}-s. Used in the parameter to
+     * {@link #setMetaInfTldSources}. See concrete subclasses for more.
+     * 
+     * @since 2.3.22
      */
     public static abstract class MetaInfTldSource {
         private MetaInfTldSource() { }
     }
 
     /**
-     * To search TLD-s under <tt>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/*.tld</tt>, as requested by the JSP
-     * specification. Note that these also used to be in the classpath, so it's redundant to use this together with a
-     * sufficiently permissive {@link ClasspathMetaInfTldSource}.
+     * To search TLD-s under <tt>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/**</tt><tt>/*.tld</tt>, as requested by
+     * the JSP specification. Note that these also used to be in the classpath, so it's redundant to use this together
+     * with a sufficiently permissive {@link ClasspathMetaInfTldSource}.
+     * 
+     * @since 2.3.22
      */
     public static final class WebInfPerLibJarMetaInfTldSource extends MetaInfTldSource {
         public final static WebInfPerLibJarMetaInfTldSource INSTANCE = new WebInfPerLibJarMetaInfTldSource();
@@ -1104,14 +1118,28 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * To search TLD-s under <tt>classpath:/META-INF/*.tld</tt> in the classpath root containers (like a "classes"
-     * directory or a jar) that have an URL that matches the specified pattern. Note that this TLD discovery mechanism is
-     * not part of the JSP specification. 
+     * To search TLD-s under {@code META-INF/**}{@code /*.tld} inside classpath root containers, that is, in directories
+     * and jar-s that are in the classpath (or are visible for the class loader otherwise). It will only search inside
+     * those roots whose URL matches the pattern specified in the constructor. It correctly handles when multiple roots
+     * contain a TLD with the same name (typically, {@code META-INF/taglib.tld}), that is, those TLD-s won't shadow each
+     * other, all of them will be loaded independently.
+     * 
+     * <p>
+     * Note that this TLD discovery mechanism is not part of the JSP specification.
+     * 
+     * @since 2.3.22
      */
     public static final class ClasspathMetaInfTldSource extends MetaInfTldSource {
         
         private final Pattern rootContainerPattern; 
         
+        /**
+         * @param rootContainerPattern
+         *            The pattern against which the classpath root container URL will be matched. For example, to only
+         *            search in jar-s whose name contains "taglib", the patter should be {@code ".*taglib\.jar$"}. To
+         *            search everywhere, the pattern should be {@code ".*"}. The pattern need to match the whole URL,
+         *            not just part of it.
+         */
         public ClasspathMetaInfTldSource(Pattern rootContainerPattern) {
             this.rootContainerPattern = rootContainerPattern;
         }
@@ -1122,6 +1150,14 @@ public class TaglibFactory implements TemplateHashModel {
         
     }
 
+    /**
+     * When it occurs in the {@link MetaInfTldSource} list, all {@link MetaInfTldSource}-s before it will be disabled.
+     * This is useful when the list is assembled from multiple sources, and some want to re-start it, rather than append
+     * to the end of it.
+     * 
+     * @see FreemarkerServlet#SYSTEM_PROPERTY_META_INF_TLD_SOURCES
+     * @see TaglibFactory#setMetaInfTldSources(List)
+     */
     public static final class ClearMetaInfTldSource extends MetaInfTldSource {
         public final static ClearMetaInfTldSource INSTANCE = new ClearMetaInfTldSource();
         private ClearMetaInfTldSource() { }; 
@@ -1947,7 +1983,7 @@ public class TaglibFactory implements TemplateHashModel {
 
     }
     
-    public static class TaglibCreationException extends Exception {
+    private static class TaglibCreationException extends Exception {
 
         public TaglibCreationException(String message, Throwable cause) {
             super(message, cause);
