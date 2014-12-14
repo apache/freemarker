@@ -9351,15 +9351,14 @@ ${bar?trim}</programlisting>
           <para><literal>JspTaglibs[<replaceable>uri</replaceable>]</literal>
           will have to find the TLD for the URI specified, just like JSP's
           <literal>@taglib</literal> directive has to. For this, it implements
-          the TLD discovery mechanism described in the JSP specification (see
-          more there). In a nutshell, it searches TLD-s in
+          the TLD discovery mechanism described in the JSP specification. See
+          more there, but in a nutshell, it searches TLD-s in
           <literal>WEB-INF/web.xml</literal> <literal>taglib</literal>
-          elements, at <literal>WEB-INF/lib/*.tld</literal>, at
-          <literal>WEB-INF/lib/*.{jar,zip}/META-INF/**/*.tld</literal>, and at
-          <literal>WEB-INF/*.tld</literal>. In additionally, it can discover
-          TLD-s that are visible for the class loader even if they are outside
-          the WAR structure, when you set that up with the
-          <literal>MetaInfTldSources</literal> and/or
+          elements, at <literal>WEB-INF/**/*.tld</literal>, and in
+          <literal>WEB-INF/lib/*.{jar,zip}/META-INF/**/*.tld</literal>.
+          Additionally, it can discover TLD-s that are visible for the class
+          loader even if they are outside the WAR structure, when you set that
+          up with the <literal>MetaInfTldSources</literal> and/or
           <literal>ClasspathTlds</literal>
           <literal>FreemarkerServlet</literal> init-params (since 2.3.22). See
           the Java API documentation of <literal>FreemarkerServlet</literal>
@@ -21655,9 +21654,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Improved code quality at many places (maintainability,
-                  error messages, performance bug fixes, test
-                  coverage).</para>
+                  <para>Bug fixed: Now <literal>*.tld</literal> files are
+                  searched in <literal>WEB-INF/</literal> and in all its
+                  subdirectories recursively. Earlier they were only searched
+                  directly under <literal>WEB-INF/</literal> and
+                  <literal>WEB-INF/lib/</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Unwanted behavior fixed: In case multiple TLD-s map to
+                  the same tag library URI, now
+                  <literal>WEB-INF/**/*.tld</literal>-s has priority over
+                  <literal>META-INF/**/*.tld</literal>-s coming from jar-s or
+                  classpath directories. Earlier, it was the other way around,
+                  except that <literal>META-INF/lib/*.tld</literal>-s could
+                  still take precedence randomly. While the JSP specification
+                  (2.2) explicitly states that the order is not defined and
+                  shouldn't be relied upon, it's just logical that if someone
+                  puts a TLD directly under <literal>WEB-INF</literal>, he
+                  meant that to be used in that particular web application,
+                  rather than the TLD-s coming from the dependency jars which
+                  are shared by multiple web applications.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Generally improved implementation quality at some
+                  parts (maintainability, error messages, performance bug
+                  fixes, test coverage).</para>
                 </listitem>
               </itemizedlist>
             </listitem>

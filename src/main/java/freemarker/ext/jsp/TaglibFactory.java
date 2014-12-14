@@ -344,21 +344,22 @@ public class TaglibFactory implements TemplateHashModel {
 
             switch (nextTldLocationLookupPhase) {
             case 0:
+                // Not in JSP spec.
                 addTldLocationsFromClasspathTlds();
                 break;
             case 1:
+                // JSP 2.2 spec / JSP.7.3.3 (also JSP.3.2)
                 addTldLocationsFromWebXml();
                 break;
             case 2:
-                addTldLocationsFromWebInfPerLibTlds();
+                // JSP 2.2 spec / JSP.7.3.4, FM-specific TLD processing order #1
+                addTldLocationsFromWebInfTlds();
                 break;
             case 3:
+                // JSP 2.2 spec / JSP.7.3.4, FM-specific TLD processing order #2
                 addTldLocationsFromMetaInfTlds();
                 break;
             case 4:
-                addTldLocationsFromWebInfTlds();
-                break;
-            case 5:
                 return null;
             default:
                 throw new BugException();
@@ -383,34 +384,36 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private void addTldLocationsFromWebInfTlds() throws IOException, SAXException {
-        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/*.tld");
+    private void addTldLocationsFromWebInfTlds()
+            throws IOException, SAXException {
+        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/**/*.tld");
+        addTldLocationsFromServletContextResourceTlds("/WEB-INF");
+    }
 
-        Set webinfEntryPaths = servletContext.getResourcePaths("/WEB-INF");
-        if (webinfEntryPaths != null) {
-            for (Iterator it = webinfEntryPaths.iterator(); it.hasNext();) {
-                String webInfEntryPath = (String) it.next();
-                if (webInfEntryPath.endsWith(".tld")) {
-                    addTldLocationFromTld(new ServletContextTldLocation(webInfEntryPath));
+    private void addTldLocationsFromServletContextResourceTlds(String basePath)
+            throws IOException, SAXException {
+        LOG.debug("!!T Listing " + basePath);
+        Set unsortedResourcePaths = servletContext.getResourcePaths(basePath);
+        if (unsortedResourcePaths != null) {
+            List/*<String>*/ resourcePaths = new ArrayList/*<String>*/(unsortedResourcePaths);
+            Collections.sort(resourcePaths);
+            // First process the files...
+            for (Iterator it = resourcePaths.iterator(); it.hasNext();) {
+                String resourcePath = (String) it.next();
+                if (resourcePath.endsWith(".tld")) {
+                    addTldLocationFromTld(new ServletContextTldLocation(resourcePath));
+                }
+            }
+            // ... only later the directories
+            for (Iterator it = resourcePaths.iterator(); it.hasNext();) {
+                String resourcePath = (String) it.next();
+                if (resourcePath.endsWith("/")) {
+                    addTldLocationsFromServletContextResourceTlds(resourcePath);
                 }
             }
         }
     }
-
-    private void addTldLocationsFromWebInfPerLibTlds() throws IOException, SAXException {
-        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.tld");
-
-        Set libEntPaths = servletContext.getResourcePaths("/WEB-INF/lib");
-        if (libEntPaths != null) {
-            for (Iterator iter = libEntPaths.iterator(); iter.hasNext();) {
-                final String libEntryPath = (String) iter.next();
-                if (libEntryPath.endsWith(".tld")) {
-                    addTldLocationFromTld(new ServletContextTldLocation(libEntryPath));
-                }
-            }
-        }
-    }
-
+    
     private void addTldLocationsFromMetaInfTlds() throws IOException, SAXException {
         if (metaInfTldSources == null || metaInfTldSources.isEmpty()) {
             return;
