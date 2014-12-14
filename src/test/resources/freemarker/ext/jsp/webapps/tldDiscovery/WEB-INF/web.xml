@@ -86,6 +86,10 @@
     <taglib-uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-2</taglib-uri>
     <taglib-location>/WEB-INF/taglib2.jar</taglib-location>
   </taglib>
+  <taglib>
+    <taglib-uri>/subdir/taglib</taglib-uri>
+    <taglib-location>/WEB-INF/fmtesttag4.tld</taglib-location>
+  </taglib>
 
   <!-- Prevent the visiting of MVC Views from outside the servlet container. RequestDispatcher.forward/include should and 
     will still work. Removing this may open security holes! -->

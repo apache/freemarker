@@ -113,9 +113,9 @@ public class TaglibFactory implements TemplateHashModel {
             = Collections.singletonList(WebInfPerLibJarMetaInfTldSource.INSTANCE);
     private List/*<String>*/ classpathTlds = Collections.EMPTY_LIST;
     
-    boolean test_emulateNoUrlToFileConversions = false; // !!T
-    boolean test_emulateNoJarURLConnections = false; // !!T
-    boolean test_emulateJarEntryUrlOpenStreamFails = false; // !!T    
+    boolean test_emulateNoUrlToFileConversions = false;
+    boolean test_emulateNoJarURLConnections = false;
+    boolean test_emulateJarEntryUrlOpenStreamFails = false;    
 
     private final Object lock = new Object(); 
     private final Map taglibs = new HashMap();
@@ -183,16 +183,15 @@ public class TaglibFactory implements TemplateHashModel {
                     try {
                         urlType = getUriType(taglibUri);
                     } catch (MalformedURLException e) {
-                        throw new TaglibCreationException("Malformed taglib URI: " + StringUtil.jQuote(taglibUri), e);
+                        throw new TaglibGettingException("Malformed taglib URI: " + StringUtil.jQuote(taglibUri), e);
                     }
                     if (urlType == URL_TYPE_RELATIVE) {
-                        // TODO Shouldn't this be done before looking up explicit mappings? Check specs.
                         normalizedTaglibUri = resolveRelativeUri(taglibUri);
                     } else if (urlType == URL_TYPE_ABSOLUTE) {
                         normalizedTaglibUri = taglibUri;
                     } else if (urlType == URL_TYPE_FULL) {
                         // Per spec., absolute URI-s can only be resolved through explicit mapping
-                        throw new TaglibCreationException("No TLD was found for the "
+                        throw new TaglibGettingException("No TLD was found for the "
                                 + StringUtil.jQuoteNoXSS(taglibUri) + " JSP taglib URI. (TLD-s are searched according "
                                 + "the JSP 2.2 specification. In development environments you may want to use the "
                                 + "\"" + FreemarkerServlet.INIT_PARAM_META_INF_TLD_LOCATIONS + "\" and "
@@ -204,8 +203,7 @@ public class TaglibFactory implements TemplateHashModel {
                     }
 
                     if (!normalizedTaglibUri.equals(taglibUri)) {
-                        // TODO I guess we should only check among non-explicit mappings here. Check specs.
-                        final Taglib taglib = (Taglib) taglibs.get(taglibUri);
+                        final Taglib taglib = (Taglib) taglibs.get(normalizedTaglibUri);
                         if (taglib != null) {
                             return taglib;
                         }
@@ -335,7 +333,7 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     private TldLocation getExplicitlyMappedTldLocation(final String uri) throws SAXException, IOException,
-            TaglibCreationException {
+            TaglibGettingException {
         while (true) {
             final TldLocation tldLocation = (TldLocation) tldLocations.get(uri);
             if (tldLocation != null) {
@@ -392,7 +390,6 @@ public class TaglibFactory implements TemplateHashModel {
 
     private void addTldLocationsFromServletContextResourceTlds(String basePath)
             throws IOException, SAXException {
-        LOG.debug("!!T Listing " + basePath);
         Set unsortedResourcePaths = servletContext.getResourcePaths(basePath);
         if (unsortedResourcePaths != null) {
             List/*<String>*/ resourcePaths = new ArrayList/*<String>*/(unsortedResourcePaths);
@@ -495,7 +492,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private void addTldLocationsFromClasspathTlds() throws SAXException, IOException, TaglibCreationException {
+    private void addTldLocationsFromClasspathTlds() throws SAXException, IOException, TaglibGettingException {
         if (classpathTlds == null || classpathTlds.size() == 0) {
             return;
         }
@@ -505,14 +502,14 @@ public class TaglibFactory implements TemplateHashModel {
         for (Iterator it = classpathTlds.iterator(); it.hasNext();) {
             String tldResourcePath = (String) it.next();
             if (tldResourcePath.trim().length() == 0) {
-                throw new TaglibCreationException("classpathTlds can't contain empty item"); 
+                throw new TaglibGettingException("classpathTlds can't contain empty item"); 
             }
             
             if (!tldResourcePath.startsWith("/")) {
                 tldResourcePath = "/" + tldResourcePath;
             }
             if (tldResourcePath.endsWith("/")) {
-                throw new TaglibCreationException("classpathTlds can't specify a directory: " + tldResourcePath); 
+                throw new TaglibGettingException("classpathTlds can't specify a directory: " + tldResourcePath); 
             }
             
             ClasspathTldLocation tldLocation = new ClasspathTldLocation(tldResourcePath);
@@ -814,7 +811,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
         final Taglib taglib = new Taglib(servletContext, tldLocation, objectWrapper);
         taglibs.put(taglibUri, taglib);
-        tldLocations.remove(taglibUri);  // TODO Why?
+        tldLocations.remove(taglibUri);
         return taglib;
     }
 
@@ -841,14 +838,14 @@ public class TaglibFactory implements TemplateHashModel {
         reader.parse(inSrc);
     }
 
-    private static String resolveRelativeUri(String uri) throws TaglibCreationException
+    private static String resolveRelativeUri(String uri) throws TaglibGettingException
     {
         TemplateModel reqHash;
         try {
             reqHash = Environment.getCurrentEnvironment().getVariable(
                     FreemarkerServlet.KEY_REQUEST_PRIVATE);
         } catch (TemplateModelException e) {
-            throw new TaglibCreationException("Failed to get FreemarkerServlet request information", e);
+            throw new TaglibGettingException("Failed to get FreemarkerServlet request information", e);
         }
         if (reqHash instanceof HttpRequestHashModel) {
             HttpServletRequest req =
@@ -869,7 +866,7 @@ public class TaglibFactory implements TemplateHashModel {
                 return '/' + uri;
             }
         }
-        throw new TaglibCreationException(
+        throw new TaglibGettingException(
                 "Can't resolve relative URI " + uri + " as request URL information is unavailable.");
     }
 
@@ -1986,13 +1983,13 @@ public class TaglibFactory implements TemplateHashModel {
 
     }
     
-    private static class TaglibCreationException extends Exception {
+    private static class TaglibGettingException extends Exception {
 
-        public TaglibCreationException(String message, Throwable cause) {
+        public TaglibGettingException(String message, Throwable cause) {
             super(message, cause);
         }
 
-        public TaglibCreationException(String message) {
+        public TaglibGettingException(String message) {
             super(message);
         }
         

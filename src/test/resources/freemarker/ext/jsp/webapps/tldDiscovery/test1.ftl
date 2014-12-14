@@ -71,6 +71,9 @@ ${JspTaglibs["http://java.sun.com/jsp/jstl/functions"].join(['a', 'b'], '+')}
   <@display.column property="maried" />
 </@display.table>
 
+<!-- Test loading from mapped relative URL -->
+<@JspTaglibs["/subdir/taglib"].simpletag />
+
 ${tl.reverse("abc")}
 ${tl.reverseInt(123)}
 ${tl.reverseIntRadix(123, 2)}

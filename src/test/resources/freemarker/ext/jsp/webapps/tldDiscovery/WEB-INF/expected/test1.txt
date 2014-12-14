@@ -128,6 +128,8 @@ a+b
 <td>Emma</td>
 <td>28</td>
 <td>true</td></tr></tbody></table>
+<!-- Test loading from mapped relative URL -->
+Executed TestSimpleTag2
 
 cba
 321

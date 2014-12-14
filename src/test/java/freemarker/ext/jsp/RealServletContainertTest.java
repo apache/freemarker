@@ -74,5 +74,10 @@ public class RealServletContainertTest extends WebAppTestCase {
             System.clearProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES);
         }
     }
+
+    @Test
+    public void tldDiscoveryRelative() throws Exception {
+        assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "subdir/test-rel.txt", "tester?view=subdir/test-rel.ftl");
+    }
     
 }
