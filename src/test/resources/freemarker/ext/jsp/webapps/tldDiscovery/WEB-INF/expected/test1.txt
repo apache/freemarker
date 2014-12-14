@@ -87,10 +87,10 @@ bar
 exit TestSimpleTag simpletag2
 exit TestSimpleTag simpletag1
 
-<!-- Test loading from JAR -->
+<!-- Test loading from web.xml-mapped JAR -->
 TestTag2.doStartTag() called here
 TestTag2.doEndTag() called here
-<!-- Test loading from autodeployed JAR -->
+<!-- Test loading from autodeployed WEB-INF/lib/*.jar -->
 TestTag3.doStartTag() called here
 TestTag3.doEndTag() called here
 <!-- Test loading from root-relative URL -->
@@ -105,10 +105,10 @@ Executed TestSimpleTag3
 <!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
 Executed TestSimpleTag2
 Executed TestSimpleTag3
-Executed TestSimpleTag3
-<!-- Test loading from "ClasspathTaglibJarPatterns", inherited from Jetty -->
+<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
 a+b
-<!-- Test loading from "ClasspathTaglibJarPatterns", set via init-param -->
+<!-- Test loading from "MetaInfTldSources", set via init-param -->
+Executed TestSimpleTag3
 <table>
 <thead>
 <tr>

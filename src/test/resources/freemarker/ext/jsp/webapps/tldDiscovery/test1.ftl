@@ -40,10 +40,10 @@ bar
 </@>
 </@>
 
-<!-- Test loading from JAR -->
+<!-- Test loading from web.xml-mapped JAR -->
 <#assign tl2 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-2"]>
 <@tl2.testtag></@>
-<!-- Test loading from autodeployed JAR -->
+<!-- Test loading from autodeployed WEB-INF/lib/*.jar -->
 <#assign tl3 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-foo"]>
 <@tl3.testtag></@>
 <!-- Test loading from root-relative URL -->
@@ -60,10 +60,10 @@ bar
 <!-- Test loading from FreemarkerServlet "ClasspathTlds" -->
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-1"].simpletag/>
 <@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-2"].simpletag/>
-<@JspTaglibs["http://freemarker.org/taglibs/test/ClassPathTlds-3"].simpletag/>
-<!-- Test loading from "ClasspathTaglibJarPatterns", inherited from Jetty -->
+<!-- Test loading from "MetaInfTldSources", inherited from Jetty -->
 ${JspTaglibs["http://java.sun.com/jsp/jstl/functions"].join(['a', 'b'], '+')}
-<!-- Test loading from "ClasspathTaglibJarPatterns", set via init-param -->
+<!-- Test loading from "MetaInfTldSources", set via init-param -->
+<@JspTaglibs["http://freemarker.org/taglibs/test/MetaInfTldSources-1"].simpletag/>
 <#assign display = JspTaglibs["http://displaytag.sf.net"]>
 <@display.table name="lsob">
   <@display.column property="name" />

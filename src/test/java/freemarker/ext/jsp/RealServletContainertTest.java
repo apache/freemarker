@@ -54,7 +54,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             // Because of emulateNoUrlToFileConversions = true it won't be able to list the directories, so:
             System.setProperty(
                     FreemarkerServlet.SYSTEM_PROPERTY_CLASSPATH_TLDS,
-                    "META-INF/tldDiscovery-ClassPathTlds-3.tld");
+                    "META-INF/tldDiscovery-MetaInfTldSources-1.tld");
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
             assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.ftl");
         } finally {
@@ -75,6 +75,24 @@ public class RealServletContainertTest extends WebAppTestCase {
         }
     }
 
+    /**
+     * Tests that (1) webInfPerLibJars still loads from WEB-INF/lib/*.jar, and (2) that
+     * {@link FreemarkerServlet#SYSTEM_PROPERTY_META_INF_TLD_SOURCES} indeed overrides the init-param, and that the
+     * Jetty container's JSTL jar-s will still be discovered.
+     */
+    @Test
+    public void tldDiscoveryNoClasspath() throws Exception {
+        try {
+            System.setProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES, "clear, webInfPerLibJars");
+            restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
+            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY,
+                    "test-noClasspath.txt", "tester?view=test-noClasspath.ftl");
+        } finally {
+            JspTestFreemarkerServlet.resetToDefaults();
+            System.clearProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES);
+        }
+    }
+    
     @Test
     public void tldDiscoveryRelative() throws Exception {
         assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "subdir/test-rel.txt", "tester?view=subdir/test-rel.ftl");
