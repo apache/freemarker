@@ -37,9 +37,9 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 + "..<@pa\n"
                 + "/><@pa>xxx</@>\n"
                 + "<@pa>{<@pa/> <@pa/>}</@>\n"
-                + "${curDirLine}<@argP p=curDirLine>${curDirLine}</@argP>${curDirLine}\n"
+                + "${curDirLine}<@argP p=curDirLine?string>${curDirLine}</@argP>${curDirLine}\n"
                 + "<#macro m p>(p=${p}){<#nested>}</#macro>\n"
-                + "${curDirLine}<@m p=curDirLine>${curDirLine}</@m>${curDirLine}");
+                + "${curDirLine}<@m p=curDirLine?string>${curDirLine}</@m>${curDirLine}");
         cfg.setTemplateLoader(tl);
     }
     
@@ -76,7 +76,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 + "[positions.ftl:3:3-3:14]xxx\n"
                 + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}\n"
                 + "-(p=5){-}-\n"
-                + "-(p=-){-}-"
+                + "-(p=7){-}-"
                 );
     }
     

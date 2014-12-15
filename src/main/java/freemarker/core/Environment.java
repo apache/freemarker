@@ -253,7 +253,11 @@ public final class Environment extends Configurable {
         int ln = instructionStack.size();
         if (ln == 0) return null;
         TemplateElement te = (TemplateElement) instructionStack.get(ln - 1);
-        return te instanceof UnifiedCall ? (UnifiedCall) te : null;
+        if (te instanceof UnifiedCall) return (UnifiedCall) te;
+        if (te instanceof Macro && ln > 1 && instructionStack.get(ln - 2) instanceof UnifiedCall) {
+            return (UnifiedCall) instructionStack.get(ln - 2);
+        }
+        return null;
     }
     
     /**
