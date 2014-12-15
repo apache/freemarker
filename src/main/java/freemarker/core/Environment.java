@@ -241,11 +241,9 @@ public final class Environment extends Configurable {
 
     /**
      * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
-     * executing custom directive. This method currently only works for custom directives (that is,
-     * {@link TemplateDirectiveModel} and {@link TemplateTransformModel} and macro calls), and when those are called
-     * from a template with the {@code <@...>} syntax. This should only be called from the
-     * {@link TemplateDirectiveModel} that was invoked with {@code <@...>}. Otherwise it might gives you a different
-     * result, like right now usually a {@code null}. 
+     * executing custom directive. This method currently only works calls made from templates with the {@code <@...>}
+     * syntax. This should only be called from the {@link TemplateDirectiveModel} that was invoked with {@code <@...>},
+     * otherwise it's return value is not defined by this API (it's usually {@code null}).
      * 
      * @since 2.3.22
      */

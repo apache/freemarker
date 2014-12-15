@@ -9,20 +9,20 @@ import freemarker.template.utility.ObjectFactory;
 
 /**
  * Gives information about the place where a directive is called from, also lets you attach a custom data object to that
- * place. Each directive call in a template has its own {@link DirectiveCallPlace} object (even if they all call the
+ * place. Each directive call in a template has its own {@link DirectiveCallPlace} object (even when they call the
  * same directive with the same parameters). The life cycle of the {@link DirectiveCallPlace} object is bound to the
- * {@link Template} object that contains the directive call. Hence, the {@link DirectiveCallPlace} objects and the
- * custom data you put into them is cached together with the {@link Template}-s (and they are normally cached - see
- * {@link Configuration#getTemplate(String)}). The custom data is normally initialized on demand, that is, when
- * directive call is first attempted, via {@link #getOrCreateCustomData(Object, ObjectFactory)}.
+ * {@link Template} object that contains the directive call. Hence, the {@link DirectiveCallPlace} object and the
+ * custom data you put into it is cached together with the {@link Template} (and templates are normally cached - see
+ * {@link Configuration#getTemplate(String)}). The custom data is normally initialized on demand, that is, when the
+ * directive call is first executed, via {@link #getOrCreateCustomData(Object, ObjectFactory)}.
  * 
  * <p>
  * <b>Don't implement this interface yourself</b>, as new methods can be added to it any time! It's only meant to be
  * implemented by the FreeMarker core.
  * 
  * <p>
- * This interface is currently only used for custom directive ({@link TemplateDirectiveModel},
- * {@link TemplateTransformModel}, and macro) calls.
+ * This interface is currently only used for custom directive calls (that is, a {@code <@...>} that calls a
+ * {@link TemplateDirectiveModel}, {@link TemplateTransformModel}, or a macro).
  * 
  * @see Environment#getCurrentDirectiveCallPlace()
  * 
@@ -49,20 +49,20 @@ public interface DirectiveCallPlace {
 
     /**
      * The 1-based column number of the last character of the directive call in the template source code, or -1 if it's
-     * not known.
+     * not known. If the directive has an end-tag ({@code </@...>}), then it points to the last character of that.
      */
     int getEndColumn();
 
     /**
      * The 1-based line number of the last character of the directive call in the template source code, or -1 if it's
-     * not known.
+     * not known. If the directive has an end-tag ({@code </@...>}), then it points to the last character of that.
      */
     int getEndLine();
 
     /**
      * Returns the custom data, or if that's {@code null}, then it creates and stores it in an atomic operation then
-     * returns it. This method is thread-safe, however, it doesn't ensure the thread safe (like synchronized) access to
-     * the custom data itself.
+     * returns it. This method is thread-safe, however, it doesn't ensure thread safe (like synchronized) access to the
+     * custom data itself.
      * 
      * <p>
      * This method will block other calls while the {@code objectFactory} is executing, thus, the object will be
@@ -90,9 +90,9 @@ public interface DirectiveCallPlace {
      *            {@link IdentityHashMap}, but then this feature would be slower, while {@code provierIdentity}
      *            mismatches aren't occurring in most applications.)
      * @param objectFactory
-     *            Called when the custom data was still {@code null} to create its initial. If can't be called because
-     *            it's {@code null}, then {@code null} will be returned as the custom data. The return value of
-     *            {@link ObjectFactory#createObject()} isn't allowed to be {@code null}.
+     *            Called when the custom data wasn't yet set, to create its initial value. If this parameter is
+     *            {@code null} and the custom data wasn't set yet, then {@code null} will be returned. The returned
+     *            value of {@link ObjectFactory#createObject()} can be any kind of object, but can't be {@code null}.
      * 
      * @return The current custom data object, or possibly {@code null} if there was no {@link ObjectFactory} provided.
      * 
@@ -103,15 +103,16 @@ public interface DirectiveCallPlace {
             throws CallPlaceCustomDataInitializationException;
 
     /**
-     * Tells if the nested content (body) can be safely cached, as it only depends on the template content and has no
-     * side-effects (other than writing to the output). Examples of cases that give {@code false}: {@code <@foo>Name: }
-     * <tt>${name}</tt>{@code</@foo>}, {@code <@foo>Name: <#if showIt>Joe</#if></@foo>}. Examples of cases that give
-     * {@code true}: {@code <@foo>Name: Joe</@foo>}, {@code <@foo />}. Note that we get {@code true} for no nested
-     * content, because that's equivalent with 0-length nested content in FTL.
+     * Tells if the nested content (the body) can be safely cached, as it only depends on the template content (not on
+     * variable values and such) and has no side-effects (other than writing to the output). Examples of cases that give
+     * {@code false}: {@code <@foo>Name: } <tt>${name}</tt>{@code</@foo>},
+     * {@code <@foo>Name: <#if showIt>Joe</#if></@foo>}. Examples of cases that give {@code true}:
+     * {@code <@foo>Name: Joe</@foo>}, {@code <@foo />}. Note that we get {@code true} for no nested content, because
+     * that's equivalent with 0-length nested content in FTL.
      * 
      * <p>
-     * This method returns a pessimistic result. For example, if it sees a custom directive call, it won't be able to
-     * tell what it does, so it will assume that it's not cacheable.
+     * This method returns a pessimistic result. For example, if it sees a custom directive call, it can't know what it
+     * does, so it will assume that it's not cacheable.
      */
     boolean isNestedOutputCacheable();
 
