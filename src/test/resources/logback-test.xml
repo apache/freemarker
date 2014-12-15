@@ -3,11 +3,12 @@
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5level %C{15}:%L - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level [%c] %C{20}:%L - %msg%n</pattern>
 		</encoder>
 	</appender>
 	
 	<logger name="org.eclipse.jetty" level="INFO" />
+    <logger name="org.eclipse.jetty.servlet.ServletHandler" level="ERROR" />
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />
