@@ -19,9 +19,11 @@ package freemarker.core;
 import freemarker.template.Template;
 
 /**
- * Objects that represent instructions or expressions
- * in the compiled tree representation of the template
- * all descend from this abstract base class.
+ * <b>Internal API - subject to change:</b> Represent a node in the parsed template (either a {@link Expression} or a
+ * {@link TemplateElement}).
+ * 
+ * @see TemplateElement
+ * @see Expression
  */
 public abstract class TemplateObject {
     

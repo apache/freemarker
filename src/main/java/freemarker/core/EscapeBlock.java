@@ -90,5 +90,9 @@ class EscapeBlock extends TemplateElement {
         default: throw new IndexOutOfBoundsException();
         }
     }    
+
+    boolean isOutputCacheable() {
+        return true;
+    }
     
 }

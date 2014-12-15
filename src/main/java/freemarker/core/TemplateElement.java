@@ -29,9 +29,10 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateSequenceModel;
 
 /**
- * Objects that represent elements in the compiled 
- * tree representation of the template necessarily 
- * descend from this abstract class.
+ * <b>Internal API - subject to change:</b> Represent directive call, interpolation, text block, or other such
+ * non-expression node in the parsed template. Some information that can be found here can be accessed through the
+ * {@link Environment#getCurrentDirectiveCallPlace()}, which a published API, and thus promises backward
+ * compatibility.
  */
 abstract public class TemplateElement extends TemplateObject {
 
@@ -368,6 +369,14 @@ abstract public class TemplateElement extends TemplateObject {
         return te;
     }
 
+    /**
+     * Tells if executing this element has output that only depends on the template content and that has no side
+     * effects.
+     */
+    boolean isOutputCacheable() {
+        return false;
+    }
+    
     /**
      * determines whether this element's presence on a line 
      * indicates that we should not strip opening whitespace

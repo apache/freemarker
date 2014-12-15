@@ -29,17 +29,21 @@ import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateTransformModel;
+import freemarker.template.utility.ObjectFactory;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An element for the unified macro/transform syntax. 
  */
-final class UnifiedCall extends TemplateElement {
+final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     private Expression nameExp;
     private Map namedArgs;
     private List positionalArgs, bodyParameterNames;
     boolean legacySyntax;
     private transient volatile SoftReference/*List<Map.Entry<String,Expression>>*/ sortedNamedArgsCache;
+    // Java 5: Use double check locking with volatile
+    private CustomDataHolder customDataHolder;
 
     UnifiedCall(Expression nameExp,
          Map namedArgs,
@@ -236,6 +240,66 @@ final class UnifiedCall extends TemplateElement {
         sortedNamedArgsCache = new SoftReference(res);
         return res;
     }
+
+    public Object getOrCreateCustomData(Object provierIdentity, ObjectFactory objectFactory)
+            throws CallPlaceCustomDataInitializationException {
+        // We are using double-checked locking, utilizing Java 5 memory model "final" trick.
+        
+        CustomDataHolder customDataHolder = this.customDataHolder;  // Findbugs false alarm
+        if (customDataHolder == null) {  // Findbugs false alarm
+            synchronized (this) {
+                customDataHolder = this.customDataHolder;
+                if (customDataHolder == null || customDataHolder.providerIdentity != provierIdentity) {
+                    if (customDataHolder == null) {
+                        try {
+                            Class.forName("java.util.concurrent.atomic.AtomicInteger");
+                        } catch (ClassNotFoundException e) {
+                            throw new CallPlaceCustomDataInitializationException("Feature requires at least Java 5", e);
+                        }
+                    }
+                    
+                    customDataHolder = createNewCustomData(provierIdentity, objectFactory);
+                    this.customDataHolder = customDataHolder; 
+                }
+            }
+        }
+        
+        if (customDataHolder.providerIdentity != provierIdentity) {
+            synchronized (this) {
+                customDataHolder = this.customDataHolder;
+                if (customDataHolder == null || customDataHolder.providerIdentity != provierIdentity) {
+                    customDataHolder = createNewCustomData(provierIdentity, objectFactory);
+                    this.customDataHolder = customDataHolder;
+                }
+            }
+        }
+        
+        return customDataHolder.customData;
+    }
+
+    protected CustomDataHolder createNewCustomData(Object provierIdentity, ObjectFactory objectFactory)
+            throws CallPlaceCustomDataInitializationException {
+        CustomDataHolder customDataHolder;
+        Object customData;
+        try {
+            customData = objectFactory.createObject();
+        } catch (Exception e) {
+            throw new CallPlaceCustomDataInitializationException(
+                    "Failed to initialize custom data for provider identity "
+                    + StringUtil.tryToString(provierIdentity) + " via factory "
+                    + StringUtil.tryToString(objectFactory), e);
+        }
+        if (customData == null) {
+            throw new NullPointerException("ObjectFactory.createObject() has returned null");
+        }
+        customDataHolder = new CustomDataHolder(provierIdentity, customData);
+        return customDataHolder;
+    }
+
+    public boolean isNestedOutputCacheable() {
+        if (nestedBlock == null) return true;
+        return nestedBlock.isOutputCacheable();
+    }
     
 /*
     //REVISIT
@@ -247,4 +311,20 @@ final class UnifiedCall extends TemplateElement {
     boolean heedsTrailingWhitespace() {
         return nestedBlock == null;
     }*/
+    
+    /**
+     * Used for implementing double check locking in implementing the
+     * {@link DirectiveCallPlace#getOrCreateCustomData(Object, ObjectFactory)}.
+     */
+    private static class CustomDataHolder {
+        
+        private final Object providerIdentity;
+        private final Object customData;
+        public CustomDataHolder(Object providerIdentity, Object customData) {
+            this.providerIdentity = providerIdentity;
+            this.customData = customData;
+        }
+        
+    }
+    
 }

@@ -238,6 +238,25 @@ public final class Environment extends Configurable {
         int ln = instructionStack.size();
         return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
+
+    /**
+     * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
+     * executing custom directive. This method currently only works for custom directives (
+     * {@link TemplateDirectiveModel} and {@link TemplateTransformModel}) and macro calls, though later it might change.
+     * This meant to be called from {@link TemplateDirectiveModel}-s to access information about the called of the
+     * directive.
+     * 
+     * @since 2.3.22
+     */
+    public DirectiveCallPlace getCurrentDirectiveCallPlace() {
+        for (int i = instructionStack.size() -1; i >= 0; i--) {
+            TemplateElement te = (TemplateElement) instructionStack.get(i);
+            if (te instanceof UnifiedCall) {
+                return (UnifiedCall) te;
+            }
+        }
+        return null;
+    }
     
     /**
      * Deletes cached values that meant to be valid only during a single
