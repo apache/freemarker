@@ -3,12 +3,11 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -17,13 +16,14 @@ import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.ObjectFactory;
 import freemarker.test.TemplateTest;
 
 public class DirectiveCallPlaceTest extends TemplateTest {
     
-    private final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-    {
+    private static final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+    static {
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate(
                 "customDataBasics.ftl",
@@ -35,7 +35,13 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 "positions.ftl",
                 "<@pa />\n"
                 + "..<@pa\n"
-                + "/><@pa>xxx</@>");
+                + "/><@pa>xxx</@>\n"
+                + "<@pa>{<@pa/> <@pa/>}</@>");
+        tl.putTemplate(
+                "callPlaceAvilability.ftl",
+                "<#macro m><#nested></#macro>"
+                + "${curDirLine}<@dummy>${curDirLine}<#if true>${curDirLine}</#if></@dummy>${curDirLine}\n"
+                + "<@m>${curDirLine}</@m>${curDirLine}");
         cfg.setTemplateLoader(tl);
     }
     
@@ -69,18 +75,31 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 "positions.ftl",
                 "[positions.ftl:1:1-1:7]"
                 + "..[positions.ftl:2:3-3:2]"
-                + "[positions.ftl:3:3-3:14]"
+                + "[positions.ftl:3:3-3:14]xxx\n"
+                + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}"
                 );
+    }
+    
+    @Test
+    public void testCallPlaceAvilability() throws IOException, TemplateException {
+        setConfiguration(cfg);
+        assertOutputForNamed(
+                "callPlaceAvilability.ftl",
+                "[-][1][1][-]\n"
+                + "[2][-]");
     }
     
     @SuppressWarnings("boxing")
     @Override
     protected Object createDataModel() {
-        return ImmutableMap.<String, Object>of(
-                "uc", new CachingUpperCaseDirective(),
-                "lc", new CachingLowerCaseDirective(),
-                "pa", new PositionAwareDirective(),
-                "x", 123);
+        Map<String, Object> dm = new HashMap<String, Object>();
+        dm.put("uc", new CachingUpperCaseDirective());
+        dm.put("lc", new CachingLowerCaseDirective());
+        dm.put("pa", new PositionAwareDirective());
+        dm.put("dummy", new DummyDirective());
+        dm.put("curDirLine", new CurDirLineScalar());
+        dm.put("x", 123);
+        return dm;
     }
 
     private abstract static class CachingTextConverterDirective implements TemplateDirectiveModel {
@@ -168,22 +187,46 @@ public class DirectiveCallPlaceTest extends TemplateTest {
 
         public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                 throws TemplateException, IOException {
-            Writer w = env.getOut();
+            Writer out = env.getOut();
             DirectiveCallPlace callPlace = env.getCurrentDirectiveCallPlace();
-            w.write("[");
-            w.write(callPlace.getTemplate().getName());
-            w.write(":");
-            w.write(Integer.toString(callPlace.getBeginLine()));
-            w.write(":");
-            w.write(Integer.toString(callPlace.getBeginColumn()));
-            w.write("-");
-            w.write(Integer.toString(callPlace.getEndLine()));
-            w.write(":");
-            w.write(Integer.toString(callPlace.getEndColumn()));
-            w.write("]");
+            out.write("[");
+            out.write(callPlace.getTemplate().getName());
+            out.write(":");
+            out.write(Integer.toString(callPlace.getBeginLine()));
+            out.write(":");
+            out.write(Integer.toString(callPlace.getBeginColumn()));
+            out.write("-");
+            out.write(Integer.toString(callPlace.getEndLine()));
+            out.write(":");
+            out.write(Integer.toString(callPlace.getEndColumn()));
+            out.write("]");
+            if (body != null) {
+                body.render(out);
+            }
+        }
+        
+    }
+
+    private static class DummyDirective implements TemplateDirectiveModel {
+
+        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+                throws TemplateException, IOException {
+            if (body != null) {
+                body.render(env.getOut());
+            }
         }
         
     }
     
+    private static class CurDirLineScalar implements TemplateScalarModel {
+
+        public String getAsString() throws TemplateModelException {
+            DirectiveCallPlace callPlace = Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace();
+            return callPlace != null
+                    ? "[" + Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace().getBeginLine() + "]"
+                    : "[-]";
+        }
+        
+    }
 
 }
