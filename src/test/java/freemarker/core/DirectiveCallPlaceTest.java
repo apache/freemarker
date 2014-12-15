@@ -2,6 +2,7 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,11 +26,16 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     {
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate(
-                "customDataBasics",
-                "<@uc>Abc</@uc> <@uc>x=${x}</@uc> <@uc>Ab<#-- -->c</@uc>");
+                "customDataBasics.ftl",
+                "<@uc>Abc</@uc> <@uc>x=${x}</@uc> <@uc>Ab<#-- -->c</@uc> <@lc/><@lc></@lc> <@lc>Abc</@lc>");
         tl.putTemplate(
-                "customDataProviderMismatch",
+                "customDataProviderMismatch.ftl",
                 "<#list [uc, lc, uc] as d><#list 1..2 as _><@d>Abc</@d></#list></#list>");
+        tl.putTemplate(
+                "positions.ftl",
+                "<@pa />\n"
+                + "..<@pa\n"
+                + "/><@pa>xxx</@>");
         cfg.setTemplateLoader(tl);
     }
     
@@ -39,8 +45,8 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         CachingTextConverterDirective.resetCacheRecreationCount();
         for (int i = 0; i < 3; i++) {
             assertOutputForNamed(
-                    "customDataBasics",
-                    "ABC[cached 1] X=123 ABC[cached 2]");
+                    "customDataBasics.ftl",
+                    "ABC[cached 1] X=123 ABC[cached 2]  abc[cached 3]");
         }
     }
 
@@ -49,11 +55,22 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         setConfiguration(cfg);
         CachingTextConverterDirective.resetCacheRecreationCount();
         assertOutputForNamed(
-                "customDataProviderMismatch",
+                "customDataProviderMismatch.ftl",
                 "ABC[cached 1]ABC[cached 1]abc[cached 2]abc[cached 2]ABC[cached 3]ABC[cached 3]");
         assertOutputForNamed(
-                "customDataProviderMismatch",
+                "customDataProviderMismatch.ftl",
                 "ABC[cached 3]ABC[cached 3]abc[cached 4]abc[cached 4]ABC[cached 5]ABC[cached 5]");
+    }
+    
+    @Test
+    public void testPositions() throws IOException, TemplateException {
+        setConfiguration(cfg);
+        assertOutputForNamed(
+                "positions.ftl",
+                "[positions.ftl:1:1-1:7]"
+                + "..[positions.ftl:2:3-3:2]"
+                + "[positions.ftl:3:3-3:14]"
+                );
     }
     
     @SuppressWarnings("boxing")
@@ -62,6 +79,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         return ImmutableMap.<String, Object>of(
                 "uc", new CachingUpperCaseDirective(),
                 "lc", new CachingLowerCaseDirective(),
+                "pa", new PositionAwareDirective(),
                 "x", 123);
     }
 
@@ -145,5 +163,27 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         }
         
     }
+    
+    private static class PositionAwareDirective implements TemplateDirectiveModel {
+
+        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+                throws TemplateException, IOException {
+            Writer w = env.getOut();
+            DirectiveCallPlace callPlace = env.getCurrentDirectiveCallPlace();
+            w.write("[");
+            w.write(callPlace.getTemplate().getName());
+            w.write(":");
+            w.write(Integer.toString(callPlace.getBeginLine()));
+            w.write(":");
+            w.write(Integer.toString(callPlace.getBeginColumn()));
+            w.write("-");
+            w.write(Integer.toString(callPlace.getEndLine()));
+            w.write(":");
+            w.write(Integer.toString(callPlace.getEndColumn()));
+            w.write("]");
+        }
+        
+    }
+    
 
 }
