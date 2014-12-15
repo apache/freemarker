@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.21</subtitle>
+  <subtitle>For FreeMarker 2.3.22-nightly</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -8648,40 +8648,52 @@ TemplateHashModel roundingModeEnums =
           <primary>logging</primary>
         </indexterm>
 
-        <para>FreeMarker integrates with the following logging packages: <link
-        xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
+        <indexterm>
+          <primary>SLF4J</primary>
+        </indexterm>
+
+        <para>FreeMarker integrates with the following logging libraries:
+        <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
         xlink:href="http://commons.apache.org/logging/">Apache Commons
         Logging</link>, <link
-        xlink:href="http://jakarta.apache.org/log4j">Log4J</link>, <link
+        xlink:href="http://jakarta.apache.org/log4j">Log4J</link> 1.x, <link
         xlink:href="http://jakarta.apache.org/avalon/logkit">Avalon
         LogKit</link>, and <link
         xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
-        By default, FreeMarker will look for the following logging packages in
-        this order, and will automatically use the first package it finds:
-        <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
-        </remark>Log4J, Avalon, <literal>java.util.logging</literal>. However,
-        if you call the static <literal>selectLoggerLibrary</literal> method
-        on the <literal>freemarker.log.Logger</literal> class with appropriate
-        parameter and <emphasis>before using any FreeMarker classes that log
-        messages</emphasis>, you can explicitly select a logger package, or
-        even disable the logging. See the API documentation for more
-        details.</para>
+        By default, FreeMarker will look for the these logging libraries in
+        the following order, and will automatically use the first one it
+        finds: <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
+        </remark>Log4J (will use SLF4J instead if it's a properly installed
+        <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache Avalon
+        LogKit, <literal>java.util.logging</literal>.</para>
 
-        <note>
-          <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging
-          aren't searched automatically due to backward compatibility
-          constraints, so to use one of them you must do this:</para>
+        <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging aren't
+        searched automatically due to backward compatibility constraints. But
+        if you have <literal>log4j-over-slf4j</literal> properly installed
+        (means, you have no real Log4j in your class path, and SLF4J has a
+        backing implementation like <literal>logback-classic</literal>), then
+        FreeMarker will use SLF4J directly instead of Log4j (since FreeMarker
+        2.3.22).</para>
 
-          <programlisting role="unspecified">import freemarker.log.Logger;
-...
-    // IMPORTANT: This should be executed before using other FreeMarker classes!
-    Logger.selectLoggerLibrary(Logger.LIBRARY_SLF4J);  // or Logger.LIBRARY_COMMONS
-...</programlisting>
+        <para>If the auto detection doesn't give you the result that you want,
+        you can set the <literal>org.freemarker.loggerLibrary</literal> system
+        property to select a logger library explicitly (since 2.3.22),
+        like:</para>
 
-          <para>Doing this is recommended, because starting from 2.4 SLF4J
-          will be used by default if present, otherwise Apache Commons Logging
-          if present, otherwise Log4J if present, etc.</para>
-        </note>
+        <programlisting role="unspecified">java <replaceable>...</replaceable> -Dorg.freemarker.loggerLibrary=SLF4J</programlisting>
+
+        <para>The supported system property values are:
+        <literal>SLF4J</literal>, <literal>CommonsLogging</literal>,
+        <literal>JUL</literal> (for <literal>java.util.logging</literal>),
+        <literal>Avalon</literal>, <literal>auto</literal> (the default
+        behavior), <literal>none</literal> (disables logging).</para>
+
+        <para>Note that for reliable operation, the system property should be
+        set when the JVM starts (like above), not later from Java code.</para>
+
+        <para>Using SLF4J is recommended, as it works best with FreeMarker,
+        and also because it will be the highest priority auto detected logger
+        starting from FreeMarker 2.4 anyway.</para>
 
         <para>All log messages produced by FreeMarker are logged into the
         logger hierarchy whose top-level logger is named
@@ -8690,7 +8702,7 @@ TemplateHashModel roundingModeEnums =
         <informaltable border="1">
           <thead>
             <tr>
-              <th>Logger name</th>
+              <th>Log category name</th>
 
               <th>Purpose</th>
             </tr>
@@ -8741,17 +8753,6 @@ TemplateHashModel roundingModeEnums =
             </tr>
           </tbody>
         </informaltable>
-
-        <para>You can call the static <literal>selectLoggerLibrary</literal>
-        method on the <literal>freemarker.log.Logger</literal> class and pass
-        it a string that will be used to prefix the above mentioned logger
-        names. This is useful if you want to have separate loggers on a
-        per-web-application basis (assuming the application uses its own local
-        <literal>freemarker.jar</literal>). Also, you can disable logging with
-        <literal>Logger.selectLoggerLibrary(Logger.LIBRARY_NONE)</literal>. In
-        any case, <literal>selectLoggerLibrary</literal> must be called early,
-        before FreeMarker could log anything, or else it will not have
-        (consistent) effect.</para>
       </section>
 
       <section xml:id="pgui_misc_servlet">
@@ -8875,6 +8876,10 @@ TemplateHashModel roundingModeEnums =
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;
     &lt;param-value&gt;UTF-8&lt;/param-value&gt; &lt;!-- The encoding of the template files. --&gt;
+  &lt;/init-param&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;locale&lt;/param-name&gt;
+    &lt;param-value&gt;en_US&lt;/param-value&gt; &lt;!-- Influences number and date/time formatting, etc. --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;number_format&lt;/param-name&gt;
@@ -9022,8 +9027,8 @@ TemplateHashModel roundingModeEnums =
           <para><literal>FreemarkerServlet</literal> has various init-params.
           It can be set up to load templates from an arbitrary directory, from
           the classpath, or relative to the Web application directory. You can
-          set the charset used for templates. You can set up what object
-          wrapper do you want to use. Etc.</para>
+          set the charset used for templates, the default locale used by
+          templates, what object wrapper do you want to use, etc.</para>
 
           <para><literal>FreemarkerServlet</literal> is easily tailored to
           special needs through subclassing. Say, if you need to have
@@ -9166,44 +9171,101 @@ TemplateHashModel roundingModeEnums =
             <primary>taglib</primary>
           </indexterm>
 
-          <para><literal>FreemarkerServlet</literal> puts a hash
-          <literal>JspTaglibs</literal> into the data-model, what you can use
-          to access JSP taglibs. The JSP custom tags will be accessible as
-          plain user-defined directives. For example, this is a JSP file that
-          uses some Struts tags:</para>
+          <para><literal>FreemarkerServlet</literal> puts the
+          <literal>JspTaglibs</literal> hash into the data-model, which you
+          can use to access JSP taglibs. The JSP custom tags will be
+          accessible as plain user-defined directives, and the custom EL
+          functions (since FreeMarker 2.3.22) as methods. For example, for
+          this JSP file:</para>
 
-          <programlisting role="template">&lt;%@page contentType="text/html;charset=ISO-8859-2" language="java"%&gt;
-&lt;%@taglib uri="/WEB-INF/struts-html.tld" prefix="html"%&gt;
-&lt;%@taglib uri="/WEB-INF/struts-bean.tld" prefix="bean"%&gt;
+          <programlisting role="template">&lt;%@ page contentType="text/html;charset=ISO-8859-2" language="java"%&gt;
+&lt;%@ taglib prefix="e" uri="/WEB-INF/example.tld" %&gt;
+&lt;%@ taglib prefix="oe" uri="/WEB-INF/other-example.tld" %&gt;
+&lt;%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %&gt;
+&lt;%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %&gt;
 
-&lt;html&gt;
-  &lt;body&gt;
-    &lt;h1&gt;&lt;bean:message key="welcome.title"/&gt;&lt;/h1&gt;
-    &lt;html:errors/&gt;
-    &lt;html:form action="/query"&gt;
-      Keyword: &lt;html:text property="keyword"/&gt;&lt;br&gt;
-      Exclude: &lt;html:text property="exclude"/&gt;&lt;br&gt;
-      &lt;html:submit value="Send"/&gt;
-    &lt;/html:form&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</programlisting>
+&lt;%-- Custom JSP tags and functions: --%&gt;
 
-          <para>And this is the (near) equivalent FTL:</para>
+&lt;e:someTag numParam="123" boolParam="true" strParam="Example" anotherParam="${someVar}"&gt;
+  ...
+&lt;/e:someTag&gt;
 
-          <programlisting role="template">&lt;#assign html=JspTaglibs["/WEB-INF/struts-html.tld"]&gt;
-&lt;#assign bean=JspTaglibs["/WEB-INF/struts-bean.tld"]&gt;
+&lt;oe:otherTag /&gt;
 
-&lt;html&gt;
-  &lt;body&gt;
-    &lt;h1&gt;&lt;@bean.message key="welcome.title"/&gt;&lt;/h1&gt;
-    &lt;@html.errors/&gt;
-    &lt;@html.form action="/query"&gt;
-      Keyword: &lt;@html.text property="keyword"/&gt;&lt;br&gt;
-      Exclude: &lt;@html.text property="exclude"/&gt;&lt;br&gt;
-      &lt;@html.submit value="Send"/&gt;
-    &lt;/@html.form&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</programlisting>
+${e:someELFunction(1, 2)}
+
+
+&lt;%-- JSTL: --%&gt;
+
+&lt;c:if test="${foo}"&gt;
+  Do this
+&lt;/c:if&gt;
+
+&lt;c:choose&gt;
+  &lt;c:when test="${x == 1}"&gt;
+      Do this
+  &lt;/c:when&gt;
+  &lt;c:otherwise&gt;
+      Do that
+  &lt;/c:otherwise&gt;
+&lt;/c:choose&gt;
+
+&lt;c:forEach var="person" items="${persons}"&gt;
+  ${person.name}
+&lt;/c:forEach&gt;
+
+${fn:trim(bar)}</programlisting>
+
+          <para>the about equivalent FTL is:</para>
+
+          <programlisting role="template">&lt;#assign e=JspTaglibs["/WEB-INF/example.tld"]&gt;
+&lt;#assign oe=JspTaglibs["/WEB-INF/other-example.tld"]&gt;
+
+&lt;#-- Custom JSP tags and functions: --#&gt;
+
+&lt;@e.someTag numParam=123 boolParam=true strParam="Example" anotherParam=someVar&gt;
+  ...
+&lt;/@e.someTag&gt;
+
+&lt;@oe.otherTag /&gt;
+
+${e.someELFunction(1, 2)}
+
+
+&lt;#-- JSTL - Instead, use native FTL constructs: --&gt;
+
+&lt;#if foo&gt;
+  Do this
+&lt;/#if&gt;
+
+&lt;#if x == 1&gt;
+  Do this
+&lt;#else&gt;
+  Do that
+&lt;/#if&gt;
+
+&lt;#list persons as person&gt;
+  ${person.name}
+&lt;/#list&gt;
+
+${bar?trim}</programlisting>
+
+          <note>
+            <para>Parameter values don't use quotation and
+            <literal>"${<replaceable>...</replaceable>}"</literal> like in
+            JSP. See more explanation later.</para>
+          </note>
+
+          <note>
+            <para><literal>JspTaglibs</literal> is not a core FreeMarker
+            feature; it only exists when the template is called through the
+            <literal>FreemarkerServlet</literal>. That's because JSP
+            tags/functions assume a servlet environment (FreeMarker doesn't),
+            plus some Servlet concepts have to be emulated in the special
+            FreeMarker data-model that <literal>FreemarkerServlet</literal>
+            builds. Many modern frameworks use FreeMarker on a pure way, not
+            through <literal>FreemarkerServlet</literal>.</para>
+          </note>
 
           <para>Since JSP custom tags are written to operate in JSP
           environment, they assume that variables (often referred as ``beans''
@@ -9243,7 +9305,7 @@ TemplateHashModel roundingModeEnums =
           page="/layout.ftl" flush=true/&gt;</literal>), or they are
           interpreted as string values, and this will cause a type mismatch
           error when FreeMarker tries to pass the value to the custom tag that
-          expects non-string value. Also note, that naturally, you can use any
+          expects non-string value. Also note that, naturally, you can use any
           FTL expression as attribute value, such as variables, calculated
           values, etc. (e.g. <literal>&lt;@tiles.insert page=layoutName
           flush=foo &amp;&amp; bar/&gt;</literal>).</para>
@@ -9285,6 +9347,30 @@ TemplateHashModel roundingModeEnums =
           JSP tags <emphasis>implemented</emphasis> in JSP language). The tag
           files had to be compiled to Java classes to be usable under
           FreeMarker.</para>
+
+          <para><literal>JspTaglibs[<replaceable>uri</replaceable>]</literal>
+          will have to find the TLD for the URI specified, just like JSP's
+          <literal>@taglib</literal> directive has to. For this, it implements
+          the TLD discovery mechanism described in the JSP specification. See
+          more there, but in a nutshell, it searches TLD-s in
+          <literal>WEB-INF/web.xml</literal> <literal>taglib</literal>
+          elements, at <literal>WEB-INF/**/*.tld</literal>, and in
+          <literal>WEB-INF/lib/*.{jar,zip}/META-INF/**/*.tld</literal>.
+          Additionally, it can discover TLD-s that are visible for the class
+          loader even if they are outside the WAR structure, when you set that
+          up with the <literal>MetaInfTldSources</literal> and/or
+          <literal>ClasspathTlds</literal>
+          <literal>FreemarkerServlet</literal> init-params (since 2.3.22). See
+          the Java API documentation of <literal>FreemarkerServlet</literal>
+          for the description of these. It's also possible to set these from
+          Java system properties, which can be handy when you want to change
+          these in the Eclipse run configuration without modifying the
+          <literal>web.xml</literal>; again, see the
+          <literal>FreemarkerServlet</literal> API docs.
+          <literal>FreemarkerServlet</literal> also recognizes the
+          <literal>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</literal>
+          servlet context attribute, and adds the entries from it to
+          <literal>MetaInfTldSources</literal>.</para>
         </section>
 
         <section>
@@ -11271,8 +11357,8 @@ foobar</programlisting>
             <para>This built-in is available since FreeMarker 2.3.21.</para>
           </note>
 
-          <para>Removes the parameter substring from the beginning of the
-          string, or returns the original string if it doesn't start with the
+          <para>Removes the parameter substring from the ending of the string,
+          or returns the original string if it doesn't start with the
           parameter substring. For example:</para>
 
           <programlisting role="template">${"abcdef"?remove_ending("def")}
@@ -16074,15 +16160,22 @@ or
             </listitem>
 
             <listitem>
-              <para><literal><replaceable>paramN</replaceable></literal>, the
-              last parameter, may optionally include a trailing ellipsis
+              <para><indexterm>
+                  <primary>catch-all parameter</primary>
+                </indexterm><indexterm>
+                  <primary>variable number of parameters</primary>
+                </indexterm><literal><replaceable>paramN</replaceable></literal>,
+              the last parameter may optionally has 3 trailing dots
               (<literal>...</literal>), which indicates the macro takes a
-              variable number of parameters. If called using named parameters,
+              variable number of parameters and the parameters that doesn't
+              match any other parameters will be collected in this last
+              parameter (also called the catch-all parameter). When the macro
+              is called with named parameters,
               <literal><replaceable>paramN</replaceable></literal> will be a
               hash containing all of the undeclared key/value pairs passed to
-              the macro. If called using positional parameters,
-              <literal><replaceable>paramN</replaceable></literal> will be a
-              sequence of the extra parameters.</para>
+              the macro. When the macro is called using positional parameters,
+              <literal><replaceable>paramN</replaceable></literal> will be the
+              sequence of the extra parameter values.</para>
             </listitem>
 
             <listitem>
@@ -16229,6 +16322,42 @@ or
     height="50"
     width="100"
   &gt;</programlisting>
+
+          <para>Example: A macro with that supports a variable number of
+          positional parameters, regardless if it uses named or positional
+          parameter passing:</para>
+
+          <programlisting role="template">&lt;#macro m a b ext...&gt;
+  a = ${a}
+  b = ${b}
+  &lt;#if ext?is_enumerable&gt;
+    &lt;#list ext as e&gt;
+      ${e_index} = ${e}
+    &lt;/#list&gt;
+  &lt;#else&gt;
+    &lt;#list ext?keys as k&gt;
+      ${k} = ${ext[k]}
+    &lt;/#list&gt;
+  &lt;/#if&gt;
+&lt;/#macro&gt;
+
+&lt;@m 1 2 3 4 5 /&gt;
+
+&lt;@m a=1 b=2 c=3 d=4 e=5 /&gt;</programlisting>
+
+          <para>Output:</para>
+
+          <programlisting role="output">  a = 1
+  b = 2
+      0 = 3
+      1 = 4
+      2 = 5
+
+  a = 1
+  b = 2
+      d = 4
+      e = 5
+      c = 3</programlisting>
 
           <section>
             <title>nested</title>
@@ -16512,8 +16641,19 @@ or
                 </indexterm><literal>boolean_format</literal>: The
               comma-separated pair of strings for representing true and false
               values respectively that is used to convert booleans to strings
-              when no explicit format is specified. Default value is
-              <literal>"true,false"</literal>. See also:<link
+              when no explicit format is specified (like in
+              <literal>${<replaceable>booleanValue</replaceable>}</literal>).
+              Note that currently white space isn't removed from this string,
+              so don't put space after the comma. Default value is
+              <literal>"true,false"</literal>, but FreeMarker will deny using
+              that particular value for
+              <literal>${<replaceable>booleanValue</replaceable>}</literal>,
+              and requires using
+              <literal>${<replaceable>booleanValue</replaceable>?c}</literal>
+              instead (this works since 2.3.21). For any other value, like
+              <literal>"Y,N"</literal>,
+              <literal>${<replaceable>booleanValue</replaceable>}</literal>
+              will work. See also:<link
               linkend="ref_builtin_string_for_boolean"><literal>string</literal>
               built-in</link>.</para>
             </listitem>
@@ -21407,19 +21547,259 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_22">
+        <title>2.3.22</title>
+
+        <para>Date of release: FIXME</para>
+
+        <para>Note that since 2.3.22 is designed to be fully backward
+        compatible with the previous 2.3.x releases, <emphasis>some of the
+        improvements and fixes described below are only activated when you
+        specifically ask for 2.3.22 <quote>incompatible
+        improvements</quote></emphasis>, because they could, with very small
+        chance, break existing applications. (See how to set that <link
+        linkend="versions_2_3_21">here...</link>)</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para/>
+            </listitem>
+
+            <listitem>
+              <para/>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>FreemarkerServlet</literal> improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>FreemarkerServlet</literal> now supports
+                  custom JSP EL functions (defined in TLD-s with
+                  <literal>function</literal> XML elements). Earlier it has
+                  ignored them. The custom EL function can be called like a
+                  Java method, for example: <literal>&lt;#assign
+                  u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ...
+                  ${u.truncate(title, 25)}</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>RFE resolved [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/feature-requests/113/">113</link>]
+                  [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/feature-requests/114/">114</link>]:
+                  <literal>FreemarkerServlet</literal> can now discover
+                  <literal>META-INF/**/*.tld</literal>-s that are visible for
+                  the class loader but aren't in
+                  <literal>WEB-INF/lib/*.jar</literal>-s. For this feature to
+                  be active, you must setup the extra TLD lookup with the
+                  <literal>MetaInfTldSources</literal> and/or
+                  <literal>ClasspathTlds</literal>
+                  <literal>FreemarkerServlet</literal> init-params (see the
+                  Java API documentation of
+                  <literal>FreemarkerServlet</literal> for the description of
+                  these). For example, if you run your application from
+                  Eclipse with an embedded Servlet container, and thus the tag
+                  library jar-s aren't on the standard locations but are in
+                  the classpath like any other dependencies, now you can just
+                  write:</para>
+
+                  <programlisting role="unspecified">&lt;init-param&gt;
+  &lt;param-name&gt;MetaInfTldSources&lt;/param-name&gt;
+  &lt;param-value&gt;classpath&lt;/param-value&gt;
+&lt;/init-param&gt;</programlisting>
+
+                  <para>and then all the <literal>META-INF</literal>
+                  directories that are visible for the class loader will be
+                  searched for TLD-s.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>MetaInfTldSources</literal> and
+                  <literal>ClasspathTlds</literal> can also be appended to or
+                  replaced by the values of Java system properties
+                  <literal>org.freemarker.jsp.metaInfTldSources</literal> and
+                  <literal>org.freemarker.jsp.classpathTlds</literal>,
+                  respectively. Thus one can adjust these in the Eclipse run
+                  configuration without modifying the
+                  <literal>web.xml</literal>. (See the Java API documentation
+                  of <literal>FreemarkerServlet</literal> for more.)</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>FreemarkerServlet</literal> now recognizes
+                  the
+                  <literal>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</literal>
+                  servlet context attribute, add entries to
+                  <literal>MetaInfTldSources</literal> (introduced above) from
+                  it.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <literal>protected
+                  FreemarkerServlet.createTaglibFactory()</literal> to allow
+                  fine tuning the settings of the
+                  <literal>TaglibFactory</literal>. It now have a few setters,
+                  like <literal>setObjectWrapper</literal>,
+                  <literal>setMetaInfTldSource</literal>, etc.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Now <literal>*.tld</literal> files are
+                  searched in <literal>WEB-INF/</literal> and in all its
+                  subdirectories recursively. Earlier they were only searched
+                  directly under <literal>WEB-INF/</literal> and
+                  <literal>WEB-INF/lib/</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Unwanted behavior fixed: In case multiple TLD-s map to
+                  the same tag library URI, now
+                  <literal>WEB-INF/**/*.tld</literal>-s has priority over
+                  <literal>META-INF/**/*.tld</literal>-s coming from jar-s or
+                  classpath directories. Earlier, it was the other way around,
+                  except that <literal>META-INF/lib/*.tld</literal>-s could
+                  still take precedence randomly. While the JSP specification
+                  (2.2) explicitly states that the order is not defined and
+                  shouldn't be relied upon, it's just logical that if someone
+                  puts a TLD directly under <literal>WEB-INF</literal>, he
+                  meant that to be used in that particular web application,
+                  rather than the TLD-s coming from the dependency jars which
+                  are shared by multiple web applications.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Generally improved implementation quality at some
+                  parts (maintainability, error messages, performance bug
+                  fixes, test coverage).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Logging facility improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Just like earlier, when auto-selecting the logger
+                  library (the default behavior), FreeMarker choses Log4j if
+                  it's available. But now, if that turns out to be
+                  <literal>log4j-over-slf4j</literal>, FreeMarker will use
+                  SLF4J directly instead. (This fixes the issue where the
+                  logged location points to FreeMarker's log adapter class
+                  instead of the real call place.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>FreeMarker now recognizes the
+                  <literal>org.freemarker.loggerLibrary</literal> system
+                  property, which specifies which logger to use, like
+                  <literal>java <replaceable>...</replaceable>
+                  -Dorg.freemarker.loggerLibrary=SLF4J</literal>. This option
+                  deprecates
+                  <literal>Logger.selectLoggerLibrary(int)</literal> as that
+                  was inherently unreliable. The system property has
+                  precedence over
+                  <literal>selectLoggerLibrary</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Generally improved implementation quality (more info
+                  printed when something fails, etc.).</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Environment.getCurrentDirectiveCallPlace()</literal>,
+              which returns a <literal>DirectiveCallPlace</literal> object
+              when called from a custom directive (i.e., from
+              <literal>TemplateDirectiveModel.execute()</literal>). The
+              <literal>DirectiveCallPlace</literal> objects lets you query
+              where the directive was called from (template, line, column). It
+              also lets you associate an arbitrary object to the directive
+              invocation inside the template, which can be used for
+              call-place-bound caching (like the minification of non-dynamic
+              nested content). See <literal>DirectiveCallPlace</literal> in
+              the Java API documentation for more.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>TemplateMethodModelEx
+              BeansWrapper.wrap(Object object, Method method)</literal> for
+              wrapping methods without wrapping their parent object and
+              without going through overloaded method selection on invocation
+              time.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>Environment.getMainTemplate()</literal> and
+              <literal>Environment.getCurrentTemplate()</literal>. Deprecated
+              the ambiguous (and often broken: [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>])
+              <literal>Environment.getTemplate()</literal>. These can be
+              useful for directives and methods that are called from templates
+              to find out which template they were called from.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
+              active only with <literal>incompatible_improvements</literal>
+              set to 2.3.22 (or higher): <literal>#include</literal> and
+              <literal>#nested</literal> doesn't change the parent
+              <literal>Template</literal> (see
+              <literal>Configurable.getParent()</literal>) of the
+              <literal>Environment</literal> anymore to the
+              <literal>Template</literal> that's included or where
+              <literal>#nested</literal> <quote>returns</quote> to. Thus, the
+              parent of <literal>Environment</literal> will be now always the
+              main <literal>Template</literal>. (The main
+              <literal>Template</literal> is the <literal>Template</literal>
+              whose <literal>process</literal> or
+              <literal>createProcessingEnvironment</literal> method was called
+              to initiate the output generation.) Note that this only matters
+              if you have set settings directly on <literal>Template</literal>
+              objects, and almost nobody does that. Also note that macro calls
+              have never changed the <literal>Environment</literal> parent to
+              the <literal>Template</literal> that contains the macro
+              definition, so there's no change there now.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/419/">419</link>]:
+              FreeMarker doesn't fail anymore when it has no permission to
+              read Java system properties, like when used in unsigned applets.
+              It just logs some warnings.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_21">
         <title>2.3.21</title>
 
         <para>Date of release: 2014-10-12</para>
 
-        <para>Note that since 2.3.21 is designed to be backward compatible
-        with the previous 2.3.x releases, <emphasis>some of the improvements
-        and fixes described below are only activated when you specifically ask
-        for 2.3.21 <quote>incompatible improvements</quote></emphasis>,
-        because they could, with very small chance, break existing
-        applications. If the dependent project is still actively developed,
-        allowing 2.3.21 "incompatible improvements" is highly recommended.
-        That can be achieved on various ways:</para>
+        <para>Note that since 2.3.21 is designed to be fully backward
+        compatible with the previous 2.3.x releases, <emphasis>some of the
+        improvements and fixes described below are only activated when you
+        specifically ask for 2.3.21 <quote>incompatible
+        improvements</quote></emphasis>, because they could, with very small
+        chance, break existing applications. If the dependent project is still
+        actively developed, allowing 2.3.21 "incompatible improvements" is
+        highly recommended. That can be achieved on various ways:</para>
 
         <itemizedlist>
           <listitem>
@@ -21853,8 +22233,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     <listitem>
                       <para>Stack frames that belong to nestings are now
                       marked differently, and are filtered out when the stack
-                      trace wouldn't fit into the error message otherwise.
-                      </para>
+                      trace wouldn't fit into the error message
+                      otherwise.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

@@ -94,7 +94,8 @@ public class TemplateCache
         try {
             return new FileTemplateLoader();
         } catch(Exception e) {
-            logger.warn("Could not create a file template loader for current directory", e);
+            logger.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
+                    + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
             return null;
         }
     }
@@ -193,7 +194,7 @@ public class TemplateCache
     throws IOException
     {
         boolean debug = logger.isDebugEnabled();
-        String debugName = debug
+        final String debugName = debug
                 ? buildDebugName(name, locale, encoding, parse)
                 : null;
         TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
@@ -282,12 +283,7 @@ public class TemplateCache
             }
             else {
                 if(debug) {
-                    logger.debug("Could not find template in cache, " +
-                        "creating new one; id=[" +
-                        StringUtil.jQuoteNoXSS(tk.name) + "[" +
-                        StringUtil.jQuoteNoXSS(tk.locale) + "," +
-                        tk.encoding + (tk.parse ? ",parsed] " : ",unparsed] ") +
-                        "]");
+                    logger.debug("Couldn't find template in cache for " + debugName + "; will try to load it.");
                 }
                 
                 // Construct a new CachedTemplate entry. Note we set the
@@ -304,8 +300,7 @@ public class TemplateCache
                 cachedTemplate.lastModified = lastModified = Long.MIN_VALUE;
             }
             if(debug) {
-                logger.debug("Compiling FreeMarker template " + 
-                    debugName + " from " + StringUtil.jQuoteNoXSS(newlyFoundSource));
+                logger.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(newlyFoundSource));
             }
             // If we get here, then we need to (re)load the template
             Object source = cachedTemplate.source;
@@ -547,7 +542,7 @@ public class TemplateCache
             boolean parse) {
         return StringUtil.jQuoteNoXSS(name) + "["
                 + StringUtil.jQuoteNoXSS(locale) + "," + encoding
-                + (parse ? ",parsed] " : ",unparsed]");
+                + (parse ? ",parsed]" : ",unparsed]");
     }    
 
     /**

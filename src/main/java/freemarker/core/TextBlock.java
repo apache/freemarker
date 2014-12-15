@@ -390,4 +390,9 @@ public final class TextBlock extends TemplateElement {
     boolean isWhitespace() {
         return text == null || trim(text).length == 0;
     }
+
+    boolean isOutputCacheable() {
+        return true;
+    }
+    
 }

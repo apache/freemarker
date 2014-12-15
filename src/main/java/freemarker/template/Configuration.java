@@ -148,6 +148,9 @@ public class Configuration extends Configurable implements Cloneable {
     
     /** FreeMarker version 2.3.21 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_21 = new Version(2, 3, 21);
+
+    /** FreeMarker version 2.3.22 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_22 = new Version(2, 3, 22);
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
@@ -218,7 +221,7 @@ public class Configuration extends Configurable implements Cloneable {
      */
     private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
-    private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding");
+    private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
     private Map localeToCharsetMap = _ConcurrentMapFactory.newThreadSafeMap();
     
     private ArrayList autoImports = new ArrayList(), autoIncludes = new ArrayList(); 
@@ -343,6 +346,22 @@ public class Configuration extends Configurable implements Cloneable {
      *       <li><p>
      *          Unclosed comments ({@code <#-- ...}) and {@code #noparse}-s won't be silently closed at the end of
      *          template anymore, but cause a parsing error instead.
+     *       </li>
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.22 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
+     *          {@link Configurable#getParent()}) of the {@link Environment} anymore to the {@link Template} that's
+     *          included or where {@code #nested} "returns" to. Thus, the parent of {@link Environment} will be now
+     *          always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
+     *          {@code process} or {@code createProcessingEnvironment} method was called to initiate the output
+     *          generation.)
+     *          Note all this only matters if you have set settings directly on {@link Template} objects, and almost
+     *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
+     *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
      *     </ul>
      *   </li>

@@ -26,6 +26,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.util.ModelFactory;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateMethodModelEx;
@@ -82,7 +84,10 @@ public class ResourceBundleModel
         }
         catch(MissingResourceException e)
         {
-            throw new TemplateModelException("No such key: " + key);
+            throw new _TemplateModelException(e,
+                    new Object[] { "No ", new _DelayedJQuote(key), " key in the ResourceBundle. "
+                            + "Note that conforming to the ResourceBundle Java API, this is an error and not just "
+                            + "a missing sub-variable (a null)." });
         }
     }
 

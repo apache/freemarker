@@ -1,0 +1,86 @@
+<?xml version="1.0" ?>
+<!--
+ Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+
+  <description>Test Tag Library</description>
+  <tlib-version>1.0</tlib-version>
+  <short-name>test-tags</short-name>
+  <uri>http://www.example.org/jsp/test</uri>
+
+  <listener>
+    <listener-class>freemarker.ext.jsp.TLDParsingTest$ExampleContextListener</listener-class>
+  </listener>
+
+  <tag>
+    <description>Set a String attribute</description>
+    <name>setStringAttributeTag</name>
+    <tag-class>freemarker.ext.jsp.TLDParsingTest$SetStringAttributeTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+      <description>The attribute name</description>
+      <name>name</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <description>The attribute value</description>
+      <name>value</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+  </tag>
+
+  <tag>
+    <description>Set a String attribute2</description>
+    <name>setStringAttributeTag2</name>
+    <tag-class>freemarker.ext.jsp.TLDParsingTest$SetStringAttributeTag</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+      <description>The attribute name</description>
+      <name>name</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+    <attribute>
+      <description>The attribute value</description>
+      <name>value</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+    </attribute>
+  </tag>
+
+  <function>
+    <description>toUpperCase</description>
+    <name>toUpperCase</name>
+    <function-class>freemarker.ext.jsp.TLDParsingTest$StringFunctions</function-class>
+    <function-signature>String toUpperCase(java.lang.String)</function-signature>
+  </function>
+
+  <function>
+    <description>toUpperCase2</description>
+    <name>toUpperCase2</name>
+    <function-class>freemarker.ext.jsp.TLDParsingTest$StringFunctions</function-class>
+    <function-signature>String toUpperCase(java.lang.String)</function-signature>
+  </function>
+
+</taglib>

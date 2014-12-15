@@ -16,9 +16,6 @@
 
 package freemarker.log;
 
-/**
- */
-interface LoggerFactory
-{
+interface LoggerFactory {
     public Logger getLogger(String category);
 }

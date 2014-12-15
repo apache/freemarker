@@ -340,12 +340,12 @@
   <target name="compileTest" depends="compile">
     <mkdir dir="build/test-classes" />
   
-    <ivy:cachepath conf="build.test" pathid="ivy.dep.test" />
+    <ivy:cachepath conf="build.test" pathid="ivy.dep.build.test" />
     <javac srcdir="src/test/java" destdir="build/test-classes" deprecation="off" 
       debug="on" optimize="off" target="1.5" source="1.5" encoding="utf-8"
       includeantruntime="false"
       classpath="build/classes"
-      classpathref="ivy.dep.test"
+      classpathref="ivy.dep.build.test"
       bootclasspath="${boot.classpath.j2se1.5}"
     />
     <copy toDir="build/test-classes">
@@ -413,13 +413,13 @@
     <property name="coverage.outfile" location="${coverage.dir}/coverage" />
    
     <mkdir dir="build/junit-reports" />
-    <ivy:cachepath conf="test" pathid="ivy.dep.test" />
+    <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
     <junit haltonfailure="on" fork="true" forkmode="once">
       <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
       <classpath>
         <pathelement path="${coverage.classes.dir}" />
         <path refid="ivy.dep.emma" />
-        <path refid="ivy.dep.test" />
+        <path refid="ivy.dep.run.test" />
       </classpath>
       <formatter type="plain" />
       <formatter type="xml" />
@@ -512,7 +512,7 @@
       docencoding="UTF-8"
       locale="en_US"
     >
-      <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistloc="src/javadoc/resources/javase-8" />
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
     </javadoc>
     <delete dir="build/javadoc-sources" />
   </target>
@@ -521,6 +521,9 @@
   
   <target name="_fixJDK8JavadocCSS" depends="_rawJavadoc" if="atLeastJDK8">
     <property name="file" value="build/api/stylesheet.css" />
+        
+    <available file="${file}" property="stylesheet.available"/>
+    <fail unless="stylesheet.available">CSS file not found: ${file}</fail>
     <echo>Fixing JDK 8 CSS in ${file}</echo>
     
     <!-- Tell that it's modified: -->
@@ -744,14 +747,8 @@
     <gzip zipfile="${freemarker.gzip}" src="${freemarker.tar}" />
     <delete file="${freemarker.tar}" />
   </target>
-  
-  <!--
-    Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
-    to a Maven repository (snapshot or central).
-    Use this after "dist" (without interleaving "clean").
-  -->
-  <target name="maven-dist"
-      description="Releases the already built distro to a Maven repository">
+
+  <target name="maven-pom">
     <echo file="build/pom.xml"><![CDATA[<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -761,7 +758,7 @@
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <version>9</version>
   </parent>
   
   <groupId>org.freemarker</groupId>
@@ -804,7 +801,15 @@
   </dependencies>
 </project>
 ]]></echo>
-    
+  </target>
+  
+  <!--
+    Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
+    to a Maven repository (snapshot or central).
+    Use this after "dist" (without interleaving "clean").
+  -->
+  <target name="maven-dist" depends="maven-pom"
+      description="Releases the already built distro to a Maven repository">
     <jar destfile="build/maven-source-attachment.jar">
       <fileset dir="${dist.dir}/source/src/main/java" />
       <fileset dir="${dist.dir}/source/src/main/resources" />
@@ -871,10 +876,8 @@ Proceed? </input>
     
     <echo>*****************************************************************</echo>
     <echo>Check the above lines for any Maven errors!</echo>
-    <echo>If it was a final release, now you have to release the staged</echo>
-    <echo>repo on https://oss.sonatype.org/.</echo>
-    <echo>If it was an unstable release, you may check the content of</echo>
-    <echo>https://oss.sonatype.org/content/repositories/snapshots/org/.</echo>
+    <echo>Now you have to release the staged repo on</echo>
+    <echo>https://oss.sonatype.org/.</echo>
     <echo>*****************************************************************</echo>
   </target>
   

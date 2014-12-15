@@ -36,12 +36,16 @@ import freemarker.template.utility.UndeclaredThrowableException;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */ 
-public class _MethodUtil {
+public final class _MethodUtil {
     
     // Get rid of these on Java 5
     private static final Method METHOD_IS_VARARGS = getIsVarArgsMethod(Method.class);
     private static final Method CONSTRUCTOR_IS_VARARGS = getIsVarArgsMethod(Constructor.class);
-    
+
+    private _MethodUtil() {
+        // Not meant to be instantiated
+    }
+
     /**
      * Determines whether the type given as the 1st argument is convertible to the type given as the 2nd argument
      * for method call argument conversion. This follows the rules of the Java reflection-based method call, except
@@ -309,5 +313,5 @@ public class _MethodUtil {
                 "; see cause exception in the Java stack trace."
         });
     }
-    
+
 }

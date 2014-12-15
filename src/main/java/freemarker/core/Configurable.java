@@ -994,8 +994,7 @@ public class Configurable
      *   <li><p>{@code "new_builtin_class_resolver"}:
      *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
      *       Since 2.3.17.
-     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
-     *       expression</a>. Otherwise the value must be one of these (ignore the quotation marks):
+     *       The value must be one of these (ignore the quotation marks):
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
@@ -1043,9 +1042,8 @@ public class Configurable
      *             
      *             <p>For more details see {@link OptInTemplateClassResolver}.
      *             
-     *         <li><p>Otherwise if the value contains dot, it's interpreted as
-     *             a full-qualified class name, and the object will be created
-     *             with its parameterless constructor.
+     *         <li><p>Otherwise if the value contains dot, it's interpreted as an <a href="#fm_obe">object builder
+     *             expression</a>.
      *       </ol>
      *       
      *   <li><p>{@code "show_error_tips"}:

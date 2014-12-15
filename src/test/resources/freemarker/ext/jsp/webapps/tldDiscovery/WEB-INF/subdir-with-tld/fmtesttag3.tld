@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+        "http://java.sun.com/j2ee/dtds/web-jsptaglib_1_1.dtd">
+<taglib>
+  <tlibversion>2.0</tlibversion>
+  <jspversion>1.2</jspversion>
+  <shortname>FreeMarker JUnit Test Support</shortname>
+  <uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld-3</uri>
+  <tag>
+    <name>simpletag</name>
+    <tagclass>freemarker.ext.jsp.taglibmembers.TestSimpleTag3</tagclass>
+  </tag>
+</taglib>

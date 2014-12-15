@@ -55,8 +55,8 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(Configuration.VERSION_2_3_21, new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getIncompatibleImprovements());
         assertEquals(Configuration.VERSION_2_3_0, new BeansWrapperBuilder(Configuration.VERSION_2_3_20).getIncompatibleImprovements());
         try {
-            new BeansWrapperBuilder(new Version(2, 3, 22));
-            fail();
+            new BeansWrapperBuilder(new Version(2, 3, 23));
+            fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("upgrade"));
         }

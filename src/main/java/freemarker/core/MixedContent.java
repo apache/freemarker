@@ -18,6 +18,7 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import freemarker.template.TemplateException;
 
@@ -72,6 +73,15 @@ final class MixedContent extends TemplateElement {
             }
             return getNodeTypeSymbol(); // MixedContent is uninteresting in a stack trace.
         }
+    }
+
+    protected boolean isOutputCacheable() {
+        for (Enumeration children = children(); children.hasMoreElements();) {
+            if (!((TemplateElement) children.nextElement()).isOutputCacheable()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     String getNodeTypeSymbol() {

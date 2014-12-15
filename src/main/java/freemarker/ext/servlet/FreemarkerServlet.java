@@ -19,11 +19,16 @@ package freemarker.ext.servlet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,6 +43,10 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
 import freemarker.ext.jsp.TaglibFactory;
+import freemarker.ext.jsp.TaglibFactory.ClasspathMetaInfTldSource;
+import freemarker.ext.jsp.TaglibFactory.ClearMetaInfTldSource;
+import freemarker.ext.jsp.TaglibFactory.MetaInfTldSource;
+import freemarker.ext.jsp.TaglibFactory.WebInfPerLibJarMetaInfTldSource;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
@@ -46,106 +55,153 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
 /**
- * <p>This is a general-purpose FreeMarker view servlet.</p>
+ * <p>
+ * This is a general-purpose FreeMarker view servlet.
+ * </p>
  * 
- * <p>The main features are:
+ * <p>
+ * The main features are:
  * 
  * <ul>
  * 
- * <li>It makes all request, request parameters, session, and servlet
- * context attributes available to templates through <code>Request</code>,
- * <code>RequestParameters</code>, <code>Session</code>, and <code>Application</code>
- * variables.
+ * <li>It makes all request, request parameters, session, and servlet context attributes available to templates through
+ * <code>Request</code>, <code>RequestParameters</code>, <code>Session</code>, and <code>Application</code> variables.
  * 
- * <li>The scope variables are also available via automatic scope discovery. That is,
- * writing <code>Application.attrName</code>, <code>Session.attrName</code>,
- * <code>Request.attrName</code> is not mandatory; it's enough to write <code>attrName</code>,
- * and if no such variable was created in the template, it will search the
- * variable in <code>Request</code>, and then in <code>Session</code>,
- * and finally in <code>Application</code>.  
+ * <li>The scope variables are also available via automatic scope discovery. That is, writing
+ * <code>Application.attrName</code>, <code>Session.attrName</code>, <code>Request.attrName</code> is not mandatory;
+ * it's enough to write <code>attrName</code>, and if no such variable was created in the template, it will search the
+ * variable in <code>Request</code>, and then in <code>Session</code>, and finally in <code>Application</code>.
  * 
- * <li>It creates a variable with name <code>JspTaglibs</code>, that can be used
- * to load JSP taglibs. For example:<br>
- * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>
+ * <li>It creates a variable with name <code>JspTaglibs</code> that can be used to load JSP taglibs. For example:<br>
+ * <code>&lt;#assign dt=JspTaglibs["http://displaytag.sf.net"]&gt;</code> or
+ * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>.
  * 
- * <li>A custom directive named <code>include_page</code> allows you to 
- * include the output of another servlet resource from your servlet container,
- * just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/&gt;</code>. You can also
- * pass parameters to the newly included page by passing a hash named 'params':
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/&gt;</code>.
- * By default, the request parameters of the original request (the one being
- * processed by FreemarkerServlet) are also inherited by the include. You can
- * explicitly control this inheritance using the 'inherit_params' parameter:
+ * <li>A custom directive named <code>include_page</code> allows you to include the output of another servlet resource
+ * from your servlet container, just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/&gt;</code>. You can also pass parameters to the newly included
+ * page by passing a hash named 'params':
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/&gt;</code>. By default, the request
+ * parameters of the original request (the one being processed by FreemarkerServlet) are also inherited by the include.
+ * You can explicitly control this inheritance using the 'inherit_params' parameter:
  * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"} inherit_params=false/&gt;</code>.
  * </ul>
  * 
- * <p>The servlet will rethrow the errors occurring during template processing,
- * wrapped into <code>ServletException</code>, except if the class name of the
- * class set by the <code>template_exception_handler</code> contains the
- * substring <code>"Debug"</code>. If it contains <code>"Debug"</code>, then it
- * is assumed that the template exception handler prints the error message to the
- * page, thus <code>FreemarkerServlet</code> will suppress the  exception, and
- * logs the problem with the servlet logger
- * (<code>javax.servlet.GenericServlet.log(...)</code>). 
+ * <p>
+ * The servlet will rethrow the errors occurring during template processing, wrapped into <code>ServletException</code>,
+ * except if the class name of the class set by the <code>template_exception_handler</code> contains the substring
+ * <code>"Debug"</code>. If it contains <code>"Debug"</code>, then it is assumed that the template exception handler
+ * prints the error message to the page, thus <code>FreemarkerServlet</code> will suppress the exception, and logs the
+ * problem with the servlet logger (<code>javax.servlet.GenericServlet.log(...)</code>).
  * 
- * <p>Supported init-params are:</p>
+ * <p>
+ * <b>Supported init-params are:</b>
+ * </p>
  * 
  * <ul>
  * 
- * <li><strong>TemplatePath</strong> specifies the location of the templates.
- * By default, this is interpreted as web application directory relative URI.<br>
- * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal
- * path in the file system (i.e. <tt>file:///var/www/project/templates/</tt>). 
- * Note that three slashes were used to specify an absolute path.<br>
- * Also, you can prepend it with <tt>class://path/to/template/package</tt> to
- * indicate that you want to load templates from the specified package
- * accessible through the classloader of the servlet.<br>
- * Default value is <tt>class://</tt> (that is, the root of the class hierarchy).
- * <i>Note that this default is different than the default in FreeMarker 1.x, when
- * it defaulted <tt>/</tt>, that is to loading from the webapp root directory.</i></li>
+ * <li><strong>{@value #INIT_PARAM_TEMPLATE_PATH}</strong>: Specifies the location of the templates. By default, this is
+ * interpreted as web application directory relative URI.<br>
+ * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
+ * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
+ * Also, you can prepend it with <tt>class://path/to/template/package</tt> to indicate that you want to load templates
+ * from the specified package accessible through the classloader of the servlet.<br>
+ * Default value is <tt>class://</tt> (that is, the root of the class hierarchy). <i>Note that this default is different
+ * than the default in FreeMarker 1.x, when it defaulted <tt>/</tt>, that is to loading from the webapp root
+ * directory.</i></li>
  * 
- * <li><strong>NoCache</strong> if set to true, generates headers in the response
- * that advise the HTTP client not to cache the returned page.
- * The default is <tt>false</tt>.</li>
+ * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to true, generates headers in the response that advise the
+ * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
  * 
- * <li><strong>ContentType</strong> if specified, response uses the specified
- * Content-type HTTP header. The value may include the charset (e.g.
- * <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified, <tt>"text/html"</tt>
- * is used. If the charset is not specified in this init-param, then the charset
- * (encoding) of the actual template file will be used (in the response HTTP header
- * and for encoding the output stream). Note that this setting can be overridden
- * on a per-template basis by specifying a custom attribute named 
- * <tt>content_type</tt> in the <tt>attributes</tt> parameter of the 
- * <tt>&lt;#ftl&gt;</tt> directive. 
- * </li>
+ * <li><strong>{@value #INIT_PARAM_CONTENT_TYPE}</strong>: If specified, response uses the specified Content-type HTTP
+ * header. The value may include the charset (e.g. <tt>"text/html; charset=ISO-8859-1"</tt>). If not specified,
+ * <tt>"text/html"</tt> is used. If the charset is not specified in this init-param, then the charset (encoding) of the
+ * actual template file will be used (in the response HTTP header and for encoding the output stream). Note that this
+ * setting can be overridden on a per-template basis by specifying a custom attribute named <tt>content_type</tt> in the
+ * <tt>attributes</tt> parameter of the <tt>&lt;#ftl&gt;</tt> directive.</li>
  * 
- * <li>The following init-params are supported only for backward compatibility, and
- * their usage is discouraged: TemplateUpdateInterval, DefaultEncoding,
- * ObjectWrapper, TemplateExceptionHandler. Use setting init-params such as
- * object_wrapper instead. 
+ * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items which
+ * are either: {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, {@value #META_INF_TLD_LOCATION_CLASSPATH}
+ * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example
+ * {@code <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or
+ * {@code <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
+ * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to not set, in which case
+ * {@link TaglibFactory} will behave as if it was {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}. Note that this
+ * can be also specified with the {@value #SYSTEM_PROPERTY_META_INF_TLD_SOURCES} system property. If both the init-param
+ * and the system property exists, the sources listed in the system property will be added after those specified by the
+ * init-param. This is where the special entry, {@value #META_INF_TLD_LOCATION_CLEAR} comes handy, as it will remove all
+ * previous list items. (An intended usage of the system property is setting it to {@code clear, classpath} in the
+ * Eclipse run configuration if you are running the application without putting the dependency jar-s into
+ * {@code WEB-INF/lib}.) Also, note that further {@code classpath:<pattern>} items are added automatically at the end of
+ * this list based on Jetty's {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context
+ * attribute.</li>
  * 
- * <li>Any other init-param will be interpreted as <code>Configuration</code>
- * level setting. See {@link Configuration#setSetting}</li>
+ * <li><strong>{@value #INIT_PARAM_CLASSPATH_TLDS}</strong> (since 2.3.22): Comma separated list of paths; see
+ * {@link TaglibFactory#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to no paths.
+ * Note that this can be also specified with the {@value #SYSTEM_PROPERTY_CLASSPATH_TLDS} system property. If both the
+ * init-param and the system property exists, the items listed in system property will be added after those specified by
+ * the init-param.</li>
+ * 
+ * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
+ * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}.
+ * Instead, use init-params with the setting names documented at {@link Configuration#setSetting(String, String)}, such
+ * as {@code object_wrapper}.
+ * 
+ * <li>Any other init-params will be interpreted as {@link Configuration}-level setting. See the possible names and
+ * values at {@link Configuration#setSetting(String, String)}.</li>
  * 
  * </ul>
  */
 
 public class FreemarkerServlet extends HttpServlet
 {
-    private static final Logger logger = Logger.getLogger("freemarker.servlet");
+    private static final Logger LOG = Logger.getLogger("freemarker.servlet");
     
     public static final long serialVersionUID = -2440216393145762479L;
 
-    private static final String INITPARAM_TEMPLATE_PATH = "TemplatePath";
-    private static final String INITPARAM_NOCACHE = "NoCache";
-    private static final String INITPARAM_CONTENT_TYPE = "ContentType";
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
-    private static final String INITPARAM_DEBUG = "Debug";
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
+     * has existed long before 2.3.22, but this constant was only added then.)
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_TEMPLATE_PATH = "TemplatePath";
     
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
+     * has existed long before 2.3.22, but this constant was only added then.)
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_NO_CACHE = "NoCache";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
+     * has existed long before 2.3.22, but this constant was only added then.)
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_CONTENT_TYPE = "ContentType";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_META_INF_TLD_LOCATIONS = "MetaInfTldSources";
+    
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_CLASSPATH_TLDS = "ClasspathTlds";
+    
+    private static final String INIT_PARAM_DEBUG = "Debug";
+
     private static final String DEPR_INITPARAM_TEMPLATE_DELAY = "TemplateDelay";
     private static final String DEPR_INITPARAM_ENCODING = "DefaultEncoding";
     private static final String DEPR_INITPARAM_OBJECT_WRAPPER = "ObjectWrapper";
@@ -158,6 +214,47 @@ public class FreemarkerServlet extends HttpServlet
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG = "htmlDebug";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE = "ignore";
     private static final String DEPR_INITPARAM_DEBUG = "debug";
+    
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+
+    /**
+     * When set, the items defined in it will be added after those coming from the
+     * {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param. The value syntax is the same as of the init-param. Note
+     * that {@value #META_INF_TLD_LOCATION_CLEAR} can be used to re-start the list, rather than continue it.
+     * 
+     * @since 2.3.22
+     */
+    public static final String SYSTEM_PROPERTY_META_INF_TLD_SOURCES = "org.freemarker.jsp.metaInfTldSources";
+
+    /**
+     * When set, the items defined in it will be added after those coming from the
+     * {@value #INIT_PARAM_CLASSPATH_TLDS} init-param. The value syntax is the same as of the init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String SYSTEM_PROPERTY_CLASSPATH_TLDS = "org.freemarker.jsp.classpathTlds";
+    
+    /**
+     * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS = "webInfPerLibJars";
+    
+    /**
+     * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String META_INF_TLD_LOCATION_CLASSPATH = "classpath";
+    
+    /**
+     * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
+     * 
+     * @since 2.3.22
+     */
+    public static final String META_INF_TLD_LOCATION_CLEAR = "clear";
+    
 
     public static final String KEY_REQUEST = "Request";
     public static final String KEY_INCLUDE = "include_page";
@@ -179,6 +276,9 @@ public class FreemarkerServlet extends HttpServlet
     private static final String ATTR_JSP_TAGLIBS_MODEL =
         ".freemarker.JspTaglibs";
 
+    private static final String ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
+            = "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern";
+    
     private static final String EXPIRATION_DATE;
 
     static {
@@ -199,6 +299,8 @@ public class FreemarkerServlet extends HttpServlet
     private ObjectWrapper wrapper;
     private String contentType;
     private boolean noCharsetInContentType;
+    private List/*<MetaInfTldSource>*/ metaInfTldSources;
+    private List/*<String>*/ classpathTlds;
     
     public void init() throws ServletException {
         try {
@@ -216,13 +318,13 @@ public class FreemarkerServlet extends HttpServlet
             
             // Process object_wrapper init-param out of order: 
             wrapper = createObjectWrapper();
-            if (logger.isDebugEnabled()) {
-                logger.debug("Using object wrapper: " + wrapper);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Using object wrapper: " + wrapper);
             }
             config.setObjectWrapper(wrapper);
             
             // Process TemplatePath init-param out of order:
-            templatePath = getInitParameter(INITPARAM_TEMPLATE_PATH);
+            templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
             if (templatePath == null)
                 templatePath = "class://";
             config.setTemplateLoader(createTemplateLoader(templatePath));
@@ -246,7 +348,7 @@ public class FreemarkerServlet extends HttpServlet
                 
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(Configurable.OBJECT_WRAPPER_KEY)
-                        || name.equals(INITPARAM_TEMPLATE_PATH)
+                        || name.equals(INIT_PARAM_TEMPLATE_PATH)
                         || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
@@ -290,20 +392,24 @@ public class FreemarkerServlet extends HttpServlet
                                 "Invalid value for servlet init-param "
                                 + DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER + ": " + value);
                     }
-                } else if (name.equals(INITPARAM_NOCACHE)) {
+                } else if (name.equals(INIT_PARAM_NO_CACHE)) {
                     nocache = StringUtil.getYesNo(value);
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
-                    if (getInitParameter(INITPARAM_DEBUG) != null) {
+                    if (getInitParameter(INIT_PARAM_DEBUG) != null) {
                         throw new ServletException(
                                 "Conflicting init-params: "
-                                + INITPARAM_DEBUG + " and "
+                                + INIT_PARAM_DEBUG + " and "
                                 + DEPR_INITPARAM_DEBUG);
                     }
                     debug = StringUtil.getYesNo(value);
-                } else if (name.equals(INITPARAM_DEBUG)) {
+                } else if (name.equals(INIT_PARAM_DEBUG)) {
                     debug = StringUtil.getYesNo(value);
-                } else if (name.equals(INITPARAM_CONTENT_TYPE)) {
+                } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
                     contentType = value;
+                } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
+                    metaInfTldSources = parseAsMetaInfTldLocations(value);
+                } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {;
+                    classpathTlds = parseCommaSeparatedList(value);
                 } else {
                     config.setSetting(name, value);
                 }
@@ -326,8 +432,46 @@ public class FreemarkerServlet extends HttpServlet
         } catch (ServletException e) {
             throw e;
         } catch (Exception e) {
-            throw new ServletException(e);
+            throw new ServletException("Error during servlet initialization", e);
         }
+    }
+
+    private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
+        List/*<MetaInfTldSource>*/ metaInfTldSources = null;
+        
+        List/*<String>*/ values = parseCommaSeparatedList(value);
+        for (Iterator it = values.iterator(); it.hasNext();) {
+            final String itemStr = (String) it.next();
+            final MetaInfTldSource metaInfTldSource;
+            if (itemStr.equals(META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
+                metaInfTldSource = WebInfPerLibJarMetaInfTldSource.INSTANCE;
+            } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLASSPATH)) {
+                String itemRightSide = itemStr.substring(META_INF_TLD_LOCATION_CLASSPATH.length()).trim();
+                if (itemRightSide.length() == 0) {
+                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(".*", Pattern.DOTALL));
+                } else if (itemRightSide.startsWith(":")) {
+                    final String regexpStr = itemRightSide.substring(1).trim();
+                    if (regexpStr.length() == 0) {
+                        throw new ParseException("Empty regular expression after \""
+                                + META_INF_TLD_LOCATION_CLASSPATH + ":\"", -1);
+                    }
+                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(regexpStr));   
+                } else {
+                    throw new ParseException("Invalid \"" + META_INF_TLD_LOCATION_CLASSPATH
+                            + "\" value syntax: " + value, -1);
+                }
+            } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLEAR)) {
+                metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
+            } else {
+                throw new ParseException("Item has no recognized source type prefix: " + value, -1);
+            }
+            if (metaInfTldSources == null) {
+                metaInfTldSources = new ArrayList();
+            }
+            metaInfTldSources.add(metaInfTldSource);
+        }
+        
+        return metaInfTldSources;
     }
 
     /**
@@ -454,27 +598,24 @@ public class FreemarkerServlet extends HttpServlet
         return config.getLocale();
     }
 
-    protected TemplateModel createModel(ObjectWrapper wrapper,
+    protected TemplateModel createModel(ObjectWrapper objectWrapper,
                                         ServletContext servletContext,
                                         final HttpServletRequest request,
                                         final HttpServletResponse response) throws TemplateModelException {
         try {
-            AllHttpScopesHashModel params = new AllHttpScopesHashModel(wrapper, servletContext, request);
+            AllHttpScopesHashModel params = new AllHttpScopesHashModel(objectWrapper, servletContext, request);
     
             // Create hash model wrapper for servlet context (the application)
             ServletContextHashModel servletContextModel =
-                (ServletContextHashModel) servletContext.getAttribute(
-                    ATTR_APPLICATION_MODEL);
+                    (ServletContextHashModel) servletContext.getAttribute(ATTR_APPLICATION_MODEL);
             if (servletContextModel == null)
             {
-                servletContextModel = new ServletContextHashModel(this, wrapper);
-                servletContext.setAttribute(
-                    ATTR_APPLICATION_MODEL,
-                    servletContextModel);
-                TaglibFactory taglibs = new TaglibFactory(servletContext);
-                servletContext.setAttribute(
-                    ATTR_JSP_TAGLIBS_MODEL,
-                    taglibs);
+                servletContextModel = new ServletContextHashModel(this, objectWrapper);
+                servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
+                
+                TaglibFactory taglibFactory = createTaglibFactory(objectWrapper, servletContext);
+                servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibFactory);
+                
                 initializeServletContext(request, response);
             }
             params.putUnlistedModel(KEY_APPLICATION, servletContextModel);
@@ -486,13 +627,13 @@ public class FreemarkerServlet extends HttpServlet
             if(session != null) {
                 sessionModel = (HttpSessionHashModel) session.getAttribute(ATTR_SESSION_MODEL);
                 if (sessionModel == null || sessionModel.isOrphaned(session)) {
-                    sessionModel = new HttpSessionHashModel(session, wrapper);
+                    sessionModel = new HttpSessionHashModel(session, objectWrapper);
                     initializeSessionAndInstallModel(request, response, 
                             sessionModel, session);
                 }
             }
             else {
-                sessionModel = new HttpSessionHashModel(this, request, response, wrapper);
+                sessionModel = new HttpSessionHashModel(this, request, response, objectWrapper);
             }
             params.putUnlistedModel(KEY_SESSION, sessionModel);
     
@@ -501,7 +642,7 @@ public class FreemarkerServlet extends HttpServlet
                 (HttpRequestHashModel) request.getAttribute(ATTR_REQUEST_MODEL);
             if (requestModel == null || requestModel.getRequest() != request)
             {
-                requestModel = new HttpRequestHashModel(request, response, wrapper);
+                requestModel = new HttpRequestHashModel(request, response, objectWrapper);
                 request.setAttribute(ATTR_REQUEST_MODEL, requestModel);
                 request.setAttribute(
                     ATTR_REQUEST_PARAMETERS_MODEL,
@@ -522,6 +663,85 @@ public class FreemarkerServlet extends HttpServlet
         } catch (IOException e) {
             throw new TemplateModelException(e);
         }
+    }
+
+    /**
+     * Called to create the {@link TaglibFactory} once per servlet context.
+     * The default implementation configures it based on the servlet-init parameters and various other environmental
+     * settings, so if you override this method, you should call super, then adjust the result.
+     * 
+     * @since 2.3.22
+     */
+    protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper,
+            ServletContext servletContext) throws TemplateModelException {
+        TaglibFactory taglibFactory = new TaglibFactory(servletContext);
+        
+        taglibFactory.setObjectWrapper(objectWrapper);
+        
+        {
+            List/*<MetaInfTldSources>*/ mergedMetaInfTldSources = new ArrayList();
+
+            if (metaInfTldSources != null) {
+                mergedMetaInfTldSources.addAll(metaInfTldSources);
+            } else {
+                // Needed so that if we will merge in Jetty stuff, the source list will contain this.
+                mergedMetaInfTldSources.add(WebInfPerLibJarMetaInfTldSource.INSTANCE);
+            }
+            
+            String sysPropVal = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
+            if (sysPropVal != null) {
+                try {
+                    List metaInfTldSourcesSysProp = parseAsMetaInfTldLocations(sysPropVal);
+                    if (metaInfTldSourcesSysProp != null) {
+                        mergedMetaInfTldSources.addAll(metaInfTldSourcesSysProp);
+                    }
+                } catch (ParseException e) {
+                    throw new TemplateModelException("Failed to parse system property \""
+                            + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
+                }
+            }
+
+            List/*<Pattern>*/ jettyTaglibJarPatterns = null;
+            try {
+                final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
+                jettyTaglibJarPatterns = attrVal != null ? parseCommaSeparatedPatterns(attrVal) : null;
+            } catch (Exception e) {
+                LOG.error("Failed to parse application context attribute \""
+                        + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
+            }
+            if (jettyTaglibJarPatterns != null) {
+                for (Iterator/*<Pattern>*/ it = jettyTaglibJarPatterns.iterator(); it.hasNext();) {
+                    Pattern pattern = (Pattern) it.next();
+                    mergedMetaInfTldSources.add(new ClasspathMetaInfTldSource(pattern));
+                }
+            }
+            
+            taglibFactory.setMetaInfTldSources(mergedMetaInfTldSources);
+        }
+        
+        {
+            List/*<String>*/ mergedClassPathTlds = new ArrayList();
+            if (classpathTlds != null) {
+                mergedClassPathTlds.addAll(classpathTlds);
+            }
+            
+            String sysPropVal = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
+            if (sysPropVal != null) {
+                try {
+                    List/*<String>*/ classpathTldsSysProp = parseCommaSeparatedList(sysPropVal);
+                    if (classpathTldsSysProp != null) {
+                        mergedClassPathTlds.addAll(classpathTldsSysProp);
+                    }
+                } catch (ParseException e) {
+                    throw new TemplateModelException("Failed to parse system property \""
+                            + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
+                }
+            }
+            
+            taglibFactory.setClasspathTlds(mergedClassPathTlds);
+        }
+        
+        return taglibFactory;        
     }
 
     void initializeSessionAndInstallModel(HttpServletRequest request,
@@ -594,16 +814,16 @@ public class FreemarkerServlet extends HttpServlet
     }
     
     /**
-     * This method is called from {@link #init()} to create the
-     * FreeMarker object wrapper object that this servlet will use
-     * for adapting request, session, and servlet context attributes into 
-     * template models.. This is a hook that allows you
-     * to custom-configure the wrapper object in a subclass.
-     * The default implementation returns a wrapper that depends on the value
-     * of <code>ObjectWrapper</code> init parameter. If <code>simple</code> is
-     * specified, {@link ObjectWrapper#SIMPLE_WRAPPER} is used; if <code>jython</code>
-     * is specified, {@link freemarker.ext.jython.JythonWrapper} is used. In
-     * every other case {@link ObjectWrapper#DEFAULT_WRAPPER} is used.
+     * Called from {@link #init()} to create the FreeMarker object wrapper that this servlet will use for adapting
+     * request, session, and servlet context attributes to {@link TemplateModel}-s. This is a hook that allows you
+     * customize the object wrapper creation in a subclass. You should call {@link #getInitParameter(String)}
+     * with {@link Configurable#OBJECT_WRAPPER_KEY} as argument, and see if it returns {@code null} or some other
+     * value that you want to interpret yourself. If it wasn't {@code null} and you don't want to interpret the value,
+     * fall back to the super method.
+     * 
+     * <p>The default implementation interprets the {@value Configurable#OBJECT_WRAPPER_KEY} servlet init-param
+     * with {@link Configurable#setSetting(String, String)} (see valid values there), or if there's no such servlet
+     * init-param, then calls {@link Configuration#getDefaultObjectWrapper(freemarker.template.Version)}. 
      */
     protected ObjectWrapper createObjectWrapper() {
         String wrapper = getServletConfig().getInitParameter(DEPR_INITPARAM_OBJECT_WRAPPER);
@@ -648,6 +868,10 @@ public class FreemarkerServlet extends HttpServlet
         }
     }
     
+    /**
+     * Should be final; don't override it. Override {@link #createObjectWrapper()} instead.
+     */
+    // [2.4] Make it final
     protected ObjectWrapper getObjectWrapper() {
         return wrapper;
     }
@@ -770,5 +994,28 @@ public class FreemarkerServlet extends HttpServlet
             // Last resort for those that ignore all of the above
             res.setHeader("Expires", EXPIRATION_DATE);
         }
+    }
+
+    private List/*<String>*/ parseCommaSeparatedList(String value) throws ParseException {
+        List/*<String>*/ valuesList = new ArrayList();
+        String[] values = StringUtil.split(value, ',');
+        for (int i = 0; i < values.length; i++) {
+            final String s = values[i].trim();
+            if (s.length() != 0) {
+                valuesList.add(s);
+            } else if (i != values.length - 1) {
+                throw new ParseException("Missing list item at index " + i, -1);
+            }
+        }
+        return valuesList;
+    }
+
+    private List parseCommaSeparatedPatterns(String value) throws ParseException {
+        List/*<String>*/ values = parseCommaSeparatedList(value);
+        List/*<Pattern>*/ patterns = new ArrayList(values.size());
+        for (int i = 0; i < values.size(); i++) {
+            patterns.add(Pattern.compile((String) values.get(i)));
+        }
+        return patterns;
     }
 }

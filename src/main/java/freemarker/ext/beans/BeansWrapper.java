@@ -52,7 +52,9 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelAdapter;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
@@ -132,7 +134,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     // -----------------------------------------------------------------------------------------------------------------
     // Introspection cache:
     
-    private final Object sharedInrospectionLock;
+    private final Object sharedIntrospectionLock;
     
     /** 
      * {@link Class} to class info cache.
@@ -314,13 +316,13 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             // As this is not a read-only BeansWrapper, the classIntrospector will be possibly replaced for a few times,
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
-            sharedInrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorFactory, sharedInrospectionLock);
+            sharedIntrospectionLock = new Object();
+            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorFactory, sharedIntrospectionLock);
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
             classIntrospector = bwConf.classIntrospectorFactory.build();
-            sharedInrospectionLock = classIntrospector.getSharedLock(); 
+            sharedIntrospectionLock = classIntrospector.getSharedLock(); 
         }
         
         falseModel = new BooleanModel(Boolean.FALSE, this);
@@ -364,8 +366,8 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         return writeProtected;
     }
     
-    Object getSharedInrospectionLock() {
-        return sharedInrospectionLock;
+    Object getSharedIntrospectionLock() {
+        return sharedIntrospectionLock;
     }
     
     /**
@@ -609,7 +611,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     private void replaceClassIntrospector(ClassIntrospectorBuilder pa) {
         checkModifiable();
         
-        final ClassIntrospector newCI = new ClassIntrospector(pa, sharedInrospectionLock);
+        final ClassIntrospector newCI = new ClassIntrospector(pa, sharedIntrospectionLock);
         final ClassIntrospector oldCI;
         
         // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
@@ -617,7 +619,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // as classIntrospector reading aren't everywhere synchronized for performance reasons. It still decreases the
         // chance of accidents, because some ops on classIntrospector are synchronized, and because it will at least
         // push the new value into the common shared memory.
-        synchronized (sharedInrospectionLock) {
+        synchronized (sharedIntrospectionLock) {
             oldCI = classIntrospector;
             if (oldCI != null) {
                 // Note that after unregistering the model factory might still gets some callback from the old
@@ -812,13 +814,31 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * <li>if the object is an Iterator, returns a {@link IteratorModel} for it
      * <li>if the object is an Enumeration, returns a {@link EnumerationModel} for it
      * <li>if the object is a String, returns a {@link StringModel} for it
-     * <li>otherwise, returns a generic {@link BeanModel} for it.
+     * <li>otherwise, returns a generic {@link StringModel} for it.
      * </ul>
      */
     public TemplateModel wrap(Object object) throws TemplateModelException
     {
         if(object == null) return nullModel;
         return modelCache.getInstance(object);
+    }
+    
+    /**
+     * Wraps a Java method so that it can be called from templates, without wrapping its parent ("this") object. The
+     * result is almost the same as that you would get by wrapping the parent object then getting the method from the
+     * resulting {@link TemplateHashModel} by name. Except, if the wrapped method is overloaded, with this method you
+     * explicitly select a an overload, while otherwise you would get a {@link TemplateMethodModelEx} that selects an
+     * overload each time it's called based on the argument values.
+     * 
+     * @param object The object whose method will be called, or {@code null} if {@code method} is a static method.
+     *          This object will be used "as is", like without unwrapping it if it's a {@link TemplateModelAdapter}.
+     * @param method The method to call, which must be an (inherited) member of the class of {@code object}, as
+     *          described by {@link Method#invoke(Object, Object...)}
+     * 
+     * @since 2.3.22
+     */
+    public TemplateMethodModelEx wrap(Object object, Method method) {
+        return new SimpleMethodModel(object, method, method.getParameterTypes(), this);
     }
 
     /**

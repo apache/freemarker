@@ -85,5 +85,9 @@ final class TrimInstruction extends TemplateElement {
         if (idx != 0) throw new IndexOutOfBoundsException();
         return ParameterRole.AST_NODE_SUBTYPE;
     }
+
+    boolean isOutputCacheable() {
+        return true;
+    }
     
 }

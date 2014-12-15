@@ -787,8 +787,8 @@ class ClassIntrospector {
     }
 
     /**
-     * Almost always, you want to use {@link BeansWrapper#getSharedInrospectionLock()}, not this! The only exception is
-     * when you get this to set the field returned by {@link BeansWrapper#getSharedInrospectionLock()}.
+     * Almost always, you want to use {@link BeansWrapper#getSharedIntrospectionLock()}, not this! The only exception is
+     * when you get this to set the field returned by {@link BeansWrapper#getSharedIntrospectionLock()}.
      */
     Object getSharedLock() {
         return sharedLock;

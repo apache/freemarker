@@ -38,6 +38,8 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import junit.framework.AssertionFailedError;
+
 import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
@@ -59,6 +61,7 @@ import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.Version;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
@@ -86,25 +89,43 @@ import freemarker.test.utility.NoOutputDirective;
 @Ignore
 public class TemplateTestCase extends FileTestCase {
     
-    private Template template;
-    private HashMap dataModel = new HashMap();
+    // Name of variables exposed to all test FTL-s:
+    private static final String ICI_INT_VALUE_VAR_NAME = "iciIntValue";
+    private static final String TEST_NAME_VAR_NAME = "testName";
+    private static final String JAVA_OBJECT_INFO_VAR_NAME = "javaObjectInfo";
+    private static final String NO_OUTPUT_VAR_NAME = "noOutput";
+    private static final String ASSERT_FAILS_VAR_NAME = "assertFails";
+    private static final String ASSERT_EQUALS_VAR_NAME = "assertEquals";
+    private static final String ASSERT_VAR_NAME = "assert";
     
+    private final String simpleTestName;
     private final String templateName;
     private final String expectedFileName;
     private final boolean noOutput;
     
-    private Configuration conf = new Configuration();
-
-    public TemplateTestCase(String name, String templateName, String expectedFileName, boolean noOutput) {
-        super(name);
+    private final Configuration conf;
+    private final HashMap dataModel = new HashMap();
+    
+    public TemplateTestCase(String testName, String simpleTestName, String templateName, String expectedFileName, boolean noOutput,
+            Version incompatibleImprovements) {
+        super(testName);
+        NullArgumentException.check("testName", testName);
         
-        NullArgumentException.check("name", name);
-        this.templateName = templateName != null ? templateName : name + ".ftl";
-        this.expectedFileName = expectedFileName != null ? expectedFileName : name + ".txt";
+        NullArgumentException.check("simpleTestName", simpleTestName);
+        this.simpleTestName = simpleTestName;
+        
+        NullArgumentException.check("templateName", templateName);
+        this.templateName = templateName;
+        
+        NullArgumentException.check("expectedFileName", expectedFileName);
+        this.expectedFileName = expectedFileName;
+        
         this.noOutput = noOutput;
+        
+        conf = new Configuration(incompatibleImprovements);
     }
     
-    public void setConfigParam(String param, String value) throws IOException {
+    public void setSetting(String param, String value) throws IOException {
         if ("auto_import".equals(param)) {
             StringTokenizer st = new StringTokenizer(value);
             if (!st.hasMoreTokens()) fail("Expecting libname");
@@ -115,16 +136,14 @@ public class TemplateTestCase extends FileTestCase {
             if (!st.hasMoreTokens()) fail("Expecting alias after 'as' in autoimport");
             String alias = st.nextToken();
             conf.addAutoImport(alias, libname);
-        }
-        else if ("clear_encoding_map".equals(param)) {
+        } else if ("clear_encoding_map".equals(param)) {
             if (StringUtil.getYesNo(value)) {
                 conf.clearEncodingMap();
             }
-        }
-        else if ("input_encoding".equals(param)) {
+        } else if ("input_encoding".equals(param)) {
             conf.setDefaultEncoding(value);
-        }
-        else {
+        // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.
+        } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS.equals(param)) {
             try {
                 conf.setSetting(param, value);
             } catch (TemplateException e) {
@@ -146,18 +165,18 @@ public class TemplateTestCase extends FileTestCase {
     public void setUp() throws Exception {
         conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
         
-        dataModel.put("assert", AssertDirective.INSTANCE);
-        dataModel.put("assertEquals", AssertEqualsDirective.INSTANCE);
-        dataModel.put("assertFails", AssertFailsDirective.INSTANCE);
-        dataModel.put("noOutput", NoOutputDirective.INSTANCE);
+        dataModel.put(ASSERT_VAR_NAME, AssertDirective.INSTANCE);
+        dataModel.put(ASSERT_EQUALS_VAR_NAME, AssertEqualsDirective.INSTANCE);
+        dataModel.put(ASSERT_FAILS_VAR_NAME, AssertFailsDirective.INSTANCE);
+        dataModel.put(NO_OUTPUT_VAR_NAME, NoOutputDirective.INSTANCE);
 
-        dataModel.put("javaObjectInfo", JavaObjectInfo.INSTANCE);
-        dataModel.put("testName", getName());
+        dataModel.put(JAVA_OBJECT_INFO_VAR_NAME, JavaObjectInfo.INSTANCE);
+        dataModel.put(TEST_NAME_VAR_NAME, getName());
+        dataModel.put(ICI_INT_VALUE_VAR_NAME, conf.getIncompatibleImprovements().intValue());
         
         dataModel.put("message", "Hello, world!");
         
-        final String testName = getName();
-        if (testName.equals("bean-maps")) {
+        if (simpleTestName.equals("bean-maps")) {
             BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w3 = new Java7MembersOnlyBeansWrapper();
@@ -198,7 +217,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("s4", w5.wrap("world"));
         }
         
-        else if (testName.equals("beans")) {
+        else if (simpleTestName.equals("beans")) {
             dataModel.put("array", new String[] { "array-0", "array-1"});
             dataModel.put("list", Arrays.asList(new String[] { "list-0", "list-1", "list-2"}));
             Map tmap = new HashMap();
@@ -214,7 +233,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("enums", BeansWrapper.getDefaultInstance().getEnumModels());
         }
         
-        else if (testName.equals("boolean")) {
+        else if (simpleTestName.equals("boolean")) {
             dataModel.put( "boolean1", TemplateBooleanModel.FALSE);
             dataModel.put( "boolean2", TemplateBooleanModel.TRUE);
             dataModel.put( "boolean3", TemplateBooleanModel.TRUE);
@@ -228,7 +247,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put( "hash2", new BooleanHash2() );
         }
         
-        else if (testName.startsWith("dateformat")) {
+        else if (simpleTestName.startsWith("dateformat")) {
             GregorianCalendar cal = new GregorianCalendar(2002, 10, 15, 14, 54, 13);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
             dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATETIME));
@@ -244,7 +263,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
         
-        else if (testName.startsWith("number-format")) {
+        else if (simpleTestName.startsWith("number-format")) {
             dataModel.put("int", new SimpleNumber(new Integer(1)));
             dataModel.put("double", new SimpleNumber(new Double(1.0)));
             dataModel.put("double2", new SimpleNumber(new Double(1 + 1e-15)));
@@ -254,7 +273,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bigDecimal2", new SimpleNumber(java.math.BigDecimal.valueOf(1, 16)));
         }
         
-        else if (testName.equals("simplehash-char-key")) {
+        else if (simpleTestName.equals("simplehash-char-key")) {
             HashMap mStringC = new HashMap();
             mStringC.put("c", "string");
             dataModel.put("mStringC", mStringC);
@@ -279,31 +298,31 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("mMixed", mMixed);
         }
     
-        else if (testName.equals("default-xmlns")) {
+        else if (simpleTestName.equals("default-xmlns")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
-        else if (testName.equals("multimodels")) {
+        else if (simpleTestName.equals("multimodels")) {
             dataModel.put("test", "selftest");
             dataModel.put("self", "self");
             dataModel.put("zero", new Integer(0));
             dataModel.put("data", new MultiModel1());
         }
         
-        else if (testName.equals("stringbimethods")) {
+        else if (simpleTestName.equals("stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
         }
         
-        else if (testName.startsWith("type-builtins")) {
+        else if (simpleTestName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
             dataModel.put("bean", new TestBean());
         }
 
-        else if (testName.equals("date-type-builtins")) {
+        else if (simpleTestName.equals("date-type-builtins")) {
             GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
             cal.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date d = cal.getTime();
@@ -313,13 +332,13 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
         }
         
-        else if (testName.equals("var-layers")) {
+        else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", new Integer(4));
             dataModel.put("z", new Integer(4));
             conf.setSharedVariable("y", new Integer(7));
         }
         
-        else if (testName.equals("xml-fragment")) {
+        else if (simpleTestName.equals("xml-fragment")) {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
             DocumentBuilder db = f.newDocumentBuilder();
@@ -327,30 +346,30 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
         }
         
-        else if (testName.equals("xmlns1")) {
+        else if (simpleTestName.equals("xmlns1")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
-        else if (testName.equals("xmlns2")) {
+        else if (simpleTestName.equals("xmlns2")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns2.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
-        else if (testName.equals("xmlns3") || testName.equals("xmlns4")) {
+        else if (simpleTestName.equals("xmlns3") || simpleTestName.equals("xmlns4")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns3.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
-        else if (testName.equals("xmlns5")) {
+        else if (simpleTestName.equals("xmlns5")) {
             InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
         
-        else if (testName.startsWith("sequence-builtins-with-")) {
+        else if (simpleTestName.startsWith("sequence-builtins")) {
             Set abcSet = new TreeSet();
             abcSet.add("a");
             abcSet.add("b");
@@ -372,26 +391,26 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
         }
         
-        else if (testName.equals("number-to-date")) {
+        else if (simpleTestName.equals("number-to-date")) {
           dataModel.put("bigInteger", new BigInteger("1305575275540"));
           dataModel.put("bigDecimal", new BigDecimal("1305575275539.5"));
         }
         
-        else if (testName.equals("varargs")) {
+        else if (simpleTestName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
         }
         
-        else if (testName.startsWith("overloaded-methods-") && !testName.startsWith("overloaded-methods-2-")) {
+        else if (simpleTestName.startsWith("overloaded-methods-") && !simpleTestName.startsWith("overloaded-methods-2-")) {
           dataModel.put("obj", new OverloadedMethods());
         }
         
-        else if (testName.startsWith("boolean-formatting")) {
+        else if (simpleTestName.startsWith("boolean-formatting")) {
           dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (BeansWrapper) conf.getObjectWrapper()));
           dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
           dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
         }
         
-        else if (testName.startsWith("number-math-builtins")) {
+        else if (simpleTestName.startsWith("number-math-builtins")) {
             dataModel.put("fNan", Float.valueOf(Float.NaN));
             dataModel.put("dNan", Double.valueOf(Double.NaN));
             dataModel.put("fNinf", Float.valueOf(Float.NEGATIVE_INFINITY));
@@ -416,45 +435,50 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
           }
           
-        else if (testName.startsWith("classic-compatible")) {
+        else if (simpleTestName.startsWith("classic-compatible")) {
             dataModel.put("array", new String[] { "a", "b", "c" });
             dataModel.put("beansArray", new BeansWrapper().wrap(new String[] { "a", "b", "c" }));
             dataModel.put("beanTrue", new BeansWrapper().wrap(Boolean.TRUE));
             dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
         }
         
-      else if (testName.startsWith("overloaded-methods-2-")) {
+      else if (simpleTestName.startsWith("overloaded-methods-2-")) {
           dataModel.put("obj", new OverloadedMethods2());
           dataModel.put("dow", Boolean.valueOf(conf.getObjectWrapper() instanceof DefaultObjectWrapper));
       }
     }
     
-    public void runTest() {
+    public void runTest() throws IOException {
+        Template template;
         try {
             template = conf.getTemplate(templateName);
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            fail("Could not load template " + StringUtil.jQuote(templateName) + "\n" + sw.toString());
+        } catch (IOException e) {
+            throw new AssertionFailedError(
+                    "Could not load template " + StringUtil.jQuote(templateName) + ":\n" + getStackTrace(e));
         }
         
         StringWriter out = noOutput ? null : new StringWriter();
         try {
             template.process(dataModel, out != null ? out : NullWriter.INSTANCE);
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            fail("Could not process template " + templateName + "\n" + sw.toString());
+        } catch (TemplateException e) {
+            throw new AssertionFailedError("Template " + StringUtil.jQuote(templateName) + " has stopped with error:\n"
+                        + getStackTrace(e));
         }
         
         if (out != null) {
             assertExpectedFileEqualsString(getName(), out.toString());
         }
     }
-    
+
+    private String getStackTrace(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
+    }
+
     @Override
     protected File getExpectedFileDirectory() throws IOException {
-        return new File(super.getExpectedFileDirectory(), "references");
+        return new File(super.getExpectedFileDirectory(), "expected");
     }
 
     @Override

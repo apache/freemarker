@@ -56,7 +56,7 @@ final class EmptyMemberAndArguments extends MaybeEmptyMemberAndArguments {
 
     static EmptyMemberAndArguments ambiguous(Object[] unwrappedArgs) {
         return new EmptyMemberAndArguments(
-                "Multiple compatible overloaded variations were found with the same priorty.",
+                "Multiple compatible overloaded variations were found with the same priority.",
                 false,
                 unwrappedArgs);
     }

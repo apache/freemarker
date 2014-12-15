@@ -63,5 +63,9 @@ public final class Comment extends TemplateElement {
     public String getText() {
         return text;
     }
+
+    boolean isOutputCacheable() {
+        return true;
+    }
     
 }

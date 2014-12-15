@@ -60,10 +60,10 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.TemplateTransformModel;
 import freemarker.template.TransformControl;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
-import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -153,7 +153,8 @@ public final class Environment extends Configurable {
     private Writer out;
     private Macro.Context currentMacroContext;
     private ArrayList localContextStack; 
-    private Namespace mainNamespace, currentNamespace, globalNamespace;
+    private final Namespace mainNamespace;
+    private Namespace currentNamespace, globalNamespace;
     private HashMap loadedLibs;
 
     private boolean inAttemptBlock;
@@ -196,13 +197,67 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Retrieves the currently processed template.
+     * Despite its name it just returns the {@link #getParent()}. If
+     * {@link Configuration#getIncompatibleImprovements()} is at least 2.3.22, then that will be the same as
+     * {@link #getMainTemplate()}. Otherwise the returned value follows the {@link Environment} parent switchings that
+     * occur at {@code #include}/{@code #import} and {@code #nested} directive calls, that is, it's not very meaningful
+     * outside FreeMarker internals.  
+     * 
+     * @deprecated Use {@link #getMainTemplate()} or {@link #getCurrentTemplate()} instead; the value returned by
+     *          this method is often not what you expect when it comes to macro/function invocations.  
      */
-    public Template getTemplate()
-    {
+    public Template getTemplate() {
         return (Template)getParent();
     }
 
+    /**
+     * Returns the topmost {@link Template}, with other words, the one for which this {@link Environment} was created.
+     * That template will never change, like {@code #include} or macro calls don't change it.
+     * 
+     * @see #getCurrentTemplate()
+     * @see #getCurrentNamespace()
+     * 
+     * @since 2.3.22
+     */
+    public Template getMainTemplate() {
+        return mainNamespace.getTemplate();
+    }
+
+    /**
+     * Returns the {@link Template} that we are "lexically" inside at moment.
+     * This template will change when entering an {@code #include} or calling a macro or function in another template,
+     * or returning to yet another template with {@code #nested}. As such, it's useful in
+     * {@link TemplateDirectiveModel} to find out if from where the directive was called. 
+     * 
+     * @see #getMainTemplate()
+     * @see #getCurrentNamespace()
+     * 
+     * @since 2.3.22
+     */
+    public Template getCurrentTemplate() {
+        int ln = instructionStack.size();
+        return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
+    }
+
+    /**
+     * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
+     * executing custom directive. This method currently only works for custom directives (
+     * {@link TemplateDirectiveModel} and {@link TemplateTransformModel}) and macro calls, though later it might change.
+     * This meant to be called from {@link TemplateDirectiveModel}-s to access information about the called of the
+     * directive.
+     * 
+     * @since 2.3.22
+     */
+    public DirectiveCallPlace getCurrentDirectiveCallPlace() {
+        for (int i = instructionStack.size() -1; i >= 0; i--) {
+            TemplateElement te = (TemplateElement) instructionStack.get(i);
+            if (te instanceof UnifiedCall) {
+                return (UnifiedCall) te;
+            }
+        }
+        return null;
+    }
+    
     /**
      * Deletes cached values that meant to be valid only during a single
      * template execution. 
@@ -462,29 +517,43 @@ public final class Environment extends Configurable {
      }
 
 
-    void visit(BodyInstruction.Context bctxt) throws TemplateException, IOException {
+    /**
+     * Used for {@code #nested}.
+     */
+    void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         ArrayList prevLocalContextStack = localContextStack;
-        TemplateElement body = invokingMacroContext.body;
-        if (body != null) {
+        TemplateElement nestedContent = invokingMacroContext.nestedContent;
+        if (nestedContent != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
-            currentNamespace = invokingMacroContext.bodyNamespace;
-            Configurable prevParent = getParent();
-            setParent(currentNamespace.getTemplate());
+            currentNamespace = invokingMacroContext.nestedContentNamespace;
+            
+            final Configurable prevParent;
+            final boolean parentReplacementOn
+                    = isIcI2322OrLater();
+            if (parentReplacementOn) {
+                prevParent = getParent();
+                setParent(currentNamespace.getTemplate());
+            } else {
+                prevParent = null;
+            }
+            
             this.localContextStack = invokingMacroContext.prevLocalContextStack;
-            if (invokingMacroContext.bodyParameterNames != null) {
-                pushLocalContext(bctxt);
+            if (invokingMacroContext.nestedContentParameterNames != null) {
+                pushLocalContext(bodyCtx);
             }
             try {
-                visit(body);
+                visit(nestedContent);
             }
             finally {
-                if (invokingMacroContext.bodyParameterNames != null) {
+                if (invokingMacroContext.nestedContentParameterNames != null) {
                     popLocalContext();
                 }
                 this.currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
-                setParent(prevParent);
+                if (parentReplacementOn) {
+                    setParent(prevParent);
+                }
                 this.localContextStack = prevLocalContextStack;
             }
         }
@@ -511,10 +580,9 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * "Visit" A TemplateNodeModel
+     * Used for {@code #visit} and {@code #recurse}.
      */
-    
-    void visit(TemplateNodeModel node, TemplateSequenceModel namespaces) 
+    void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces) 
     throws TemplateException, IOException 
     {
         if (nodeNamespaces == null) {
@@ -534,7 +602,7 @@ public final class Environment extends Configurable {
         try {
             TemplateModel macroOrTransform = getNodeProcessor(node);
             if (macroOrTransform instanceof Macro) {
-                visit((Macro) macroOrTransform, null, null, null, null);
+                invoke((Macro) macroOrTransform, null, null, null, null);
             }
             else if (macroOrTransform instanceof TemplateTransformModel) {
                 visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
@@ -597,7 +665,7 @@ public final class Environment extends Configurable {
     void fallback() throws TemplateException, IOException {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (macroOrTransform instanceof Macro) {
-            visit((Macro) macroOrTransform, null, null, null, null);
+            invoke((Macro) macroOrTransform, null, null, null, null);
         }
         else if (macroOrTransform instanceof TemplateTransformModel) {
             visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
@@ -605,101 +673,131 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * "visit" a macro.
+     * Calls the macro or function with the given arguments and nested block.
      */
-    
-    void visit(Macro macro, 
-               Map namedArgs, 
-               List positionalArgs, 
-               List bodyParameterNames,
-               TemplateElement nestedBlock) 
-       throws TemplateException, IOException 
-    {
+    void invoke(Macro macro, 
+               Map namedArgs, List positionalArgs, 
+               List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
         if (macro == Macro.DO_NOTHING_MACRO) {
             return;
         }
+        
         pushElement(macro);
         try {
-            Macro.Context previousMacroContext = currentMacroContext;
-            Macro.Context mc = macro.new Context(this, nestedBlock, bodyParameterNames);
-
-            String catchAll = macro.getCatchAll();
-            TemplateModel unknownVars = null;
+            final Macro.Context macroCtx = macro.new Context(this, nestedBlock, bodyParameterNames);
+            setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
             
-            if (namedArgs != null) {
-                if (catchAll != null)
-                    unknownVars = new SimpleHash();
-                for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    String varName = (String) entry.getKey();
-                    boolean hasVar = macro.hasArgNamed(varName);
-                    if (hasVar || catchAll != null) {
-                        Expression arg = (Expression) entry.getValue();
-                        TemplateModel value = arg.eval(this);
-                        if (hasVar) {
-                            mc.setLocalVar(varName, value);
-                        } else {
-                            ((SimpleHash)unknownVars).put(varName, value);
-                        }
-                    } else {
-                        throw new _MiscTemplateException(this, new Object[] {
-                                "Macro ", new _DelayedJQuote(macro.getName()), " has no such argument: ",
-                                varName });
-                    }
-                }
-            }
-            else if (positionalArgs != null) {
-                if (catchAll != null)
-                    unknownVars = new SimpleSequence();
-                String[] argumentNames = macro.getArgumentNamesInternal();
-                int size = positionalArgs.size();
-                if (argumentNames.length < size && catchAll == null) {
-                    throw new _MiscTemplateException(this, new Object[] { 
-                            "Macro " + StringUtil.jQuote(macro.getName()) + " only accepts "
-                            + argumentNames.length + " parameters." });
-                }
-                for (int i = 0; i < size; i++) {
-                    Expression argExp = (Expression) positionalArgs.get(i);
-                    TemplateModel argModel = argExp.eval(this);
-                    try {
-                        if (i < argumentNames.length) {
-                            String argName = argumentNames[i];
-                            mc.setLocalVar(argName, argModel);
-                        } else {
-                            ((SimpleSequence)unknownVars).add(argModel);
-                        }
-                    } catch (RuntimeException re) {
-                        throw new _MiscTemplateException(re, this);
-                    }
-                }
-            }
-            if (catchAll != null) {
-                mc.setLocalVar(catchAll, unknownVars);
-            }
-            ArrayList prevLocalContextStack = localContextStack;
+            final Macro.Context prevMacroCtx = currentMacroContext;
+            currentMacroContext = macroCtx;
+            
+            final ArrayList prevLocalContextStack = localContextStack;
             localContextStack = null;
-            Namespace prevNamespace = currentNamespace;
-            Configurable prevParent = getParent();
+            
+            final Namespace prevNamespace = currentNamespace;
             currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
-            currentMacroContext = mc;
+            
+            final Configurable prevParent;
+            final boolean parentReplacementOn
+                    = isIcI2322OrLater();
+            if (parentReplacementOn) {
+                prevParent = getParent();
+                // This line is historically missing from here (a bug), but for BC we leave it so:
+                //setParent(currentNamespace.getTemplate());
+            } else {
+                prevParent = null;
+            }
+            
             try {
-                mc.runMacro(this);
-            }
-            catch (ReturnInstruction.Return re) {
-            }
-            catch (TemplateException te) {
+                macroCtx.runMacro(this);
+            } catch (ReturnInstruction.Return re) {
+                // Not an error, just a <#return>
+            } catch (TemplateException te) {
                 handleTemplateException(te);
             } finally {
-                currentMacroContext = previousMacroContext;
+                currentMacroContext = prevMacroCtx;
                 localContextStack = prevLocalContextStack;
                 currentNamespace = prevNamespace;
-                setParent(prevParent);
+                if (parentReplacementOn) {
+                    setParent(prevParent);
+                }
             }
         } finally {
             popElement();
         }
     }
+
+    /**
+     * Sets the local variables corresponding to the macro call arguments in the macro context.
+     */
+    private void setMacroContextLocalsFromArguments(
+            final Macro.Context macroCtx,
+            final Macro macro,
+            final Map namedArgs, final List positionalArgs) throws TemplateException, _MiscTemplateException {
+        String catchAllParamName = macro.getCatchAll();
+        if (namedArgs != null) {
+            final SimpleHash catchAllParamValue;
+            if (catchAllParamName != null) {
+                catchAllParamValue = new SimpleHash((ObjectWrapper) null);
+                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
+            } else {
+                catchAllParamValue = null;
+            }
+            
+            for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
+                final Map.Entry argNameAndValExp = (Map.Entry) it.next();
+                final String argName = (String) argNameAndValExp.getKey();
+                final boolean isArgNameDeclared = macro.hasArgNamed(argName);
+                if (isArgNameDeclared || catchAllParamName != null) {
+                    Expression argValueExp = (Expression) argNameAndValExp.getValue();
+                    TemplateModel argValue = argValueExp.eval(this);
+                    if (isArgNameDeclared) {
+                        macroCtx.setLocalVar(argName, argValue);
+                    } else {
+                        catchAllParamValue.put(argName, argValue);
+                    }
+                } else {
+                    throw new _MiscTemplateException(this, new Object[] {
+                            (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                            " has no parameter with name ", new _DelayedJQuote(argName), "." });
+                }
+            }
+        } else if (positionalArgs != null) {
+            final SimpleSequence catchAllParamValue;
+            if (catchAllParamName != null) {
+                catchAllParamValue = new SimpleSequence((ObjectWrapper) null);
+                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
+            } else {
+                catchAllParamValue = null;
+            }
+            
+            String[] argNames = macro.getArgumentNamesInternal();
+            final int argsCnt = positionalArgs.size();
+            if (argNames.length < argsCnt && catchAllParamName == null) {
+                throw new _MiscTemplateException(this, new Object[] { 
+                        (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                        " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
+                        new _DelayedToString(argsCnt), "."});
+            }
+            for (int i = 0; i < argsCnt; i++) {
+                Expression argValueExp = (Expression) positionalArgs.get(i);
+                TemplateModel argValue = argValueExp.eval(this);
+                try {
+                    if (i < argNames.length) {
+                        String argName = argNames[i];
+                        macroCtx.setLocalVar(argName, argValue);
+                    } else {
+                        catchAllParamValue.add(argValue);
+                    }
+                } catch (RuntimeException re) {
+                    throw new _MiscTemplateException(re, this);
+                }
+            }
+        }
+    }
     
+    /**
+     * Defines the given macro in the current namespace (doesn't call it).
+     */
     void visitMacroDef(Macro macro) {
         macroToNamespaceLookup.put(macro, currentNamespace);
         currentNamespace.put(macro.getName(), macro);
@@ -724,7 +822,7 @@ public final class Environment extends Configurable {
         for (int i=0; i<children.size(); i++) {
             TemplateNodeModel child = (TemplateNodeModel) children.get(i);
             if (child != null) {
-                visit(child, namespaces);
+                invokeNodeHandlerFor(child, namespaces);
             }
         }
     }
@@ -1663,33 +1761,36 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the main name-space.
-     * This is correspondent of FTL <code>.main</code> hash.
+     * Returns the main namespace.
+     * This corresponds to the FTL {@code .main} hash.
      */
     public Namespace getMainNamespace() {
         return mainNamespace;
     }
 
     /**
-     * Returns the main name-space.
-     * This is correspondent of FTL <code>.namespace</code> hash.
+     * Returns the current namespace.
+     * This corresponds to the FTL {@code .namespace} hash.
+     * Initially, the current name space is the main namespace, but when inside an {@code #import}-ed template, it will
+     * change to the namespace of that import. Note that {@code #include} doesn't affect the namespace, so if you are
+     * in an {@code #import}-ed template and then from there do an {@code #include}, the current namespace will remain
+     * the namespace of the {@code #import}.  
      */
     public Namespace getCurrentNamespace() {
         return currentNamespace;
     }
     
     /**
-     * Returns a fictitious name-space that contains the globally visible variables
-     * that were created in the template, but not the variables of the data-model.
-     * There is no such thing in FTL; this strange method was added because of the
-     * JSP taglib support, since this imaginary name-space contains the page-scope
-     * attributes.
+     * Returns the name-space that contains the globally visible non-data-model variables
+     * (usually created with {@code &lt;#global ...&gt;}).
      */
     public Namespace getGlobalNamespace() {
         return globalNamespace;
     }
     
-    
+    /**
+     * Returns the data-model (also known as the template context in some other template engines).
+     */
     public TemplateHashModel getDataModel() {
     	final TemplateHashModel result = new TemplateHashModel() {
             public boolean isEmpty() {
@@ -1960,17 +2061,26 @@ public final class Environment extends Configurable {
     public void include(Template includedTemplate)
     throws TemplateException, IOException
     {
-        Template prevTemplate = getTemplate();
-        setParent(includedTemplate);
+        final Template prevTemplate;
+        final boolean parentReplacementOn = isIcI2322OrLater();
+        if (parentReplacementOn) {
+            prevTemplate = getTemplate();
+            setParent(includedTemplate);
+        } else {
+            prevTemplate = null;
+        }
+        
         importMacros(includedTemplate);
         try {
             visit(includedTemplate.getRootTreeNode());
         }
         finally {
-            setParent(prevTemplate);
+            if (parentReplacementOn) {
+                setParent(prevTemplate);
+            }
         }
     }
-    
+
     /**
      * Emulates <code>import</code> directive, except that <code>name</code> must be tempate
      * root relative.
@@ -2160,6 +2270,10 @@ public final class Environment extends Configurable {
         }
     };
     
+    private boolean isIcI2322OrLater() {
+        return getConfiguration().getIncompatibleImprovements().intValue() < _TemplateAPI.VERSION_INT_2_3_22;
+    }
+
     /**
      * See {@link #setFastInvalidReferenceExceptions(boolean)}. 
      */
