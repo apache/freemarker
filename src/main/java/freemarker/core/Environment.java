@@ -245,19 +245,15 @@ public final class Environment extends Configurable {
      * {@link TemplateDirectiveModel} and {@link TemplateTransformModel} and macro calls), and when those are called
      * from a template with the {@code <@...>} syntax. This should only be called from the
      * {@link TemplateDirectiveModel} that was invoked with {@code <@...>}. Otherwise it might gives you a different
-     * result than as you expected. For example, currently, directives like {@code #if} aren't visible by this method,
-     * so you will see the closes custom directive call, but later that might changes. 
+     * result, like right now usually a {@code null}. 
      * 
      * @since 2.3.22
      */
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
-        for (int i = instructionStack.size() -1; i >= 0; i--) {
-            TemplateElement te = (TemplateElement) instructionStack.get(i);
-            if (te instanceof UnifiedCall) {
-                return (UnifiedCall) te;
-            }
-        }
-        return null;
+        int ln = instructionStack.size();
+        if (ln == 0) return null;
+        TemplateElement te = (TemplateElement) instructionStack.get(ln - 1);
+        return te instanceof UnifiedCall ? (UnifiedCall) te : null;
     }
     
     /**

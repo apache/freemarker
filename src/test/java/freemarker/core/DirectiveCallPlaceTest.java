@@ -36,12 +36,10 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 "<@pa />\n"
                 + "..<@pa\n"
                 + "/><@pa>xxx</@>\n"
-                + "<@pa>{<@pa/> <@pa/>}</@>");
-        tl.putTemplate(
-                "callPlaceAvilability.ftl",
-                "<#macro m><#nested></#macro>"
-                + "${curDirLine}<@dummy>${curDirLine}<#if true>${curDirLine}</#if></@dummy>${curDirLine}\n"
-                + "<@m>${curDirLine}</@m>${curDirLine}");
+                + "<@pa>{<@pa/> <@pa/>}</@>\n"
+                + "${curDirLine}<@argP p=curDirLine>${curDirLine}</@argP>${curDirLine}\n"
+                + "<#macro m p>(p=${p}){<#nested>}</#macro>\n"
+                + "${curDirLine}<@m p=curDirLine>${curDirLine}</@m>${curDirLine}");
         cfg.setTemplateLoader(tl);
     }
     
@@ -76,17 +74,10 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 "[positions.ftl:1:1-1:7]"
                 + "..[positions.ftl:2:3-3:2]"
                 + "[positions.ftl:3:3-3:14]xxx\n"
-                + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}"
+                + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}\n"
+                + "-(p=5){-}-\n"
+                + "-(p=-){-}-"
                 );
-    }
-    
-    @Test
-    public void testCallPlaceAvilability() throws IOException, TemplateException {
-        setConfiguration(cfg);
-        assertOutputForNamed(
-                "callPlaceAvilability.ftl",
-                "[-][1][1][-]\n"
-                + "[2][-]");
     }
     
     @SuppressWarnings("boxing")
@@ -96,7 +87,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         dm.put("uc", new CachingUpperCaseDirective());
         dm.put("lc", new CachingLowerCaseDirective());
         dm.put("pa", new PositionAwareDirective());
-        dm.put("dummy", new DummyDirective());
+        dm.put("argP", new ArgPrinterDirective());
         dm.put("curDirLine", new CurDirLineScalar());
         dm.put("x", 123);
         return dm;
@@ -207,12 +198,20 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         
     }
 
-    private static class DummyDirective implements TemplateDirectiveModel {
+    private static class ArgPrinterDirective implements TemplateDirectiveModel {
 
         public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                 throws TemplateException, IOException {
+            final Writer out = env.getOut();
+            if (params.size() > 0) {
+                out.write("(p=");
+                out.write(((TemplateScalarModel) params.get("p")).getAsString());
+                out.write(")");
+            }
             if (body != null) {
-                body.render(env.getOut());
+                out.write("{");
+                body.render(out);
+                out.write("}");
             }
         }
         
@@ -223,8 +222,8 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         public String getAsString() throws TemplateModelException {
             DirectiveCallPlace callPlace = Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace();
             return callPlace != null
-                    ? "[" + Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace().getBeginLine() + "]"
-                    : "[-]";
+                    ? String.valueOf(Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace().getBeginLine())
+                    : "-";
         }
         
     }
