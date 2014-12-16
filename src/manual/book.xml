@@ -21678,6 +21678,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Removed all the <literal>xsd</literal> files
+                  (<literal>web-app</literal> and <literal>taglib</literal>
+                  schemas) from the FreeMarker artifact and from the XML
+                  entity resolver, as they were unused during XML
+                  parsing.</para>
+                </listitem>
+
+                <listitem>
                   <para>Generally improved implementation quality at some
                   parts (maintainability, error messages, performance bug
                   fixes, test coverage).</para>

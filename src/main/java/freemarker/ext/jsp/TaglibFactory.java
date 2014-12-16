@@ -1847,20 +1847,12 @@ public class TaglibFactory implements TemplateHashModel {
         private static final Map DTDS = new HashMap();
         static
         {
-            // JSP taglib 2.1
-            DTDS.put("http://java.sun.com/xml/ns/jee/web-jsptaglibrary_2_1.xsd", "web-jsptaglibrary_2_1.xsd");
-            // JSP taglib 2.0
-            DTDS.put("http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd", "web-jsptaglibrary_2_0.xsd");
             // JSP taglib 1.2
             DTDS.put("-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN", "web-jsptaglibrary_1_2.dtd");
             DTDS.put("http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd", "web-jsptaglibrary_1_2.dtd");
             // JSP taglib 1.1
             DTDS.put("-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN", "web-jsptaglibrary_1_1.dtd");
             DTDS.put("http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd", "web-jsptaglibrary_1_1.dtd");
-            // Servlet 2.5
-            DTDS.put("http://java.sun.com/xml/ns/jee/web-app_2_5.xsd", "web-app_2_5.xsd");
-            // Servlet 2.4
-            DTDS.put("http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd", "web-app_2_4.xsd");
             // Servlet 2.3
             DTDS.put("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN", "web-app_2_3.dtd");
             DTDS.put("http://java.sun.com/dtd/web-app_2_3.dtd", "web-app_2_3.dtd");
