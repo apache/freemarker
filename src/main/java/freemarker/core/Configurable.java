@@ -1412,7 +1412,7 @@ public class Configurable
         
         private UnknownSettingException(Environment env, String name, String correctedName) {
             super(env, new Object[] {
-                    "Unknown setting: ", new _DelayedJQuote(name),
+                    "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
                             ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
@@ -1429,7 +1429,7 @@ public class Configurable
         
         private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
             super(cause, env, new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(name),
+                    "Failed to set FreeMarker configuration setting ", new _DelayedJQuote(name),
                     " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
         

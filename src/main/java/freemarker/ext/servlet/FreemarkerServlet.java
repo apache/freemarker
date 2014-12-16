@@ -155,7 +155,6 @@ import freemarker.template.utility.StringUtil;
  * 
  * </ul>
  */
-
 public class FreemarkerServlet extends HttpServlet
 {
     private static final Logger LOG = Logger.getLogger("freemarker.servlet");
@@ -301,51 +300,69 @@ public class FreemarkerServlet extends HttpServlet
     private boolean noCharsetInContentType;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
-    
+
     public void init() throws ServletException {
         try {
-            config = createConfiguration();
-            
-            // Only override what's coming from the config if it was explicitly specified: 
-            final String iciInitParamValue = getInitParameter(Configuration.INCOMPATIBLE_IMPROVEMENTS);
-            if (iciInitParamValue != null) {
+            initialize();
+        } catch (Exception e) {
+            // At least Jetty doesn't log the ServletException itself, only its cause exception. Thus we add some
+            // message here that (re)states the obvious.
+            throw new ServletException("Error while initializing " + this.getClass().getName()
+                    + " servlet; see cause exception.", e);
+        }
+    }
+    
+    private void initialize() throws InitParamValueException, MalformedWebXmlException, ConflictingInitParamsException {
+        config = createConfiguration();
+        
+        // Only override what's coming from the config if it was explicitly specified: 
+        final String iciInitParamValue = getInitParameter(Configuration.INCOMPATIBLE_IMPROVEMENTS);
+        if (iciInitParamValue != null) {
+            try {
                 config.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, iciInitParamValue);
+            } catch (Exception e) {
+                throw new InitParamValueException(Configuration.INCOMPATIBLE_IMPROVEMENTS, iciInitParamValue, e);
             }
-            
-            // Set defaults:
-            config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-            contentType = DEFAULT_CONTENT_TYPE;
-            
-            // Process object_wrapper init-param out of order: 
-            wrapper = createObjectWrapper();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Using object wrapper: " + wrapper);
-            }
-            config.setObjectWrapper(wrapper);
-            
-            // Process TemplatePath init-param out of order:
-            templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
-            if (templatePath == null)
-                templatePath = "class://";
+        }
+        
+        // Set defaults:
+        config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        contentType = DEFAULT_CONTENT_TYPE;
+        
+        // Process object_wrapper init-param out of order: 
+        wrapper = createObjectWrapper();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Using object wrapper: " + wrapper);
+        }
+        config.setObjectWrapper(wrapper);
+        
+        // Process TemplatePath init-param out of order:
+        templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
+        if (templatePath == null)
+            templatePath = "class://";
+        try {
             config.setTemplateLoader(createTemplateLoader(templatePath));
+        } catch (Exception e) {
+            throw new InitParamValueException(INIT_PARAM_TEMPLATE_PATH, templatePath, e);
+        }
 
-            // Process all other init-params:
-            Enumeration initpnames = getServletConfig().getInitParameterNames();
-            while (initpnames.hasMoreElements()) {
-                String name = (String) initpnames.nextElement();
-                String value = getInitParameter(name);
-                
-                if (name == null) {
-                    throw new ServletException(
-                            "init-param without param-name. "
-                            + "Maybe the web.xml is not well-formed?");
-                }
-                if (value == null) {
-                    throw new ServletException(
-                            "init-param without param-value. "
-                            + "Maybe the web.xml is not well-formed?");
-                }
-                
+        // Process all other init-params:
+        Enumeration initpnames = getServletConfig().getInitParameterNames();
+        while (initpnames.hasMoreElements()) {
+            final String name = (String) initpnames.nextElement();
+            final String value = getInitParameter(name);
+            if (name == null) {
+                throw new MalformedWebXmlException(
+                        "init-param without param-name. "
+                        + "Maybe the web.xml is not well-formed?");
+            }
+            if (value == null) {
+                throw new MalformedWebXmlException(
+                        "init-param " + StringUtil.jQuote(value) + " without param-value. "
+                        + "Maybe the web.xml is not well-formed?");
+            }
+            
+            try {
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(Configurable.OBJECT_WRAPPER_KEY)
                         || name.equals(INIT_PARAM_TEMPLATE_PATH)
@@ -353,18 +370,14 @@ public class FreemarkerServlet extends HttpServlet
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
                     if (getInitParameter(Configuration.DEFAULT_ENCODING_KEY) != null) {
-                        throw new ServletException(
-                                "Conflicting init-params: "
-                                + Configuration.DEFAULT_ENCODING_KEY + " and "
-                                + DEPR_INITPARAM_ENCODING);
+                        throw new ConflictingInitParamsException(
+                                Configuration.DEFAULT_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
                     }
                     config.setDefaultEncoding(value);
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_DELAY)) { // BC
                     if (getInitParameter(Configuration.TEMPLATE_UPDATE_DELAY_KEY) != null) {
-                        throw new ServletException(
-                                "Conflicting init-params: "
-                                + Configuration.TEMPLATE_UPDATE_DELAY_KEY + " and "
-                                + DEPR_INITPARAM_TEMPLATE_DELAY);
+                        throw new ConflictingInitParamsException(
+                                Configuration.TEMPLATE_UPDATE_DELAY_KEY, DEPR_INITPARAM_TEMPLATE_DELAY);
                     }
                     try {
                         config.setTemplateUpdateDelay(Integer.parseInt(value));
@@ -373,12 +386,10 @@ public class FreemarkerServlet extends HttpServlet
                     }
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER)) { // BC
                     if (getInitParameter(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY) != null) {
-                        throw new ServletException(
-                                "Conflicting init-params: "
-                                + Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY + " and "
-                                + DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
+                        throw new ConflictingInitParamsException(
+                                Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
                     }
-
+    
                     if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
                         config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
@@ -388,18 +399,14 @@ public class FreemarkerServlet extends HttpServlet
                     } else if  (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
                         config.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
                     } else {
-                        throw new ServletException(
-                                "Invalid value for servlet init-param "
-                                + DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER + ": " + value);
+                        throw new InitParamValueException(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER, value,
+                                "Not one of the supported values.");
                     }
                 } else if (name.equals(INIT_PARAM_NO_CACHE)) {
                     nocache = StringUtil.getYesNo(value);
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
                     if (getInitParameter(INIT_PARAM_DEBUG) != null) {
-                        throw new ServletException(
-                                "Conflicting init-params: "
-                                + INIT_PARAM_DEBUG + " and "
-                                + DEPR_INITPARAM_DEBUG);
+                        throw new ConflictingInitParamsException(INIT_PARAM_DEBUG, DEPR_INITPARAM_DEBUG);
                     }
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_DEBUG)) {
@@ -413,26 +420,26 @@ public class FreemarkerServlet extends HttpServlet
                 } else {
                     config.setSetting(name, value);
                 }
-            } // while initpnames
-            
-            noCharsetInContentType = true;
-            int i = contentType.toLowerCase().indexOf("charset=");
-            if (i != -1) {
-                char c = ' ';
-                i--;
-                while (i >= 0) {
-                    c = contentType.charAt(i);
-                    if (!Character.isWhitespace(c)) break;
-                    i--;
-                }
-                if (i == -1 || c == ';') {
-                    noCharsetInContentType = false;
-                }
+            } catch (ConflictingInitParamsException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new InitParamValueException(name, value, e);
             }
-        } catch (ServletException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ServletException("Error during servlet initialization", e);
+        } // while initpnames
+        
+        noCharsetInContentType = true;
+        int i = contentType.toLowerCase().indexOf("charset=");
+        if (i != -1) {
+            char c = ' ';
+            i--;
+            while (i >= 0) {
+                c = contentType.charAt(i);
+                if (!Character.isWhitespace(c)) break;
+                i--;
+            }
+            if (i == -1 || c == ';') {
+                noCharsetInContentType = false;
+            }
         }
     }
 
@@ -463,7 +470,7 @@ public class FreemarkerServlet extends HttpServlet
             } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLEAR)) {
                 metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
             } else {
-                throw new ParseException("Item has no recognized source type prefix: " + value, -1);
+                throw new ParseException("Item has no recognized source type prefix: " + itemStr, -1);
             }
             if (metaInfTldSources == null) {
                 metaInfTldSources = new ArrayList();
@@ -1004,7 +1011,7 @@ public class FreemarkerServlet extends HttpServlet
             if (s.length() != 0) {
                 valuesList.add(s);
             } else if (i != values.length - 1) {
-                throw new ParseException("Missing list item at index " + i, -1);
+                throw new ParseException("Missing list item after a comma", -1);
             }
         }
         return valuesList;
@@ -1018,4 +1025,37 @@ public class FreemarkerServlet extends HttpServlet
         }
         return patterns;
     }
+    
+    private static class InitParamValueException extends Exception {
+        
+        InitParamValueException(String initParamName, String initParamValue, Throwable casue) {
+            super("Failed to set the " + StringUtil.jQuote(initParamName) + " servlet init-param to "
+                    + StringUtil.jQuote(initParamValue) + "; see cause exception.",
+                    casue);
+        }
+
+        public InitParamValueException(String initParamName, String initParamValue, String cause) {
+            super("Failed to set the " + StringUtil.jQuote(initParamName) + " servlet init-param to "
+                    + StringUtil.jQuote(initParamValue) + ": " + cause);
+        }
+        
+    }
+    
+    private static class ConflictingInitParamsException extends Exception {
+        
+        ConflictingInitParamsException(String recommendedName, String otherName) {
+            super("Conflicting servlet init-params: "
+                    + StringUtil.jQuote(recommendedName) + " and " + StringUtil.jQuote(otherName)
+                    + ". Only use " + StringUtil.jQuote(recommendedName) + ".");
+        }
+    }
+
+    private static class MalformedWebXmlException extends Exception {
+
+        MalformedWebXmlException(String message) {
+            super(message);
+        }
+        
+    }
+    
 }
