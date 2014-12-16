@@ -193,7 +193,8 @@ public class TaglibFactory implements TemplateHashModel {
                         // Per spec., absolute URI-s can only be resolved through explicit mapping
                         throw new TaglibGettingException("No TLD was found for the "
                                 + StringUtil.jQuoteNoXSS(taglibUri) + " JSP taglib URI. (TLD-s are searched according "
-                                + "the JSP 2.2 specification. In development environments you may want to use the "
+                                + "the JSP 2.2 specification. In development- and embedded-servlet-container "
+                                + "setups you may also need the "
                                 + "\"" + FreemarkerServlet.INIT_PARAM_META_INF_TLD_LOCATIONS + "\" and "
                                 + "\"" + FreemarkerServlet.INIT_PARAM_CLASSPATH_TLDS + "\" "
                                 + FreemarkerServlet.class.getName() + " init-params or the similar system "
@@ -418,6 +419,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         Set/*<URLWithExternalForm>*/ cpMetaInfDirUrlsWithEF = null;
         
+        // Skip past the last "clear":
         int srcIdxStart = 0;
         for (int i = metaInfTldSources.size() - 1; i >= 0; i--) {
             if (metaInfTldSources.get(i) instanceof ClearMetaInfTldSource) {
@@ -425,6 +427,7 @@ public class TaglibFactory implements TemplateHashModel {
                 break;
             }
         }
+        
         for (int srcIdx = srcIdxStart; srcIdx < metaInfTldSources.size(); srcIdx++) {
             MetaInfTldSource miTldSource = (MetaInfTldSource) metaInfTldSources.get(srcIdx);
             
@@ -461,7 +464,7 @@ public class TaglibFactory implements TemplateHashModel {
                     if (cpMiTldLocation.getRootContainerPattern().matcher(rootContainerUrl).matches()) {
                         final File urlAsFile = urlToFileOrNull(url);
                         if (urlAsFile != null) {
-                            addTldLocationsFromFileDirectory(urlAsFile);
+                            addTldLocationsFromFileDirectory(urlAsFile, true);
                         } else if (isJarUrl) {
                             addTldLocationsFromJarDirectoryEntryURL(url, true);
                         } else {
@@ -479,7 +482,10 @@ public class TaglibFactory implements TemplateHashModel {
     }
     
     private void addTldLocationsFromWebInfPerLibJarMetaInfTlds() throws IOException, SAXException {
-        LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.{jar,zip}" + META_INF_ABS_PATH + "*.tld");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.{jar,zip}" + META_INF_ABS_PATH
+                    + "*.tld");
+        }
 
         Set libEntPaths = servletContext.getResourcePaths("/WEB-INF/lib");
         if (libEntPaths != null) {
@@ -706,7 +712,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
     }
 
-    private void addTldLocationsFromFileDirectory(final File dir) throws IOException, SAXException {
+    private void addTldLocationsFromFileDirectory(final File dir, boolean skipWrongTLDs) throws IOException, SAXException {
         if (dir.isDirectory()) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Scanning for *.tld-s in File directory: " + StringUtil.jQuoteNoXSS(dir));
@@ -719,7 +725,16 @@ public class TaglibFactory implements TemplateHashModel {
     
             });
             for (int i = 0; i < tldFiles.length; i++) {
-                addTldLocationFromTld(new FileTldLocation(tldFiles[i]));
+                final File file = tldFiles[i];
+                try {
+                    addTldLocationFromTld(new FileTldLocation(file));
+                } catch (SAXException e) {
+                    if (skipWrongTLDs) {
+                        LOG.error("Error while parsing TLD - skipping: " + file, e);
+                    } else {
+                        throw e;
+                    }
+                }
             }
         } else {
             LOG.warn("Skipped scanning for *.tld for non-existent directory: " + StringUtil.jQuoteNoXSS(dir));
@@ -1048,9 +1063,13 @@ public class TaglibFactory implements TemplateHashModel {
     private static URL tryCreateServletContextJarEntryUrl(
             ServletContext servletContext, final String servletContextJarFilePath, final String entryPath) {
         try {
+            final URL jarFileUrl = servletContext.getResource(servletContextJarFilePath);
+            if (jarFileUrl == null) {
+                throw new IOException("Servlet context resource not found: " + servletContextJarFilePath);
+            }
             return new URL(
                     "jar:"
-                    + toUri(servletContext.getResource(servletContextJarFilePath))
+                    + toUri(jarFileUrl)
                     + JAR_URL_ENTRY_PATH_START
                     + URLEncoder.encode(
                             entryPath.startsWith("/") ? entryPath.substring(1) : entryPath,
@@ -1338,7 +1357,8 @@ public class TaglibFactory implements TemplateHashModel {
             try {
                 rawIn = fallbackRawJarContentInputStreamFactory.getInputStream();
                 if (rawIn == null) {
-                    throw new IOException("Raw jar's InputStreamFactory has returned null.");
+                    throw new IOException("Jar's InputStreamFactory (" + fallbackRawJarContentInputStreamFactory
+                            + ") says the resource doesn't exist.");
                 }
                 zipIn = new ZipInputStream(rawIn);
                 while (true) {

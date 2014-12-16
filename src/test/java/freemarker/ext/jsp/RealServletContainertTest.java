@@ -54,7 +54,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             // Because of emulateNoUrlToFileConversions = true it won't be able to list the directories, so:
             System.setProperty(
                     FreemarkerServlet.SYSTEM_PROPERTY_CLASSPATH_TLDS,
-                    "META-INF/tldDiscovery-MetaInfTldSources-1.tld");
+                    "META-INF/tldDiscovery MetaInfTldSources-1.tld");
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
             assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.ftl");
         } finally {

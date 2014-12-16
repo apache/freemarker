@@ -47,10 +47,10 @@ bar
 <#assign tl3 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-foo"]>
 <@tl3.testtag></@>
 <!-- Test loading from root-relative URL -->
-<#assign tl4 = JspTaglibs["/WEB-INF/taglib2.jar"]>
+<#assign tl4 = JspTaglibs["/WEB-INF/taglib 2.jar"]>
 <@tl4.testtag></@>
 <!-- Test loading from non-root-relative URL -->
-<#assign tl5 = JspTaglibs["WEB-INF/taglib2.jar"]>
+<#assign tl5 = JspTaglibs["WEB-INF/taglib 2.jar"]>
 <@tl5.testtag></@>
 <!-- Test loading from autodeployed .tld -->
 <#assign tl6 = JspTaglibs["http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-autodeploy-tld-2"]>
