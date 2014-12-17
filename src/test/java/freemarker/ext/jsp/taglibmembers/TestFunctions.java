@@ -1,5 +1,10 @@
 package freemarker.ext.jsp.taglibmembers;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.google.common.collect.ImmutableMap;
+
 public final class TestFunctions {
     
     private TestFunctions() {
@@ -22,6 +27,34 @@ public final class TestFunctions {
         final int signum = i >= 0 ? 1 : -1;
         String s = reverse(Integer.toString(i  * signum, radix));
         return Integer.parseInt(s, radix) * signum;
+    }
+    
+    public static long sum(int... xs) {
+        long sum = 0;
+        for (int x : xs) {
+            sum += x;
+        }
+        return sum;
+    }
+
+    @SuppressWarnings("boxing")
+    public static String sum(Map<String, Integer> m) {
+        long sum = 0;
+        StringBuilder keys = new StringBuilder(); 
+        for (Entry<String, Integer> e : m.entrySet()) {
+            keys.append(e.getKey());
+            sum += e.getValue();
+        }
+        return keys.append('=').append(sum).toString();
+    }
+    
+    public static int[] testArray() {
+        return new int[] { 1, 2, 3 };
+    }
+
+    @SuppressWarnings("boxing")
+    public static Map<String, Integer> testMap() {
+        return ImmutableMap.<String, Integer>of("a", 1, "b", 2, "c", 3);
     }
     
 }

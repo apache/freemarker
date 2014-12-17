@@ -28,8 +28,9 @@ public class RealServletContainertTest extends WebAppTestCase {
     
     @Test
     public void elFunctions() throws Exception {
-        System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.ftl"));
-        //assertJSPAndFTLOutputEquals(WEBAPP_EL_FUNCTIONS, "tester?view=1");
+        //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.jsp"));
+        //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.ftl"));
+        assertJSPAndFTLOutputEquals(WEBAPP_EL_FUNCTIONS, "tester?view=1");
     }
 
     @Test
