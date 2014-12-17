@@ -8652,6 +8652,22 @@ TemplateHashModel roundingModeEnums =
           <primary>SLF4J</primary>
         </indexterm>
 
+        <indexterm>
+          <primary>Log4j2</primary>
+        </indexterm>
+
+        <para>Is short, the recommended setup in contemporary application (as
+        of 2015) is using SLF4J API for logging everywhere. To get FreeMarker
+        2.3.x. to use SLF4J, simply add the
+        <literal>org.slf4j:log4j-over-slf4j</literal> dependency to your
+        project, and ensure that <literal>log4j:log4j</literal> isn't present.
+        (Starting from FreeMarker 2.4.x you don't need
+        <literal>log4j-over-slf4j</literal> anymore, though it does no harm
+        either.)</para>
+
+        <para>Read on if you are curious about the details, or if you can't
+        use SLF4J...</para>
+
         <para>FreeMarker integrates with the following logging libraries:
         <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
         xlink:href="http://commons.apache.org/logging/">Apache Commons
@@ -8661,19 +8677,30 @@ TemplateHashModel roundingModeEnums =
         LogKit</link>, and <link
         xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
         By default, FreeMarker will look for the these logging libraries in
-        the following order, and will automatically use the first one it
-        finds: <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
-        </remark>Log4J (will use SLF4J instead if it's a properly installed
-        <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache Avalon
-        LogKit, <literal>java.util.logging</literal>.</para>
+        the following order, and will automatically use the first one it finds
+        (in 2.3.x): <remark>[2.4 - un-remark this] SLF4J, Apache Commons
+        Logging, </remark>Log4J (will use SLF4J instead if it's a properly
+        installed <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache
+        Avalon LogKit, <literal>java.util.logging</literal>. As you can see,
+        Log4j has the highest priority. The presence of Log4j is simply
+        detected from the presence of the
+        <literal>org.apache.log4j.Logger</literal> class, which means that
+        Log4j redirections like <literal>log4j-over-slf4j</literal> or
+        <literal>log4j-1.2-api</literal> will also get the highest
+        priority.</para>
 
         <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging aren't
         searched automatically due to backward compatibility constraints. But
-        if you have <literal>log4j-over-slf4j</literal> properly installed
-        (means, you have no real Log4j in your class path, and SLF4J has a
-        backing implementation like <literal>logback-classic</literal>), then
-        FreeMarker will use SLF4J directly instead of Log4j (since FreeMarker
-        2.3.22).</para>
+        if you have <literal>org.slf4j:log4j-over-slf4j</literal> properly
+        installed (means, you have no real Log4j in your class path, and SLF4J
+        has a backing implementation like <literal>logback-classic</literal>),
+        then FreeMarker will use the SLF4J API directly instead of the Log4j
+        API (since FreeMarker 2.3.22).</para>
+
+        <para>Note that a similar trick can be applied for logging into
+        Log4j2: If <literal>org.apache.logging.log4j:log4j-1.2-api</literal>
+        is present, FreeMarker 2.3.x will pick that as it looks like Log4j,
+        but all the messages will actually go to Log4j2.</para>
 
         <para>If the auto detection doesn't give you the result that you want,
         you can set the <literal>org.freemarker.loggerLibrary</literal> system
@@ -8693,11 +8720,11 @@ TemplateHashModel roundingModeEnums =
 
         <para>Using SLF4J is recommended, as it works best with FreeMarker,
         and also because it will be the highest priority auto detected logger
-        starting from FreeMarker 2.4 anyway.</para>
+        starting from FreeMarker 2.4.</para>
 
-        <para>All log messages produced by FreeMarker are logged into the
-        logger hierarchy whose top-level logger is named
-        <literal>freemarker</literal>. Currently used loggers are:</para>
+        <para>All log messages produced by FreeMarker are logged with a logger
+        category that starts with <literal>freemarker.</literal>. The
+        currently used logger categories are:</para>
 
         <informaltable border="1">
           <thead>
