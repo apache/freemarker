@@ -3,28 +3,13 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
   <tlib-version>3.0</tlib-version>
   <short-name>FreeMarker-test-taglib</short-name>
-
-  <tag>
-    <name>testtag</name>
-    <tag-class>freemarker.ext.jsp.taglibmembers.TestTag</tag-class>
-    <body-content>JSP</body-content>
-  </tag>
-
-  <tag>
-    <name><!-- white space -->
-      simpletag<!-- white space -->
-    </name>
-    <tag-class><!-- white space -->
-      freemarker.ext.jsp.taglibmembers.TestSimpleTag<!-- white space -->
-    </tag-class>
-    <body-content>JSP</body-content>
-  </tag>
+  <uri>http://freemarker.org/test/taglibs/el-functions</uri>
 
   <function>
     <description>Reverses a string</description>
     <name>reverse</name>
     <function-class>freemarker.ext.jsp.taglibmembers.TestFunctions</function-class>
-    <function-signature>java.lang.String reverse(java.lang.String)</function-signature>
+    <function-signature>JasperIgnoresThisTypeAnSoShallWe reverse(java.lang.String)</function-signature>
   </function>
 
   <function>
@@ -36,8 +21,22 @@
 
   <function>
     <description>Reverses an int assuming the given radix</description>
-    <name>reverseIntRadix</name>
-    <function-class>freemarker.ext.jsp.taglibmembers.TestFunctions</function-class>
-    <function-signature>int reverse(int, int)</function-signature>
+    <name><!-- white space -->
+      reverseIntRadix<!-- white space -->
+    </name>
+    <function-class><!-- white space -->
+      freemarker.ext.jsp.taglibmembers.TestFunctions<!-- white space -->
+    </function-class>
+    <function-signature><!-- white space -->
+      int reverse(int, int)<!-- white space -->
+    </function-signature>
   </function>
+
+  <function>
+    <description>Calculates the hypotenuse of a right angle triangle</description>
+    <name>hypotenuse</name>
+    <function-class>freemarker.ext.jsp.taglibmembers.EnclosingClass$NestedClass</function-class>
+    <function-signature>double hypotenuse(double, double)</function-signature>
+  </function>
+
 </taglib>

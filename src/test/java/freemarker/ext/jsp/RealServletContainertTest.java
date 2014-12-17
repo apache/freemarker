@@ -12,6 +12,7 @@ import freemarker.test.servlet.WebAppTestCase;
 public class RealServletContainertTest extends WebAppTestCase {
 
     private static final String WEBAPP_BASIC = "basic";
+    private static final String WEBAPP_EL_FUNCTIONS = "elFunctions";
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";
 
     @Test
@@ -21,8 +22,14 @@ public class RealServletContainertTest extends WebAppTestCase {
     
     @Ignore  // c:forEach fails because of EL context issues
     @Test
-    public void test2() throws Exception {
+    public void basic1JSTL() throws Exception {
         assertOutputsEqual(WEBAPP_BASIC, "tester?view=1.jsp", "tester?view=1-jstl.ftl");        
+    }
+    
+    @Test
+    public void elFunctions() throws Exception {
+        System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.ftl"));
+        //assertJSPAndFTLOutputEquals(WEBAPP_EL_FUNCTIONS, "tester?view=1");
     }
 
     @Test
