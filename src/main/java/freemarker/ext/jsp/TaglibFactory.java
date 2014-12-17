@@ -1683,29 +1683,23 @@ public class TaglibFactory implements TemplateHashModel {
             if (stack.size() == 3) {
                 if (E_NAME.equals(qName)) {
                     if (E_TAG.equals(stack.get(1))) {
-                        tagNameCData = cDataCollector.toString();
-                        cDataCollector = null;
+                        tagNameCData = pullCData();
                     }
                     else if (E_FUNCTION.equals(stack.get(1))) {
-                        functionNameCData = cDataCollector.toString();
-                        cDataCollector = null;
+                        functionNameCData = pullCData();
                     }
                 }
                 else if (E_TAG_CLASS_LEGACY.equals(qName) || E_TAG_CLASS.equals(qName)) {
-                    tagClassCData = cDataCollector.toString();
-                    cDataCollector = null;
+                    tagClassCData = pullCData();
                 }
                 else if (E_LISTENER_CLASS.equals(qName)) {
-                    listenerClassCData = cDataCollector.toString();
-                    cDataCollector = null;
+                    listenerClassCData = pullCData();
                 }
                 else if (E_FUNCTION_CLASS.equals(qName)) {
-                    functionClassCData = cDataCollector.toString();
-                    cDataCollector = null;
+                    functionClassCData = pullCData();
                 }
                 else if (E_FUNCTION_SIGNATURE.equals(qName)) {
-                    functionSignatureCData = cDataCollector.toString();
-                    cDataCollector = null;
+                    functionSignatureCData = pullCData();
                 }
             } else if (stack.size() == 2) {
                 if (E_TAG.equals(qName)) {
@@ -1797,6 +1791,12 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             stack.pop();
+        }
+        
+        private String pullCData() {
+            String r = cDataCollector.toString().trim();
+            cDataCollector = null;
+            return r;
         }
 
         private void checkChildElementNotNull(String parentElementName, String childElementName, String value)

@@ -21689,6 +21689,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Bug fixed: Leading and trailing whitespace in TLD-s
+                  inside the <literal>name</literal> and
+                  <literal>tag-class</literal> elements is now removed.</para>
+                </listitem>
+
+                <listitem>
                   <para>Unwanted behavior fixed: In case multiple TLD-s map to
                   the same tag library URI, now
                   <literal>WEB-INF/**/*.tld</literal>-s has priority over
