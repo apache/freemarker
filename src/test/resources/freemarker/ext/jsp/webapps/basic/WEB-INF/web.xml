@@ -31,6 +31,10 @@
 			<param-name>ContentType</param-name>
 			<param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
 		</init-param>
+        <init-param>
+            <param-name>BufferSize</param-name>
+            <param-value>128 KB</param-value>
+        </init-param>
 
 		<!-- FreeMarker settings: -->
 		<init-param>

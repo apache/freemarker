@@ -123,6 +123,13 @@ import freemarker.template.utility.StringUtil;
  * setting can be overridden on a per-template basis by specifying a custom attribute named <tt>content_type</tt> in the
  * <tt>attributes</tt> parameter of the <tt>&lt;#ftl&gt;</tt> directive.</li>
  * 
+ * <li><strong>{@value #INIT_PARAM_BUFFER_SIZE}</strong>: Sets the size of the output buffer in bytes, or if "KB" or
+ * "MB" is written after the number (like {@code <param-value>256 KB</param-value>}) then in kilobytes or megabytes.
+ * This corresponds to {@link HttpServletResponse#setBufferSize(int)}. If the {@link HttpServletResponse} state doesn't
+ * allow changing the buffer size, it will silently do nothing. If this init param isn't specified, then the buffer size
+ * is not set by {@link FreemarkerServlet} in the HTTP response, which usually means that the default buffer size of the
+ * servlet container will be used.</li>
+ * 
  * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items which
  * are either: {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, {@value #META_INF_TLD_LOCATION_CLASSPATH}
  * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example
@@ -185,6 +192,13 @@ public class FreemarkerServlet extends HttpServlet
      */
     public static final String INIT_PARAM_CONTENT_TYPE = "ContentType";
 
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_BUFFER_SIZE = "BufferSize";
+    
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      * 
@@ -293,6 +307,7 @@ public class FreemarkerServlet extends HttpServlet
 
     private String templatePath;
     private boolean nocache;
+    private Integer bufferSize;
     protected boolean debug;
     private Configuration config;
     private ObjectWrapper wrapper;
@@ -404,6 +419,8 @@ public class FreemarkerServlet extends HttpServlet
                     }
                 } else if (name.equals(INIT_PARAM_NO_CACHE)) {
                     nocache = StringUtil.getYesNo(value);
+                } else if (name.equals(INIT_PARAM_BUFFER_SIZE)) {
+                    bufferSize = new Integer(parseSize(value));
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
                     if (getInitParameter(INIT_PARAM_DEBUG) != null) {
                         throw new ConflictingInitParamsException(INIT_PARAM_DEBUG, DEPR_INITPARAM_DEBUG);
@@ -526,6 +543,14 @@ public class FreemarkerServlet extends HttpServlet
         // Give chance to subclasses to perform preprocessing
         if (preprocessRequest(request, response)) {
             return;
+        }
+        
+        if (bufferSize != null && !response.isCommitted()) {
+            try {
+                response.setBufferSize(bufferSize.intValue());
+            } catch (IllegalStateException e) {
+                LOG.debug("Can't set buffer size any more,", e);
+            }
         }
 
         String path = requestUrlToTemplatePath(request);
@@ -1026,6 +1051,39 @@ public class FreemarkerServlet extends HttpServlet
         return patterns;
     }
     
+    private int parseSize(String value) throws ParseException {
+        int lastDigitIdx;
+        for (lastDigitIdx = value.length() - 1; lastDigitIdx >= 0; lastDigitIdx--) {
+            char c = value.charAt(lastDigitIdx);
+            if (c >= '0' && c <= '9') {
+                break;
+            }
+        }
+        
+        final int n = Integer.parseInt(value.substring(0, lastDigitIdx + 1).trim());
+        
+        final String unitStr = value.substring(lastDigitIdx + 1).trim().toUpperCase();
+        final int unit;
+        if (unitStr.length() == 0 || unitStr.equals("B")) {
+            unit = 1;
+        } else if (unitStr.equals("K") || unitStr.equals("KB") || unitStr.equals("KIB")) {
+            unit = 1024;
+        } else if (unitStr.equals("M") || unitStr.equals("MB") || unitStr.equals("MIB")) {
+            unit = 1024 * 1024;
+        } else {
+            throw new ParseException("Unknown unit: " + unitStr, lastDigitIdx + 1);
+        }
+        
+        long size = (long) n * unit;
+        if (size < 0) {
+            throw new IllegalArgumentException("Buffer size can't be negative");
+        }
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Buffer size can't bigger than " + Integer.MAX_VALUE);
+        }
+        return (int) size;
+    }
+
     private static class InitParamValueException extends Exception {
         
         InitParamValueException(String initParamName, String initParamValue, Throwable casue) {

@@ -21681,6 +21681,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Added new init-param, <literal>BufferSize</literal>.
+                  This sets the buffer size via
+                  <literal>HTTPServletResponse.setBufferSize()</literal> if
+                  the response state still allows that.</para>
+                </listitem>
+
+                <listitem>
                   <para>Bug fixed: Now <literal>*.tld</literal> files are
                   searched in <literal>WEB-INF/</literal> and in all its
                   subdirectories recursively. Earlier they were only searched
