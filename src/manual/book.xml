@@ -21620,6 +21620,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Bug fixed: Error message was unhelpful when there was
+                  a type mismatch between the actual and the expected type of
+                  a custom tag parameter. This was a very frequent problem of
+                  users who call JSP taglibs from FTL (the typical
+                  "java.lang.IllegalArgumentException: argument type
+                  mismatch", without any FTL context). Now it's a proper error
+                  with explanation, solution tip, and FTL error
+                  position/quotation.</para>
+                </listitem>
+
+                <listitem>
                   <para>RFE resolved [<link
                   xlink:href="https://sourceforge.net/p/freemarker/feature-requests/113/">113</link>]
                   [<link

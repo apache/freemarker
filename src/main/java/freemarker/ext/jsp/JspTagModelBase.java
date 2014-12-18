@@ -27,6 +27,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import freemarker.core._DelayedJQuote;
+import freemarker.core._DelayedShortClassName;
+import freemarker.core._ErrorDescriptionBuilder;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateModel;
@@ -78,29 +82,56 @@ class JspTagModelBase
             ? (BeansWrapper)wrapper
             : BeansWrapper.getDefaultInstance();
         if(args != null && !args.isEmpty()) {
-            Object[] aarg = new Object[1];
+            final Object[] argArray = new Object[1];
             for (Iterator iter = args.entrySet().iterator(); iter.hasNext();)
             {
-                Map.Entry entry = (Map.Entry) iter.next();
-                Object arg = bwrapper.unwrap((TemplateModel)entry.getValue());
-                aarg[0] = arg;
-                Method m = (Method)propertySetters.get(entry.getKey());
-                if (m == null) {
+                final Map.Entry entry = (Map.Entry) iter.next();
+                final Object arg = bwrapper.unwrap((TemplateModel)entry.getValue());
+                argArray[0] = arg;
+                final Object paramName = entry.getKey();
+                Method setterMethod = (Method)propertySetters.get(paramName);
+                if (setterMethod == null) {
                     if (dynaSetter == null) {
                         throw new TemplateModelException("Unknown property "
-                                + StringUtil.jQuote(entry.getKey().toString())
+                                + StringUtil.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
                     }
                     else {
-                        dynaSetter.invoke(tag, new Object[] {null, entry.getKey(), aarg[0]});
+                        dynaSetter.invoke(tag, new Object[] {null, paramName, argArray[0]});
                     }
                 }
                 else {
                     if(arg instanceof BigDecimal) {
-                        aarg[0] = BeansWrapper.coerceBigDecimal(
-                                (BigDecimal)arg, m.getParameterTypes()[0]);
+                        argArray[0] = BeansWrapper.coerceBigDecimal(
+                                (BigDecimal)arg, setterMethod.getParameterTypes()[0]);
                     }
-                    m.invoke(tag, aarg);
+                    try {
+                        setterMethod.invoke(tag, argArray);
+                    } catch (IllegalArgumentException e) {
+                        final Class setterType = setterMethod.getParameterTypes()[0];
+                        final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(new Object[] {
+                                "Failed to set JSP tag parameter ", new _DelayedJQuote(paramName),
+                                " (declared type: ", new _DelayedShortClassName(setterType)
+                                + ", actual value's type: ",
+                                (argArray[0] != null
+                                        ? (Object) new _DelayedShortClassName(argArray[0].getClass()) : "Null"),
+                                "). See cause exception for the more specific cause..."
+                                });
+                        if (!(setterType.isAssignableFrom(String.class))
+                                && argArray[0] != null && argArray[0] instanceof String) {
+                            desc.tip(new Object[] {
+                                    "This problem is often caused by unnecessary parameter quotation. Paramteres "
+                                    + "aren't quoted in FTL, similarly as they aren't quoted in most languages. "
+                                    + "For example, these parameter assignments are wrong: ",
+                                    "<@my.tag p1=\"true\" p2=\"10\" p3=\"${someVariable}\" p4=\"${x+1}\" />",
+                                    ". The correct form is: ",
+                                    "<@my.tag p1=true p2=10 p3=someVariable p4=x+1 />",
+                                    ". Only string literals are quoted (regardless of where they occur): ",
+                                    "<@my.box style=\"info\" message=\"Hello ${name}!\" width=200 />",
+                                    "."});
+                        }
+                        throw new _TemplateModelException(e, null, desc);
+                    }
                 }
             }
         }

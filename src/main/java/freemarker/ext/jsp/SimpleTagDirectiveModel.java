@@ -101,7 +101,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
             throw e;
         }
         catch(Exception e) {
-            throw new TemplateModelException(e);
+            throw new TemplateModelException("Error while invoking JSP tag", e);
         }
     }
 }
