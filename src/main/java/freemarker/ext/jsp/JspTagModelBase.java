@@ -32,6 +32,7 @@ import freemarker.core._DelayedShortClassName;
 import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -39,11 +40,13 @@ import freemarker.template.utility.StringUtil;
 
 class JspTagModelBase
 {
+    protected final String tagName;
     private final Class tagClass;
     private final Method dynaSetter;
     private final Map propertySetters = new HashMap();
     
-    protected JspTagModelBase(Class tagClass) throws IntrospectionException {
+    protected JspTagModelBase(String tagName, Class tagClass) throws IntrospectionException {
+        this.tagName = tagName;
         this.tagClass = tagClass;
         BeanInfo bi = Introspector.getBeanInfo(tagClass);
         PropertyDescriptor[] pda = bi.getPropertyDescriptors();
@@ -107,7 +110,7 @@ class JspTagModelBase
                     }
                     try {
                         setterMethod.invoke(tag, argArray);
-                    } catch (IllegalArgumentException e) {
+                    } catch (Exception e) {
                         final Class setterType = setterMethod.getParameterTypes()[0];
                         final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(new Object[] {
                                 "Failed to set JSP tag parameter ", new _DelayedJQuote(paramName),
@@ -117,7 +120,7 @@ class JspTagModelBase
                                         ? (Object) new _DelayedShortClassName(argArray[0].getClass()) : "Null"),
                                 "). See cause exception for the more specific cause..."
                                 });
-                        if (!(setterType.isAssignableFrom(String.class))
+                        if (e instanceof IllegalArgumentException && !(setterType.isAssignableFrom(String.class))
                                 && argArray[0] != null && argArray[0] instanceof String) {
                             desc.tip(new Object[] {
                                     "This problem is often caused by unnecessary parameter quotation. Paramteres "
@@ -137,4 +140,15 @@ class JspTagModelBase
         }
     }
 
+    protected final TemplateModelException toTemplateModelException(Exception e) {
+        if (e instanceof TemplateModelException) {
+            return (TemplateModelException) e;
+        }
+        if (e instanceof TemplateExceptionWrapperJspException) {
+            return (TemplateModelException) e.getCause();
+        }
+        return new _TemplateModelException(e, new Object[] {
+                "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception" });
+    }
+    
 }

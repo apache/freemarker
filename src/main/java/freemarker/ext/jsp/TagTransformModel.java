@@ -47,8 +47,8 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
     private final boolean isIterationTag;
     private final boolean isTryCatchFinally;
             
-    public TagTransformModel(Class tagClass) throws IntrospectionException {
-        super(tagClass);
+    public TagTransformModel(String tagName, Class tagClass) throws IntrospectionException {
+        super(tagName, tagClass);
         isIterationTag = IterationTag.class.isAssignableFrom(tagClass);
         isBodyTag = isIterationTag && BodyTag.class.isAssignableFrom(tagClass);
         isTryCatchFinally = TryCatchFinally.class.isAssignableFrom(tagClass);
@@ -90,11 +90,8 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         catch(TemplateModelException e) {
             throw e;
         }
-        catch(RuntimeException e) {
-            throw e;
-        }
         catch(Exception e) {
-            throw new TemplateModelException(e);
+            throw toTemplateModelException(e);
         }
     }
 
@@ -351,8 +348,11 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                     }
                 }
             }
-            catch(JspException e) {
-                throw new TemplateModelException(e.getMessage(), e);
+            catch(TemplateModelException e) {
+                throw e;
+            }
+            catch(Exception e) {
+                throw toTemplateModelException(e);
             }
         }
         
@@ -379,8 +379,11 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 endEvaluation();
                 return END_EVALUATION;
             }
-            catch(JspException e) {
-                throw new TemplateModelException(e);
+            catch(TemplateModelException e) {
+                throw e;
+            }
+            catch(Exception e) {
+                throw toTemplateModelException(e);
             }
         }
         

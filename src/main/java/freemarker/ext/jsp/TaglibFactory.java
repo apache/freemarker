@@ -1711,10 +1711,10 @@ public class TaglibFactory implements TemplateHashModel {
                     final TemplateModel impl;
                     try {
                         if (Tag.class.isAssignableFrom(tagClass)) {
-                            impl = new TagTransformModel(tagClass);
+                            impl = new TagTransformModel(tagNameCData, tagClass);
                         }
                         else {
-                            impl = new SimpleTagDirectiveModel(tagClass);
+                            impl = new SimpleTagDirectiveModel(tagNameCData, tagClass);
                         }
                     } catch (IntrospectionException e) {
                         throw new TldParsingSAXException(

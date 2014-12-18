@@ -445,7 +445,7 @@ public abstract class ArithmeticEngine {
             }
             // Make the compiler happy. getCommonClassCode() is guaranteed to 
             // return only above codes, or throw an exception.
-            throw new Error();
+            throw new BugException();
         }
     
         public Number toNumber(String s) {
