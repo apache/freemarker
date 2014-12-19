@@ -316,6 +316,8 @@ public class FreemarkerServlet extends HttpServlet
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
+    private boolean objectWrapperMismatchWarnLogged;
+
     /**
      * Don't override this method to adjust FreeMarker settings! Override the protected methods for that, such as
      * {@link #createTemplateLoader(String)}, {@link #createObjectWrapper()}. Also note that lot of things can be
@@ -592,6 +594,13 @@ public class FreemarkerServlet extends HttpServlet
 
         ServletContext servletContext = getServletContext();
         try {
+            if (wrapper != config.getObjectWrapper() && !objectWrapperMismatchWarnLogged && LOG.isWarnEnabled()) {
+                LOG.warn(
+                        this.getClass().getName()
+                        + ".wrapper != config.getObjectWrapper(); possibly the result of incorrect class extension");
+                objectWrapperMismatchWarnLogged = true;
+            }
+            
             TemplateModel model = createModel(wrapper, servletContext, request, response);
 
             // Give subclasses a chance to hook into preprocessing
