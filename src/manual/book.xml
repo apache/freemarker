@@ -21699,6 +21699,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Added new overridable method:
+                  <literal>FreemarkerServlet.createDefaultObjectWrapper()</literal>.
+                  This can be used for what
+                  <literal>createObjectWrapper()</literal> is usually
+                  overridden for, but without unwillingly disabling the
+                  processing of the related init-params (like of
+                  <literal>object_wrapper</literal>).</para>
+                </listitem>
+
+                <listitem>
                   <para>Bug fixed: Now <literal>*.tld</literal> files are
                   searched in <literal>WEB-INF/</literal> and in all its
                   subdirectories recursively. Earlier they were only searched

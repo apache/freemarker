@@ -316,6 +316,11 @@ public class FreemarkerServlet extends HttpServlet
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
+    /**
+     * Don't override this method to adjust FreeMarker settings! Override the protected methods for that, such as
+     * {@link #createTemplateLoader(String)}, {@link #createObjectWrapper()}. Also note that lot of things can be
+     * changed with init-params instead of overriding methods.
+     */
     public void init() throws ServletException {
         try {
             initialize();
@@ -842,20 +847,26 @@ public class FreemarkerServlet extends HttpServlet
      * instance.
      */
     protected Configuration createConfiguration() {
+        // We can only set incompatible_improvements later, so ignore the deprecation warning here.
         return new Configuration();
     }
     
     /**
-     * Called from {@link #init()} to create the FreeMarker object wrapper that this servlet will use for adapting
-     * request, session, and servlet context attributes to {@link TemplateModel}-s. This is a hook that allows you
-     * customize the object wrapper creation in a subclass. You should call {@link #getInitParameter(String)}
-     * with {@link Configurable#OBJECT_WRAPPER_KEY} as argument, and see if it returns {@code null} or some other
-     * value that you want to interpret yourself. If it wasn't {@code null} and you don't want to interpret the value,
-     * fall back to the super method.
+     * Called from {@link #init()} to create the {@link ObjectWrapper}; to customzie this aspect, in most cases you
+     * should override {@link #createDefaultObjectWrapper()} instead. Overriding this method is necessary when you want
+     * to customize how the {@link ObjectWrapper} is created <em>from the init-param values</em>, or you want to do some
+     * post-processing (like checking) on the created {@link ObjectWrapper}. To customize init-param interpretation,
+     * call {@link #getInitParameter(String)} with {@link Configurable#OBJECT_WRAPPER_KEY} as argument, and see if it
+     * returns a value that you want to interpret yourself. If was {@code null} or you don't want to interpret the
+     * value, fall back to the super method.
      * 
-     * <p>The default implementation interprets the {@value Configurable#OBJECT_WRAPPER_KEY} servlet init-param
-     * with {@link Configurable#setSetting(String, String)} (see valid values there), or if there's no such servlet
-     * init-param, then calls {@link Configuration#getDefaultObjectWrapper(freemarker.template.Version)}. 
+     * <p>
+     * The default implementation interprets the {@value Configurable#OBJECT_WRAPPER_KEY} servlet init-param with
+     * calling {@link Configurable#setSetting(String, String)} (see valid values there), or if there's no such servlet
+     * init-param, then it calls {@link #createDefaultObjectWrapper()}.
+     * 
+     * @return The {@link ObjectWrapper} that will be used for adapting request, session, and servlet context attributes
+     *         to {@link TemplateModel}-s, and also as the object wrapper setting of {@link Configuration}.
      */
     protected ObjectWrapper createObjectWrapper() {
         String wrapper = getServletConfig().getInitParameter(DEPR_INITPARAM_OBJECT_WRAPPER);
@@ -884,11 +895,11 @@ public class FreemarkerServlet extends HttpServlet
                     throw new NoClassDefFoundError(e.getMessage());
                 }
             }
-            return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
+            return createDefaultObjectWrapper();
         } else {
             wrapper = getInitParameter(Configurable.OBJECT_WRAPPER_KEY);
             if (wrapper == null) {
-                return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
+                return createDefaultObjectWrapper();
             } else {
                 try {
                     config.setSetting(Configurable.OBJECT_WRAPPER_KEY, wrapper);
@@ -898,6 +909,23 @@ public class FreemarkerServlet extends HttpServlet
                 return config.getObjectWrapper();
             }
         }
+    }
+
+    /**
+     * Override this to specify what the default {@link ObjectWrapper} will be when the
+     * {@value Configurable#OBJECT_WRAPPER_KEY} Servlet init-param wasn't specified. Note that this is called by
+     * {@link #createConfiguration()}, and so if that was also overidden but improperly then this method might won't be
+     * ever called.
+     * 
+     * <p>
+     * The default implementation calls {@link Configuration#getDefaultObjectWrapper(freemarker.template.Version)}. You
+     * should also pass in the version paramter when creating an {@link ObjectWrapper} that supports that. You can get
+     * the version by calling {@link #getConfiguration()} and then {@link Configuration#getIncompatibleImprovements()}.
+     * 
+     * @since 2.3.22
+     */
+    protected ObjectWrapper createDefaultObjectWrapper() {
+        return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
     }
     
     /**
