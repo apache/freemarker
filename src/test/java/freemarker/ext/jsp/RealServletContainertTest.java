@@ -22,7 +22,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
     @Test
     public void basicCustomTags1() throws Exception {
-        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.ftl");
+        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.ftl", false);
     }
     
     @Test

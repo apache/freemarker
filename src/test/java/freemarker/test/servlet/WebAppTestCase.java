@@ -105,9 +105,14 @@ public class WebAppTestCase {
 
     protected void assertOutputsEqual(String webAppName, String webAppRelURL1, final String webAppRelURL2)
             throws Exception {
-        String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL1));
-        String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL2));
+        String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL1), true);
+        String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL2), true);
         assertEquals(jspOutput, ftlOutput);
+    }
+
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL)
+            throws Exception {
+        assertExpectedEqualsOutput(webAppName, expectedFileName, webAppRelURL, true);
     }
     
     /**
@@ -115,14 +120,14 @@ public class WebAppTestCase {
      *            The name of the file that stores the expected content, relatively to
      *            {@code servketContext:/WEB-INF/expected}.
      */
-    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL)
-            throws Exception {
-        final String actual = normalizeWS(getResponseContent(webAppName, webAppRelURL));
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL,
+            boolean compressWS) throws Exception {
+        final String actual = normalizeWS(getResponseContent(webAppName, webAppRelURL), compressWS);
         final String expected;
         {
             final InputStream in = new URL(getWebAppDirURL(webAppName) + EXPECTED_DIR + expectedFileName).openStream();
             try {
-                expected = normalizeWS(IOUtils.toString(in, "utf-8"));
+                expected = normalizeWS(IOUtils.toString(in, "utf-8"), compressWS);
             } finally {
                 in.close();
             }
@@ -138,14 +143,19 @@ public class WebAppTestCase {
         }
     }
     
+    private Pattern BR = Pattern.compile("\r\n|\r"); 
     private Pattern MULTI_LINE_WS = Pattern.compile("[\t ]*[\r\n][\t \r\n]*", Pattern.DOTALL); 
     private Pattern SAME_LINE_WS = Pattern.compile("[\t ]+", Pattern.DOTALL); 
     
-    private String normalizeWS(String s) {
-        return SAME_LINE_WS.matcher(
-                MULTI_LINE_WS.matcher(s).replaceAll("\n"))
-                .replaceAll(" ")
-                .trim();
+    private String normalizeWS(String s, boolean compressWS) {
+        if (compressWS) {
+            return SAME_LINE_WS.matcher(
+                    MULTI_LINE_WS.matcher(s).replaceAll("\n"))
+                    .replaceAll(" ")
+                    .trim();
+        } else {
+            return BR.matcher(s).replaceAll("\n");
+        }
     }
 
     private synchronized void ensureWebAppIsDeployed(String webAppName) throws Exception {
