@@ -16,14 +16,19 @@ public class RealServletContainertTest extends WebAppTestCase {
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";
 
     @Test
-    public void basic1() throws Exception {
-        assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=1");
+    public void basicTrivial() throws Exception {
+        assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=trivial");
+    }
+
+    @Test
+    public void basicCustomTags1() throws Exception {
+        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.ftl");
     }
     
-    @Ignore  // c:forEach fails because of EL context issues
     @Test
-    public void basic1JSTL() throws Exception {
-        assertOutputsEqual(WEBAPP_BASIC, "tester?view=1.jsp", "tester?view=1-jstl.ftl");        
+    @Ignore  // c:forEach fails because of EL context issues
+    public void basicTrivialJSTL() throws Exception {
+        assertOutputsEqual(WEBAPP_BASIC, "tester?view=trivial.jsp", "tester?view=trivial-jstl-@Ignore.ftl");        
     }
     
     @Test
