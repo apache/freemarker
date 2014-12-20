@@ -21,23 +21,28 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    public void basicCustomTags1() throws Exception {
-        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.ftl", false);
-    }
-    
-    @Test
     @Ignore  // c:forEach fails because of EL context issues
     public void basicTrivialJSTL() throws Exception {
         assertOutputsEqual(WEBAPP_BASIC, "tester?view=trivial.jsp", "tester?view=trivial-jstl-@Ignore.ftl");        
     }
-    
+
+    @Test
+    public void basicCustomTags1() throws Exception {
+        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.ftl", false);
+    }
+
+    @Test
+    public void basicCustomAttributes() throws Exception {
+        assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes.txt", "tester?view=attributes.ftl");
+    }
+
     @Test
     public void elFunctions() throws Exception {
         //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.jsp"));
         //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.ftl"));
         assertJSPAndFTLOutputEquals(WEBAPP_EL_FUNCTIONS, "tester?view=1");
     }
-
+    
     @Test
     public void tldDiscoveryBasic() throws Exception {
         try {
