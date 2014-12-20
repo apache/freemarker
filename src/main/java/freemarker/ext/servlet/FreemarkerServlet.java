@@ -595,10 +595,20 @@ public class FreemarkerServlet extends HttpServlet
         ServletContext servletContext = getServletContext();
         try {
             if (wrapper != config.getObjectWrapper() && !objectWrapperMismatchWarnLogged && LOG.isWarnEnabled()) {
-                LOG.warn(
-                        this.getClass().getName()
-                        + ".wrapper != config.getObjectWrapper(); possibly the result of incorrect class extension");
-                objectWrapperMismatchWarnLogged = true;
+                final boolean logWarn;
+                // Deliberate double check locking.
+                synchronized (this) {
+                    logWarn = !objectWrapperMismatchWarnLogged;
+                    if (logWarn) {
+                        objectWrapperMismatchWarnLogged = true;
+                    }
+                }
+                if (logWarn) {
+                    LOG.warn(
+                            this.getClass().getName()
+                            + ".wrapper != config.getObjectWrapper(); possibly the result of incorrect extension of "
+                            + FreemarkerServlet.class.getName() + ".");
+                }
             }
             
             TemplateModel model = createModel(wrapper, servletContext, request, response);
