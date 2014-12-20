@@ -40,3 +40,13 @@ ${a1}
 ${a2}
 <@t.getAndSet name="a2" value='P2' scope="page" />
 ${a2}
+
+Values created in the template:
+<#global a = 's'>
+String: <@t.attributeInfo name='a' />
+<#global a = 1>
+Number: <@t.attributeInfo name='a' />
+<#global a = true>
+Boolean: <@t.attributeInfo name='a' />
+
+Values created in Java:

@@ -36,3 +36,10 @@ P1
 G2
 page:a2 was G2, set to P2
 P2
+
+Values created in the template:
+String: s [java.lang.String]
+Number: 1 [java.math.BigDecimal]
+Boolean: true [java.lang.Boolean]
+
+Values created in Java:

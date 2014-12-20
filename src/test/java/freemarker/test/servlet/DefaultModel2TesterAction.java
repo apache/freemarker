@@ -1,6 +1,7 @@
 package freemarker.test.servlet;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +28,7 @@ public final class DefaultModel2TesterAction implements Model2Action {
         req.setAttribute("ls", Arrays.asList("a", "b", "c"));
         req.setAttribute("m", ImmutableMap.<String, Integer>builder().put("a", 11).put("b", 22).put("c", 33).build());
         req.setAttribute("b", new TestBean("Joe", 30, true));
+        req.setAttribute("d", new Date(123456L));
         req.setAttribute("lsob", Arrays.asList(
                 new TestBean("Joe", 30, true), new TestBean("Fred", 25, false), new TestBean("Emma", 28, true)));
         return null;
