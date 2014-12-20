@@ -60,6 +60,7 @@ import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Constants;
@@ -363,6 +364,17 @@ public class Configuration extends Configurable implements Cloneable {
      *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
      *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
+     *         <li><p>
+     *           When using {@link FreemarkerServlet} with custom JSP tag libraries: When a date/time/date-time value
+     *           was put into the JSP page scope as an attribute (via {@code #global} or via the JSP PageContext API)
+     *           and later read back with the JSP PageContext API (typically in a custom JSP tag), it may come back as a
+     *           {@link freemarker.template.SimpleDate} object, rather than as a {@link java.util.Date}.
+     *           (This has occurred if the value was created directly in FTL, or if you are using
+     *           {@link DefaultObjectWrapper}, not pure BeansWrapper. The origin of the problem is that FTL had no
+     *           native date/time/date-time type when the JSP taglib extension was written; FTL numbers, strings and
+     *           booleans were always transformed back to plain Java types. It's highly unlikely that something expects
+     *           the presence of this oversight.)
+     *         </li>
      *     </ul>
      *   </li>
      * </ul>

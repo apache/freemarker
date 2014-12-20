@@ -8889,7 +8889,9 @@ TemplateHashModel roundingModeEnums =
   &lt;!-- FreeMarker settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.21&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
+    &lt;!-- Recommended to set to a high value. For the details, see the Java API docs of
+         freemarker.template.Configuration#Configuration(Version). --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
@@ -8898,15 +8900,18 @@ TemplateHashModel roundingModeEnums =
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_update_delay&lt;/param-name&gt;
-    &lt;param-value&gt;0&lt;/param-value&gt; &lt;!-- 0 is for development only! Use higher value otherwise. --&gt;
+    &lt;!-- 0 is for development only! Use higher value otherwise. --&gt;
+    &lt;param-value&gt;0&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;
-    &lt;param-value&gt;UTF-8&lt;/param-value&gt; &lt;!-- The encoding of the template files. --&gt;
+    &lt;!-- The encoding of the template files. --&gt;
+    &lt;param-value&gt;UTF-8&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;locale&lt;/param-name&gt;
-    &lt;param-value&gt;en_US&lt;/param-value&gt; &lt;!-- Influences number and date/time formatting, etc. --&gt;
+    &lt;!-- Influences number and date/time formatting, etc. --&gt;
+    &lt;param-value&gt;en_US&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;number_format&lt;/param-name&gt;
@@ -8925,7 +8930,7 @@ TemplateHashModel roundingModeEnums =
 
 &lt;!--
   Prevent the visiting of MVC Views from outside the servlet container.
-  RequestDispatcher.forward/include should and will still work.
+  RequestDispatcher.forward/include should, and will still work.
   Removing this may open security holes!
 --&gt;
 &lt;security-constraint&gt;
@@ -8934,7 +8939,7 @@ TemplateHashModel roundingModeEnums =
     &lt;url-pattern&gt;*.ftl&lt;/url-pattern&gt;
   &lt;/web-resource-collection&gt;
   &lt;auth-constraint&gt;
-    &lt;!-- Nobody is allowed to visit these --&gt;
+    &lt;!-- Nobody is allowed to visit these directly. --&gt;
   &lt;/auth-constraint&gt;
 &lt;/security-constraint&gt;</programlisting>
 
@@ -21706,6 +21711,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   overridden for, but without unwillingly disabling the
                   processing of the related init-params (like of
                   <literal>object_wrapper</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed (only active with
+                  <literal>incompatible_improvements</literal> set to 2.3.22
+                  or higher): When a date/time/date-time value was put into
+                  the JSP page scope as an attribute (via
+                  <literal>#global</literal> or via the JSP
+                  <literal>PageContext</literal> API) and later read back with
+                  the JSP <literal>PageContext</literal> API (typically in a
+                  custom JSP tag), it may come back as a
+                  <literal>freemarker.template.SimpleDate</literal> object,
+                  rather than as a <literal>java.util.Date</literal>. (This
+                  has occurred if the value was created directly in FTL, or if
+                  you are using <literal>DefaultObjectWrapper</literal>, not
+                  pure <literal>BeansWrapper</literal>. The origin of the
+                  problem is that FTL had no native date/time/date-time type
+                  when the JSP taglib extension was written; FTL numbers,
+                  strings and booleans were always transformed back to plain
+                  Java types. It's highly unlikely that something expects the
+                  presence of this oversight.)</para>
                 </listitem>
 
                 <listitem>

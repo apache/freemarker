@@ -48,5 +48,7 @@ String: <@t.attributeInfo name='a' />
 Number: <@t.attributeInfo name='a' />
 <#global a = true>
 Boolean: <@t.attributeInfo name='a' />
+<#global a = '2014-12-20T18:19+02:00'?datetime.iso>
+Date-time: <@t.attributeInfo name='a' />
 
 Values created in Java:

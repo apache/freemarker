@@ -41,5 +41,6 @@ Values created in the template:
 String: s [java.lang.String]
 Number: 1 [java.math.BigDecimal]
 Boolean: true [java.lang.Boolean]
+Date-time: 2014-12-20T16:19:00Z [java.util.Date]
 
 Values created in Java:

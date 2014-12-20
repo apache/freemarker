@@ -50,12 +50,14 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -65,6 +67,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private static final Class OBJECT_CLASS = Object.class;
         
     private final Environment environment;
+    private final int incompatibleImprovements;
     private List tags = new ArrayList();
     private List outs = new ArrayList();
     private final GenericServlet servlet;
@@ -77,6 +80,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     protected FreeMarkerPageContext() throws TemplateModelException
     {
         environment = Environment.getCurrentEnvironment();
+        incompatibleImprovements = environment.getConfiguration().getIncompatibleImprovements().intValue();
 
         TemplateModel appModel = environment.getGlobalVariable(
                 FreemarkerServlet.KEY_APPLICATION_PRIVATE);
@@ -200,6 +204,11 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                     }
                     if (m instanceof TemplateBooleanModel) {
                         return Boolean.valueOf(((TemplateBooleanModel) m).getAsBoolean());
+                    }
+                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22) {
+                        if (m instanceof TemplateDateModel) {
+                            return ((TemplateDateModel) m).getAsDate();
+                        }
                     }
                     return m;
                 }
