@@ -21716,22 +21716,66 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Bug fixed (only active with
                   <literal>incompatible_improvements</literal> set to 2.3.22
-                  or higher): When a date/time/date-time value was put into
-                  the JSP page scope as an attribute (via
+                  or higher): Some kind of values, when put into the JSP
+                  <emphasis>page</emphasis> scope (via
                   <literal>#global</literal> or via the JSP
                   <literal>PageContext</literal> API) and later read back with
                   the JSP <literal>PageContext</literal> API (typically in a
-                  custom JSP tag), it may come back as a
-                  <literal>freemarker.template.SimpleDate</literal> object,
-                  rather than as a <literal>java.util.Date</literal>. (This
-                  has occurred if the value was created directly in FTL, or if
-                  you are using <literal>DefaultObjectWrapper</literal>, not
-                  pure <literal>BeansWrapper</literal>. The origin of the
-                  problem is that FTL had no native date/time/date-time type
-                  when the JSP taglib extension was written; FTL numbers,
-                  strings and booleans were always transformed back to plain
-                  Java types. It's highly unlikely that something expects the
-                  presence of this oversight.)</para>
+                  custom JSP tag), might come back as FreeMarker
+                  <literal>TemplateModel</literal> objects instead of as
+                  objects with a standard Java type. Other Servlet scopes
+                  aren't affected. It's highly unlikely that something expects
+                  the presence of this bug. The affected values are of the FTL
+                  type listed below, and to trigger the bug, they either had
+                  to be created directly in the template (like as an FTL
+                  literal or with
+                  <literal>?date</literal>/<literal>time</literal>/<literal>datetime</literal>),
+                  or you had to use <literal>DefaultObjectWrapper</literal>,
+                  instead of pure(r) <literal>BeansWrapper</literal>:</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>Date/time/date-time values may came back as
+                      <literal>freemarker.template.SimpleDate</literal>-s, now
+                      they come back as <literal>java.util.Date</literal>-s
+                      instead.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Sequence values may came back as
+                      <literal>freemarker.template.SimpleSequence</literal>-s,
+                      now they come back as
+                      <literal>freemarker.ext.beans.SequenceAdapter</literal>-s
+                      instead, which implements
+                      <literal>java.util.List</literal> (only if the
+                      <literal>ObjectWrapper</literal> is a subclass of
+                      <literal>BeansWrapper</literal>, but that's practically
+                      always the case in applications that use FreeMarker's
+                      JSP extension).</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Hash values may came back as
+                      <literal>freemarker.template.SimpleHash</literal>, now
+                      they come back as
+                      <literal>freemarker.ext.beans.HashAdapter</literal>-s
+                      instead, which implements
+                      <literal>java.util.Map</literal> (again, only if the
+                      object wrapper is a subclass of
+                      <literal>BeansWrapper</literal>).</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Collection values may came back as
+                      <literal>freemarker.template.SimpleCollection</literal>,
+                      now they come back as
+                      <literal>freemarker.ext.beans.CollectionAdapter</literal>-s
+                      instead, which implements
+                      <literal>java.util.Collection</literal> (again, only if
+                      the object wrapper is a subclass of
+                      <literal>BeansWrapper</literal>).</para>
+                    </listitem>
+                  </itemizedlist>
                 </listitem>
 
                 <listitem>

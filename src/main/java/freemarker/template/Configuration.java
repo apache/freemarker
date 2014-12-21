@@ -365,15 +365,31 @@ public class Configuration extends Configurable implements Cloneable {
      *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
      *         <li><p>
-     *           When using {@link FreemarkerServlet} with custom JSP tag libraries: When a date/time/date-time value
-     *           was put into the JSP page scope as an attribute (via {@code #global} or via the JSP PageContext API)
-     *           and later read back with the JSP PageContext API (typically in a custom JSP tag), it may come back as a
-     *           {@link freemarker.template.SimpleDate} object, rather than as a {@link java.util.Date}.
-     *           (This has occurred if the value was created directly in FTL, or if you are using
-     *           {@link DefaultObjectWrapper}, not pure BeansWrapper. The origin of the problem is that FTL had no
-     *           native date/time/date-time type when the JSP taglib extension was written; FTL numbers, strings and
-     *           booleans were always transformed back to plain Java types. It's highly unlikely that something expects
-     *           the presence of this oversight.)
+     *           When using {@link FreemarkerServlet} with custom JSP tag libraries: Some kind of values, when put into
+     *           the JSP <em>page</em> scope (via {@code #global} or via the JSP {@code PageContext} API) and later read
+     *           back with the JSP {@code PageContext} API (typically in a custom JSP tag), might come back as
+     *           FreeMarker {@link TemplateModel} objects instead of as objects with a standard Java type. Other Servlet
+     *           scopes aren't affected. It's highly unlikely that something expects the presence of this bug. The
+     *           affected values are of the FTL type listed below, and to trigger the bug, they either had to be created
+     *           directly in the template (like as an FTL literal or with {@code ?date}/{@code time}/{@code datetime}),
+     *           or you had to use {@link DefaultObjectWrapper}, instead of pure(r) {@link BeansWrapper}:
+     *           <ul>
+     *             <li>Date/time/date-time values may came back as {@link SimpleDate}-s, now they come back as
+     *             {@link java.util.Date java.util.Date}-s instead.</li>
+     *             
+     *             <li>Sequence values may came back as {@link SimpleSequence}-s, now they come back as
+     *             {@code freemarker.ext.beans.SequenceAdapter}-s instead, which implements {@link java.util.List}
+     *             (only if the {@link ObjectWrapper} is a subclass of {@link BeansWrapper}, but that's practically
+     *             always the case in applications that use FreeMarker's JSP extension).</li>
+     *             
+     *             <li>Hash values may came back as {@link SimpleHash}, now they come back as
+     *             {@code freemarker.ext.beans.HashAdapter}-s instead, which implements {@link java.util.Map} (again,
+     *             only if the object wrapper is a subclass of BeansWrapper).</li>
+     *             
+     *             <li>Collection values may came back as {@link SimpleCollection}, now they come back as
+     *             {@code freemarker.ext.beans.CollectionAdapter}-s instead, which implements
+     *             {@link java.util.Collection} (again, only if the object wrapper is a subclass of BeansWrapper).</li>
+     *           </ul>
      *         </li>
      *     </ul>
      *   </li>

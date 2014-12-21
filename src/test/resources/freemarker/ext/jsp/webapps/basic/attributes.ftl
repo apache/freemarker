@@ -50,5 +50,9 @@ Number: <@t.attributeInfo name='a' />
 Boolean: <@t.attributeInfo name='a' />
 <#global a = '2014-12-20T18:19+02:00'?datetime.iso>
 Date-time: <@t.attributeInfo name='a' />
+<#global a = [1, 2, 3]>
+Sequence: <@t.attributeInfo name='a' />
+<#global a = {'a': 1, 'b': 2, 'c': 3}>
+Hash: <@t.attributeInfo name='a' />
 
 Values created in Java:

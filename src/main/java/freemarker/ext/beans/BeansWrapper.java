@@ -919,6 +919,17 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     {
         return unwrap(model, Object.class);
     }
+
+    /**
+     * Similar to {@link #unwrap(TemplateModel)}, but it returns the valeu of the {@code defaultResult} parameter if it
+     * couldn't unwrapp it.
+     * 
+     * @since 2.3.22
+     */
+    public Object tryUnwrap(TemplateModel model, Object defaultResult) throws TemplateModelException {
+        final Object obj = tryUnwrap(model, Object.class);
+        return obj != CAN_NOT_UNWRAP ? obj : defaultResult;
+    }
     
     /**
      * Attempts to unwrap a model into an object of the desired class. 
@@ -927,7 +938,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * primitives, primitive wrappers, numbers, dates, sets, lists, maps, and
      * native arrays.
      * @param model the model to unwrap
-     * @param hint the class of the unwrapped result
+     * @param hint the class of the unwrapped result; {@code Object.class} of we don't know what the expected type is.
      * @return the unwrapped result of the desired class
      * @throws TemplateModelException if an attempted unwrapping fails.
      */
@@ -941,7 +952,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         return obj;
     }
-
+    
     /**
      * Same as {@link #tryUnwrap(TemplateModel, Class, int)} with 0 type flags argument.
      */
@@ -971,7 +982,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     /**
      * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
      */
-    private Object tryUnwrap(TemplateModel model, Class hint, int typeFlags, Map recursionStops) 
+    private Object tryUnwrap(final TemplateModel model, Class hint, final int typeFlags, final Map recursionStops) 
     throws TemplateModelException {
         if(model == null || model == nullModel) {
             return null;
@@ -990,12 +1001,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         if(model instanceof AdapterTemplateModel) {
             Object wrapped = ((AdapterTemplateModel)model).getAdaptedObject(
                     hint);
-            if(hint.isInstance(wrapped)) {
+            if (hint == Object.class || hint.isInstance(wrapped)) {
                 return wrapped;
             }
             
             // Attempt numeric conversion: 
-            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
+            if (hint != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(hint))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
                 if(number != null) return number;
             }
@@ -1003,12 +1014,12 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         
         if(model instanceof WrapperTemplateModel) {
             Object wrapped = ((WrapperTemplateModel)model).getWrappedObject();
-            if(hint.isInstance(wrapped)) {
+            if (hint == Object.class || hint.isInstance(wrapped)) {
                 return wrapped;
             }
             
             // Attempt numeric conversion: 
-            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
+            if(hint != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(hint))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
                 if(number != null) {
                     return number;
@@ -1020,90 +1031,92 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         // to various model interfaces based on the hint class. This helps us
         // select the appropriate interface in multi-interface models when we
         // know what is expected as the return type.
+        if (hint != Object.class) {
 
-        // Java 5: Also should check for CharSequence at the end
-        if(String.class == hint) {
-            if(model instanceof TemplateScalarModel) {
-                return ((TemplateScalarModel)model).getAsString();
+            // Java 5: Also should check for CharSequence at the end
+            if(String.class == hint) {
+                if(model instanceof TemplateScalarModel) {
+                    return ((TemplateScalarModel)model).getAsString();
+                }
+                // String is final, so no other conversion will work
+                return CAN_NOT_UNWRAP;
             }
-            // String is final, so no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-
-        // Primitive numeric types & Number.class and its subclasses
-        if(ClassUtil.isNumerical(hint)) {
-            if(model instanceof TemplateNumberModel) {
-                Number number = forceUnwrappedNumberToType(
-                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed);
-                if(number != null) {
-                    return number;
+    
+            // Primitive numeric types & Number.class and its subclasses
+            if(ClassUtil.isNumerical(hint)) {
+                if(model instanceof TemplateNumberModel) {
+                    Number number = forceUnwrappedNumberToType(
+                            ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed);
+                    if(number != null) {
+                        return number;
+                    }
                 }
             }
-        }
-        
-        if(boolean.class == hint || Boolean.class == hint) {
-            if(model instanceof TemplateBooleanModel) {
-                return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
+            
+            if(boolean.class == hint || Boolean.class == hint) {
+                if(model instanceof TemplateBooleanModel) {
+                    return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
+                }
+                // Boolean is final, no other conversion will work
+                return CAN_NOT_UNWRAP;
             }
-            // Boolean is final, no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-
-        if(Map.class == hint) {
-            if(model instanceof TemplateHashModel) {
-                return new HashAdapter((TemplateHashModel)model, this);
-            }
-        }
-        
-        if(List.class == hint) {
-            if(model instanceof TemplateSequenceModel) {
-                return new SequenceAdapter((TemplateSequenceModel)model, this);
-            }
-        }
-        
-        if(Set.class == hint) {
-            if(model instanceof TemplateCollectionModel) {
-                return new SetAdapter((TemplateCollectionModel)model, this);
-            }
-        }
-        
-        if(Collection.class == hint || ITERABLE_CLASS == hint) {
-            if(model instanceof TemplateCollectionModel) {
-                return new CollectionAdapter((TemplateCollectionModel)model, 
-                        this);
-            }
-            if(model instanceof TemplateSequenceModel) {
-                return new SequenceAdapter((TemplateSequenceModel)model, this);
-            }
-        }
-        
-        // TemplateSequenceModels can be converted to arrays
-        if(hint.isArray()) {
-            if(model instanceof TemplateSequenceModel) {
-                return unwrapSequenceToArray((TemplateSequenceModel) model, hint, true, recursionStops);
-            }
-            // array classes are final, no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-        
-        // Allow one-char strings to be coerced to characters
-        if(char.class == hint || hint == Character.class) {
-            if(model instanceof TemplateScalarModel) {
-                String s = ((TemplateScalarModel)model).getAsString();
-                if(s.length() == 1) {
-                    return new Character(s.charAt(0));
+    
+            if(Map.class == hint) {
+                if(model instanceof TemplateHashModel) {
+                    return new HashAdapter((TemplateHashModel)model, this);
                 }
             }
-            // Character is final, no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-
-        if(Date.class.isAssignableFrom(hint) && model instanceof TemplateDateModel) {
-            Date date = ((TemplateDateModel)model).getAsDate();
-            if(hint.isInstance(date)) {
-                return date;
+            
+            if(List.class == hint) {
+                if(model instanceof TemplateSequenceModel) {
+                    return new SequenceAdapter((TemplateSequenceModel)model, this);
+                }
             }
-        }
+            
+            if(Set.class == hint) {
+                if(model instanceof TemplateCollectionModel) {
+                    return new SetAdapter((TemplateCollectionModel)model, this);
+                }
+            }
+            
+            if(Collection.class == hint || ITERABLE_CLASS == hint) {
+                if(model instanceof TemplateCollectionModel) {
+                    return new CollectionAdapter((TemplateCollectionModel)model, 
+                            this);
+                }
+                if(model instanceof TemplateSequenceModel) {
+                    return new SequenceAdapter((TemplateSequenceModel)model, this);
+                }
+            }
+            
+            // TemplateSequenceModels can be converted to arrays
+            if(hint.isArray()) {
+                if(model instanceof TemplateSequenceModel) {
+                    return unwrapSequenceToArray((TemplateSequenceModel) model, hint, true, recursionStops);
+                }
+                // array classes are final, no other conversion will work
+                return CAN_NOT_UNWRAP;
+            }
+            
+            // Allow one-char strings to be coerced to characters
+            if(char.class == hint || hint == Character.class) {
+                if(model instanceof TemplateScalarModel) {
+                    String s = ((TemplateScalarModel)model).getAsString();
+                    if(s.length() == 1) {
+                        return new Character(s.charAt(0));
+                    }
+                }
+                // Character is final, no other conversion will work
+                return CAN_NOT_UNWRAP;
+            }
+    
+            if(Date.class.isAssignableFrom(hint) && model instanceof TemplateDateModel) {
+                Date date = ((TemplateDateModel)model).getAsDate();
+                if(hint.isInstance(date)) {
+                    return date;
+                }
+            }
+        }  //  End: if (hint != Object.class)
         
         // Since the hint class was of no help initially, now we use
         // a quite arbitrary order in which we walk through the TemplateModel subinterfaces, and unwrapp them to
@@ -1146,6 +1159,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                     // It had to be unwrapped to Character, but the string length wasn't 1 => Fall through
                 }
             }
+            // Should be earlier than TemplateScalarModel, but we keep it here until FM 2.4 or such
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
                     && model instanceof TemplateBooleanModel
                     && (itf != 0 || hint.isAssignableFrom(Boolean.class))) {

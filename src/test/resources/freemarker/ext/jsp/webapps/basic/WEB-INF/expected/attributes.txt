@@ -42,5 +42,7 @@ String: s [java.lang.String]
 Number: 1 [java.math.BigDecimal]
 Boolean: true [java.lang.Boolean]
 Date-time: 2014-12-20T16:19:00Z [java.util.Date]
+Sequence: [1, 2, 3] [freemarker.ext.beans.SequenceAdapter]
+Hash: {a=1, b=2, c=3} [freemarker.ext.beans.HashAdapter]
 
 Values created in Java:

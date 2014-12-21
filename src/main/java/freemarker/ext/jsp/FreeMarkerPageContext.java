@@ -43,6 +43,7 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 
 import freemarker.core.Environment;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
@@ -75,6 +76,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final ObjectWrapper wrapper;
+    private final boolean wrapperIsBeansWrapper;
     private JspWriter jspOut;
     
     protected FreeMarkerPageContext() throws TemplateModelException
@@ -107,10 +109,11 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
         if(requestModel instanceof HttpRequestHashModel) {
             HttpRequestHashModel reqHash = (HttpRequestHashModel)requestModel;
-            this.request = reqHash.getRequest();
-            this.session = request.getSession(false);
-            this.response = reqHash.getResponse();
-            this.wrapper = reqHash.getObjectWrapper();
+            request = reqHash.getRequest();
+            session = request.getSession(false);
+            response = reqHash.getResponse();
+            wrapper = reqHash.getObjectWrapper();
+            wrapperIsBeansWrapper = this.wrapper instanceof BeansWrapper;
         }
         else  {
             throw new  TemplateModelException("Could not find an instance of " + 
@@ -189,31 +192,34 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         switch (scope) {
             case PAGE_SCOPE: {
                 try {
-                    TemplateModel m = environment.getGlobalNamespace().get(name);
-                    if (m instanceof AdapterTemplateModel) {
-                        return ((AdapterTemplateModel) m).getAdaptedObject(OBJECT_CLASS);
-                    }
-                    if (m instanceof WrapperTemplateModel) {
-                        return ((WrapperTemplateModel)m).getWrappedObject();
-                    }
-                    if (m instanceof TemplateScalarModel) {
-                        return ((TemplateScalarModel) m).getAsString();
-                    }
-                    if (m instanceof TemplateNumberModel) {
-                        return ((TemplateNumberModel) m).getAsNumber();
-                    }
-                    if (m instanceof TemplateBooleanModel) {
-                        return Boolean.valueOf(((TemplateBooleanModel) m).getAsBoolean());
-                    }
-                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22) {
-                        if (m instanceof TemplateDateModel) {
-                            return ((TemplateDateModel) m).getAsDate();
+                    final TemplateModel tm = environment.getGlobalNamespace().get(name);
+                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22 && wrapperIsBeansWrapper) {
+                        return ((BeansWrapper) wrapper).tryUnwrap(tm, tm);
+                    } else {
+                        if (tm instanceof AdapterTemplateModel) {
+                            return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
                         }
+                        if (tm instanceof WrapperTemplateModel) {
+                            return ((WrapperTemplateModel)tm).getWrappedObject();
+                        }
+                        if (tm instanceof TemplateScalarModel) {
+                            return ((TemplateScalarModel) tm).getAsString();
+                        }
+                        if (tm instanceof TemplateNumberModel) {
+                            return ((TemplateNumberModel) tm).getAsNumber();
+                        }
+                        if (tm instanceof TemplateBooleanModel) {
+                            return Boolean.valueOf(((TemplateBooleanModel) tm).getAsBoolean());
+                        }
+                        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22
+                                && tm instanceof TemplateDateModel) {
+                            return ((TemplateDateModel) tm).getAsDate();
+                        }
+                        return tm;
                     }
-                    return m;
                 }
                 catch (TemplateModelException e) {
-                    throw new UndeclaredThrowableException(e);
+                    throw new UndeclaredThrowableException("Failed to unwrapp FTL global variable", e);
                 }
             }
             case REQUEST_SCOPE: {
