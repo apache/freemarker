@@ -17,21 +17,22 @@
 package freemarker.template;
 
 /**
- * "sequence" template language data type; an object that contains other objects accessible through
- * an integer 0-based index.
+ * "sequence" template language data type; an object that contains other objects accessible through an integer 0-based
+ * index.
  * 
- * <p>Used in templates like: {@code mySeq[index]}, {@code <#list mySeq as i>...</#list>}, {@code mySeq?size}, etc. 
+ * <p>
+ * Used in templates like: {@code mySeq[index]}, {@code <#list mySeq as i>...</#list>}, {@code mySeq?size}, etc.
  */
 public interface TemplateSequenceModel extends TemplateModel {
 
     /**
      * Retrieves the i-th template model in this sequence.
      * 
-     * @return the item at the specified index, or <code>null</code> if
-     * the index is out of bounds. Note that a <code>null</code> value is
-     * interpreted by FreeMarker as "variable does not exist", and accessing
-     * a missing variables is usually considered as an error in the FreeMarker
-     * Template Language, so the usage of a bad index will not remain hidden.
+     * @return the item at the specified index, or <code>null</code> if the index is out of bounds. Note that a
+     *         <code>null</code> value is interpreted by FreeMarker as "variable does not exist", and accessing a
+     *         missing variables is usually considered as an error in the FreeMarker Template Language, so the usage of
+     *         a bad index will not remain hidden, unless the default value for that case was also specified in the
+     *         template.
      */
     TemplateModel get(int index) throws TemplateModelException;
 

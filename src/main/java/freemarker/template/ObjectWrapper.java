@@ -78,7 +78,9 @@ public interface ObjectWrapper {
      * {@link TemplateModel} implementation that delegates to the original object.
      * 
      * @param obj The object to wrap into a {@link TemplateModel}. If it already implements {@link TemplateModel},
-     *      it should just return the object as is.
+     *      it should just return the object as is. If it's {@code null}, the method should return {@code null}
+     *      (however, {@link BeansWrapper}, has a legacy option for returning a null model object instead, but it's not
+     *      a good idea).
      * 
      * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the
      *     return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.  

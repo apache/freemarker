@@ -62,7 +62,6 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.UndeclaredThrowableException;
 import freemarker.template.utility.WriteProtectable;
 
@@ -260,6 +259,21 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly) {
+        this(bwConf, readOnly, true);
+    }
+    
+    /**
+     * Initializes the instance based on the the {@link BeansWrapperConfiguration} specified.
+     * 
+     * @param readOnly Makes the instance's configuration settings read-only via
+     *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
+     *     
+     * @param finalizeConstruction Decides if the construction if finalized now, or the caller will do some more
+     *     adjustments on the instance then call {@link #finalizeConstruction(boolean)} itself. 
+     * 
+     * @since 2.3.22
+     */
+    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly, boolean finalizeConstruction) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
         if (bwConf.getMethodAppearanceFineTuner() == null) {
             Class thisClass = this.getClass();
@@ -333,6 +347,18 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         modelCache = new BeansModelCache(BeansWrapper.this);
         setUseCache(bwConf.getUseModelCache());
 
+        finalizeConstruction(readOnly);
+    }
+
+    /**
+     * Meant to be called after {@link BeansWrapper#BeansWrapper(BeansWrapperConfiguration, boolean, boolean)} when
+     * its last argument was {@code false}; makes the instance read-only if necessary, then registers the model
+     * factories in the class introspector. No further changes should be done after calling this, if {@code readOnly}
+     * was {@code true}. 
+     * 
+     * @since 2.3.22
+     */
+    protected void finalizeConstruction(boolean readOnly) {
         if (readOnly) {
             writeProtect();
         }
@@ -735,12 +761,13 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * Sets the null model. This model is returned from the
-     * {@link #wrap(Object)} method whenever the underlying object 
-     * reference is null. It defaults to null reference, which is dealt 
-     * with quite strictly on engine level, however you can substitute an 
-     * arbitrary (perhaps more lenient) model, such as 
-     * {@link freemarker.template.TemplateScalarModel#EMPTY_STRING}.
+     * Sets the null model. This model is returned from the {@link #wrap(Object)} method whenever the wrapped object is
+     * {@code null}. It defaults to {@code null}, which is dealt with quite strictly on engine level, however you can
+     * substitute an arbitrary (perhaps more lenient) model, like an empty string. For proper working, the
+     * {@code nullModel} should be an {@link AdapterTemplateModel} that returns {@code null} for
+     * {@link AdapterTemplateModel#getAdaptedObject(Class)}.
+     * 
+     * @deprecated Changing the {@code null} model can cause a lot of confusion; don't do it.
      */
     public void setNullModel(TemplateModel nullModel)
     {
@@ -771,7 +798,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
-        NullArgumentException.check("version", incompatibleImprovements);
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }

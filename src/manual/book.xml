@@ -21611,6 +21611,50 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><literal>DefaultObjectWrapper</literal> with its
+              <literal>incompatible_improvements</literal> set to 2.3.22 (see
+              how to set that <link linkend="versions_2_3_21">here...</link>)
+              or with its new <literal>useAdaptersForContainers</literal>
+              setting set to <literal>true</literal> doesn't copy
+              <literal>Map</literal>-s, <literal>List</literal>-s and array
+              anymore when wrapping them to
+              <literal>TemplateModel</literal>-s, just puts a
+              <literal>TemplateModel</literal> adapter layer over them. The
+              wrapped values will be instances of the new
+              <literal>SimpleMapAdapter</literal>,
+              <literal>SimpleListAdapter</literal>,
+              <literal>SimpleArrayAdapter</literal> classes, instead of
+              <literal>SimpleHash</literal>-es and
+              <literal>SimpleSequence</literal>-s.</para>
+
+              <para>Reasons and consequences: Especially since the garbage
+              collector of Java become more efficient over time, the copying
+              strategy has caused more problems than good. Most importantly,
+              now the key order of <literal>Map</literal>-s was is never lost
+              (bug fixed: [<link
+              xlink:href="http://sourceforge.net/p/freemarker/bugs/368/">368</link>]),
+              and the exact type and identity of the <literal>Map</literal> is
+              kept when the wrapped
+              <literal>Map</literal>/<literal>List</literal> is passed back to
+              Java method from the template. The new adapter approach also
+              tends to be faster, though it depends on if how many times the
+              <emphasis>same</emphasis> <literal>Map</literal> or
+              <literal>List</literal> entry is read from the template. Most
+              templates only look at the same entry once in average, in which
+              case it's faster than the copying approach. When the same entry
+              is accessed for several times, the copying approach becomes
+              faster as it remembers the wrapped form of the entries, so they
+              don't have to be re-wrapped again and again.</para>
+            </listitem>
+
+            <listitem>
+              <para>For this it uses SimpleMapAdapter, SimpleListAdapter,
+              SimpleArrayAdapter as alternatives to SimpleHash and
+              SimpleSequence. now uses there instead of SimpleHash, etc., when
+              its incompatible_improvements setting is set to 2.3.22.</para>
+            </listitem>
+
+            <listitem>
               <para><literal>FreemarkerServlet</literal> improvements:</para>
 
               <itemizedlist>
@@ -21974,6 +22018,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 &lt;/init-param&gt;</programlisting>
           </listitem>
         </itemizedlist>
+
+        <para>Some changes require the
+        <literal>incompatible_improvements</literal> of the
+        <literal>object_wrapper</literal> to be set. If you aren't setting the
+        <literal>object_wrapper</literal> anywhere, that's the same as the
+        <literal>incompatible_improvements</literal> of the
+        <literal>Configuration</literal>. Otherwise it has to be set of the
+        <literal>ObjectWrapper</literal> itself (if you are using a builder,
+        like <literal>new
+        DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build()</literal>,
+        if you are using a constructor, then <literal>new
+        DefaultObjectWrapper(Configuration.VERSION_2_3_21)</literal>, or if
+        you are using the <literal>object_wrapper</literal> property (a string
+        value) or FreemarkerSerlvet init-param, then
+        <literal>"DefaultObjectWrapper(2.3.21)"</literal>.)</para>
 
         <para>Note that we have changed our proprietary BSD-style license to
         Apache License, Version 2.0. See the <link linkend="app_license">new

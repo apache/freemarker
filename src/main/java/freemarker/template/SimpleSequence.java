@@ -24,34 +24,51 @@ import java.util.List;
 import freemarker.ext.beans.BeansWrapper;
 
 /**
- * <p>A convenient implementation of a list. This
- * object implements {@link TemplateSequenceModel}, using an underlying 
- * <tt>java.util.List</tt> implementation.</p>
+ * A simple implementation of the {@link TemplateSequenceModel} interface, using its own underlying {@link List} for
+ * storing the list items. If you are wrapping an already existing {@link List} or {@code array}, also consider using
+ * {@link SimpleMapAdapter} or {@link SimpleArrayAdapter} (see comparison below).
+ * 
+ * <p>
+ * This class is thread-safe if you don't call methods modifying methods (like {@link #add(Object)}) after you have made
+ * the object available for multiple threads (assuming you have published it safely to the other threads; see JSR-133
+ * Java Memory Model). These methods aren't called by FreeMarker, so it's usually not a concern.
+ * 
+ * <p>
+ * <b>{@link SimpleSequence} VS {@link SimpleListAdapter}/{@link SimpleArrayAdapter} - Which to use when?</b>
+ * </p>
+ * 
+ * <p>
+ * For a {@link List} or {@code array} that exists regardless of FreeMarker, only you need to access it for templates,
+ * {@link SimpleMapAdapter} should be the default choice, as it has more predictable performance (no spikes).
+ * 
+ * <p>
+ * For a sequence that's made specifically to be used from templates, creating an empty {@link SimpleSequence} then
+ * filling it with {@link SimpleSequence#add(Object)} is usually the way to go, as the resulting sequence is
+ * significantly faster to read from templates than a {@link SimpleListAdapter} (though it's somewhat slower to read
+ * from a plain Java method to which it had to be passed adapted to a {@link List}).
+ * 
+ * <p>
+ * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the sequence
+ * from a {@link List} (via {@link SimpleListAdapter#SimpleListAdapter(List, ObjectWrapper)} or
+ * {@link SimpleSequence#SimpleSequence(Collection)}), which will be the faster depends on how many times will the
+ * <em>same</em> {@link List} entry be read from the template(s) later, on average. If, on average, you read each entry
+ * for more 4 times, {@link SimpleSequence} will be most certainly faster, but if for 2 times or less (and especially if
+ * not at all) then {@link SimpleMapAdapter} will be. Before choosing based on performance though, pay attention to the
+ * behavioral differences; {@link SimpleSequence} will shallow-copy a the {@link List} at construction time, so it won't
+ * reflect {@link List} content changes after the {@link SimpleSequence} construction.
  *
- * <p>A <tt>SimpleSequence</tt> can act as a cache for a
- * <tt>TemplateCollectionModel</tt>, e.g. one that gets data from a
- * database.  When passed a <tt>TemplateCollectionModel</tt> as an
- * argument to its constructor, the <tt>SimpleSequence</tt> immediately 
- * copies all the elements and discards the <tt>TemplateCollectionModel</tt>.</p>
- *
- * <p>This class is thread-safe if you don't call the <tt>add</tt> method after you
- * have made the object available for multiple threads, and you have published it
- * safely.
- *
- * <p><b>Note:</b><br>
- * As of 2.0, this class is unsynchronized by default.
- * To obtain a synchronized wrapper, call the {@link #synchronizedWrapper} method.</p>
- *
- * @see SimpleHash
- * @see SimpleScalar
+ * @see SimpleListAdapter
+ * @see SimpleArrayAdapter
+ * @see TemplateSequenceModel
  */
-public class SimpleSequence extends WrappingTemplateModel
-implements TemplateSequenceModel, Serializable {
+public class SimpleSequence extends WrappingTemplateModel implements TemplateSequenceModel, Serializable {
 
     /**
-     * @serial The <tt>List</tt> that this <tt>SimpleSequence</tt> wraps.
+     * The {@link List} that stored the elements of this sequence. It migth contains both {@link TemplateModel} elements
+     * and non-{@link TemplateModel} elements.
      */
     protected final List list;
+    
     private List unwrappedList;
 
     /**
@@ -92,9 +109,10 @@ implements TemplateSequenceModel, Serializable {
     }
     
     /**
-     * Constructs a simple sequence from the passed collection model using the
-     * default object wrapper set in 
-     * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}.
+     * Constructs a simple sequence from the passed collection model, which shouldn't be added to later. The internal
+     * list will be build immediately (not lazily). The resulting sequence shouldn't be extended with
+     * {@link #add(Object)}, because the appropriate {@link ObjectWrapper} won't be available; use
+     * {@link #SimpleSequence(Collection, ObjectWrapper)} instead, if you need that.
      */
     public SimpleSequence(TemplateCollectionModel tcm) throws TemplateModelException {
         ArrayList alist = new ArrayList();
@@ -106,11 +124,12 @@ implements TemplateSequenceModel, Serializable {
     }
 
     /**
-     * Constructs an empty simple sequence using the specified object wrapper.
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper set in 
-     * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)} is
-     * used.
+     * Constructs an empty sequence using the specified object wrapper.
+     * 
+     * @param wrapper
+     *            The object wrapper to use to wrap the list items into {@link TemplateModel} instances. {@code null} is
+     *            allowed, but deprecated, and will cause the deprecated default object wrapper (set in
+     *            {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)}) to be used.
      */
     public SimpleSequence(ObjectWrapper wrapper) {
         super(wrapper);
@@ -120,6 +139,9 @@ implements TemplateSequenceModel, Serializable {
     /**
      * Constructs an empty simple sequence with preallocated capacity.
      * 
+     * @param wrapper
+     *            See the similar parameter of {@link SimpleSequence#SimpleSequence(ObjectWrapper)}.
+     * 
      * @since 2.3.21
      */
     public SimpleSequence(int capacity, ObjectWrapper wrapper) {
@@ -128,15 +150,16 @@ implements TemplateSequenceModel, Serializable {
     }    
     
     /**
-     * Constructs a simple sequence that will contain the elements
-     * from the specified {@link Collection} and will use the specified object
-     * wrapper.
-     * @param collection the collection containing initial values. Note that a
-     * copy of the collection is made for internal use.
-     * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If null, the default wrapper set in 
-     * {@link WrappingTemplateModel#setDefaultObjectWrapper(ObjectWrapper)} is
-     * used.
+     * Constructs a simple sequence that will contain the elements from the specified {@link Collection}; consider
+     * using {@link SimpleListAdapter} instead.
+     * 
+     * @param collection
+     *            The collection containing the initial items of this sequence. A shalow copy of this collection is made
+     *            immediately for internal use (thus, later modification on the parameter collection won't be visible in
+     *            the resulting sequence). The items however, will be only wrapped with the {@link ObjectWrapper}
+     *            lazily, when first needed.
+     * @param wrapper
+     *            See the similar parameter of {@link SimpleSequence#SimpleSequence(ObjectWrapper)}.
      */
     public SimpleSequence(Collection collection, ObjectWrapper wrapper) {
         super(wrapper);
@@ -144,12 +167,12 @@ implements TemplateSequenceModel, Serializable {
     }
 
     /**
-     * Adds an arbitrary object to the end of this <tt>SimpleSequence</tt>.
-     * If the object itself does not implement the {@link TemplateModel} 
-     * interface, it will be wrapped into an appropriate adapter on the first 
-     * call to {@link #get(int)}.
+     * Adds an arbitrary object to the end of this sequence. If the newly added object does not implement the
+     * {@link TemplateModel} interface, it will be wrapped into the appropriate {@link TemplateModel} interface when
+     * it's first read (lazily).
      *
-     * @param obj the boolean to be added.
+     * @param obj
+     *            The object to be added.
      */
     public void add(Object obj) {
         list.add(obj);
@@ -157,27 +180,24 @@ implements TemplateSequenceModel, Serializable {
     }
 
     /**
-     * Adds a boolean to the end of this <tt>SimpleSequence</tt>, by 
-     * coercing the boolean into {@link TemplateBooleanModel#TRUE} or 
-     * {@link TemplateBooleanModel#FALSE}.
+     * Adds a boolean value to the end of this sequence. The newly added boolean will be immediately converted into
+     * {@link TemplateBooleanModel#TRUE} or {@link TemplateBooleanModel#FALSE}, without using the {@link ObjectWrapper}.
      *
-     * @param b the boolean to be added.
+     * @param b
+     *            The boolean value to be added.
+     * 
+     * @deprecated Use {@link #add(Object)} instead, as this bypasses the {@link ObjectWrapper}.
      */
     public void add(boolean b) {
-        if (b) {
-            add(TemplateBooleanModel.TRUE);
-        } 
-        else {
-            add(TemplateBooleanModel.FALSE);
-        }
+        add(b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE);
     }
     
     /**
-     * Note that this method creates and returns a deep-copy of the underlying list used
-     * internally. This could be a gotcha for some people
-     * at some point who want to alter something in the data model,
-     * but we should maintain our immutability semantics (at least using default SimpleXXX wrappers) 
-     * for the data model. It will recursively unwrap the stuff in the underlying container. 
+     * Builds a deep-copy of the underlying list, unwrapping any values that were already converted to
+     * {@link TemplateModel}-s. When called for the second time (or later), it just reuses the first result, unless the
+     * sequence was modified since then.
+     * 
+     * @deprecated No replacement exists; not a reliable way of getting back the original list elemnts.
      */
     public List toList() throws TemplateModelException {
         if (unwrappedList == null) {
@@ -186,10 +206,11 @@ implements TemplateSequenceModel, Serializable {
             try {
                 result = (List) listClass.newInstance();
             } catch (Exception e) {
-                throw new TemplateModelException("Error instantiating an object of type " + listClass.getName() + "\n" + e.getMessage());
+                throw new TemplateModelException("Error instantiating an object of type " + listClass.getName(),
+                        e);
             }
             BeansWrapper bw = BeansWrapper.getDefaultInstance();
-            for (int i=0; i<list.size(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 Object elem = list.get(i);
                 if (elem instanceof TemplateModel) {
                     elem = bw.unwrap((TemplateModel) elem);
@@ -202,21 +223,21 @@ implements TemplateSequenceModel, Serializable {
     }
     
     /**
-     * @return the specified index in the list
+     * Returns the item at the specified index of the list. If the item isn't yet an {@link TemplateModel}, it will wrap
+     * it to one now, and writes it back into the backing list.
      */
-    public TemplateModel get(int i) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateModelException {
         try {
-            Object value = list.get(i);
+            Object value = list.get(index);
             if (value instanceof TemplateModel) {
                 return (TemplateModel) value;
             }
             TemplateModel tm = wrap(value);
-            list.set(i, tm);
+            list.set(index, tm);
             return tm;
         }
         catch(IndexOutOfBoundsException e) {
             return null;
-//            throw new TemplateModelException(i + " out of bounds [0, " + list.size() + ")");
         }
     }
 
@@ -254,10 +275,12 @@ implements TemplateSequenceModel, Serializable {
                 return SimpleSequence.this.size();
             }
         }
+        
         public List toList() throws TemplateModelException {
             synchronized (SimpleSequence.this) {
                 return SimpleSequence.this.toList();
             }
         }
     }
+    
 }

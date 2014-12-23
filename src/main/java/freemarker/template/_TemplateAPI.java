@@ -40,7 +40,7 @@ public class _TemplateAPI {
                     + incompatibleImprovements + ", but the installed FreeMarker version is only "
                     + Configuration.getVersion() + ". You may need to upgrade FreeMarker in your project.");
         }
-        if (iciV < 200300) {
+        if (iciV < VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("\"incompatibleImprovements\" must be at least 2.3.0.");
         }
     }

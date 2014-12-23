@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Node;
@@ -46,6 +47,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
     static final private ObjectWrapper JYTHON_WRAPPER;
     
+    private boolean useAdaptersForContainers;
+    
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
      * {@link Configuration#DEFAULT_INCOMPATIBLE_IMPROVEMENTS}.
@@ -67,18 +70,34 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * @since 2.3.21
      */
     public DefaultObjectWrapper(Version incompatibleImprovements) {
-        super(incompatibleImprovements);
+        this(new DefaultObjectWrapperConfiguration(incompatibleImprovements) { }, false);
     }
 
     /**
-     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapperConfiguration, boolean)}.
+     * Use {@link #DefaultObjectWrapper(DefaultObjectWrapperConfiguration, boolean)} instead if possible;
+     * it does the same, except that it tolerates a non-{@link DefaultObjectWrapperConfiguration} configuration too.
      * 
      * @since 2.3.21
      */
-    protected DefaultObjectWrapper(BeansWrapperConfiguration dowCfg, boolean readOnly) {
-        super(dowCfg, readOnly);
+    protected DefaultObjectWrapper(BeansWrapperConfiguration bwCfg, boolean readOnly) {
+        super(bwCfg, readOnly, false);
+        DefaultObjectWrapperConfiguration dowDowCfg = bwCfg instanceof DefaultObjectWrapperConfiguration
+                ? (DefaultObjectWrapperConfiguration) bwCfg
+                : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
+        useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
+        finalizeConstruction(readOnly);
     }
 
+    /**
+     * Calls {@link BeansWrapper#BeansWrapper(BeansWrapperConfiguration, boolean)} and sets up
+     * {@link DefaultObjectWrapper}-specific fields.
+     * 
+     * @since 2.3.22
+     */
+    protected DefaultObjectWrapper(DefaultObjectWrapperConfiguration dowCfg, boolean readOnly) {
+        this((BeansWrapperConfiguration) dowCfg, readOnly);
+    }
+    
     static {
         Class cl;
         ObjectWrapper ow;
@@ -128,14 +147,26 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             }
             return new SimpleDate((java.util.Date) obj, getDefaultDateType());
         }
-        if (obj.getClass().isArray()) {
-            obj = convertArray(obj);
+        final Class objClass = obj.getClass();
+        if (objClass.isArray()) {
+            if (useAdaptersForContainers) {
+                return SimpleArrayAdapter.adapt(obj, this);
+            } else {
+                obj = convertArray(obj);
+                // Falls through (a strange legacy...)
+            }
         }
         if (obj instanceof Collection) {
-            return new SimpleSequence((Collection) obj, this);
+            return useAdaptersForContainers && obj instanceof List
+                    ? (TemplateModel) new SimpleListAdapter((List) obj, this)
+                    : (TemplateModel) new SimpleSequence((Collection) obj, this);
+            // IcI 2.4: When useAdaptersForContainers is true, we should wrap collections with TemplateCollectionModelEx
+            // ("Ex" is to add size() (?size) and isEmpty()).
         }
         if (obj instanceof Map) {
-            return new SimpleHash((Map) obj, this);
+            return useAdaptersForContainers
+                    ? (TemplateModel) new SimpleMapAdapter((Map) obj, this)
+                    : (TemplateModel) new SimpleHash((Map) obj, this);
         }
         if (obj instanceof Boolean) {
             return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -166,7 +197,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Converts an array to a java.util.List
+     * Converts an array to a java.util.List.
      */
     protected Object convertArray(Object arr) {
         final int size = Array.getLength(arr);
@@ -176,5 +207,42 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         }
         return list;
     }
+
+    /**
+     * The getter pair of {@link #setUseAdaptersForContainers(boolean)}.
+     * 
+     * @since 2.3.22
+     */
+    public boolean getUseAdaptersForContainers() {
+        return useAdaptersForContainers;
+    }
+
+    /**
+     * Sets if to wrap container objects ({@link Map}-s, {@link List}-s, arrays and such) the copying approach or the
+     * adapter approach should be used. {@code true} is recommended, which is also the default when the
+     * {@code incompatible_improvements} of this instance was set to {@link Configuration#VERSION_2_3_22} or higher. To
+     * understand the difference, check some of the classes that implement the two approaches
+     * <ul>
+     * <li>Copying approach: {@link SimpleHash}, {@link SimpleSequence}</li>
+     * <li>Adapter approach: {@link SimpleMapAdapter}, {@link SimpleListAdapter}, {@link SimpleArrayAdapter}</li>
+     * </ul>
+     * 
+     * @since 2.3.22
+     */
+    public void setUseAdaptersForContainers(boolean useAdaptersForContainers) {
+        checkModifiable();
+        this.useAdaptersForContainers = useAdaptersForContainers;
+    }
+    
+    /** 
+     * Returns the lowest version number that is equivalent with the parameter version.
+     * @since 2.3.22
+     */
+    protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        Version bwIcI = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_22
+                ? bwIcI : Configuration.VERSION_2_3_22;
+    }    
     
 }

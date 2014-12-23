@@ -160,7 +160,7 @@ public class Configuration extends Configurable implements Cloneable {
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
-    private static final Version version;
+    private static final Version VERSION;
     static {
         try {
             Properties vp = new Properties();
@@ -192,7 +192,7 @@ public class Configuration extends Configurable implements Cloneable {
                 
                 final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
                 
-                version = new Version(versionString, gaeCompliant, buildDate);
+                VERSION = new Version(versionString, gaeCompliant, buildDate);
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
@@ -1552,7 +1552,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @deprecated Use {@link #getVersion()} instead.
      */
     public static String getVersionNumber() {
-        return version.toString();
+        return VERSION.toString();
     }
     
     /**
@@ -1584,7 +1584,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @since 2.3.20
      */ 
     public static Version getVersion() {
-        return version;
+        return VERSION;
     }
     
     /**

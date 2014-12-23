@@ -32,7 +32,7 @@ import java.util.Iterator;
  * variable for many times, <tt>SimpleSequence</tt> may gives better performance, as the
  * wrapping of non-<tt>TemplateModel</tt> objects happens only once.
  *
- * <p>This class is thread-safe. The returned <tt>TemplateModelIterator</tt>-s
+ * <p>This class is thread-safe. The returned {@link TemplateModelIterator}-s
  * are <em>not</em> thread-safe.
  */
 public class SimpleCollection extends WrappingTemplateModel
@@ -77,7 +77,7 @@ implements TemplateCollectionModel, Serializable {
      * only on of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
      * method of a <tt>TemplateModelIterator</tt> instance, all other instance will throw a
      * <tt>TemplateModelException</tt> when you try to call their methods, since the wrapped <tt>Iterator</tt>
-     * can't return the first element.
+     * can't return the first element anymore.
      */
     public TemplateModelIterator iterator() {
         if (iterator != null) {
@@ -89,15 +89,15 @@ implements TemplateCollectionModel, Serializable {
         }
     }
     
-    /*
-     * An instance of this class must be accessed only from a single thread.
-     * The encapsulated Iterator may accessible from multiple threads (as multiple
-     * SimpleTemplateModelIterator instance can wrap the same Iterator instance),
-     * but the first thread which uses the shared Iterator will monopolize that.
+    /**
+     * Wraps an {@link Iterator}; not thread-safe. The encapsulated {@link Iterator} may be accessible from multiple
+     * threads (as multiple {@link SimpleTemplateModelIterator} instance can wrap the same {@link Iterator} instance),
+     * but if the {@link Iterator} was marked in the constructor as shared, the first thread which uses the
+     * {@link Iterator} will monopolize that.
      */
     private class SimpleTemplateModelIterator implements TemplateModelIterator {
         
-        private Iterator iterator;
+        private final Iterator iterator;
         private boolean iteratorShared;
             
         SimpleTemplateModelIterator(Iterator iterator, boolean iteratorShared) {
@@ -106,26 +106,24 @@ implements TemplateCollectionModel, Serializable {
         }
 
         public TemplateModel next() throws TemplateModelException {
-            if (iteratorShared) makeIteratorDirty();
+            if (iteratorShared) { 
+                makeIteratorDirty();
+            }
             
             if (!iterator.hasNext()) {
                 throw new TemplateModelException("The collection has no more elements.");
             }
             
             Object value  = iterator.next();
-            if (value instanceof TemplateModel) {
-                return (TemplateModel) value;
-            } else {
-                return wrap(value);
-            }
+            return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
 
         public boolean hasNext() throws TemplateModelException {
-            /* 
-             * Theorically this should not make the iterator dirty,
-             * but I met sync. problems if I don't do it here. :(
-             */
-            if (iteratorShared) makeIteratorDirty();
+            // Theorically this should not make the iterator dirty, but I met sync. problems if I don't do it here. :(
+            if (iteratorShared) {
+                makeIteratorDirty();
+            }
+            
             return iterator.hasNext();
         }
         
@@ -133,8 +131,8 @@ implements TemplateCollectionModel, Serializable {
             synchronized (SimpleCollection.this) {
                 if (iteratorDirty) {
                     throw new TemplateModelException(
-                            "This collection variable wraps a java.util.Iterator, "
-                            + "thus it can be <list>-ed or <foreach>-ed only once");
+                            "This collection value wraps a java.util.Iterator, "
+                            + "thus it can be listed only once.");
                 } else {
                     iteratorDirty = true;
                     iteratorShared = false;
