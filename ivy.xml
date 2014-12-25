@@ -72,8 +72,6 @@
     
     <conf name="manual" description="for generating the manual with Docgen" />
     
-    <conf name="emma" description="for generating EMMA reports" />
-    
     <conf name="bnd" description="for creating OSGi bundle" />
     
     <conf name="example.servlet" description="servlet-based examples" />
@@ -154,11 +152,6 @@
     
     <dependency org="org.freemarker" name="docgen" rev="1.0-branch-head" conf="manual->default" changing="true" />
     
-    <!-- EMMA -->
-    
-    <dependency org="emma" name="emma" rev="2.0.5312" conf="emma->default" />
-    <dependency org="emma" name="emma_ant" rev="2.0.5312" conf="emma->default" />
-    
     <!-- parser -->
     
     <dependency org="net.java.dev.javacc" name="javacc" rev="3.2" conf="parser->default" />
@@ -169,7 +162,6 @@
     
     <!-- As the tests *run* on Ant, so it's a provided dependency there. -->
     <exclude org="ant" module="ant" conf="run.test" />
-    <exclude org="ant" module="ant" conf="emma" />
     
     <!-- Ensure that JSP versions don't accidentally hide each-other -->
     
