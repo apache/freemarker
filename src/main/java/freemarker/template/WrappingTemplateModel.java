@@ -17,8 +17,8 @@
 package freemarker.template;
 
 /**
- * Convenience base-class for containers that wrap arbitrary Java objects into 
- * {@link TemplateModel} instances.
+ * Convenience base-class for containers that wrap their contained arbitrary Java objects into {@link TemplateModel}
+ * instances.
  */
 abstract public class WrappingTemplateModel {
 

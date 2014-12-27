@@ -111,7 +111,7 @@ implements TemplateCollectionModel, Serializable {
             }
             
             if (!iterator.hasNext()) {
-                throw new TemplateModelException("The collection has no more elements.");
+                throw new TemplateModelException("The collection has no more items.");
             }
             
             Object value  = iterator.next();

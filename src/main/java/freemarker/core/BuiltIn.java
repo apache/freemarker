@@ -108,6 +108,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("interpret", new Interpret());
         builtins.put("is_boolean", new BuiltInsForMultipleTypes.is_booleanBI());
         builtins.put("is_collection", new BuiltInsForMultipleTypes.is_collectionBI());
+        builtins.put("is_collection_ex", new BuiltInsForMultipleTypes.is_collection_exBI());
         bi = new BuiltInsForMultipleTypes.is_dateLikeBI();
         builtins.put("is_date", bi);  // misnomer
         builtins.put("is_date_like", bi);

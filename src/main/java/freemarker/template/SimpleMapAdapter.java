@@ -27,19 +27,23 @@ import freemarker.ext.util.WrapperTemplateModel;
  * be used from a template, also consider using {@link SimpleHash} (see comparison there).
  * 
  * <p>
- * Thread safety: A {@link SimpleMapAdapter} is as thread-safe as the {@link Map} that it wraps. Normally you only have
- * to consider read-only access, as the FreeMarker template language doesn't allow writing these hashes (though of
+ * Thread safety: A {@link SimpleMapAdapter} is as thread-safe as the {@link Map} that it wraps is. Normally you only
+ * have to consider read-only access, as the FreeMarker template language doesn't allow writing these hashes (though of
  * course, a Java methods called from the template can violate this rule).
  * 
  * @since 2.3.22
  */
-public final class SimpleMapAdapter extends WrappingTemplateModel
+public class SimpleMapAdapter extends WrappingTemplateModel
         implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel,
         Serializable {
 
     private final Map map;
 
-    public SimpleMapAdapter(Map map, ObjectWrapper wrapper) {
+    public static SimpleMapAdapter adapt(Map map, ObjectWrapper wrapper) {
+        return new SimpleMapAdapter(map, wrapper);
+    }
+    
+    private SimpleMapAdapter(Map map, ObjectWrapper wrapper) {
         super(wrapper);
         this.map = map;
     }

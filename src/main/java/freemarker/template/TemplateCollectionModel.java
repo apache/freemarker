@@ -16,18 +16,30 @@
 
 package freemarker.template;
 
+import java.util.Collection;
+
 /**
- * "collection" template language data type: a collection of values that can be enumerated, repeatedly (not just once).
- * This is very similar to {@link TemplateSequenceModel}, but it doesn't support indexed (random) access and
- * its size can't be queried.
- *  
- * <p>They are mostly used in template languages like {@code <#list myCollection as i>...</#list>}.  
+ * "collection" template language data type: a collection of values that can be enumerated, but can't be or not meant to
+ * be accessed by index or key. As such, this is not a super-interface of {@link TemplateSequenceModel}, and
+ * implementations of that interface needn't also implement this interface just because they can. They should though, if
+ * enumeration with this interface is significantly faster than enumeration by index. The {@code #list} directive will
+ * enumerate using this interface if it's available.
+ * 
+ * <p>
+ * The enumeration should be repeatable if that's possible with reasonable effort, otherwise a second enumeration
+ * attempt is allowed to throw an {@link TemplateModelException}. Generally, the interface user Java code need not
+ * handle that kind of exception, as in practice only the template author can handle it, by not listing such collections
+ * twice.
+ * 
+ * <p>
+ * Note that to wrap Java's {@link Collection}, you should implement {@link TemplateCollectionModelEx}, not just this
+ * interface.
  */
 public interface TemplateCollectionModel extends TemplateModel {
 
     /**
-     * Retrieves a template model iterator that is used to iterate over
-     * the elements in this collection.
+     * Retrieves a template model iterator that is used to iterate over the elements in this collection.
      */
     public TemplateModelIterator iterator() throws TemplateModelException;
+
 }

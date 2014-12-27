@@ -19,9 +19,11 @@ package freemarker.template;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.w3c.dom.Node;
 
@@ -48,6 +50,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     static final private ObjectWrapper JYTHON_WRAPPER;
     
     private boolean useAdaptersForContainers;
+    private boolean useAdaptersForNonListCollections;
     
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
@@ -57,7 +60,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      *          {@link #DefaultObjectWrapper(Version)} instead.
      */
     public DefaultObjectWrapper() {
-        super();
+        this(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
     }
     
     /**
@@ -85,6 +88,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 ? (DefaultObjectWrapperConfiguration) bwCfg
                 : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
         useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
+        useAdaptersForNonListCollections = dowDowCfg.getUseAdaptersForNonListCollections();
         finalizeConstruction(readOnly);
     }
 
@@ -157,15 +161,17 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             }
         }
         if (obj instanceof Collection) {
-            return useAdaptersForContainers && obj instanceof List
-                    ? (TemplateModel) new SimpleListAdapter((List) obj, this)
-                    : (TemplateModel) new SimpleSequence((Collection) obj, this);
-            // IcI 2.4: When useAdaptersForContainers is true, we should wrap collections with TemplateCollectionModelEx
-            // ("Ex" is to add size() (?size) and isEmpty()).
+            if (useAdaptersForContainers && obj instanceof List) {
+                return SimpleListAdapter.adapt((List) obj, this);
+            } else {
+                return useAdaptersForNonListCollections && !(obj instanceof List)
+                        ? (TemplateModel) SimpleNonListCollectionAdapter.adapt((Collection) obj, this)
+                        : (TemplateModel) new SimpleSequence((Collection) obj, this);
+            }
         }
         if (obj instanceof Map) {
             return useAdaptersForContainers
-                    ? (TemplateModel) new SimpleMapAdapter((Map) obj, this)
+                    ? (TemplateModel) SimpleMapAdapter.adapt((Map) obj, this)
                     : (TemplateModel) new SimpleHash((Map) obj, this);
         }
         if (obj instanceof Boolean) {
@@ -227,6 +233,15 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * <li>Adapter approach: {@link SimpleMapAdapter}, {@link SimpleListAdapter}, {@link SimpleArrayAdapter}</li>
      * </ul>
      * 
+     * <p>
+     * <b>Attention:</b> For backward compatibility, currently, non-{@link List} collections (like {@link Set}-s) will
+     * only be wrapped with adapter approach (with {@link SimpleNonListCollectionAdapter}) if
+     * {@link #setUseAdaptersForNonListCollections(boolean) useAdaptersForNonListCollections} was set to {@code true}.
+     * Currently the default is {@code false}, but in new projects you should set it to {@code true}.
+     * See {@link #setUseAdaptersForNonListCollections(boolean)} for more.
+     * 
+     * @see #setUseAdaptersForNonListCollections(boolean)
+     * 
      * @since 2.3.22
      */
     public void setUseAdaptersForContainers(boolean useAdaptersForContainers) {
@@ -234,6 +249,34 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         this.useAdaptersForContainers = useAdaptersForContainers;
     }
     
+    /**
+     * Getter pair of {@link #setUseAdaptersForNonListCollections(boolean)}; see there.
+     * 
+     * @since 2.3.22
+     */
+    public boolean getUseAdaptersForNonListCollections() {
+        return useAdaptersForNonListCollections;
+    }
+
+    /**
+     * Specifies if non-{@link List} {@link Collections} (like {@link Set}-s) will be wrapped with with the legacy
+     * {@link SimpleSequence}, or with the more modern {@link SimpleNonListCollectionAdapter}. This meant to be used when
+     * {@link #getUseAdaptersForContainers()} is also {@code true}. In new projects you should definitely set this to
+     * {@code true}. At least before {@code incompatible_improvements} 2.4.0 it defaults to {@code false}, because of
+     * backward compatibility concerns. Namely, in earlier versions even non-{@link List} {@link Collection}-s were
+     * wrapped into a {@link TemplateSequenceModel}, which means that the templates could access the items by index if
+     * they wanted to (the index values were defined by the iteration order). This was not very useful, or was even
+     * confusing, and conflicts with the adapter approach.
+     * 
+     * @see #setUseAdaptersForContainers(boolean)
+     * 
+     * @since 2.3.22
+     */
+    public void setUseAdaptersForNonListCollections(boolean legacyNonListCollectionWrapping) {
+        checkModifiable();
+        this.useAdaptersForNonListCollections = legacyNonListCollectionWrapping;
+    }
+
     /** 
      * Returns the lowest version number that is equivalent with the parameter version.
      * @since 2.3.22

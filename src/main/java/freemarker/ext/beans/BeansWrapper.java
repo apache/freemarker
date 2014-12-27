@@ -47,6 +47,7 @@ import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -74,7 +75,7 @@ import freemarker.template.utility.WriteProtectable;
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
  * was safely published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety. 
  */
-public class BeansWrapper implements ObjectWrapper, WriteProtectable
+public class BeansWrapper implements ObjectWrapperAndUnwrapper, WriteProtectable
 {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 

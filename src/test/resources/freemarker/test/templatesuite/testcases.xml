@@ -125,6 +125,9 @@
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.DefaultObjectWrapper"/> 
    </testCase>
+   <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, useAdaptersForNonListCollections=true)"/> 
+   </testCase>
    <testCase name="sequence-builtins[#endTN]-with-SimpleObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
    </testCase>

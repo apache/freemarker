@@ -14059,13 +14059,13 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_hash</literal></td>
 
-                <td>hash</td>
+                <td>hash (including extended hash)</td>
               </tr>
 
               <tr>
                 <td><literal>is_hash_ex</literal></td>
 
-                <td>extended hash (i.e. supports <literal>?keys</literal> and
+                <td>extended hash (supports <literal>?keys</literal> and
                 <literal>?values</literal>)</td>
               </tr>
 
@@ -14078,7 +14078,14 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_collection</literal></td>
 
-                <td>collection</td>
+                <td>collection (including extended collection)</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_collection_ex</literal></td>
+
+                <td>extended collection (supports
+                <literal>?size</literal>)</td>
               </tr>
 
               <tr>
@@ -21721,7 +21728,64 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   existing <literal>Map</literal> or <literal>List</literal>
                   or array.</para>
                 </listitem>
+
+                <listitem>
+                  <para>At least until
+                  <literal>incompatible_improvements</literal> 2.4.0,
+                  <literal>java.util.Collection</literal>-s that aren't
+                  <literal>List</literal>-s (like <literal>Set</literal>-s)
+                  will continue using <literal>SimpleSequence</literal> (i.e.,
+                  the copying approach) by default. This is because
+                  <literal>SimpleSequence</literal> gave indexed access to
+                  these non-<literal>List</literal>-s, like in
+                  <literal>mySet[2]</literal>, which is strange but some
+                  existing templates may utilize this. To enable the more
+                  modern adapter approach, set
+                  <literal>DefaultObjectWrapper</literal>'s
+                  <literal>useAdaptersForNonListCollections</literal> property
+                  to <literal>true</literal>. Then indexed access won't be
+                  possible for <literal>Set</literal>-s and such (note that
+                  <literal>?size</literal> will still work), so you may want
+                  to retest old templates, but you get the advantages of the
+                  adapter approach. In new project it's highly recommended to
+                  set <literal>useAdaptersForNonListCollections</literal> to
+                  <literal>true</literal>. (The adapter approach is
+                  implemented by
+                  <literal>SimpleNonListCollectionAdapter</literal>.)</para>
+                </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added new, FTL type interface,
+              <literal>freemarker.template.TemplateCollectionModelEx</literal>,
+              which adds the <literal>size()</literal>,
+              <literal>isEmpty()</literal>, and <literal>boolean
+              contains(TemplateModel)</literal> methods to the
+              <literal>TemplateCollectionModel</literal> interface. This was
+              added because when wrapping
+              <literal>java.util.Collections</literal>, these extra
+              capabilities area available anyway, but FTL couldn't tap on them
+              till now. While the exact interface details are marked as
+              experimental, the feature itself is already utilized when
+              setting the <literal>useAdaptersForNonListCollections</literal>
+              property of <literal>DefaultObjectWrapper</literal> to
+              <literal>true</literal> (see earlier).</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new interface,
+              <literal>freemarker.template.ObjectWrapperAndUnwrapper</literal>.
+              This extends <literal>ObjectWrapper</literal> with unwrapping
+              functionality. This functionality has already existed for a long
+              time in all <literal>BeansWrapper</literal> subclasses, like in
+              <literal>DefaultObjectWrapper</literal>, but it wasn't
+              <quote>factored out</quote> into its own published interface
+              that other <literal>ObjectWrapper</literal>-s could implement
+              too. This is useful for <literal>TemplateModel</literal>
+              implementations that don't want to require a
+              <literal>BeansWrapper</literal> (or its subclass), only the
+              availability of the unwrapping functionality.</para>
             </listitem>
 
             <listitem>

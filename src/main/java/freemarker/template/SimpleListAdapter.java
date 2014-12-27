@@ -10,18 +10,30 @@ import freemarker.ext.util.WrapperTemplateModel;
  * {@link TemplateSequenceModel}. If you aren't wrapping an already existing {@link List}, but build a sequence
  * specifically to be used from a template, also consider using {@link SimpleSequence} (see comparison there).
  * 
+ * <p>
+ * Thread safety: A {@link SimpleListAdapter} is as thread-safe as the {@link List} that it wraps is. Normally you only
+ * have to consider read-only access, as the FreeMarker template language doesn't allow writing these sequences (though
+ * of course, a Java methods called from the template can violate this rule).
+ * 
  * @see SimpleSequence
  * @see SimpleArrayAdapter
  * @see TemplateSequenceModel
  * 
  * @since 2.3.22
  */
-public final class SimpleListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+public class SimpleListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
     private final List list;
 
-    public SimpleListAdapter(List list, ObjectWrapper wrapper) {
+    /**
+     * Factory method for creating new adapter instances.
+     */
+    public static SimpleListAdapter adapt(List list, ObjectWrapper wrapper) {
+        return new SimpleListAdapter(list, wrapper);
+    }
+    
+    private SimpleListAdapter(List list, ObjectWrapper wrapper) {
         super(wrapper);
         this.list = list;
     }

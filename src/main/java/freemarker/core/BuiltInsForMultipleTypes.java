@@ -29,6 +29,7 @@ import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -244,6 +245,14 @@ class BuiltInsForMultipleTypes {
         }
     }
 
+    static class is_collection_exBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateCollectionModelEx) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
     static class is_dateLikeBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
@@ -393,22 +402,28 @@ class BuiltInsForMultipleTypes {
     }
 
     static class sizeBI extends BuiltIn {
-        TemplateModel _eval(Environment env)
-                throws TemplateException
-        {
+        TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
+
+            final int size;
             if (model instanceof TemplateSequenceModel) {
-                int size = ((TemplateSequenceModel) model).size();
-                return new SimpleNumber(size);
+                size = ((TemplateSequenceModel) model).size();
+            } else if (model instanceof TemplateCollectionModelEx) {
+                size = ((TemplateCollectionModelEx) model).size();
+            } else if (model instanceof TemplateHashModelEx) {
+                size = ((TemplateHashModelEx) model).size();
+            } else {
+                throw new UnexpectedTypeException(
+                        target, model,
+                        "extended-hash or sequence or extended collection",
+                        new Class[] {
+                                TemplateHashModelEx.class,
+                                TemplateSequenceModel.class,
+                                TemplateCollectionModelEx.class
+                        },
+                        env);
             }
-            if (model instanceof TemplateHashModelEx) {
-                int size = ((TemplateHashModelEx) model).size();
-                return new SimpleNumber(size);
-            }
-            throw new UnexpectedTypeException(
-                    target, model,
-                    "extended-hash or sequence", new Class[] { TemplateHashModelEx.class, TemplateSequenceModel.class },
-                    env);
+            return new SimpleNumber(size);
         }
     }
     

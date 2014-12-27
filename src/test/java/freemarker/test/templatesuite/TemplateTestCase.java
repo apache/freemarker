@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -51,6 +52,7 @@ import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleCollection;
+import freemarker.template.SimpleNonListCollectionAdapter;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
@@ -319,6 +321,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
+            dataModel.put("testcollectionEx", SimpleNonListCollectionAdapter.adapt(new HashSet(), null));
             dataModel.put("bean", new TestBean());
         }
 
@@ -389,6 +392,12 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("listWithNullsOnly", listWithNullsOnly);
             
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
+            
+            Set set = new HashSet();
+            set.add("a");
+            set.add("b");
+            set.add("c");
+            dataModel.put("set", set);
         }
         
         else if (simpleTestName.equals("number-to-date")) {

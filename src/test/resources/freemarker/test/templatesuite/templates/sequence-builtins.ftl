@@ -1,3 +1,4 @@
+<@noOutput>
 <#setting locale="en_US">
 <#setting number_format="0.#########">
 
@@ -5,8 +6,9 @@
 <#list ls as i>
 - ${i}
 </#list>
-Size ${ls?size}
-
+<@assertEquals expected=0 actual=ls?size />
+<@assertEquals expected=3 actual=set?size />
+</@noOutput>
 Sorting scalars:
 ----------------
 

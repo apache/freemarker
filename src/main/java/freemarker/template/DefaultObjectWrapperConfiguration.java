@@ -14,12 +14,15 @@ import freemarker.ext.beans.BeansWrapperConfiguration;
 public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConfiguration {
     
     private boolean useAdaptersForContainers;
+    private boolean useAdaptersForNonListCollections;
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {
         super(DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements), true);
         useAdaptersForContainers = getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22;
+        useAdaptersForNonListCollections = false; // [2.4]: = IcI >= _TemplateAPI.VERSION_INT_2_4_0;
     }
 
+    /** See {@link DefaultObjectWrapper#getUseAdaptersForContainers()}. */
     public boolean getUseAdaptersForContainers() {
         return useAdaptersForContainers;
     }
@@ -28,14 +31,30 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
     public void setUseAdaptersForContainers(boolean useAdaptersForContainers) {
         this.useAdaptersForContainers = useAdaptersForContainers;
     }
+    
+    /** See {@link DefaultObjectWrapper#getUseAdaptersForNonListCollections()}. */
+    public boolean getUseAdaptersForNonListCollections() {
+        return useAdaptersForNonListCollections;
+    }
+
+    /** See {@link DefaultObjectWrapper#setUseAdaptersForNonListCollections(boolean)}. */
+    public void setUseAdaptersForNonListCollections(boolean legacyNonListCollectionWrapping) {
+        this.useAdaptersForNonListCollections = legacyNonListCollectionWrapping;
+    }
 
     public int hashCode() {
-        return super.hashCode() * 31 + (useAdaptersForContainers ? 1231 : 1237);
+        int result = super.hashCode();
+        final int prime = 31;
+        result = result * prime + (useAdaptersForContainers ? 1231 : 1237);
+        result = result * prime + (useAdaptersForNonListCollections ? 1231 : 1237);
+        return result;
     }
 
     public boolean equals(Object obj) {
         if (!super.equals(obj)) return false;
-        return useAdaptersForContainers == ((DefaultObjectWrapperConfiguration) obj).getUseAdaptersForContainers();
+        final DefaultObjectWrapperConfiguration dowCfg = (DefaultObjectWrapperConfiguration) obj;
+        return useAdaptersForContainers == dowCfg.getUseAdaptersForContainers()
+                && useAdaptersForNonListCollections == dowCfg.getUseAdaptersForNonListCollections();
     }
 
 }
