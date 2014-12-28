@@ -21742,7 +21742,56 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     </listitem>
 
                     <listitem>
-                      <para>When the wrapped list is a
+                      <para>At least until
+                      <literal>incompatible_improvements</literal> 2.4.0,
+                      <literal>java.util.Collection</literal>-s that aren't
+                      <literal>List</literal>-s (like
+                      <literal>Set</literal>-s) will continue using
+                      <literal>SimpleSequence</literal> (i.e., the copying
+                      approach) by default. This is because
+                      <literal>SimpleSequence</literal> gave indexed access to
+                      these non-<literal>List</literal>-s, like in
+                      <literal>mySet[2]</literal>, which is strange but some
+                      existing templates may utilize this, even if only
+                      accidentally. To enable the more modern adapter
+                      approach, set <literal>DefaultObjectWrapper</literal>'s
+                      <literal>useAdaptersForNonListCollections</literal>
+                      property to <literal>true</literal>. Then indexed access
+                      won't be possible for <literal>Set</literal>-s and such
+                      (nor will <literal>?first</literal> and
+                      <literal>?last</literal> work, but
+                      <literal>?size</literal> will still do), so you may want
+                      to retest old templates, but you get the advantages of
+                      the adapter approach. In new project it's highly
+                      recommended to set
+                      <literal>useAdaptersForNonListCollections</literal> to
+                      <literal>true</literal>. (The adapter approach is
+                      implemented by
+                      <literal>SimpleNonListCollectionAdapter</literal>.)</para>
+                    </listitem>
+
+                    <listitem>
+                      <para><literal>List</literal>-s and
+                      <literal>Map</literal>-s that are exposed to templates
+                      in multiple threads are now under greater stress
+                      regarding their correct operation under multi-threaded
+                      read-only access. This is because the adapters won't
+                      copy their contents into well known
+                      <literal>List</literal> and <literal>Map</literal>
+                      implementations (<literal>HashMap</literal>,
+                      <literal>ArrayList</literal>, etc.) before accessing
+                      them from multiple threads. So this is mostly a concern
+                      with custom <literal>List</literal> and
+                      <literal>Map</literal> implementations, which aren't as
+                      mature as the standard Java classes. Note that this was
+                      always like so with pure
+                      <literal>BeansWrapper</literal>, which is used by a lot
+                      of projects/frameworks (like by Struts) for a long time,
+                      so it's not an uncharted territory.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>When the wrapped <literal>List</literal> is a
                       <literal>AbstractSequentialList</literal> (like a
                       <literal>LinkedList</literal>), the resulting adapter
                       will implement
@@ -21755,33 +21804,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>TemplateCollectionModel</literal> wasn't
                       implemented as it wasn't needed for efficient
                       enumeration there.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>At least until
-                      <literal>incompatible_improvements</literal> 2.4.0,
-                      <literal>java.util.Collection</literal>-s that aren't
-                      <literal>List</literal>-s (like
-                      <literal>Set</literal>-s) will continue using
-                      <literal>SimpleSequence</literal> (i.e., the copying
-                      approach) by default. This is because
-                      <literal>SimpleSequence</literal> gave indexed access to
-                      these non-<literal>List</literal>-s, like in
-                      <literal>mySet[2]</literal>, which is strange but some
-                      existing templates may utilize this. To enable the more
-                      modern adapter approach, set
-                      <literal>DefaultObjectWrapper</literal>'s
-                      <literal>useAdaptersForNonListCollections</literal>
-                      property to <literal>true</literal>. Then indexed access
-                      won't be possible for <literal>Set</literal>-s and such
-                      (note that <literal>?size</literal> will still work), so
-                      you may want to retest old templates, but you get the
-                      advantages of the adapter approach. In new project it's
-                      highly recommended to set
-                      <literal>useAdaptersForNonListCollections</literal> to
-                      <literal>true</literal>. (The adapter approach is
-                      implemented by
-                      <literal>SimpleNonListCollectionAdapter</literal>.)</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>
