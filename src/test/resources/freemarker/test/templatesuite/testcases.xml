@@ -83,6 +83,9 @@
    <testCase name="iterators"/>
    <testCase name="lastcharacter"/>
    <testCase name="list" />
+   <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, useAdaptersForNonListCollections=true)" />
+   </testCase>
    <testCase name="listliteral" />
    <testCase name="localization" >
       <setting locale="en_AU"/>

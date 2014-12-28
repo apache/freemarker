@@ -364,14 +364,16 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testListAdapter() throws TemplateModelException {
-        List testList = new ArrayList<Object>();
-        testList.add(1);
-        testList.add(null);
-        testList.add("c");
-        testList.add(new String[] { "x" });
-
         {
+            List testList = new ArrayList<Object>();
+            testList.add(1);
+            testList.add(null);
+            testList.add("c");
+            testList.add(new String[] { "x" });
+            
             TemplateSequenceModel seq = (TemplateSequenceModel) OW22.wrap(testList);
+            assertTrue(seq instanceof SimpleListAdapter);
+            assertFalse(seq instanceof TemplateCollectionModel);  // Maybe changes at 2.4.0
             assertEquals(4, seq.size());
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
@@ -382,9 +384,42 @@ public class DefaultObjectWrapperTest {
         }
 
         {
+            List testList = new LinkedList<Object>();
+            testList.add(1);
+            testList.add(null);
+            testList.add("c");
+            
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW22.wrap(testList);
+            assertTrue(seq instanceof SimpleListAdapter);
+            assertTrue(seq instanceof TemplateCollectionModel);  // Maybe changes at 2.4.0
+            assertEquals(3, seq.size());
+            assertNull(seq.get(-1));
+            assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
+            assertNull(seq.get(1));
+            assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
+            assertNull(seq.get(3));
+            
+            assertCollectionTMEquals((TemplateCollectionModel) seq, 1, null, "c");
+            
+            TemplateModelIterator it = ((TemplateCollectionModel) seq).iterator();
+            it.next();
+            it.next();
+            it.next();
+            try {
+                it.next();
+                fail();
+            } catch (TemplateModelException e) {
+                assertTrue(e.getMessage().contains("no more"));
+            }
+        }
+        
+        {
+            List testList = new ArrayList<Object>();
+            testList.add(null);
+            
             final TemplateSequenceModel seq = (TemplateSequenceModel) OW22NM.wrap(testList);
-            assertSame(NullModel.INSTANCE, seq.get(1));
-            assertNull(seq.get(4));
+            assertSame(NullModel.INSTANCE, seq.get(0));
+            assertNull(seq.get(1));
         }
     }
 

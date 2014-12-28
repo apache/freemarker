@@ -21742,6 +21742,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     </listitem>
 
                     <listitem>
+                      <para>When the wrapped list is a
+                      <literal>AbstractSequentialList</literal> (like a
+                      <literal>LinkedList</literal>), the resulting adapter
+                      will implement
+                      <literal>TemplateCollectionModel</literal> for more
+                      efficient enumeration (<literal>#list</literal>-ing), in
+                      additionally to <literal>TemplateSequenceModel</literal>
+                      of course. <literal>TemplateCollectionModel</literal>
+                      allows FTL to traverse the list without accessing
+                      elements by index. With the legacy copying approach
+                      <literal>TemplateCollectionModel</literal> wasn't
+                      implemented as it wasn't needed for efficient
+                      enumeration there.</para>
+                    </listitem>
+
+                    <listitem>
                       <para>At least until
                       <literal>incompatible_improvements</literal> 2.4.0,
                       <literal>java.util.Collection</literal>-s that aren't

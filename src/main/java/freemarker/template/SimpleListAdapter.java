@@ -1,7 +1,10 @@
 package freemarker.template;
 
 import java.io.Serializable;
+import java.util.AbstractSequentialList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import freemarker.ext.util.WrapperTemplateModel;
 
@@ -24,13 +27,16 @@ import freemarker.ext.util.WrapperTemplateModel;
 public class SimpleListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
-    private final List list;
+    protected final List list;
 
     /**
      * Factory method for creating new adapter instances.
      */
     public static SimpleListAdapter adapt(List list, ObjectWrapper wrapper) {
-        return new SimpleListAdapter(list, wrapper);
+        // [2.4] SimpleListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary 
+        return list instanceof AbstractSequentialList
+                ? new SimpleListAdapterWithCollectionSupport(list, wrapper)
+                : new SimpleListAdapter(list, wrapper);
     }
     
     private SimpleListAdapter(List list, ObjectWrapper wrapper) {
@@ -52,6 +58,42 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
 
     public Object getWrappedObject() {
         return list;
+    }
+    
+    private static class SimpleListAdapterWithCollectionSupport extends SimpleListAdapter implements TemplateCollectionModel {
+
+        private SimpleListAdapterWithCollectionSupport(List list, ObjectWrapper wrapper) {
+            super(list, wrapper);
+        }
+
+        public TemplateModelIterator iterator() throws TemplateModelException {
+            return new IteratorAdapter(list.iterator(), getObjectWrapper());
+        }
+        
+    }
+    
+    private static class IteratorAdapter implements TemplateModelIterator {
+        
+        private final Iterator it;
+        private final ObjectWrapper wrapper; 
+        
+        private IteratorAdapter(Iterator it, ObjectWrapper wrapper) {
+            this.it = it;
+            this.wrapper = wrapper;
+        }
+
+        public TemplateModel next() throws TemplateModelException {
+            try {
+                return wrapper.wrap(it.next());
+            } catch (NoSuchElementException e) {
+                throw new TemplateModelException("The collection has no more items.", e);
+            }
+        }
+
+        public boolean hasNext() throws TemplateModelException {
+            return it.hasNext();
+        }
+        
     }
 
 }

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -52,8 +53,8 @@ import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleCollection;
-import freemarker.template.SimpleNonListCollectionAdapter;
 import freemarker.template.SimpleDate;
+import freemarker.template.SimpleNonListCollectionAdapter;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
@@ -164,6 +165,7 @@ public class TemplateTestCase extends FileTestCase {
      * We really might as well just expose pretty much 
      * the same tree to all our tests. (JR)
      */
+    @SuppressWarnings("boxing")
     public void setUp() throws Exception {
         conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
         
@@ -263,6 +265,28 @@ public class TemplateTestCase extends FileTestCase {
             });
             dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
+        }
+
+        else if (templateName.equals("list.ftl")) {
+            List<Integer> arrayList = new ArrayList<Integer>();
+            arrayList.add(11);
+            arrayList.add(22);
+            arrayList.add(33);
+            dataModel.put("arrayList", arrayList);
+            
+            List<Integer> linkedList = new LinkedList<Integer>();
+            linkedList.add(11);
+            linkedList.add(22);
+            linkedList.add(33);
+            dataModel.put("linkedList", linkedList);
+            
+            Set<Integer> set = new TreeSet<Integer>();
+            set.add(11);
+            set.add(22);
+            set.add(33);
+            dataModel.put("set", set);
+            
+            dataModel.put("iterator", linkedList.iterator());
         }
         
         else if (simpleTestName.startsWith("number-format")) {
