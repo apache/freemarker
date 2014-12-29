@@ -178,11 +178,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
         if (obj instanceof Iterator) {
-            return new SimpleCollection((Iterator) obj, this);
+            return useAdaptersForContainers
+                    ? (TemplateModel) SimpleIteratorAdapter.adapt((Iterator) obj, this)
+                    : (TemplateModel) new SimpleCollection((Iterator) obj, this);
         }
         return handleUnknownType(obj);
     }
-    
     
     /**
      * Called if an unknown type is passed in.

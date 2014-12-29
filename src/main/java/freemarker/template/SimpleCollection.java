@@ -38,7 +38,7 @@ import java.util.Iterator;
 public class SimpleCollection extends WrappingTemplateModel
 implements TemplateCollectionModel, Serializable {
     
-    private boolean iteratorDirty;
+    private boolean iteratorOwned;
     private final Iterator iterator;
     private final Collection collection;
 
@@ -81,10 +81,10 @@ implements TemplateCollectionModel, Serializable {
      */
     public TemplateModelIterator iterator() {
         if (iterator != null) {
-            return new SimpleTemplateModelIterator(iterator, true);
+            return new SimpleTemplateModelIterator(iterator, false);
         } else {
             synchronized (collection) {
-                return new SimpleTemplateModelIterator(collection.iterator(), false);
+                return new SimpleTemplateModelIterator(collection.iterator(), true);
             }
         }
     }
@@ -98,16 +98,16 @@ implements TemplateCollectionModel, Serializable {
     private class SimpleTemplateModelIterator implements TemplateModelIterator {
         
         private final Iterator iterator;
-        private boolean iteratorShared;
+        private boolean iteratorOwnedByMe;
             
-        SimpleTemplateModelIterator(Iterator iterator, boolean iteratorShared) {
+        SimpleTemplateModelIterator(Iterator iterator, boolean iteratorOwnedByMe) {
             this.iterator = iterator;
-            this.iteratorShared = iteratorShared;
+            this.iteratorOwnedByMe = iteratorOwnedByMe;
         }
 
         public TemplateModel next() throws TemplateModelException {
-            if (iteratorShared) { 
-                makeIteratorDirty();
+            if (!iteratorOwnedByMe) { 
+                takeIteratorOwnership();
             }
             
             if (!iterator.hasNext()) {
@@ -119,25 +119,25 @@ implements TemplateCollectionModel, Serializable {
         }
 
         public boolean hasNext() throws TemplateModelException {
-            // Theorically this should not make the iterator dirty, but I met sync. problems if I don't do it here. :(
-            if (iteratorShared) {
-                makeIteratorDirty();
+            // Calling hasNext may looks safe, but I have met sync. problems.
+            if (!iteratorOwnedByMe) {
+                takeIteratorOwnership();
             }
             
             return iterator.hasNext();
         }
         
-        private void makeIteratorDirty() throws TemplateModelException {
+        private void takeIteratorOwnership() throws TemplateModelException {
             synchronized (SimpleCollection.this) {
-                if (iteratorDirty) {
+                if (iteratorOwned) {
                     throw new TemplateModelException(
-                            "This collection value wraps a java.util.Iterator, "
-                            + "thus it can be listed only once.");
+                            "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
                 } else {
-                    iteratorDirty = true;
-                    iteratorShared = false;
+                    iteratorOwned = true;
+                    iteratorOwnedByMe = true;
                 }
             }
         }
     }
+    
 }

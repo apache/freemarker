@@ -21805,6 +21805,40 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       implemented as it wasn't needed for efficient
                       enumeration there.</para>
                     </listitem>
+
+                    <listitem>
+                      <para>Iterators (when you put them directly into the
+                      data-model) are wrapped into
+                      <literal>SimpleIteratorAdapter</literal> instead of
+                      <literal>SimpleCollection</literal>. This has two
+                      consequences:</para>
+
+                      <itemizedlist>
+                        <listitem>
+                          <para>The wrapped <literal>Iterator</literal> is now
+                          unwrapped properly to the original Java object when
+                          it's passed to Java method from the template.</para>
+                        </listitem>
+
+                        <listitem>
+                          <para>Wrapped <literal>Iterator</literal>-s (not to
+                          be confused with <literal>Iterable</literal>) aren't
+                          thread-safe anymore, to spare some synchronizations,
+                          after all, exposing the same
+                          <literal>Iterator</literal> to multiple parallel
+                          template executions doesn't make much sense. This
+                          shouldn't be a migration concern, as even earlier,
+                          only one of those template executions could succeed
+                          (the <quote>content</quote> of
+                          <literal>Iterator</literal>-s wasn't copied, so the
+                          one who first accessed it become the exclusive
+                          owner). The change is just that earlier it was
+                          guaranteed that the other threads will fail (that
+                          was the thread-safe about it), while now there are
+                          no such guarantees.</para>
+                        </listitem>
+                      </itemizedlist>
+                    </listitem>
                   </itemizedlist>
                 </listitem>
 

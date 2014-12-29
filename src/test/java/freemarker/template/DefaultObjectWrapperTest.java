@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.ext.beans.BeansWrapper;
@@ -39,7 +41,7 @@ public class DefaultObjectWrapperTest {
     static {
         OW22NM.setNullModel(NullModel.INSTANCE);
     }
-    
+
     private final static DefaultObjectWrapper OW22NLCA = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
     static {
         OW22NLCA.setUseAdaptersForNonListCollections(true);
@@ -370,10 +372,10 @@ public class DefaultObjectWrapperTest {
             testList.add(null);
             testList.add("c");
             testList.add(new String[] { "x" });
-            
+
             TemplateSequenceModel seq = (TemplateSequenceModel) OW22.wrap(testList);
             assertTrue(seq instanceof SimpleListAdapter);
-            assertFalse(seq instanceof TemplateCollectionModel);  // Maybe changes at 2.4.0
+            assertFalse(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
             assertEquals(4, seq.size());
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
@@ -388,19 +390,19 @@ public class DefaultObjectWrapperTest {
             testList.add(1);
             testList.add(null);
             testList.add("c");
-            
+
             TemplateSequenceModel seq = (TemplateSequenceModel) OW22.wrap(testList);
             assertTrue(seq instanceof SimpleListAdapter);
-            assertTrue(seq instanceof TemplateCollectionModel);  // Maybe changes at 2.4.0
+            assertTrue(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
             assertEquals(3, seq.size());
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertNull(seq.get(1));
             assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
             assertNull(seq.get(3));
-            
+
             assertCollectionTMEquals((TemplateCollectionModel) seq, 1, null, "c");
-            
+
             TemplateModelIterator it = ((TemplateCollectionModel) seq).iterator();
             it.next();
             it.next();
@@ -412,11 +414,11 @@ public class DefaultObjectWrapperTest {
                 assertTrue(e.getMessage().contains("no more"));
             }
         }
-        
+
         {
             List testList = new ArrayList<Object>();
             testList.add(null);
-            
+
             final TemplateSequenceModel seq = (TemplateSequenceModel) OW22NM.wrap(testList);
             assertSame(NullModel.INSTANCE, seq.get(0));
             assertNull(seq.get(1));
@@ -530,7 +532,7 @@ public class DefaultObjectWrapperTest {
             TemplateMethodModelEx getClassM = (TemplateMethodModelEx) testBeanTM.get("getClass");
             Object r = getClassM.exec(Collections.singletonList(objTM));
             final Class rClass = (Class) ((WrapperTemplateModel) r).getWrappedObject();
-            assertTrue(expectedPojoClass.isAssignableFrom(rClass));
+            assertTrue(rClass + " instanceof " + expectedPojoClass, expectedPojoClass.isAssignableFrom(rClass));
         }
 
         if (expectedPojoToString != null) {
@@ -553,7 +555,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(3, coll.size());
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
-            
+
             assertTrue(coll.contains(OW22NLCA.wrap("a")));
             assertTrue(coll.contains(OW22NLCA.wrap("b")));
             assertTrue(coll.contains(OW22NLCA.wrap("c")));
@@ -583,7 +585,7 @@ public class DefaultObjectWrapperTest {
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
             assertTrue(tm1 instanceof SimpleListAdapter || tm2 instanceof SimpleListAdapter);
-            
+
             List similarList = new ArrayList();
             similarList.add("b");
             assertTrue(coll.contains(OW22NLCA.wrap(similarList)));
@@ -591,7 +593,8 @@ public class DefaultObjectWrapperTest {
             assertFalse(coll.contains(OW22NLCA.wrap("a")));
             assertFalse(coll.contains(OW22NLCA.wrap(1)));
 
-            assertRoundtrip(OW22NLCA, set, SimpleNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", " + obj2 + "]");
+            assertRoundtrip(OW22NLCA, set, SimpleNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
+                    + obj2 + "]");
         }
     }
 
@@ -599,16 +602,16 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testCollectionAdapterOutOfBounds() throws TemplateModelException {
         Set set = Collections.singleton(123);
-        
+
         TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22NLCA.wrap(set);
         TemplateModelIterator it = coll.iterator();
-        
+
         for (int i = 0; i < 3; i++) {
             assertTrue(it.hasNext());
         }
-        
+
         assertEquals(123, OW22NLCA.unwrap(it.next()));
-        
+
         for (int i = 0; i < 3; i++) {
             assertFalse(it.hasNext());
             try {
@@ -657,6 +660,52 @@ public class DefaultObjectWrapperTest {
         assertEquals("a", OW22.unwrap(seq.get(0)));
         assertEquals("b", OW22.unwrap(seq.get(1)));
         assertEquals("c", OW22.unwrap(seq.get(2)));
+    }
+
+    @Test
+    public void testIteratorWrapping() throws TemplateModelException, ClassNotFoundException {
+        testIteratorWrapping(OW0, SimpleCollection.class, Class.forName("freemarker.ext.beans.SetAdapter"));
+        testIteratorWrapping(OW22, SimpleIteratorAdapter.class, Iterator.class);
+    }
+
+    private void testIteratorWrapping(DefaultObjectWrapper ow, Class<?> expectedTMClass, Class<?> expectedPOJOClass)
+            throws TemplateModelException {
+        final List<String> list = ImmutableList.<String> of("a", "b", "c");
+        Iterator<String> it = list.iterator();
+        TemplateCollectionModel coll = (TemplateCollectionModel) ow.wrap(it);
+
+        assertRoundtrip(ow, coll, expectedTMClass, expectedPOJOClass, null);
+
+        TemplateModelIterator itIt = coll.iterator();
+        TemplateModelIterator itIt2 = coll.iterator(); // used later
+        assertTrue(itIt.hasNext());
+        assertEquals("a", ow.unwrap(itIt.next()));
+        assertTrue(itIt.hasNext());
+        assertEquals("b", ow.unwrap(itIt.next()));
+        assertTrue(itIt.hasNext());
+        assertEquals("c", ow.unwrap(itIt.next()));
+        assertFalse(itIt.hasNext());
+        try {
+            itIt.next();
+            fail();
+        } catch (TemplateModelException e) {
+            assertTrue(e.getMessage().contains("no more"));
+        }
+
+        try {
+            itIt2.hasNext();
+            fail();
+        } catch (TemplateModelException e) {
+            assertTrue(e.getMessage().contains("can be listed only once"));
+        }
+
+        TemplateModelIterator itIt3 = coll.iterator();
+        try {
+            itIt3.hasNext();
+            fail();
+        } catch (TemplateModelException e) {
+            assertTrue(e.getMessage().contains("can be listed only once"));
+        }
     }
 
     public static class RoundtripTesterBean {
