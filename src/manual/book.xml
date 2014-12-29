@@ -21995,7 +21995,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>FreemarkerServlet</literal> now recognizes
                   the
                   <literal>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</literal>
-                  servlet context attribute, add entries to
+                  servlet context attribute, and adds entries to
                   <literal>MetaInfTldSources</literal> (introduced above) from
                   it.</para>
                 </listitem>
@@ -22027,9 +22027,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Bug fixed (only active with
+                  <para>Bug fixed, only active with
                   <literal>incompatible_improvements</literal> set to 2.3.22
-                  or higher): Some kind of values, when put into the JSP
+                  or higher: Some kind of values, when put into the JSP
                   <emphasis>page</emphasis> scope (via
                   <literal>#global</literal> or via the JSP
                   <literal>PageContext</literal> API) and later read back with
@@ -22039,54 +22039,50 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   objects with a standard Java type. Other Servlet scopes
                   aren't affected. It's highly unlikely that something expects
                   the presence of this bug. The affected values are of the FTL
-                  type listed below, and to trigger the bug, they either had
+                  types listed below, and to trigger the bug, they either had
                   to be created directly in the template (like as an FTL
                   literal or with
                   <literal>?date</literal>/<literal>time</literal>/<literal>datetime</literal>),
-                  or you had to use <literal>DefaultObjectWrapper</literal>,
-                  instead of pure(r) <literal>BeansWrapper</literal>:</para>
+                  or you had to use <literal>DefaultObjectWrapper</literal> or
+                  <literal>SimpleObjectWrapper</literal> (or a subclass of
+                  them):</para>
 
                   <itemizedlist>
                     <listitem>
-                      <para>Date/time/date-time values may came back as
+                      <para>FTL date/time/date-time values may came back as
                       <literal>freemarker.template.SimpleDate</literal>-s, now
                       they come back as <literal>java.util.Date</literal>-s
                       instead.</para>
                     </listitem>
 
                     <listitem>
-                      <para>Sequence values may came back as
-                      <literal>freemarker.template.SimpleSequence</literal>-s,
-                      now they come back as
-                      <literal>freemarker.ext.beans.SequenceAdapter</literal>-s
-                      instead, which implements
-                      <literal>java.util.List</literal> (only if the
-                      <literal>ObjectWrapper</literal> is a subclass of
-                      <literal>BeansWrapper</literal>, but that's practically
-                      always the case in applications that use FreeMarker's
-                      JSP extension).</para>
+                      <para>FTL sequence values may came back as
+                      <literal>SimpleSequence</literal>-s, now they come back
+                      as <literal>java.util.List</literal>-s as expected. This
+                      stands assuming that the
+                      <literal>object_wrapper</literal> configuration setting
+                      is a subclass of <literal>BeansWrapper</literal> (such
+                      as <literal>DefaultObjectWrapper</literal>), but that's
+                      practically always the case in applications that use
+                      FreeMarker's JSP extension (otherwise it can still work,
+                      but it depends on the quality and capabilities of the
+                      <literal>ObjectWrapper</literal> implementation).</para>
                     </listitem>
 
                     <listitem>
-                      <para>Hash values may came back as
-                      <literal>freemarker.template.SimpleHash</literal>, now
-                      they come back as
-                      <literal>freemarker.ext.beans.HashAdapter</literal>-s
-                      instead, which implements
-                      <literal>java.util.Map</literal> (again, only if the
-                      object wrapper is a subclass of
+                      <para>FTL hash values may came back as
+                      <literal>SimpleHash</literal>-es, now they come back as
+                      <literal>java.util.Map</literal>-s as expected (again,
+                      assuming that the object wrapper is a subclass of
                       <literal>BeansWrapper</literal>).</para>
                     </listitem>
 
                     <listitem>
-                      <para>Collection values may came back as
-                      <literal>freemarker.template.SimpleCollection</literal>,
-                      now they come back as
-                      <literal>freemarker.ext.beans.CollectionAdapter</literal>-s
-                      instead, which implements
-                      <literal>java.util.Collection</literal> (again, only if
-                      the object wrapper is a subclass of
-                      <literal>BeansWrapper</literal>).</para>
+                      <para>FTL collection values may came back as
+                      <literal>SimpleCollection</literal>-s, now they come
+                      back as <literal>java.util.Collection</literal>-s as
+                      expected (again, assuming that the object wrapper is a
+                      subclass of <literal>BeansWrapper</literal>).</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

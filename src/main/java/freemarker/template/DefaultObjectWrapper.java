@@ -64,11 +64,17 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     /**
-     * Use {@link DefaultObjectWrapperBuilder} instead if possible.
-     * Instances created with this constructor won't share the class introspection caches with other instances.
-     * See {@link BeansWrapper#BeansWrapper(Version)} (the superclass constructor) for more details.
+     * Use {@link DefaultObjectWrapperBuilder} instead if possible. Instances created with this constructor won't share
+     * the class introspection caches with other instances. See {@link BeansWrapper#BeansWrapper(Version)} (the
+     * superclass constructor) for more details.
      * 
-     * @param incompatibleImprovements As of yet, the same as in {@link BeansWrapper#BeansWrapper(Version)}.
+     * @param incompatibleImprovements
+     *            It's the same as in {@link BeansWrapper#BeansWrapper(Version)}, plus these  changes:
+     *            <ul>
+     *              <li>2.3.22 (or higher): The default value of
+     *                  {@link #setUseAdaptersForContainers(boolean) useAdaptersForContainers} changes to
+     *                  {@code true}.</li>
+     *            </ul>
      * 
      * @since 2.3.21
      */
@@ -225,21 +231,26 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
 
     /**
-     * Sets if to wrap container objects ({@link Map}-s, {@link List}-s, arrays and such) the copying approach or the
-     * adapter approach should be used. {@code true} is recommended, which is also the default when the
+     * Sets if to wrap container objects ({@link Map}-s, {@link List}-s, arrays and such) the legacy copying approach or
+     * the newer adapter approach should be used. {@code true} is recommended, which is also the default when the
      * {@code incompatible_improvements} of this instance was set to {@link Configuration#VERSION_2_3_22} or higher. To
-     * understand the difference, check some of the classes that implement the two approaches
+     * understand the difference, check some of the classes that implement the two approaches:
      * <ul>
      * <li>Copying approach: {@link SimpleHash}, {@link SimpleSequence}</li>
-     * <li>Adapter approach: {@link SimpleMapAdapter}, {@link SimpleListAdapter}, {@link SimpleArrayAdapter}</li>
+     * <li>Adapter approach: {@link SimpleMapAdapter}, {@link SimpleListAdapter}, {@link SimpleArrayAdapter},
+     * {@link SimpleIteratorAdapter}</li>
      * </ul>
+     * 
+     * <p>
+     * See also the related Version History entry under 2.3.22 in the FreeMarker Manual, which gives a breakdown of
+     * the consequences.
      * 
      * <p>
      * <b>Attention:</b> For backward compatibility, currently, non-{@link List} collections (like {@link Set}-s) will
      * only be wrapped with adapter approach (with {@link SimpleNonListCollectionAdapter}) if
      * {@link #setUseAdaptersForNonListCollections(boolean) useAdaptersForNonListCollections} was set to {@code true}.
-     * Currently the default is {@code false}, but in new projects you should set it to {@code true}.
-     * See {@link #setUseAdaptersForNonListCollections(boolean)} for more.
+     * Currently the default is {@code false}, but in new projects you should set it to {@code true}. See
+     * {@link #setUseAdaptersForNonListCollections(boolean)} for more.
      * 
      * @see #setUseAdaptersForNonListCollections(boolean)
      * 
