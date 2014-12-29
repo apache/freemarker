@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapper;
 
 /**
@@ -183,7 +185,22 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     }
 
     public TemplateModel get(String key) throws TemplateModelException {
-        Object result = map.get(key);
+        Object result;
+        try {
+            result = map.get(key);
+        } catch (ClassCastException e) {
+            throw new _TemplateModelException(
+                    e, new Object[] {
+                            "ClassCastException while getting Map entry with String key ",
+                            new _DelayedJQuote(key)
+                    });
+        } catch (NullPointerException e) {
+            throw new _TemplateModelException(
+                    e, new Object[] {
+                            "NullPointerException while getting Map entry with String key ",
+                            new _DelayedJQuote(key)
+                    });
+        }
         // The key to use for putting -- it's the key that already exists in
         // the map (either key or charKey below). This way, we'll never put a 
         // new key in the map, avoiding spurious ConcurrentModificationException
@@ -191,12 +208,27 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
         // SourceForge tracker.
         Object putKey = null;
         if (result == null) {
-            if (key.length() == 1) {
-                // just check for Character key if this is a single-character string
+            // Check for Character key if this is a single-character string.
+            // In SortedMap-s, however, we can't do that safely, as it can cause ClassCastException.
+            if (key.length() == 1 && !(map instanceof SortedMap)) {
                 Character charKey = new Character(key.charAt(0));
-                result = map.get(charKey);
-                if (result != null || map.containsKey(charKey)) {
-                    putKey = charKey;
+                try {
+                    result = map.get(charKey);
+                    if (result != null || map.containsKey(charKey)) {
+                        putKey = charKey;
+                    }
+                } catch (ClassCastException e) {
+                    throw new _TemplateModelException(
+                            e, new Object[] {
+                                    "ClassCastException while getting Map entry with Character key ",
+                                    new _DelayedJQuote(key)
+                            });
+                } catch (NullPointerException e) {
+                    throw new _TemplateModelException(
+                            e, new Object[] {
+                                    "NullPointerException while getting Map entry with Character key ",
+                                    new _DelayedJQuote(key)
+                            });
                 }
             }
             if (putKey == null) {

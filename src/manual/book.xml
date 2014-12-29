@@ -21604,11 +21604,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para/>
-            </listitem>
+              <para>Error message quality improvements:</para>
 
-            <listitem>
-              <para/>
+              <itemizedlist>
+                <listitem>
+                  <para>Several improvements when calling custom JSP tags; see
+                  them in its own section later.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <literal>Map.get</literal> or
+                  <literal>Map.containsKey</literal> of a wrapped
+                  <literal>Map</literal> throws a
+                  <literal>ClassCastException</literal> or
+                  <literal>NullPointerException</literal>, the error will
+                  point to the causing FTL expression (with some explanation),
+                  rather than bubbling up as low level runtime error.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
@@ -21883,6 +21896,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   for wrapping methods without wrapping their parent object
                   and without going through overloaded method selection on
                   invocation time.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/372/">372</link>]:
+                  <literal>ClassCastException</literal> when a
+                  <literal>SortedMap</literal> (typically, a
+                  <literal>TreeMap</literal>) is wrapped with
+                  <literal>DefaultObjectWrapper</literal> and then a 1
+                  character long string is get from it that doesn't exist. To
+                  fix the issue, if the wrapped <literal>Map</literal> is a
+                  <literal>SortedMap</literal>,
+                  <literal>DefaultObjectWrapper</literal>
+                  (<literal>SimpleHash</literal>, to be more precise) won't
+                  try to fall back to a <literal>Character</literal> key after
+                  with the <literal>String</literal> key it has got
+                  <literal>null</literal>. (This change should be backward
+                  compatible, because when a <literal>SortedMap</literal> has
+                  <literal>Character</literal> keys, the initial attempt with
+                  <literal>String</literal> key causes
+                  <literal>ClassCastException</literal>, thus, such
+                  <literal>SortedMap</literal>-s were never usable as FTL
+                  hashes.)</para>
                 </listitem>
               </itemizedlist>
             </listitem>

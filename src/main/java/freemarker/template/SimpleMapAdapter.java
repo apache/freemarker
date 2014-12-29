@@ -18,7 +18,10 @@ package freemarker.template;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.SortedMap;
 
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.ext.util.WrapperTemplateModel;
 
 /**
@@ -49,14 +52,45 @@ public class SimpleMapAdapter extends WrappingTemplateModel
     }
 
     public TemplateModel get(String key) throws TemplateModelException {
-        Object val = map.get(key);
+        Object val;
+        try {
+            val = map.get(key);
+        } catch (ClassCastException e) {
+            throw new _TemplateModelException(
+                    e, new Object[] {
+                            "ClassCastException while getting Map entry with String key ",
+                            new _DelayedJQuote(key)
+                    });
+        } catch (NullPointerException e) {
+            throw new _TemplateModelException(
+                    e, new Object[] {
+                            "NullPointerException while getting Map entry with String key ",
+                            new _DelayedJQuote(key)
+                    });
+        }
+            
         if (val == null) {
-            if (key.length() == 1) {
-                // Check for a Character key if this is a single-character string
+            // Check for Character key if this is a single-character string.
+            // In SortedMap-s, however, we can't do that safely, as it can cause ClassCastException.
+            if (key.length() == 1 && !(map instanceof SortedMap)) {
                 Character charKey = new Character(key.charAt(0));
-                val = map.get(charKey);
-                if (val == null && !(map.containsKey(key) || map.containsKey(charKey))) {
-                    return null;
+                try {
+                    val = map.get(charKey);
+                    if (val == null && !(map.containsKey(key) || map.containsKey(charKey))) {
+                        return null;
+                    }
+                } catch (ClassCastException e) {
+                    throw new _TemplateModelException(
+                            e, new Object[] {
+                                    "Class casting exception while getting Map entry with Character key ",
+                                    new _DelayedJQuote(charKey)
+                            });
+                } catch (NullPointerException e) {
+                    throw new _TemplateModelException(
+                            e, new Object[] {
+                                    "NullPointerException while getting Map entry with Character key ",
+                                    new _DelayedJQuote(charKey)
+                            });
                 }
             } else if (!map.containsKey(key)) {
                 return null;

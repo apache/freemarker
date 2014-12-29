@@ -707,6 +707,39 @@ public class DefaultObjectWrapperTest {
             assertTrue(e.getMessage().contains("can be listed only once"));
         }
     }
+    
+    @SuppressWarnings("boxing")
+    @Test
+    public void testCharKeyFallback() throws TemplateModelException {
+        Map hashMapS = new HashMap<String, Integer>();
+        hashMapS.put("a", 1);
+        Map sortedMapS = new TreeMap<String, Integer>();
+        sortedMapS.put("a", 1);
+        Map hashMapC = new HashMap<Character, Integer>();
+        hashMapC.put('a', 1);
+        Map sortedMapC = new TreeMap<Character, Integer>();
+        sortedMapC.put('a', 1);
+        
+        for (DefaultObjectWrapper ow : new DefaultObjectWrapper[] { OW0, OW22 } ) {
+            assertEquals(1, ow.unwrap(((TemplateHashModel) ow.wrap(hashMapS)).get("a")));
+            assertEquals(1, ow.unwrap(((TemplateHashModel) ow.wrap(hashMapC)).get("a")));
+            assertEquals(1, ow.unwrap(((TemplateHashModel) ow.wrap(sortedMapS)).get("a")));
+            try {
+                ((TemplateHashModel) ow.wrap(sortedMapC)).get("a");
+            } catch (TemplateModelException e) {
+                assertTrue(e.getMessage().contains("String key"));
+            }
+            
+            assertNull(((TemplateHashModel) ow.wrap(hashMapS)).get("b"));
+            assertNull(((TemplateHashModel) ow.wrap(hashMapC)).get("b"));
+            assertNull(((TemplateHashModel) ow.wrap(sortedMapS)).get("b"));
+            try {
+                ((TemplateHashModel) ow.wrap(sortedMapC)).get("b");
+            } catch (TemplateModelException e) {
+                assertTrue(e.getMessage().contains("String key"));
+            }
+        }
+    }
 
     public static class RoundtripTesterBean {
 
