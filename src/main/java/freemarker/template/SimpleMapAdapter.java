@@ -85,9 +85,14 @@ public class SimpleMapAdapter extends WrappingTemplateModel
                 Character charKey = new Character(key.charAt(0));
                 try {
                     val = map.get(charKey);
-                    if (val == null && !(map.containsKey(key) || map.containsKey(charKey))) {
-                        return null;
-                    }
+                    if (val == null) {
+                        TemplateModel wrappedNull = wrap(null);
+                        if (wrappedNull == null || !(map.containsKey(key) || map.containsKey(charKey))) {
+                            return null;
+                        } else {
+                            return wrappedNull;
+                        }
+                    } 
                 } catch (ClassCastException e) {
                     throw new _TemplateModelException(
                             e, new Object[] {
@@ -101,10 +106,16 @@ public class SimpleMapAdapter extends WrappingTemplateModel
                                     new _DelayedJQuote(charKey)
                             });
                 }
-            } else if (!map.containsKey(key)) {
-                return null;
+            } else {  // No char key fallback was possible
+                TemplateModel wrappedNull = wrap(null);
+                if (wrappedNull == null || !map.containsKey(key)) {
+                    return null;
+                } else {
+                    return wrappedNull;
+                }
             }
         }
+        
         return wrap(val);
     }
 
