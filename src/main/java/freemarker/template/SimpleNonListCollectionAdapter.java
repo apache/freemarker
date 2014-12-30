@@ -10,14 +10,18 @@ import freemarker.core._TemplateModelException;
 import freemarker.ext.util.WrapperTemplateModel;
 
 /**
- * Adapts a non-{@link List} Java {@link Collection} to the corresponding {@link TemplateModel} interface(s), most
- * importantly to {@link TemplateCollectionModelEx}. For {@link List}-s, use {@link SimpleListAdapter}, or else you lose
- * indexed element access.
+ * <b>Experimental - subject to change:</b> Adapts a non-{@link List} Java {@link Collection} to the corresponding
+ * {@link TemplateModel} interface(s), most importantly to {@link TemplateCollectionModelEx}. For {@link List}-s, use
+ * {@link SimpleListAdapter}, or else you lose indexed element access.
  * 
  * <p>
  * Thread safety: A {@link SimpleNonListCollectionAdapter} is as thread-safe as the {@link Collection} that it wraps is.
  * Normally you only have to consider read-only access, as the FreeMarker template language doesn't allow writing these
  * collections (though of course, a Java methods called from the template can violate this rule).
+ * 
+ * <p>
+ * <b>Experimental status warning:</b> This class is subject to change on non-backward compatible ways, hence, it
+ * shouldn't be used from outside FreeMarker yet.
  * 
  * @since 2.3.22
  */
@@ -28,6 +32,12 @@ public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implem
 
     /**
      * Factory method for creating new adapter instances.
+     * 
+     * @param collection
+     *            The collection to adapt; can't be {@code null}.
+     * @param wrapper
+     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
+     *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
     public static SimpleNonListCollectionAdapter adapt(Collection collection, ObjectWrapperAndUnwrapper wrapper) {
         return new SimpleNonListCollectionAdapter(collection, wrapper);

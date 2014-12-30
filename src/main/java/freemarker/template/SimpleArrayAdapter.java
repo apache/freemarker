@@ -20,10 +20,15 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
     /**
-     * @param array The array to adapt; must be an array.
-     * @param wrapper The {@link ObjectWrapper} used to wrap the items in the array
+     * Factory method for creating new adapter instances.
+     * 
+     * @param array
+     *            The array to adapt; can't be {@code null}. Must be an array. 
+     * @param wrapper
+     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
+     *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
-    public static SimpleArrayAdapter adapt(Object array, ObjectWrapper wrapper) {
+    public static SimpleArrayAdapter adapt(Object array, ObjectWrapperAndUnwrapper wrapper) {
         final Class componentType = array.getClass().getComponentType();
         if (componentType == null) {
             throw new IllegalArgumentException("Not an array");

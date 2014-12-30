@@ -21,6 +21,12 @@ public class SimpleIteratorAdapter extends WrappingTemplateModel implements Temp
     private final Iterator iterator;
     private boolean iteratorOwned;
 
+    /**
+     * Factory method for creating new adapter instances.
+     * 
+     * @param iterator
+     *            The iterator to adapt; can't be {@code null}.
+     */
     public static SimpleIteratorAdapter adapt(Iterator iterator, ObjectWrapper wrapper) {
         return new SimpleIteratorAdapter(iterator, wrapper);
     }

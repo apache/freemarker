@@ -31,14 +31,20 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
 
     /**
      * Factory method for creating new adapter instances.
+     * 
+     * @param list
+     *            The list to adapt; can't be {@code null}.
+     * @param wrapper
+     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
+     *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
-    public static SimpleListAdapter adapt(List list, ObjectWrapper wrapper) {
-        // [2.4] SimpleListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary 
+    public static SimpleListAdapter adapt(List list, ObjectWrapperAndUnwrapper wrapper) {
+        // [2.4] SimpleListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary
         return list instanceof AbstractSequentialList
                 ? new SimpleListAdapterWithCollectionSupport(list, wrapper)
                 : new SimpleListAdapter(list, wrapper);
     }
-    
+
     private SimpleListAdapter(List list, ObjectWrapper wrapper) {
         super(wrapper);
         this.list = list;
@@ -59,8 +65,9 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
     public Object getWrappedObject() {
         return list;
     }
-    
-    private static class SimpleListAdapterWithCollectionSupport extends SimpleListAdapter implements TemplateCollectionModel {
+
+    private static class SimpleListAdapterWithCollectionSupport extends SimpleListAdapter implements
+            TemplateCollectionModel {
 
         private SimpleListAdapterWithCollectionSupport(List list, ObjectWrapper wrapper) {
             super(list, wrapper);
@@ -69,14 +76,14 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
         public TemplateModelIterator iterator() throws TemplateModelException {
             return new IteratorAdapter(list.iterator(), getObjectWrapper());
         }
-        
+
     }
-    
+
     private static class IteratorAdapter implements TemplateModelIterator {
-        
+
         private final Iterator it;
-        private final ObjectWrapper wrapper; 
-        
+        private final ObjectWrapper wrapper;
+
         private IteratorAdapter(Iterator it, ObjectWrapper wrapper) {
             this.it = it;
             this.wrapper = wrapper;
@@ -93,7 +100,7 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
         public boolean hasNext() throws TemplateModelException {
             return it.hasNext();
         }
-        
+
     }
 
 }

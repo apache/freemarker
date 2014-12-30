@@ -42,7 +42,16 @@ public class SimpleMapAdapter extends WrappingTemplateModel
 
     private final Map map;
 
-    public static SimpleMapAdapter adapt(Map map, ObjectWrapper wrapper) {
+    /**
+     * Factory method for creating new adapter instances.
+     * 
+     * @param map
+     *            The map to adapt; can't be {@code null}.
+     * @param wrapper
+     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
+     *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
+     */
+    public static SimpleMapAdapter adapt(Map map, ObjectWrapperAndUnwrapper wrapper) {
         return new SimpleMapAdapter(map, wrapper);
     }
     

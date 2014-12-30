@@ -49,7 +49,7 @@ import freemarker.ext.beans.BeansWrapper;
  * 
  * <p>
  * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the sequence
- * from a {@link List} (via {@link SimpleListAdapter#adapt(List, ObjectWrapper)} or
+ * from a {@link List} (via {@link SimpleListAdapter#adapt(List, ObjectWrapperAndUnwrapper)} or
  * {@link SimpleSequence#SimpleSequence(Collection)}), which will be the faster depends on how many times will the
  * <em>same</em> {@link List} entry be read from the template(s) later, on average. If, on average, you read each entry
  * for more 4 times, {@link SimpleSequence} will be most certainly faster, but if for 2 times or less (and especially if
