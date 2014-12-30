@@ -18,7 +18,6 @@ session:a1 was 3, set to null
 a1: 4
 application:a1 was 4, set to null
 a1: -
-
 a2: -
 application:a2 was null, set to 4
 a2: 4
@@ -28,28 +27,24 @@ request:a2 was null, set to 2
 a2: 2
 page:a2 was null, set to 1
 a2: 1
-
 G1
 page:a1 was G1, set to P1
 P1
-
 G2
 page:a2 was G2, set to P2
 P2
-
 Values created in the template:
 String: s [java.lang.String]
 Number: 1 [java.math.BigDecimal]
 Boolean: true [java.lang.Boolean]
-Date-time: 2014-12-20T16:19:00Z [java.util.Date]
-Sequence: [1, 2, 3] [freemarker.ext.beans.SequenceAdapter]
-Hash: {a=1, b=2, c=3} [freemarker.ext.beans.HashAdapter]
-
+Date-time: [IGNORED]
+Sequence: [1, 2, 3] [freemarker.template.SimpleSequence]
+Hash: {"a": 1, "b": 2, "c": 3} [freemarker.core.HashLiteral$SequenceHash]
 Values created in Java:
-LinkedList: [1, 2, 3] [java.util.LinkedList]
-ArrayList: [1, 2, 3] [java.util.ArrayList]
-MyList: [1, 2, 3] [freemarker.ext.jsp.RealServletContainertTest$MyList]
-LinkedHashMap: {a=1, b=2, c=3} [java.util.LinkedHashMap]
-TreeMap: {a=1, b=2, c=3} [java.util.TreeMap]
-MyMap: {a=1, b=2, c=3} [freemarker.ext.jsp.RealServletContainertTest$MyMap]
-TreeSet: [1, 2, 3] [freemarker.ext.beans.SequenceAdapter]
+LinkedList: [1, 2, 3] [freemarker.template.SimpleSequence]
+ArrayList: [1, 2, 3] [freemarker.template.SimpleSequence]
+MyList: [1, 2, 3] [freemarker.template.SimpleSequence]
+LinkedHashMap: {a=1, b=2, c=3} [freemarker.template.SimpleHash]
+TreeMap: {a=1, b=2, c=3} [freemarker.template.SimpleHash]
+MyMap: [IGNORED] [freemarker.template.SimpleHash]
+TreeSet: [1, 2, 3] [freemarker.template.SimpleSequence]

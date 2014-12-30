@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 public class WebAppTestCase {
     
+    public static final String IGNORED_MASK = "[IGNORED]";
+
     private static final Logger LOG = LoggerFactory.getLogger(WebAppTestCase.class);
 
     private static final String ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN
@@ -114,14 +117,22 @@ public class WebAppTestCase {
             throws Exception {
         assertExpectedEqualsOutput(webAppName, expectedFileName, webAppRelURL, true);
     }
+
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL,
+            boolean compressWS) throws Exception {
+        assertExpectedEqualsOutput(webAppName, expectedFileName, webAppRelURL, compressWS, null);
+    }
     
     /**
      * @param expectedFileName
      *            The name of the file that stores the expected content, relatively to
      *            {@code servketContext:/WEB-INF/expected}.
+     * @param ignoredParts
+     *            Parts that will be search-and-replaced with {@value #IGNORED_MASK} with both in the expected and
+     *            actual outputs.
      */
     protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL,
-            boolean compressWS) throws Exception {
+            boolean compressWS, List<Pattern> ignoredParts) throws Exception {
         final String actual = normalizeWS(getResponseContent(webAppName, webAppRelURL), compressWS);
         final String expected;
         {
@@ -132,9 +143,18 @@ public class WebAppTestCase {
                 in.close();
             }
         }
-        assertEquals(expected, actual);
+        assertEquals(maskIgnored(expected, ignoredParts), maskIgnored(actual, ignoredParts));
     }
     
+    private String maskIgnored(String s, List<Pattern> ignoredParts) {
+        if (ignoredParts == null) return s;
+        
+        for (Pattern ignoredPart : ignoredParts) {
+            s = ignoredPart.matcher(s).replaceAll(IGNORED_MASK);
+        }
+        return s;
+    }
+
     protected synchronized void restartWebAppIfStarted(String webAppName) throws Exception {
         WebAppContext context = deployedWebApps.get(webAppName);
         if (context != null) {

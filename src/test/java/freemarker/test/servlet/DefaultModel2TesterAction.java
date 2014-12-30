@@ -11,13 +11,11 @@ import com.google.common.collect.ImmutableMap;
 /**
  * Used by {@link Model2TesterServlet} if no action was explicitly specified.
  */
-public final class DefaultModel2TesterAction implements Model2Action {
+public class DefaultModel2TesterAction implements Model2Action {
 
     public static final DefaultModel2TesterAction INSTANCE = new DefaultModel2TesterAction();
     
-    private DefaultModel2TesterAction() {
-        // Not meant to be instantiated
-    }
+    protected DefaultModel2TesterAction() { }
 
     @SuppressWarnings("boxing")
     public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {

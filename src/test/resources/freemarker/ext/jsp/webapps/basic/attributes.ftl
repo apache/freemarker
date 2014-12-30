@@ -56,3 +56,17 @@ Sequence: <@t.attributeInfo name='a' />
 Hash: <@t.attributeInfo name='a' />
 
 Values created in Java:
+<#global a = linkedList>
+LinkedList: <@t.attributeInfo name='a' />
+<#global a = arrayList>
+ArrayList: <@t.attributeInfo name='a' />
+<#global a = myList>
+MyList: <@t.attributeInfo name='a' />
+<#global a = linkedHashMap>
+LinkedHashMap: <@t.attributeInfo name='a' />
+<#global a = treeMap>
+TreeMap: <@t.attributeInfo name='a' />
+<#global a = myMap>
+MyMap: <@t.attributeInfo name='a' />
+<#global a = treeSet>
+TreeSet: <@t.attributeInfo name='a' />

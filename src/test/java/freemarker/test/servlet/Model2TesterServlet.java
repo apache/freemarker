@@ -2,14 +2,17 @@ package freemarker.test.servlet;
 
 import java.io.IOException;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
 import freemarker.ext.servlet.FreemarkerServlet;
+import freemarker.template.utility.StringUtil;
 
 /**
  * MVC controller servlet used for {@link FreemarkerServlet} JUnit tests. It understands these request parameters:
@@ -26,6 +29,7 @@ public class Model2TesterServlet extends HttpServlet {
     
     public static final String VIEW_PARAM_NAME = "view";
     public static final String ACTION_PARAM_NAME = "action";
+    public static final String VIEW_SERVLET_PARAM_NAME = "viewServlet";
 
     private static final long serialVersionUID = 1L;
 
@@ -78,7 +82,27 @@ public class Model2TesterServlet extends HttpServlet {
             return;
         }
         
-        req.getRequestDispatcher(viewPath).forward(req, resp);
+        final String paramViewServlet = req.getParameter(VIEW_SERVLET_PARAM_NAME);
+        if (paramViewServlet == null) {
+            req.getRequestDispatcher(viewPath).forward(req, resp);
+        } else {
+            final RequestDispatcher requestDispatcher = getServletContext().getNamedDispatcher(paramViewServlet);
+            if (requestDispatcher == null) {
+                throw new ServletException("Can't find request dispatched for servlet name "
+                        + StringUtil.jQuote(paramViewServlet) + ".");
+            }
+            
+            final HttpServletRequestWrapper viewReq = new HttpServletRequestWrapper(req) {
+
+                @Override
+                public String getPathInfo() {
+                    return viewPath;
+                }
+                
+            };
+            
+            requestDispatcher.forward(viewReq, resp);
+        }
     }
 
     private String removeStartingSlash(final String s) {
