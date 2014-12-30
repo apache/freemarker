@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
@@ -64,11 +65,11 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
 
         Iterator it = tmArgs.iterator();
         for(int i = 0; i < argCount; ++i) {
-            Object pojo = unwrapper.tryUnwrap(
+            Object pojo = unwrapper.tryUnwrapTo(
                     (TemplateModel) it.next(),
                     unwarppingHints[i],
                     typeFlags != null ? typeFlags[i] : 0);
-            if(pojo == BeansWrapper.CAN_NOT_UNWRAP) {
+            if(pojo == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                 return EmptyMemberAndArguments.noCompatibleOverload(i + 1);
             }
             pojoArgs[i] = pojo;

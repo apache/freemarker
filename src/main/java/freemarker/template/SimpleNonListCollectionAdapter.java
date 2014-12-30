@@ -81,7 +81,7 @@ public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implem
     }
 
     public boolean contains(TemplateModel item) throws TemplateModelException {
-        Object itemPojo = ((ObjectWrapperAndUnwrapper) getObjectWrapper()).unwrap(item, Object.class);
+        Object itemPojo = ((ObjectWrapperAndUnwrapper) getObjectWrapper()).unwrap(item);
         try {
             return collection.contains(itemPojo);
         } catch (ClassCastException e) {

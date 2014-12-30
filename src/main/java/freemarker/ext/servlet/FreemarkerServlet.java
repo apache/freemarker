@@ -572,6 +572,9 @@ public class FreemarkerServlet extends HttpServlet
                     path,
                     deduceLocale(path, request, response));
         } catch (FileNotFoundException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Template not found: " + path, e);
+            }
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }

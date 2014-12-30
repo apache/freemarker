@@ -21856,41 +21856,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new, FTL type interface,
-                  <literal>freemarker.template.TemplateCollectionModelEx</literal>,
-                  which adds the <literal>size()</literal>,
-                  <literal>isEmpty()</literal>, and <literal>boolean
-                  contains(TemplateModel)</literal> methods to the
-                  <literal>TemplateCollectionModel</literal> interface. This
-                  was added because when wrapping
-                  <literal>java.util.Collections</literal> these extra
-                  capabilities area available anyway, but FTL couldn't tap on
-                  them till now. While the exact interface details are marked
-                  as experimental, the feature itself is already utilized for
-                  <literal>?size</literal> when setting the
-                  <literal>useAdaptersForNonListCollections</literal> property
-                  of <literal>DefaultObjectWrapper</literal> to
-                  <literal>true</literal> (see earlier).</para>
-                </listitem>
-
-                <listitem>
-                  <para>Added new interface,
-                  <literal>freemarker.template.ObjectWrapperAndUnwrapper</literal>.
-                  This extends <literal>ObjectWrapper</literal> with
-                  unwrapping functionality. This functionality has already
-                  existed for a long time in <literal>BeansWrapper</literal>
-                  and its subclasses, like in
-                  <literal>DefaultObjectWrapper</literal>, but it wasn't
-                  <quote>factored out</quote> into its own published interface
-                  that other <literal>ObjectWrapper</literal>-s could
-                  implement. This is useful for
-                  <literal>TemplateModel</literal> implementations that don't
-                  want to require a <literal>BeansWrapper</literal> (or its
-                  subclass), only the availability of the unwrapping
-                  functionality.</para>
-                </listitem>
-
-                <listitem>
                   <para>Added <literal>TemplateMethodModelEx
                   BeansWrapper.wrap(Object object, Method method)</literal>
                   for wrapping methods without wrapping their parent object
@@ -21919,6 +21884,42 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ClassCastException</literal>, thus, such
                   <literal>SortedMap</literal>-s were never usable as FTL
                   hashes.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new, <emphasis>experimental</emphasis> FTL type
+                  interface,
+                  <literal>freemarker.template.TemplateCollectionModelEx</literal>,
+                  which adds the <literal>size()</literal>,
+                  <literal>isEmpty()</literal>, and <literal>boolean
+                  contains(TemplateModel)</literal> methods to the
+                  <literal>TemplateCollectionModel</literal> interface. This
+                  was added because when wrapping
+                  <literal>java.util.Collections</literal> these extra
+                  capabilities area available anyway, but FTL couldn't tap on
+                  them till now. While the exact interface details are marked
+                  as experimental, the feature itself is already utilized for
+                  <literal>?size</literal> when setting the
+                  <literal>useAdaptersForNonListCollections</literal> property
+                  of <literal>DefaultObjectWrapper</literal> to
+                  <literal>true</literal> (see earlier).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new <emphasis>experimental</emphasis> interface,
+                  <literal>freemarker.template.ObjectWrapperAndUnwrapper</literal>.
+                  This extends <literal>ObjectWrapper</literal> with
+                  unwrapping functionality. This functionality has already
+                  existed for a long time in <literal>BeansWrapper</literal>
+                  and its subclasses, like in
+                  <literal>DefaultObjectWrapper</literal>, but it wasn't
+                  <quote>factored out</quote> into its own published interface
+                  that other <literal>ObjectWrapper</literal>-s could
+                  implement. This is useful for
+                  <literal>TemplateModel</literal> implementations that don't
+                  want to require a <literal>BeansWrapper</literal> (or its
+                  subclass), only the availability of the unwrapping
+                  functionality.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

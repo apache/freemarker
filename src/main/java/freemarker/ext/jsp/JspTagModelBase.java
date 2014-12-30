@@ -34,6 +34,7 @@ import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
@@ -80,16 +81,15 @@ class JspTagModelBase
         InvocationTargetException, 
         IllegalAccessException
     {
-        BeansWrapper bwrapper = 
-            wrapper instanceof BeansWrapper
-            ? (BeansWrapper)wrapper
-            : BeansWrapper.getDefaultInstance();
         if(args != null && !args.isEmpty()) {
+            ObjectWrapperAndUnwrapper unwrapper = 
+                    wrapper instanceof ObjectWrapperAndUnwrapper ? (ObjectWrapperAndUnwrapper) wrapper
+                            : BeansWrapper.getDefaultInstance();  // [2.4] Throw exception in this case
             final Object[] argArray = new Object[1];
             for (Iterator iter = args.entrySet().iterator(); iter.hasNext();)
             {
                 final Map.Entry entry = (Map.Entry) iter.next();
-                final Object arg = bwrapper.unwrap((TemplateModel)entry.getValue());
+                final Object arg = unwrapper.unwrap((TemplateModel) entry.getValue());
                 argArray[0] = arg;
                 final Object paramName = entry.getKey();
                 Method setterMethod = (Method)propertySetters.get(paramName);

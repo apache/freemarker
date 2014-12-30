@@ -43,13 +43,13 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 
 import freemarker.core.Environment;
-import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModelEx;
@@ -76,7 +76,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final ObjectWrapper wrapper;
-    private final boolean wrapperIsBeansWrapper;
+    private final ObjectWrapperAndUnwrapper unwrapper;
     private JspWriter jspOut;
     
     protected FreeMarkerPageContext() throws TemplateModelException
@@ -113,7 +113,8 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             session = request.getSession(false);
             response = reqHash.getResponse();
             wrapper = reqHash.getObjectWrapper();
-            wrapperIsBeansWrapper = this.wrapper instanceof BeansWrapper;
+            unwrapper = this.wrapper instanceof ObjectWrapperAndUnwrapper
+                    ? (ObjectWrapperAndUnwrapper) this.wrapper : null;
         }
         else  {
             throw new  TemplateModelException("Could not find an instance of " + 
@@ -193,9 +194,9 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             case PAGE_SCOPE: {
                 try {
                     final TemplateModel tm = environment.getGlobalNamespace().get(name);
-                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22 && wrapperIsBeansWrapper) {
-                        return ((BeansWrapper) wrapper).tryUnwrap(tm, tm);
-                    } else {
+                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22 && unwrapper != null) {
+                        return unwrapper.unwrap(tm);
+                    } else { // Legacy behavior branch
                         if (tm instanceof AdapterTemplateModel) {
                             return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
                         }

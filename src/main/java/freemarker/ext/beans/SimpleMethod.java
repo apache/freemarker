@@ -24,6 +24,7 @@ import java.util.List;
 import freemarker.core._DelayedFTLTypeDescription;
 import freemarker.core._DelayedOrdinal;
 import freemarker.core._TemplateModelException;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.ClassUtil;
@@ -87,8 +88,8 @@ class SimpleMethod
         while (argIdx < normalArgCnt) {
             Class argType = argTypes[argIdx];
             TemplateModel argVal = (TemplateModel) it.next();
-            Object unwrappedArgVal = w.tryUnwrap(argVal, argType);
-            if(unwrappedArgVal == BeansWrapper.CAN_NOT_UNWRAP) {
+            Object unwrappedArgVal = w.tryUnwrapTo(argVal, argType);
+            if(unwrappedArgVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                 throw createArgumentTypeMismarchException(argIdx, argVal, argType);
             }
             if (unwrappedArgVal == null && argType.isPrimitive()) {
@@ -111,8 +112,8 @@ class SimpleMethod
                 // We first try to treat the last argument as a vararg *array*.
                 // This is consistent to what OverloadedVarArgMethod does.
                 if (argsLen - argIdx == 1
-                        && (unwrappedArgVal = w.tryUnwrap(argVal, varargType))
-                            != BeansWrapper.CAN_NOT_UNWRAP) {
+                        && (unwrappedArgVal = w.tryUnwrapTo(argVal, varargType))
+                            != ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     // It was a vararg array.
                     unwrappedArgs[argIdx++] = unwrappedArgVal;
                 } else {
@@ -122,8 +123,8 @@ class SimpleMethod
                     Object varargArray = Array.newInstance(varargItemType, varargArrayLen);
                     for (int varargIdx = 0; varargIdx < varargArrayLen; varargIdx++) {
                         TemplateModel varargVal = (TemplateModel) (varargIdx == 0 ? argVal : it.next());
-                        Object unwrappedVarargVal = w.tryUnwrap(varargVal, varargItemType);
-                        if(unwrappedVarargVal == BeansWrapper.CAN_NOT_UNWRAP) {
+                        Object unwrappedVarargVal = w.tryUnwrapTo(varargVal, varargItemType);
+                        if(unwrappedVarargVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                             throw createArgumentTypeMismarchException(
                                     argIdx + varargIdx, varargVal, varargItemType);
                         }
