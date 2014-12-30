@@ -5486,9 +5486,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.21) do you want to apply the fixes that are not 100%
+// version (here 2.3.22) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -5714,7 +5714,7 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
@@ -6687,7 +6687,7 @@ list.add("blue");
 // Get the object wrapper we will use. The details of the
 // construction aren't important now (see JavaDocs for that):
 ObjectWrapper wrapper
-        = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21)
+        = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22)
           .build();
 
 // Normaly, you would create a plain java.util.HashMap here, and
@@ -6893,7 +6893,7 @@ ${theObject.sin(123)}</programlisting>
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 <replaceable>..</replaceable>.
 cfg.setSharedVariable("warp", new WarpDirective());
 cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
@@ -6910,7 +6910,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
           <para>Never use <literal>TemplateModel</literal> implementation that
           is not <link linkend="gloss.threadSafe">thread-safe</link> for
           shared variables, if the configuration is used by multiple threads!
-          This is the typical situation for Servlet based Web sites.</para>
+          This is the typical situation for Servlet based applications.</para>
         </warning>
 
         <para>Due to backward compatibility heritage, the set of shared
@@ -7087,7 +7087,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_21);
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_22);
 myCfg.setLocale(java.util.Locale.ITALY);
 myCfg.setNumberFormat("0.####");</programlisting>
 
@@ -7111,7 +7111,7 @@ myCfg.setNumberFormat("0.####");</programlisting>
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
-      &lt;prop key="incompatible_improvements"&gt;2.3.21&lt;/prop&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.22&lt;/prop&gt;
       &lt;prop key="locale"&gt;it_IT&lt;/prop&gt;
       &lt;prop key="number_format"&gt;0.####&lt;/prop&gt;
     &lt;/props&gt;
@@ -8071,7 +8071,7 @@ env.process();</programlisting>
         <link linkend="pgui_datamodel_objectWrapper">object wrapper</link>
         that was originally added to FreeMarker so arbitrary POJO-s (Plain Old
         Java Objects) can be wrapped into <literal>TemplateModel</literal>
-        interfaces. Since then it has becomed the normal way of doing things,
+        interfaces. Since then it has became the normal way of doing things,
         and in fact the <literal>DefaultObjectWrapper</literal> itself is a
         <literal>BeansWrapper</literal> extension. So everything described
         here goes for the <literal>DefaultObjectWrapper</literal> too, except
