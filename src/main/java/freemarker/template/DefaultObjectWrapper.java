@@ -192,8 +192,12 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     /**
-     * Called if an unknown type is passed in.
-     * Since 2.3, this falls back on XML wrapper and BeansWrapper functionality.
+     * Called for an object that aren't wrappable with the <tt>Simple<i>Xxx/</i></tt> classes, that is, a non-basic Java
+     * type, like an application specific type, or a DOM node. In its default implementation, it deals with wrapping W3C
+     * DOM nodes, Jython objects, and then if it's neither, it calls {@link BeansWrapper#wrap(Object)}. When you
+     * override this method, you should first decide if you want to wrap the object in a custom way (and if so then do
+     * it and return with the result), and if not, then you should call the super method (assuming the default behavior
+     * is fine with you).
      */
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
         if (obj instanceof Node) {

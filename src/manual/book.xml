@@ -5775,10 +5775,10 @@ public class Test {
         <para>You have seen how to build a data-model in the <link
         linkend="pgui_quickstart">Getting Started</link> using the standard
         Java classes (<literal>Map</literal>, <literal>String</literal>,
-        etc.). Internally, the variables available in the template are java
+        etc.). Internally, the variables available in the template are Java
         objects that implement the
         <literal>freemarker.template.TemplateModel</literal> interface. But
-        you could use standard java collections as variables in your
+        you could use standard Java collections as variables in your
         data-model, because these were replaced with the appropriate
         <literal>TemplateModel</literal> instances behind the scenes. This
         facility is called <emphasis role="term">object wrapping</emphasis>.
@@ -5790,10 +5790,10 @@ public class Test {
         <literal>javax.servlet.ServletRequest</literal> objects as a hash
         variable that contains the request attributes, or even to traverse XML
         documents as FTL variables (<link linkend="xgui">see here</link>). To
-        wrap (convert) these objects, however, you need to plug the proper, so
-        called, object wrapper implementation (possibly your custom
+        wrap (convert) these objects, however, you need to plug the proper
+        <literal>ObjectWrapper</literal> implementation (possibly your custom
         implementation); this will be discussed <link
-        linkend="pgui_datamodel_objectWrapper">later</link>. The meat for now
+        linkend="pgui_datamodel_objectWrapper">later</link>. The point for now
         is that any object that you want to access from the templates, sooner
         or later must be converted to an object that implements
         <literal>TemplateModel</literal> interface. So first you should
@@ -5910,7 +5910,8 @@ public class Test {
         <note>
           <para>For historical reasons the interface for string scalars is
           called <literal>TemplateScalarModel</literal>, not
-          <literal>TemplateStringModel</literal>.</para>
+          <literal>TemplateStringModel</literal>. (It's because in early
+          FreeMarker strings were the only kind of scalars.)</para>
         </note>
 
         <para>A trivial implementation of these interfaces are available in
@@ -5934,7 +5935,7 @@ public class Test {
         the original instance.</para>
 
         <section>
-          <title>Difficulties with the <quote>date-like</quote> type</title>
+          <title>Difficulties with the <quote>date-like</quote> types</title>
 
           <indexterm>
             <primary>date</primary>
@@ -6608,233 +6609,198 @@ public class RepeatDirective implements TemplateDirectiveModel {
           <primary>wrapper</primary>
         </indexterm>
 
-        <para>When you add something to a container, it may receive any Java
-        object as a parameter, not necessarily a
-        <literal>TemplateModel</literal>, as you could see in the FreeMarker
-        API. This is because the container implementation can silently replace
-        that object with the appropriate <literal>TemplateModel</literal>
-        object. For example if you add a <literal>String</literal> to the
-        container, perhaps it will be replaced with a
-        <literal>SimpleScalar</literal> instance which stores the same
-        text.</para>
+        <para>The object wrapper is an object that implements the
+        <literal>freemarker.template.ObjectWrapper</literal> interface. It's
+        purpose is to implement a mapping between Java objects (like
+        <literal>String</literal>-s, <literal>Map</literal>-s,
+        <literal>List</literal>-s, instances of your application specific
+        classes, etc.) and FTL's type system. With other words, it specifies
+        how the templates will see the Java objects of the data-model
+        (including the return value of Java methods called from the template).
+        The object wrapper is plugged into the
+        <literal>Configuration</literal> as its
+        <literal>object_wrapper</literal> setting (or with
+        <literal>Configuration.setObjectWrapper</literal>).</para>
 
-        <para>As for when the replacement occurs, it's the business of the
-        container in question (i.e. the business of the class that implements
-        the container interface), but it must happen at the latest when you
-        get the subvariable, as the getter methods (according to the
-        interfaces) return <literal>TemplateModel</literal>, not
-        <literal>Object</literal>. For example, <literal>SimpleHash</literal>,
-        <literal>SimpleSequence</literal> and
-        <literal>SimpleCollection</literal> use the laziest strategy; they
-        replace a non-<literal>TemplateModel</literal> subvariable with an
-        appropriate <literal>TemplateModel</literal> object when you get the
-        subvariable for the first time.</para>
+        <para>FTL's type system is technically represented by the
+        <literal>TemplateModel</literal> sub-interfaces that were introduced
+        earlier (<literal>TemplateScalarModel</literal>,
+        <literal>TemplateHashMode</literal>,
+        <literal>TemplateSequenceModel</literal>, etc). To map a Java object
+        to FTL's type system, object wrapper's <literal>TemplateModel
+        wrap(java.lang.Object obj)</literal> method will be called.</para>
 
-        <para>As for what java objects can be replaced, and with what
-        <literal>TemplateModel</literal> implementations, it is either handled
-        by the container implementation itself, or it delegates this to an
-        <literal>ObjectWrapper</literal> instance.
-        <literal>ObjectWrapper</literal> is an interface that specifies one
-        method: <literal>TemplateModel wrap(java.lang.Object obj)</literal>.
-        You pass in an <literal>Object</literal>, and it returns the
-        corresponding <literal>TemplateModel</literal> object, or throws a
-        <literal>TemplateModelException</literal> if this is not possible. The
-        replacement rules are coded into the <literal>ObjectWrapper</literal>
-        implementation.</para>
+        <para>Sometimes FreeMarker needs to reverse this mapping, in which
+        case the <literal>ObjectWrapper</literal>'s <literal>Object
+        unwrap(TemplateModel)</literal> method is called (or some other
+        variation of that, but see the API documentation for such details).
+        This last operation is in
+        <literal>ObjectWrapperAndUnwrapper</literal>, the subinterface of
+        <literal>ObjectWrapper</literal>. Most real world object wrappers will
+        implement <literal>ObjectWrapperAndUnwrapper</literal>.</para>
 
-        <para>The most important <literal>ObjectWrapper</literal>
-        implementations that the FreeMarker core provides are:</para>
+        <para>Here's how wrapping Java objects that contain other objects
+        (like a <literal>Map</literal>, a <literal>List</literal>, an array,
+        or an object with some JavaBean properties) usually work. Let's say,
+        an object wrapper wraps an <literal>Object[]</literal> array into some
+        implementation of the <literal>TemplateSquenceModel</literal>
+        interface. When FreeMarker needs an item from that FTL sequence, it
+        will call <literal>TemplateSquenceModel.get(int index)</literal>. The
+        return type of this method is <literal>TemplateModel</literal>, that
+        is, the <literal>TemplateSquenceModel</literal> implementation not
+        only have to get the <literal>Object</literal> from the given index of
+        the array, it's also responsible for wrapping that value before
+        returning it. To solve that, a typical
+        <literal>TemplateSquenceModel</literal> implementation will store the
+        <literal>ObjectWrapper</literal> that has cerated it, and then invoke
+        that <literal>ObjectWrapper</literal> to wrap the contained value. The
+        same logic stands for <literal>TemplateHashModel</literal> or for any
+        other <literal>TemplateModel</literal> that's a container for further
+        <literal>TemplateModel</literal>-s. Hence, usually, no mater how deep
+        the value hierarchy is, all values will be wrapped by the same single
+        <literal>ObjectWrapper</literal>. (To create
+        <literal>TemplateModel</literal> implementations that follow this
+        idiom, you can use the
+        <literal>freemarker.template.WrappingTemplateModel</literal> as base
+        class.)</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><literal>freemarker.template.DefaultObjectWrapper</literal>:
-            It replaces <literal>String</literal> with
-            <literal>SimpleScalar</literal>, <literal>Number</literal> with
-            <literal>SimpleNumber</literal>, <literal>List</literal> and array
-            with <literal>SimpleSequence</literal>, <literal>Map</literal>
-            with <literal>SimpleHash</literal>, <literal>Boolean</literal>
-            with <literal>TemplateBooleanModel.TRUE</literal> or
-            <literal>TemplateBooleanModel.FALSE</literal>, W3C DOM nodes with
-            <literal>freemarker.ext.dom.NodeModel</literal>. For Jython
-            objects, this wrapper will invoke
-            <literal>freemarker.ext.jython.JythonWrapper</literal>. For all
-            other objects, it will invoke <link
-            linkend="pgui_misc_beanwrapper"><literal>BeansWrapper</literal></link>.</para>
-          </listitem>
+        <para>The data-model itself (the root variable) is a
+        <literal>TemplateHashModel</literal>. The root object that you specify
+        to <literal>Template.process</literal> will be wrapped with the object
+        wrapper specified in the <literal>object_wrapper</literal>
+        configuration setting, which must yield a
+        <literal>TemplateHashModel</literal>. From then on, the wrapping of
+        the contained values follow the logic described earlier (i.e., the
+        container is responsible for wrapping its children).</para>
 
-          <listitem>
-            <para><literal>freemarker.ext.beans.BeansWrapper</literal>: It can
-            expose JavaBean properties and other members of arbitrary objects
-            using Java reflection; there is a separated <link
-            linkend="pgui_misc_beanwrapper">chapter about it</link>.
-            <literal>DefaultObjectWrapper</literal> extends this
-            wrapper.</para>
-          </listitem>
-        </itemizedlist>
+        <para>Well behaving object wrappers bypass objects that already
+        implement <literal>TemplateModel</literal> as is. So if you put an
+        object into the data-model that already implements
+        <literal>TemplateModel</literal> (or you return as such object from a
+        Java method that's called from the template, etc.), then you can avoid
+        actual object wrapping. You do this usually when you are creating a
+        value specifically to be accessed from a template. Thus, you avoid
+        much of the object wrapping performance overhead, also you can control
+        exactly what will the template see (not depending on the mapping
+        strategy of the current object wrapper). A frequent application of
+        this trick is using a
+        <literal>freemarker.template.SimpleHash</literal> as the data-model
+        root (rather than a <literal>Map</literal>), by filling it with
+        <literal>SimpleHash</literal>'s <literal>put</literal> method (that's
+        important, so it won't have to copy an existing <literal>Map</literal>
+        that you have already filled). This speeds up top-level data-model
+        variable access.</para>
 
-        <para>For a concrete example, let's see how the
-        <literal>Simple<replaceable>Xxx</replaceable></literal> classes
-        work:</para>
+        <section xml:id="pgui_datamodel_defaultObjectWrapper">
+          <title>The default object wrapper</title>
 
-        <programlisting role="unspecified">Map map = new HashMap();
-map.put("anotherString", "blah");
-map.put("anotherNumber", new Double(3.14));
-List list = new ArrayList();
-list.add("red");
-list.add("green");
-list.add("blue");
+          <indexterm>
+            <primary>object wrapper</primary>
 
-// Get the object wrapper we will use. The details of the
-// construction aren't important now (see JavaDocs for that):
-ObjectWrapper wrapper
-        = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22)
-          .build();
+            <secondary>default</secondary>
+          </indexterm>
 
-// Normaly, you would create a plain java.util.HashMap here, and
-// later let the ObjectWrapper wrap it in Template.process(...).
-// But for demonstration purposes we will bypass the object wrapper
-// and create a SimpleHash directly that's like the wrapper would
-// create:
-SimpleHash root = new SimpleHash(wrapper);
-root.put("theString", "wombat");
-root.put("theNumber", new Integer(8));
-root.put("theMap", map);
-root.put("theList", list);</programlisting>
+          <indexterm>
+            <primary>DefaultObjectWrapper</primary>
+          </indexterm>
 
-        <para>Assuming that <literal>root</literal> is the data-model root,
-        the resulting data-model is:</para>
+          <para>The default of the <literal>object_wrapper</literal>
+          <literal>Configuration</literal> setting is a
+          <literal>freemarker.template.DefaultObjectWrapper</literal>
+          singleton. Unless you have very special requirements, it's
+          recommended to use this object wrapper, or an instance of a
+          <literal>DefaultObjectWrapper</literal> subclass of yours.</para>
 
-        <programlisting role="dataModel">(root)
- |
- +- theString = "wombat"
- |
- +- theNumber = 8
- |
- +- theMap
- |   |
- |   +- anotherString = "blah"
- |   |
- |   +- anotherNumber = 3.14
- |
- +- theList
-     |
-     +- (1st) = "red"
-     |
-     +- (2nd) = "green"
-     |
-     +- (3rd) = "blue"</programlisting>
+          <para>It recognizes most basic Java types, like
+          <literal>String</literal>, <literal>Number</literal>,
+          <literal>Boolean</literal>, <literal>Date</literal>,
+          <literal>List</literal> (and in general all kind of
+          <literal>java.util.Collection</literal>-s), arrays,
+          <literal>Map</literal>, etc., and wraps them into the naturally
+          matching <literal>TemplateModel</literal> interfaces. It will also
+          wrap W3C DOM nodes with
+          <literal>freemarker.ext.dom.NodeModel</literal>, so you can
+          conveniently traverse XML as <link linkend="xgui">described in its
+          own chapter</link>). For Jython objects, it will delegate to
+          <literal>freemarker.ext.jython.JythonWrapper</literal>. For all
+          other objects, it will invoke <literal>BeansWrapper.wrap</literal>
+          (the super class's method), which will expose the JavaBean
+          properties of the objects as hash items (like
+          <literal>myObj.foo</literal> in FTL will call
+          <literal>getFoo()</literal> behind the scenes), and will also expose
+          the public methods (JavaBean actions) of the object (like
+          <literal>myObj.bar(1, 2)</literal> in FTL will call a method). (For
+          more information about BeansWrapper, <link
+          linkend="pgui_misc_beanwrapper">see its own section</link>.)</para>
 
-        <para>Note that the <literal>Object</literal>-s inside
-        <literal>theMap</literal> and <literal>theList</literal> are
-        accessible as subvariables too. This is because when you, say, try to
-        access <literal>theMap.anotherString</literal>, then the
-        <literal>SimpleHash</literal> (which is used as root hash here) will
-        silently replace the <literal>Map</literal>
-        (<literal>theMap</literal>) with a <literal>SimpleHash</literal>
-        instance that uses the same wrapper as the root hash, so when you try
-        to access the <literal>anotherString</literal> subvariable of it, it
-        will replace that with a <literal>SimpleScalar</literal>.</para>
+          <para>Some further details that's worth mentioning about
+          <literal>DefaultObjectWrapper</literal>:</para>
 
-        <para>If you drop an ``arbitrary'' object into the data-model,
-        <literal>DefaultObjectWrapper</literal> will fall back to
-        <literal>BeansWrapper</literal> to wrap the it:</para>
+          <itemizedlist>
+            <listitem>
+              <para>You shouldn't use its constructor usually, instead create
+              it using a <literal>DefaultObjectWrapperBuilder</literal>. This
+              allows FreeMarker to use singletons.</para>
+            </listitem>
 
-        <programlisting role="unspecified">SimpleHash root = new SimpleHash(wrapper);
-// expose a "simple" java objects:
-root.put("theString", "wombat");
-// expose an "arbitrary" java objects:
-root.put("theObject", new TestObject("green mouse", 1200));
-</programlisting>
+            <listitem xml:id="topic.defaultObjectWrapperIcI">
+              <para>It has a <literal>incompatibleImprovements</literal>
+              property, that's highly recommended to set to 2.3.22 or higher
+              (see the API documentation for the effects). Here's how:</para>
 
-        <para>Assuming this is <literal>TestObject</literal>:</para>
+              <itemizedlist>
+                <listitem>
+                  <para>If you have set the
+                  <literal>incompatible_improvements</literal> setting of the
+                  <literal>Configuration</literal> to 2.3.22 or higher, and
+                  you don't set the <literal>object_wrapper</literal> setting
+                  (so it remains on its default), then you have to do nothing,
+                  as it already uses a <literal>DefaultObjectWrapper</literal>
+                  singleton with the matching
+                  <literal>incompatibleImprovements</literal>.</para>
+                </listitem>
 
-        <programlisting role="unspecified">public class TestObject {
-    private String name;
-    private int price;
+                <listitem>
+                  <para>Otherwise, if you configuring FreeMarker with a
+                  <literal>.properties</literal> file (or from a
+                  <literal>java.util.Properties</literal> constructed
+                  otherwise), or with <literal>FreemarkerServlet</literal>
+                  init-params, set <literal>object_wrapper</literal> to
+                  <literal>DefaultObjectWrapper(2.3.22)</literal> (literally,
+                  that's the string value).</para>
+                </listitem>
 
-    public TestObject(String name, int price) {
-        this.name = name;
-        this.price = price;
-    }
+                <listitem>
+                  <para>Otherwise, if you are configuring FreeMarker through
+                  its Java API:</para>
 
-    // JavaBean properties
-    // Note that public fields are not visible directly;
-    // you must write a getter method for them.
-    public String getName() {return name;}
-    public int getPrice() {return price;}
-    
-    // A method
-    public double sin(double x) {
-        return Math.sin(x);
-    }
-}</programlisting>
+                  <programlisting role="unspecified">cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build());</programlisting>
+                </listitem>
+              </itemizedlist>
+            </listitem>
 
-        <para>The data-model will be:</para>
+            <listitem>
+              <para>In new or properly test-covered projects it's also
+              recommended to set the
+              <literal>useAdaptersForNonListCollection</literal> property to
+              <literal>true</literal>. If you are using
+              <literal>.properties</literal> or
+              <literal>FreemarkerServlet</literal> init-params or such, that
+              will look like <literal>DefaultObjectWrapper(2.3.22,
+              useAdaptersForNonListCollections=true)</literal>, while with the
+              Java API you call
+              <literal>setUseAdaptersForNonListCollections(true)</literal> on
+              the <literal>DefaultObjectWrapperBuilder</literal> object before
+              calling <literal>build()</literal>.</para>
+            </listitem>
 
-        <programlisting role="dataModel">(root)
- |
- +- theString = "wombat"
- |
- +- theObject
-     |
-     +- name = "green mouse"
-     |
-     +- price = 1200
-     |
-     +- number sin(number)</programlisting>
-
-        <para>So we can merge it with this template:</para>
-
-        <programlisting role="template">${theObject.name}
-${theObject.price}
-${theObject.sin(123)}</programlisting>
-
-        <para>Which will output:</para>
-
-        <programlisting role="output">green mouse
-1200
--0,45990349068959124</programlisting>
-
-        <para>You have seen in earlier examples of this manual that we have
-        used <literal>java.util.HashMap</literal> as root hash, and not
-        <literal>SimpleHash</literal> or other FreeMarker specific class. It
-        works because
-        <literal>Template.process(<replaceable>...</replaceable>)</literal>
-        automatically wraps the object you give as its data-model argument. It
-        uses the object wrapper dictated by the
-        <literal>Configuration</literal> level <link
-        linkend="pgui_config_settings">setting</link>,
-        <literal>object_wrapper</literal> (unless you explicitly specify an
-        <literal>ObjectWrapper</literal> as its parameter). Thus, in simple
-        FreeMarker application you need not know about
-        <literal>TemplateModel</literal>-s at all. Note that the root need not
-        be a <literal>java.util.Map</literal>. It can be anything that is
-        wrapped so that it implements the <literal>TemplateHashModel</literal>
-        interface.</para>
-
-        <para>You can configure what <literal>ObjectWrapper</literal>
-        FreeMarker uses with
-        <literal>cfg.setObjectWrapper(ObjectWrapper)</literal>, where
-        <literal>cfg</literal> is the <literal>Configuration</literal>
-        instance. Note that you can plug in your custom
-        <literal>ObjectWrapper</literal> implementation here, hence you have
-        full control over how templates see the data-model.</para>
-
-        <para>For <literal>TemplateModel</literal> implementations that wrap
-        basic Java container types, as <literal>java.util.Map</literal>-s and
-        <literal>java.util.List</literal>-s, the convention is that they use
-        the same object wrapper to wrap their subvariables as their parent
-        container does (that's why the <literal>SimpleHash</literal>
-        constructor has an <literal>ObjectWrapper</literal> parameter).
-        Technically correctly said, they are instantiated by their parent
-        container (so it has full control over the creation of them), and the
-        parent container create them so they will use the same object wrapper
-        as the parent itself. Thus, if <literal>wrapper</literal> is used for
-        the wrapping of the root hash (see it in the examples above), it will
-        be used for the wrapping of the subvariables (and the subvariables of
-        the subvariables, etc.) as well. This is exactly the same phenomenon
-        as you have seen with <literal>theMap.anotherString</literal>
-        earlier.</para>
+            <listitem>
+              <para>The most common way of customizing
+              <literal>DefaultObjectWrapper</literal> is overriding its
+              <literal>handleUnknownType</literal> method.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
       </section>
     </chapter>
 
@@ -8066,6 +8032,21 @@ env.process();</programlisting>
 
           <secondary>wrapping</secondary>
         </indexterm>
+
+        <indexterm>
+          <primary>BeansWrapper</primary>
+        </indexterm>
+
+        <note>
+          <para>Using <literal>BeansWrapper</literal> directly is not
+          recommended anymore. Use its subclass,
+          <literal>DefaultObjectWrapper</literal> instead, though by ensuring
+          that its <literal>incompatibleImprovements</literal> property is at
+          least 2.3.22. <literal>DefaultObjectWrapper</literal> gives cleaner
+          data-model (less confusing multi-type FTL values) and is usually
+          faster. <link linkend="pgui_datamodel_defaultObjectWrapper">See more
+          about DefaultObjectWrapper here...</link></para>
+        </note>
 
         <para>The <literal>freemarker.ext.beans.BeansWrapper</literal> is an
         <link linkend="pgui_datamodel_objectWrapper">object wrapper</link>
@@ -21637,8 +21618,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para><literal>DefaultObjectWrapper</literal>, only with its
                   <literal>incompatible_improvements</literal> set to 2.3.22
-                  (see how to set that <link
-                  linkend="versions_2_3_21">here...</link>) or with its new
+                  (<link linkend="topic.defaultObjectWrapperIcI">see how
+                  here...</link>) or with its new
                   <literal>useAdaptersForContainers</literal> setting set to
                   <literal>true</literal>: It doesn't copy
                   <literal>Map</literal>-s, <literal>List</literal>-s, and
