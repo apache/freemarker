@@ -65,6 +65,7 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
@@ -475,10 +476,14 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
         }
         
-      else if (simpleTestName.startsWith("overloaded-methods-2-")) {
-          dataModel.put("obj", new OverloadedMethods2());
-          dataModel.put("dow", Boolean.valueOf(conf.getObjectWrapper() instanceof DefaultObjectWrapper));
-      }
+        else if (simpleTestName.startsWith("overloaded-methods-2-")) {
+            dataModel.put("obj", new OverloadedMethods2());
+            final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
+            dataModel.put("dow", dow);
+            dataModel.put("dowPre22", dow
+                    && ((DefaultObjectWrapper) conf.getObjectWrapper()).getIncompatibleImprovements()
+                            .intValue() < _TemplateAPI.VERSION_INT_2_3_22);
+        }
     }
     
     public void runTest() throws IOException {

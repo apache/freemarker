@@ -229,7 +229,7 @@
 <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(['a', 'b']) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
 <@assertEquals actual=obj.mIntArrayVsIntegerArrayPreference([1, 2]) expected="mIntArrayVsIntegerArrayPreference(Integer[] [1, 2])" />
 
-<#if dow>
+<#if dowPre22>
   <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaStringArray) expected="mStringArrayVsObjectArrayPreference(Object[] [a, b])" />
   <@assertEquals actual=obj.mStringArrayVsObjectArrayPreference(obj.javaIntArray) expected="mStringArrayVsObjectArrayPreference(Object[] [11, 22])" />
 <#else>

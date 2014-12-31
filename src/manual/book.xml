@@ -21726,6 +21726,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     </listitem>
 
                     <listitem>
+                      <para>As now the exact type of the wrapped original
+                      object is used for overloaded method selection, the
+                      choice can be different (and similar to what it would be
+                      with pure <literal>BeansWrapper</literal>). It's
+                      difficult to find cases where this matters. A change is
+                      most probable around arrays, as with the copying
+                      approach they were unwrapped to
+                      <literal>List</literal>-s, not to the original array. As
+                      the overloaded method mechanism can convert between
+                      arrays and lists (in both directions), it's usually not
+                      a problem. But, it doesn't do conversion between
+                      different array types when the overloaded method has
+                      various types on the parameter position of the array, so
+                      that's a risk factor.</para>
+                    </listitem>
+
+                    <listitem>
                       <para><literal>SimpleHash</literal> and
                       <literal>SimpleSequence</literal> haven't become
                       deprecated. They are still used for hashes and sequences

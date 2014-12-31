@@ -244,4 +244,10 @@
    <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003021"/>
    </testCase>
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc-dow-2.3.22" noOutput="true">
+      <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperInc2003022"/>
+   </testCase>
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow-2.3.22" noOutput="true">
+      <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003022"/>
+   </testCase>
 </testCases>

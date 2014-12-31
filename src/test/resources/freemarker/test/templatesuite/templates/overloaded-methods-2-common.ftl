@@ -1,5 +1,5 @@
 <@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringList) expected="mStringArrayVsListPreference(List [a, b])" />
-<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringArray) expected=dow?string("mStringArrayVsListPreference(List [a, b])", "mStringArrayVsListPreference(String[] [a, b])") />
+<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringArray) expected=dowPre22?string("mStringArrayVsListPreference(List [a, b])", "mStringArrayVsListPreference(String[] [a, b])") />
 <#if dow>
   <@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaObjectArray) expected="mStringArrayVsListPreference(List [a, b])" />
 </#if>
@@ -21,7 +21,7 @@
 <@assertEquals actual=obj.mObjectArrayNonOverloaded(obj.javaStringList) expected="mObjectArrayNonOverloaded(Object[] [a, b])" />
 <@assertEquals actual=obj.mObjectArrayNonOverloaded(obj.javaStringArray) expected="mObjectArrayNonOverloaded(Object[] [a, b])" />
 
-<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringArray) expected=dow?string("mStringArrayVsListPreference(List [a, b])", "mStringArrayVsListPreference(String[] [a, b])") />
+<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringArray) expected=dowPre22?string("mStringArrayVsListPreference(List [a, b])", "mStringArrayVsListPreference(String[] [a, b])") />
 
 <@assertEquals actual=obj.mStringArrayVarargsNonOverloaded('a', 'b') expected="mStringArrayVarargsNonOverloaded(String[] [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsNonOverloaded(['a', 'b']) expected="mStringArrayVarargsNonOverloaded(String[] [a, b])" />
@@ -31,7 +31,7 @@
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded1('a', 'b') expected="mStringArrayVarargsOverloaded1(String[] [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded1(['a', 'b']) expected="mStringArrayVarargsOverloaded1(List [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded1(obj.javaStringList) expected="mStringArrayVarargsOverloaded1(List [a, b])" />
-<@assertEquals actual=obj.mStringArrayVarargsOverloaded1(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded1(List [a, b])", "mStringArrayVarargsOverloaded1(String[] [a, b])") />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded1(obj.javaStringArray) expected=dowPre22?string("mStringArrayVarargsOverloaded1(List [a, b])", "mStringArrayVarargsOverloaded1(String[] [a, b])") />
 
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2('a', 'b') expected="mStringArrayVarargsOverloaded2(String[] [a, b])" />
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded2('a') expected="mStringArrayVarargsOverloaded2(String a)" />
@@ -54,7 +54,7 @@
 
 <#-- Fixed arg solutions have priority: -->
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b]])" />
-<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray) expected=dow?string("mStringArrayVarargsOverloaded4(List[] [[a, b]])", "mStringArrayVarargsOverloaded4(String[] [a, b])") />
+<@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringArray) expected=dowPre22?string("mStringArrayVarargsOverloaded4(List[] [[a, b]])", "mStringArrayVarargsOverloaded4(String[] [a, b])") />
 
 <#-- Choses between the vararg solutions: -->
 <@assertEquals actual=obj.mStringArrayVarargsOverloaded4(obj.javaStringList, obj.javaStringList) expected="mStringArrayVarargsOverloaded4(List[] [[a, b], [a, b]])" />
