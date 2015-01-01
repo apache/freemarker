@@ -97,7 +97,7 @@ implements
      */
     public BeanModel(Object object, BeansWrapper wrapper)
     {
-        // TODO 2.4: All models were introspected here, then the results was discareded, and get() will just do the
+        // [2.4]: All models were introspected here, then the results was discareded, and get() will just do the
         // introspection again. So is this necessary? (The inrospectNow parameter was added in 2.3.21 to allow
         // lazy-introspecting BeansWrapper.trueModel|falseModel.)
         this(object, wrapper, true);
@@ -109,7 +109,7 @@ implements
         this.object = object;
         this.wrapper = wrapper;
         if (inrospectNow && object != null) {
-            // TODO: Could this be removed? [FM 2.4]
+            // [2.4]: Could this be removed?
             wrapper.getClassIntrospector().get(object.getClass());
         }
     }

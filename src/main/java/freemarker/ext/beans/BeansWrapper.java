@@ -1444,7 +1444,7 @@ public class BeansWrapper implements ObjectWrapperAndUnwrapper, WriteProtectable
         IllegalAccessException,
         TemplateModelException
     {
-        // TODO: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
+        // [2.4]: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
         // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
         return 
