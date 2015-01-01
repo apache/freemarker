@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.utility.APIObjectWrapper;
+import freemarker.template.utility.RichObjectWrapper;
 
 /**
  * Adapts a {@link List} to the corresponding {@link TemplateModel} interface(s), most importantly to
@@ -25,7 +27,7 @@ import freemarker.ext.util.WrapperTemplateModel;
  * @since 2.3.22
  */
 public class SimpleListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
-        AdapterTemplateModel, WrapperTemplateModel, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     protected final List list;
 
@@ -35,17 +37,16 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
      * @param list
      *            The list to adapt; can't be {@code null}.
      * @param wrapper
-     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
-     *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
+     *            The {@link ObjectWrapper} used to wrap the items in the array.
      */
-    public static SimpleListAdapter adapt(List list, ObjectWrapperAndUnwrapper wrapper) {
+    public static SimpleListAdapter adapt(List list, RichObjectWrapper wrapper) {
         // [2.4] SimpleListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary
         return list instanceof AbstractSequentialList
                 ? new SimpleListAdapterWithCollectionSupport(list, wrapper)
                 : new SimpleListAdapter(list, wrapper);
     }
 
-    private SimpleListAdapter(List list, ObjectWrapper wrapper) {
+    private SimpleListAdapter(List list, RichObjectWrapper wrapper) {
         super(wrapper);
         this.list = list;
     }
@@ -69,7 +70,7 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
     private static class SimpleListAdapterWithCollectionSupport extends SimpleListAdapter implements
             TemplateCollectionModel {
 
-        private SimpleListAdapterWithCollectionSupport(List list, ObjectWrapper wrapper) {
+        private SimpleListAdapterWithCollectionSupport(List list, RichObjectWrapper wrapper) {
             super(list, wrapper);
         }
 
@@ -101,6 +102,10 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
             return it.hasNext();
         }
 
+    }
+
+    public TemplateModel getAPI() throws TemplateModelException {
+        return ((APIObjectWrapper) getObjectWrapper()).wrapAsAPI(list);
     }
 
 }

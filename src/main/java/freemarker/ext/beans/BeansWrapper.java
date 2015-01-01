@@ -63,6 +63,7 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
+import freemarker.template.utility.RichObjectWrapper;
 import freemarker.template.utility.UndeclaredThrowableException;
 import freemarker.template.utility.WriteProtectable;
 
@@ -75,7 +76,7 @@ import freemarker.template.utility.WriteProtectable;
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
  * was safely published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety. 
  */
-public class BeansWrapper implements ObjectWrapperAndUnwrapper, WriteProtectable
+public class BeansWrapper implements RichObjectWrapper, WriteProtectable
 {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 
@@ -872,6 +873,10 @@ public class BeansWrapper implements ObjectWrapperAndUnwrapper, WriteProtectable
      */
     public TemplateMethodModelEx wrap(Object object, Method method) {
         return new SimpleMethodModel(object, method, method.getParameterTypes(), this);
+    }
+    
+    public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
+        return new APIModel(obj, this);
     }
 
     /**

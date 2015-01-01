@@ -21720,6 +21720,42 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>New built-ins: <literal>?api</literal> and
+              <literal>?has_api</literal>. This exposes the Java API of the
+              object, if the configuration allows it. This is mostly meant to
+              be used when a <literal>Map</literal> or <literal>List</literal>
+              (or other <literal>Collection</literal>) has some custom methods
+              (business logic methods) that you need to call from the
+              template. As FreeMarker (by default) exposes these as clean FTL
+              hash and sequence values, you couldn't access the custom
+              methods. For example, <literal>myMap.myMethod()</literal> in the
+              template basically translates to <literal>((Method)
+              myMap.get("myMethod")).invoke(...)</literal> in Java. Now you
+              can write <literal>myMap?api.myMethod()</literal>, which
+              basically translates to <literal>myMap.myMethod()</literal> in
+              Java. Using <literal>?api</literal> also happens to offer a
+              workaround for the lack of non-<literal>String</literal>
+              <literal>Map</literal> key support in FTL's
+              <literal>[]</literal> operator (as in
+              <literal>myMap[key]</literal>), because now you can write
+              <literal>myMap?api.get(nonStringKey)</literal>.</para>
+
+              <para>However, <literal>?api</literal> is not enabled by
+              default, for now at least. The
+              <literal>api_builtin_enabled</literal> setting has to be set to
+              <literal>true</literal> for that. Also the
+              <literal>object_wrapper</literal> and the value itself has to
+              support <literal>?api</literal>.
+              <literal>DefaultObjectWrapper</literal> with
+              <literal>incompatibleImprovements</literal> 2.3.22 (or with
+              <literal>useAdaptersForContainers</literal> set to
+              <literal>true</literal>) and pure
+              <literal>BeansWrapper</literal> supports it, for
+              <literal>Map</literal>-s, <literal>List</literal>-s and other
+              <literal>Collection</literal>-s.</para>
+            </listitem>
+
+            <listitem>
               <para>Error message quality improvements:</para>
 
               <itemizedlist>
@@ -21773,8 +21809,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>DefaultObjectWrapper</literal>, which has always
                   used the adapter approach, albeit a different implementation
                   of it. As the shortcomings of
-                  <literal>DefaultObjectWrapper</literal> are fixed now [TODO
-                  assuming <literal>?api</literal> will get into 2.3.22], it's
+                  <literal>DefaultObjectWrapper</literal> are fixed now, it's
                   always recommended over <literal>BeansWrapper</literal>, as
                   <literal>BeansWrapper</literal> gives quite confusing
                   multi-typed values and is substantially slower.)</para>
@@ -22053,6 +22088,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   want to require a <literal>BeansWrapper</literal> (or its
                   subclass), only the availability of the unwrapping
                   functionality.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new experimental interfaces to implement
+                  <literal>?api</literal> (see it in the FTL section):
+                  <literal>TemplateModelWithAPISupport</literal>,
+                  <literal>ObjectAPIWrapper</literal>,
+                  <literal>RichObjectWrapper</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

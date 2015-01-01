@@ -8,6 +8,7 @@ import java.util.List;
 import freemarker.core._DelayedShortClassName;
 import freemarker.core._TemplateModelException;
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.utility.APIObjectWrapper;
 
 /**
  * <b>Experimental - subject to change:</b> Adapts a non-{@link List} Java {@link Collection} to the corresponding
@@ -26,7 +27,7 @@ import freemarker.ext.util.WrapperTemplateModel;
  * @since 2.3.22
  */
 public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,
-        AdapterTemplateModel, WrapperTemplateModel, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     private final Collection collection;
 
@@ -39,11 +40,11 @@ public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implem
      *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
-    public static SimpleNonListCollectionAdapter adapt(Collection collection, ObjectWrapperAndUnwrapper wrapper) {
+    public static SimpleNonListCollectionAdapter adapt(Collection collection, APIObjectWrapper wrapper) {
         return new SimpleNonListCollectionAdapter(collection, wrapper);
     }
 
-    private SimpleNonListCollectionAdapter(Collection collection, ObjectWrapperAndUnwrapper wrapper) {
+    private SimpleNonListCollectionAdapter(Collection collection, APIObjectWrapper wrapper) {
         super(wrapper);
         this.collection = collection;
     }
@@ -100,6 +101,10 @@ public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implem
                     itemPojo != null ? new _DelayedShortClassName(itemPojo.getClass()) : (Object) "Null",
                     ", doesn't match the type of (some of) the collection items; see cause exception." });
         }
+    }
+
+    public TemplateModel getAPI() throws TemplateModelException {
+        return ((APIObjectWrapper) getObjectWrapper()).wrapAsAPI(collection);
     }
 
 }

@@ -92,6 +92,8 @@ public class Configurable
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
     /** @since 2.3.21 */
     public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
+    /** @since 2.3.22 */
+    public static final String API_BUILTIN_ENABLED_KEY = "api_builtin_enabled";
 
     private Configurable parent;
     private Properties properties;
@@ -119,6 +121,7 @@ public class Configurable
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
+    private Boolean apiBuiltinEnabled;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -902,6 +905,27 @@ public class Configurable
             : (parent != null ? parent.getShowErrorTips() : true);
     }
     
+    /**
+     * See {@link #setShowErrorTips(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public void setAPIBuiltinEnabled(boolean value) {
+        apiBuiltinEnabled = Boolean.valueOf(value);
+        properties.setProperty(API_BUILTIN_ENABLED_KEY, String.valueOf(value));
+    }
+
+    /**
+     * See {@link #setShowErrorTips(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public boolean isAPIBuiltinEnabled() {
+        return apiBuiltinEnabled != null 
+                ? apiBuiltinEnabled.booleanValue()
+                : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    }
+    
     private static final String ALLOWED_CLASSES = "allowed_classes";
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
@@ -1282,6 +1306,8 @@ public class Configurable
                 setAutoFlush(StringUtil.getYesNo(value));
             } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
                 setShowErrorTips(StringUtil.getYesNo(value));
+            } else if (API_BUILTIN_ENABLED_KEY.equals(name)) {
+                setAPIBuiltinEnabled(StringUtil.getYesNo(value));
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);

@@ -439,6 +439,8 @@ public class DefaultObjectWrapperTest {
 
             assertCollectionTMEquals(hash.keys(), "a", "b", "c", "d");
             assertCollectionTMEquals(hash.values(), 1, null, "C", Collections.singletonList("x"));
+            
+            assertSizeThroughAPIModel(4, hash);
         }
 
         {
@@ -502,6 +504,8 @@ public class DefaultObjectWrapperTest {
             assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
             assertTrue(seq.get(3) instanceof SimpleArrayAdapter);
             assertNull(seq.get(4));
+            
+            assertSizeThroughAPIModel(4, seq);
         }
 
         {
@@ -688,6 +692,8 @@ public class DefaultObjectWrapperTest {
             }
 
             assertRoundtrip(OW22_FUTURE, set, SimpleNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
+            
+            assertSizeThroughAPIModel(3, coll);
         }
 
         {
@@ -858,6 +864,16 @@ public class DefaultObjectWrapperTest {
                 assertTrue(e.getMessage().contains("String key"));
             }
         }
+    }
+    
+    private void assertSizeThroughAPIModel(int expectedSize, TemplateModel normalModel) throws TemplateModelException {
+        if (!(normalModel instanceof TemplateModelWithAPISupport)) {
+            fail(); 
+        }
+        TemplateHashModel apiModel = (TemplateHashModel) ((TemplateModelWithAPISupport) normalModel).getAPI();
+        TemplateMethodModelEx sizeMethod = (TemplateMethodModelEx) apiModel.get("size");
+        TemplateNumberModel r = (TemplateNumberModel) sizeMethod.exec(Collections.emptyList());
+        assertEquals(expectedSize, r.getAsNumber().intValue());
     }
 
     public static class RoundtripTesterBean {

@@ -38,6 +38,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
@@ -228,6 +229,30 @@ class BuiltInsForMultipleTypes {
 
     }
 
+    static class apiBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            if (!env.isAPIBuiltinEnabled()) {
+                throw new _MiscTemplateException(this, new Object[] {
+                        "Can't use ?api, because the \"", Configurable.API_BUILTIN_ENABLED_KEY,
+                        "\" configuration setting is false. Set it to true." });
+            }
+            final TemplateModel tm = target.eval(env);
+            if (!(tm instanceof TemplateModelWithAPISupport)) {
+                target.assertNonNull(tm, env);
+                throw new APINotSupportedTemplateException(env, target, tm);
+            }
+            return ((TemplateModelWithAPISupport) tm).getAPI();
+        }
+    }
+
+    static class has_apiBI extends BuiltIn {
+        TemplateModel _eval(Environment env) throws TemplateException {
+            final TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return tm instanceof TemplateModelWithAPISupport ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+    
     static class is_booleanBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
