@@ -109,7 +109,7 @@
         </init-param>
         <init-param>
             <param-name>object_wrapper</param-name>
-            <param-value>DefaultObjectWrapper(2.3.22, useAdaptersForNonListCollections=true)</param-value>
+            <param-value>DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)</param-value>
         </init-param>
         
         <!-- Common parts: -->

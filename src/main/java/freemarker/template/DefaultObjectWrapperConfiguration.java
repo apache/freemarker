@@ -14,12 +14,12 @@ import freemarker.ext.beans.BeansWrapperConfiguration;
 public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConfiguration {
     
     private boolean useAdaptersForContainers;
-    private boolean useAdaptersForNonListCollections;
+    private boolean forceLegacyNonListCollections;
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {
         super(DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements), true);
         useAdaptersForContainers = getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22;
-        useAdaptersForNonListCollections = false; // [2.4]: = IcI >= _TemplateAPI.VERSION_INT_2_4_0;
+        forceLegacyNonListCollections = true; // [2.4]: = IcI < _TemplateAPI.VERSION_INT_2_4_0;
     }
 
     /** See {@link DefaultObjectWrapper#getUseAdaptersForContainers()}. */
@@ -32,29 +32,29 @@ public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConf
         this.useAdaptersForContainers = useAdaptersForContainers;
     }
     
-    /** See {@link DefaultObjectWrapper#getUseAdaptersForNonListCollections()}. */
-    public boolean getUseAdaptersForNonListCollections() {
-        return useAdaptersForNonListCollections;
+    /** See {@link DefaultObjectWrapper#getForceLegacyNonListCollections()}. */
+    public boolean getForceLegacyNonListCollections() {
+        return forceLegacyNonListCollections;
     }
 
-    /** See {@link DefaultObjectWrapper#setUseAdaptersForNonListCollections(boolean)}. */
-    public void setUseAdaptersForNonListCollections(boolean legacyNonListCollectionWrapping) {
-        this.useAdaptersForNonListCollections = legacyNonListCollectionWrapping;
+    /** See {@link DefaultObjectWrapper#setForceLegacyNonListCollections(boolean)}. */
+    public void setForceLegacyNonListCollections(boolean legacyNonListCollectionWrapping) {
+        this.forceLegacyNonListCollections = legacyNonListCollectionWrapping;
     }
-
+    
     public int hashCode() {
         int result = super.hashCode();
         final int prime = 31;
         result = result * prime + (useAdaptersForContainers ? 1231 : 1237);
-        result = result * prime + (useAdaptersForNonListCollections ? 1231 : 1237);
+        result = result * prime + (forceLegacyNonListCollections ? 1231 : 1237);
         return result;
     }
 
-    public boolean equals(Object obj) {
-        if (!super.equals(obj)) return false;
-        final DefaultObjectWrapperConfiguration dowCfg = (DefaultObjectWrapperConfiguration) obj;
-        return useAdaptersForContainers == dowCfg.getUseAdaptersForContainers()
-                && useAdaptersForNonListCollections == dowCfg.getUseAdaptersForNonListCollections();
+    public boolean equals(Object that) {
+        if (!super.equals(that)) return false;
+        final DefaultObjectWrapperConfiguration thatDowCfg = (DefaultObjectWrapperConfiguration) that;
+        return useAdaptersForContainers == thatDowCfg.getUseAdaptersForContainers()
+                && forceLegacyNonListCollections == thatDowCfg.forceLegacyNonListCollections;
     }
 
 }

@@ -43,9 +43,9 @@ public class DefaultObjectWrapperTest {
         OW22NM.setNullModel(NullModel.INSTANCE);
     }
 
-    private final static DefaultObjectWrapper OW22NLCA = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
+    private final static DefaultObjectWrapper OW22_FUTURE = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
     static {
-        OW22NLCA.setUseAdaptersForNonListCollections(true);
+        OW22_FUTURE.setForceLegacyNonListCollections(false);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class DefaultObjectWrapperTest {
             assertTrue(bw.isClassIntrospectionCacheRestricted());
 
             assertFalse(bw.getUseAdaptersForContainers());
-            assertFalse(bw.getUseAdaptersForNonListCollections());
+            assertTrue(bw.getForceLegacyNonListCollections());
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertTrue(bw.wrap(new ArrayList()) instanceof SimpleSequence);
             assertTrue(bw.wrap(new String[] {}) instanceof SimpleSequence);
@@ -132,7 +132,7 @@ public class DefaultObjectWrapperTest {
                 assertTrue(bw.isWriteProtected());
                 assertEquals(simpleMapWrapper, bw.isSimpleMapWrapper());
                 assertFalse(bw.getUseAdaptersForContainers());
-                assertFalse(bw.getUseAdaptersForNonListCollections());
+                assertTrue(bw.getForceLegacyNonListCollections());
                 assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
                 assertTrue(bw.wrap(new ArrayList()) instanceof SimpleSequence);
                 assertTrue(bw.wrap(new String[] {}) instanceof SimpleSequence);
@@ -150,7 +150,7 @@ public class DefaultObjectWrapperTest {
                 assertTrue(bw.isWriteProtected());
                 assertEquals(simpleMapWrapper, bw.isSimpleMapWrapper());
                 assertTrue(bw.getUseAdaptersForContainers());
-                assertFalse(bw.getUseAdaptersForNonListCollections());
+                assertTrue(bw.getForceLegacyNonListCollections());
                 assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapAdapter);
                 assertTrue(bw.wrap(new ArrayList()) instanceof SimpleListAdapter);
                 assertTrue(bw.wrap(new String[] {}) instanceof SimpleArrayAdapter);
@@ -234,21 +234,23 @@ public class DefaultObjectWrapperTest {
 
         {
             DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21);
-            builder.setUseAdaptersForNonListCollections(true);
+            builder.setForceLegacyNonListCollections(false);
             DefaultObjectWrapper bw = builder.build();
             assertSame(bw, builder.build());
+            assertFalse(bw.getForceLegacyNonListCollections());
 
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertTrue(bw.wrap(new ArrayList()) instanceof SimpleSequence);
             assertTrue(bw.wrap(new String[] {}) instanceof SimpleSequence);
-            assertTrue(bw.wrap(new HashSet()) instanceof SimpleNonListCollectionAdapter);
+            assertTrue(bw.wrap(new HashSet()) instanceof SimpleSequence);
         }
 
         {
             DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22);
-            builder.setUseAdaptersForNonListCollections(true);
+            builder.setForceLegacyNonListCollections(false);
             DefaultObjectWrapper bw = builder.build();
             assertSame(bw, builder.build());
+            assertFalse(bw.getForceLegacyNonListCollections());
 
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapAdapter);
             assertTrue(bw.wrap(new ArrayList()) instanceof SimpleListAdapter);
@@ -264,7 +266,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, ow.getIncompatibleImprovements());
             assertFalse(ow.isWriteProtected());
             assertFalse(ow.getUseAdaptersForContainers());
-            assertFalse(ow.getUseAdaptersForNonListCollections());
+            assertTrue(ow.getForceLegacyNonListCollections());
         }
 
         {
@@ -272,7 +274,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(Configuration.VERSION_2_3_0, ow.getIncompatibleImprovements());
             assertFalse(ow.isWriteProtected());
             assertFalse(ow.getUseAdaptersForContainers());
-            assertFalse(ow.getUseAdaptersForNonListCollections());
+            assertTrue(ow.getForceLegacyNonListCollections());
         }
 
         {
@@ -280,7 +282,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(Configuration.VERSION_2_3_21, ow.getIncompatibleImprovements());
             assertFalse(ow.isWriteProtected());
             assertFalse(ow.getUseAdaptersForContainers());
-            assertFalse(ow.getUseAdaptersForNonListCollections());
+            assertTrue(ow.getForceLegacyNonListCollections());
         }
         
         {
@@ -288,7 +290,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(Configuration.VERSION_2_3_22, ow.getIncompatibleImprovements());
             assertFalse(ow.isWriteProtected());
             assertTrue(ow.getUseAdaptersForContainers());
-            assertFalse(ow.getUseAdaptersForNonListCollections());
+            assertTrue(ow.getForceLegacyNonListCollections());
         }
         
         try {
@@ -667,25 +669,25 @@ public class DefaultObjectWrapperTest {
             set.add("a");
             set.add("b");
             set.add("c");
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22NLCA.wrap(set);
+            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
             assertTrue(coll instanceof SimpleNonListCollectionAdapter);
             assertEquals(3, coll.size());
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
 
-            assertTrue(coll.contains(OW22NLCA.wrap("a")));
-            assertTrue(coll.contains(OW22NLCA.wrap("b")));
-            assertTrue(coll.contains(OW22NLCA.wrap("c")));
-            assertTrue(coll.contains(OW22NLCA.wrap("c")));
-            assertFalse(coll.contains(OW22NLCA.wrap("d")));
+            assertTrue(coll.contains(OW22_FUTURE.wrap("a")));
+            assertTrue(coll.contains(OW22_FUTURE.wrap("b")));
+            assertTrue(coll.contains(OW22_FUTURE.wrap("c")));
+            assertTrue(coll.contains(OW22_FUTURE.wrap("c")));
+            assertFalse(coll.contains(OW22_FUTURE.wrap("d")));
             try {
-                assertFalse(coll.contains(OW22NLCA.wrap(1)));
+                assertFalse(coll.contains(OW22_FUTURE.wrap(1)));
                 fail();
             } catch (TemplateModelException e) {
                 assertTrue(e.getMessage().contains("Integer"));
             }
 
-            assertRoundtrip(OW22NLCA, set, SimpleNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
+            assertRoundtrip(OW22_FUTURE, set, SimpleNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
         }
 
         {
@@ -693,24 +695,24 @@ public class DefaultObjectWrapperTest {
             final List<String> list = Collections.singletonList("b");
             set.add(list);
             set.add(null);
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22NLCA.wrap(set);
+            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
             TemplateModelIterator it = coll.iterator();
             final TemplateModel tm1 = it.next();
-            Object obj1 = OW22NLCA.unwrap(tm1);
+            Object obj1 = OW22_FUTURE.unwrap(tm1);
             final TemplateModel tm2 = it.next();
-            Object obj2 = OW22NLCA.unwrap(tm2);
+            Object obj2 = OW22_FUTURE.unwrap(tm2);
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
             assertTrue(tm1 instanceof SimpleListAdapter || tm2 instanceof SimpleListAdapter);
 
             List similarList = new ArrayList();
             similarList.add("b");
-            assertTrue(coll.contains(OW22NLCA.wrap(similarList)));
-            assertTrue(coll.contains(OW22NLCA.wrap(null)));
-            assertFalse(coll.contains(OW22NLCA.wrap("a")));
-            assertFalse(coll.contains(OW22NLCA.wrap(1)));
+            assertTrue(coll.contains(OW22_FUTURE.wrap(similarList)));
+            assertTrue(coll.contains(OW22_FUTURE.wrap(null)));
+            assertFalse(coll.contains(OW22_FUTURE.wrap("a")));
+            assertFalse(coll.contains(OW22_FUTURE.wrap(1)));
 
-            assertRoundtrip(OW22NLCA, set, SimpleNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
+            assertRoundtrip(OW22_FUTURE, set, SimpleNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
                     + obj2 + "]");
         }
     }
@@ -720,14 +722,14 @@ public class DefaultObjectWrapperTest {
     public void testCollectionAdapterOutOfBounds() throws TemplateModelException {
         Set set = Collections.singleton(123);
 
-        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22NLCA.wrap(set);
+        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
         TemplateModelIterator it = coll.iterator();
 
         for (int i = 0; i < 3; i++) {
             assertTrue(it.hasNext());
         }
 
-        assertEquals(123, OW22NLCA.unwrap(it.next()));
+        assertEquals(123, OW22_FUTURE.unwrap(it.next()));
 
         for (int i = 0; i < 3; i++) {
             assertFalse(it.hasNext());
@@ -747,7 +749,7 @@ public class DefaultObjectWrapperTest {
 
         {
             DefaultObjectWrapper dow = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
-            dow.setUseAdaptersForNonListCollections(true);
+            dow.setForceLegacyNonListCollections(false);
             TemplateCollectionModelEx coll = (TemplateCollectionModelEx) dow.wrap(set);
             assertEquals(1, coll.size());
             assertFalse(coll.isEmpty());
@@ -756,7 +758,7 @@ public class DefaultObjectWrapperTest {
 
         {
             DefaultObjectWrapper dow = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
-            dow.setUseAdaptersForNonListCollections(true);
+            dow.setForceLegacyNonListCollections(false);
             dow.setNullModel(NullModel.INSTANCE);
             TemplateCollectionModelEx coll = (TemplateCollectionModelEx) dow.wrap(set);
             assertEquals(1, coll.size());

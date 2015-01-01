@@ -84,7 +84,7 @@
    <testCase name="lastcharacter"/>
    <testCase name="list" />
    <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, useAdaptersForNonListCollections=true)" />
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
    </testCase>
    <testCase name="listliteral" />
    <testCase name="localization" >
@@ -129,7 +129,7 @@
       <setting object_wrapper="freemarker.template.DefaultObjectWrapper"/> 
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
-      <setting object_wrapper="DefaultObjectWrapper(2.3.22, useAdaptersForNonListCollections=true)"/> 
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)"/> 
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-SimpleObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.SimpleObjectWrapper"/> 

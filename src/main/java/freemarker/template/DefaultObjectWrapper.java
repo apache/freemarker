@@ -19,7 +19,6 @@ package freemarker.template;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     static final private ObjectWrapper JYTHON_WRAPPER;
     
     private boolean useAdaptersForContainers;
-    private boolean useAdaptersForNonListCollections;
+    private boolean forceLegacyNonListCollections;
     
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
@@ -94,7 +93,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 ? (DefaultObjectWrapperConfiguration) bwCfg
                 : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
         useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
-        useAdaptersForNonListCollections = dowDowCfg.getUseAdaptersForNonListCollections();
+        forceLegacyNonListCollections = dowDowCfg.getForceLegacyNonListCollections();
         finalizeConstruction(readOnly);
     }
 
@@ -167,12 +166,16 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
             }
         }
         if (obj instanceof Collection) {
-            if (useAdaptersForContainers && obj instanceof List) {
-                return SimpleListAdapter.adapt((List) obj, this);
+            if (useAdaptersForContainers) {
+                if (obj instanceof List) {
+                    return SimpleListAdapter.adapt((List) obj, this);
+                } else {
+                    return forceLegacyNonListCollections
+                            ? (TemplateModel) new SimpleSequence((Collection) obj, this)
+                            : (TemplateModel) SimpleNonListCollectionAdapter.adapt((Collection) obj, this);
+                }
             } else {
-                return useAdaptersForNonListCollections && !(obj instanceof List)
-                        ? (TemplateModel) SimpleNonListCollectionAdapter.adapt((Collection) obj, this)
-                        : (TemplateModel) new SimpleSequence((Collection) obj, this);
+                return new SimpleSequence((Collection) obj, this);
             }
         }
         if (obj instanceof Map) {
@@ -252,11 +255,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * <p>
      * <b>Attention:</b> For backward compatibility, currently, non-{@link List} collections (like {@link Set}-s) will
      * only be wrapped with adapter approach (with {@link SimpleNonListCollectionAdapter}) if
-     * {@link #setUseAdaptersForNonListCollections(boolean) useAdaptersForNonListCollections} was set to {@code true}.
-     * Currently the default is {@code false}, but in new projects you should set it to {@code true}. See
-     * {@link #setUseAdaptersForNonListCollections(boolean)} for more.
+     * {@link #setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} was set to {@code false}.
+     * Currently the default is {@code true}, but in new projects you should set it to {@code false}. See
+     * {@link #setForceLegacyNonListCollections(boolean)} for more.
      * 
-     * @see #setUseAdaptersForNonListCollections(boolean)
+     * @see #setForceLegacyNonListCollections(boolean)
      * 
      * @since 2.3.22
      */
@@ -266,31 +269,31 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     }
     
     /**
-     * Getter pair of {@link #setUseAdaptersForNonListCollections(boolean)}; see there.
+     * Getter pair of {@link #setForceLegacyNonListCollections(boolean)}; see there.
      * 
      * @since 2.3.22
      */
-    public boolean getUseAdaptersForNonListCollections() {
-        return useAdaptersForNonListCollections;
+    public boolean getForceLegacyNonListCollections() {
+        return forceLegacyNonListCollections;
     }
 
     /**
-     * Specifies if non-{@link List} {@link Collections} (like {@link Set}-s) will be wrapped with with the legacy
-     * {@link SimpleSequence}, or with the more modern {@link SimpleNonListCollectionAdapter}. This meant to be used when
-     * {@link #getUseAdaptersForContainers()} is also {@code true}. In new projects you should definitely set this to
-     * {@code true}. At least before {@code incompatible_improvements} 2.4.0 it defaults to {@code false}, because of
-     * backward compatibility concerns. Namely, in earlier versions even non-{@link List} {@link Collection}-s were
-     * wrapped into a {@link TemplateSequenceModel}, which means that the templates could access the items by index if
-     * they wanted to (the index values were defined by the iteration order). This was not very useful, or was even
-     * confusing, and conflicts with the adapter approach.
+     * Specifies whether non-{@link List} {@link Collection}-s (like {@link Set}-s) must be wrapped by pre-fetching into
+     * a {@link SimpleSequence}. The modern approach is wrapping into a {@link SimpleNonListCollectionAdapter}. This
+     * setting only has effect when {@link #getUseAdaptersForContainers()} is also {@code true}, as otherwise
+     * {@link SimpleSequence} will be used regardless of this. In new projects you should set this to {@code false}. At
+     * least before {@code incompatible_improvements} 2.4.0 it defaults to {@code true}, because of backward
+     * compatibility concerns: with {@link TemplateSequenceModel} templates could access the items by index if they
+     * wanted to (the index values were defined by the iteration order). This was not very useful, or was even
+     * confusing, and it conflicts with the adapter approach.
      * 
      * @see #setUseAdaptersForContainers(boolean)
      * 
      * @since 2.3.22
      */
-    public void setUseAdaptersForNonListCollections(boolean legacyNonListCollectionWrapping) {
+    public void setForceLegacyNonListCollections(boolean forceLegacyNonListCollections) {
         checkModifiable();
-        this.useAdaptersForNonListCollections = legacyNonListCollectionWrapping;
+        this.forceLegacyNonListCollections = forceLegacyNonListCollections;
     }
 
     /** 

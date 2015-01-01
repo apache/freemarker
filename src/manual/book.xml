@@ -6782,14 +6782,14 @@ public class RepeatDirective implements TemplateDirectiveModel {
             <listitem>
               <para>In new or properly test-covered projects it's also
               recommended to set the
-              <literal>useAdaptersForNonListCollection</literal> property to
-              <literal>true</literal>. If you are using
+              <literal>forceLegacyNonListCollections</literal> property to
+              <literal>false</literal>. If you are using
               <literal>.properties</literal> or
               <literal>FreemarkerServlet</literal> init-params or such, that
               will look like <literal>DefaultObjectWrapper(2.3.22,
-              useAdaptersForNonListCollections=true)</literal>, while with the
+              forceLegacyNonListCollections=false)</literal>, while with the
               Java API you call
-              <literal>setUseAdaptersForNonListCollections(true)</literal> on
+              <literal>setForceLegacyNonListCollections(false)</literal> on
               the <literal>DefaultObjectWrapperBuilder</literal> object before
               calling <literal>build()</literal>.</para>
             </listitem>
@@ -21901,17 +21901,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       existing templates may utilize this, even if only
                       accidentally. To enable the more modern adapter
                       approach, set <literal>DefaultObjectWrapper</literal>'s
-                      <literal>useAdaptersForNonListCollections</literal>
-                      property to <literal>true</literal>. Then indexed access
-                      won't be possible for <literal>Set</literal>-s and such
-                      (nor will <literal>?first</literal> and
+                      <literal>forceLegacyNonListCollections</literal>
+                      property to <literal>false</literal>. Then indexed
+                      access won't be possible for <literal>Set</literal>-s
+                      and such (nor will <literal>?first</literal> and
                       <literal>?last</literal> work, but
                       <literal>?size</literal> will still do), so you may want
                       to retest old templates, but you get the advantages of
                       the adapter approach. In new project it's highly
                       recommended to set
-                      <literal>useAdaptersForNonListCollections</literal> to
-                      <literal>true</literal>. (The adapter approach is
+                      <literal>forceLegacyNonListCollections</literal> to
+                      <literal>false</literal>. (The adapter approach is
                       implemented by
                       <literal>SimpleNonListCollectionAdapter</literal>.)</para>
                     </listitem>
@@ -22033,9 +22033,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   them till now. While the exact interface details are marked
                   as experimental, the feature itself is already utilized for
                   <literal>?size</literal> when setting the
-                  <literal>useAdaptersForNonListCollections</literal> property
-                  of <literal>DefaultObjectWrapper</literal> to
-                  <literal>true</literal> (see earlier).</para>
+                  <literal>forceLegacyNonListCollections</literal> property of
+                  <literal>DefaultObjectWrapper</literal> to
+                  <literal>false</literal> (see earlier).</para>
                 </listitem>
 
                 <listitem>
