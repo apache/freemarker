@@ -6801,6 +6801,141 @@ public class RepeatDirective implements TemplateDirectiveModel {
             </listitem>
           </itemizedlist>
         </section>
+
+        <section xml:id="pgui_datamodel_customObjectWrappingExample">
+          <title>Custom object wrapping example</title>
+
+          <indexterm>
+            <primary>object wrapper</primary>
+
+            <secondary>custom</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>custom object wrapper</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>DefaultObjectWrapper</primary>
+
+            <secondary>extending</secondary>
+          </indexterm>
+
+          <para>Let's say you have an application-specific class like
+          this:</para>
+
+          <programlisting role="unspecified">package com.example.myapp;
+
+public class Tupple&lt;E1, E2&gt; {
+    public Tupple(E1 e1, E2 e2) { ... }
+    public E1 getE1() { ... }
+    public E2 getE2() { ... }
+}</programlisting>
+
+          <para>You want templates to see this as a sequence of length 2, so
+          that you can do things like <literal>someTupple[1]</literal>,
+          <literal>&lt;#list someTupple
+          <replaceable>...</replaceable>&gt;</literal>, or
+          <literal>someTupple?size</literal>. For that you need to create a
+          <literal>TemplateSequenceModel</literal> implementation that adapts
+          a <literal>Tupple</literal> to the
+          <literal>TempateSequenceMoldel</literal> interface:</para>
+
+          <programlisting role="unspecified">package com.example.myapp.freemarker;
+
+...
+
+public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+        AdapterTemplateModel {
+    
+    private final Tupple&lt;?, ?&gt; tupple;
+    
+    public TuppleAdapter(Tupple&lt;?, ?&gt; tupple, ObjectWrapper ow) {
+        super(ow);  // coming from WrappingTemplateModel
+        this.tupple = tupple;
+    }
+
+    @Override  // coming from TemplateSequenceModel
+    public int size() throws TemplateModelException {
+        return 2;
+    }
+    
+    @Override  // coming from TemplateSequenceModel
+    public TemplateModel get(int index) throws TemplateModelException {
+        switch (index) {
+        case 0: return wrap(tupple.getE1());
+        case 1: return wrap(tupple.getE2());
+        default: return null;
+        }
+    }
+
+    @Override  // coming from AdapterTemplateModel
+    public Object getAdaptedObject(Class hint) {
+        return tupple;
+    }
+    
+}</programlisting>
+
+          <para>Regarding the classes and interfaces:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>TemplateSequenceModel</literal>: This is why the
+              template will see this as a sequence</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>WrappingTemplateModel</literal>: Just a
+              convenience class, used for <literal>TemplateModel</literal>-s
+              that do object wrapping themselves. That's normally only needed
+              for objects that contain other objects. See the
+              <literal>wrap(<replaceable>...</replaceable>)</literal> calls
+              above.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>AdapterTemplateModel</literal>: Indicates that
+              this template model adapts an already existing object to a
+              <literal>TemplateModel</literal> interface, thus unwrapping
+              should give back that original object.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Lastly, we tell FreeMarker to wrap <literal>Tupple</literal>-s
+          with the <literal>TuppleAdapter</literal> (alternatively, you could
+          wrap them manually before passing them to FreeMarker). For that,
+          first we create a custom object wrapper:</para>
+
+          <programlisting role="unspecified">package com.example.myapp.freemarker;
+
+...
+
+public class MyAppObjectWrapper extends DefaultObjectWrapper {
+
+    public MyAppObjectWrapper(Version incompatibleImprovements) {
+        super(incompatibleImprovements);
+    }
+    
+    @Override
+    protected TemplateModel handleUnknownType(final Object obj) throws TemplateModelException {
+        if (obj instanceof Tupple) {
+            return new TuppleAdapter((Tupple&lt;?, ?&gt;) obj, this);
+        }
+        
+        return super.handleUnknownType(obj);
+    }
+    
+}</programlisting>
+
+          <para>and then where you configure FreeMarker (<link
+          linkend="pgui_config">about configuring, see here...</link>) we plug
+          our object wrapper in:</para>
+
+          <programlisting role="unspecified">// Where you initialize the cfg *singleton* (happens just once in the application life-cycle):
+cfg = new Configuration(Configuration.VERSION_2_3_22);
+...
+cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
+        </section>
       </section>
     </chapter>
 
