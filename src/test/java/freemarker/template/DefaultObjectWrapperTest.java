@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -101,7 +102,7 @@ public class DefaultObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     @Test
-    public void testDefaultObjectWrapperBuilder() throws Exception {
+    public void testBuilder() throws Exception {
         {
             DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
             DefaultObjectWrapper bw = builder.build();
@@ -136,6 +137,7 @@ public class DefaultObjectWrapperTest {
                 assertTrue(bw.wrap(new ArrayList()) instanceof SimpleSequence);
                 assertTrue(bw.wrap(new String[] {}) instanceof SimpleSequence);
                 assertTrue(bw.wrap(new HashSet()) instanceof SimpleSequence);
+                assertTrue(bw.wrap('c') instanceof TemplateScalarModel); // StringModel now, but should change later
             }
 
             {
@@ -234,6 +236,7 @@ public class DefaultObjectWrapperTest {
             DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21);
             builder.setUseAdaptersForNonListCollections(true);
             DefaultObjectWrapper bw = builder.build();
+            assertSame(bw, builder.build());
 
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
             assertTrue(bw.wrap(new ArrayList()) instanceof SimpleSequence);
@@ -245,11 +248,125 @@ public class DefaultObjectWrapperTest {
             DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22);
             builder.setUseAdaptersForNonListCollections(true);
             DefaultObjectWrapper bw = builder.build();
+            assertSame(bw, builder.build());
 
             assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapAdapter);
             assertTrue(bw.wrap(new ArrayList()) instanceof SimpleListAdapter);
             assertTrue(bw.wrap(new String[] {}) instanceof SimpleArrayAdapter);
             assertTrue(bw.wrap(new HashSet()) instanceof SimpleNonListCollectionAdapter);
+        }
+    }
+    
+    @Test
+    public void testConstructors() throws Exception {
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper();
+            assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, ow.getIncompatibleImprovements());
+            assertFalse(ow.isWriteProtected());
+            assertFalse(ow.getUseAdaptersForContainers());
+            assertFalse(ow.getUseAdaptersForNonListCollections());
+        }
+
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_2_3_20);
+            assertEquals(Configuration.VERSION_2_3_0, ow.getIncompatibleImprovements());
+            assertFalse(ow.isWriteProtected());
+            assertFalse(ow.getUseAdaptersForContainers());
+            assertFalse(ow.getUseAdaptersForNonListCollections());
+        }
+
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_2_3_21);
+            assertEquals(Configuration.VERSION_2_3_21, ow.getIncompatibleImprovements());
+            assertFalse(ow.isWriteProtected());
+            assertFalse(ow.getUseAdaptersForContainers());
+            assertFalse(ow.getUseAdaptersForNonListCollections());
+        }
+        
+        {
+            DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_2_3_22);
+            assertEquals(Configuration.VERSION_2_3_22, ow.getIncompatibleImprovements());
+            assertFalse(ow.isWriteProtected());
+            assertTrue(ow.getUseAdaptersForContainers());
+            assertFalse(ow.getUseAdaptersForNonListCollections());
+        }
+        
+        try {
+            new DefaultObjectWrapper(new Version(99, 9, 9));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("version"));
+        }
+    }
+    
+    
+    @Test
+    public void testCustomization() throws TemplateModelException {
+        {
+            CustomizedDefaultObjectWrapper ow = new CustomizedDefaultObjectWrapper(Configuration.VERSION_2_3_22);
+            assertEquals(Configuration.VERSION_2_3_22, ow.getIncompatibleImprovements());
+            assertTrue(ow.getUseAdaptersForContainers());
+            testCustomizationCommonPart(ow,
+                    SimpleMapAdapter.class, SimpleListAdapter.class, SimpleArrayAdapter.class);
+        }
+        
+        {
+            CustomizedDefaultObjectWrapper ow = new CustomizedDefaultObjectWrapper(Configuration.VERSION_2_3_21);
+            assertFalse(ow.getUseAdaptersForContainers());
+            assertEquals(Configuration.VERSION_2_3_21, ow.getIncompatibleImprovements());
+            testCustomizationCommonPart(ow,
+                    SimpleHash.class, SimpleSequence.class, SimpleSequence.class);
+        }
+        
+        {
+            CustomizedDefaultObjectWrapper ow = new CustomizedDefaultObjectWrapper(Configuration.VERSION_2_3_20);
+            assertFalse(ow.getUseAdaptersForContainers());
+            assertEquals(Configuration.VERSION_2_3_0, ow.getIncompatibleImprovements());
+            testCustomizationCommonPart(ow,
+                    SimpleHash.class, SimpleSequence.class, SimpleSequence.class);
+        }
+    }
+
+    @SuppressWarnings("boxing")
+    private void testCustomizationCommonPart(CustomizedDefaultObjectWrapper ow,
+            Class<? extends TemplateHashModel> mapTMClass,
+            Class<? extends TemplateSequenceModel> listTMClass,
+            Class<? extends TemplateSequenceModel> arrayTMClass)
+            throws TemplateModelException {
+        assertFalse(ow.isWriteProtected());
+        
+        TemplateSequenceModel seq = (TemplateSequenceModel) ow.wrap(new Tupple(11, 22));
+        assertEquals(2, seq.size());
+        assertEquals(11, ow.unwrap(seq.get(0)));
+        assertEquals(22, ow.unwrap(seq.get(1)));
+        
+        assertTrue(ow.wrap("x") instanceof SimpleScalar);
+        assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
+        assertTrue(ow.wrap(new Date()) instanceof SimpleDate);
+        assertEquals(TemplateBooleanModel.TRUE, ow.wrap(true));
+        
+        assertTrue(mapTMClass.isInstance(ow.wrap(Collections.emptyMap())));
+        assertTrue(listTMClass.isInstance(ow.wrap(Collections.emptyList())));
+        assertTrue(arrayTMClass.isInstance(ow.wrap(new boolean[] { })));
+        assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);  // at least until IcI 2.4
+        assertTrue(ow.wrap('c') instanceof TemplateScalarModel); // StringModel right now, but should change later
+        
+        TemplateHashModel bean = (TemplateHashModel) ow.wrap(new TestBean());
+        assertEquals(1, ow.unwrap(bean.get("x")));
+        {
+            // Check method calls, and also if the return value is wrapped with the overidden "wrap".
+            final TemplateModel mr = (TemplateModel) ((TemplateMethodModelEx) bean.get("m")).exec(Collections.emptyList());
+            assertEquals(
+                    Collections.singletonList(1),
+                    ow.unwrap(mr));
+            assertTrue(listTMClass.isInstance(mr));
+        }
+        {
+            // Check custom TM usage and round trip:
+            final TemplateModel mr = (TemplateModel) ((TemplateMethodModelEx) bean.get("incTupple"))
+                    .exec(Collections.singletonList(ow.wrap(new Tupple<Integer, Integer>(1, 2))));
+            assertEquals(new Tupple<Integer, Integer>(2, 3), ow.unwrap(mr));
+            assertTrue(TuppleAdapter.class.isInstance(mr));
         }
     }
 
@@ -762,5 +879,112 @@ public class DefaultObjectWrapperTest {
         }
 
     }
+    
+    private static class Tupple<E1, E2> {
+        
+        private final E1 e1;
+        private final E2 e2;
 
+        public Tupple(E1 e1, E2 e2) {
+            if (e1 == null || e2 == null) throw new NullPointerException();
+            this.e1 = e1;
+            this.e2 = e2;
+        }
+
+        public E1 getE1() {
+            return e1;
+        }
+
+        public E2 getE2() {
+            return e2;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((e1 == null) ? 0 : e1.hashCode());
+            result = prime * result + ((e2 == null) ? 0 : e2.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            Tupple other = (Tupple) obj;
+            if (e1 == null) {
+                if (other.e1 != null) return false;
+            } else if (!e1.equals(other.e1)) return false;
+            if (e2 == null) {
+                if (other.e2 != null) return false;
+            } else if (!e2.equals(other.e2)) return false;
+            return true;
+        }
+        
+    }
+    
+    @SuppressWarnings("boxing")
+    public static class TestBean {
+        
+        public int getX() {
+            return 1;
+        }
+        
+        public List<Integer> m() {
+            return Collections.singletonList(1);
+        }
+
+        public Tupple incTupple(Tupple<Integer, Integer> tupple) {
+            return new Tupple(tupple.e1 + 1, tupple.e2 + 1);
+        }
+        
+    }
+    
+    private static class CustomizedDefaultObjectWrapper extends DefaultObjectWrapper {
+
+        private CustomizedDefaultObjectWrapper(Version incompatibleImprovements) {
+            super(incompatibleImprovements);
+        }
+        
+        @Override
+        protected TemplateModel handleUnknownType(final Object obj) throws TemplateModelException {
+            if (obj instanceof Tupple) {
+                return new TuppleAdapter((Tupple<?, ?>) obj, this);
+            }
+            
+            return super.handleUnknownType(obj);
+        }
+        
+    }
+    
+    private static class TuppleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+            AdapterTemplateModel {
+        
+        private final Tupple<?, ?> tupple;
+        
+        public TuppleAdapter(Tupple<?, ?> tupple, ObjectWrapper ow) {
+            super(ow);
+            this.tupple = tupple;
+        }
+
+        public int size() throws TemplateModelException {
+            return 2;
+        }
+        
+        public TemplateModel get(int index) throws TemplateModelException {
+            switch (index) {
+            case 0: return wrap(tupple.getE1());
+            case 1: return wrap(tupple.getE2());
+            default: return null;
+            }
+        }
+
+        public Object getAdaptedObject(Class hint) {
+            return tupple;
+        }
+        
+    };
+    
 }

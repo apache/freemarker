@@ -96,6 +96,14 @@ public class ConfigurationTest extends TestCase{
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
         assertUsesLegacyTemplateLoader(cfg);
+        
+        // ---
+        
+        cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Object ow = cfg.getObjectWrapper();
+        assertEquals(DefaultObjectWrapper.class, ow.getClass());
+        assertEquals(Configuration.VERSION_2_3_22,
+                ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
     }
     
     public void testTemplateLoadingErrors() throws Exception {
