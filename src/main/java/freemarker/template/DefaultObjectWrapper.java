@@ -305,6 +305,21 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         Version bwIcI = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_22
                 ? bwIcI : Configuration.VERSION_2_3_22;
-    }    
+    }
+
+    public String toPropertiesString() {
+        String bwProps = super.toPropertiesString();
+        
+        // Remove simpleMapWrapper, as its irrelevant for this wrapper:
+        if (bwProps.startsWith("simpleMapWrapper")) {
+            int smwEnd = bwProps.indexOf(',');
+            if (smwEnd != -1) {
+                bwProps = bwProps.substring(smwEnd + 1).trim();
+            }
+        }
+        
+        return "useAdaptersForContainers=" + useAdaptersForContainers + ", forceLegacyNonListCollections="
+                + forceLegacyNonListCollections + ", " + bwProps;
+    }
     
 }

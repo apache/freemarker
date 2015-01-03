@@ -1698,15 +1698,28 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     public String toString() {
+        final String propsStr = toPropertiesString();
         return ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
-                + "(" + incompatibleImprovements + ") { "
-                + "simpleMapWrapper = " + simpleMapWrapper + ", "
-                + "exposureLevel = " + classIntrospector.getExposureLevel() + ", "
-                + "exposeFields = " + classIntrospector.getExposeFields() + ", "
-                + "sharedClassIntrospCache = "
-                + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none")
-                + ", ... "
-                + " }";
+                + "(" + incompatibleImprovements + ", "
+                + (propsStr.length() != 0 ? propsStr + ", ..." : "")
+                + ")";
+    }
+    
+    /**
+     * Returns the name-value pairs that describe the configuration of this {@link BeansWrapper}; called from
+     * {@link #toString()}. The expected format is like {@code "foo=bar, baaz=wombat"}. When overriding this, you should
+     * call the super method, and then insert the content before it with a following {@code ", "}, or after it with a
+     * preceding {@code ", "}.
+     * 
+     * @since 2.3.22
+     */
+    protected String toPropertiesString() {
+        // Start with "simpleMapWrapper", because the override in DefaultObjectWrapper expects it to be there!
+        return "simpleMapWrapper=" + simpleMapWrapper + ", "
+               + "exposureLevel=" + classIntrospector.getExposureLevel() + ", "
+               + "exposeFields=" + classIntrospector.getExposeFields() + ", "
+               + "sharedClassIntrospCache="
+               + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none");
     }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
