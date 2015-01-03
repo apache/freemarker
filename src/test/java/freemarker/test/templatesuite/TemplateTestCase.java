@@ -45,6 +45,10 @@ import junit.framework.AssertionFailedError;
 import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.Java7MembersOnlyBeansWrapper;
@@ -176,12 +180,17 @@ public class TemplateTestCase extends FileTestCase {
         dataModel.put(NO_OUTPUT_VAR_NAME, NoOutputDirective.INSTANCE);
 
         dataModel.put(JAVA_OBJECT_INFO_VAR_NAME, JavaObjectInfo.INSTANCE);
-        dataModel.put(TEST_NAME_VAR_NAME, getName());
+        dataModel.put(TEST_NAME_VAR_NAME, simpleTestName);
         dataModel.put(ICI_INT_VALUE_VAR_NAME, conf.getIncompatibleImprovements().intValue());
         
         dataModel.put("message", "Hello, world!");
-        
-        if (simpleTestName.equals("bean-maps")) {
+
+        if (simpleTestName.startsWith("api-builtin")) {
+            dataModel.put("map", ImmutableMap.of(1, "a", 2, "b", 3, "c"));
+            dataModel.put("list", ImmutableList.of(1, 2, 3));
+            dataModel.put("set", ImmutableSet.of("a", "b", "c"));
+            dataModel.put("s", "test");
+        } else if (simpleTestName.equals("bean-maps")) {
             BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w3 = new Java7MembersOnlyBeansWrapper();

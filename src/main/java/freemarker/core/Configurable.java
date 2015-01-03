@@ -906,7 +906,8 @@ public class Configurable
     }
     
     /**
-     * See {@link #setShowErrorTips(boolean)}
+     * Specifies if {@code ?api} can be used in templates. Defaults to {@code false} so that updating FreeMarker won't
+     * decrease the security of existing applications.
      * 
      * @since 2.3.22
      */
@@ -916,7 +917,7 @@ public class Configurable
     }
 
     /**
-     * See {@link #setShowErrorTips(boolean)}
+     * See {@link #setAPIBuiltinEnabled(boolean)}
      * 
      * @since 2.3.22
      */
@@ -1073,6 +1074,11 @@ public class Configurable
      *   <li><p>{@code "show_error_tips"}:
      *       See {@link #setShowErrorTips(boolean)}.
      *       Since 2.3.21.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       
+     *   <li><p>{@code api_builtin_enabled}:
+     *       See {@link #setAPIBuiltinEnabled(boolean)}.
+     *       Since 2.3.22.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
      * </ul>

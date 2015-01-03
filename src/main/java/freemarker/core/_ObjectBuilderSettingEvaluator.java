@@ -547,7 +547,7 @@ public class _ObjectBuilderSettingEvaluator {
                     return cl.newInstance();
                 } catch (Exception e) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Failed to call " + cl.getName() + " constructor", e);
+                            "Failed to call " + cl.getName() + " 0-argument constructor", e);
                 }
             } else {
                 BeansWrapper ow = env.getObjectWrapper();

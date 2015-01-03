@@ -44,6 +44,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.StringUtil;
 
@@ -59,7 +60,7 @@ import freemarker.template.utility.StringUtil;
 
 public class BeanModel
 implements
-    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel
+    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport
 {
     private static final Logger logger = Logger.getLogger("freemarker.beans");
     protected final Object object;
@@ -393,5 +394,10 @@ implements
     protected Set keySet()
     {
         return wrapper.getClassIntrospector().keySet(object.getClass());
-    }    
+    }
+
+    public TemplateModel getAPI() throws TemplateModelException {
+        return wrapper.wrapAsAPI(object);
+    }
+    
 }

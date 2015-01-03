@@ -10136,6 +10136,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_buitin_api_and_has_api">api</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_boolean">boolean</link></para>
           </listitem>
 
@@ -10238,6 +10242,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_numType">float</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_buitin_api_and_has_api">has_api</link></para>
           </listitem>
 
           <listitem>
@@ -13914,6 +13923,121 @@ Sorted by name.last:
         exceptional situations (debugging, advanced macros) they can be
         useful. If you need to use these in your normal page templates, you
         may revisit the data-model so you don't need to use these.</para>
+
+        <section xml:id="ref_buitin_api_and_has_api">
+          <title>api, has_api</title>
+
+          <note>
+            <para>These built-ins exists since FreeMarker 2.3.22</para>
+          </note>
+
+          <para><literal><replaceable>value</replaceable>?api</literal>
+          provides access to the API (usually, the Java API) of
+          <literal><replaceable>value</replaceable></literal>, like
+          <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
+          if the value itself supports this extra feature. This meant to be
+          used rarely, when you need to call a Java method of an object, but
+          the simplistic view of the value that FreeMarker exposes to the
+          templates hides that, and there's no equivalent built-in either. For
+          example, when you have <literal>Map</literal> that you put into the
+          data-model (and you are using the default object wrapper),
+          <literal>myMap.myMethod()</literal> in a template basically
+          translates to <literal>((Method)
+          myMap.get("myMethod")).invoke(...)</literal> in Java, thus you can't
+          call <literal>myMethod</literal>. If, however, you write
+          <literal>myMap?api.myMethod()</literal> instead, that means
+          <literal>myMap.myMethod()</literal> in Java.</para>
+
+          <para><emphasis>You should avoid using <literal>api</literal>, and
+          rely on the capabilities of the FTL types and the related built-ins
+          as far as possible.</emphasis> For example, don't use
+          <literal>users?api.size()</literal>, but
+          <literal>users?size</literal>. The variation that uses
+          <literal>?api</literal> is more verbose, slower, more easily breaks
+          when FreeMarker configuration settings are changed, and most
+          importantly, more prone to break as the technical details of the
+          data-model changes. For example, if <literal>users</literal> is
+          changed from a <literal>List</literal> to an array,
+          <literal>users?size</literal> will keep working, while
+          <literal>users?api.size()</literal> will break.</para>
+
+          <para>Avoid calling methods that <emphasis>modify</emphasis> an
+          object (especially <literal>Map</literal>-s and
+          <literal>Collection</literal>-s) or that aren't thread safe from
+          other reasons. Templates usually aren't expected to modify the
+          objects exposed to them, just to display them. Thus the application
+          may passes some objects to multiple (possibly concurrent) template
+          processings.</para>
+
+          <para>The <literal>api</literal> built-in is not everywhere
+          available, some requirements has to be met:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The <literal>api_builtin_enabled</literal> configuration
+              setting must be set to <literal>true</literal>. Its default is
+              <literal>false</literal> (at least as of 2.3.22) for not
+              lowering the security of existing applications.</para>
+            </listitem>
+
+            <listitem>
+              <para>The value itself has to support it. We are talking about
+              the value as the template sees it, which is created from the
+              original object (that's coming from the data-model or from a
+              Java method return value) value via <link
+              linkend="pgui_datamodel_objectWrapper">object wrapping</link>.
+              Hence, this depends on the <literal>object_wrapper</literal>
+              FreeMarker configuration setting, and on the class of the
+              wrapped (the original) object:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>When the object wrapper is a
+                  <literal>DefaultObjectWrapper</literal> with its
+                  <literal>incompatibleImprovements</literal> set to 2.3.22 or
+                  higher (<link linkend="topic.defaultObjectWrapperIcI">see
+                  how to set it here</link>) (actually, what matters its that
+                  its <literal>useAdaptersForContainer</literal> property is
+                  set to <literal>true</literal>, but that's the default with
+                  said <literal>incompatibleImprovements</literal>), FTL
+                  values made from <literal>Map</literal>-s and
+                  <literal>List</literal>-s support <literal>?api</literal>.
+                  Other <literal>java.util.Collections</literal> also, if
+                  <literal>DefaultObjectWrapper</literal>'s
+                  <literal>forceLegacyNonListCollections</literal> property is
+                  set to <literal>false</literal> (default is
+                  <literal>true</literal> for better out-of-the-box backward
+                  compatibility).</para>
+                </listitem>
+
+                <listitem>
+                  <para>When wrapped with pure
+                  <literal>BeansWrapper</literal>, all values support
+                  <literal>?api</literal>. But again, avoid using it if
+                  there's another solution.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Custom <literal>TemplateModel</literal>-s can support
+                  <literal>?api</literal> by implementing the
+                  <literal>freemarker.template.TemplateModelWithAPISupport</literal>
+                  interface.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Using <literal>?api</literal> when it's not allowed in the
+          configuration or when the value doesn't support it will abort
+          template processing with error.</para>
+
+          <para>Whether a value supports <literal>?api</literal> can be
+          checked like
+          <literal><replaceable>value</replaceable>?has_api</literal>, which
+          returns a boolean value. Note that the result of
+          <literal>?has_api</literal> isn't influenced by the
+          <literal>api_builtin_enabled</literal> setting.</para>
+        </section>
 
         <section xml:id="ref_builtin_numType">
           <title>byte, double, float, int, long, short</title>
@@ -20952,72 +21076,28 @@ End book</programlisting>
             which is the same as <literal>user["password"]</literal>), and
             variable names are strings.</para>
 
-            <para>So FTL's hashes are not general purpose associate arrays
-            that could be used for looking up values with keys of arbitrary
-            type. FTL is presentation oriented language, and it has no feature
-            dedicated for that purpose. It has, however, methods. Methods are
-            part of the data-model, and they can do all kind of fancy
-            data-model related calculations, so of course you can add some
-            methods to the data-model for <literal>Map</literal> lookup. The
-            bad news is that the building of the data-model, as it's an
-            application specific issue, is the task of the programmers who use
-            FreeMarker, so it's their task to ensure that such methods are
-            present there to serve the template authors. (However, when
-            template authors need to call methods that are not about
-            presentation, then consider if the data-model is simple enough.
-            Maybe you should push some calculations back to the data-model
-            building phase. Ideally the data-model contains what should be
-            displayed, and not something that serves as the base of further
-            calculations.)</para>
+            <para>So until FTL has a type that supports non-String keys, you
+            will have to turn to the Java API of the <literal>Map</literal>.
+            You can do it like this:
+            <literal>myMap?api.get(nonStringKey)</literal>. However, for
+            <literal>?api</literal> to work, you may need to configured
+            FreeMarker a bit; <link linkend="ref_buitin_api_and_has_api">see
+            more here...</link></para>
 
-            <para>If you read the programmer's guide, then you know that
-            technically, the data-model is a tree of
-            <literal>freemarker.template.TemplateModel</literal> objects. The
-            building of the data-model usually (but not necessary) happens by
-            automatically wrapping (enclosing) plain Java objects into
-            <literal>TemplateModel</literal> objects. The object that does
-            this wrapping is the object wrapper, and it's specified when you
-            configure FreeMarker. FreeMarker comes with a few object wrapper
-            implementations out-of-the-box, and probably the most widely used
-            of them is <link
-            linkend="pgui_misc_beanwrapper"><literal>freemarker.ext.beans.BeansWrapper</literal></link>.
-            If you use an instance of this as the object wrapper, then
-            <literal>java.util.Map</literal>-s you put into the data-model
-            will also act as a method, so you can write
-            <literal>myMap(myKey)</literal> in the template, that will
-            internally call <literal>Map.get(myKey)</literal>. There will be
-            no restriction regarding the type of <literal>myKey</literal>, as
-            <literal>Map.get(Object key)</literal> has no such restriction. If
-            the value of <literal>myKey</literal> was wrapped with
-            <literal>BeansWrapper</literal> or other object wrapper whose
-            wrapped objects support unwrapping, or it is given as literal in
-            the template, then the value will be automatically unwrapped to
-            plain Java object before the actual invocation of the
-            <literal>Map.get(Object key)</literal> method, so it will not be
-            invoked with <literal>TemplateModel</literal>-s.</para>
-
-            <para>But there still will be a problem. Java's
-            <literal>Map</literal> is particular about the exact class of the
-            key, so for numerical keys calculated inside the templates you
-            will have to cast them to the proper Java type, otherwise the item
-            will not be found. For example if you use
-            <literal>Integer</literal> keys in a Map, then you have to write
-            <literal>${myMap.get(123?int)}</literal>. This is an ugly effect
-            caused by that FTL's deliberately simplified type system just has
-            a single numerical type, while Java distinguishes a lot of
-            numerical types. (Ideally, in the above case, the programmers
-            ensure that the <literal>get</literal> method automatically
-            converts the key to <literal>Integer</literal>, so it's not the
-            problem of the template author. This can be done with wrapper
-            customization, but the wrapper has to know that the particular
-            <literal>Map</literal> object uses <literal>Integer</literal>
-            keys, which assumes application specific knowledge.) Note that the
-            casting is not needed when the key value comes directly from the
-            data-model (i.e. you didn't modified its value with arithmetical
-            caluclations in the template), including the case when it's the
-            return value of a method, and it was of the proper class before
-            wrapping, because then the result of the unwrapping will be of the
-            original type.</para>
+            <para>Note that as Java's <literal>Map</literal> is particular
+            about the exact class of the key, at least for numerical keys
+            calculated inside the templates you will have to cast them to the
+            proper Java type, otherwise the item will not be found. For
+            example if you use <literal>Integer</literal> keys in a Map, then
+            you should write <literal>${myMap.get(numKey?int)}</literal>. This
+            is because of FTL's deliberately simplified type system has only a
+            single numerical type, while Java distinguishes a lot of numerical
+            types. Note that the casting is not needed when the key value
+            comes directly from the data-model (i.e. you didn't modified its
+            value with arithmetical calculations in the template), including
+            the case when it's the return value of a method, and it was of the
+            proper class before wrapping, because then the result of the
+            unwrapping will be of the original type.</para>
           </answer>
         </qandaentry>
 
@@ -21720,39 +21800,40 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>New built-ins: <literal>?api</literal> and
-              <literal>?has_api</literal>. This exposes the Java API of the
-              object, if the configuration allows it. This is mostly meant to
-              be used when a <literal>Map</literal> or <literal>List</literal>
-              (or other <literal>Collection</literal>) has some custom methods
-              (business logic methods) that you need to call from the
-              template. As FreeMarker (by default) exposes these as clean FTL
-              hash and sequence values, you couldn't access the custom
-              methods. For example, <literal>myMap.myMethod()</literal> in the
-              template basically translates to <literal>((Method)
-              myMap.get("myMethod")).invoke(...)</literal> in Java. Now you
-              can write <literal>myMap?api.myMethod()</literal>, which
-              basically translates to <literal>myMap.myMethod()</literal> in
-              Java. Using <literal>?api</literal> also happens to offer a
+              <para>New built-ins: <literal>api</literal> and
+              <literal>has_api</literal>.
+              <literal><replaceable>value</replaceable>?api</literal> provides
+              access to the API (usually, the Java API) of
+              <literal><replaceable>value</replaceable></literal>, like
+              <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
+              if the value itself supports this extra feature. This meant to
+              be used rarely, when you need to call a Java method of an
+              object, but the simplistic view of the value that FreeMarker
+              exposes to the templates hides that, and there's no equivalent
+              built-in either. For example, when you put a
+              <literal>Map</literal> into the data-model (and you are using
+              the default object wrapper), <literal>myMap.myMethod()</literal>
+              in a template basically translates to <literal>((Method)
+              myMap.get("myMethod")).invoke(...)</literal> in Java, thus you
+              can't call <literal>myMethod</literal>. If, however, you write
+              <literal>myMap?api.myMethod()</literal> instead, that means
+              <literal>myMap.myMethod()</literal> in Java.</para>
+
+              <para><emphasis>You should avoid using <literal>api</literal>,
+              and rely on the capabilities of the FTL types and the related
+              built-ins as far as possible.</emphasis></para>
+
+              <para>Using <literal>?api</literal> also happens to offer a
               workaround for the lack of non-<literal>String</literal>
               <literal>Map</literal> key support in FTL's
               <literal>[]</literal> operator (as in
               <literal>myMap[key]</literal>), because now you can write
               <literal>myMap?api.get(nonStringKey)</literal>.</para>
 
-              <para>However, <literal>?api</literal> is not enabled by
-              default, for now at least. The
-              <literal>api_builtin_enabled</literal> setting has to be set to
-              <literal>true</literal> for that. Also the
-              <literal>object_wrapper</literal> and the value itself has to
-              support <literal>?api</literal>.
-              <literal>DefaultObjectWrapper</literal> with
-              <literal>incompatibleImprovements</literal> 2.3.22 (or with
-              <literal>useAdaptersForContainers</literal> set to
-              <literal>true</literal>) and pure
-              <literal>BeansWrapper</literal> supports it, for
-              <literal>Map</literal>-s, <literal>List</literal>-s and other
-              <literal>Collection</literal>-s.</para>
+              <para><literal>?api</literal> is not enabled by default and
+              isn't available for all values. <link
+              linkend="ref_buitin_api_and_has_api">See more
+              here...</link></para>
             </listitem>
 
             <listitem>
@@ -21941,9 +22022,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       access won't be possible for <literal>Set</literal>-s
                       and such (nor will <literal>?first</literal> and
                       <literal>?last</literal> work, but
-                      <literal>?size</literal> will still do), so you may want
-                      to retest old templates, but you get the advantages of
-                      the adapter approach. In new project it's highly
+                      <literal>?size</literal> will still work), so you may
+                      want to retest old templates, but you get the advantages
+                      of the adapter approach. In new projects it's highly
                       recommended to set
                       <literal>forceLegacyNonListCollections</literal> to
                       <literal>false</literal>. (The adapter approach is

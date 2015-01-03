@@ -19,11 +19,15 @@ package freemarker.template;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
+
+import org.junit.Test;
+
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
@@ -35,7 +39,7 @@ import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
 
-public class ConfigurationTest extends TestCase{
+public class ConfigurationTest extends TestCase {
 
     public ConfigurationTest(String name) {
         super(name);
@@ -396,6 +400,24 @@ public class ConfigurationTest extends TestCase{
             assertEquals("my", cVal.getAsString());
             assertEquals(MyScalarModel.class, cVal.getClass());
         }
+    }
+
+    @Test
+    public void testApiBuiltinEnabled() throws IOException, TemplateException {
+        for (Version v : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22 }) {
+            Configuration cfg = new Configuration(v);
+            try {
+                new Template(null, "${1?api}", cfg).process(null, NullWriter.INSTANCE);
+                fail();
+            } catch (TemplateException e) {
+                assertTrue(e.getMessage().contains("api_builtin_enabled"));
+            }
+        }
+        
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setAPIBuiltinEnabled(true);
+        new Template(null, "${m?api.hashCode()}", cfg)
+                .process(Collections.singletonMap("m", new HashMap()), NullWriter.INSTANCE);
     }
     
     private static class MyScalarModel implements TemplateScalarModel {

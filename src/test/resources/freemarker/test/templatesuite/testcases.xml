@@ -28,12 +28,25 @@
             url_escaping_charset CDATA #IMPLIED
             incompatible_improvements CDATA #IMPLIED
             time_zone CDATA #IMPLIED
+            api_builtin_enabled CDATA #IMPLIED
       >
 ]>
 
 <testCases>
    <setting input_encoding="UTF-8" output_encoding="UTF-8" />
    
+   <testCase name="api-builtins" noOutput="true">
+      <setting
+            object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)"
+            api_builtin_enabled="true"
+      />
+   </testCase>
+   <testCase name="api-builtins[#endTN]-bw" noOutput="true">
+      <setting
+            object_wrapper="BeansWrapper(2.3.0)"
+            api_builtin_enabled="true"
+      />
+   </testCase>
    <testCase name="arithmetic" />
    <testCase name="bean-maps"/>
    <testCase name="beans">
