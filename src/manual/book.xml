@@ -20458,13 +20458,52 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Note: JSP 1.x was really bad as an MVC template engine
-            because it was not made for that, so I don't deal with that here.
-            We compare FreeMarker with the JSP 2.0 + JSTL combo.</para>
+            <para>We compare FreeMarker with the JSP 2.0 + JSTL combo
+            here.</para>
 
             <para>FreeMarker Pros:</para>
 
             <itemizedlist>
+              <listitem>
+                <para>Terser syntax. Consider this JSP (assuming
+                <literal>&lt;%@ taglib prefix="c"
+                uri="http://java.sun.com/jsp/jstl/core"
+                %&gt;</literal>):</para>
+
+                <programlisting role="template">&lt;c:if test="${t}"&gt;
+  True
+&lt;/c:if&gt;
+
+&lt;c:choose&gt;
+  &lt;c:when test="${n == 123}"&gt;
+      Do this
+  &lt;/c:when&gt;
+  &lt;c:otherwise&gt;
+      Do that
+  &lt;/c:otherwise&gt;
+&lt;/c:choose&gt;
+
+&lt;c:forEach var="i" items="${ls}"&gt;
+- ${i}
+&lt;/c:forEach&gt;</programlisting>
+
+                <para>and the equivalent FTL:</para>
+
+                <programlisting role="template">&lt;#if t&gt;
+  True
+&lt;/#if&gt;
+
+&lt;#if n == 123&gt;
+  Do this
+&lt;#else&gt;
+  Do that
+&lt;/#if&gt;
+
+&lt;#list ls as i&gt;
+- ${i}
+&lt;/#list&gt;</programlisting>
+              </listitem>
+
               <listitem>
                 <para>FreeMarker is not tied to Servlets, networking or the
                 Web; it is just a class library to generate text output by
@@ -20496,15 +20535,14 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Much easier to define ad-hoc macros and
-                functions.</para>
+                <para>Easier to define ad-hoc macros and functions.</para>
               </listitem>
 
               <listitem>
                 <para>No sweeping errors under the carpet. Missing variables
-                will cause an error by default, and not silently default to
-                arbitrary values. Also, <literal>null</literal>-s are not
-                treated silently as 0/false/empty string. <link
+                and <literal>null</literal>-s will not silently default to
+                <literal>0</literal>/<literal>false</literal>/empty-string,
+                but cause error. <link
                 linkend="faq_picky_about_missing_vars">See more about this
                 here...</link></para>
               </listitem>
@@ -20518,17 +20556,9 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Macros and functions are just variables (compare it to
-                how JSP custom tags work), so they can be easily passed around
-                as parameter values, put into the data-model, ...etc, just
-                like any other value.</para>
-              </listitem>
-
-              <listitem>
-                <para>Easier to read, more terse syntax. For example:
-                <literal>&lt;#if x&gt;...&lt;/#if&gt;</literal> instead of
-                <literal>&lt;c:if
-                test="${x}"&gt;...&lt;/c:if&gt;</literal></para>
+                <para>Macros and functions are just variables, so they can be
+                easily passed around as parameter values, put into the
+                data-model, etc., just like any other values.</para>
               </listitem>
 
               <listitem>
@@ -20550,15 +20580,16 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Since macros and function are just variables, incorrect
+                <para>Since macros and functions are just variables, incorrect
                 directive and parameter names and missing required parameters
                 can be detected only on runtime.</para>
               </listitem>
 
               <listitem>
                 <para>Its syntax doesn't follow the HTML/XML rules apart from
-                some visual similarity, which is confusing for new users.
-                (It's the price of the terseness...)</para>
+                some visual similarity, which is confusing for new users (it's
+                the price of the terseness). JSP doesn't follow it either, but
+                it's closer to it.</para>
               </listitem>
 
               <listitem>
@@ -20568,7 +20599,9 @@ End book</programlisting>
             </itemizedlist>
 
             <para>You may read this if you are considering replacing JSP with
-            FreeMarker: <xref linkend="pgui_misc_servlet_model2"/></para>
+            FreeMarker in an existing application or in a legacy framework
+            that only supports JSP: <xref
+            linkend="pgui_misc_servlet_model2"/></para>
           </answer>
         </qandaentry>
 
@@ -20822,7 +20855,10 @@ End book</programlisting>
                 <literal>boolean_format</literal> setting
                 (<literal>Configuration.setBooleanFormat</literal>) to reflect
                 that, and then since FreeMarker 2.3.20 you can just write
-                <literal>${<replaceable>someBoolean</replaceable>}</literal>.</para>
+                <literal>${<replaceable>someBoolean</replaceable>}</literal>.
+                (Note that this doesn't work for
+                <literal>true</literal>/<literal>false</literal> though - you
+                have to use <literal>?c</literal> there.)</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -21025,9 +21061,13 @@ End book</programlisting>
                 templates) should declare their arguments as
                 <literal>TemplateModel</literal>-s and the more specific sub
                 interfaces of that. After all, the object wrapping is about
-                apparently transforming the data-model to something that
-                serves the purpose of the presentation layer, and these
-                methods are part of the presentation layer.</para>
+                transforming the data-model to something that serves the
+                purpose of the presentation layer, and these methods are part
+                of the presentation layer. If you still need a plain Java type
+                there, you may turn to the
+                <literal>ObjectWrapperAndUnwrapper</literal> interface of the
+                current <literal>ObjectWrapper</literal> (can be get with
+                <literal>Environment.getObjectWrapper()</literal>).</para>
               </listitem>
 
               <listitem>
@@ -21040,15 +21080,16 @@ End book</programlisting>
                 responsibility of the <link
                 linkend="pgui_datamodel_objectWrapper">object wrapper</link>
                 to ensure the conversion of the arguments to the proper type.
-                If you use the <literal>DefaultObjectWrapper</literal> or the
-                <link
+                If you use the <link
+                linkend="pgui_datamodel_defaultObjectWrapper"><literal>DefaultObjectWrapper</literal></link>
+                or the <link
                 linkend="pgui_misc_beanwrapper"><literal>BeansWrapper</literal></link>
-                then this will happen automatically (but be sure you are using
-                at least FreeMarker 2.3.3). Furthermore if you use
-                <literal>BeansWrapper</literal>, then the method will surely
-                get exactly the same instance that was earlier wrapped (as far
-                as it was wrapped by the
-                <literal>BeansWrapper</literal>).</para>
+                then this will happen automatically. For
+                <literal>DefaultObjectWrapper</literal>, this mechanism works
+                much better, if you <link
+                linkend="topic.defaultObjectWrapperIcI">set its
+                <literal>incompatibleImprovements</literal> to
+                2.3.22</link>.</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -21113,10 +21154,14 @@ End book</programlisting>
             <para>Certainly you are using <literal>BeansWrapper</literal> as
             your object wrapper, or a custom subclass of it, and the
             <literal>simpleMapWrapper</literal> property of that is left to
-            <literal>false</literal>. Unfortunatelly, it's the default (for
+            <literal>false</literal>. Unfortunately, it's the default (for
             backward compatibility), so you have to explicitly set it to
-            <literal>true</literal> where you create the object
-            wrapper.</para>
+            <literal>true</literal> where you create the object wrapper. Also,
+            at least since 2.3.22, applications should just use
+            <literal>DefaultObjectWrapper</literal> (with <link
+            linkend="topic.defaultObjectWrapperIcI">its
+            <literal>incompatibleImprovements</literal> set to 2.3.22</link> -
+            that's important), which never had this problem.</para>
           </answer>
         </qandaentry>
 
@@ -21158,8 +21203,8 @@ End book</programlisting>
             linkend="dgui_template_exp_seqenceop_slice">subsequence
             operator</link> instead of removing sequence items. However, be
             aware of the performance implications: these operations are fast,
-            but the hashes/sequences that are the result of many subseqent
-            applications of these operations (i.e. when you use the result of
+            but the hashes/sequences that are the result of many subsequent
+            applications of these operations (i.e., when you use the result of
             the operation as the input of yet another operation, and so on)
             will be slow to read.</para>
 
