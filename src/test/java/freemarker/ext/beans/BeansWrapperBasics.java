@@ -37,6 +37,7 @@ public class BeansWrapperBasics {
     private void assertWrappingResult(Class<? extends TemplateModel> expectedClass, TemplateModel tm)
             throws TemplateModelException {
         assertTrue(expectedClass.isInstance(tm));
+        // All BeansWrapper products support `?api`:
         assertTrue(((TemplateModelWithAPISupport) tm).getAPI() instanceof APIModel);
     }
 

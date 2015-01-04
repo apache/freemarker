@@ -410,7 +410,7 @@ public class ConfigurationTest extends TestCase {
                 new Template(null, "${1?api}", cfg).process(null, NullWriter.INSTANCE);
                 fail();
             } catch (TemplateException e) {
-                assertTrue(e.getMessage().contains("api_builtin_enabled"));
+                assertTrue(e.getMessage().contains(Configurable.API_BUILTIN_ENABLED_KEY));
             }
         }
         

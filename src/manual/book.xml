@@ -22166,11 +22166,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>DefaultObjectWrapper</literal> and then a 1
                   character long string is get from it that doesn't exist. To
                   fix the issue, if the wrapped <literal>Map</literal> is a
-                  <literal>SortedMap</literal>,
-                  <literal>DefaultObjectWrapper</literal>
-                  (<literal>SimpleHash</literal>, to be more precise) won't
-                  try to fall back to a <literal>Character</literal> key after
-                  with the <literal>String</literal> key it has got
+                  <literal>SortedMap</literal> and it's wrapped by
+                  <literal>DefaultObjectWrapper</literal>, it won't try to
+                  fall back to a <literal>Character</literal> key after with
+                  the <literal>String</literal> key has got
                   <literal>null</literal>. (This change should be backward
                   compatible, because when a <literal>SortedMap</literal> has
                   <literal>Character</literal> keys, the initial attempt with
