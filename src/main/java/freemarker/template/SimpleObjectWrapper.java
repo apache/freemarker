@@ -20,7 +20,8 @@ import freemarker.ext.beans.BeansWrapper;
 
 /**
  * A restricted object wrapper that will not expose arbitrary object, just those that directly correspond to the
- * {@link TemplateModel} sub-interfaces ({@code String}, {@code Map} and such).
+ * {@link TemplateModel} sub-interfaces ({@code String}, {@code Map} and such). If it had to wrap other kind of objects,
+ * it will throw exception. It will also block {@code ?api} calls on the values it wraps.
  */
 public class SimpleObjectWrapper extends DefaultObjectWrapper {
     
@@ -47,7 +48,12 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
      * In this implementation, this just throws an exception.
      */
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("Don't know how to present an object of this type to a template: " 
+        throw new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: " 
                                          + obj.getClass().getName());
     }
+
+    public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
+        throw new TemplateModelException("SimpleObjectWrapper deliberately doesn't allow ?api.");
+    }
+    
 }
