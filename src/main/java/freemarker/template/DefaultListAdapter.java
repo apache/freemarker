@@ -16,17 +16,21 @@ import freemarker.template.utility.RichObjectWrapper;
  * specifically to be used from a template, also consider using {@link SimpleSequence} (see comparison there).
  * 
  * <p>
- * Thread safety: A {@link SimpleListAdapter} is as thread-safe as the {@link List} that it wraps is. Normally you only
+ * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the {@link List} that it wraps is. Normally you only
  * have to consider read-only access, as the FreeMarker template language doesn't allow writing these sequences (though
- * of course, a Java methods called from the template can violate this rule).
+ * of course, Java methods called from the template can violate this rule).
+ * 
+ * <p>
+ * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
+ * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  * 
  * @see SimpleSequence
- * @see SimpleArrayAdapter
+ * @see DefaultArrayAdapter
  * @see TemplateSequenceModel
  * 
  * @since 2.3.22
  */
-public class SimpleListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+public class DefaultListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     protected final List list;
@@ -39,14 +43,14 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
      * @param wrapper
      *            The {@link ObjectWrapper} used to wrap the items in the array.
      */
-    public static SimpleListAdapter adapt(List list, RichObjectWrapper wrapper) {
-        // [2.4] SimpleListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary
+    public static DefaultListAdapter adapt(List list, RichObjectWrapper wrapper) {
+        // [2.4] DefaultListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary
         return list instanceof AbstractSequentialList
-                ? new SimpleListAdapterWithCollectionSupport(list, wrapper)
-                : new SimpleListAdapter(list, wrapper);
+                ? new DefaultListAdapterWithCollectionSupport(list, wrapper)
+                : new DefaultListAdapter(list, wrapper);
     }
 
-    private SimpleListAdapter(List list, RichObjectWrapper wrapper) {
+    private DefaultListAdapter(List list, RichObjectWrapper wrapper) {
         super(wrapper);
         this.list = list;
     }
@@ -67,10 +71,10 @@ public class SimpleListAdapter extends WrappingTemplateModel implements Template
         return list;
     }
 
-    private static class SimpleListAdapterWithCollectionSupport extends SimpleListAdapter implements
+    private static class DefaultListAdapterWithCollectionSupport extends DefaultListAdapter implements
             TemplateCollectionModel {
 
-        private SimpleListAdapterWithCollectionSupport(List list, RichObjectWrapper wrapper) {
+        private DefaultListAdapterWithCollectionSupport(List list, RichObjectWrapper wrapper) {
             super(list, wrapper);
         }
 

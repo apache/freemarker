@@ -29,15 +29,27 @@ import org.w3c.dom.Node;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
+import freemarker.ext.jython.JythonWrapper;
 import freemarker.log.Logger;
 
 /**
- * The default implementation of the {@link ObjectWrapper} interface. Note that instances of this class generally should
- * be made by {@link DefaultObjectWrapperBuilder} and its overloads, not with its constructor.
+ * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to create instances of
+ * this, as an instance of this is already the default value of the
+ * {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper setting}. Then the
+ * {@link #DefaultObjectWrapper(Version) incompatibleImprovements} of the {@link DefaultObjectWrapper} will be the same
+ * that you have set for the {@link Configuration} itself. As of this writing, it's highly recommended to use
+ * {@link Configuration#Configuration(Version) incompatibleImprovements} 2.3.22 (or higher).
  * 
- * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
- * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
- * was safely published and then left unmodified. 
+ * <p>
+ * If you still need to create an instance, that should be done with an {@link DefaultObjectWrapperBuilder}, not with
+ * its constructor, as that allow FreeMarker for reusing singletons. For new projects, it's recommended to set
+ * {@link DefaultObjectWrapperBuilder#setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} to
+ * {@code false} - something that setting {@code incompatibleImprovements} to 2.3.22 won't do.
+ * 
+ * <p>
+ * This class is only thread-safe after you have finished calling its setter methods, and then safely published it (see
+ * JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that was safely
+ * published and then left unmodified.
  */
 public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     
@@ -131,6 +143,15 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         JYTHON_WRAPPER = ow;
     }
 
+    /**
+     * Wraps the parameter object to {@link TemplateModel} interface(s). Simple types like numbers, strings, booleans
+     * and dates will be wrapped into the corresponding {@code SimpleXxx} classes (like {@link SimpleNumber}).
+     * {@link Map}-s, {@link List}-s, other {@link Collection}-s, arrays and {@link Iterator}-s will be wrapped into the
+     * corresponding {@code SimpleXxx} or {@code DefaultXxxAdapter} classes (like {@link SimpleHash} or
+     * {@link DefaultMapAdapter}), depending on {@link #getUseAdaptersForContainers()} and
+     * {@link #getForceLegacyNonListCollections()}. After that, the wrapping is handled by
+     * {@link #handleUnknownType(Object)}, so see more there.
+     */
     public TemplateModel wrap(Object obj) throws TemplateModelException {
         if (obj == null) {
             return super.wrap(null);
@@ -159,7 +180,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         final Class objClass = obj.getClass();
         if (objClass.isArray()) {
             if (useAdaptersForContainers) {
-                return SimpleArrayAdapter.adapt(obj, this);
+                return DefaultArrayAdapter.adapt(obj, this);
             } else {
                 obj = convertArray(obj);
                 // Falls through (a strange legacy...)
@@ -168,11 +189,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         if (obj instanceof Collection) {
             if (useAdaptersForContainers) {
                 if (obj instanceof List) {
-                    return SimpleListAdapter.adapt((List) obj, this);
+                    return DefaultListAdapter.adapt((List) obj, this);
                 } else {
                     return forceLegacyNonListCollections
                             ? (TemplateModel) new SimpleSequence((Collection) obj, this)
-                            : (TemplateModel) SimpleNonListCollectionAdapter.adapt((Collection) obj, this);
+                            : (TemplateModel) DefaultNonListCollectionAdapter.adapt((Collection) obj, this);
                 }
             } else {
                 return new SimpleSequence((Collection) obj, this);
@@ -180,7 +201,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         }
         if (obj instanceof Map) {
             return useAdaptersForContainers
-                    ? (TemplateModel) SimpleMapAdapter.adapt((Map) obj, this)
+                    ? (TemplateModel) DefaultMapAdapter.adapt((Map) obj, this)
                     : (TemplateModel) new SimpleHash((Map) obj, this);
         }
         if (obj instanceof Boolean) {
@@ -188,19 +209,22 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         }
         if (obj instanceof Iterator) {
             return useAdaptersForContainers
-                    ? (TemplateModel) SimpleIteratorAdapter.adapt((Iterator) obj, this)
+                    ? (TemplateModel) DefaultIteratorAdapter.adapt((Iterator) obj, this)
                     : (TemplateModel) new SimpleCollection((Iterator) obj, this);
         }
         return handleUnknownType(obj);
     }
     
     /**
-     * Called for an object that aren't wrappable with the <tt>Simple<i>Xxx/</i></tt> classes, that is, a non-basic Java
-     * type, like an application specific type, or a DOM node. In its default implementation, it deals with wrapping W3C
-     * DOM nodes, Jython objects, and then if it's neither, it calls {@link BeansWrapper#wrap(Object)}. When you
-     * override this method, you should first decide if you want to wrap the object in a custom way (and if so then do
-     * it and return with the result), and if not, then you should call the super method (assuming the default behavior
-     * is fine with you).
+     * Called for an object that aren't considered to be of a "basic" Java type, like for an application specific type,
+     * or for a W3C DOM node. In its default implementation, W3C {@link Node}-s will be wrapped as {@link NodeModel}-s
+     * (allows DOM tree traversal), Jython objects will be delegated to the {@link JythonWrapper}, others will be
+     * wrapped using {@link BeansWrapper#wrap(Object)}.
+     * 
+     * <p>
+     * When you override this method, you should first decide if you want to wrap the object in a custom way (and if so
+     * then do it and return with the result), and if not, then you should call the super method (assuming the default
+     * behavior is fine with you).
      */
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
         if (obj instanceof Node) {
@@ -244,8 +268,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * understand the difference, check some of the classes that implement the two approaches:
      * <ul>
      * <li>Copying approach: {@link SimpleHash}, {@link SimpleSequence}</li>
-     * <li>Adapter approach: {@link SimpleMapAdapter}, {@link SimpleListAdapter}, {@link SimpleArrayAdapter},
-     * {@link SimpleIteratorAdapter}</li>
+     * <li>Adapter approach: {@link DefaultMapAdapter}, {@link DefaultListAdapter}, {@link DefaultArrayAdapter},
+     * {@link DefaultIteratorAdapter}</li>
      * </ul>
      * 
      * <p>
@@ -254,7 +278,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * 
      * <p>
      * <b>Attention:</b> For backward compatibility, currently, non-{@link List} collections (like {@link Set}-s) will
-     * only be wrapped with adapter approach (with {@link SimpleNonListCollectionAdapter}) if
+     * only be wrapped with adapter approach (with {@link DefaultNonListCollectionAdapter}) if
      * {@link #setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} was set to {@code false}.
      * Currently the default is {@code true}, but in new projects you should set it to {@code false}. See
      * {@link #setForceLegacyNonListCollections(boolean)} for more.
@@ -279,7 +303,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
 
     /**
      * Specifies whether non-{@link List} {@link Collection}-s (like {@link Set}-s) must be wrapped by pre-fetching into
-     * a {@link SimpleSequence}. The modern approach is wrapping into a {@link SimpleNonListCollectionAdapter}. This
+     * a {@link SimpleSequence}. The modern approach is wrapping into a {@link DefaultNonListCollectionAdapter}. This
      * setting only has effect when {@link #getUseAdaptersForContainers()} is also {@code true}, as otherwise
      * {@link SimpleSequence} will be used regardless of this. In new projects you should set this to {@code false}. At
      * least before {@code incompatible_improvements} 2.4.0 it defaults to {@code true}, because of backward

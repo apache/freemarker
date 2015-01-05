@@ -25,40 +25,42 @@ import freemarker.ext.beans.BeansWrapper;
 
 /**
  * A simple implementation of the {@link TemplateSequenceModel} interface, using its own underlying {@link List} for
- * storing the list items. If you are wrapping an already existing {@link List} or {@code array}, also consider using
- * {@link SimpleMapAdapter} or {@link SimpleArrayAdapter} (see comparison below).
+ * storing the list items. If you are wrapping an already existing {@link List} or {@code array}, you should certainly
+ * use {@link DefaultMapAdapter} or {@link DefaultArrayAdapter} (see comparison below).
  * 
  * <p>
- * This class is thread-safe if you don't call methods modifying methods (like {@link #add(Object)}) after you have made
- * the object available for multiple threads (assuming you have published it safely to the other threads; see JSR-133
- * Java Memory Model). These methods aren't called by FreeMarker, so it's usually not a concern.
+ * This class is thread-safe if you don't call modifying methods (like {@link #add(Object)}) after you have made the
+ * object available for multiple threads (assuming you have published it safely to the other threads; see JSR-133 Java
+ * Memory Model). These methods aren't called by FreeMarker, so it's usually not a concern.
  * 
  * <p>
- * <b>{@link SimpleSequence} VS {@link SimpleListAdapter}/{@link SimpleArrayAdapter} - Which to use when?</b>
+ * <b>{@link SimpleSequence} VS {@link DefaultListAdapter}/{@link DefaultArrayAdapter} - Which to use when?</b>
  * </p>
  * 
  * <p>
- * For a {@link List} or {@code array} that exists regardless of FreeMarker, only you need to access it for templates,
- * {@link SimpleMapAdapter} should be the default choice, as it has more predictable performance (no spikes).
+ * For a {@link List} or {@code array} that exists regardless of FreeMarker, only you need to access it from templates,
+ * {@link DefaultMapAdapter} should be the default choice, as it can be unwrapped to the originally wrapped object
+ * (important when passing it to Java methods from the template). It also has more predictable performance (no spikes).
  * 
  * <p>
  * For a sequence that's made specifically to be used from templates, creating an empty {@link SimpleSequence} then
  * filling it with {@link SimpleSequence#add(Object)} is usually the way to go, as the resulting sequence is
- * significantly faster to read from templates than a {@link SimpleListAdapter} (though it's somewhat slower to read
+ * significantly faster to read from templates than a {@link DefaultListAdapter} (though it's somewhat slower to read
  * from a plain Java method to which it had to be passed adapted to a {@link List}).
  * 
  * <p>
  * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the sequence
- * from a {@link List} (via {@link SimpleListAdapter#adapt(List, freemarker.template.utility.RichObjectWrapper)} or
+ * from a {@link List} (via {@link DefaultListAdapter#adapt(List, freemarker.template.utility.RichObjectWrapper)} or
  * {@link SimpleSequence#SimpleSequence(Collection)}), which will be the faster depends on how many times will the
  * <em>same</em> {@link List} entry be read from the template(s) later, on average. If, on average, you read each entry
- * for more 4 times, {@link SimpleSequence} will be most certainly faster, but if for 2 times or less (and especially if
- * not at all) then {@link SimpleMapAdapter} will be. Before choosing based on performance though, pay attention to the
- * behavioral differences; {@link SimpleSequence} will shallow-copy a the {@link List} at construction time, so it won't
- * reflect {@link List} content changes after the {@link SimpleSequence} construction.
+ * for more than 4 times, {@link SimpleSequence} will be most certainly faster, but if for 2 times or less (and
+ * especially if not at all) then {@link DefaultMapAdapter} will be. Before choosing based on performance though, pay
+ * attention to the behavioral differences; {@link SimpleSequence} will shallow-copy the original {@link List} at
+ * construction time, so it won't reflect {@link List} content changes after the {@link SimpleSequence} construction,
+ * also {@link SimpleSequence} can't be unwrapped to the original wrapped instance.
  *
- * @see SimpleListAdapter
- * @see SimpleArrayAdapter
+ * @see DefaultListAdapter
+ * @see DefaultArrayAdapter
  * @see TemplateSequenceModel
  */
 public class SimpleSequence extends WrappingTemplateModel implements TemplateSequenceModel, Serializable {
@@ -151,7 +153,7 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
     
     /**
      * Constructs a simple sequence that will contain the elements from the specified {@link Collection}; consider
-     * using {@link SimpleListAdapter} instead.
+     * using {@link DefaultListAdapter} instead.
      * 
      * @param collection
      *            The collection containing the initial items of this sequence. A shalow copy of this collection is made

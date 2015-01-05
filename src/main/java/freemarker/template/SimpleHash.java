@@ -30,8 +30,8 @@ import freemarker.ext.beans.BeansWrapper;
 
 /**
  * A simple implementation of the {@link TemplateHashModelEx} interface, using its own underlying {@link Map} or
- * {@link SortedMap} for storing the hash entries. If you are wrapping an already existing {@link Map}, also consider
- * using {@link SimpleMapAdapter} (see comparison below).
+ * {@link SortedMap} for storing the hash entries. If you are wrapping an already existing {@link Map}, you should
+ * certainly use {@link DefaultMapAdapter} instead (see comparison below).
  *
  * <p>
  * This class is thread-safe if you don't call modifying methods (like {@link #put(String, Object)},
@@ -40,17 +40,18 @@ import freemarker.ext.beans.BeansWrapper;
  * so it's usually not a concern.
  * 
  * <p>
- * <b>{@link SimpleHash} VS {@link SimpleMapAdapter} - Which to use when?</b>
+ * <b>{@link SimpleHash} VS {@link DefaultMapAdapter} - Which to use when?</b>
  * 
  * <p>
- * For a {@link Map} that exists regardless of FreeMarker, only you need to access it for templates,
- * {@link SimpleMapAdapter} should be the default choice, as it reflects the exact behavior of the underlying
- * {@link Map} (no surprises), and has more predictable performance (no spikes).
+ * For a {@link Map} that exists regardless of FreeMarker, only you need to access it from templates,
+ * {@link DefaultMapAdapter} should be the default choice, as it reflects the exact behavior of the underlying
+ * {@link Map} (no surprises), can be unwrapped to the originally wrapped object (important when passing it to Java
+ * methods from the template), and has more predictable performance (no spikes).
  * 
  * <p>
  * For a hash that's made specifically to be used from templates, creating an empty {@link SimpleHash} then filling it
  * with {@link SimpleHash#put(String, Object)} is usually the way to go, as the resulting hash is significantly faster
- * to read from templates than a {@link SimpleMapAdapter} (though it's somewhat slower to read from a plain Java method
+ * to read from templates than a {@link DefaultMapAdapter} (though it's somewhat slower to read from a plain Java method
  * to which it had to be passed adapted to a {@link Map}).
  * 
  * <p>
@@ -59,12 +60,12 @@ import freemarker.ext.beans.BeansWrapper;
  * {@link SimpleHash#SimpleHash(Map, ObjectWrapper)}), which will be the faster depends on how many times will the
  * <em>same</em> {@link Map} entry be read from the template(s) later, on average. If, on average, you read each entry
  * for more than 4 times, {@link SimpleHash} will be most certainly faster, but if for 2 times or less (and especially
- * if not at all) then {@link SimpleMapAdapter} will be. Before choosing based on performance though, pay attention to
- * the behavioral differences; {@link SimpleHash} will shallow-copy a the {@link Map} at construction time, so key order
- * will be lost in some cases, and it won't reflect {@link Map} content changes after the {@link SimpleHash}
- * construction.
+ * if not at all) then {@link DefaultMapAdapter} will be. Before choosing based on performance though, pay attention to
+ * the behavioral differences; {@link SimpleHash} will shallow-copy the original {@link Map} at construction time, so
+ * key order will be lost in some cases, and it won't reflect {@link Map} content changes after the {@link SimpleHash}
+ * construction, also {@link SimpleHash} can't be unwrapped to the original {@link Map} instance.
  *
- * @see SimpleMapAdapter
+ * @see DefaultMapAdapter
  * @see TemplateHashModelEx
  */
 public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx, Serializable {
@@ -112,7 +113,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
 
     /**
      * Creates a new hash by shallow-coping (possibly cloning) the underlying map; in many applications you should use
-     * {@link SimpleMapAdapter} instead.
+     * {@link DefaultMapAdapter} instead.
      *
      * @param map
      *            The Map to use for the key/value pairs. It makes a copy for internal use. If the map implements the

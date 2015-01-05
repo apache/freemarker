@@ -10,12 +10,17 @@ import freemarker.ext.util.WrapperTemplateModel;
  * {@link TemplateCollectionModel}. The resulting {@link TemplateCollectionModel} can only be iterated once.
  * 
  * <p>
- * Thread safety: This class is not thread-safe. That's because it doesn't make sense to expose an {@link Iterator} to
- * multiple template processings, since it can give back the items only once.
+ * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the array that it wraps is. Normally you only
+ * have to consider read-only access, as the FreeMarker template language doesn't allow writing these sequences (though
+ * of course, Java methods called from the template can violate this rule).
+ * 
+ * <p>
+ * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
+ * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  * 
  * @since 2.3.22
  */
-public class SimpleIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
+public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
     private final Iterator iterator;
@@ -27,11 +32,11 @@ public class SimpleIteratorAdapter extends WrappingTemplateModel implements Temp
      * @param iterator
      *            The iterator to adapt; can't be {@code null}.
      */
-    public static SimpleIteratorAdapter adapt(Iterator iterator, ObjectWrapper wrapper) {
-        return new SimpleIteratorAdapter(iterator, wrapper);
+    public static DefaultIteratorAdapter adapt(Iterator iterator, ObjectWrapper wrapper) {
+        return new DefaultIteratorAdapter(iterator, wrapper);
     }
 
-    private SimpleIteratorAdapter(Iterator iterator, ObjectWrapper wrapper) {
+    private DefaultIteratorAdapter(Iterator iterator, ObjectWrapper wrapper) {
         super(wrapper);
         this.iterator = iterator;
     }

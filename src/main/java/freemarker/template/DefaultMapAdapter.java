@@ -31,13 +31,17 @@ import freemarker.template.utility.APIObjectWrapper;
  * be used from a template, also consider using {@link SimpleHash} (see comparison there).
  * 
  * <p>
- * Thread safety: A {@link SimpleMapAdapter} is as thread-safe as the {@link Map} that it wraps is. Normally you only
+ * Thread safety: A {@link DefaultMapAdapter} is as thread-safe as the {@link Map} that it wraps is. Normally you only
  * have to consider read-only access, as the FreeMarker template language doesn't allow writing these hashes (though of
- * course, a Java methods called from the template can violate this rule).
+ * course, Java methods called from the template can violate this rule).
+ * 
+ * <p>
+ * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
+ * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  * 
  * @since 2.3.22
  */
-public class SimpleMapAdapter extends WrappingTemplateModel
+public class DefaultMapAdapter extends WrappingTemplateModel
         implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport,
         Serializable {
 
@@ -51,11 +55,11 @@ public class SimpleMapAdapter extends WrappingTemplateModel
      * @param wrapper
      *            The {@link ObjectWrapper} used to wrap the items in the array.
      */
-    public static SimpleMapAdapter adapt(Map map, APIObjectWrapper wrapper) {
-        return new SimpleMapAdapter(map, wrapper);
+    public static DefaultMapAdapter adapt(Map map, APIObjectWrapper wrapper) {
+        return new DefaultMapAdapter(map, wrapper);
     }
     
-    private SimpleMapAdapter(Map map, ObjectWrapper wrapper) {
+    private DefaultMapAdapter(Map map, ObjectWrapper wrapper) {
         super(wrapper);
         this.map = map;
     }

@@ -69,7 +69,7 @@ import freemarker.template.utility.WriteProtectable;
 
 /**
  * {@link ObjectWrapper} that is able to expose the Java API of arbitrary Java objects. This is also the superclass of
- * {@link DefaultObjectWrapper}. Note that instances of this class generally should be created with
+ * {@link DefaultObjectWrapper}. Note that instances of this class generally should be created with a
  * {@link BeansWrapperBuilder}, not with its public constructors.
  * 
  * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published

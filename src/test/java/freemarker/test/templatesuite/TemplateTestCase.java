@@ -58,7 +58,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleDate;
-import freemarker.template.SimpleNonListCollectionAdapter;
+import freemarker.template.DefaultNonListCollectionAdapter;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
@@ -355,7 +355,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
-            dataModel.put("testcollectionEx", SimpleNonListCollectionAdapter.adapt(new HashSet(), null));
+            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet(), null));
             dataModel.put("bean", new TestBean());
         }
 

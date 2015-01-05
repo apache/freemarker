@@ -13,12 +13,18 @@ import freemarker.template.utility.APIObjectWrapper;
 /**
  * <b>Experimental - subject to change:</b> Adapts a non-{@link List} Java {@link Collection} to the corresponding
  * {@link TemplateModel} interface(s), most importantly to {@link TemplateCollectionModelEx}. For {@link List}-s, use
- * {@link SimpleListAdapter}, or else you lose indexed element access.
+ * {@link DefaultListAdapter}, or else you lose indexed element access.
  * 
  * <p>
- * Thread safety: A {@link SimpleNonListCollectionAdapter} is as thread-safe as the {@link Collection} that it wraps is.
- * Normally you only have to consider read-only access, as the FreeMarker template language doesn't allow writing these
- * collections (though of course, a Java methods called from the template can violate this rule).
+ * Thread safety: A {@link DefaultNonListCollectionAdapter} is as thread-safe as the {@link Collection} that it wraps
+ * is. Normally you only have to consider read-only access, as the FreeMarker template language doesn't allow writing
+ * these collections (though of course, Java methods called from the template can violate this rule).
+ * 
+ * <p>
+ * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
+ * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher, and its
+ * {@link DefaultObjectWrapper#setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} property is
+ * {@code false}, which is still not the default as of 2.3.22 (so you have to set it explicitly).
  * 
  * <p>
  * <b>Experimental status warning:</b> This class is subject to change on non-backward compatible ways, hence, it
@@ -26,7 +32,7 @@ import freemarker.template.utility.APIObjectWrapper;
  * 
  * @since 2.3.22
  */
-public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,
+public class DefaultNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     private final Collection collection;
@@ -40,17 +46,17 @@ public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implem
      *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
-    public static SimpleNonListCollectionAdapter adapt(Collection collection, APIObjectWrapper wrapper) {
-        return new SimpleNonListCollectionAdapter(collection, wrapper);
+    public static DefaultNonListCollectionAdapter adapt(Collection collection, APIObjectWrapper wrapper) {
+        return new DefaultNonListCollectionAdapter(collection, wrapper);
     }
 
-    private SimpleNonListCollectionAdapter(Collection collection, APIObjectWrapper wrapper) {
+    private DefaultNonListCollectionAdapter(Collection collection, APIObjectWrapper wrapper) {
         super(wrapper);
         this.collection = collection;
     }
 
     public TemplateModelIterator iterator() throws TemplateModelException {
-        return new SimpleIteratorAdapter(collection.iterator());
+        return new IteratorAdapter(collection.iterator());
     }
 
     public int size() {
@@ -69,11 +75,11 @@ public class SimpleNonListCollectionAdapter extends WrappingTemplateModel implem
         return getWrappedObject();
     }
 
-    private class SimpleIteratorAdapter implements TemplateModelIterator {
+    private class IteratorAdapter implements TemplateModelIterator {
 
         private final Iterator iterator;
 
-        SimpleIteratorAdapter(Iterator iterator) {
+        IteratorAdapter(Iterator iterator) {
             this.iterator = iterator;
         }
 

@@ -18134,7 +18134,7 @@ There was no specific handler for node y
           when you want to pass it as a <literal>java.util.Locale</literal>
           object to a Java method. (The <literal>Locale</literal> object will
           be wrapped according the <literal>object_wrapper</literal> setting
-          value. Whether you can actually pass this value to a Java methods as
+          value. Whether you can actually pass this value to a Java method as
           a <literal>Locale</literal> object depends on the object wrapper,
           but an object wrapper that let you call Java methods directly is
           very unlikely to not support that.)</para>
@@ -21926,9 +21926,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   into thin <literal>TemplateModel</literal> adapters, that
                   will reach the original object for all operations. The
                   wrapped values will be instances of the new
-                  <literal>SimpleMapAdapter</literal>,
-                  <literal>SimpleListAdapter</literal> and
-                  <literal>SimpleArrayAdapter</literal> classes, instead of
+                  <literal>DefaultMapAdapter</literal>,
+                  <literal>DefaultListAdapter</literal> and
+                  <literal>DefaultArrayAdapter</literal> classes, instead of
                   the legacy (copying) <literal>SimpleHash</literal> and
                   <literal>SimpleSequence</literal> classes. (Note that many
                   projects use pure <literal>BeansWrapper</literal> instead of
@@ -22074,7 +22074,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>forceLegacyNonListCollections</literal> to
                       <literal>false</literal>. (The adapter approach is
                       implemented by
-                      <literal>SimpleNonListCollectionAdapter</literal>.)</para>
+                      <literal>DefaultNonListCollectionAdapter</literal>.)</para>
                     </listitem>
 
                     <listitem>
@@ -22116,7 +22116,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     <listitem>
                       <para>Iterators (when you put them directly into the
                       data-model) are wrapped into
-                      <literal>SimpleIteratorAdapter</literal> instead of
+                      <literal>DefaultIteratorAdapter</literal> instead of
                       <literal>SimpleCollection</literal>. This has two
                       consequences:</para>
 

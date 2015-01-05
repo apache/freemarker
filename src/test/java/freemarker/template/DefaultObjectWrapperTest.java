@@ -160,9 +160,9 @@ public class DefaultObjectWrapperTest {
                 assertEquals(simpleMapWrapper, bw.isSimpleMapWrapper());
                 assertTrue(bw.getUseAdaptersForContainers());
                 assertTrue(bw.getForceLegacyNonListCollections());
-                assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapAdapter);
-                assertTrue(bw.wrap(new ArrayList()) instanceof SimpleListAdapter);
-                assertTrue(bw.wrap(new String[] {}) instanceof SimpleArrayAdapter);
+                assertTrue(bw.wrap(new HashMap()) instanceof DefaultMapAdapter);
+                assertTrue(bw.wrap(new ArrayList()) instanceof DefaultListAdapter);
+                assertTrue(bw.wrap(new String[] {}) instanceof DefaultArrayAdapter);
                 assertTrue(bw.wrap(new HashSet()) instanceof SimpleSequence);
             }
         }
@@ -178,7 +178,7 @@ public class DefaultObjectWrapperTest {
                     bw.getIncompatibleImprovements());
             assertTrue(bw.isWriteProtected());
             assertTrue(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapAdapter);
+            assertTrue(bw.wrap(new HashMap()) instanceof DefaultMapAdapter);
         }
 
         {
@@ -261,10 +261,10 @@ public class DefaultObjectWrapperTest {
             assertSame(bw, builder.build());
             assertFalse(bw.getForceLegacyNonListCollections());
 
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleMapAdapter);
-            assertTrue(bw.wrap(new ArrayList()) instanceof SimpleListAdapter);
-            assertTrue(bw.wrap(new String[] {}) instanceof SimpleArrayAdapter);
-            assertTrue(bw.wrap(new HashSet()) instanceof SimpleNonListCollectionAdapter);
+            assertTrue(bw.wrap(new HashMap()) instanceof DefaultMapAdapter);
+            assertTrue(bw.wrap(new ArrayList()) instanceof DefaultListAdapter);
+            assertTrue(bw.wrap(new String[] {}) instanceof DefaultArrayAdapter);
+            assertTrue(bw.wrap(new HashSet()) instanceof DefaultNonListCollectionAdapter);
         }
     }
     
@@ -318,7 +318,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(Configuration.VERSION_2_3_22, ow.getIncompatibleImprovements());
             assertTrue(ow.getUseAdaptersForContainers());
             testCustomizationCommonPart(ow,
-                    SimpleMapAdapter.class, SimpleListAdapter.class, SimpleArrayAdapter.class);
+                    DefaultMapAdapter.class, DefaultListAdapter.class, DefaultArrayAdapter.class);
         }
         
         {
@@ -412,12 +412,12 @@ public class DefaultObjectWrapperTest {
                 Class.forName("freemarker.ext.beans.SequenceAdapter"),
                 "[a, b, c]");
 
-        assertRoundtrip(dow22, linkedHashMap, SimpleMapAdapter.class, LinkedHashMap.class, linkedHashMap.toString());
-        assertRoundtrip(dow22, treeMap, SimpleMapAdapter.class, TreeMap.class, treeMap.toString());
-        assertRoundtrip(dow22, gMap, SimpleMapAdapter.class, ImmutableMap.class, gMap.toString());
-        assertRoundtrip(dow22, linkedList, SimpleListAdapter.class, LinkedList.class, linkedList.toString());
-        assertRoundtrip(dow22, intArray, SimpleArrayAdapter.class, int[].class, null);
-        assertRoundtrip(dow22, stringArray, SimpleArrayAdapter.class, String[].class, null);
+        assertRoundtrip(dow22, linkedHashMap, DefaultMapAdapter.class, LinkedHashMap.class, linkedHashMap.toString());
+        assertRoundtrip(dow22, treeMap, DefaultMapAdapter.class, TreeMap.class, treeMap.toString());
+        assertRoundtrip(dow22, gMap, DefaultMapAdapter.class, ImmutableMap.class, gMap.toString());
+        assertRoundtrip(dow22, linkedList, DefaultListAdapter.class, LinkedList.class, linkedList.toString());
+        assertRoundtrip(dow22, intArray, DefaultArrayAdapter.class, int[].class, null);
+        assertRoundtrip(dow22, stringArray, DefaultArrayAdapter.class, String[].class, null);
     }
 
     @SuppressWarnings("boxing")
@@ -444,7 +444,7 @@ public class DefaultObjectWrapperTest {
             assertEquals(1, ((TemplateNumberModel) hash.get("a")).getAsNumber());
             assertNull(hash.get("b"));
             assertEquals("C", ((TemplateScalarModel) hash.get("c")).getAsString());
-            assertTrue(hash.get("d") instanceof SimpleListAdapter);
+            assertTrue(hash.get("d") instanceof DefaultListAdapter);
 
             assertCollectionTMEquals(hash.keys(), "a", "b", "c", "d");
             assertCollectionTMEquals(hash.values(), 1, null, "C", Collections.singletonList("x"));
@@ -504,14 +504,14 @@ public class DefaultObjectWrapperTest {
             testList.add(new String[] { "x" });
 
             TemplateSequenceModel seq = (TemplateSequenceModel) OW22.wrap(testList);
-            assertTrue(seq instanceof SimpleListAdapter);
+            assertTrue(seq instanceof DefaultListAdapter);
             assertFalse(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
             assertEquals(4, seq.size());
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertNull(seq.get(1));
             assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
-            assertTrue(seq.get(3) instanceof SimpleArrayAdapter);
+            assertTrue(seq.get(3) instanceof DefaultArrayAdapter);
             assertNull(seq.get(4));
             
             assertSizeThroughAPIModel(4, seq);
@@ -524,7 +524,7 @@ public class DefaultObjectWrapperTest {
             testList.add("c");
 
             TemplateSequenceModel seq = (TemplateSequenceModel) OW22.wrap(testList);
-            assertTrue(seq instanceof SimpleListAdapter);
+            assertTrue(seq instanceof DefaultListAdapter);
             assertTrue(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
             assertEquals(3, seq.size());
             assertNull(seq.get(-1));
@@ -572,7 +572,7 @@ public class DefaultObjectWrapperTest {
     }
 
     private void assertArrayAdapterClass(String adapterCompType, TemplateModel adaptedArray) {
-        assertTrue(adaptedArray instanceof SimpleArrayAdapter);
+        assertTrue(adaptedArray instanceof DefaultArrayAdapter);
         assertTrue(adaptedArray.getClass().getName()
                 .contains("$" + adapterCompType.substring(0, 1).toUpperCase() + adapterCompType.substring(1)));
     }
@@ -683,7 +683,7 @@ public class DefaultObjectWrapperTest {
             set.add("b");
             set.add("c");
             TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW22_FUTURE.wrap(set);
-            assertTrue(coll instanceof SimpleNonListCollectionAdapter);
+            assertTrue(coll instanceof DefaultNonListCollectionAdapter);
             assertEquals(3, coll.size());
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
@@ -700,7 +700,7 @@ public class DefaultObjectWrapperTest {
                 assertTrue(e.getMessage().contains("Integer"));
             }
 
-            assertRoundtrip(OW22_FUTURE, set, SimpleNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
+            assertRoundtrip(OW22_FUTURE, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
             
             assertSizeThroughAPIModel(3, coll);
         }
@@ -718,7 +718,7 @@ public class DefaultObjectWrapperTest {
             Object obj2 = OW22_FUTURE.unwrap(tm2);
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
-            assertTrue(tm1 instanceof SimpleListAdapter || tm2 instanceof SimpleListAdapter);
+            assertTrue(tm1 instanceof DefaultListAdapter || tm2 instanceof DefaultListAdapter);
 
             List similarList = new ArrayList();
             similarList.add("b");
@@ -727,7 +727,7 @@ public class DefaultObjectWrapperTest {
             assertFalse(coll.contains(OW22_FUTURE.wrap("a")));
             assertFalse(coll.contains(OW22_FUTURE.wrap(1)));
 
-            assertRoundtrip(OW22_FUTURE, set, SimpleNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
+            assertRoundtrip(OW22_FUTURE, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
                     + obj2 + "]");
         }
     }
@@ -799,7 +799,7 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testIteratorWrapping() throws TemplateModelException, ClassNotFoundException {
         testIteratorWrapping(OW0, SimpleCollection.class, Class.forName("freemarker.ext.beans.SetAdapter"));
-        testIteratorWrapping(OW22, SimpleIteratorAdapter.class, Iterator.class);
+        testIteratorWrapping(OW22, DefaultIteratorAdapter.class, Iterator.class);
     }
 
     private void testIteratorWrapping(DefaultObjectWrapper ow, Class<?> expectedTMClass, Class<?> expectedPOJOClass)

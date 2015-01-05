@@ -20,9 +20,9 @@ public class SimpleObjectWrapperTest {
         {
             SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_2_3_22);
             testCustomizationCommonPart(ow);
-            assertTrue(ow.wrap(Collections.emptyMap()) instanceof SimpleMapAdapter);
-            assertTrue(ow.wrap(Collections.emptyList()) instanceof SimpleListAdapter);
-            assertTrue(ow.wrap(new boolean[] { }) instanceof SimpleArrayAdapter);
+            assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
+            assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
+            assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
             assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);  // at least until IcI 2.4
         }
         

@@ -48,6 +48,7 @@ import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.log.Logger;
 import freemarker.template.AdapterTemplateModel;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
@@ -60,6 +61,11 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * A base class for wrapping a W3C DOM Node as a FreeMarker template model.
+ * 
+ * <p>
+ * Note that {@link DefaultObjectWrapper} automatically wraps W3C DOM {@link Node}-s into this, so you may not need to
+ * do that with this class manually. Though, before dropping the {@link Node}-s into the data-model, you may want to
+ * apply {@link NodeModel#simplify(Node)} on them.
  */
 abstract public class NodeModel
 implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,

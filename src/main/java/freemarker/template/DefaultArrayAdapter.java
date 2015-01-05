@@ -9,14 +9,23 @@ import freemarker.ext.util.WrapperTemplateModel;
  * Adapts an {@code array} of a non-primitive elements to the corresponding {@link TemplateModel} interface(s), most
  * importantly to {@link TemplateHashModelEx}. If you aren't wrapping an already existing {@code array}, but build a
  * sequence specifically to be used from a template, also consider using {@link SimpleSequence} (see comparison there).
+ *
+ * <p>
+ * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the array that it wraps is. Normally you only
+ * have to consider read-only access, as the FreeMarker template language doesn't allow writing these sequences (though
+ * of course, Java methods called from the template can violate this rule).
+ * 
+ * <p>
+ * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
+ * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  * 
  * @see SimpleSequence
- * @see SimpleListAdapter
+ * @see DefaultListAdapter
  * @see TemplateSequenceModel
  * 
  * @since 2.3.22
  */
-public abstract class SimpleArrayAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+public abstract class DefaultArrayAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
     /**
@@ -28,7 +37,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
      *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
-    public static SimpleArrayAdapter adapt(Object array, ObjectWrapperAndUnwrapper wrapper) {
+    public static DefaultArrayAdapter adapt(Object array, ObjectWrapperAndUnwrapper wrapper) {
         final Class componentType = array.getClass().getComponentType();
         if (componentType == null) {
             throw new IllegalArgumentException("Not an array");
@@ -65,7 +74,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
         }
     }
 
-    private SimpleArrayAdapter(ObjectWrapper wrapper) {
+    private DefaultArrayAdapter(ObjectWrapper wrapper) {
         super(wrapper);
     }
 
@@ -73,7 +82,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
         return getWrappedObject();
     }
 
-    private static class ObjectArrayAdapter extends SimpleArrayAdapter {
+    private static class ObjectArrayAdapter extends DefaultArrayAdapter {
 
         private final Object[] array;
 
@@ -96,7 +105,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class ByteArrayAdapter extends SimpleArrayAdapter {
+    private static class ByteArrayAdapter extends DefaultArrayAdapter {
 
         private final byte[] array;
 
@@ -120,7 +129,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class ShortArrayAdapter extends SimpleArrayAdapter {
+    private static class ShortArrayAdapter extends DefaultArrayAdapter {
 
         private final short[] array;
 
@@ -144,7 +153,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class IntArrayAdapter extends SimpleArrayAdapter {
+    private static class IntArrayAdapter extends DefaultArrayAdapter {
 
         private final int[] array;
 
@@ -168,7 +177,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class LongArrayAdapter extends SimpleArrayAdapter {
+    private static class LongArrayAdapter extends DefaultArrayAdapter {
 
         private final long[] array;
 
@@ -192,7 +201,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class FloatArrayAdapter extends SimpleArrayAdapter {
+    private static class FloatArrayAdapter extends DefaultArrayAdapter {
 
         private final float[] array;
 
@@ -216,7 +225,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class DoubleArrayAdapter extends SimpleArrayAdapter {
+    private static class DoubleArrayAdapter extends DefaultArrayAdapter {
 
         private final double[] array;
 
@@ -240,7 +249,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class CharArrayAdapter extends SimpleArrayAdapter {
+    private static class CharArrayAdapter extends DefaultArrayAdapter {
 
         private final char[] array;
 
@@ -264,7 +273,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
 
     }
 
-    private static class BooleanArrayAdapter extends SimpleArrayAdapter {
+    private static class BooleanArrayAdapter extends DefaultArrayAdapter {
 
         private final boolean[] array;
 
@@ -291,7 +300,7 @@ public abstract class SimpleArrayAdapter extends WrappingTemplateModel implement
     /**
      * Much slower than the specialized versions; used only as the last resort.
      */
-    private static class GenericPrimitiveArrayAdapter extends SimpleArrayAdapter {
+    private static class GenericPrimitiveArrayAdapter extends DefaultArrayAdapter {
 
         private final Object array;
         private final int length;
