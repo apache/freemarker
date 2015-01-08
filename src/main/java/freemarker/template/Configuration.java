@@ -209,12 +209,14 @@ public class Configuration extends Configurable implements Cloneable {
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
-    private boolean templateLoaderWasSet;
-
-    private boolean objectWrapperWasSet;
+    
+    private boolean templateLoaderExplicitlySet;
+    private boolean objectWrapperExplicitlySet;
+    private boolean templateExceptionHandlerExplicitlySet;
+    private boolean logTemplateExceptionsExplicitlySet;
     
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
-    
+
     /**
      * Needed so that it doesn't mater in what order do you call {@link #setSharedVaribles(Map)}
      * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
@@ -636,9 +638,18 @@ public class Configuration extends Configurable implements Cloneable {
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
                 recreateTemplateCacheWith(templateLoader, cache.getCacheStorage());
-                templateLoaderWasSet = true;
             }
+            templateLoaderExplicitlySet = true;
         }
+    }
+    
+    /**
+     * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateLoaderExplicitlySet() {
+        return templateLoaderExplicitlySet;
     }
 
     /**
@@ -780,7 +791,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         ObjectWrapper prevObjectWrapper = getObjectWrapper();
         super.setObjectWrapper(objectWrapper);
-        objectWrapperWasSet = true;
+        objectWrapperExplicitlySet = true;
         if (objectWrapper != prevObjectWrapper) {
             try {
                 setSharedVariablesFromRewrappableSharedVariables();
@@ -790,6 +801,44 @@ public class Configuration extends Configurable implements Cloneable {
                         e);
             }
         }
+    }
+    
+    /**
+     * Tells if {@link #setObjectWrapper(ObjectWrapper)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isObjectWrapperExplicitlySet() {
+        return objectWrapperExplicitlySet;
+    }
+    
+    public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
+        super.setTemplateExceptionHandler(templateExceptionHandler);
+        templateExceptionHandlerExplicitlySet = true;
+    }
+
+    /**
+     * Tells if {@link #setTemplateExceptionHandler(TemplateExceptionHandler)} (or equivalent) was already called on
+     * this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateExceptionHandlerExplicitlySet() {
+        return templateExceptionHandlerExplicitlySet;
+    }    
+    
+    public void setLogTemplateExceptions(boolean value) {
+        super.setLogTemplateExceptions(value);
+        logTemplateExceptionsExplicitlySet = true;
+    }
+
+    /**
+     * Tells if {@link #setLogTemplateExceptions(boolean)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isLogTemplateExceptionsExplicitlySet() {
+        return logTemplateExceptionsExplicitlySet;
     }
 
     /**
@@ -820,10 +869,10 @@ public class Configuration extends Configurable implements Cloneable {
                 = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
         this.incompatibleImprovements = incompatibleImprovements;
         if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
-            if (!templateLoaderWasSet) {
+            if (!templateLoaderExplicitlySet) {
                 recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
             }
-            if (!objectWrapperWasSet) {
+            if (!objectWrapperExplicitlySet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
                 super.setObjectWrapper(getDefaultObjectWrapper(incompatibleImprovements));
             }
@@ -1047,7 +1096,7 @@ public class Configuration extends Configurable implements Cloneable {
                 }
                 msg += tlDesc + ".";
                 
-                if (!templateLoaderWasSet) {
+                if (!templateLoaderExplicitlySet) {
                     msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
                             + "default value, which is most certainly not intended and the cause of this problem."; 
                 }

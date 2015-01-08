@@ -22420,6 +22420,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Bug fixed: Defaults set in an overidden
+                  <literal>FreemarkerServlet.createConfiguration</literal>
+                  won't be accidentally overwritten by
+                  <literal>FreemarkerServlet</literal>'s factory defaults
+                  anymore. This was a problem with theses settings only:
+                  <literal>template_exception_handler</literal>,
+                  <literal>log_template_exceptions</literal>,
+                  <literal>object_wrapper</literal>,
+                  <literal>template_loader</literal>.</para>
+                </listitem>
+
+                <listitem>
                   <para>Removed all the <literal>xsd</literal> files
                   (<literal>web-app</literal> and <literal>taglib</literal>
                   schemas) from the FreeMarker artifact and from the XML

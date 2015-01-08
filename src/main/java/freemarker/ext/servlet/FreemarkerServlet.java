@@ -399,8 +399,9 @@ public class FreemarkerServlet extends HttpServlet
 
     /**
      * Don't override this method to adjust FreeMarker settings! Override the protected methods for that, such as
-     * {@link #createTemplateLoader(String)}, {@link #createObjectWrapper()}. Also note that lot of things can be
-     * changed with init-params instead of overriding methods.
+     * {@link #createConfiguration()}, {@link #createTemplateLoader(String)}, {@link #createDefaultObjectWrapper()},
+     * etc. Also note that lot of things can be changed with init-params instead of overriding methods, so if you
+     * override settings, usually you should only override their defaults.
      */
     public void init() throws ServletException {
         try {
@@ -426,9 +427,14 @@ public class FreemarkerServlet extends HttpServlet
             }
         }
         
-        // Set FreeMarker-specfici defaults:
-        config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        config.setLogTemplateExceptions(false);
+        // Set FreemarkerServlet-specific defaults, except where createConfiguration() has already set them:
+        if (!config.isTemplateExceptionHandlerExplicitlySet()) {
+            config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        }
+        if (!config.isLogTemplateExceptionsExplicitlySet()) {
+            config.setLogTemplateExceptions(false);
+        }
+        
         contentType = DEFAULT_CONTENT_TYPE;
         
         // Process object_wrapper init-param out of order: 
@@ -440,12 +446,15 @@ public class FreemarkerServlet extends HttpServlet
         
         // Process TemplatePath init-param out of order:
         templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
-        if (templatePath == null)
+        if (templatePath == null && !config.isTemplateLoaderExplicitlySet()) {
             templatePath = "class://";
-        try {
-            config.setTemplateLoader(createTemplateLoader(templatePath));
-        } catch (Exception e) {
-            throw new InitParamValueException(INIT_PARAM_TEMPLATE_PATH, templatePath, e);
+        }
+        if (templatePath != null) {
+            try {
+                config.setTemplateLoader(createTemplateLoader(templatePath));
+            } catch (Exception e) {
+                throw new InitParamValueException(INIT_PARAM_TEMPLATE_PATH, templatePath, e);
+            }
         }
 
         // Process all other init-params:
@@ -460,7 +469,7 @@ public class FreemarkerServlet extends HttpServlet
             }
             if (value == null) {
                 throw new MalformedWebXmlException(
-                        "init-param " + StringUtil.jQuote(value) + " without param-value. "
+                        "init-param " + StringUtil.jQuote(name) + " without param-value. "
                         + "Maybe the web.xml is not well-formed?");
             }
             
@@ -967,16 +976,30 @@ public class FreemarkerServlet extends HttpServlet
     }
 
     /**
-     * This method is called from {@link #init()} to create the
-     * FreeMarker configuration object that this servlet will use
-     * for template loading. This is a hook that allows you
-     * to custom-configure the configuration object in a subclass.
-     * The default implementation returns a new {@link Configuration}
-     * instance.
+     * Creates the FreeMarker {@link Configuration} singleton and (when overidden) maybe sets its defaults. Servlet
+     * init-params will be applied later, and thus can overwrite the settings specified here.
+     * 
+     * <p>
+     * By overriding this method you can set your preferred {@link Configuration} setting defaults, as only the settings
+     * for which an init-param was specified will be overwritten later. (Note that {@link FreemarkerServlet} also has
+     * its own defaults for a few settings, but since 2.3.22, the servlet detects if those settings were already set
+     * here and then it won't overwrite them.)
+     * 
+     * <p>
+     * The default implementation simply creates a new instance with {@link Configuration#Configuration()} and returns
+     * it.
      */
     protected Configuration createConfiguration() {
         // We can only set incompatible_improvements later, so ignore the deprecation warning here.
         return new Configuration();
+    }
+    
+    /**
+     * Sets the defaults of the configuration that are specific to the {@link FreemarkerServlet} subclass.
+     * This is called after the common (wired in) {@link FreemarkerServlet} setting defaults was set, also the 
+     */
+    protected void setConfigurationDefaults() {
+        // do nothing
     }
     
     /**
@@ -1027,7 +1050,11 @@ public class FreemarkerServlet extends HttpServlet
         } else {
             wrapper = getInitParameter(Configurable.OBJECT_WRAPPER_KEY);
             if (wrapper == null) {
-                return createDefaultObjectWrapper();
+                if (!config.isObjectWrapperExplicitlySet()) {
+                    return createDefaultObjectWrapper();
+                } else {
+                    return config.getObjectWrapper();
+                }
             } else {
                 try {
                     config.setSetting(Configurable.OBJECT_WRAPPER_KEY, wrapper);
@@ -1043,7 +1070,8 @@ public class FreemarkerServlet extends HttpServlet
      * Override this to specify what the default {@link ObjectWrapper} will be when the
      * {@code object_wrapper} Servlet init-param wasn't specified. Note that this is called by
      * {@link #createConfiguration()}, and so if that was also overidden but improperly then this method might won't be
-     * ever called.
+     * ever called. Also note that if you set the {@code object_wrapper} in {@link #createConfiguration()}, then this
+     * won't be called, since then that has already specified the default.
      * 
      * <p>
      * The default implementation calls {@link Configuration#getDefaultObjectWrapper(freemarker.template.Version)}. You
@@ -1064,6 +1092,9 @@ public class FreemarkerServlet extends HttpServlet
         return wrapper;
     }
     
+    /**
+     * {@code null} if the {@code template_loader} setting was set in a custom {@link #createConfiguration()}. 
+     */
     protected final String getTemplatePath() {
         return templatePath;
     }
