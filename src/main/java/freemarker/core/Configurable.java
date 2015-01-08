@@ -94,6 +94,8 @@ public class Configurable
     public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
     /** @since 2.3.22 */
     public static final String API_BUILTIN_ENABLED_KEY = "api_builtin_enabled";
+    /** @since 2.3.22 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = "log_template_exceptions";
 
     private Configurable parent;
     private Properties properties;
@@ -122,6 +124,7 @@ public class Configurable
     private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
+    private Boolean logTemplateExceptions;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -155,6 +158,8 @@ public class Configurable
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         showErrorTips = Boolean.TRUE;
+        apiBuiltinEnabled = Boolean.FALSE;
+        logTemplateExceptions = Boolean.TRUE;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         
@@ -925,6 +930,32 @@ public class Configurable
         return apiBuiltinEnabled != null 
                 ? apiBuiltinEnabled.booleanValue()
                 : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    }
+    
+    /**
+     * Specifies if {@link TemplateException}-s thrown by template processing are logged by FreeMarker or not. The
+     * default is {@code true} for backward compatibility, but that results in logging the exception twice in properly
+     * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
+     * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
+     * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
+     * caught by {@code #attempt}/{@code #recover}; those are always logged, no mater what.
+     * 
+     * @since 2.3.22
+     */
+    public void setLogTemplateExceptions(boolean value) {
+        logTemplateExceptions = Boolean.valueOf(value);
+        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, String.valueOf(value));
+    }
+
+    /**
+     * See {@link #setLogTemplateExceptions(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public boolean getLogTemplateExceptions() {
+        return logTemplateExceptions != null 
+                ? logTemplateExceptions.booleanValue()
+                : (parent != null ? parent.getLogTemplateExceptions() : true);
     }
     
     private static final String ALLOWED_CLASSES = "allowed_classes";

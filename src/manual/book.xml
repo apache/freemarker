@@ -22466,6 +22466,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Generally improved implementation quality (more info
                   printed when something fails, etc.).</para>
                 </listitem>
+
+                <listitem>
+                  <para>New configuration setting:
+                  <literal>log_template_exceptions</literal>
+                  (<literal>Configuration.setLogTemplateExceptions(boolean)</literal>).
+                  This specifies if <literal>TemplateException</literal>-s
+                  thrown by template processing are logged by FreeMarker or
+                  not. The default is <literal>true</literal> for backward
+                  compatibility, but that results in logging the exception
+                  twice in properly written applications, because there the
+                  <literal>TemplateException</literal> thrown by the public
+                  FreeMarker API is also logged by the caller (even if only as
+                  the cause exception of a higher level exception). Hence, in
+                  modern applications it should be set to
+                  <literal>false</literal>. (Note that this setting has no
+                  effect on the logging of exceptions caught by
+                  <literal>#attempt</literal>/<literal>#recover</literal>;
+                  those are always logged.)</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
