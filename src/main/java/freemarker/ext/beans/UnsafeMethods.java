@@ -56,7 +56,7 @@ class UnsafeMethods {
                 {
                     in.close();
                 }
-                Set set = new HashSet(props.size() * 4/3, .75f);
+                Set set = new HashSet(props.size() * 4/3, 1f);
                 Map primClasses = createPrimitiveClassesMap();
                 for (Iterator iterator = props.keySet().iterator(); iterator.hasNext();)
                 {

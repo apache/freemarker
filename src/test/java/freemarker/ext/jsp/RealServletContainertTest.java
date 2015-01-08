@@ -1,5 +1,7 @@
 package freemarker.ext.jsp;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     private static final String WEBAPP_BASIC = "basic";
     private static final String WEBAPP_EL_FUNCTIONS = "elFunctions";
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";
+    private static final String WEBAPP_ERRORS = "errors";
 
     @Test
     public void basicTrivial() throws Exception {
@@ -154,6 +157,45 @@ public class RealServletContainertTest extends WebAppTestCase {
         assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "subdir/test-rel.txt", "tester?view=subdir/test-rel.ftl");
     }
     
+    @Test
+    public void errorStatusCodes() throws Exception {
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-runtime.ftl&viewServlet=freemarker-default-prod"));
+        
+        /*
+        assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS, "missing.jsp"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-runtime.jsp"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-parsetime.jsp"));
+        
+        assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=not-failing.ftl&viewServlet=freemarker-default-dev"));
+        assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=missing.ftl&viewServlet=freemarker-default-dev"));
+        assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-runtime.ftl&viewServlet=freemarker-default-dev"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-default-dev"));
+        
+        assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=not-failing.ftl&viewServlet=freemarker-default-prod"));
+        assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=missing.ftl&viewServlet=freemarker-default-prod"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-runtime.ftl&viewServlet=freemarker-default-prod"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-default-prod"));
+        
+        assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=not-failing.ftl&viewServlet=freemarker-future-prod"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=missing.ftl&viewServlet=freemarker-future-prod"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-runtime.ftl&viewServlet=freemarker-future-prod"));
+        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
+                "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-future-prod"));
+                */
+    }
+
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {
 
         public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {

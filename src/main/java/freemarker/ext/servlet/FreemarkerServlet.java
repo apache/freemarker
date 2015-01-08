@@ -59,12 +59,15 @@ import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
 /**
- * <p>
- * This is a general-purpose FreeMarker view servlet.
- * </p>
+ * FreeMarker MVC View servlet that can be used similarly to JSP views. That is, you put the variables to expose into
+ * HTTP servlet request attributes, then forward to an FTL file (instead of to a JSP file) that's mapped to this servet
+ * (usually via the {@code <url-pattern>*.ftl<url-pattern>}). See web.xml example (and more) in the FreeMarker Manual!
+ * 
  * 
  * <p>
- * The main features are:
+ * <b>Main features</b>
+ * </p>
+ *
  * 
  * <ul>
  * 
@@ -80,26 +83,22 @@ import freemarker.template.utility.StringUtil;
  * <code>&lt;#assign dt=JspTaglibs["http://displaytag.sf.net"]&gt;</code> or
  * <code>&lt;#assign tiles=JspTaglibs["/WEB-INF/struts-tiles.tld"]&gt;</code>.
  * 
- * <li>A custom directive named <code>include_page</code> allows you to include the output of another servlet resource
- * from your servlet container, just as if you used <code>ServletRequest.getRequestDispatcher(path).include()</code>:<br>
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp"/&gt;</code>. You can also pass parameters to the newly included
- * page by passing a hash named 'params':
- * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"}/&gt;</code>. By default, the request
+ * <li>A custom directive named {@code include_page} allows you to include the output of another servlet resource from
+ * your servlet container, just as if you used {@code ServletRequest.getRequestDispatcher(path).include()}:
+ * {@code <@include_page path="/myWebapp/somePage.jsp"/>}. You can also pass parameters to the newly included page by
+ * passing a hash named {@code params}:
+ * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params= lang: "en", q="5"}/&gt;</code>. By default, the request
  * parameters of the original request (the one being processed by FreemarkerServlet) are also inherited by the include.
- * You can explicitly control this inheritance using the 'inherit_params' parameter:
+ * You can explicitly control this inheritance using the {@code inherit_params} parameter:
  * <code>&lt;@include_page path="/myWebapp/somePage.jsp" params={lang: "en", q="5"} inherit_params=false/&gt;</code>.
+ * 
  * </ul>
  * 
- * <p>
- * The servlet will rethrow the errors occurring during template processing, wrapped into <code>ServletException</code>,
- * except if the class name of the class set by the <code>template_exception_handler</code> contains the substring
- * <code>"Debug"</code>. If it contains <code>"Debug"</code>, then it is assumed that the template exception handler
- * prints the error message to the page, thus <code>FreemarkerServlet</code> will suppress the exception, and logs the
- * problem with the servlet logger (<code>javax.servlet.GenericServlet.log(...)</code>).
  * 
  * <p>
- * <b>Supported init-params are:</b>
+ * <b>Supported {@code init-param}-s</b>
  * </p>
+ * 
  * 
  * <ul>
  * 
@@ -129,6 +128,13 @@ import freemarker.template.utility.StringUtil;
  * allow changing the buffer size, it will silently do nothing. If this init param isn't specified, then the buffer size
  * is not set by {@link FreemarkerServlet} in the HTTP response, which usually means that the default buffer size of the
  * servlet container will be used.</li>
+ *
+ * <li><strong>{@value #INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE}</strong> (since 2.3.22): If {@code false} (default,
+ * but not recommended), if a template is requested that's missing, this servlet responses with a HTTP 404 "Not found"
+ * error, and only logs the problem with debug level. If {@code true} (recommended), the servlet will log the issue with
+ * error level, then throws an exception that bubbles up to the servlet container, which usually then creates a HTTP 500
+ * "Internal server error" response (and maybe logs the event into the container log). See "Error handling" later for
+ * more!</li>
  * 
  * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items which
  * are either: {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, {@value #META_INF_TLD_LOCATION_CLASSPATH}
@@ -152,19 +158,78 @@ import freemarker.template.utility.StringUtil;
  * init-param and the system property exists, the items listed in system property will be added after those specified by
  * the init-param.</li>
  * 
+ * <li><strong>"Debug"</strong>: Deprecated, has no effect since 2.3.22. (Earlier it has enabled/disabled sending
+ * debug-level log messages to the servlet container log, but this servlet doesn't log debug level messages into the
+ * servlet container log anymore, only into the FreeMarker log.)</li>
+ * 
  * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
  * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}.
  * Instead, use init-params with the setting names documented at {@link Configuration#setSetting(String, String)}, such
  * as {@code object_wrapper}.
  * 
- * <li>Any other init-params will be interpreted as {@link Configuration}-level setting. See the possible names and
- * values at {@link Configuration#setSetting(String, String)}.</li>
+ * <li><strong>Any other init-params</strong> will be interpreted as {@link Configuration}-level FreeMarker setting. See
+ * the possible names and values at {@link Configuration#setSetting(String, String)}.</li>
+ * 
+ * </ul>
+ * 
+ * 
+ * <p>
+ * <b>Error handling</b>
+ * </p>
+ * 
+ * 
+ * <p>
+ * Notes:
+ * </p>
+ * 
+ * <ul>
+ *
+ * <li>Logging below, where not said otherwise, always refers to logging with FreeMarker's logging facility (see
+ * {@link Logger}), under the "freemarker.servlet" category.</li>
+ * <li>Throwing a {@link ServletException} to the servlet container is mentioned at a few places below. That in practice
+ * usually means HTTP 500 "Internal server error" response, and maybe a log entry in the servlet container's log.</li>
+ * </ul>
+ *
+ * <p>
+ * Errors types:
+ * </p>
+ * 
+ * <ul>
+ * 
+ * <li>If the servlet initialization fails, the servlet won't be started as usual. The cause is usually logged with
+ * error level. When it isn't, check the servlet container's log.
+ * 
+ * <li>If the requested template doesn't exist, by default the servlet returns a HTTP 404 "Not found" response, and logs
+ * the problem with <em>debug</em> level. Responding with HTTP 404 is how JSP behaves, but it's actually not a
+ * recommended setting anymore. By setting {@value #INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE} init-param to {@code true}
+ * (recommended), it will instead log the problem with error level, then the servlet throws {@link ServletException} to
+ * the servlet container (with the proper cause exception). After all, if the visited URL had an associated "action" but
+ * the template behind it is missing, that's an internal server error, not a wrong URL.</li>
+ * 
+ * <li>
+ * If the template contains parsing errors, it will log it with error level, then the servlet throws
+ * {@link ServletException} to the servlet container (with the proper cause exception).</li>
+ * 
+ * <li>
+ * If the template throws exception during its execution, and the value of the {@code template_exception_handler}
+ * init-param is {@code rethrow} (recommended), it will log it with error level, then the servlet throws
+ * {@link ServletException} to the servlet container (with the proper cause exception). If, however, the
+ * {@code template_exception_handler} init-param is {@code html_debug}, then as that template exception handler prints
+ * the error message to the page, no exception will be thrown (so that the page buffer is not discarded), and the error
+ * is logged with error level, and then for backward compatibility it's logged again into the servlet container's log.
+ * For production, only the first approach ({@code rethrow}) fits, so you should set the
+ * {@code template_exception_handler} init-param to {@code rethrow}! {@code html_debug} is for template development
+ * only. When the value of the {@code template_exception_handler} setting is neither {@code rethrow} nor
+ * {@code html_debug}, the servlet will check the name of the {@link TemplateExceptionHandler} object in use, and if
+ * that contains the substring "Debug", then it behaves as with {@code html_debug}, otherwise it behaves as with
+ * {@code rethrow}.
  * 
  * </ul>
  */
 public class FreemarkerServlet extends HttpServlet
 {
     private static final Logger LOG = Logger.getLogger("freemarker.servlet");
+    private static final Logger LOG_RT = Logger.getLogger("freemarker.runtime");
     
     public static final long serialVersionUID = -2440216393145762479L;
 
@@ -205,6 +270,13 @@ public class FreemarkerServlet extends HttpServlet
      * @since 2.3.22
      */
     public static final String INIT_PARAM_META_INF_TLD_LOCATIONS = "MetaInfTldSources";
+
+    /**
+     * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
+     * 
+     * @since 2.3.22
+     */
+    public static final String INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE = "ExceptionOnMissingTemplate";
     
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
@@ -308,7 +380,14 @@ public class FreemarkerServlet extends HttpServlet
     private String templatePath;
     private boolean nocache;
     private Integer bufferSize;
+    private boolean exceptionOnMissingTemplate;
+    
+    /**
+     * @deprecated Not used anymore; to enable/disable debug logging, just set the logging level of the logging library
+     *             used by {@link Logger}.
+     */
     protected boolean debug;
+    
     private Configuration config;
     private ObjectWrapper wrapper;
     private String contentType;
@@ -347,8 +426,9 @@ public class FreemarkerServlet extends HttpServlet
             }
         }
         
-        // Set defaults:
+        // Set FreeMarker-specfici defaults:
         config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        config.setLogTemplateExceptions(false);
         contentType = DEFAULT_CONTENT_TYPE;
         
         // Process object_wrapper init-param out of order: 
@@ -437,6 +517,8 @@ public class FreemarkerServlet extends HttpServlet
                     debug = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
                     contentType = value;
+                } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
+                    exceptionOnMissingTemplate = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
                     metaInfTldSources = parseAsMetaInfTldLocations(value);
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {;
@@ -560,39 +642,48 @@ public class FreemarkerServlet extends HttpServlet
             }
         }
 
-        String path = requestUrlToTemplatePath(request);
+        String templatePath = requestUrlToTemplatePath(request);
 
-        if (debug) {
-            log("Requested template: " + StringUtil.jQuoteNoXSS(path));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Requested template " + StringUtil.jQuoteNoXSS(templatePath) + ".");
         }
 
-        Template template = null;
+        final Locale locale = deduceLocale(templatePath, request, response);
+        
+        final Template template;
         try {
-            template = config.getTemplate(
-                    path,
-                    deduceLocale(path, request, response));
+            template = config.getTemplate(templatePath, locale);
         } catch (FileNotFoundException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Template not found: " + path, e);
+            if (exceptionOnMissingTemplate) {
+                throw newServletExceptionWithFreeMarkerLogging(
+                        "Template not found for name " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Responding HTTP 404 \"Not found\" for missing template "
+                            + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+                }
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
             }
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
+        } catch (freemarker.core.ParseException e) {
+            throw newServletExceptionWithFreeMarkerLogging(
+                    "Parsing error with template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+        } catch (Exception e) {
+            throw newServletExceptionWithFreeMarkerLogging(
+                    "Unexpected error when loading template " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
         }
         
         Object attrContentType = template.getCustomAttribute("content_type");
         if(attrContentType != null) {
             response.setContentType(attrContentType.toString());
-        }
-        else {
+        } else {
             if (noCharsetInContentType) {
-                response.setContentType(
-                        contentType + "; charset=" + template.getEncoding());
+                response.setContentType(contentType + "; charset=" + template.getEncoding());
             } else {
                 response.setContentType(contentType);
             }
         }
 
-        // Set cache policy
         setBrowserCachingPolicy(response);
 
         ServletContext servletContext = getServletContext();
@@ -611,25 +702,36 @@ public class FreemarkerServlet extends HttpServlet
                     postTemplateProcess(request, response, template, model);
                 }
             }
-        } catch (TemplateException te) {
-            if (config.getTemplateExceptionHandler()
-                        .getClass().getName().indexOf("Debug") != -1) {
-                this.log("Error executing FreeMarker template", te);
+        } catch (TemplateException e) {
+            final String message = "Error executing FreeMarker template";
+            if (config.getTemplateExceptionHandler().getClass().getName().indexOf("Debug") != -1) {
+                LOG.error(message, e);
+                log(message, e);  // for backward compatibility
             } else {
-                ServletException e = new ServletException(
-                        "Error executing FreeMarker template", te);
-                try {
-                    // Prior to Servlet 2.5, the cause exception wasn't set by the above constructor.
-                    // If we are on 2.5+ then this will throw an exception as the cause was already set.
-                    e.initCause(te);
-                } catch (Exception ex) {
-                    // Ignored; see above
-                }
-                throw e;
+                throw newServletExceptionWithFreeMarkerLogging(message, e);
             }
         }
     }
 
+    private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
+        if (cause instanceof TemplateException) {
+            // For backward compatibility, we log into the same category as Environment did.
+            LOG_RT.error(message, cause);
+        } else {
+            LOG.error(message, cause);
+        }
+
+        ServletException e = new ServletException(message, cause);
+        try {
+            // Prior to Servlet 2.5, the cause exception wasn't set by the above constructor.
+            // If we are on 2.5+ then this will throw an exception as the cause was already set.
+            e.initCause(cause);
+        } catch (Exception ex) {
+            // Ignored; see above
+        }
+        throw e;
+    }
+    
     private void logWarnOnObjectWrapperMismatch() {
         // Deliberately uses double check locking.
         if (wrapper != config.getObjectWrapper() && !objectWrapperMismatchWarnLogged && LOG.isWarnEnabled()) {
@@ -887,7 +989,7 @@ public class FreemarkerServlet extends HttpServlet
      * value, fall back to the super method.
      * 
      * <p>
-     * The default implementation interprets the {@value Configurable#OBJECT_WRAPPER_KEY} servlet init-param with
+     * The default implementation interprets the {@code object_wrapper} servlet init-param with
      * calling {@link Configurable#setSetting(String, String)} (see valid values there), or if there's no such servlet
      * init-param, then it calls {@link #createDefaultObjectWrapper()}.
      * 
@@ -939,7 +1041,7 @@ public class FreemarkerServlet extends HttpServlet
 
     /**
      * Override this to specify what the default {@link ObjectWrapper} will be when the
-     * {@value Configurable#OBJECT_WRAPPER_KEY} Servlet init-param wasn't specified. Note that this is called by
+     * {@code object_wrapper} Servlet init-param wasn't specified. Note that this is called by
      * {@link #createConfiguration()}, and so if that was also overidden but improperly then this method might won't be
      * ever called.
      * 
@@ -1081,7 +1183,7 @@ public class FreemarkerServlet extends HttpServlet
             res.setHeader("Expires", EXPIRATION_DATE);
         }
     }
-
+    
     private List/*<String>*/ parseCommaSeparatedList(String value) throws ParseException {
         List/*<String>*/ valuesList = new ArrayList();
         String[] values = StringUtil.split(value, ',');

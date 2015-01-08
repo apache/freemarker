@@ -137,18 +137,18 @@
 		<url-pattern>*.ftl</url-pattern>
 	</servlet-mapping>
 
-	<!-- Prevent the visiting of MVC Views from outside the servlet container. 
-		RequestDispatcher.forward/include should and will still work. Removing this 
-		may open security holes! -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>FreeMarker MVC Views</web-resource-name>
-			<url-pattern>*.ftl</url-pattern>
-			<url-pattern>*.jsp</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<!-- Nobody is allowed to visit these -->
-		</auth-constraint>
-	</security-constraint>
+    <!-- Prevent the visiting of MVC Views from outside the servlet container. 
+        RequestDispatcher.forward/include should and will still work. Removing this 
+        may open security holes! -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>FreeMarker MVC Views</web-resource-name>
+            <url-pattern>*.ftl</url-pattern>
+            <url-pattern>*.jsp</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- Nobody is allowed to visit these -->
+        </auth-constraint>
+    </security-constraint>
 
 </web-app>

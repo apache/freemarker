@@ -59,8 +59,23 @@ public class WebAppTestCase {
         server.stop();
         server.join(); // TODO redundant?
     }
-    
+
     protected final String getResponseContent(String webAppName, String webAppRelURL) throws Exception {
+        HTTPResponse resp = getHTTPResponse(webAppName, webAppRelURL);
+        if (resp.getStatusCode() != HttpURLConnection.HTTP_OK) {
+            fail("Expected HTTP status " + HttpURLConnection.HTTP_OK + ", but got "
+                    + resp.getStatusCode() + " (message: " + resp.getStatusMessage() + ") for URI "
+                    + resp.getURI());
+        }
+        return resp.getContent();
+    }
+
+    protected final int getResponseStatusCode(String webAppName, String webAppRelURL) throws Exception {
+        HTTPResponse resp = getHTTPResponse(webAppName, webAppRelURL);
+        return resp.getStatusCode();
+    }
+    
+    protected final HTTPResponse getHTTPResponse(String webAppName, String webAppRelURL) throws Exception {
         if (webAppName.startsWith("/") || webAppName.endsWith("/")) {
             throw new IllegalArgumentException("\"webAppName\" can't start or end with \"/\": " + webAppName);
         }
@@ -77,20 +92,25 @@ public class WebAppTestCase {
         httpCon.connect();
         try {
             LOG.debug("HTTP GET: {}", uri);
+
+            final int responseCode = httpCon.getResponseCode();
             
-            final int httpStatusCode = httpCon.getResponseCode();
-            if (httpStatusCode != HttpURLConnection.HTTP_OK) {
-                fail("Expected HTTP status " + HttpURLConnection.HTTP_OK + ", but got "
-                        + httpStatusCode + " (message: " + httpCon.getResponseMessage() + ") for URI "
-                        + uri);
+            final String content;
+            if (responseCode == 200) {
+                InputStream in = httpCon.getInputStream();
+                try {
+                    content = IOUtils.toString(in, "UTF-8");
+                } finally {
+                    in.close();
+                }
+            } else {
+                content = null;
             }
             
-            InputStream in = httpCon.getInputStream();
-            try {            
-                return IOUtils.toString(in, "UTF-8");
-            } finally {
-                in.close();
-            }
+            return new HTTPResponse(
+                    responseCode, httpCon.getResponseMessage(),
+                    content,
+                    uri);
         } finally {
             httpCon.disconnect();
         }
@@ -225,6 +245,37 @@ public class WebAppTestCase {
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to get grandparent URL for " + webXmlURL, e);
         }
+    }
+    
+    private static class HTTPResponse {
+        private final int statusCode;
+        private final String content;
+        private final String statusMessage;
+        private final URI uri;
+        
+        public HTTPResponse(int statusCode, String statusMessage, String content, URI uri) {
+            this.statusCode = statusCode;
+            this.content = content;
+            this.statusMessage = statusMessage;
+            this.uri = uri;
+        }
+        
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+        
+        public String getContent() {
+            return content;
+        }
+
+        public URI getURI() {
+            return uri;
+        }
+        
     }
     
 }
