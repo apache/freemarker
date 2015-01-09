@@ -29,7 +29,6 @@ import org.w3c.dom.Node;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
 import freemarker.ext.dom.NodeModel;
-import freemarker.ext.jython.JythonWrapper;
 import freemarker.log.Logger;
 
 /**
@@ -218,7 +217,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     /**
      * Called for an object that aren't considered to be of a "basic" Java type, like for an application specific type,
      * or for a W3C DOM node. In its default implementation, W3C {@link Node}-s will be wrapped as {@link NodeModel}-s
-     * (allows DOM tree traversal), Jython objects will be delegated to the {@link JythonWrapper}, others will be
+     * (allows DOM tree traversal), Jython objects will be delegated to the {@code JythonWrapper}, others will be
      * wrapped using {@link BeansWrapper#wrap(Object)}.
      * 
      * <p>
