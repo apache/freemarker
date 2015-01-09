@@ -37,6 +37,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     private static final String WEBAPP_EL_FUNCTIONS = "elFunctions";
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";
     private static final String WEBAPP_ERRORS = "errors";
+    private static final String WEBAPP_CONFIG = "config";
 
     @Test
     public void basicTrivial() throws Exception {
@@ -189,6 +190,18 @@ public class RealServletContainertTest extends WebAppTestCase {
                 "tester?view=failing-runtime.ftl&viewServlet=freemarker-future-prod"));
         assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
                 "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-future-prod"));
+    }
+    
+    @Test
+    public void testTemplateLoaderConfig() throws Exception {
+        assertEquals("from /WEB-INF/classes", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-classpath-root"));
+        assertEquals("from /WEB-INF/classes/sub", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-classpath-sub"));
+        assertEquals("from /WEB-INF/templates", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-webinfPerTemplates"));
+        assertEquals("from /", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-contentRoot"));
     }
 
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {

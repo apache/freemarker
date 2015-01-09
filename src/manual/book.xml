@@ -22319,6 +22319,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>The <literal>TemplatePath</literal> init-param now
+                  supports a new kind of path, that looks like
+                  <literal>classpath:com/example/myapp/templates</literal>.
+                  This is similar to the old
+                  <literal>class://com/example/myapp/templates</literal>, but
+                  it uses the Thread Context Class Loader of the thread that
+                  initializes <literal>FreemarkerSerlvet</literal>, and thus
+                  will work even if <literal>freemarker.jar</literal> is not
+                  local to the web application. <literal>class://</literal>
+                  had the problem that it uses the defining class loader of
+                  <literal>FreemarkerSerlvet</literal> itself (or of its
+                  subclass).</para>
+                </listitem>
+
+                <listitem>
                   <para>Added new overridable method:
                   <literal>FreemarkerServlet.createDefaultObjectWrapper()</literal>.
                   This can be used for what

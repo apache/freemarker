@@ -106,11 +106,15 @@ import freemarker.template.utility.StringUtil;
  * interpreted as web application directory relative URI.<br>
  * Alternatively, you can prepend it with <tt>file://</tt> to indicate a literal path in the file system (i.e.
  * <tt>file:///var/www/project/templates/</tt>). Note that three slashes were used to specify an absolute path.<br>
- * Also, you can prepend it with <tt>class://path/to/template/package</tt> to indicate that you want to load templates
- * from the specified package accessible through the classloader of the servlet.<br>
- * Default value is <tt>class://</tt> (that is, the root of the class hierarchy). <i>Note that this default is different
- * than the default in FreeMarker 1.x, when it defaulted <tt>/</tt>, that is to loading from the webapp root
- * directory.</i></li>
+ * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
+ * you want to load templates from the specified package accessible through the Thread Context Class Loader of the
+ * thread that initializes this servlet.<br>
+ * For backward compatibility (not recommended!), you can also use the {@code class://} prefix, like in
+ * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
+ * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
+ * {@code freemarer.jar} usually) is not local to the web application, while the templates are.<br>
+ * The default value is <tt>class://</tt> (that is, the root of the class hierarchy), which is not recommended anymore,
+ * and should be overwritten with the init-param.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_NO_CACHE}</strong>: If set to true, generates headers in the response that advise the
  * HTTP client not to cache the returned page. The default is <tt>false</tt>.</li>
@@ -230,6 +234,10 @@ public class FreemarkerServlet extends HttpServlet
 {
     private static final Logger LOG = Logger.getLogger("freemarker.servlet");
     private static final Logger LOG_RT = Logger.getLogger("freemarker.runtime");
+
+    private static final String TEMPLATE_PATH_PREFIX_CLASSPATH = "classpath:";
+    private static final String TEMPLATE_PATH_PREFIX_CLASS = "class://";
+    private static final String TEMPLATE_PATH_PREFIX_FILE = "file://";
     
     public static final long serialVersionUID = -2440216393145762479L;
 
@@ -447,7 +455,7 @@ public class FreemarkerServlet extends HttpServlet
         // Process TemplatePath init-param out of order:
         templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
         if (templatePath == null && !config.isTemplateLoaderExplicitlySet()) {
-            templatePath = "class://";
+            templatePath = TEMPLATE_PATH_PREFIX_CLASS;
         }
         if (templatePath != null) {
             try {
@@ -604,19 +612,38 @@ public class FreemarkerServlet extends HttpServlet
      * @param templatePath the template path to create a loader for
      * @return a newly created template loader
      */
-    protected TemplateLoader createTemplateLoader(String templatePath) throws IOException
+    protected TemplateLoader createTemplateLoader(final String templatePath) throws IOException
     {
-        if (templatePath.startsWith("class://")) {
-            // substring(7) is intentional as we "reuse" the last slash
-            return new ClassTemplateLoader(getClass(), templatePath.substring(7));
-        } else {
-            if (templatePath.startsWith("file://")) {
-                templatePath = templatePath.substring(7);
-                return new FileTemplateLoader(new File(templatePath));
-            } else {
-                return new WebappTemplateLoader(this.getServletContext(), templatePath);
+        if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_CLASS)) {
+            String packagePath = templatePath.substring(TEMPLATE_PATH_PREFIX_CLASS.length());
+            packagePath = normalizeToAbsolutePackagePath(packagePath);
+            return new ClassTemplateLoader(getClass(), packagePath);
+        } else if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_CLASSPATH)) {
+            // To be similar to Spring resource paths, we don't require "//":
+            String packagePath = templatePath.substring(TEMPLATE_PATH_PREFIX_CLASSPATH.length());
+            packagePath = normalizeToAbsolutePackagePath(packagePath);
+            
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            if (classLoader == null) {
+                LOG.warn("No Thread Context Class Loader was found. Falling back to the class loader of "
+                        + this.getClass().getName() + ".");
+                classLoader = getClass().getClassLoader();
             }
+            
+            return new ClassTemplateLoader(classLoader, packagePath);
+        } else if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_FILE)) {
+                String filePath = templatePath.substring(TEMPLATE_PATH_PREFIX_FILE.length());
+                return new FileTemplateLoader(new File(filePath));
+        } else {
+            return new WebappTemplateLoader(this.getServletContext(), templatePath);
         }
+    }
+
+    private String normalizeToAbsolutePackagePath(String path) {
+        while (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return "/" + path;
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)

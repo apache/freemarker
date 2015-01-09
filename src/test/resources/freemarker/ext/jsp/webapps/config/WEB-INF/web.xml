@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+
+    <servlet>
+        <servlet-name>tester</servlet-name>
+        <servlet-class>freemarker.test.servlet.Model2TesterServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>tester</servlet-name>
+        <url-pattern>/tester</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>freemarker-classpath-sub</servlet-name>
+		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>classpath:sub</param-value>
+        </init-param>
+	</servlet>
+
+    <servlet>
+        <servlet-name>freemarker-classpath-root</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>classpath:/</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>freemarker-webinfPerTemplates</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>WEB-INF/templates</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>freemarker-contentRoot</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value></param-value>
+        </init-param>
+    </servlet>
+
+</web-app>
