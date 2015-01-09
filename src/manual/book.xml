@@ -22440,9 +22440,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Generally improved implementation quality at some
-                  parts (maintainability, error messages, performance bug
-                  fixes, test coverage).</para>
+                  <para>Generally improved implementation quality
+                  (maintainability, error messages, performance bug fixes,
+                  test coverage) and better API documentation.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
