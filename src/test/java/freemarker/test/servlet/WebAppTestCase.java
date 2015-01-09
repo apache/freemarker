@@ -206,7 +206,7 @@ public class WebAppTestCase {
         final String webAppDirURL = getWebAppDirURL(webAppName);
         
         WebAppContext context = new WebAppContext(webAppDirURL, "/" + webAppName);
-        context.setParentLoaderPriority(true);
+        
         // Pattern of jar file names scanned for META-INF/*.tld:
         context.setAttribute(
                 ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN,

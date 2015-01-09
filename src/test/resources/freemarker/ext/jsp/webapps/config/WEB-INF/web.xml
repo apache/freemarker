@@ -14,15 +14,25 @@
         <url-pattern>/tester</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-		<servlet-name>freemarker-classpath-sub</servlet-name>
-		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+    <!-- Must use a webapp-local class for "class:", otherwise it won't find local resources. -->
+    <servlet>
+        <servlet-name>freemarker-class-root</servlet-name>
+        <servlet-class>webapps.cfg.WebappLocalFreemarkerServlet</servlet-class>
         <init-param>
             <param-name>TemplatePath</param-name>
-            <param-value>classpath:sub</param-value>
+            <param-value>class://</param-value>
         </init-param>
-	</servlet>
+    </servlet>
+    <servlet>
+        <servlet-name>freemarker-class-sub</servlet-name>
+        <servlet-class>webapps.cfg.WebappLocalFreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>class://sub</param-value>
+        </init-param>
+    </servlet>
 
+    <!-- No need to use webapp-local class for "classpath:" -->
     <servlet>
         <servlet-name>freemarker-classpath-root</servlet-name>
         <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
@@ -31,6 +41,14 @@
             <param-value>classpath:/</param-value>
         </init-param>
     </servlet>
+	<servlet>
+		<servlet-name>freemarker-classpath-sub</servlet-name>
+		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>classpath:sub</param-value>
+        </init-param>
+	</servlet>
 
     <servlet>
         <servlet-name>freemarker-webinfPerTemplates</servlet-name>

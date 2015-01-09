@@ -195,9 +195,23 @@ public class RealServletContainertTest extends WebAppTestCase {
     @Test
     public void testTemplateLoaderConfig() throws Exception {
         assertEquals("from /WEB-INF/classes", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-class-root"));
+        assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=sub/test2.ftl&viewServlet=freemarker-class-root"));
+        assertEquals("from /WEB-INF/classes/sub", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-class-sub"));
+        assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test2.ftl&viewServlet=freemarker-class-sub"));
+        
+        assertEquals("from /WEB-INF/classes", getResponseContent(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-classpath-root"));
+        assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=sub/test2.ftl&viewServlet=freemarker-classpath-root"));
         assertEquals("from /WEB-INF/classes/sub", getResponseContent(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-classpath-sub"));
+        assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
+                "tester?view=test2.ftl&viewServlet=freemarker-classpath-sub"));
+        
         assertEquals("from /WEB-INF/templates", getResponseContent(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-webinfPerTemplates"));
         assertEquals("from /", getResponseContent(WEBAPP_CONFIG,
