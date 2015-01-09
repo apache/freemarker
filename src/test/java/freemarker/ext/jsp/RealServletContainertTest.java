@@ -159,10 +159,6 @@ public class RealServletContainertTest extends WebAppTestCase {
     
     @Test
     public void errorStatusCodes() throws Exception {
-        assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-runtime.ftl&viewServlet=freemarker-default-prod"));
-        
-        /*
         assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS, "missing.jsp"));
         assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-runtime.jsp"));
         assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-parsetime.jsp"));
@@ -193,7 +189,6 @@ public class RealServletContainertTest extends WebAppTestCase {
                 "tester?view=failing-runtime.ftl&viewServlet=freemarker-future-prod"));
         assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
                 "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-future-prod"));
-                */
     }
 
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {
