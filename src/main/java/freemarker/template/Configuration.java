@@ -752,29 +752,36 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets a class relative to which we do the {@code Class.getResource()} call to load templates.
-     * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix))},
-     * so see {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
+     * Sets the class whose {@link Class#getResource(String)} method will be used to load templates, from the inside the
+     * package specified. See {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
+     * 
+     * @param basePackagePath
+     *            Separate steps with {@code "/"}, not {@code "."}, and note that it matters if this starts with
+     *            {@code /} or not. See {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
      * 
      * @see #setClassLoaderForTemplateLoading(ClassLoader, String)
      * @see #setTemplateLoader(TemplateLoader)
      */
-    public void setClassForTemplateLoading(Class clazz, String pathPrefix) {
-        setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix));
+    public void setClassForTemplateLoading(Class resourceLoaderClass, String basePackagePath) {
+        setTemplateLoader(new ClassTemplateLoader(resourceLoaderClass, basePackagePath));
     }
     
     /**
-     * Sets a {@link ClassLoader} with which we do the {@code ClassLoader.getResource()} calls to load templates.
-     * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(classLoader, pathPrefix))},
-     * so see {@link ClassTemplateLoader#ClassTemplateLoader(ClassLoader, String)} for more details.
+     * Sets the {@link ClassLoader} whose {@link ClassLoader#getResource(String)} method will be used to load templates,
+     * from the inside the package specified. See {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for
+     * more details.
+     * 
+     * @param basePackagePath
+     *            Separate steps with {@code "/"}, not {@code "."}. See
+     *            {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
      * 
      * @see #setClassForTemplateLoading(Class, String)
      * @see #setTemplateLoader(TemplateLoader)
      * 
      * @since 2.3.22
      */
-    public void setClassLoaderForTemplateLoading(ClassLoader classLoader, String pathPrefix) {
-        setTemplateLoader(new ClassTemplateLoader(classLoader, pathPrefix));
+    public void setClassLoaderForTemplateLoading(ClassLoader classLoader, String basePackagePath) {
+        setTemplateLoader(new ClassTemplateLoader(classLoader, basePackagePath));
     }
 
     /**

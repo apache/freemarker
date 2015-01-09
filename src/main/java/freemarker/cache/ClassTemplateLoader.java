@@ -18,143 +18,137 @@ package freemarker.cache;
 
 import java.net.URL;
 
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * A {@link TemplateLoader} that uses streams reachable through 
- * {@link Class#getResourceAsStream(String)} as its source of templates.
+ * A {@link TemplateLoader} that can load templates from the "classpath". Naturally, it can load from jar files, or from
+ * anywhere where Java can load classes from. Internally, it uses {@link Class#getResource(String)} or
+ * {@link ClassLoader#getResource(String)} to load templates.
  */
-public class ClassTemplateLoader extends URLTemplateLoader
-{
-    private final Class baseClass;
-    private final ClassLoader classLoader;
-    private final String packagePath;
+public class ClassTemplateLoader extends URLTemplateLoader {
     
+    private final Class resourceLoaderClass;
+    private final ClassLoader classLoader;
+    private final String basePackagePath;
+
     /**
-     * Creates a template loader that will use the {@link Class#getResource(String)}
-     * method of its own class to load the resources, and <code>"/"</code> as base path.
-     * This means that that template paths will be resolved relatvively the root package
-     * of the class hierarchy, so you hardly ever should use this constructor, rather do
-     * something like this:<br>
-     * {@link #ClassTemplateLoader(Class, String)
-     * new ClassTemplateLoader(com.example.myapplication.SomeClass.class, "templates")}
+     * Creates a template loader that will use the {@link Class#getResource(String)} method of its own class to load the
+     * resources, and {@code "/"} as base package path. This means that that template paths will be resolved relatively
+     * the root package of the class hierarchy, so you hardly ever should use this constructor, rather do something like
+     * this:<br>
+     * {@link #ClassTemplateLoader(Class, String) new ClassTemplateLoader(com.example.myapplication.SomeClass.class,
+     * "templates")}
      *
-     * <p>If you extend this class, then the extending class will be used to load
-     * the resources.
+     * <p>
+     * If you extend this class, then the extending class will be used to load the resources.
      *
-     * <p>Warning: this constructor was malfunctioned prior FreeMarker 2.3.4
-     * -- please update FreeMarker if needed.
-     *
-     * @deprecated confusing constructor, and seldom useful;
-     *     use {@link #ClassTemplateLoader(Class, String)} instead.
+     * @deprecated It's a confusing constructor, and seldom useful; use {@link #ClassTemplateLoader(Class, String)}
+     *             instead.
      */
-    public ClassTemplateLoader()
-    {
+    public ClassTemplateLoader() {
         this(null, true, null, "/");
     }
 
     /**
-     * Creates a template loader that will use the {@link Class#getResource(String)}
-     * method of the specified class to load the resources, and <code>""</code> as base
-     * path. This means that template paths will be resolved relatively to the class
-     * location, that is, relatively to the directory (package) of the class.
+     * Creates a template loader that will use the {@link Class#getResource(String)} method of the specified class to
+     * load the resources, and {@code ""} as base package path. This means that template paths will be resolved
+     * relatively to the class location, that is, relatively to the directory (package) of the class.
      *
-     * @param baseClass the class whose
-     * {@link Class#getResource(String)} will be used to load the templates.
+     * @param resourceLoaderClass
+     *            the class whose {@link Class#getResource(String)} will be used to load the templates.
      *
-     * @deprecated it's confusing that the base path is <code>""</code>;
-     *     use {@link #ClassTemplateLoader(Class, String)} instead.
+     * @deprecated It's confusing that the base path is {@code ""}; use {@link #ClassTemplateLoader(Class, String)}
+     *             instead.
      */
-    public ClassTemplateLoader(Class baseClass)
-    {
-        this(baseClass, "");
+    public ClassTemplateLoader(Class resourceLoaderClass) {
+        this(resourceLoaderClass, "");
     }
 
     /**
-     * Creates a template loader that will use the {@link Class#getResource(String)} method
-     * of the specified class to load the resources, and the specified base path (absolute or relative).
+     * Creates a template loader that will use the {@link Class#getResource(String)} method of the specified class to
+     * load the resources, and the specified base package path (absolute or relative).
      *
-     * <p>Examples:
+     * <p>
+     * Examples:
      * <ul>
-     *   <li>Relative base path (will load from the
-     *       <code>com.example.myapplication.templates</code> package):<br>
-     *       <code>new ClassTemplateLoader(<br>
-     *       com.example.myapplication.SomeClass.class,<br>
-     *       "templates")</code>
-     *   <li>Absolute base path:<br>
-     *       <code>new ClassTemplateLoader(<br>
-     *       somepackage.SomeClass.class,<br>
-     *       "/com/example/myapplication/templates")</code>
+     * <li>Relative base path (will load from the {@code com.example.myapplication.templates} package):<br>
+     * {@code new ClassTemplateLoader(com.example.myapplication.SomeClass.class, "templates")}
+     * <li>Absolute base path:<br>
+     * {@code new ClassTemplateLoader(somepackage.SomeClass.class, "/com/example/myapplication/templates")}
      * </ul>
      *
-     * @param baseClass the class whose {@link Class#getResource(String)} method will be used
-     *     to load the templates. Be sure that you chose a class whose defining class-loader
-     *     sees the templates. This parameter can't be <code>null</code>.
-     * @param packagePath the path to the package that contains the templates.
-     *     A path that doesn't start with a slash (/) is relative to the
-     *     path (package) of the specified class. A path that starts with a slash
-     *     is an absolute path starting from the root of the package hierarchy. Path
-     *     components should be separated by forward slashes independently of the
-     *     separator character used by the underlying operating system.
-     *     This parameter can't be <code>null</code>.
+     * @param resourceLoaderClass
+     *            The class whose {@link Class#getResource(String)} method will be used to load the templates. Be sure
+     *            that you chose a class whose defining class-loader sees the templates. This parameter can't be
+     *            {@code null}.
+     * @param basePackagePath
+     *            The package that contains the templates, in path ({@code /}-separated) format. If it doesn't start
+     *            with a {@code /} then it's relative to the path (package) of the {@code resourceLoaderClass} class. If
+     *            it starts with {@code /} then it's relative to the root of the package hierarchy. Note that path
+     *            components should be separated by forward slashes independently of the separator character used by the
+     *            underlying operating system. This parameter can't be {@code null}.
+     * 
+     * @see #ClassTemplateLoader(ClassLoader, String)
      */
-    public ClassTemplateLoader(Class baseClass, String packagePath)
-    {
-        this(baseClass, false, null, packagePath);
+    public ClassTemplateLoader(Class resourceLoaderClass, String basePackagePath) {
+        this(resourceLoaderClass, false, null, basePackagePath);
     }
 
     /**
-     * Similar to {@link #ClassTemplateLoader(Class, String)}, but instead of a class, it uses a {@link ClassLoader} to
-     * load the resources. Because {@link ClassLoader} aren't belonging to any package, a relative {@code packagePath}
-     * will mean the same as an absolute.
-     *  
+     * Similar to {@link #ClassTemplateLoader(Class, String)}, but instead of {@link Class#getResource(String)} it uses
+     * {@link ClassLoader#getResource(String)}. Because a {@link ClassLoader} isn't bound to any Java package, it
+     * doesn't mater if the {@code basePackagePath} starts with {@code /} or not, it will be always relative to the root
+     * of the package hierarchy
+     * 
      * @since 2.3.22
      */
-    public ClassTemplateLoader(ClassLoader classLoader, String packagePath)
-    {
-        this(null, true, classLoader, packagePath);
+    public ClassTemplateLoader(ClassLoader classLoader, String basePackagePath) {
+        this(null, true, classLoader, basePackagePath);
     }
-    
-    private ClassTemplateLoader(Class baseClass, boolean allowNullBaseClass, ClassLoader classLoader, String packagePath)
-    {
-        if(baseClass == null && !allowNullBaseClass)
-        {
-            throw new IllegalArgumentException("baseClass == null");
+
+    private ClassTemplateLoader(Class resourceLoaderClass, boolean allowNullBaseClass, ClassLoader classLoader,
+            String basePackagePath) {
+        if (!allowNullBaseClass) {
+            NullArgumentException.check("resourceLoaderClass", resourceLoaderClass);
         }
-        if(packagePath == null)
-        {
-            throw new IllegalArgumentException("path == null");
-        }
-        
-        // Either set a non-null baseClass or a non-null classLoader, not both:
-        this.baseClass = classLoader == null ? (baseClass == null ? this.getClass() : baseClass) : null;
-        if (this.baseClass == null && classLoader == null) {
-            throw new IllegalArgumentException("classLoader == null");
+        NullArgumentException.check("basePackagePath", basePackagePath);
+
+        // Either set a non-null resourceLoaderClass or a non-null classLoader, not both:
+        this.resourceLoaderClass = classLoader == null ? (resourceLoaderClass == null ? this.getClass()
+                : resourceLoaderClass) : null;
+        if (this.resourceLoaderClass == null && classLoader == null) {
+            throw new NullArgumentException("classLoader");
         }
         this.classLoader = classLoader;
-        
-        this.packagePath = canonicalizePrefix(packagePath);
+
+        String canonBasePackagePath = canonicalizePrefix(basePackagePath);
+        if (this.classLoader != null && canonBasePackagePath.startsWith("/")) {
+            canonBasePackagePath = canonBasePackagePath.substring(1);
+        }
+        this.basePackagePath = canonBasePackagePath;
     }
-    
+
     protected URL getURL(String name)
     {
-        String fullPath = packagePath + name;
-        
+        String fullPath = basePackagePath + name;
+
         // Block java.net.URLClassLoader exploits:
-        if (packagePath.equals("/") && !isSchemeless(fullPath)) {
+        if (basePackagePath.equals("/") && !isSchemeless(fullPath)) {
             return null;
         }
-        
-        return baseClass != null ? baseClass.getResource(fullPath) : classLoader.getResource(fullPath);
+
+        return resourceLoaderClass != null ? resourceLoaderClass.getResource(fullPath) : classLoader
+                .getResource(fullPath);
     }
-    
+
     private static boolean isSchemeless(String fullPath) {
         int i = 0;
         int ln = fullPath.length();
-        
+
         // Skip a single initial /, as things like "/file:/..." might work:
         if (i < ln && fullPath.charAt(i) == '/') i++;
-        
+
         // Check if there's no ":" earlier than a '/', as the URLClassLoader
         // could interpret that as an URL scheme:
         while (i < ln) {
@@ -171,12 +165,49 @@ public class ClassTemplateLoader extends URLTemplateLoader
      * 
      * @since 2.3.21
      */
-   public String toString() {
+    public String toString() {
         return "ClassTemplateLoader("
-                + (baseClass != null
-                        ? "baseClass=" + baseClass.getName()
+                + (resourceLoaderClass != null
+                        ? "resourceLoaderClass=" + resourceLoaderClass.getName()
                         : "classLoader=" + StringUtil.jQuote(classLoader))
-                + ", packagePath=" + StringUtil.jQuote(packagePath) + ")";
+                + ", basePackagePath"
+                + "="
+                + StringUtil.jQuote(basePackagePath)
+                + (resourceLoaderClass != null
+                        ? (basePackagePath.startsWith("/") ? "" : " /* relatively to resourceLoaderClass pkg */")
+                        : ""
+                )
+                + ")";
+    }
+
+    /**
+     * See the similar parameter of {@link #ClassTemplateLoader(Class, String)}; {@code null} when other mechanism is
+     * used to load the resources.
+     * 
+     * @since 2.3.22
+     */
+    public Class getResourceLoaderClass() {
+        return resourceLoaderClass;
+    }
+
+    /**
+     * See the similar parameter of {@link #ClassTemplateLoader(ClassLoader, String)}; {@code null} when other mechanism
+     * is used to load the resources.
+     * 
+     * @since 2.3.22
+     */
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    /**
+     * See the similar parameter of {@link #ClassTemplateLoader(ClassLoader, String)}; note that this is a normalized
+     * version of what was actually passed to the constructor.
+     * 
+     * @since 2.3.22
+     */
+    public String getBasePackagePath() {
+        return basePackagePath;
     }
 
 }
