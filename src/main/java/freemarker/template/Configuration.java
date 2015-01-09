@@ -103,7 +103,8 @@ import freemarker.template.utility.XmlEscape;
  * <ul>
  *   <li>{@link #setTemplateLoader(TemplateLoader) template_loader}: The default value is deprecated and in fact quite
  *       useless. (For the most common cases you can use the convenience methods,
- *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} too.)
+ *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} and
+ *       {@link #setClassLoaderForTemplateLoading(ClassLoader, String)} too.)
  *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
@@ -620,6 +621,7 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>Convenience methods exists to install commonly used loaders, instead of using this method:
      * {@link #setClassForTemplateLoading(Class, String)}, 
+     * {@link #setClassLoaderForTemplateLoading(ClassLoader, String)}, 
      * {@link #setDirectoryForTemplateLoading(File)}, and
      * {@link #setServletContextForTemplateLoading(Object, String)}.
      * 
@@ -750,14 +752,29 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets a class relative to which we do the Class.getResource() call to load templates.
+     * Sets a class relative to which we do the {@code Class.getResource()} call to load templates.
      * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix))},
      * so see {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
      * 
+     * @see #setClassLoaderForTemplateLoading(ClassLoader, String)
      * @see #setTemplateLoader(TemplateLoader)
      */
     public void setClassForTemplateLoading(Class clazz, String pathPrefix) {
         setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix));
+    }
+    
+    /**
+     * Sets a {@link ClassLoader} with which we do the {@code ClassLoader.getResource()} calls to load templates.
+     * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(classLoader, pathPrefix))},
+     * so see {@link ClassTemplateLoader#ClassTemplateLoader(ClassLoader, String)} for more details.
+     * 
+     * @see #setClassForTemplateLoading(Class, String)
+     * @see #setTemplateLoader(TemplateLoader)
+     * 
+     * @since 2.3.22
+     */
+    public void setClassLoaderForTemplateLoading(ClassLoader classLoader, String pathPrefix) {
+        setTemplateLoader(new ClassTemplateLoader(classLoader, pathPrefix));
     }
 
     /**

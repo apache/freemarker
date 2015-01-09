@@ -22535,6 +22535,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>ClassTemplateLoader</literal> now can be created
+              by specifying a <literal>ClassLoader</literal> directly, rather
+              than by specifying a base <literal>Class</literal>. That is, now
+              there's <literal>ClassTemplateLoader(ClassLoader,
+              String)</literal> constructor, and also a
+              <literal>Configuration.setClassLoaderForTemplateLoading(ClassLoader,
+              String)</literal> method.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
               active only with <literal>incompatible_improvements</literal>

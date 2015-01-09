@@ -26,8 +26,9 @@ import freemarker.template.utility.StringUtil;
  */
 public class ClassTemplateLoader extends URLTemplateLoader
 {
-    private Class baseClass;
-    private String packagePath;
+    private final Class baseClass;
+    private final ClassLoader classLoader;
+    private final String packagePath;
     
     /**
      * Creates a template loader that will use the {@link Class#getResource(String)}
@@ -49,7 +50,7 @@ public class ClassTemplateLoader extends URLTemplateLoader
      */
     public ClassTemplateLoader()
     {
-        setFields(this.getClass(), "/");
+        this(null, true, null, "/");
     }
 
     /**
@@ -66,7 +67,7 @@ public class ClassTemplateLoader extends URLTemplateLoader
      */
     public ClassTemplateLoader(Class baseClass)
     {
-        setFields(baseClass, "");
+        this(baseClass, "");
     }
 
     /**
@@ -99,9 +100,42 @@ public class ClassTemplateLoader extends URLTemplateLoader
      */
     public ClassTemplateLoader(Class baseClass, String packagePath)
     {
-        setFields(baseClass, packagePath);
+        this(baseClass, false, null, packagePath);
     }
 
+    /**
+     * Similar to {@link #ClassTemplateLoader(Class, String)}, but instead of a class, it uses a {@link ClassLoader} to
+     * load the resources. Because {@link ClassLoader} aren't belonging to any package, a relative {@code packagePath}
+     * will mean the same as an absolute.
+     *  
+     * @since 2.3.22
+     */
+    public ClassTemplateLoader(ClassLoader classLoader, String packagePath)
+    {
+        this(null, true, classLoader, packagePath);
+    }
+    
+    private ClassTemplateLoader(Class baseClass, boolean allowNullBaseClass, ClassLoader classLoader, String packagePath)
+    {
+        if(baseClass == null && !allowNullBaseClass)
+        {
+            throw new IllegalArgumentException("baseClass == null");
+        }
+        if(packagePath == null)
+        {
+            throw new IllegalArgumentException("path == null");
+        }
+        
+        // Either set a non-null baseClass or a non-null classLoader, not both:
+        this.baseClass = classLoader == null ? (baseClass == null ? this.getClass() : baseClass) : null;
+        if (this.baseClass == null && classLoader == null) {
+            throw new IllegalArgumentException("classLoader == null");
+        }
+        this.classLoader = classLoader;
+        
+        this.packagePath = canonicalizePrefix(packagePath);
+    }
+    
     protected URL getURL(String name)
     {
         String fullPath = packagePath + name;
@@ -111,7 +145,7 @@ public class ClassTemplateLoader extends URLTemplateLoader
             return null;
         }
         
-        return baseClass.getResource(fullPath);
+        return baseClass != null ? baseClass.getResource(fullPath) : classLoader.getResource(fullPath);
     }
     
     private static boolean isSchemeless(String fullPath) {
@@ -132,26 +166,16 @@ public class ClassTemplateLoader extends URLTemplateLoader
         return true;
     }
 
-    private void setFields(Class baseClass, String packagePath) {
-        if(baseClass == null)
-        {
-            throw new IllegalArgumentException("baseClass == null");
-        }
-        if(packagePath == null)
-        {
-            throw new IllegalArgumentException("path == null");
-        }
-        this.baseClass = baseClass;
-        this.packagePath = canonicalizePrefix(packagePath);
-    }
-
     /**
      * Show class name and some details that are useful in template-not-found errors.
      * 
      * @since 2.3.21
      */
    public String toString() {
-        return "ClassTemplateLoader(baseClass=" + baseClass.getName()
+        return "ClassTemplateLoader("
+                + (baseClass != null
+                        ? "baseClass=" + baseClass.getName()
+                        : "classLoader=" + StringUtil.jQuote(classLoader))
                 + ", packagePath=" + StringUtil.jQuote(packagePath) + ")";
     }
 
