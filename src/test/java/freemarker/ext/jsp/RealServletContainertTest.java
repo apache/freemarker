@@ -49,7 +49,6 @@ import freemarker.test.servlet.WebAppTestCase;
 public class RealServletContainertTest extends WebAppTestCase {
 
     private static final String WEBAPP_BASIC = "basic";
-    private static final String WEBAPP_EL_FUNCTIONS = "elFunctions";
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";
     private static final String WEBAPP_ERRORS = "errors";
     private static final String WEBAPP_CONFIG = "config";
@@ -94,10 +93,10 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    public void elFunctions() throws Exception {
+    public void basicELFunctions() throws Exception {
         //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.jsp"));
         //System.out.println(getResponseContent(WEBAPP_EL_FUNCTIONS, "tester?view=1.ftl"));
-        assertJSPAndFTLOutputEquals(WEBAPP_EL_FUNCTIONS, "tester?view=1");
+        assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=customELFunctions1");
     }
     
     @Test
