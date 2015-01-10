@@ -17,7 +17,6 @@
 package freemarker.ext.servlet;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +54,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateNotFoundException;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
@@ -685,7 +685,7 @@ public class FreemarkerServlet extends HttpServlet
         final Template template;
         try {
             template = config.getTemplate(templatePath, locale);
-        } catch (FileNotFoundException e) {
+        } catch (TemplateNotFoundException e) {
             if (exceptionOnMissingTemplate) {
                 throw newServletExceptionWithFreeMarkerLogging(
                         "Template not found for name " + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
@@ -694,7 +694,7 @@ public class FreemarkerServlet extends HttpServlet
                     LOG.debug("Responding HTTP 404 \"Not found\" for missing template "
                             + StringUtil.jQuoteNoXSS(templatePath) + ".", e);
                 }
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page template not found");
                 return;
             }
         } catch (freemarker.core.ParseException e) {
