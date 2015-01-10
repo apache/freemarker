@@ -531,12 +531,6 @@ public class _ObjectBuilderSettingEvaluator {
             }
             
             return result;
-            
-            /*
-            // !!T
-            return "class=" + className + ", v2321Mode=" + v2321Mode
-                    + ", positional=" + positionalParamValues + ", named=" + namedParamNames + namedParamValues;
-            */
         }
         
         private Object callConstructor(Class cl)
