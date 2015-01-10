@@ -234,7 +234,8 @@ class BuiltInsForMultipleTypes {
             if (!env.isAPIBuiltinEnabled()) {
                 throw new _MiscTemplateException(this, new Object[] {
                         "Can't use ?api, because the \"", Configurable.API_BUILTIN_ENABLED_KEY,
-                        "\" configuration setting is false. Set it to true." });
+                        "\" configuration setting is false. Think twice before you set it to true though. Especially, "
+                        + "it shouldn't abussed for modifying Map-s and Collection-s." });
             }
             final TemplateModel tm = target.eval(env);
             if (!(tm instanceof TemplateModelWithAPISupport)) {
