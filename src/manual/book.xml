@@ -22320,6 +22320,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Bug fixed: If you had multiple
+                  <literal>FreemarkerServlet</literal>-s with different
+                  configuration settings in the same servlet context, that
+                  could lead to malfunction. (Normally, you only have one,
+                  just like there's only one servlet that processes
+                  <literal>*.jsp</literal>.)</para>
+                </listitem>
+
+                <listitem>
                   <para>Removed all the <literal>xsd</literal> files
                   (<literal>web-app</literal> and <literal>taglib</literal>
                   schemas) from the FreeMarker artifact and from the XML

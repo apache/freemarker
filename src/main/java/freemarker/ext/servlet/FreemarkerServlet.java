@@ -357,13 +357,14 @@ public class FreemarkerServlet extends HttpServlet
     // Note these names start with dot, so they're essentially invisible from
     // a freemarker script.
     private static final String ATTR_REQUEST_MODEL = ".freemarker.Request";
-    private static final String ATTR_REQUEST_PARAMETERS_MODEL =
-        ".freemarker.RequestParameters";
+    private static final String ATTR_REQUEST_PARAMETERS_MODEL = ".freemarker.RequestParameters";
     private static final String ATTR_SESSION_MODEL = ".freemarker.Session";
-    private static final String ATTR_APPLICATION_MODEL =
-        ".freemarker.Application";
-    private static final String ATTR_JSP_TAGLIBS_MODEL =
-        ".freemarker.JspTaglibs";
+    
+    /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
+    private static final String ATTR_APPLICATION_MODEL = ".freemarker.Application";
+    
+    /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
+    private static final String ATTR_JSP_TAGLIBS_MODEL = ".freemarker.JspTaglibs";
 
     private static final String ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
             = "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern";
@@ -399,6 +400,10 @@ public class FreemarkerServlet extends HttpServlet
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
     private List/*<String>*/ classpathTlds;
 
+    private Object lazyInitFieldsLock = new Object();
+    private ServletContextHashModel servletContextModel;
+    private TaglibFactory taglibFactory;
+    
     private boolean objectWrapperMismatchWarnLogged;
 
     /**
@@ -804,21 +809,30 @@ public class FreemarkerServlet extends HttpServlet
             AllHttpScopesHashModel params = new AllHttpScopesHashModel(objectWrapper, servletContext, request);
     
             // Create hash model wrapper for servlet context (the application)
-            ServletContextHashModel servletContextModel =
-                    (ServletContextHashModel) servletContext.getAttribute(ATTR_APPLICATION_MODEL);
-            if (servletContextModel == null)
-            {
-                servletContextModel = new ServletContextHashModel(this, objectWrapper);
-                servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
-                
-                TaglibFactory taglibFactory = createTaglibFactory(objectWrapper, servletContext);
-                servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibFactory);
-                
-                initializeServletContext(request, response);
+            final ServletContextHashModel servletContextModel;
+            final TaglibFactory taglibFactory;
+            synchronized (lazyInitFieldsLock) {
+                if (this.servletContextModel == null) {
+                    servletContextModel = new ServletContextHashModel(this, objectWrapper);
+                    taglibFactory = createTaglibFactory(objectWrapper, servletContext);
+                    
+                    // For backward compatibility only. We don't use these:
+                    servletContext.setAttribute(ATTR_APPLICATION_MODEL, servletContextModel);
+                    servletContext.setAttribute(ATTR_JSP_TAGLIBS_MODEL, taglibFactory);
+                    
+                    initializeServletContext(request, response);
+
+                    this.taglibFactory = taglibFactory;
+                    this.servletContextModel = servletContextModel;
+                } else {
+                    servletContextModel = this.servletContextModel;
+                    taglibFactory = this.taglibFactory;
+                }
             }
+            
             params.putUnlistedModel(KEY_APPLICATION, servletContextModel);
             params.putUnlistedModel(KEY_APPLICATION_PRIVATE, servletContextModel);
-            params.putUnlistedModel(KEY_JSP_TAGLIBS, (TemplateModel)servletContext.getAttribute(ATTR_JSP_TAGLIBS_MODEL));
+            params.putUnlistedModel(KEY_JSP_TAGLIBS, taglibFactory);
             // Create hash model wrapper for session
             HttpSessionHashModel sessionModel;
             HttpSession session = request.getSession(false);
