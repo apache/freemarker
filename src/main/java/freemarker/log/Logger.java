@@ -32,13 +32,13 @@ import java.util.Map;
  * 
  * <p>
  * If the auto detection sequence describet above doesn't give you the result that you want, see
- * {@link #PROPERTY_NAME_LOGGER_LIBRARY}.
+ * {@link #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY}.
  */
 public abstract class Logger {
 
     /**
-     * The {@value #PROPERTY_NAME_LOGGER_LIBRARY} system property is used to select a logger library explicitly, rather
-     * than relying on automatic selection. You meant to set this system property where the JVM is started, like
+     * The {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} system property is used to select a logger library explicitly,
+     * rather than relying on automatic selection. You meant to set this system property where the JVM is started, like
      * {@code java ... -Dorg.freemarker.loggerLibrary=SLF4j}. Setting it from Java code isn't reliable, also it can
      * cause confusion if you override the value set by others with {@code -D}.
      * 
@@ -61,7 +61,7 @@ public abstract class Logger {
      * 
      * @since 2.3.22
      */
-    public static final String PROPERTY_NAME_LOGGER_LIBRARY = "org.freemarker.loggerLibrary";
+    public static final String SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY = "org.freemarker.loggerLibrary";
 
     /**
      * Enum value used for {@link #selectLoggerLibrary(int)}; indicates auto-selection as described in the class
@@ -71,7 +71,7 @@ public abstract class Logger {
     private static final int MIN_LIBRARY_ENUM = LIBRARY_AUTO;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates auto-selection as described in the class
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates auto-selection as described in the class
      * documentation of {@link #Logger()}. @since 2.3.22
      */
     public static final String LIBRARY_NAME_AUTO = "auto";
@@ -82,7 +82,8 @@ public abstract class Logger {
     public static final int LIBRARY_NONE = 0;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that no logging should occur. @since 2.3.22
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that no logging should occur. @since
+     * 2.3.22
      */
     public static final String LIBRARY_NAME_NONE = "none";
 
@@ -92,8 +93,8 @@ public abstract class Logger {
     public static final int LIBRARY_JAVA = 1;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that {@code java.util.logging} should be used. @since
-     * 2.3.22
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that {@code java.util.logging} should be
+     * used. @since 2.3.22
      */
     public static final String LIBRARY_NAME_JUL = "JUL";
 
@@ -105,7 +106,8 @@ public abstract class Logger {
     public static final int LIBRARY_AVALON = 2;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Avalon LogKit should be used. @since 2.3.22
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Avalon LogKit should be used. @since
+     * 2.3.22
      * 
      * @deprecated Avalon LogKit support will be removed sometimes in the future.
      */
@@ -118,7 +120,7 @@ public abstract class Logger {
     public static final int LIBRARY_LOG4J = 3;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Log4J should be used. @since 2.3.22
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Log4J should be used. @since 2.3.22
      */
     // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_LOG4J = "Log4j";
@@ -129,8 +131,8 @@ public abstract class Logger {
     public static final int LIBRARY_COMMONS = 4;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Apache commons-logging should be used. @since
-     * 2.3.22
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that Apache commons-logging should be
+     * used. @since 2.3.22
      */
     // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_COMMONS_LOGGING = "CommonsLogging";
@@ -141,7 +143,7 @@ public abstract class Logger {
     public static final int LIBRARY_SLF4J = 5;
 
     /**
-     * {@value #PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that SLF4J should be used. @since 2.3.22
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} property value; indicates that SLF4J should be used. @since 2.3.22
      */
     // This value is also used as part of the factory class name.
     public static final String LIBRARY_NAME_SLF4J = "SLF4J";
@@ -201,10 +203,10 @@ public abstract class Logger {
     private static final Map loggersByCategory = new HashMap();
 
     /**
-     * Selects the logger library to use, unless it's already specified by the {@value #PROPERTY_NAME_LOGGER_LIBRARY}
-     * system property. Call this early in application initialization phase, before calling any other FreeMarker API-s,
-     * since once parts of the FreeMarker library bind to the logging subsystem, the change in this value will have no
-     * effect on them.
+     * Selects the logger library to use, unless it's already specified by the
+     * {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} system property. Call this early in application initialization
+     * phase, before calling any other FreeMarker API-s, since once parts of the FreeMarker library bind to the logging
+     * subsystem, the change in this value will have no effect on them.
      * 
      * @param libraryEnum
      *            One of <tt>LIBRARY_...</tt> constants. By default, {@link #LIBRARY_AUTO} is used.
@@ -214,9 +216,9 @@ public abstract class Logger {
      *             {@value #LIBRARY_NONE}) and it's not found in the classpath.
      * 
      * @deprecated This method isn't reliable, unless you can somehow ensure that you access the FreeMarker classes
-     *             first; use the {@value #PROPERTY_NAME_LOGGER_LIBRARY} Java system property instead, like
-     *             {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}. See {@link #PROPERTY_NAME_LOGGER_LIBRARY} for
-     *             more.
+     *             first; use the {@value #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} Java system property instead, like
+     *             {@code java ... -Dorg.freemarker.loggerLibrary=slf4j}. See
+     *             {@link #SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY} for more.
      */
     public static void selectLoggerLibrary(int libraryEnum) throws ClassNotFoundException {
         if (libraryEnum < MIN_LIBRARY_ENUM || libraryEnum > MAX_LIBRARY_ENUM) {
@@ -243,8 +245,8 @@ public abstract class Logger {
                 } else if (libraryEnum != Logger.libraryEnum) {
                     logWarnInLogger("Ignored " + Logger.class.getName() + ".selectLoggerLibrary(\""
                             + getLibraryName(libraryEnum)
-                            + "\") call, because the \"" + PROPERTY_NAME_LOGGER_LIBRARY + "\" system property is set "
-                            + "to \"" + getLibraryName(Logger.libraryEnum) + "\".");
+                            + "\") call, because the \"" + SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY
+                            + "\" system property is set to \"" + getLibraryName(Logger.libraryEnum) + "\".");
                 }
             }
         }
@@ -364,7 +366,7 @@ public abstract class Logger {
         synchronized (Logger.class) {
             if (loggerFactory != null) return;
 
-            String sysPropVal = getSystemProperty(PROPERTY_NAME_LOGGER_LIBRARY);
+            String sysPropVal = getSystemProperty(SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY);
 
             final int libraryEnum;
             if (sysPropVal != null) {
@@ -381,7 +383,7 @@ public abstract class Logger {
                 } while (matchedEnum <= MAX_LIBRARY_ENUM && !foundMatch);
 
                 if (!foundMatch) {
-                    logWarnInLogger("Ignored invalid \"" + PROPERTY_NAME_LOGGER_LIBRARY
+                    logWarnInLogger("Ignored invalid \"" + SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY
                             + "\" system property value: \"" + sysPropVal + "\"");
                     if (onlyIfCanBeSetFromSysProp) return;
                 }
