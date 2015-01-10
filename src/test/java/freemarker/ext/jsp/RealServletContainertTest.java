@@ -1,7 +1,11 @@
 package freemarker.ext.jsp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -14,6 +18,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,7 +28,17 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.TemplateLoader;
+import freemarker.cache.WebappTemplateLoader;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.servlet.FreemarkerServlet;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.SimpleObjectWrapper;
+import freemarker.template.TemplateExceptionHandler;
 import freemarker.test.servlet.DefaultModel2TesterAction;
 import freemarker.test.servlet.WebAppTestCase;
 
@@ -217,6 +232,20 @@ public class RealServletContainertTest extends WebAppTestCase {
         assertEquals("from /", getResponseContent(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-contentRoot"));
     }
+    
+    @Test
+    public void testConfigurationDefaults() throws Exception {
+        assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-assertDefaultsFreemarkerServlet"));
+        assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-assertDefaultsIcI2322FreemarkerServlet"));
+        assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-assertCustomizedDefaultsFreemarkerServlet"));
+        assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults1FreemarkerServlet"));
+        assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
+                "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults2FreemarkerServlet"));
+    }
 
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {
 
@@ -291,6 +320,130 @@ public class RealServletContainertTest extends WebAppTestCase {
         @Override
         public int size() {
             return 3;
+        }
+        
+    }
+    
+    public static abstract class AssertingFreemarkerServlet extends FreemarkerServlet {
+
+        @Override
+        public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+                IOException {
+            Configuration cfg = getConfiguration();
+            try {
+                doAssertions(cfg);
+            } catch (Exception e) {
+                throw new ServletException("Test failed", e);
+            }
+            
+            response.setStatus(200);
+            response.getWriter().write("OK");
+        }
+
+        protected abstract void doAssertions(Configuration cfg) throws Exception;
+        
+    }
+    
+    public static class AssertDefaultsFreemarkerServlet extends AssertingFreemarkerServlet {
+
+        protected void doAssertions(Configuration cfg) {
+            assertEquals(Configuration.VERSION_2_3_22, cfg.getIncompatibleImprovements());
+            
+            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+            
+            assertFalse(cfg.getLogTemplateExceptions());
+            
+            {
+                ObjectWrapper ow = cfg.getObjectWrapper();
+                assertTrue(ow instanceof DefaultObjectWrapper);
+                assertEquals(Configuration.VERSION_2_3_22, ((DefaultObjectWrapper) ow).getIncompatibleImprovements());
+            }
+            
+            {
+                TemplateLoader tl = cfg.getTemplateLoader();
+                assertTrue(tl instanceof ClassTemplateLoader);
+                assertEquals("/", ((ClassTemplateLoader) tl).getBasePackagePath());
+            }
+            
+        }
+        
+    }
+
+    public static class AssertDefaultsIcI2322FreemarkerServlet extends AssertDefaultsFreemarkerServlet {
+
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+            return cfg;
+        }
+        
+    }
+    
+    public static class AssertCustomizedDefaultsFreemarkerServlet extends AssertingFreemarkerServlet {
+
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            cfg.setLogTemplateExceptions(true);
+            cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build());
+            cfg.setTemplateLoader(new WebappTemplateLoader(getServletContext()));
+            return cfg;
+        }
+
+        protected void doAssertions(Configuration cfg) {
+            assertEquals(Configuration.VERSION_2_3_20, cfg.getIncompatibleImprovements());
+            
+            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.RETHROW_HANDLER);
+            
+            assertTrue(cfg.getLogTemplateExceptions());
+            
+            {
+                ObjectWrapper ow = cfg.getObjectWrapper();
+                assertSame(BeansWrapper.class, ow.getClass());
+                assertEquals(Configuration.VERSION_2_3_21, ((BeansWrapper) ow).getIncompatibleImprovements());
+            }
+            
+            {
+                TemplateLoader tl = cfg.getTemplateLoader();
+                assertTrue(tl instanceof WebappTemplateLoader);
+            }
+            
+        }
+        
+    }
+    
+    public static class AssertObjectWrapperDefaults1FreemarkerServlet extends AssertingFreemarkerServlet {
+
+        @Override
+        protected void doAssertions(Configuration cfg) throws Exception {
+            ObjectWrapper ow = cfg.getObjectWrapper();
+            assertSame(BeansWrapper.class, ow.getClass());
+            assertEquals(Configuration.VERSION_2_3_21, ((BeansWrapper) ow).getIncompatibleImprovements());
+        }
+
+        @Override
+        protected ObjectWrapper createDefaultObjectWrapper() {
+            return new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
+        }
+        
+    }
+
+    public static class AssertObjectWrapperDefaults2FreemarkerServlet extends
+            AssertObjectWrapperDefaults1FreemarkerServlet {
+
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
+            cfg.setObjectWrapper(new SimpleObjectWrapper(Configuration.VERSION_2_3_22));
+            return cfg;
+        }
+        
+        @Override
+        protected void doAssertions(Configuration cfg) throws Exception {
+            ObjectWrapper ow = cfg.getObjectWrapper();
+            assertSame(SimpleObjectWrapper.class, ow.getClass());
+            assertEquals(Configuration.VERSION_2_3_22, ((BeansWrapper) ow).getIncompatibleImprovements());
         }
         
     }

@@ -58,7 +58,6 @@
             <param-value>WEB-INF/templates</param-value>
         </init-param>
     </servlet>
-
     <servlet>
         <servlet-name>freemarker-contentRoot</servlet-name>
         <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
@@ -66,6 +65,31 @@
             <param-name>TemplatePath</param-name>
             <param-value></param-value>
         </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>freemarker-assertDefaultsFreemarkerServlet</servlet-name>
+        <servlet-class>freemarker.ext.jsp.RealServletContainertTest$AssertDefaultsFreemarkerServlet</servlet-class>
+        <init-param>
+            <param-name>incompatible_improvements</param-name>
+            <param-value>2.3.22</param-value>
+        </init-param>
+    </servlet>
+    <servlet>
+        <servlet-name>freemarker-assertDefaultsIcI2322FreemarkerServlet</servlet-name>
+        <servlet-class>freemarker.ext.jsp.RealServletContainertTest$AssertDefaultsIcI2322FreemarkerServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>freemarker-assertCustomizedDefaultsFreemarkerServlet</servlet-name>
+        <servlet-class>freemarker.ext.jsp.RealServletContainertTest$AssertCustomizedDefaultsFreemarkerServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>freemarker-assertObjectWrapperDefaults1FreemarkerServlet</servlet-name>
+        <servlet-class>freemarker.ext.jsp.RealServletContainertTest$AssertObjectWrapperDefaults1FreemarkerServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>freemarker-assertObjectWrapperDefaults2FreemarkerServlet</servlet-name>
+        <servlet-class>freemarker.ext.jsp.RealServletContainertTest$AssertObjectWrapperDefaults2FreemarkerServlet</servlet-class>
     </servlet>
 
 </web-app>
