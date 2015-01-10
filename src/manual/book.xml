@@ -21916,16 +21916,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>DefaultObjectWrapper</literal>, only with its
                   <literal>incompatible_improvements</literal> set to 2.3.22
                   (<link linkend="topic.defaultObjectWrapperIcI">see how
-                  here...</link>) or with its new
+                  here...</link>), or more precisely, with its new
                   <literal>useAdaptersForContainers</literal> setting set to
-                  <literal>true</literal>: It doesn't copy
-                  <literal>Map</literal>-s, <literal>List</literal>-s, and
-                  arrays anymore when wrapping them into
-                  <literal>TemplateModel</literal>-s (which is the interface
-                  through with templates access all values), just wraps them
-                  into thin <literal>TemplateModel</literal> adapters, that
-                  will reach the original object for all operations. The
-                  wrapped values will be instances of the new
+                  <literal>true</literal> (which defaults to
+                  <literal>true</literal> when
+                  <literal>incompatible_improvements</literal> is set to
+                  2.3.22): It doesn't copy <literal>Map</literal>-s,
+                  <literal>List</literal>-s, and arrays anymore when wrapping
+                  them into <literal>TemplateModel</literal>-s (which is the
+                  interface through with templates access all values), just
+                  wraps them into thin <literal>TemplateModel</literal>
+                  adapters, that will reach the original object for all
+                  operations. The wrapped values will be instances of the new
                   <literal>DefaultMapAdapter</literal>,
                   <literal>DefaultListAdapter</literal> and
                   <literal>DefaultArrayAdapter</literal> classes, instead of
@@ -21942,211 +21944,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                   <para>While keeping backward compatibility as much as
                   possible was an important factor in this change, this is a
-                  quite deep change, so let's see the consequences and reasons
-                  (but again, this change is <emphasis>not</emphasis> active
-                  by default, so merely updating FreeMarker wont risk the
-                  stability of existing applications):</para>
-
-                  <itemizedlist>
-                    <listitem>
-                      <para>Bug fixed [<link
-                      xlink:href="http://sourceforge.net/p/freemarker/bugs/368/">368</link>]:
-                      With the new approach (the adapter approach), the key
-                      order of <literal>Map</literal>-s is never lost. The
-                      copying approach could only keep that for
-                      <literal>HashMap</literal> subclasses (such as
-                      <literal>LinkedHashMap</literal>) and
-                      <literal>SortedMap</literal>-s (such as
-                      <literal>TreeMap</literal>), but not for more exotic
-                      <literal>Map</literal>-s, like Guava's
-                      <literal>ImmutableMap</literal>. Also, any other
-                      behavioral peculiarities of the original
-                      <literal>Map</literal> (e.g., case insensitive key
-                      lookup) is kept now.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>The exact type and identity of the
-                      <literal>Map</literal>/<literal>List</literal> is kept
-                      when the wrapped value is passed back to a Java method
-                      from the template. With the legacy approach the Java
-                      methods have received a <literal>Map</literal> or
-                      <literal>List</literal> of a special FreeMarker specific
-                      type (that acted as an adapter for the
-                      <literal>TemplateModel</literal>).</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>Performance characteristics change, mostly for the
-                      better, but it depends on the application. If the
-                      template reads the <emphasis>same(!)</emphasis> entry
-                      <emphasis>from the data model</emphasis> roughly once or
-                      twice (or not at all), which is typical, them the
-                      adapter approach gives better results, otherwise the
-                      legacy copying approach is faster (as it can reuse the
-                      wrapped entry from the previous read), though this
-                      slowdown certainly not a concern for most applications.
-                      The performance of the new adapter approach is more
-                      predictable, because it has no initial
-                      <quote>spike</quote> to set up the container copy
-                      (especially painful for huge collections), instead the
-                      performance is linearly proportional to the number of
-                      data model reads (and not to the number of collection
-                      entries).</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>If the
-                      <literal>Map</literal>/<literal>List</literal>/array is
-                      changed after it was wrapped, the change will now become
-                      visible in the data-model. With the copying approach,
-                      the wrapped value was a shallow-snapshot of the original
-                      <literal>Map</literal>/<literal>List</literal>/array.
-                      While it's unlikely that someone has deliberately
-                      utilized this, it's a risk factor when switching to
-                      adapters.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>It's theoretically possible that some code (mostly
-                      <literal>TemplateDirectiveModel</literal>
-                      implementations) mistakenly assumed that wrapped
-                      <literal>Map</literal>-s are
-                      <literal>SimpleHash</literal>-es, and wrapped
-                      <literal>List</literal>-s are
-                      <literal>SimpleSequence</literal>-s, etc., instead of
-                      them just being <literal>TemplateHashModel</literal>-s
-                      and <literal>TemplateSequenceModel</literal>-s. Such
-                      code was always wrong, but now it will indeed break, so
-                      it's a risk factor.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>As now the exact type of the wrapped original
-                      object is used for overloaded method selection, the
-                      choice can be different (and similar to what it would be
-                      with pure <literal>BeansWrapper</literal>). It's
-                      difficult to find cases where this matters. A change is
-                      most probable around arrays, as with the copying
-                      approach they were unwrapped to
-                      <literal>List</literal>-s, not to the original array. As
-                      the overloaded method mechanism can convert between
-                      arrays and lists (in both directions), it's usually not
-                      a problem. But, it doesn't do conversion between
-                      different array types when the overloaded method has
-                      various types on the parameter position of the array, so
-                      that's a risk factor.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para><literal>SimpleHash</literal> and
-                      <literal>SimpleSequence</literal> haven't become
-                      deprecated. They are still used for hashes and sequences
-                      created in FTL, and are recommended for values that are
-                      built specifically to be used from templates, rather
-                      than wrapping an already existing <literal>Map</literal>
-                      or <literal>List</literal> or array.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>At least until
-                      <literal>incompatible_improvements</literal> 2.4.0,
-                      <literal>java.util.Collection</literal>-s that aren't
-                      <literal>List</literal>-s (like
-                      <literal>Set</literal>-s) will continue using
-                      <literal>SimpleSequence</literal> (i.e., the copying
-                      approach) by default. This is because
-                      <literal>SimpleSequence</literal> gave indexed access to
-                      these non-<literal>List</literal>-s, like in
-                      <literal>mySet[2]</literal>, which is strange but some
-                      existing templates may utilize this, even if only
-                      accidentally. To enable the more modern adapter
-                      approach, set <literal>DefaultObjectWrapper</literal>'s
-                      <literal>forceLegacyNonListCollections</literal>
-                      property to <literal>false</literal>. Then indexed
-                      access won't be possible for <literal>Set</literal>-s
-                      and such (nor will <literal>?first</literal> and
-                      <literal>?last</literal> work, but
-                      <literal>?size</literal> will still work), so you may
-                      want to retest old templates, but you get the advantages
-                      of the adapter approach. In new projects it's highly
-                      recommended to set
-                      <literal>forceLegacyNonListCollections</literal> to
-                      <literal>false</literal>. (The adapter approach is
-                      implemented by
-                      <literal>DefaultNonListCollectionAdapter</literal>.)</para>
-                    </listitem>
-
-                    <listitem>
-                      <para><literal>List</literal>-s and
-                      <literal>Map</literal>-s that are exposed to templates
-                      in multiple threads are now under greater stress
-                      regarding their correct operation under multi-threaded
-                      read-only access. This is because the adapters won't
-                      copy their contents into well known
-                      <literal>List</literal> and <literal>Map</literal>
-                      implementations (<literal>HashMap</literal>,
-                      <literal>ArrayList</literal>, etc.) before accessing
-                      them from multiple threads. So this is mostly a concern
-                      with custom <literal>List</literal> and
-                      <literal>Map</literal> implementations, which aren't as
-                      mature as the standard Java classes. Note that this was
-                      always like so with pure
-                      <literal>BeansWrapper</literal>, which is used by a lot
-                      of projects/frameworks (like by Struts) for a long time,
-                      so it's not an uncharted territory.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>When the wrapped <literal>List</literal> is a
-                      <literal>AbstractSequentialList</literal> (like a
-                      <literal>LinkedList</literal>), the resulting adapter
-                      will implement
-                      <literal>TemplateCollectionModel</literal> for more
-                      efficient enumeration (<literal>#list</literal>-ing), in
-                      additionally to <literal>TemplateSequenceModel</literal>
-                      of course. <literal>TemplateCollectionModel</literal>
-                      allows FTL to traverse the list without accessing
-                      elements by index. With the legacy copying approach
-                      <literal>TemplateCollectionModel</literal> wasn't
-                      implemented as it wasn't needed for efficient
-                      enumeration there.</para>
-                    </listitem>
-
-                    <listitem>
-                      <para>Iterators (when you put them directly into the
-                      data-model) are wrapped into
-                      <literal>DefaultIteratorAdapter</literal> instead of
-                      <literal>SimpleCollection</literal>. This has two
-                      consequences:</para>
-
-                      <itemizedlist>
-                        <listitem>
-                          <para>The wrapped <literal>Iterator</literal> is now
-                          unwrapped properly to the original Java object when
-                          it's passed to Java method from the template.</para>
-                        </listitem>
-
-                        <listitem>
-                          <para>Wrapped <literal>Iterator</literal>-s (not to
-                          be confused with <literal>Iterable</literal>) aren't
-                          thread-safe anymore, to spare some synchronizations,
-                          after all, exposing the same
-                          <literal>Iterator</literal> to multiple parallel
-                          template executions doesn't make much sense. This
-                          shouldn't be a migration concern, as even earlier,
-                          only one of those template executions could succeed
-                          (the <quote>content</quote> of
-                          <literal>Iterator</literal>-s wasn't copied, so the
-                          one who first accessed it become the exclusive
-                          owner). The change is just that earlier it was
-                          guaranteed that the other threads will fail (that
-                          was the thread-safe about it), while now there are
-                          no such guarantees.</para>
-                        </listitem>
-                      </itemizedlist>
-                    </listitem>
-                  </itemizedlist>
+                  quite deep change, so you may want to <link
+                  linkend="topic.defaultObjectWrapperSwitchToAdapters">review
+                  the consequences and reasons here...</link> (But again, this
+                  change is <emphasis>not</emphasis> active by default, so
+                  merely updating FreeMarker wont risk the stability of
+                  existing applications)</para>
                 </listitem>
 
                 <listitem>
@@ -22177,6 +21980,49 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ClassCastException</literal>, thus, such
                   <literal>SortedMap</literal>-s were never usable as FTL
                   hashes.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/368/">368</link>]:
+                  Only with <literal>incompatible_improvements</literal> set
+                  to 2.3.22 or with its new
+                  <literal>useAdaptersForContainers</literal> setting set to
+                  <literal>true</literal>: Key order and other behavioral
+                  peculiarities of <quote>custom</quote>
+                  <literal>Map</literal> types isn't lost anymore. The same
+                  stands for <literal>List</literal>-s too.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new setting,
+                  <literal>forceLegacyNonListCollections</literal>. This only
+                  matters when <literal>useAdaptersForContainers</literal> is
+                  <literal>true</literal>. Then, unless you set this to
+                  <literal>true</literal>,
+                  <literal>java.util.Collection</literal>-s that aren't
+                  <literal>List</literal>-s (like <literal>Set</literal>-s)
+                  will continue using <literal>SimpleSequence</literal> (i.e.,
+                  the copying approach) instead of the adapter approach. The
+                  default is <literal>false</literal>, at least until
+                  <literal>incompatible_improvements</literal> 2.4.0, because
+                  <literal>SimpleSequence</literal> gave indexed access to
+                  these non-<literal>List</literal>-s, like in
+                  <literal>mySet[2]</literal>, which is strange but some
+                  existing templates may utilize this, even if only
+                  accidentally. With
+                  <literal>forceLegacyNonListCollections</literal> set to
+                  <literal>false</literal>, indexed access won't be possible
+                  for <literal>Set</literal>-s and such anymore (nor will
+                  <literal>?first</literal> and <literal>?last</literal> work,
+                  but <literal>?size</literal> will still do), so you may want
+                  to retest old templates. On the other hand, you get the
+                  advantages of the adapter approach. Hence, in new projects
+                  it's highly recommended to set
+                  <literal>forceLegacyNonListCollections</literal> to
+                  <literal>false</literal>. (The adapter approach is
+                  implemented by
+                  <literal>DefaultNonListCollectionAdapter</literal>.)</para>
                 </listitem>
 
                 <listitem>
@@ -22216,11 +22062,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new experimental interfaces to implement
-                  <literal>?api</literal> (see it in the FTL section):
-                  <literal>TemplateModelWithAPISupport</literal>,
+                  <para>Added new <emphasis>experimental</emphasis> interfaces
+                  to implement <literal>?api</literal> (see it in the FTL
+                  section): <literal>TemplateModelWithAPISupport</literal>,
                   <literal>ObjectAPIWrapper</literal>,
-                  <literal>RichObjectWrapper</literal>.</para>
+                  <literal>RichObjectWrapper</literal>. Note that while the
+                  interfaces are experimental, <literal>?api</literal> itself
+                  isn't.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -22312,15 +22160,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Added new init-param, <literal>BufferSize</literal>.
-                  This sets the buffer size via
+                  <para>Added new servlet init-param,
+                  <literal>BufferSize</literal>. This sets the buffer size via
                   <literal>HTTPServletResponse.setBufferSize()</literal> if
                   the response state still allows that.</para>
                 </listitem>
 
                 <listitem>
-                  <para>The <literal>TemplatePath</literal> init-param now
-                  supports a new kind of path, that looks like
+                  <para>The <literal>TemplatePath</literal> servlet init-param
+                  now supports a new kind of path, that looks like
                   <literal>classpath:com/example/myapp/templates</literal>.
                   This is similar to the old
                   <literal>class://com/example/myapp/templates</literal>, but
@@ -22334,6 +22182,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Added new servlet <literal>init-param</literal>,
+                  <literal>ExceptionOnMissingTemplate</literal>. Setting this
+                  to <literal>true</literal> changes the behavior on
+                  template-not-found errors to similar to what you experience
+                  with other kind of template exceptions (a HTTP 500
+                  <quote>Internal Server error</quote> response on most
+                  setups). When it's <literal>false</literal> (the legacy
+                  behavior), you only get a HTTP 404 <quote>Not found</quote>.
+                  While that's also how JSP views work, this turns out to be a
+                  problem, because some frameworks give 404 to the visitor too
+                  if the MVC view gives 404. But to get to the point where you
+                  forward to the MVC View, the visitor had to visit a valid
+                  URL, only that page misses its View, so its broken on the
+                  server side, so it should be a 500.</para>
+                </listitem>
+
+                <listitem>
                   <para>Added new overridable method:
                   <literal>FreemarkerServlet.createDefaultObjectWrapper()</literal>.
                   This can be used for what
@@ -22341,6 +22206,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   overridden for, but without unwillingly disabling the
                   processing of the related init-params (like of
                   <literal>object_wrapper</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Improved (or fixed) error logging: Now logs will
+                  always get into FreeMarker's own log, not only into the
+                  servlet container log. Also, earlier template-not-found and
+                  template parsing error details logs were sometimes lost,
+                  depending on the servlet container.</para>
                 </listitem>
 
                 <listitem>
@@ -22599,6 +22472,168 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               FreeMarker doesn't fail anymore when it has no permission to
               read Java system properties, like when used in unsigned applets.
               It just logs some warnings.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Notes</title>
+
+          <para xml:id="topic.defaultObjectWrapperSwitchToAdapters">The
+          consequences and reasons of introducing adapter approach for
+          container types in <literal>DefaultObjectWrapper</literal> when its
+          incompatibleImprovements is set to 2.3.22:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>With the new approach (the adapter approach), the key
+              order of <literal>Map</literal>-s is never lost. The copying
+              approach could only keep that for <literal>HashMap</literal>
+              subclasses (such as <literal>LinkedHashMap</literal>) and
+              <literal>SortedMap</literal>-s (such as
+              <literal>TreeMap</literal>), but not for more exotic
+              <literal>Map</literal>-s, like Guava's
+              <literal>ImmutableMap</literal>. Also, any other behavioral
+              peculiarities of the original <literal>Map</literal> (e.g., case
+              insensitive key lookup) is kept now.</para>
+            </listitem>
+
+            <listitem>
+              <para>The exact type and identity of the
+              <literal>Map</literal>/<literal>List</literal> is kept when the
+              wrapped value is passed back to a Java method from the template.
+              With the legacy approach the Java methods have received a
+              <literal>Map</literal> or <literal>List</literal> of a special
+              FreeMarker specific type (that acted as an adapter for the
+              <literal>TemplateModel</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>Performance characteristics change, mostly for the better,
+              but it depends on the application. If the template reads the
+              <emphasis>same(!)</emphasis> entry <emphasis>from the data
+              model</emphasis> roughly once or twice (or not at all), which is
+              typical, them the adapter approach gives better results,
+              otherwise the legacy copying approach is faster (as it can reuse
+              the wrapped entry from the previous read), though this slowdown
+              certainly not a concern for most applications. The performance
+              of the new adapter approach is more predictable, because it has
+              no initial <quote>spike</quote> to set up the container copy
+              (especially painful for huge collections), instead the
+              performance is linearly proportional to the number of data model
+              reads (and not to the number of collection entries).</para>
+            </listitem>
+
+            <listitem>
+              <para>If the
+              <literal>Map</literal>/<literal>List</literal>/array is changed
+              after it was wrapped, the change will now become visible in the
+              data-model. With the copying approach, the wrapped value was a
+              shallow-snapshot of the original
+              <literal>Map</literal>/<literal>List</literal>/array. While it's
+              unlikely that someone has deliberately utilized this, it's a
+              risk factor when switching to adapters.</para>
+            </listitem>
+
+            <listitem>
+              <para>It's theoretically possible that some code (mostly
+              <literal>TemplateDirectiveModel</literal> implementations)
+              mistakenly assumed that wrapped <literal>Map</literal>-s are
+              <literal>SimpleHash</literal>-es, and wrapped
+              <literal>List</literal>-s are
+              <literal>SimpleSequence</literal>-s, etc., instead of them just
+              being <literal>TemplateHashModel</literal>-s and
+              <literal>TemplateSequenceModel</literal>-s. Such code was always
+              wrong, but now it will indeed break, so it's a risk
+              factor.</para>
+            </listitem>
+
+            <listitem>
+              <para>As now the exact type of the wrapped original object is
+              used for overloaded method selection, the choice can be
+              different (and similar to what it would be with pure
+              <literal>BeansWrapper</literal>). It's difficult to find cases
+              where this matters. A change is most probable around arrays, as
+              with the copying approach they were unwrapped to
+              <literal>List</literal>-s, not to the original array. As the
+              overloaded method mechanism can convert between arrays and lists
+              (in both directions), it's usually not a problem. But, it
+              doesn't do conversion between different array types when the
+              overloaded method has various types on the parameter position of
+              the array, so that's a risk factor.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>SimpleHash</literal> and
+              <literal>SimpleSequence</literal> haven't become deprecated.
+              They are still used for hashes and sequences created in FTL, and
+              are recommended for values that are built specifically to be
+              used from templates, rather than wrapping an already existing
+              <literal>Map</literal> or <literal>List</literal> or
+              array.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>List</literal>-s and <literal>Map</literal>-s
+              that are exposed to templates in multiple threads are now under
+              greater stress regarding their correct operation under
+              multi-threaded read-only access. This is because the adapters
+              won't copy their contents into well known
+              <literal>List</literal> and <literal>Map</literal>
+              implementations (<literal>HashMap</literal>,
+              <literal>ArrayList</literal>, etc.) before accessing them from
+              multiple threads. So this is mostly a concern with custom
+              <literal>List</literal> and <literal>Map</literal>
+              implementations, which aren't as mature as the standard Java
+              classes. Note that this was always like so with pure
+              <literal>BeansWrapper</literal>, which is used by a lot of
+              projects/frameworks (like by Struts) for a long time, so it's
+              not an uncharted territory.</para>
+            </listitem>
+
+            <listitem>
+              <para>When the wrapped <literal>List</literal> is a
+              <literal>AbstractSequentialList</literal> (like a
+              <literal>LinkedList</literal>), the resulting adapter will
+              implement <literal>TemplateCollectionModel</literal> for more
+              efficient enumeration (<literal>#list</literal>-ing), in
+              additionally to <literal>TemplateSequenceModel</literal> of
+              course. <literal>TemplateCollectionModel</literal> allows FTL to
+              traverse the list without accessing elements by index. With the
+              legacy copying approach
+              <literal>TemplateCollectionModel</literal> wasn't implemented as
+              it wasn't needed for efficient enumeration there.</para>
+            </listitem>
+
+            <listitem>
+              <para>Iterators (when you put them directly into the data-model)
+              are wrapped into <literal>DefaultIteratorAdapter</literal>
+              instead of <literal>SimpleCollection</literal>. This has two
+              consequences:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>The wrapped <literal>Iterator</literal> is now
+                  unwrapped properly to the original Java object when it's
+                  passed to Java method from the template.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Wrapped <literal>Iterator</literal>-s (not to be
+                  confused with <literal>Iterable</literal>) aren't
+                  thread-safe anymore, to spare some synchronizations, after
+                  all, exposing the same <literal>Iterator</literal> to
+                  multiple parallel template executions doesn't make much
+                  sense. This shouldn't be a migration concern, as even
+                  earlier, only one of those template executions could succeed
+                  (the <quote>content</quote> of <literal>Iterator</literal>-s
+                  wasn't copied, so the one who first accessed it become the
+                  exclusive owner). The change is just that earlier it was
+                  guaranteed that the other threads will fail (that was the
+                  thread-safe about it), while now there are no such
+                  guarantees.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
