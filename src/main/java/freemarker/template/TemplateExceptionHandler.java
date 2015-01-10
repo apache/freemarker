@@ -79,7 +79,7 @@ public interface TemplateExceptionHandler {
             if (!env.isInAttemptBlock()) {
                 PrintWriter pw = (out instanceof PrintWriter) ? (PrintWriter) out : new PrintWriter(out);
                 te.printStackTrace(pw);
-                pw.flush();
+                pw.flush();  // To commit the HTTP response
             }
             throw te;
         }
@@ -128,7 +128,7 @@ public interface TemplateExceptionHandler {
                     pw.println(StringUtil.XMLEncNQG(stackTraceSW.toString()));
                     
                     pw.println("</pre></div></html>");
-                    pw.flush();
+                    pw.flush();  // To commit the HTTP response
                 } finally {
                     if (!externalPw) pw.close();
                 }

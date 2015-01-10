@@ -5499,7 +5499,7 @@ cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templ
 cfg.setDefaultEncoding("UTF-8");
 
 // Sets how errors will appear.
-// During development TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
+// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
 cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
@@ -5717,7 +5717,7 @@ public class Test {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
@@ -9011,12 +9011,12 @@ TemplateHashModel roundingModeEnums =
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
-    &lt;!-- Some may prefer "html_debug" for development. --&gt;
+    &lt;!-- Use "html_debug" instead during development! --&gt;
     &lt;param-value&gt;rethrow&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_update_delay&lt;/param-name&gt;
-    &lt;!-- 0 is for development only! Use higher value otherwise. --&gt;
+    &lt;!-- ATTENTION, 0 is for development only! Use higher value otherwise. --&gt;
     &lt;param-value&gt;0&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;

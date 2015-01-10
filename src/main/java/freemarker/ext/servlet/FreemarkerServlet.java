@@ -216,17 +216,13 @@ import freemarker.template.utility.StringUtil;
  * 
  * <li>
  * If the template throws exception during its execution, and the value of the {@code template_exception_handler}
- * init-param is {@code rethrow} (recommended), it will log it with error level, then the servlet throws
- * {@link ServletException} to the servlet container (with the proper cause exception). If, however, the
- * {@code template_exception_handler} init-param is {@code html_debug}, then as that template exception handler prints
- * the error message to the page, no exception will be thrown (so that the page buffer is not discarded), and the error
- * is logged with error level, and then for backward compatibility it's logged again into the servlet container's log.
- * For production, only the first approach ({@code rethrow}) fits, so you should set the
- * {@code template_exception_handler} init-param to {@code rethrow}! {@code html_debug} is for template development
- * only. When the value of the {@code template_exception_handler} setting is neither {@code rethrow} nor
- * {@code html_debug}, the servlet will check the name of the {@link TemplateExceptionHandler} object in use, and if
- * that contains the substring "Debug", then it behaves as with {@code html_debug}, otherwise it behaves as with
- * {@code rethrow}.
+ * init-param is {@code rethrow} (recommended), it will log it with error level and then the servlet throws
+ * {@link ServletException} to the servlet container (with the proper cause exception). But beware, the default value of
+ * the {@code template_exception_handler} init-param is {@code html_debug}, which is for development only! Set it to
+ * {@code rethrow} for production. The {@code html_debug} (and {@code debug}) handlers will print error details to the
+ * page and then commit the HTTP response with response code 200 "OK", thus, the server wont be able roll back the
+ * response and send back an HTTP 500 page. This is so that the template developers will see the error without digging
+ * the logs. 
  * 
  * </ul>
  */

@@ -23,10 +23,12 @@
 			<param-value>/</param-value>
 		</init-param>
 
+        <!-- This is the default anyway:
 		<init-param>
 			<param-name>template_exception_handler</param-name>
-			<param-value>debug</param-value>
+			<param-value>html_debug</param-value>
 		</init-param>
+        -->
 
 		<load-on-startup>1</load-on-startup>
 	</servlet>
