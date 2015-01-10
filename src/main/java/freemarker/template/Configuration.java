@@ -17,7 +17,6 @@
 package freemarker.template;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
@@ -1085,13 +1084,13 @@ public class Configuration extends Configurable implements Cloneable {
      *     treated as a static text, so <code>${...}</code>, {@code <#...>} etc. will not have special meaning
      *     in it.
      *     
-     * @param ignoreMissing If {@code true}, the method won't throw {@link FileNotFoundException} if the template
+     * @param ignoreMissing If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template
      *     doesn't exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
      * 
      * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
      * 
-     * @throws FileNotFoundException if the template could not be found.
-     * @throws IOException if there was a problem loading the template.
+     * @throws TemplateNotFoundException if the template could not be found.
+     * @throws IOException if there was a problem with reading the template "file".
      * @throws ParseException (extends <code>IOException</code>) if the template is syntactically bad.
      * 
      * @since 2.3.21
@@ -1125,7 +1124,7 @@ public class Configuration extends Configurable implements Cloneable {
                             + "default value, which is most certainly not intended and the cause of this problem."; 
                 }
             }
-            throw new FileNotFoundException(msg);
+            throw new TemplateNotFoundException(name, msg);
         }
         return result;
     }

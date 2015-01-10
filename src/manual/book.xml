@@ -22560,6 +22560,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new exception,
+              <literal>TemplateNotFoundException</literal>, which is now used
+              instead of <literal>TemplateNotFoundException</literal> when
+              getting a template. As it extends
+              <literal>TemplateNotFoundException</literal>, this change is
+              backward compatible. The main goal was to counter the common
+              misunderstanding that template paths are real file paths.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
               active only with <literal>incompatible_improvements</literal>
