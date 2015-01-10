@@ -735,19 +735,20 @@ public class FreemarkerServlet extends HttpServlet
                 }
             }
         } catch (TemplateException e) {
-            final String message = "Error executing FreeMarker template";
-            if (config.getTemplateExceptionHandler().getClass().getName().indexOf("Debug") != -1) {
-                LOG.error(message, e);
-                log(message, e);  // for backward compatibility
-            } else {
-                throw newServletExceptionWithFreeMarkerLogging(message, e);
+            final TemplateExceptionHandler teh = config.getTemplateExceptionHandler();
+            // Ensure that debug handler responses aren't rolled back:
+            if (teh == TemplateExceptionHandler.HTML_DEBUG_HANDLER || teh == TemplateExceptionHandler.DEBUG_HANDLER
+                    || teh.getClass().getName().indexOf("Debug") != -1) {
+                response.flushBuffer();
             }
+            throw newServletExceptionWithFreeMarkerLogging("Error executing FreeMarker template", e);
         }
     }
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
         if (cause instanceof TemplateException) {
-            // For backward compatibility, we log into the same category as Environment did.
+            // For backward compatibility, we log into the same category as Environment did when
+            // log_template_exceptions was true.
             LOG_RT.error(message, cause);
         } else {
             LOG.error(message, cause);
