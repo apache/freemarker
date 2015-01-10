@@ -78,7 +78,9 @@ public interface TemplateExceptionHandler {
                 throws TemplateException {
             if (!env.isInAttemptBlock()) {
                 PrintWriter pw = (out instanceof PrintWriter) ? (PrintWriter) out : new PrintWriter(out);
-                te.printStackTrace(pw);
+                pw.print("FreeMarker template error (DEBUG mode; use RETHROW in production!):\n");
+                te.printStackTrace(pw, false, true, true);
+                
                 pw.flush();  // To commit the HTTP response
             }
             throw te;
@@ -113,7 +115,8 @@ public interface TemplateExceptionHandler {
                     pw.print(FONT_RESET_CSS);
                     pw.print("'>"
                             + "<b style='font-size:12px; font-style:normal; font-weight:bold; "
-                            + "text-decoration:none; text-transform: none;'>FreeMarker template error</b>"
+                            + "text-decoration:none; text-transform: none;'>FreeMarker template error "
+                            + " (HTML_DEBUG mode; use RETHROW in production!)</b>"
                             + "<pre style='display:block; background: none; border: 0; margin:0; padding: 0;"
                             + "font-family:monospace; ");
                     pw.print(FONT_RESET_CSS);

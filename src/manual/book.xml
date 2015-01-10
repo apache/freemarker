@@ -22308,7 +22308,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Bug fixed: Defaults set in an overidden
+                  <para>Bug fixed: Defaults set in an overridden
                   <literal>FreemarkerServlet.createConfiguration</literal>
                   won't be accidentally overwritten by
                   <literal>FreemarkerServlet</literal>'s factory defaults
@@ -22472,6 +22472,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               FreeMarker doesn't fail anymore when it has no permission to
               read Java system properties, like when used in unsigned applets.
               It just logs some warnings.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>HTML_DEBUG</literal> and <literal>DEBUG</literal>
+              <literal>TemplateExceptionHandler</literal> output now contains
+              a warning like <quote>HTML_DEBUG mode; use RETHROW in
+              production!</quote>, due to frequent misuse.</para>
             </listitem>
           </itemizedlist>
         </section>
