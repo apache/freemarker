@@ -258,24 +258,24 @@ public class TemplateCache
                 boolean sourceEquals = newlyFoundSource.equals(cachedTemplate.source);
                 if(lastModifiedNotChanged && sourceEquals) {
                     if(debug) {
-                        logger.debug(debugName + " using cached since " + 
-                                newlyFoundSource + " didn't change.");
+                        logger.debug(debugName + ": using cached since " + 
+                                newlyFoundSource + " hasn't changed.");
                     }
                     storeCached(tk, cachedTemplate);
                     return (Template)cachedTemplate.templateOrException;
                 }
                 else {
                     if(debug && !sourceEquals) {
-                        logger.debug("Updating source, info for cause: " + 
+                        logger.debug("Updating source because: " + 
                             "sourceEquals=" + sourceEquals + 
                             ", newlyFoundSource=" + StringUtil.jQuoteNoXSS(newlyFoundSource) + 
-                            ", cachedTemplate.source=" + StringUtil.jQuoteNoXSS(cachedTemplate.source));
+                            ", cached.source=" + StringUtil.jQuoteNoXSS(cachedTemplate.source));
                     }
                     if(debug && !lastModifiedNotChanged) {
-                        logger.debug("Updating source, info for cause: " + 
+                        logger.debug("Updating source because: " + 
                             "lastModifiedNotChanged=" + lastModifiedNotChanged + 
-                            ", cache lastModified=" + cachedTemplate.lastModified + 
-                            " != file lastModified=" + lastModified);
+                            ", cached.lastModified=" + cachedTemplate.lastModified + 
+                            " != source.lastModified=" + lastModified);
                     }
                     // Update the source
                     cachedTemplate.source = newlyFoundSource;
