@@ -62,7 +62,7 @@ public class BeanModel
 implements
     TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport
 {
-    private static final Logger logger = Logger.getLogger("freemarker.beans");
+    private static final Logger LOG = Logger.getLogger("freemarker.beans");
     protected final Object object;
     protected final BeansWrapper wrapper;
     
@@ -183,7 +183,7 @@ implements
             if (retval == UNKNOWN) {
                 if (wrapper.isStrict()) {
                     throw new InvalidPropertyException("No such bean property: " + key);
-                } else if (logger.isDebugEnabled()) {
+                } else if (LOG.isDebugEnabled()) {
                     logNoSuchKey(key, classInfo);
                 }
                 retval = wrapper.wrap(null);
@@ -210,7 +210,7 @@ implements
 
     private void logNoSuchKey(String key, Map keyMap)
     {
-        logger.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
+        LOG.debug("Key " + StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
             object.getClass().getName() + ". Introspection information for " +
             "the class is: " + keyMap);
     }

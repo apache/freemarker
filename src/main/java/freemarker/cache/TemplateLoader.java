@@ -46,40 +46,38 @@ import freemarker.template.Configuration;
 public interface TemplateLoader {
 	
     /**
-     * Finds the object that acts as the source of the template with the
-     * given name. This method is called by the {@link TemplateCache} when a template
-     * is requested, before calling either {@link #getLastModified(Object)} or
+     * Finds the object that acts as the source of the template with the given name. This method is called by the
+     * {@link TemplateCache} when a template is requested, before calling either {@link #getLastModified(Object)} or
      * {@link #getReader(Object, String)}.
      *
-     * @param name the name of the template, already localized and normalized by
-     * the {@link freemarker.cache.TemplateCache cache}.
-     * It is completely up to the loader implementation to interpret
-     * the name, however it should expect to receive hierarchical paths where
-     * path components are separated by a slash (not backslash). Backslashes
-     * (or any other OS specific separator character) are not considered as separators by
-     * FreeMarker, and thus they will not be replaced with slash before passing to this method,
-     * so it's up to the template loader to handle them (say, be throwing and exception that
-     * tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
-     * typical mistake of Windows users).
-     * The passed names are always considered relative to some loader-defined root
-     * location (often referred as the "template root directory"), and will never start with
-     * a slash, nor will they contain a path component consisting of either a single or a double
-     * dot -- these are all resolved by the template cache before passing the name to the
-     * loader. As a side effect, paths that trivially reach outside template root directory,
-     * such as <tt>../my.ftl</tt>, will be rejected by the template cache, so they never
-     * reach the template loader. Note again, that if the path uses backslash as path separator
-     * instead of slash as (the template loader should not accept that), the normalization will
-     * not properly happen, as FreeMarker (the cache) recognizes only the slashes as separators.
+     * @param name
+     *            the name of the template, already localized and normalized by the
+     *            {@link freemarker.cache.TemplateCache cache}. It is completely up to the loader implementation to
+     *            interpret the name, however it should expect to receive hierarchical paths where path components are
+     *            separated by a slash (not backslash). Backslashes (or any other OS specific separator character) are
+     *            not considered as separators by FreeMarker, and thus they will not be replaced with slash before
+     *            passing to this method, so it's up to the template loader to handle them (say, be throwing and
+     *            exception that tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
+     *            typical mistake of Windows users). The passed names are always considered relative to some
+     *            loader-defined root location (often referred as the "template root directory"), and will never start
+     *            with a slash, nor will they contain a path component consisting of either a single or a double dot --
+     *            these are all resolved by the template cache before passing the name to the loader. As a side effect,
+     *            paths that trivially reach outside template root directory, such as <tt>../my.ftl</tt>, will be
+     *            rejected by the template cache, so they never reach the template loader. Note again, that if the path
+     *            uses backslash as path separator instead of slash as (the template loader should not accept that), the
+     *            normalization will not properly happen, as FreeMarker (the cache) recognizes only the slashes as
+     *            separators.
      *
-     * @return an object representing the template source, which can be
-     * supplied in subsequent calls to {@link #getLastModified(Object)} and
-     * {@link #getReader(Object, String)}. Null must be returned if the source
-     * for the template can not be found (do not throw <code>FileNotFoundException</code>!).
-     * The returned object may will be compared with a cached template source
-     * object for equality, using the <code>equals</code> method. Thus,
-     * objects returned for the same physical source must be equivalent
-     * according to <code>equals</code> method, otherwise template caching
-     * can become very ineffective!
+     * @return an object representing the template source, which can be supplied in subsequent calls to
+     *         {@link #getLastModified(Object)} and {@link #getReader(Object, String)}. Null must be returned if the
+     *         source for the template can not be found (do not throw exception!). The returned object may will be
+     *         compared with a cached template source object for equality, using the <code>equals</code> method. Thus,
+     *         objects returned for the same physical source must be equivalent according to <code>equals</code> method,
+     *         otherwise template caching can become very ineffective!
+     * 
+     * @throws IOException
+     *             When an error occurs that makes it impossible to find out if the template exists, or to access the
+     *             existing template.
      */
     public Object findTemplateSource(String name)
     throws

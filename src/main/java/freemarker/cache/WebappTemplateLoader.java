@@ -37,7 +37,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class WebappTemplateLoader implements TemplateLoader
 {
-    private static final Logger logger = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = Logger.getLogger("freemarker.cache");
     
     private final ServletContext servletContext;
     private final String subdirPath;
@@ -111,7 +111,7 @@ public class WebappTemplateLoader implements TemplateLoader
         try {
             url = servletContext.getResource(fullPath);
         } catch(MalformedURLException e) {
-            logger.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath),
+            LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath),
                     e);
             return null;
         }

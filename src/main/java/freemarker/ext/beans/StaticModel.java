@@ -39,7 +39,7 @@ import freemarker.template.TemplateModelException;
  */
 final class StaticModel implements TemplateHashModelEx
 {
-    private static final Logger logger = Logger.getLogger("freemarker.beans");
+    private static final Logger LOG = Logger.getLogger("freemarker.beans");
     private final Class clazz;
     private final BeansWrapper wrapper;
     private final Map map = new HashMap();
@@ -170,8 +170,8 @@ final class StaticModel implements TemplateHashModelEx
                     {
                         if(obj != null)
                         {
-                            if (logger.isInfoEnabled()) {
-                                logger.info("Overwriting value [" + obj + "] for " +
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("Overwriting value [" + obj + "] for " +
                                         " key '" + name + "' with [" + method + 
                                         "] in static model for " + clazz.getName());
                             }

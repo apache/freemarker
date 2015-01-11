@@ -59,7 +59,7 @@ public class TemplateCache
     private static final String PARENT_DIR_PATH_PREFIX = "../";
     private static final String PARENT_DIR_PATH = "/../";
     private static final char SLASH = '/';
-    private static final Logger logger = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = Logger.getLogger("freemarker.cache");
 
     /** Maybe {@code null}. */
     private final TemplateLoader templateLoader;
@@ -94,7 +94,7 @@ public class TemplateCache
         try {
             return new FileTemplateLoader();
         } catch(Exception e) {
-            logger.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
+            LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
                     + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
             return null;
         }
@@ -193,7 +193,7 @@ public class TemplateCache
     private Template getTemplate(TemplateLoader loader, String name, Locale locale, String encoding, boolean parse)
     throws IOException
     {
-        boolean debug = logger.isDebugEnabled();
+        boolean debug = LOG.isDebugEnabled();
         final String debugName = debug
                 ? buildDebugName(name, locale, encoding, parse)
                 : null;
@@ -217,7 +217,7 @@ public class TemplateCache
                 // If we're within the refresh delay, return the cached copy
                 if (now - cachedTemplate.lastChecked < delay) {
                     if(debug) {
-                        logger.debug(debugName + " cached copy not yet stale; using cached.");
+                        LOG.debug(debugName + " cached copy not yet stale; using cached.");
                     }
                     // Can be null, indicating a cached negative lookup
                     Object t = cachedTemplate.templateOrException;
@@ -245,7 +245,7 @@ public class TemplateCache
                 // Template source was removed
                 if (newlyFoundSource == null) {
                     if(debug) {
-                        logger.debug(debugName + " no source found.");
+                        LOG.debug(debugName + " no source found.");
                     } 
                     storeNegativeLookup(tk, cachedTemplate, null);
                     return null;
@@ -258,7 +258,7 @@ public class TemplateCache
                 boolean sourceEquals = newlyFoundSource.equals(cachedTemplate.source);
                 if(lastModifiedNotChanged && sourceEquals) {
                     if(debug) {
-                        logger.debug(debugName + ": using cached since " + 
+                        LOG.debug(debugName + ": using cached since " + 
                                 newlyFoundSource + " hasn't changed.");
                     }
                     storeCached(tk, cachedTemplate);
@@ -266,13 +266,13 @@ public class TemplateCache
                 }
                 else {
                     if(debug && !sourceEquals) {
-                        logger.debug("Updating source because: " + 
+                        LOG.debug("Updating source because: " + 
                             "sourceEquals=" + sourceEquals + 
                             ", newlyFoundSource=" + StringUtil.jQuoteNoXSS(newlyFoundSource) + 
                             ", cached.source=" + StringUtil.jQuoteNoXSS(cachedTemplate.source));
                     }
                     if(debug && !lastModifiedNotChanged) {
-                        logger.debug("Updating source because: " + 
+                        LOG.debug("Updating source because: " + 
                             "lastModifiedNotChanged=" + lastModifiedNotChanged + 
                             ", cached.lastModified=" + cachedTemplate.lastModified + 
                             " != source.lastModified=" + lastModified);
@@ -283,7 +283,7 @@ public class TemplateCache
             }
             else {
                 if(debug) {
-                    logger.debug("Couldn't find template in cache for " + debugName + "; will try to load it.");
+                    LOG.debug("Couldn't find template in cache for " + debugName + "; will try to load it.");
                 }
                 
                 // Construct a new CachedTemplate entry. Note we set the
@@ -300,7 +300,7 @@ public class TemplateCache
                 cachedTemplate.lastModified = lastModified = Long.MIN_VALUE;
             }
             if(debug) {
-                logger.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(newlyFoundSource));
+                LOG.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(newlyFoundSource));
             }
             // If we get here, then we need to (re)load the template
             Object source = cachedTemplate.source;
@@ -521,7 +521,7 @@ public class TemplateCache
         }
         name = normalizeName(name);
         if(name != null && templateLoader != null) {
-            boolean debug = logger.isDebugEnabled();
+            boolean debug = LOG.isDebugEnabled();
             String debugName = debug
                     ? buildDebugName(name, locale, encoding, parse)
                     : null;
@@ -534,7 +534,7 @@ public class TemplateCache
                     storage.remove(tk);
                 }
             }
-            logger.debug(debugName + " was removed from the cache, if it was there");
+            LOG.debug(debugName + " was removed from the cache, if it was there");
         }
     }
 
@@ -642,13 +642,13 @@ public class TemplateCache
         }
         StringBuffer buf = new StringBuffer(path.length()).append(basePath);
         int l = basePath.length();
-        boolean debug = logger.isDebugEnabled();
+        boolean debug = LOG.isDebugEnabled();
         for(;;)
         {
             String fullPath = buf.append(resourcePath).toString();
             if(debug)
             {
-                logger.debug("Trying to find template source "
+                LOG.debug("Trying to find template source "
                         + StringUtil.jQuoteNoXSS(fullPath));
             }
             Object templateSource = modifyForConfIcI(templateLoader.findTemplateSource(fullPath));

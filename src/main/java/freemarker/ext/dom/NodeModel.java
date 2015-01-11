@@ -72,7 +72,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel
 {
 
-    static final Logger logger = Logger.getLogger("freemarker.dom");
+    static private final Logger LOG = Logger.getLogger("freemarker.dom");
 
     private static final Object STATIC_LOCK = new Object();
     
@@ -92,8 +92,8 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         } catch (Exception e) {
             // do nothing
         }
-        if (xpathSupportClass == null && logger.isWarnEnabled()) {
-            logger.warn("No XPath support is available.");
+        if (xpathSupportClass == null && LOG.isWarnEnabled()) {
+            LOG.warn("No XPath support is available.");
         }
     }
     
@@ -556,8 +556,8 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Using Jaxen classes for XPath support");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Using Jaxen classes for XPath support");
         }
     }
     
@@ -571,8 +571,8 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Using Xalan classes for XPath support");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Using Xalan classes for XPath support");
         }
     }
     
@@ -582,8 +582,8 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("Using Sun's internal Xalan classes for XPath support");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Using Sun's internal Xalan classes for XPath support");
         }
     }
     
@@ -648,7 +648,7 @@ implements TemplateNodeModel, TemplateHashModel, TemplateSequenceModel,
                     xps = (XPathSupport) xpathSupportClass.newInstance();
                     xpathSupportMap.put(doc, new WeakReference(xps));
                 } catch (Exception e) {
-                    logger.error("Error instantiating xpathSupport class", e);
+                    LOG.error("Error instantiating xpathSupport class", e);
                 }                
             }
         }

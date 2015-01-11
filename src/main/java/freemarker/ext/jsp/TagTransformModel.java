@@ -41,7 +41,7 @@ import freemarker.template.TransformControl;
  */
 class TagTransformModel extends JspTagModelBase implements TemplateTransformModel
 {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     
     private final boolean isBodyTag;
     private final boolean isIterationTag;
@@ -393,7 +393,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 needPop = false;
             }
             if(tag.doEndTag() == Tag.SKIP_PAGE) {
-                logger.warn("Tag.SKIP_PAGE was ignored from a " + tag.getClass().getName() + " tag.");
+                LOG.warn("Tag.SKIP_PAGE was ignored from a " + tag.getClass().getName() + " tag.");
             }
         }
         
