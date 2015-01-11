@@ -46,6 +46,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.cache._CacheAPI;
@@ -130,6 +131,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
+    public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
     
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -159,6 +161,8 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
+    
+    private static final String DEFAULT = "default";
     
     private static final Version VERSION;
     static {
@@ -211,6 +215,7 @@ public class Configuration extends Configurable implements Cloneable {
     private TemplateCache cache;
     
     private boolean templateLoaderExplicitlySet;
+    private boolean templateLookupStrategyExplicitlySet;
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
@@ -431,9 +436,10 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setDelay(5000);
     }
     
-    private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
+    private void recreateTemplateCacheWith(
+            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage, this);
+        cache = new TemplateCache(loader, storage, templateLookupStrategy, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
@@ -453,7 +459,8 @@ public class Configuration extends Configurable implements Cloneable {
             copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();
-            copy.recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage());
+            copy.recreateTemplateCacheWith(
+                    cache.getTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException(e.getMessage());  // Java 5: use cause exc.
@@ -630,15 +637,12 @@ public class Configuration extends Configurable implements Cloneable {
      * (But if you still care what it is, before "incompatible improvements" 2.3.21 it's a {@link FileTemplateLoader}
      * that uses the current directory as its root; as it's hard tell what that directory will be, it's not very useful
      * and dangerous. Starting with "incompatible improvements" 2.3.21 the default is {@code null}.)   
-     * 
-     * <p>Note that setting the template loader will re-create the template cache, so
-     * all its content will be lost.
      */
     public void setTemplateLoader(TemplateLoader templateLoader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
-                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage());
+                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(), cache.getTemplateLookupStrategy());
             }
             templateLoaderExplicitlySet = true;
         }
@@ -660,6 +664,35 @@ public class Configuration extends Configurable implements Cloneable {
     {
         return cache.getTemplateLoader();
     }
+    
+    /**
+     * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name;
+     * as a side effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT}.
+     * 
+     * @since 2.3.22
+     */
+    public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
+        if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(), templateLookupStrategy);
+        }
+        templateLookupStrategyExplicitlySet = true;
+    }
+    
+    /**
+     * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateLookupStrategyExplicitlySet() {
+        return templateLookupStrategyExplicitlySet;
+    }
+
+    /**
+     * The getter pair of {@link #setTemplateLookupStrategy(TemplateLookupStrategy)}.
+     */
+    public TemplateLookupStrategy getTemplateLookupStrategy() {
+        return cache.getTemplateLookupStrategy();
+    }
 
     /**
      * Sets the {@link CacheStorage} used for caching {@link Template}-s;
@@ -676,7 +709,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setCacheStorage(CacheStorage storage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), storage);
+            recreateTemplateCacheWith(cache.getTemplateLoader(), storage, cache.getTemplateLookupStrategy());
         }
     }
     
@@ -893,7 +926,8 @@ public class Configuration extends Configurable implements Cloneable {
         this.incompatibleImprovements = incompatibleImprovements;
         if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             if (!templateLoaderExplicitlySet) {
-                recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
+                recreateTemplateCacheWith(
+                        getDefaultTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
             }
             if (!objectWrapperExplicitlySet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
@@ -1425,13 +1459,18 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Enables/disables localized template lookup. Enabled by default.
      * 
-     * <p>Localized lookup works like this: Let's say your locale setting is "en_AU", and you call
-     * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the template
-     * under names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}.
+     * <p>
+     * With the default {@link TemplateLookupStrategy}, localized lookup works like this: Let's say your locale setting
+     * is {@code Locale("en", "AU")}, and you call {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}.
+     * Then FreeMarker will look for the template under these names, stopping at the first that exists:
+     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. See {@link TemplateLookupStrategy#DEFAULT} for
+     * a more details. If you need to generate different template names, use
+     * {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} with your custom {@link TemplateLookupStrategy}.
      * 
-     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
-     * While setting it can't cause any serious problems, and in fact it works well on most hardware, it's not
-     * guaranteed that FreeMarker will see the update in all threads.
+     * <p>
+     * Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe. While
+     * setting it can't cause any serious problems, and in fact it works well on most hardware, it's not guaranteed that
+     * FreeMarker will see the update in all threads.
      */
     public void setLocalizedLookup(boolean localizedLookup) {
         this.localizedLookup = localizedLookup;
@@ -1510,6 +1549,11 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (TEMPLATE_LOADER_KEY.equals(name)) {
                 setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
                         value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+            } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(name)) {
+                setTemplateLookupStrategy(value.equalsIgnoreCase(DEFAULT)
+                        ? TemplateLookupStrategy.DEFAULT
+                        : (TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
+                        value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {
                 unknown = true;
             }

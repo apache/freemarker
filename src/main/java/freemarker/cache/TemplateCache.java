@@ -52,7 +52,6 @@ import freemarker.template.utility.UndeclaredThrowableException;
 public class TemplateCache
 {
     private static final String ASTERISKSTR = "*";
-    private static final String LOCALE_SEPARATOR = "_";
     private static final char ASTERISK = '*';
     private static final String CURRENT_DIR_PATH_PREFIX = "./";
     private static final String CURRENT_DIR_PATH = "/./";
@@ -66,6 +65,8 @@ public class TemplateCache
     
     /** Here we keep our cached templates */
     private final CacheStorage storage;
+    private final TemplateLookupStrategy templateLookupStrategy;
+    
     private final boolean isStorageConcurrent;
     /** The default refresh delay in milliseconds. */
     private long delay = 5000;
@@ -117,7 +118,8 @@ public class TemplateCache
     }
 
     /**
-     * Creates an instance with the default {@link CacheStorage}.
+     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
+     * {@link SoftCacheStorage} and {@link TemplateLookupStrategy#DEFAULT} parameters.
      * 
      * @since 2.3.21
      */
@@ -126,23 +128,39 @@ public class TemplateCache
     }
     
     /**
-     * @param templateLoader The {@link TemplateLoader} to use. Can't be {@code null}.
-     * @param cacheStorage The {@link CacheStorage} to use. Can't be {@code null}.
-     * @param config The {@link Configuration} this cache will be used for. Can be {@code null} for backward
-     *          compatibility, as it can be set with {@link #setConfiguration(Configuration)} later.
-     *          
+     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
+     * {@link TemplateLookupStrategy#DEFAULT} parameter.
+     * 
      * @since 2.3.21
      */
-    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config)
-    {
+    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
+        this(templateLoader, cacheStorage, TemplateLookupStrategy.DEFAULT, config);
+    }
+    
+    /**
+     * @param templateLoader
+     *            The {@link TemplateLoader} to use. Can't be {@code null}.
+     * @param cacheStorage
+     *            The {@link CacheStorage} to use. Can't be {@code null}.
+     * @param templateLookupStrategy
+     *            The {@link TemplateLookupStrategy} to use. Can't be {@code null}.
+     * @param config
+     *            The {@link Configuration} this cache will be used for. Can be {@code null} for backward compatibility,
+     *            as it can be set with {@link #setConfiguration(Configuration)} later.
+     * 
+     * @since 2.3.22
+     */
+    public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage,
+            TemplateLookupStrategy templateLookupStrategy, Configuration config) {
         this.templateLoader = templateLoader;
-        if(cacheStorage == null) 
-        {
-            throw new IllegalArgumentException("storage == null");
-        }
+        
+        NullArgumentException.check("cacheStorage", cacheStorage);
         this.storage = cacheStorage;
         isStorageConcurrent = cacheStorage instanceof ConcurrentCacheStorage &&
-            ((ConcurrentCacheStorage)cacheStorage).isConcurrent();
+                ((ConcurrentCacheStorage)cacheStorage).isConcurrent();
+        
+        NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
+        this.templateLookupStrategy = templateLookupStrategy;
 
         this.config = config;
     }
@@ -170,6 +188,13 @@ public class TemplateCache
         return storage;
     }
     
+    /**
+     * @since 2.3.22
+     */
+    public TemplateLookupStrategy getTemplateLookupStrategy() {
+        return templateLookupStrategy;
+    }
+
     /**
      * Retrieves the template with the given name (and according the specified further parameters) from the
      * template cache, loading it into the cache first if it's missing/staled.
@@ -574,40 +599,11 @@ public class TemplateCache
         }
     }
 
-    private Object findTemplateSource(String name, Locale locale)
-    throws
-        IOException
-    {
-        if (localizedLookup) {
-            int lastDot = name.lastIndexOf('.');
-            String prefix = lastDot == -1 ? name : name.substring(0, lastDot);
-            String suffix = lastDot == -1 ? "" : name.substring(lastDot);
-            String localeName = LOCALE_SEPARATOR + locale.toString();
-            StringBuffer buf = new StringBuffer(name.length() + localeName.length());
-            buf.append(prefix);
-            for (;;)
-            {
-                buf.setLength(prefix.length());
-                String path = buf.append(localeName).append(suffix).toString();
-                Object templateSource = acquireTemplateSource(path);
-                if (templateSource != null)
-                {
-                    return templateSource;
-                }
-                int lastUnderscore = localeName.lastIndexOf('_');
-                if (lastUnderscore == -1)
-                    break;
-                localeName = localeName.substring(0, lastUnderscore);
-            }
-            return null;
-        }
-        else
-        {
-            return acquireTemplateSource(name);
-        }
+    private Object findTemplateSource(String name, Locale locale) throws IOException {
+        return templateLookupStrategy.findTemplateSource(new TemplateCacheTemplateLookupContext(name, locale));
     }
 
-    private Object acquireTemplateSource(String path) throws IOException
+    private Object findTemplateSourceWithAcquisitionStrategy(String path) throws IOException
     {
         int asterisk = path.indexOf(ASTERISK);
         // Shortcut in case there is no acquisition
@@ -806,4 +802,17 @@ public class TemplateCache
             }
         }
     }
+    
+    private class TemplateCacheTemplateLookupContext extends TemplateLookupContext {
+
+        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale) {
+            super(templateName, localizedLookup ? templateLocale : null);
+        }
+
+        public Object findTemplateSourceWithAcquisitionStrategy(String name) throws IOException {
+            return TemplateCache.this.findTemplateSourceWithAcquisitionStrategy(name);
+        }
+        
+    }
+    
 }

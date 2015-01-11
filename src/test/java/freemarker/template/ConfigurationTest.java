@@ -32,6 +32,8 @@ import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
+import freemarker.cache.TemplateLookupContext;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -211,6 +213,40 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1, cache.getSize());
         cfg.setTemplateLoader(cfg.getTemplateLoader());
         assertEquals(1, cache.getSize());
+    }
+    
+    public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        assertEquals(1, cache.getSize());
+        
+        final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
+            public Object findTemplateSource(TemplateLookupContext ctx) throws IOException {
+                return ctx.findTemplateSourceWithAcquisitionStrategy(ctx.getTemplateName());
+            }
+        };
+        cfg.setTemplateLookupStrategy(myStrategy);
+        assertEquals(0, cache.getSize());
+        assertSame(myStrategy, cfg.getTemplateLookupStrategy());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        
+        cfg.setTemplateLookupStrategy(myStrategy);
+        assertEquals(1, cache.getSize());
+        
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        assertEquals(0, cache.getSize());
     }
     
     public void testSetTimeZone() throws TemplateException {

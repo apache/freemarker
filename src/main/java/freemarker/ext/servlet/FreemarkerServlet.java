@@ -382,6 +382,7 @@ public class FreemarkerServlet extends HttpServlet
         EXPIRATION_DATE = httpDate.format(expiration.getTime());
     }
 
+    // Init-param values:
     private String templatePath;
     private boolean nocache;
     private Integer bufferSize;
@@ -790,14 +791,19 @@ public class FreemarkerServlet extends HttpServlet
     }
     
     /**
-     * Returns the locale used for the 
-     * {@link Configuration#getTemplate(String, Locale)} call.
-     * The base implementation simply returns the locale setting of the
-     * configuration. Override this method to provide different behaviour, i.e.
+     * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call. The base implementation
+     * simply returns the locale setting of the configuration. Override this method to provide different behaviour, i.e.
      * to use the locale indicated in the request.
+     * 
+     * @param templatePath
+     *            The template path (templat name) as it will be passed to {@link Configuration#getTemplate(String)}.
+     *            (Not to be confused with the servlet init-param of identical name; they aren't related.)
+     * 
+     * @throws ServletException
+     *             Can be thrown since 2.3.22, if the locale can't be deduced from the URL.
      */
-    protected Locale deduceLocale(
-            String templatePath, HttpServletRequest request, HttpServletResponse response) {
+    protected Locale deduceLocale(String templatePath, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException {
         return config.getLocale();
     }
 
@@ -966,15 +972,22 @@ public class FreemarkerServlet extends HttpServlet
     }
 
     /**
-     * Maps the request URL to a template path that is passed to 
-     * {@link Configuration#getTemplate(String, Locale)}. You can override it
-     * (i.e. to provide advanced rewriting capabilities), but you are strongly
-     * encouraged to call the overridden method first, then only modify its
-     * return value. 
-     * @param request the currently processed request
-     * @return a String representing the template path
+     * Maps the request URL to a template path (template name) that is passed to
+     * {@link Configuration#getTemplate(String, Locale)}. You can override it (i.e. to provide advanced rewriting
+     * capabilities), but you are strongly encouraged to call the overridden method first, then only modify its return
+     * value.
+     * 
+     * @param request
+     *            The currently processed HTTP request
+     * @return The template path (template name); can't be {@code null}. This is what's passed to
+     *         {@link Configuration#getTemplate(String)} later. (Not to be confused with the {@code templatePath}
+     *         servlet init-param of identical name; that basically specifies the "virtual file system" to which this
+     *         will be relative to.)
+     * 
+     * @throws ServletException
+     *             Can be thrown since 2.3.22, if the template path can't be deduced from the URL.
      */
-    protected String requestUrlToTemplatePath(HttpServletRequest request)
+    protected String requestUrlToTemplatePath(HttpServletRequest request) throws ServletException
     {
         // First, see if it's an included request
         String includeServletPath  = (String) request.getAttribute("javax.servlet.include.servlet_path");
@@ -1131,7 +1144,10 @@ public class FreemarkerServlet extends HttpServlet
     }
     
     /**
-     * {@code null} if the {@code template_loader} setting was set in a custom {@link #createConfiguration()}. 
+     * The value of the {@code TemplatePath} init-param. {@code null} if the {@code template_loader} setting was set in
+     * a custom {@link #createConfiguration()}.
+     * 
+     * @deprecated Not called by FreeMarker code, and there's no point to override this (unless to cause confusion).
      */
     protected final String getTemplatePath() {
         return templatePath;

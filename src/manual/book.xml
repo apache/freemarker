@@ -16101,21 +16101,21 @@ All rights reserved.</emphasis></programlisting>
               <primary>localization</primary>
             </indexterm>
 
-            <para>Whenever a template is loaded, it is assigned a locale. A
-            locale is a language and an optional country or dialect
-            identifier. A template is typically loaded by some code that the
-            programmer wrote and he chooses a locale for the template based on
-            some aspect. For example, when the
-            <literal>FreemarkerServlet</literal> loads templates, it always
-            requests the template with locale matching the language preference
-            of the browser that requested the web page.</para>
+            <para>A locale is a language and an optional country or dialect
+            identifier (plus also maybe a further variant identifier, like
+            <quote>MAC</quote>). Whenever a template is requested, a desired
+            locale is always specified (explicitly or implicitly), and
+            FreeMarke will try to find a variant of the template that matches
+            that locale. When a template includes or imports another template,
+            internally that will also be requested for a locale, for the
+            locale that the <literal>locale</literal> setting is set to, and
+            that's usually for the locale of the top-level template.</para>
 
-            <para>When a template includes another template, it attempts to
-            load a template with the same locale. Suppose your template was
-            loaded with locale <literal>en_US</literal>, which means U.S.
-            English. When you include another template:</para>
+            <para>Suppose your template was loaded with locale
+            <literal>en_US</literal>, which means U.S. English. When you
+            include another template:</para>
 
-            <programlisting role="template">&lt;include "footer.ftl"&gt;</programlisting>
+            <programlisting role="template">&lt;#include "footer.ftl"&gt;</programlisting>
 
             <para>the engine will in fact look for several templates, in this
             order:</para>
@@ -16126,7 +16126,7 @@ All rights reserved.</emphasis></programlisting>
               </listitem>
 
               <listitem>
-                <para><literal>footer_en.ftl</literal>, and finally</para>
+                <para><literal>footer_en.ftl</literal></para>
               </listitem>
 
               <listitem>
@@ -16134,15 +16134,23 @@ All rights reserved.</emphasis></programlisting>
               </listitem>
             </itemizedlist>
 
-            <para><phrase role="forProgrammers">Note that you can disable
-            localized lookup feature with the
-            <literal>setLocalizedLookup</literal> method of
-            <literal>Configuration</literal>.</phrase></para>
+            <para>and it will use the first one that exists.</para>
 
-            <para>When you use both acquisition and localized template lookup,
-            the template with more specific locale in a parent directory takes
-            precedence over template with less specific locale in a child
-            directory. Suppose you use the following include from
+            <para>Note that if how (and if) FreeMarker searches the localized
+            variations is configurable by the programmers, so we are just
+            describing the default behavior here.<phrase
+            role="forProgrammers"> You can disable localized lookup with the
+            <literal>localized_lookup</literal> setting
+            (<literal>Configuration.setLocalizedLookup(boolean)</literal>).
+            Also, you can define your own sequence of deduced template names
+            with the <literal>template_lookup_strategy</literal> setting
+            (<literal>Configuration.setTemplateLookupStrategy(TemplateLookupStrategy)</literal>).</phrase></para>
+
+            <para>When you use both acquisition (i.e., <literal>*</literal>
+            step in the path) and localized template lookup, the template with
+            more specific locale in a parent directory takes precedence over
+            template with less specific locale in a child directory. Suppose
+            you use the following include from
             <literal>/foo/bar/template.ftl</literal>:</para>
 
             <programlisting role="template">&lt;#include "*/footer.ftl"&gt;</programlisting>
@@ -22432,23 +22440,46 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>ClassTemplateLoader</literal> now can be created
-              by specifying a <literal>ClassLoader</literal> directly, rather
-              than by specifying a base <literal>Class</literal>. That is, now
-              there's <literal>ClassTemplateLoader(ClassLoader,
-              String)</literal> constructor, and also a
-              <literal>Configuration.setClassLoaderForTemplateLoading(ClassLoader,
-              String)</literal> method.</para>
-            </listitem>
+              <para>Template loading:</para>
 
-            <listitem>
-              <para>Added new exception,
-              <literal>TemplateNotFoundException</literal>, which is now used
-              instead of <literal>TemplateNotFoundException</literal> when
-              getting a template. As it extends
-              <literal>TemplateNotFoundException</literal>, this change is
-              backward compatible. The main goal was to counter the common
-              misunderstanding that template paths are real file paths.</para>
+              <itemizedlist>
+                <listitem>
+                  <para>Added new <literal>Configuration</literal> setting,
+                  <literal>template_lookup_strategy</literal>
+                  (<literal>Configuration.setTemplateLookupStrategy(templateLookupStrategy)</literal>).
+                  This allows customizing what
+                  <literal>TemplateLoader</literal>-level names will be tried
+                  when a template is requested. With this you can define a
+                  custom localized lookup sequence instead of the default
+                  (which looks like: <literal>foo_de_LU_MAC.ftl,
+                  foo_de_LU.ftl, foo_de.ftl,</literal><literal>
+                  foo.ftl</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>ClassTemplateLoader</literal> now can be
+                  created by specifying a <literal>ClassLoader</literal>
+                  directly, rather than by specifying a base
+                  <literal>Class</literal>. That is, now there's
+                  <literal>ClassTemplateLoader(ClassLoader, String)</literal>
+                  constructor, and also a
+                  <literal>Configuration.setClassLoaderForTemplateLoading(ClassLoader,
+                  String)</literal> method.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new exception,
+                  <literal>TemplateNotFoundException</literal>, which is now
+                  used instead of <literal>TemplateNotFoundException</literal>
+                  when getting a template. As it extends
+                  <literal>TemplateNotFoundException</literal>, this change is
+                  backward compatible. The main goal was to counter the common
+                  misunderstanding that template paths are real file paths.
+                  Also, <literal>TemplateNotFoundException</literal> have
+                  <literal>getTemplateName()</literal> method that gives you
+                  the name of the missing template.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>

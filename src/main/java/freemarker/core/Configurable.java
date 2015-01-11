@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
@@ -1187,6 +1188,11 @@ public class Configurable
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
      *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       
+     *   <li><p>{@code "template_lookup_strategy"}:
+     *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.
+     *       <br>String value: {@code "default"} (case insensitive) for {@link TemplateLookupStrategy#DEFAULT}, or else
+     *       interpreted as an <a href="#fm_obe">object builder expression</a>.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
@@ -1212,8 +1218,9 @@ public class Configurable
      *   </li>
      *   <li>
      *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
-     *      a public static <tt>INSTANCE</tt> field, the value of that filed will be the value of the expression, and
-     *      the constructor won't be called.
+     *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
+     *      the constructor won't be called. Note that if you use the backward compatible
+     *      syntax, where these's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
      *   </li>
      *   <li>
      *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
