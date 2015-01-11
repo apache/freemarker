@@ -46,7 +46,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 dynamicValue = parser.FreeMarkerText();
             }
             catch(ParseException e) {
-                e.setTemplateName(getTemplate().getName());
+                e.setTemplateName(getTemplate().getSourceName());
                 throw e;
             }
             this.constantValue = null;

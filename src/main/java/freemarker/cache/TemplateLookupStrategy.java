@@ -8,7 +8,7 @@ import freemarker.template.Configuration;
 /**
  * Finds the {@link TemplateLoader}-level (storage-level) template source for a template name. This usually means trying
  * various {@link TemplateLoader}-level template names that were deduced from the requested name by delegating to
- * {@link TemplateLookupContext#findTemplateSourceWithAcquisitionStrategy(String)}. See {@link #DEFAULT} as an example.
+ * {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}. See {@link #DEFAULT} as an example.
  * The lookup strategy meant to operate solely with template names, not with {@link TemplateLoader}-s directly.
  * 
  * @since 2.3.22
@@ -36,11 +36,11 @@ public interface TemplateLookupStrategy {
 
         private static final String LOCALE_SEPARATOR = "_";
         
-        public Object findTemplateSource(TemplateLookupContext ctx) throws IOException {
+        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
             final String templateName = ctx.getTemplateName();
             
             if (ctx.getTemplateLocale() == null) {
-                return ctx.findTemplateSourceWithAcquisitionStrategy(templateName);
+                return ctx.lookupWithAcquisitionStrategy(templateName);
             }
             
             // Localized lookup:
@@ -50,16 +50,17 @@ public interface TemplateLookupStrategy {
             String localeName = LOCALE_SEPARATOR + ctx.getTemplateLocale().toString();
             StringBuffer buf = new StringBuffer(templateName.length() + localeName.length());
             buf.append(prefix);
-            tryLocalePostfixes: for (;;) {
+            tryLocaleNameVariations: while (true) {
                 buf.setLength(prefix.length());
                 String path = buf.append(localeName).append(suffix).toString();
-                Object templateSource = ctx.findTemplateSourceWithAcquisitionStrategy(path);
-                if (templateSource != null) {
-                    return templateSource;
+                TemplateLookupResult lookupResult = ctx.lookupWithAcquisitionStrategy(path);
+                if (lookupResult != null) {
+                    return lookupResult;
                 }
+                
                 int lastUnderscore = localeName.lastIndexOf('_');
                 if (lastUnderscore == -1) {
-                    break tryLocalePostfixes;
+                    break tryLocaleNameVariations;
                 }
                 localeName = localeName.substring(0, lastUnderscore);
             }
@@ -76,11 +77,12 @@ public interface TemplateLookupStrategy {
      *            are needed to implement the strategy. Some of the important input methods are:
      *            {@link TemplateLookupContext#getTemplateName()}, {@link TemplateLookupContext#getTemplateLocale()}.
      *            The most important operation is
-     *            {@link TemplateLookupContext#findTemplateSourceWithAcquisitionStrategy(String)}.
+     *            {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}.
      * 
-     * @return The template source (see {@link TemplateLoader#findTemplateSource(String)} to understand what that means)
-     *         or {@code null} if no matching template exists.
+     * @return Usually the return value of
+     *         {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}, or {@code null} if no
+     *         matching template exists.
      */
-    Object findTemplateSource(TemplateLookupContext ctx) throws IOException;
+    TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
 
 }

@@ -33,6 +33,7 @@ import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.cache.TemplateLookupContext;
+import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
@@ -232,8 +233,8 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1, cache.getSize());
         
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
-            public Object findTemplateSource(TemplateLookupContext ctx) throws IOException {
-                return ctx.findTemplateSourceWithAcquisitionStrategy(ctx.getTemplateName());
+            public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+                return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
             }
         };
         cfg.setTemplateLookupStrategy(myStrategy);

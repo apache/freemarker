@@ -21907,6 +21907,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   point to the causing FTL expression (with some explanation),
                   rather than bubbling up as low level runtime error.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Bug fixed: When localized lookup or template
+                  acquisition has kicked in, error messages have still quoted
+                  the name used for requesting the template, rather that the
+                  actual template source name (like <literal>foo.ftl</literal>
+                  instead of <literal>foo_en.ftl</literal>, when the template
+                  was get as <literal>foo.ftl</literal>, but behind the scenes
+                  was loaded from <literal>foo_en.ftl</literal>).</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
@@ -22478,6 +22488,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   Also, <literal>TemplateNotFoundException</literal> have
                   <literal>getTemplateName()</literal> method that gives you
                   the name of the missing template.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Template-s not have a
+                  <literal>getSourceName()</literal>, in additionally to
+                  <literal>getName()</literal>. These two return the same as
+                  far as no localized lookup or acquisition
+                  (<literal>*</literal> in the name) or other lookup strategy
+                  is involved. But when there is,
+                  <literal>getSourceName()</literal> gives the name of the
+                  actually loaded template inside the virtual file system that
+                  the <literal>TemplateLoader</literal> defines. On the other
+                  hand, <literal>getName()</literal> has always returned the
+                  name for which the template was requested (in canonicalized
+                  form), as that's the name that's used for pretty much
+                  everything (like for relative inclusion resolution). The
+                  location information in template exceptions is now using
+                  <literal>getSourceName()</literal>. </para>
                 </listitem>
               </itemizedlist>
             </listitem>

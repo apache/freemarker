@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLookupContext;
+import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 
 public class TemplateLookupStrategyTest {
@@ -53,10 +54,14 @@ public class TemplateLookupStrategyTest {
             cfg.clearTemplateCache();
         }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("aa", "BB", "CC_DD")).getName());
-        assertEquals(ImmutableList.of("aa/test.ftl"), tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("aa", "BB", "CC_DD"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("aa/test.ftl", t.getSourceName());
+            assertEquals(ImmutableList.of("aa/test.ftl"), tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
     }
     
     @Test
@@ -128,45 +133,69 @@ public class TemplateLookupStrategyTest {
             cfg.clearTemplateCache();
         }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("aa", "BB", "CC_DD")).getName());
-        assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("aa", "BB", "CC_DD"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("test_aa_BB_CC_DD.ftl", t.getSourceName());
+            assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("aa", "BB", "CC_XX")).getName());
-        assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("aa", "BB", "CC_XX"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("test_aa_BB_CC.ftl", t.getSourceName());
+            assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("aa", "BB", "XX_XX")).getName());
-        assertEquals(
-                ImmutableList.of("test_aa_BB_XX_XX.ftl", "test_aa_BB_XX.ftl", "test_aa_BB.ftl"),
-                tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("aa", "BB", "XX_XX"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("test_aa_BB.ftl", t.getSourceName());
+            assertEquals(
+                    ImmutableList.of("test_aa_BB_XX_XX.ftl", "test_aa_BB_XX.ftl", "test_aa_BB.ftl"),
+                    tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("aa", "XX", "XX_XX")).getName());
-        assertEquals(
-                ImmutableList.of("test_aa_XX_XX_XX.ftl", "test_aa_XX_XX.ftl", "test_aa_XX.ftl", "test_aa.ftl"),
-                tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("aa", "XX", "XX_XX"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("test_aa.ftl", t.getSourceName());
+            assertEquals(
+                    ImmutableList.of("test_aa_XX_XX_XX.ftl", "test_aa_XX_XX.ftl", "test_aa_XX.ftl", "test_aa.ftl"),
+                    tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("xx", "XX", "XX_XX")).getName());
-        assertEquals(
-                ImmutableList.of(
-                        "test_xx_XX_XX_XX.ftl", "test_xx_XX_XX.ftl", "test_xx_XX.ftl", "test_xx.ftl", "test.ftl"),
-                tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("xx", "XX", "XX_XX"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("test.ftl", t.getSourceName());
+            assertEquals(
+                    ImmutableList.of(
+                            "test_xx_XX_XX_XX.ftl", "test_xx_XX_XX.ftl", "test_xx_XX.ftl", "test_xx.ftl", "test.ftl"),
+                    tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
         
-        assertEquals("test.ftl", cfg.getTemplate("test.ftl", new Locale("xx", "BB", "CC_DD")).getName());
-        assertEquals(
-                ImmutableList.of(
-                    "test_xx_BB_CC_DD.ftl", "test_xx_BB_CC.ftl", "test_xx_BB.ftl", "test_xx.ftl", "test.ftl"),
-                tl.templatesTried);
-        tl.templatesTried.clear();
-        cfg.clearTemplateCache();
+        {
+            final Template t = cfg.getTemplate("test.ftl", new Locale("xx", "BB", "CC_DD"));
+            assertEquals("test.ftl", t.getName());
+            assertEquals("test.ftl", t.getSourceName());
+            assertEquals(
+                    ImmutableList.of(
+                        "test_xx_BB_CC_DD.ftl", "test_xx_BB_CC.ftl", "test_xx_BB.ftl", "test_xx.ftl", "test.ftl"),
+                    tl.templatesTried);
+            tl.templatesTried.clear();
+            cfg.clearTemplateCache();
+        }
     }
     
     private static class MockTemplateLoader extends StringTemplateLoader {
@@ -178,10 +207,6 @@ public class TemplateLookupStrategyTest {
             templatesTried.add(name);
             return super.findTemplateSource(name);
         }
-
-        public List<String> getTemplatesTried() {
-            return templatesTried;
-        }
         
     }
     
@@ -191,14 +216,14 @@ public class TemplateLookupStrategyTest {
         
         private MyTemplateLookupStrategy() { }
 
-        public Object findTemplateSource(TemplateLookupContext ctx) throws IOException {
+        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
             String lang = ctx.getTemplateLocale().getLanguage().toLowerCase();
-            Object ts = ctx.findTemplateSourceWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
+            TemplateLookupResult ts = ctx.lookupWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
             if (ts != null) {
                 return ts;
             }
             
-            return ctx.findTemplateSourceWithAcquisitionStrategy(ctx.getTemplateName());
+            return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
         }
         
     }

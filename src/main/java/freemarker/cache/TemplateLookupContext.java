@@ -6,7 +6,7 @@ import java.util.Locale;
 import freemarker.template.Configuration;
 
 /**
- * Used as the parameter of {@link TemplateLookupStrategy#findTemplateSource(TemplateLookupContext)}.
+ * Used as the parameter of {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}.
  * 
  * @since 2.3.22
  */
@@ -21,7 +21,7 @@ public abstract class TemplateLookupContext {
      * 
      * @return The template source or {@code null} if the template doesn't exist.
      */
-    public abstract Object findTemplateSourceWithAcquisitionStrategy(String name) throws IOException;
+    public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException;
 
     /** Default visibility to prevent extending the class from outside this package. */
     TemplateLookupContext(String templateName, Locale templateLocale) {
