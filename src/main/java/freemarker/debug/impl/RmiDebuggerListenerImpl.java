@@ -35,7 +35,7 @@ extends
 implements
     DebuggerListener, Unreferenced
 {
-    private static final Logger logger = Logger.getLogger(
+    private static final Logger LOG = Logger.getLogger(
             "freemarker.debug.client");
     
     private static final long serialVersionUID = 1L;
@@ -50,7 +50,7 @@ implements
         }
         catch (NoSuchObjectException e)
         {
-            logger.warn("Failed to unexport RMI debugger listener", e);
+            LOG.warn("Failed to unexport RMI debugger listener", e);
         }
     }
     

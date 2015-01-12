@@ -17,7 +17,6 @@
 package freemarker.template;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
@@ -47,6 +46,7 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.cache._CacheAPI;
@@ -60,6 +60,7 @@ import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.ext.servlet.FreemarkerServlet;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Constants;
@@ -102,7 +103,8 @@ import freemarker.template.utility.XmlEscape;
  * <ul>
  *   <li>{@link #setTemplateLoader(TemplateLoader) template_loader}: The default value is deprecated and in fact quite
  *       useless. (For the most common cases you can use the convenience methods,
- *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} too.)
+ *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} and
+ *       {@link #setClassLoaderForTemplateLoading(ClassLoader, String)} too.)
  *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
@@ -129,6 +131,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String AUTO_INCLUDE_KEY = "auto_include";
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
+    public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
     
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -159,7 +162,9 @@ public class Configuration extends Configurable implements Cloneable {
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final int PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.intValue(); 
     
-    private static final Version version;
+    private static final String DEFAULT = "default";
+    
+    private static final Version VERSION;
     static {
         try {
             Properties vp = new Properties();
@@ -191,7 +196,7 @@ public class Configuration extends Configurable implements Cloneable {
                 
                 final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
                 
-                version = new Version(versionString, gaeCompliant, buildDate);
+                VERSION = new Version(versionString, gaeCompliant, buildDate);
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
@@ -208,12 +213,15 @@ public class Configuration extends Configurable implements Cloneable {
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
 
     private TemplateCache cache;
-    private boolean templateLoaderWasSet;
-
-    private boolean objectWrapperWasSet;
+    
+    private boolean templateLoaderExplicitlySet;
+    private boolean templateLookupStrategyExplicitlySet;
+    private boolean objectWrapperExplicitlySet;
+    private boolean templateExceptionHandlerExplicitlySet;
+    private boolean logTemplateExceptionsExplicitlySet;
     
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
-    
+
     /**
      * Needed so that it doesn't mater in what order do you call {@link #setSharedVaribles(Map)}
      * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
@@ -353,6 +361,16 @@ public class Configuration extends Configurable implements Cloneable {
      *     2.3.22 (or higher):
      *     <ul>
      *       <li><p>
+     *          {@link DefaultObjectWrapper} has some substantial changes with {@code incompatibleImprovements} 2.3.22;
+     *          check them out at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. It's important to know
+     *          that if you set the {@code object_wrapper} setting, rather than leaving it on its default value, the
+     *          {@code object_wrapper} won't inherit the {@code incompatibleImprovements} of the {@link Configuration}.
+     *          In that case, if you want the 2.3.22 improvements of {@link DefaultObjectWrapper}, you have to set it
+     *          in the {@link DefaultObjectWrapper} object itself too! (Note that it's OK to use a
+     *          {@link DefaultObjectWrapper} with a different {@code incompatibleImprovements} version number
+     *          than that of the {@link Configuration}, if that's really what you want.)
+     *       </li>
+     *       <li><p>
      *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
      *          {@link Configurable#getParent()}) of the {@link Environment} anymore to the {@link Template} that's
      *          included or where {@code #nested} "returns" to. Thus, the parent of {@link Environment} will be now
@@ -363,6 +381,36 @@ public class Configuration extends Configurable implements Cloneable {
      *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
      *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
+     *         <li><p>
+     *           When using {@link FreemarkerServlet} with custom JSP tag libraries: Fixes bug where some kind of
+     *           values, when put into the JSP <em>page</em> scope (via {@code #global} or via the JSP
+     *           {@code PageContext} API) and later read back with the JSP {@code PageContext} API (typically in a
+     *           custom JSP tag), might come back as FreeMarker {@link TemplateModel} objects instead of as objects with
+     *           a standard Java type. Other Servlet scopes aren't affected. It's highly unlikely that something expects
+     *           the presence of this bug. The affected values are of the FTL types listed below, and to trigger the
+     *           bug, they either had to be created directly in the template (like as an FTL literal or with
+     *           {@code ?date}/{@code time}/{@code datetime}), or you had to use {@link DefaultObjectWrapper}
+     *           or {@link SimpleObjectWrapper} (or a subclass of them):
+     *           <ul>
+     *             <li>FTL date/time/date-time values may came back as {@link SimpleDate}-s, now they come back as
+     *             {@link java.util.Date java.util.Date}-s instead.</li>
+     *             
+     *             <li>FTL sequence values may came back as {@link SimpleSequence}-s, now they come back as
+     *             {@link java.util.List}-s as expected. This at least stands assuming that the
+     *             {@link Configuration#setSetting(String, String) object_wrapper} configuration setting is a subclass
+     *             of {@link BeansWrapper} (such as {@link DefaultObjectWrapper}), but that's practically always the
+     *             case in applications that use FreeMarker's JSP extension (otherwise it can still work, but it depends
+     *             on the quality and capabilities of the {@link ObjectWrapper} implementation).</li>
+     *             
+     *             <li>FTL hash values may came back as {@link SimpleHash}-es, now they come back as
+     *             {@link java.util.Map}-s as expected (again, assuming that the object wrapper is a subclass of
+     *             {@link BeansWrapper}).</li>
+     *             
+     *             <li>FTL collection values may came back as {@link SimpleCollection}-s, now they come back as
+     *             {@link java.util.Collection}-s as expected (again, assuming that the object wrapper is a subclass of
+     *             {@link BeansWrapper}).</li>
+     *           </ul>
+     *         </li>
      *     </ul>
      *   </li>
      * </ul>
@@ -388,9 +436,10 @@ public class Configuration extends Configurable implements Cloneable {
         cache.setDelay(5000);
     }
     
-    private void recreateTemplateCacheWith(TemplateLoader loader, CacheStorage storage) {
+    private void recreateTemplateCacheWith(
+            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage, this);
+        cache = new TemplateCache(loader, storage, templateLookupStrategy, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
@@ -410,7 +459,8 @@ public class Configuration extends Configurable implements Cloneable {
             copy.autoImportNsToTmpMap = new HashMap(autoImportNsToTmpMap);
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();
-            copy.recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage());
+            copy.recreateTemplateCacheWith(
+                    cache.getTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException(e.getMessage());  // Java 5: use cause exc.
@@ -577,6 +627,7 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * <p>Convenience methods exists to install commonly used loaders, instead of using this method:
      * {@link #setClassForTemplateLoading(Class, String)}, 
+     * {@link #setClassLoaderForTemplateLoading(ClassLoader, String)}, 
      * {@link #setDirectoryForTemplateLoading(File)}, and
      * {@link #setServletContextForTemplateLoading(Object, String)}.
      * 
@@ -586,18 +637,24 @@ public class Configuration extends Configurable implements Cloneable {
      * (But if you still care what it is, before "incompatible improvements" 2.3.21 it's a {@link FileTemplateLoader}
      * that uses the current directory as its root; as it's hard tell what that directory will be, it's not very useful
      * and dangerous. Starting with "incompatible improvements" 2.3.21 the default is {@code null}.)   
-     * 
-     * <p>Note that setting the template loader will re-create the template cache, so
-     * all its content will be lost.
      */
     public void setTemplateLoader(TemplateLoader templateLoader) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
-                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage());
-                templateLoaderWasSet = true;
+                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(), cache.getTemplateLookupStrategy());
             }
+            templateLoaderExplicitlySet = true;
         }
+    }
+    
+    /**
+     * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateLoaderExplicitlySet() {
+        return templateLoaderExplicitlySet;
     }
 
     /**
@@ -606,6 +663,35 @@ public class Configuration extends Configurable implements Cloneable {
     public TemplateLoader getTemplateLoader()
     {
         return cache.getTemplateLoader();
+    }
+    
+    /**
+     * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name;
+     * as a side effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT}.
+     * 
+     * @since 2.3.22
+     */
+    public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
+        if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(), templateLookupStrategy);
+        }
+        templateLookupStrategyExplicitlySet = true;
+    }
+    
+    /**
+     * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateLookupStrategyExplicitlySet() {
+        return templateLookupStrategyExplicitlySet;
+    }
+
+    /**
+     * The getter pair of {@link #setTemplateLookupStrategy(TemplateLookupStrategy)}.
+     */
+    public TemplateLookupStrategy getTemplateLookupStrategy() {
+        return cache.getTemplateLookupStrategy();
     }
 
     /**
@@ -623,7 +709,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setCacheStorage(CacheStorage storage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), storage);
+            recreateTemplateCacheWith(cache.getTemplateLoader(), storage, cache.getTemplateLookupStrategy());
         }
     }
     
@@ -698,14 +784,36 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
-     * Sets a class relative to which we do the Class.getResource() call to load templates.
-     * This is equivalent to {@code setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix))},
-     * so see {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
+     * Sets the class whose {@link Class#getResource(String)} method will be used to load templates, from the inside the
+     * package specified. See {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
      * 
+     * @param basePackagePath
+     *            Separate steps with {@code "/"}, not {@code "."}, and note that it matters if this starts with
+     *            {@code /} or not. See {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
+     * 
+     * @see #setClassLoaderForTemplateLoading(ClassLoader, String)
      * @see #setTemplateLoader(TemplateLoader)
      */
-    public void setClassForTemplateLoading(Class clazz, String pathPrefix) {
-        setTemplateLoader(new ClassTemplateLoader(clazz, pathPrefix));
+    public void setClassForTemplateLoading(Class resourceLoaderClass, String basePackagePath) {
+        setTemplateLoader(new ClassTemplateLoader(resourceLoaderClass, basePackagePath));
+    }
+    
+    /**
+     * Sets the {@link ClassLoader} whose {@link ClassLoader#getResource(String)} method will be used to load templates,
+     * from the inside the package specified. See {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for
+     * more details.
+     * 
+     * @param basePackagePath
+     *            Separate steps with {@code "/"}, not {@code "."}. See
+     *            {@link ClassTemplateLoader#ClassTemplateLoader(Class, String)} for more details.
+     * 
+     * @see #setClassForTemplateLoading(Class, String)
+     * @see #setTemplateLoader(TemplateLoader)
+     * 
+     * @since 2.3.22
+     */
+    public void setClassLoaderForTemplateLoading(ClassLoader classLoader, String basePackagePath) {
+        setTemplateLoader(new ClassTemplateLoader(classLoader, basePackagePath));
     }
 
     /**
@@ -739,7 +847,7 @@ public class Configuration extends Configurable implements Cloneable {
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         ObjectWrapper prevObjectWrapper = getObjectWrapper();
         super.setObjectWrapper(objectWrapper);
-        objectWrapperWasSet = true;
+        objectWrapperExplicitlySet = true;
         if (objectWrapper != prevObjectWrapper) {
             try {
                 setSharedVariablesFromRewrappableSharedVariables();
@@ -749,6 +857,44 @@ public class Configuration extends Configurable implements Cloneable {
                         e);
             }
         }
+    }
+    
+    /**
+     * Tells if {@link #setObjectWrapper(ObjectWrapper)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isObjectWrapperExplicitlySet() {
+        return objectWrapperExplicitlySet;
+    }
+    
+    public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
+        super.setTemplateExceptionHandler(templateExceptionHandler);
+        templateExceptionHandlerExplicitlySet = true;
+    }
+
+    /**
+     * Tells if {@link #setTemplateExceptionHandler(TemplateExceptionHandler)} (or equivalent) was already called on
+     * this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateExceptionHandlerExplicitlySet() {
+        return templateExceptionHandlerExplicitlySet;
+    }    
+    
+    public void setLogTemplateExceptions(boolean value) {
+        super.setLogTemplateExceptions(value);
+        logTemplateExceptionsExplicitlySet = true;
+    }
+
+    /**
+     * Tells if {@link #setLogTemplateExceptions(boolean)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isLogTemplateExceptionsExplicitlySet() {
+        return logTemplateExceptionsExplicitlySet;
     }
 
     /**
@@ -779,10 +925,11 @@ public class Configuration extends Configurable implements Cloneable {
                 = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
         this.incompatibleImprovements = incompatibleImprovements;
         if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
-            if (!templateLoaderWasSet) {
-                recreateTemplateCacheWith(getDefaultTemplateLoader(), cache.getCacheStorage());
+            if (!templateLoaderExplicitlySet) {
+                recreateTemplateCacheWith(
+                        getDefaultTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
             }
-            if (!objectWrapperWasSet) {
+            if (!objectWrapperExplicitlySet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
                 super.setObjectWrapper(getDefaultObjectWrapper(incompatibleImprovements));
             }
@@ -971,13 +1118,13 @@ public class Configuration extends Configurable implements Cloneable {
      *     treated as a static text, so <code>${...}</code>, {@code <#...>} etc. will not have special meaning
      *     in it.
      *     
-     * @param ignoreMissing If {@code true}, the method won't throw {@link FileNotFoundException} if the template
+     * @param ignoreMissing If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template
      *     doesn't exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
      * 
      * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
      * 
-     * @throws FileNotFoundException if the template could not be found.
-     * @throws IOException if there was a problem loading the template.
+     * @throws TemplateNotFoundException if the template could not be found.
+     * @throws IOException if there was a problem with reading the template "file".
      * @throws ParseException (extends <code>IOException</code>) if the template is syntactically bad.
      * 
      * @since 2.3.21
@@ -1006,12 +1153,12 @@ public class Configuration extends Configurable implements Cloneable {
                 }
                 msg += tlDesc + ".";
                 
-                if (!templateLoaderWasSet) {
+                if (!templateLoaderExplicitlySet) {
                     msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
                             + "default value, which is most certainly not intended and the cause of this problem."; 
                 }
             }
-            throw new FileNotFoundException(msg);
+            throw new TemplateNotFoundException(name, msg);
         }
         return result;
     }
@@ -1312,13 +1459,18 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Enables/disables localized template lookup. Enabled by default.
      * 
-     * <p>Localized lookup works like this: Let's say your locale setting is "en_AU", and you call
-     * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the template
-     * under names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}.
+     * <p>
+     * With the default {@link TemplateLookupStrategy}, localized lookup works like this: Let's say your locale setting
+     * is {@code Locale("en", "AU")}, and you call {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}.
+     * Then FreeMarker will look for the template under these names, stopping at the first that exists:
+     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. See {@link TemplateLookupStrategy#DEFAULT} for
+     * a more details. If you need to generate different template names, use
+     * {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} with your custom {@link TemplateLookupStrategy}.
      * 
-     * <p>Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe.
-     * While setting it can't cause any serious problems, and in fact it works well on most hardware, it's not
-     * guaranteed that FreeMarker will see the update in all threads.
+     * <p>
+     * Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe. While
+     * setting it can't cause any serious problems, and in fact it works well on most hardware, it's not guaranteed that
+     * FreeMarker will see the update in all threads.
      */
     public void setLocalizedLookup(boolean localizedLookup) {
         this.localizedLookup = localizedLookup;
@@ -1397,6 +1549,11 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (TEMPLATE_LOADER_KEY.equals(name)) {
                 setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
                         value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+            } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(name)) {
+                setTemplateLookupStrategy(value.equalsIgnoreCase(DEFAULT)
+                        ? TemplateLookupStrategy.DEFAULT
+                        : (TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
+                        value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {
                 unknown = true;
             }
@@ -1524,7 +1681,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @deprecated Use {@link #getVersion()} instead.
      */
     public static String getVersionNumber() {
-        return version.toString();
+        return VERSION.toString();
     }
     
     /**
@@ -1556,7 +1713,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @since 2.3.20
      */ 
     public static Version getVersion() {
-        return version;
+        return VERSION;
     }
     
     /**

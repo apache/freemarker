@@ -21,12 +21,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.servlet.ServletContext;
 
 import freemarker.log.Logger;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -35,7 +37,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class WebappTemplateLoader implements TemplateLoader
 {
-    private static final Logger logger = Logger.getLogger("freemarker.cache");
+    private static final Logger LOG = Logger.getLogger("freemarker.cache");
     
     private final ServletContext servletContext;
     private final String subdirPath;
@@ -109,7 +111,7 @@ public class WebappTemplateLoader implements TemplateLoader
         try {
             url = servletContext.getResource(fullPath);
         } catch(MalformedURLException e) {
-            logger.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath),
+            LOG.warn("Could not retrieve resource " + StringUtil.jQuoteNoXSS(fullPath),
                     e);
             return null;
         }
@@ -169,10 +171,19 @@ public class WebappTemplateLoader implements TemplateLoader
      * @since 2.3.21
      */
     public String toString() {
-        return "WebappTemplateLoader(servletContext.name="
-                + StringUtil.jQuote(servletContext.getServletContextName()) + ", subdirPath=" + StringUtil.jQuote(subdirPath)
-                + ")";
+        return "WebappTemplateLoader(subdirPath=" + StringUtil.jQuote(subdirPath) + ", servletContext={contextPath="
+                + StringUtil.jQuote(getContextPath()) + ", displayName="
+                + StringUtil.jQuote(servletContext.getServletContextName()) + "})";
     }
 
+    /** Gets the context path if we are on Servlet 2.5+, or else returns failure description string. */
+    private String getContextPath() {
+        try {
+            Method m = servletContext.getClass().getMethod("getContextPath", CollectionUtils.EMPTY_CLASS_ARRAY);
+            return (String) m.invoke(servletContext, CollectionUtils.EMPTY_OBJECT_ARRAY);
+        } catch (Throwable e) {
+            return "[can't query before Serlvet 2.5]";
+        }
+    }
     
 }

@@ -53,16 +53,16 @@ class MessageUtil {
         return formatLocation("in", template, line, column);
     }
 
-    static String formatLocationForSimpleParsingError(String templateName, int line, int column) {
-        return formatLocation("in", templateName, line, column);
+    static String formatLocationForSimpleParsingError(String templateSourceName, int line, int column) {
+        return formatLocation("in", templateSourceName, line, column);
     }
 
     static String formatLocationForDependentParsingError(Template template, int line, int column) {
         return formatLocation("on", template, line, column);
     }
 
-    static String formatLocationForDependentParsingError(String templateName, int line, int column) {
-        return formatLocation("on", templateName, line, column);
+    static String formatLocationForDependentParsingError(String templateSourceName, int line, int column) {
+        return formatLocation("on", templateSourceName, line, column);
     }
 
     static String formatLocationForEvaluationError(Template template, int line, int column) {
@@ -71,26 +71,26 @@ class MessageUtil {
 
     static String formatLocationForEvaluationError(Macro macro, int line, int column) {
         Template t = macro.getTemplate();
-        return formatLocation("at", t != null ? t.getName() : null, macro.getName(), macro.isFunction(), line, column);
+        return formatLocation("at", t != null ? t.getSourceName() : null, macro.getName(), macro.isFunction(), line, column);
     }
     
-    static String formatLocationForEvaluationError(String templateName, int line, int column) {
-        return formatLocation("at", templateName, line, column);
+    static String formatLocationForEvaluationError(String templateSourceName, int line, int column) {
+        return formatLocation("at", templateSourceName, line, column);
     }
 
     private static String formatLocation(String preposition, Template template, int line, int column) {
-        return formatLocation(preposition, template != null ? template.getName() : null, line, column);
+        return formatLocation(preposition, template != null ? template.getSourceName() : null, line, column);
     }
     
-    private static String formatLocation(String preposition, String templateName, int line, int column) {
+    private static String formatLocation(String preposition, String templateSourceName, int line, int column) {
         return formatLocation(
-                preposition, templateName,
+                preposition, templateSourceName,
                 null, false,
                 line, column);
     }
 
     private static String formatLocation(
-            String preposition, String templateName,
+            String preposition, String templateSourceName,
             String macroOrFuncName, boolean isFunction,
             int line, int column) {
         String templateDesc;
@@ -99,8 +99,8 @@ class MessageUtil {
             line -= TemplateObject.RUNTIME_EVAL_LINE_DISPLACEMENT - 1;
             macroOrFuncName = null;
         } else { 
-            templateDesc = templateName != null
-                ? "template " + StringUtil.jQuoteNoXSS(templateName)
+            templateDesc = templateSourceName != null
+                ? "template " + StringUtil.jQuoteNoXSS(templateSourceName)
                 : "nameless template";
         }
         return "in " + templateDesc

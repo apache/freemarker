@@ -27,9 +27,6 @@ import junit.framework.TestCase;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.DefaultObjectWrapperBuilder;
-import freemarker.template.SimpleHash;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModel;
@@ -385,95 +382,6 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertNotSame(bw3, bw4);
         
         assertTrue(hardReferences.size() != 0);  // just to save it from GC until this line        
-    }
-
-    public void testDefaultObjectWrapperFactoryProducts() throws Exception {
-        {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
-            factory.setSimpleMapWrapper(true);
-            BeansWrapper bw = factory.build();
-            assertSame(bw, factory.build());
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertTrue(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            assertTrue(bw.isClassIntrospectionCacheRestricted());
-        }
-        
-        {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.getVersion());
-            factory.setSimpleMapWrapper(true);
-            BeansWrapper bw = factory.build();
-            assertSame(bw, factory.build());
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(
-                    BeansWrapper.normalizeIncompatibleImprovementsVersion(Configuration.getVersion()),
-                    bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertTrue(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-        }
-        
-        {
-            BeansWrapper bw = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19).build();
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertFalse(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            
-            assertSame(bw, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_20).build());
-            assertSame(bw, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_0).build());
-            assertSame(bw, new DefaultObjectWrapperBuilder(new Version(2, 3, 5)).build());
-        }
-        
-        {
-            BeansWrapper bw = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build();
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(Configuration.VERSION_2_3_21, bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertFalse(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            assertTrue(bw.isClassIntrospectionCacheRestricted());
-            
-            assertSame(bw, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build());
-        }
-
-        {
-            BeansWrapper bw = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19).build();
-            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
-        }
-        
-        {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
-            factory.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
-            BeansWrapper bw = factory.build();
-            BeansWrapper bw2 = factory.build();
-            assertSame(bw, bw2);  // not cached
-            
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertFalse(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            assertEquals(BeansWrapper.EXPOSE_PROPERTIES_ONLY, bw.getExposureLevel());
-        }
-        
-        {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_19);
-            factory.setExposeFields(true);
-            BeansWrapper bw = factory.build();
-            BeansWrapper bw2 = factory.build();
-            assertSame(bw, bw2);  // not cached
-            
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(Configuration.VERSION_2_3_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertFalse(bw.isSimpleMapWrapper());
-            assertTrue(bw.wrap(new HashMap()) instanceof SimpleHash);
-            assertEquals(true, bw.isExposeFields());
-        }
     }
     
     public void testClassInrospectorCache() throws TemplateModelException {

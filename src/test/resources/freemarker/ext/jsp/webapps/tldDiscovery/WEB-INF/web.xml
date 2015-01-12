@@ -80,11 +80,11 @@
 
   <taglib>
     <taglib-uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2</taglib-uri>
-    <taglib-location>/WEB-INF/fmtesttag.tld</taglib-location>
+    <taglib-location>/not-auto-scanned/fmtesttag.tld</taglib-location>
   </taglib>
   <taglib>
     <taglib-uri>http://freemarker.sf.net/taglibs/freemarker-junit-test-tag-2.2-2</taglib-uri>
-    <taglib-location>/WEB-INF/taglib2.jar</taglib-location>
+    <taglib-location>/WEB-INF/taglib 2.jar</taglib-location>
   </taglib>
   <taglib>
     <taglib-uri>/subdir/taglib</taglib-uri>

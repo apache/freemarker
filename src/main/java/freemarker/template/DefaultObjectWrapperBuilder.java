@@ -33,7 +33,7 @@ import freemarker.ext.beans._BeansAPI;
  * 
  * @since 2.3.21
  */
-public class DefaultObjectWrapperBuilder extends BeansWrapperConfiguration {
+public class DefaultObjectWrapperBuilder extends DefaultObjectWrapperConfiguration {
 
     private final static WeakHashMap/*<ClassLoader, Map<BeansWrapperSettings, WeakReference<DefaultObjectWrapper>>*/
             INSTANCE_CACHE = new WeakHashMap();
@@ -58,7 +58,7 @@ public class DefaultObjectWrapperBuilder extends BeansWrapperConfiguration {
         return (DefaultObjectWrapper) _BeansAPI.getBeansWrapperSubclassSingleton(
                 this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, DefaultObjectWrapperFactory.INSTANCE);
     }
-
+    
     private static class DefaultObjectWrapperFactory
         implements _BeansAPI._BeansWrapperSubclassFactory {
     

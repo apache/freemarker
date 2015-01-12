@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -43,6 +45,10 @@ import junit.framework.AssertionFailedError;
 import org.junit.Ignore;
 import org.xml.sax.InputSource;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.Java7MembersOnlyBeansWrapper;
@@ -52,6 +58,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleDate;
+import freemarker.template.DefaultNonListCollectionAdapter;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
@@ -62,6 +69,7 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.NullWriter;
 import freemarker.template.utility.StringUtil;
@@ -162,6 +170,7 @@ public class TemplateTestCase extends FileTestCase {
      * We really might as well just expose pretty much 
      * the same tree to all our tests. (JR)
      */
+    @SuppressWarnings("boxing")
     public void setUp() throws Exception {
         conf.setDirectoryForTemplateLoading(new File(getTestClassDirectory(), "templates"));
         
@@ -171,12 +180,17 @@ public class TemplateTestCase extends FileTestCase {
         dataModel.put(NO_OUTPUT_VAR_NAME, NoOutputDirective.INSTANCE);
 
         dataModel.put(JAVA_OBJECT_INFO_VAR_NAME, JavaObjectInfo.INSTANCE);
-        dataModel.put(TEST_NAME_VAR_NAME, getName());
+        dataModel.put(TEST_NAME_VAR_NAME, simpleTestName);
         dataModel.put(ICI_INT_VALUE_VAR_NAME, conf.getIncompatibleImprovements().intValue());
         
         dataModel.put("message", "Hello, world!");
-        
-        if (simpleTestName.equals("bean-maps")) {
+
+        if (simpleTestName.startsWith("api-builtin")) {
+            dataModel.put("map", ImmutableMap.of(1, "a", 2, "b", 3, "c"));
+            dataModel.put("list", ImmutableList.of(1, 2, 3));
+            dataModel.put("set", ImmutableSet.of("a", "b", "c"));
+            dataModel.put("s", "test");
+        } else if (simpleTestName.equals("bean-maps")) {
             BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
             BeansWrapper w3 = new Java7MembersOnlyBeansWrapper();
@@ -262,6 +276,28 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
         }
+
+        else if (templateName.equals("list.ftl")) {
+            List<Integer> arrayList = new ArrayList<Integer>();
+            arrayList.add(11);
+            arrayList.add(22);
+            arrayList.add(33);
+            dataModel.put("arrayList", arrayList);
+            
+            List<Integer> linkedList = new LinkedList<Integer>();
+            linkedList.add(11);
+            linkedList.add(22);
+            linkedList.add(33);
+            dataModel.put("linkedList", linkedList);
+            
+            Set<Integer> set = new TreeSet<Integer>();
+            set.add(11);
+            set.add(22);
+            set.add(33);
+            dataModel.put("set", set);
+            
+            dataModel.put("iterator", linkedList.iterator());
+        }
         
         else if (simpleTestName.startsWith("number-format")) {
             dataModel.put("int", new SimpleNumber(new Integer(1)));
@@ -319,6 +355,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList()));
+            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet(), null));
             dataModel.put("bean", new TestBean());
         }
 
@@ -389,6 +426,12 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("listWithNullsOnly", listWithNullsOnly);
             
             dataModel.put("abcCollection", new SimpleCollection(abcSet));
+            
+            Set set = new HashSet();
+            set.add("a");
+            set.add("b");
+            set.add("c");
+            dataModel.put("set", set);
         }
         
         else if (simpleTestName.equals("number-to-date")) {
@@ -442,10 +485,14 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("beanFalse", new BeansWrapper().wrap(Boolean.FALSE));
         }
         
-      else if (simpleTestName.startsWith("overloaded-methods-2-")) {
-          dataModel.put("obj", new OverloadedMethods2());
-          dataModel.put("dow", Boolean.valueOf(conf.getObjectWrapper() instanceof DefaultObjectWrapper));
-      }
+        else if (simpleTestName.startsWith("overloaded-methods-2-")) {
+            dataModel.put("obj", new OverloadedMethods2());
+            final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
+            dataModel.put("dow", dow);
+            dataModel.put("dowPre22", dow
+                    && ((DefaultObjectWrapper) conf.getObjectWrapper()).getIncompatibleImprovements()
+                            .intValue() < _TemplateAPI.VERSION_INT_2_3_22);
+        }
     }
     
     public void runTest() throws IOException {

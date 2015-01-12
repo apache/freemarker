@@ -1,0 +1,88 @@
+
+<!-- Test repeated execution -->
+doStartTag() called here
+doAfterBody() called here
+Blah
+doAfterBody() called here
+Blah
+doAfterBody() called here
+Blah
+doEndTag() called here
+doFinally() called here
+
+<!-- Test 0-time execution -->
+doStartTag() called here
+doEndTag() called here
+doFinally() called here
+
+<!-- Test abrupt execution -->
+doStartTag() called here
+doCatch() called here with class freemarker.core._TemplateModelException: Error while invoking the "testtag" JSP custom tag; see cause exception
+doFinally() called here
+
+<!-- Test nested execution -->
+doStartTag() called here
+doAfterBody() called here
+Outer Blah
+doStartTag() called here
+doAfterBody() called here
+Inner Blah
+doAfterBody() called here
+Inner Blah
+doEndTag() called here
+doFinally() called here
+doAfterBody() called here
+Outer Blah
+doStartTag() called here
+doAfterBody() called here
+Inner Blah
+doAfterBody() called here
+Inner Blah
+doEndTag() called here
+doFinally() called here
+doEndTag() called here
+doFinally() called here
+
+<!-- Test nested execution with intermittent non-JSP transform -->
+doStartTag() called here
+doAfterBody() called here
+Outer Blah
+doStartTag() called here
+doAfterBody() called here
+Inner Blah
+doAfterBody() called here
+Inner Blah
+doEndTag() called here
+doFinally() called heredoAfterBody() called here
+Outer Blah
+doStartTag() called here
+doAfterBody() called here
+Inner Blah
+doAfterBody() called here
+Inner Blah
+doEndTag() called here
+doFinally() called heredoEndTag() called here
+doFinally() called here
+
+enter TestSimpleTag simpletag1
+invoking body i=0
+foo
+enter TestSimpleTag simpletag2
+invoking body i=0
+bar
+invoking body i=1
+bar
+invoking body i=2
+bar
+exit TestSimpleTag simpletag2
+invoking body i=1
+foo
+enter TestSimpleTag simpletag2
+invoking body i=0
+bar
+invoking body i=1
+bar
+invoking body i=2
+bar
+exit TestSimpleTag simpletag2
+exit TestSimpleTag simpletag1

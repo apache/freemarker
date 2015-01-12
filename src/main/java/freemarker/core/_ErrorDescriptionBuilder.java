@@ -35,7 +35,7 @@ import freemarker.template.utility.StringUtil;
  */
 public class _ErrorDescriptionBuilder {
 
-    private static final Logger logger = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
 
     private final String description;
     private final Object[] descriptionParts;
@@ -82,7 +82,7 @@ public class _ErrorDescriptionBuilder {
             } catch (Throwable e) {
                 // Should not happen. But we rather give a not-so-good error message than replace it with another...
                 // So we ignore this.
-                logger.error("Error when searching blamer for better error message.", e);
+                LOG.error("Error when searching blamer for better error message.", e);
             }
         }
         

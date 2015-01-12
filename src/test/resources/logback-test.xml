@@ -8,7 +8,6 @@
 	</appender>
 	
 	<logger name="org.eclipse.jetty" level="INFO" />
-    <logger name="org.eclipse.jetty.servlet.ServletHandler" level="ERROR" />
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />

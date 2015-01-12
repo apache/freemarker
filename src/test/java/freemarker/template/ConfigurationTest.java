@@ -19,15 +19,22 @@ package freemarker.template;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
+
+import org.junit.Test;
+
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
+import freemarker.cache.TemplateLookupContext;
+import freemarker.cache.TemplateLookupResult;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -35,7 +42,7 @@ import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.NullWriter;
 
-public class ConfigurationTest extends TestCase{
+public class ConfigurationTest extends TestCase {
 
     public ConfigurationTest(String name) {
         super(name);
@@ -96,6 +103,14 @@ public class ConfigurationTest extends TestCase{
         cfg.setIncompatibleImprovements(oldVersion);
         assertUsesLegacyObjectWrapper(cfg);
         assertUsesLegacyTemplateLoader(cfg);
+        
+        // ---
+        
+        cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Object ow = cfg.getObjectWrapper();
+        assertEquals(DefaultObjectWrapper.class, ow.getClass());
+        assertEquals(Configuration.VERSION_2_3_22,
+                ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
     }
     
     public void testTemplateLoadingErrors() throws Exception {
@@ -199,6 +214,40 @@ public class ConfigurationTest extends TestCase{
         assertEquals(1, cache.getSize());
         cfg.setTemplateLoader(cfg.getTemplateLoader());
         assertEquals(1, cache.getSize());
+    }
+    
+    public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        assertEquals(1, cache.getSize());
+        
+        final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
+            public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+                return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
+            }
+        };
+        cfg.setTemplateLookupStrategy(myStrategy);
+        assertEquals(0, cache.getSize());
+        assertSame(myStrategy, cfg.getTemplateLookupStrategy());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        
+        cfg.setTemplateLookupStrategy(myStrategy);
+        assertEquals(1, cache.getSize());
+        
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        assertEquals(0, cache.getSize());
     }
     
     public void testSetTimeZone() throws TemplateException {
@@ -388,6 +437,24 @@ public class ConfigurationTest extends TestCase{
             assertEquals("my", cVal.getAsString());
             assertEquals(MyScalarModel.class, cVal.getClass());
         }
+    }
+
+    @Test
+    public void testApiBuiltinEnabled() throws IOException, TemplateException {
+        for (Version v : new Version[] { Configuration.VERSION_2_3_0, Configuration.VERSION_2_3_22 }) {
+            Configuration cfg = new Configuration(v);
+            try {
+                new Template(null, "${1?api}", cfg).process(null, NullWriter.INSTANCE);
+                fail();
+            } catch (TemplateException e) {
+                assertTrue(e.getMessage().contains(Configurable.API_BUILTIN_ENABLED_KEY));
+            }
+        }
+        
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setAPIBuiltinEnabled(true);
+        new Template(null, "${m?api.hashCode()}", cfg)
+                .process(Collections.singletonMap("m", new HashMap()), NullWriter.INSTANCE);
     }
     
     private static class MyScalarModel implements TemplateScalarModel {

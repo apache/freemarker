@@ -33,14 +33,13 @@ import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
 
 /**
  */
 class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel
 {
-    protected SimpleTagDirectiveModel(Class tagClass) throws IntrospectionException {
-        super(tagClass);
+    protected SimpleTagDirectiveModel(String tagName, Class tagClass) throws IntrospectionException {
+        super(tagName, tagClass);
         if(!SimpleTag.class.isAssignableFrom(tagClass)) {
             throw new IllegalArgumentException(tagClass.getName() + 
                     " does not implement either the " + Tag.class.getName() + 
@@ -74,7 +73,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                                 body.render(out == null ? pageContext.getOut() : out);
                             }
                             catch(TemplateException e) {
-                                throw new JspException(e);
+                                throw new TemplateExceptionWrapperJspException(e);
                             }
                         }
                     });
@@ -97,11 +96,17 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
         catch(TemplateException e) {
             throw e;
         }
-        catch(RuntimeException e) {
-            throw e;
-        }
         catch(Exception e) {
-            throw new TemplateModelException(e);
+            throw toTemplateModelException(e);
         }
     }
+    
+    static final class TemplateExceptionWrapperJspException extends JspException {
+
+        public TemplateExceptionWrapperJspException(Throwable cause) {
+            super("Nested content has thrown template exception", cause);
+        }
+        
+    }
+    
 }

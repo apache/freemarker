@@ -76,6 +76,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         
         builtins.put("abs", new absBI());
         builtins.put("ancestors", new ancestorsBI());
+        builtins.put("api", new BuiltInsForMultipleTypes.apiBI());
         builtins.put("boolean", new BuiltInsForStringsMisc.booleanBI());
         builtins.put("byte", new byteBI());
         builtins.put("c", new BuiltInsForMultipleTypes.cBI());
@@ -100,6 +101,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("float", new floatBI());
         builtins.put("floor", new floorBI());
         builtins.put("chunk", new chunkBI());
+        builtins.put("has_api", new BuiltInsForMultipleTypes.has_apiBI());
         builtins.put("has_content", new ExistenceBuiltins.has_contentBI());
         builtins.put("html", new BuiltInsForStringsEncoding.htmlBI());
         builtins.put("if_exists", new ExistenceBuiltins.if_existsBI());
@@ -108,6 +110,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("interpret", new Interpret());
         builtins.put("is_boolean", new BuiltInsForMultipleTypes.is_booleanBI());
         builtins.put("is_collection", new BuiltInsForMultipleTypes.is_collectionBI());
+        builtins.put("is_collection_ex", new BuiltInsForMultipleTypes.is_collection_exBI());
         bi = new BuiltInsForMultipleTypes.is_dateLikeBI();
         builtins.put("is_date", bi);  // misnomer
         builtins.put("is_date_like", bi);

@@ -5486,9 +5486,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.21) do you want to apply the fixes that are not 100%
+// version (here 2.3.22) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -5499,7 +5499,7 @@ cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templ
 cfg.setDefaultEncoding("UTF-8");
 
 // Sets how errors will appear.
-// During development TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
+// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
 cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
@@ -5714,10 +5714,10 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
@@ -5775,10 +5775,10 @@ public class Test {
         <para>You have seen how to build a data-model in the <link
         linkend="pgui_quickstart">Getting Started</link> using the standard
         Java classes (<literal>Map</literal>, <literal>String</literal>,
-        etc.). Internally, the variables available in the template are java
+        etc.). Internally, the variables available in the template are Java
         objects that implement the
         <literal>freemarker.template.TemplateModel</literal> interface. But
-        you could use standard java collections as variables in your
+        you could use standard Java collections as variables in your
         data-model, because these were replaced with the appropriate
         <literal>TemplateModel</literal> instances behind the scenes. This
         facility is called <emphasis role="term">object wrapping</emphasis>.
@@ -5790,10 +5790,10 @@ public class Test {
         <literal>javax.servlet.ServletRequest</literal> objects as a hash
         variable that contains the request attributes, or even to traverse XML
         documents as FTL variables (<link linkend="xgui">see here</link>). To
-        wrap (convert) these objects, however, you need to plug the proper, so
-        called, object wrapper implementation (possibly your custom
+        wrap (convert) these objects, however, you need to plug the proper
+        <literal>ObjectWrapper</literal> implementation (possibly your custom
         implementation); this will be discussed <link
-        linkend="pgui_datamodel_objectWrapper">later</link>. The meat for now
+        linkend="pgui_datamodel_objectWrapper">later</link>. The point for now
         is that any object that you want to access from the templates, sooner
         or later must be converted to an object that implements
         <literal>TemplateModel</literal> interface. So first you should
@@ -5910,7 +5910,8 @@ public class Test {
         <note>
           <para>For historical reasons the interface for string scalars is
           called <literal>TemplateScalarModel</literal>, not
-          <literal>TemplateStringModel</literal>.</para>
+          <literal>TemplateStringModel</literal>. (It's because in early
+          FreeMarker strings were the only kind of scalars.)</para>
         </note>
 
         <para>A trivial implementation of these interfaces are available in
@@ -5934,7 +5935,7 @@ public class Test {
         the original instance.</para>
 
         <section>
-          <title>Difficulties with the <quote>date-like</quote> type</title>
+          <title>Difficulties with the <quote>date-like</quote> types</title>
 
           <indexterm>
             <primary>date</primary>
@@ -6608,233 +6609,333 @@ public class RepeatDirective implements TemplateDirectiveModel {
           <primary>wrapper</primary>
         </indexterm>
 
-        <para>When you add something to a container, it may receive any Java
-        object as a parameter, not necessarily a
-        <literal>TemplateModel</literal>, as you could see in the FreeMarker
-        API. This is because the container implementation can silently replace
-        that object with the appropriate <literal>TemplateModel</literal>
-        object. For example if you add a <literal>String</literal> to the
-        container, perhaps it will be replaced with a
-        <literal>SimpleScalar</literal> instance which stores the same
-        text.</para>
+        <para>The object wrapper is an object that implements the
+        <literal>freemarker.template.ObjectWrapper</literal> interface. It's
+        purpose is to implement a mapping between Java objects (like
+        <literal>String</literal>-s, <literal>Map</literal>-s,
+        <literal>List</literal>-s, instances of your application specific
+        classes, etc.) and FTL's type system. With other words, it specifies
+        how the templates will see the Java objects of the data-model
+        (including the return value of Java methods called from the template).
+        The object wrapper is plugged into the
+        <literal>Configuration</literal> as its
+        <literal>object_wrapper</literal> setting (or with
+        <literal>Configuration.setObjectWrapper</literal>).</para>
 
-        <para>As for when the replacement occurs, it's the business of the
-        container in question (i.e. the business of the class that implements
-        the container interface), but it must happen at the latest when you
-        get the subvariable, as the getter methods (according to the
-        interfaces) return <literal>TemplateModel</literal>, not
-        <literal>Object</literal>. For example, <literal>SimpleHash</literal>,
-        <literal>SimpleSequence</literal> and
-        <literal>SimpleCollection</literal> use the laziest strategy; they
-        replace a non-<literal>TemplateModel</literal> subvariable with an
-        appropriate <literal>TemplateModel</literal> object when you get the
-        subvariable for the first time.</para>
+        <para>FTL's type system is technically represented by the
+        <literal>TemplateModel</literal> sub-interfaces that were introduced
+        earlier (<literal>TemplateScalarModel</literal>,
+        <literal>TemplateHashMode</literal>,
+        <literal>TemplateSequenceModel</literal>, etc). To map a Java object
+        to FTL's type system, object wrapper's <literal>TemplateModel
+        wrap(java.lang.Object obj)</literal> method will be called.</para>
 
-        <para>As for what java objects can be replaced, and with what
-        <literal>TemplateModel</literal> implementations, it is either handled
-        by the container implementation itself, or it delegates this to an
-        <literal>ObjectWrapper</literal> instance.
-        <literal>ObjectWrapper</literal> is an interface that specifies one
-        method: <literal>TemplateModel wrap(java.lang.Object obj)</literal>.
-        You pass in an <literal>Object</literal>, and it returns the
-        corresponding <literal>TemplateModel</literal> object, or throws a
-        <literal>TemplateModelException</literal> if this is not possible. The
-        replacement rules are coded into the <literal>ObjectWrapper</literal>
-        implementation.</para>
+        <para>Sometimes FreeMarker needs to reverse this mapping, in which
+        case the <literal>ObjectWrapper</literal>'s <literal>Object
+        unwrap(TemplateModel)</literal> method is called (or some other
+        variation of that, but see the API documentation for such details).
+        This last operation is in
+        <literal>ObjectWrapperAndUnwrapper</literal>, the subinterface of
+        <literal>ObjectWrapper</literal>. Most real world object wrappers will
+        implement <literal>ObjectWrapperAndUnwrapper</literal>.</para>
 
-        <para>The most important <literal>ObjectWrapper</literal>
-        implementations that the FreeMarker core provides are:</para>
+        <para>Here's how wrapping Java objects that contain other objects
+        (like a <literal>Map</literal>, a <literal>List</literal>, an array,
+        or an object with some JavaBean properties) usually work. Let's say,
+        an object wrapper wraps an <literal>Object[]</literal> array into some
+        implementation of the <literal>TemplateSquenceModel</literal>
+        interface. When FreeMarker needs an item from that FTL sequence, it
+        will call <literal>TemplateSquenceModel.get(int index)</literal>. The
+        return type of this method is <literal>TemplateModel</literal>, that
+        is, the <literal>TemplateSquenceModel</literal> implementation not
+        only have to get the <literal>Object</literal> from the given index of
+        the array, it's also responsible for wrapping that value before
+        returning it. To solve that, a typical
+        <literal>TemplateSquenceModel</literal> implementation will store the
+        <literal>ObjectWrapper</literal> that has cerated it, and then invoke
+        that <literal>ObjectWrapper</literal> to wrap the contained value. The
+        same logic stands for <literal>TemplateHashModel</literal> or for any
+        other <literal>TemplateModel</literal> that's a container for further
+        <literal>TemplateModel</literal>-s. Hence, usually, no mater how deep
+        the value hierarchy is, all values will be wrapped by the same single
+        <literal>ObjectWrapper</literal>. (To create
+        <literal>TemplateModel</literal> implementations that follow this
+        idiom, you can use the
+        <literal>freemarker.template.WrappingTemplateModel</literal> as base
+        class.)</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><literal>freemarker.template.DefaultObjectWrapper</literal>:
-            It replaces <literal>String</literal> with
-            <literal>SimpleScalar</literal>, <literal>Number</literal> with
-            <literal>SimpleNumber</literal>, <literal>List</literal> and array
-            with <literal>SimpleSequence</literal>, <literal>Map</literal>
-            with <literal>SimpleHash</literal>, <literal>Boolean</literal>
-            with <literal>TemplateBooleanModel.TRUE</literal> or
-            <literal>TemplateBooleanModel.FALSE</literal>, W3C DOM nodes with
-            <literal>freemarker.ext.dom.NodeModel</literal>. For Jython
-            objects, this wrapper will invoke
-            <literal>freemarker.ext.jython.JythonWrapper</literal>. For all
-            other objects, it will invoke <link
-            linkend="pgui_misc_beanwrapper"><literal>BeansWrapper</literal></link>.</para>
-          </listitem>
+        <para>The data-model itself (the root variable) is a
+        <literal>TemplateHashModel</literal>. The root object that you specify
+        to <literal>Template.process</literal> will be wrapped with the object
+        wrapper specified in the <literal>object_wrapper</literal>
+        configuration setting, which must yield a
+        <literal>TemplateHashModel</literal>. From then on, the wrapping of
+        the contained values follow the logic described earlier (i.e., the
+        container is responsible for wrapping its children).</para>
 
-          <listitem>
-            <para><literal>freemarker.ext.beans.BeansWrapper</literal>: It can
-            expose JavaBean properties and other members of arbitrary objects
-            using Java reflection; there is a separated <link
-            linkend="pgui_misc_beanwrapper">chapter about it</link>.
-            <literal>DefaultObjectWrapper</literal> extends this
-            wrapper.</para>
-          </listitem>
-        </itemizedlist>
+        <para>Well behaving object wrappers bypass objects that already
+        implement <literal>TemplateModel</literal> as is. So if you put an
+        object into the data-model that already implements
+        <literal>TemplateModel</literal> (or you return as such object from a
+        Java method that's called from the template, etc.), then you can avoid
+        actual object wrapping. You do this usually when you are creating a
+        value specifically to be accessed from a template. Thus, you avoid
+        much of the object wrapping performance overhead, also you can control
+        exactly what will the template see (not depending on the mapping
+        strategy of the current object wrapper). A frequent application of
+        this trick is using a
+        <literal>freemarker.template.SimpleHash</literal> as the data-model
+        root (rather than a <literal>Map</literal>), by filling it with
+        <literal>SimpleHash</literal>'s <literal>put</literal> method (that's
+        important, so it won't have to copy an existing <literal>Map</literal>
+        that you have already filled). This speeds up top-level data-model
+        variable access.</para>
 
-        <para>For a concrete example, let's see how the
-        <literal>Simple<replaceable>Xxx</replaceable></literal> classes
-        work:</para>
+        <section xml:id="pgui_datamodel_defaultObjectWrapper">
+          <title>The default object wrapper</title>
 
-        <programlisting role="unspecified">Map map = new HashMap();
-map.put("anotherString", "blah");
-map.put("anotherNumber", new Double(3.14));
-List list = new ArrayList();
-list.add("red");
-list.add("green");
-list.add("blue");
+          <indexterm>
+            <primary>object wrapper</primary>
 
-// Get the object wrapper we will use. The details of the
-// construction aren't important now (see JavaDocs for that):
-ObjectWrapper wrapper
-        = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21)
-          .build();
+            <secondary>default</secondary>
+          </indexterm>
 
-// Normaly, you would create a plain java.util.HashMap here, and
-// later let the ObjectWrapper wrap it in Template.process(...).
-// But for demonstration purposes we will bypass the object wrapper
-// and create a SimpleHash directly that's like the wrapper would
-// create:
-SimpleHash root = new SimpleHash(wrapper);
-root.put("theString", "wombat");
-root.put("theNumber", new Integer(8));
-root.put("theMap", map);
-root.put("theList", list);</programlisting>
+          <indexterm>
+            <primary>DefaultObjectWrapper</primary>
+          </indexterm>
 
-        <para>Assuming that <literal>root</literal> is the data-model root,
-        the resulting data-model is:</para>
+          <para>The default of the <literal>object_wrapper</literal>
+          <literal>Configuration</literal> setting is a
+          <literal>freemarker.template.DefaultObjectWrapper</literal>
+          singleton. Unless you have very special requirements, it's
+          recommended to use this object wrapper, or an instance of a
+          <literal>DefaultObjectWrapper</literal> subclass of yours.</para>
 
-        <programlisting role="dataModel">(root)
- |
- +- theString = "wombat"
- |
- +- theNumber = 8
- |
- +- theMap
- |   |
- |   +- anotherString = "blah"
- |   |
- |   +- anotherNumber = 3.14
- |
- +- theList
-     |
-     +- (1st) = "red"
-     |
-     +- (2nd) = "green"
-     |
-     +- (3rd) = "blue"</programlisting>
+          <para>It recognizes most basic Java types, like
+          <literal>String</literal>, <literal>Number</literal>,
+          <literal>Boolean</literal>, <literal>Date</literal>,
+          <literal>List</literal> (and in general all kind of
+          <literal>java.util.Collection</literal>-s), arrays,
+          <literal>Map</literal>, etc., and wraps them into the naturally
+          matching <literal>TemplateModel</literal> interfaces. It will also
+          wrap W3C DOM nodes with
+          <literal>freemarker.ext.dom.NodeModel</literal>, so you can
+          conveniently traverse XML as <link linkend="xgui">described in its
+          own chapter</link>). For Jython objects, it will delegate to
+          <literal>freemarker.ext.jython.JythonWrapper</literal>. For all
+          other objects, it will invoke <literal>BeansWrapper.wrap</literal>
+          (the super class's method), which will expose the JavaBean
+          properties of the objects as hash items (like
+          <literal>myObj.foo</literal> in FTL will call
+          <literal>getFoo()</literal> behind the scenes), and will also expose
+          the public methods (JavaBean actions) of the object (like
+          <literal>myObj.bar(1, 2)</literal> in FTL will call a method). (For
+          more information about BeansWrapper, <link
+          linkend="pgui_misc_beanwrapper">see its own section</link>.)</para>
 
-        <para>Note that the <literal>Object</literal>-s inside
-        <literal>theMap</literal> and <literal>theList</literal> are
-        accessible as subvariables too. This is because when you, say, try to
-        access <literal>theMap.anotherString</literal>, then the
-        <literal>SimpleHash</literal> (which is used as root hash here) will
-        silently replace the <literal>Map</literal>
-        (<literal>theMap</literal>) with a <literal>SimpleHash</literal>
-        instance that uses the same wrapper as the root hash, so when you try
-        to access the <literal>anotherString</literal> subvariable of it, it
-        will replace that with a <literal>SimpleScalar</literal>.</para>
+          <para>Some further details that's worth mentioning about
+          <literal>DefaultObjectWrapper</literal>:</para>
 
-        <para>If you drop an ``arbitrary'' object into the data-model,
-        <literal>DefaultObjectWrapper</literal> will fall back to
-        <literal>BeansWrapper</literal> to wrap the it:</para>
+          <itemizedlist>
+            <listitem>
+              <para>You shouldn't use its constructor usually, instead create
+              it using a <literal>DefaultObjectWrapperBuilder</literal>. This
+              allows FreeMarker to use singletons.</para>
+            </listitem>
 
-        <programlisting role="unspecified">SimpleHash root = new SimpleHash(wrapper);
-// expose a "simple" java objects:
-root.put("theString", "wombat");
-// expose an "arbitrary" java objects:
-root.put("theObject", new TestObject("green mouse", 1200));
-</programlisting>
+            <listitem xml:id="topic.defaultObjectWrapperIcI">
+              <para>It has a <literal>incompatibleImprovements</literal>
+              property, that's highly recommended to set to 2.3.22 or higher
+              (see the API documentation for the effects). Here's how:</para>
 
-        <para>Assuming this is <literal>TestObject</literal>:</para>
+              <itemizedlist>
+                <listitem>
+                  <para>If you have set the
+                  <literal>incompatible_improvements</literal> setting of the
+                  <literal>Configuration</literal> to 2.3.22 or higher, and
+                  you don't set the <literal>object_wrapper</literal> setting
+                  (so it remains on its default), then you have to do nothing,
+                  as it already uses a <literal>DefaultObjectWrapper</literal>
+                  singleton with the matching
+                  <literal>incompatibleImprovements</literal>.</para>
+                </listitem>
 
-        <programlisting role="unspecified">public class TestObject {
-    private String name;
-    private int price;
+                <listitem>
+                  <para>Otherwise, if you configuring FreeMarker with a
+                  <literal>.properties</literal> file (or from a
+                  <literal>java.util.Properties</literal> constructed
+                  otherwise), or with <literal>FreemarkerServlet</literal>
+                  init-params, set <literal>object_wrapper</literal> to
+                  <literal>DefaultObjectWrapper(2.3.22)</literal> (literally,
+                  that's the string value).</para>
+                </listitem>
 
-    public TestObject(String name, int price) {
-        this.name = name;
-        this.price = price;
-    }
+                <listitem>
+                  <para>Otherwise, if you are configuring FreeMarker through
+                  its Java API:</para>
 
-    // JavaBean properties
-    // Note that public fields are not visible directly;
-    // you must write a getter method for them.
-    public String getName() {return name;}
-    public int getPrice() {return price;}
-    
-    // A method
-    public double sin(double x) {
-        return Math.sin(x);
-    }
+                  <programlisting role="unspecified">cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_22).build());</programlisting>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>In new or properly test-covered projects it's also
+              recommended to set the
+              <literal>forceLegacyNonListCollections</literal> property to
+              <literal>false</literal>. If you are using
+              <literal>.properties</literal> or
+              <literal>FreemarkerServlet</literal> init-params or such, that
+              will look like <literal>DefaultObjectWrapper(2.3.22,
+              forceLegacyNonListCollections=false)</literal>, while with the
+              Java API you call
+              <literal>setForceLegacyNonListCollections(false)</literal> on
+              the <literal>DefaultObjectWrapperBuilder</literal> object before
+              calling <literal>build()</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>The most common way of customizing
+              <literal>DefaultObjectWrapper</literal> is overriding its
+              <literal>handleUnknownType</literal> method.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section xml:id="pgui_datamodel_customObjectWrappingExample">
+          <title>Custom object wrapping example</title>
+
+          <indexterm>
+            <primary>object wrapper</primary>
+
+            <secondary>custom</secondary>
+          </indexterm>
+
+          <indexterm>
+            <primary>custom object wrapper</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>DefaultObjectWrapper</primary>
+
+            <secondary>extending</secondary>
+          </indexterm>
+
+          <para>Let's say you have an application-specific class like
+          this:</para>
+
+          <programlisting role="unspecified">package com.example.myapp;
+
+public class Tupple&lt;E1, E2&gt; {
+    public Tupple(E1 e1, E2 e2) { ... }
+    public E1 getE1() { ... }
+    public E2 getE2() { ... }
 }</programlisting>
 
-        <para>The data-model will be:</para>
+          <para>You want templates to see this as a sequence of length 2, so
+          that you can do things like <literal>someTupple[1]</literal>,
+          <literal>&lt;#list someTupple
+          <replaceable>...</replaceable>&gt;</literal>, or
+          <literal>someTupple?size</literal>. For that you need to create a
+          <literal>TemplateSequenceModel</literal> implementation that adapts
+          a <literal>Tupple</literal> to the
+          <literal>TempateSequenceMoldel</literal> interface:</para>
 
-        <programlisting role="dataModel">(root)
- |
- +- theString = "wombat"
- |
- +- theObject
-     |
-     +- name = "green mouse"
-     |
-     +- price = 1200
-     |
-     +- number sin(number)</programlisting>
+          <programlisting role="unspecified">package com.example.myapp.freemarker;
 
-        <para>So we can merge it with this template:</para>
+...
 
-        <programlisting role="template">${theObject.name}
-${theObject.price}
-${theObject.sin(123)}</programlisting>
+public class TuppleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+        AdapterTemplateModel {
+    
+    private final Tupple&lt;?, ?&gt; tupple;
+    
+    public TuppleAdapter(Tupple&lt;?, ?&gt; tupple, ObjectWrapper ow) {
+        super(ow);  // coming from WrappingTemplateModel
+        this.tupple = tupple;
+    }
 
-        <para>Which will output:</para>
+    @Override  // coming from TemplateSequenceModel
+    public int size() throws TemplateModelException {
+        return 2;
+    }
+    
+    @Override  // coming from TemplateSequenceModel
+    public TemplateModel get(int index) throws TemplateModelException {
+        switch (index) {
+        case 0: return wrap(tupple.getE1());
+        case 1: return wrap(tupple.getE2());
+        default: return null;
+        }
+    }
 
-        <programlisting role="output">green mouse
-1200
--0,45990349068959124</programlisting>
+    @Override  // coming from AdapterTemplateModel
+    public Object getAdaptedObject(Class hint) {
+        return tupple;
+    }
+    
+}</programlisting>
 
-        <para>You have seen in earlier examples of this manual that we have
-        used <literal>java.util.HashMap</literal> as root hash, and not
-        <literal>SimpleHash</literal> or other FreeMarker specific class. It
-        works because
-        <literal>Template.process(<replaceable>...</replaceable>)</literal>
-        automatically wraps the object you give as its data-model argument. It
-        uses the object wrapper dictated by the
-        <literal>Configuration</literal> level <link
-        linkend="pgui_config_settings">setting</link>,
-        <literal>object_wrapper</literal> (unless you explicitly specify an
-        <literal>ObjectWrapper</literal> as its parameter). Thus, in simple
-        FreeMarker application you need not know about
-        <literal>TemplateModel</literal>-s at all. Note that the root need not
-        be a <literal>java.util.Map</literal>. It can be anything that is
-        wrapped so that it implements the <literal>TemplateHashModel</literal>
-        interface.</para>
+          <para>Regarding the classes and interfaces:</para>
 
-        <para>You can configure what <literal>ObjectWrapper</literal>
-        FreeMarker uses with
-        <literal>cfg.setObjectWrapper(ObjectWrapper)</literal>, where
-        <literal>cfg</literal> is the <literal>Configuration</literal>
-        instance. Note that you can plug in your custom
-        <literal>ObjectWrapper</literal> implementation here, hence you have
-        full control over how templates see the data-model.</para>
+          <itemizedlist>
+            <listitem>
+              <para><literal>TemplateSequenceModel</literal>: This is why the
+              template will see this as a sequence</para>
+            </listitem>
 
-        <para>For <literal>TemplateModel</literal> implementations that wrap
-        basic Java container types, as <literal>java.util.Map</literal>-s and
-        <literal>java.util.List</literal>-s, the convention is that they use
-        the same object wrapper to wrap their subvariables as their parent
-        container does (that's why the <literal>SimpleHash</literal>
-        constructor has an <literal>ObjectWrapper</literal> parameter).
-        Technically correctly said, they are instantiated by their parent
-        container (so it has full control over the creation of them), and the
-        parent container create them so they will use the same object wrapper
-        as the parent itself. Thus, if <literal>wrapper</literal> is used for
-        the wrapping of the root hash (see it in the examples above), it will
-        be used for the wrapping of the subvariables (and the subvariables of
-        the subvariables, etc.) as well. This is exactly the same phenomenon
-        as you have seen with <literal>theMap.anotherString</literal>
-        earlier.</para>
+            <listitem>
+              <para><literal>WrappingTemplateModel</literal>: Just a
+              convenience class, used for <literal>TemplateModel</literal>-s
+              that do object wrapping themselves. That's normally only needed
+              for objects that contain other objects. See the
+              <literal>wrap(<replaceable>...</replaceable>)</literal> calls
+              above.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>AdapterTemplateModel</literal>: Indicates that
+              this template model adapts an already existing object to a
+              <literal>TemplateModel</literal> interface, thus unwrapping
+              should give back that original object.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>Lastly, we tell FreeMarker to wrap <literal>Tupple</literal>-s
+          with the <literal>TuppleAdapter</literal> (alternatively, you could
+          wrap them manually before passing them to FreeMarker). For that,
+          first we create a custom object wrapper:</para>
+
+          <programlisting role="unspecified">package com.example.myapp.freemarker;
+
+...
+
+public class MyAppObjectWrapper extends DefaultObjectWrapper {
+
+    public MyAppObjectWrapper(Version incompatibleImprovements) {
+        super(incompatibleImprovements);
+    }
+    
+    @Override
+    protected TemplateModel handleUnknownType(final Object obj) throws TemplateModelException {
+        if (obj instanceof Tupple) {
+            return new TuppleAdapter((Tupple&lt;?, ?&gt;) obj, this);
+        }
+        
+        return super.handleUnknownType(obj);
+    }
+    
+}</programlisting>
+
+          <para>and then where you configure FreeMarker (<link
+          linkend="pgui_config">about configuring, see here...</link>) we plug
+          our object wrapper in:</para>
+
+          <programlisting role="unspecified">// Where you initialize the cfg *singleton* (happens just once in the application life-cycle):
+cfg = new Configuration(Configuration.VERSION_2_3_22);
+...
+cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
+        </section>
       </section>
     </chapter>
 
@@ -6893,7 +6994,7 @@ ${theObject.sin(123)}</programlisting>
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 <replaceable>..</replaceable>.
 cfg.setSharedVariable("warp", new WarpDirective());
 cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
@@ -6910,7 +7011,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
           <para>Never use <literal>TemplateModel</literal> implementation that
           is not <link linkend="gloss.threadSafe">thread-safe</link> for
           shared variables, if the configuration is used by multiple threads!
-          This is the typical situation for Servlet based Web sites.</para>
+          This is the typical situation for Servlet based applications.</para>
         </warning>
 
         <para>Due to backward compatibility heritage, the set of shared
@@ -7087,7 +7188,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_21);
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_22);
 myCfg.setLocale(java.util.Locale.ITALY);
 myCfg.setNumberFormat("0.####");</programlisting>
 
@@ -7111,7 +7212,7 @@ myCfg.setNumberFormat("0.####");</programlisting>
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
-      &lt;prop key="incompatible_improvements"&gt;2.3.21&lt;/prop&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.22&lt;/prop&gt;
       &lt;prop key="locale"&gt;it_IT&lt;/prop&gt;
       &lt;prop key="number_format"&gt;0.####&lt;/prop&gt;
     &lt;/props&gt;
@@ -8067,11 +8168,26 @@ env.process();</programlisting>
           <secondary>wrapping</secondary>
         </indexterm>
 
+        <indexterm>
+          <primary>BeansWrapper</primary>
+        </indexterm>
+
+        <note>
+          <para>Using <literal>BeansWrapper</literal> directly is not
+          recommended anymore. Use its subclass,
+          <literal>DefaultObjectWrapper</literal> instead, though by ensuring
+          that its <literal>incompatibleImprovements</literal> property is at
+          least 2.3.22. <literal>DefaultObjectWrapper</literal> gives cleaner
+          data-model (less confusing multi-type FTL values) and is usually
+          faster. <link linkend="pgui_datamodel_defaultObjectWrapper">See more
+          about DefaultObjectWrapper here...</link></para>
+        </note>
+
         <para>The <literal>freemarker.ext.beans.BeansWrapper</literal> is an
         <link linkend="pgui_datamodel_objectWrapper">object wrapper</link>
         that was originally added to FreeMarker so arbitrary POJO-s (Plain Old
         Java Objects) can be wrapped into <literal>TemplateModel</literal>
-        interfaces. Since then it has becomed the normal way of doing things,
+        interfaces. Since then it has became the normal way of doing things,
         and in fact the <literal>DefaultObjectWrapper</literal> itself is a
         <literal>BeansWrapper</literal> extension. So everything described
         here goes for the <literal>DefaultObjectWrapper</literal> too, except
@@ -8652,6 +8768,22 @@ TemplateHashModel roundingModeEnums =
           <primary>SLF4J</primary>
         </indexterm>
 
+        <indexterm>
+          <primary>Log4j2</primary>
+        </indexterm>
+
+        <para>Is short, the recommended setup in contemporary application (as
+        of 2015) is using SLF4J API for logging everywhere. To get FreeMarker
+        2.3.x. to use SLF4J, simply add the
+        <literal>org.slf4j:log4j-over-slf4j</literal> dependency to your
+        project, and ensure that <literal>log4j:log4j</literal> isn't present.
+        (Starting from FreeMarker 2.4.x you don't need
+        <literal>log4j-over-slf4j</literal> anymore, though it does no harm
+        either.)</para>
+
+        <para>Read on if you are curious about the details, or if you can't
+        use SLF4J...</para>
+
         <para>FreeMarker integrates with the following logging libraries:
         <link xlink:href="http://www.slf4j.org/">SLF4J</link>, <link
         xlink:href="http://commons.apache.org/logging/">Apache Commons
@@ -8661,19 +8793,30 @@ TemplateHashModel roundingModeEnums =
         LogKit</link>, and <link
         xlink:href="http://java.sun.com/j2se/1.4/docs/api/java/util/logging/package-summary.html"><literal>java.util.logging</literal></link>.
         By default, FreeMarker will look for the these logging libraries in
-        the following order, and will automatically use the first one it
-        finds: <remark>[2.4 - un-remark this] SLF4J, Apache Commons Logging,
-        </remark>Log4J (will use SLF4J instead if it's a properly installed
-        <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache Avalon
-        LogKit, <literal>java.util.logging</literal>.</para>
+        the following order, and will automatically use the first one it finds
+        (in 2.3.x): <remark>[2.4 - un-remark this] SLF4J, Apache Commons
+        Logging, </remark>Log4J (will use SLF4J instead if it's a properly
+        installed <literal>log4j-over-slf4j</literal>, since 2.3.22), Apache
+        Avalon LogKit, <literal>java.util.logging</literal>. As you can see,
+        Log4j has the highest priority. The presence of Log4j is simply
+        detected from the presence of the
+        <literal>org.apache.log4j.Logger</literal> class, which means that
+        Log4j redirections like <literal>log4j-over-slf4j</literal> or
+        <literal>log4j-1.2-api</literal> will also get the highest
+        priority.</para>
 
         <para>Prior to FreeMarker 2.4, SLF4J and Apache Commons Logging aren't
         searched automatically due to backward compatibility constraints. But
-        if you have <literal>log4j-over-slf4j</literal> properly installed
-        (means, you have no real Log4j in your class path, and SLF4J has a
-        backing implementation like <literal>logback-classic</literal>), then
-        FreeMarker will use SLF4J directly instead of Log4j (since FreeMarker
-        2.3.22).</para>
+        if you have <literal>org.slf4j:log4j-over-slf4j</literal> properly
+        installed (means, you have no real Log4j in your class path, and SLF4J
+        has a backing implementation like <literal>logback-classic</literal>),
+        then FreeMarker will use the SLF4J API directly instead of the Log4j
+        API (since FreeMarker 2.3.22).</para>
+
+        <para>Note that a similar trick can be applied for logging into
+        Log4j2: If <literal>org.apache.logging.log4j:log4j-1.2-api</literal>
+        is present, FreeMarker 2.3.x will pick that as it looks like Log4j,
+        but all the messages will actually go to Log4j2.</para>
 
         <para>If the auto detection doesn't give you the result that you want,
         you can set the <literal>org.freemarker.loggerLibrary</literal> system
@@ -8693,11 +8836,11 @@ TemplateHashModel roundingModeEnums =
 
         <para>Using SLF4J is recommended, as it works best with FreeMarker,
         and also because it will be the highest priority auto detected logger
-        starting from FreeMarker 2.4 anyway.</para>
+        starting from FreeMarker 2.4.</para>
 
-        <para>All log messages produced by FreeMarker are logged into the
-        logger hierarchy whose top-level logger is named
-        <literal>freemarker</literal>. Currently used loggers are:</para>
+        <para>All log messages produced by FreeMarker are logged with a logger
+        category that starts with <literal>freemarker.</literal>. The
+        currently used logger categories are:</para>
 
         <informaltable border="1">
           <thead>
@@ -8862,24 +9005,29 @@ TemplateHashModel roundingModeEnums =
   &lt;!-- FreeMarker settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.21&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.22&lt;/param-value&gt;
+    &lt;!-- Recommended to set to a high value. For the details, see the Java API docs of
+         freemarker.template.Configuration#Configuration(Version). --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_exception_handler&lt;/param-name&gt;
-    &lt;!-- Some may prefer "html_debug" for development. --&gt;
+    &lt;!-- Use "html_debug" instead during development! --&gt;
     &lt;param-value&gt;rethrow&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;template_update_delay&lt;/param-name&gt;
-    &lt;param-value&gt;0&lt;/param-value&gt; &lt;!-- 0 is for development only! Use higher value otherwise. --&gt;
+    &lt;!-- ATTENTION, 0 is for development only! Use higher value otherwise. --&gt;
+    &lt;param-value&gt;0&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;default_encoding&lt;/param-name&gt;
-    &lt;param-value&gt;UTF-8&lt;/param-value&gt; &lt;!-- The encoding of the template files. --&gt;
+    &lt;!-- The encoding of the template files. --&gt;
+    &lt;param-value&gt;UTF-8&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;locale&lt;/param-name&gt;
-    &lt;param-value&gt;en_US&lt;/param-value&gt; &lt;!-- Influences number and date/time formatting, etc. --&gt;
+    &lt;!-- Influences number and date/time formatting, etc. --&gt;
+    &lt;param-value&gt;en_US&lt;/param-value&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;number_format&lt;/param-name&gt;
@@ -8898,7 +9046,7 @@ TemplateHashModel roundingModeEnums =
 
 &lt;!--
   Prevent the visiting of MVC Views from outside the servlet container.
-  RequestDispatcher.forward/include should and will still work.
+  RequestDispatcher.forward/include should, and will still work.
   Removing this may open security holes!
 --&gt;
 &lt;security-constraint&gt;
@@ -8907,7 +9055,7 @@ TemplateHashModel roundingModeEnums =
     &lt;url-pattern&gt;*.ftl&lt;/url-pattern&gt;
   &lt;/web-resource-collection&gt;
   &lt;auth-constraint&gt;
-    &lt;!-- Nobody is allowed to visit these --&gt;
+    &lt;!-- Nobody is allowed to visit these directly. --&gt;
   &lt;/auth-constraint&gt;
 &lt;/security-constraint&gt;</programlisting>
 
@@ -9988,6 +10136,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_buitin_api_and_has_api">api</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_boolean">boolean</link></para>
           </listitem>
 
@@ -10090,6 +10242,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_numType">float</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_buitin_api_and_has_api">has_api</link></para>
           </listitem>
 
           <listitem>
@@ -13767,6 +13924,121 @@ Sorted by name.last:
         useful. If you need to use these in your normal page templates, you
         may revisit the data-model so you don't need to use these.</para>
 
+        <section xml:id="ref_buitin_api_and_has_api">
+          <title>api, has_api</title>
+
+          <note>
+            <para>These built-ins exists since FreeMarker 2.3.22</para>
+          </note>
+
+          <para><literal><replaceable>value</replaceable>?api</literal>
+          provides access to the API (usually, the Java API) of
+          <literal><replaceable>value</replaceable></literal>, like
+          <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
+          if the value itself supports this extra feature. This meant to be
+          used rarely, when you need to call a Java method of an object, but
+          the simplistic view of the value that FreeMarker exposes to the
+          templates hides that, and there's no equivalent built-in either. For
+          example, when you have <literal>Map</literal> that you put into the
+          data-model (and you are using the default object wrapper),
+          <literal>myMap.myMethod()</literal> in a template basically
+          translates to <literal>((Method)
+          myMap.get("myMethod")).invoke(...)</literal> in Java, thus you can't
+          call <literal>myMethod</literal>. If, however, you write
+          <literal>myMap?api.myMethod()</literal> instead, that means
+          <literal>myMap.myMethod()</literal> in Java.</para>
+
+          <para><emphasis>You should avoid using <literal>api</literal>, and
+          rely on the capabilities of the FTL types and the related built-ins
+          as far as possible.</emphasis> For example, don't use
+          <literal>users?api.size()</literal>, but
+          <literal>users?size</literal>. The variation that uses
+          <literal>?api</literal> is more verbose, slower, more easily breaks
+          when FreeMarker configuration settings are changed, and most
+          importantly, more prone to break as the technical details of the
+          data-model changes. For example, if <literal>users</literal> is
+          changed from a <literal>List</literal> to an array,
+          <literal>users?size</literal> will keep working, while
+          <literal>users?api.size()</literal> will break.</para>
+
+          <para>Avoid calling methods that <emphasis>modify</emphasis> an
+          object (especially <literal>Map</literal>-s and
+          <literal>Collection</literal>-s) or that aren't thread safe from
+          other reasons. Templates usually aren't expected to modify the
+          objects exposed to them, just to display them. Thus the application
+          may passes some objects to multiple (possibly concurrent) template
+          processings.</para>
+
+          <para>The <literal>api</literal> built-in is not everywhere
+          available, some requirements has to be met:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The <literal>api_builtin_enabled</literal> configuration
+              setting must be set to <literal>true</literal>. Its default is
+              <literal>false</literal> (at least as of 2.3.22) for not
+              lowering the security of existing applications.</para>
+            </listitem>
+
+            <listitem>
+              <para>The value itself has to support it. We are talking about
+              the value as the template sees it, which is created from the
+              original object (that's coming from the data-model or from a
+              Java method return value) value via <link
+              linkend="pgui_datamodel_objectWrapper">object wrapping</link>.
+              Hence, this depends on the <literal>object_wrapper</literal>
+              FreeMarker configuration setting, and on the class of the
+              wrapped (the original) object:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>When the object wrapper is a
+                  <literal>DefaultObjectWrapper</literal> with its
+                  <literal>incompatibleImprovements</literal> set to 2.3.22 or
+                  higher (<link linkend="topic.defaultObjectWrapperIcI">see
+                  how to set it here</link>) (actually, what matters its that
+                  its <literal>useAdaptersForContainer</literal> property is
+                  set to <literal>true</literal>, but that's the default with
+                  said <literal>incompatibleImprovements</literal>), FTL
+                  values made from <literal>Map</literal>-s and
+                  <literal>List</literal>-s support <literal>?api</literal>.
+                  Other <literal>java.util.Collections</literal> also, if
+                  <literal>DefaultObjectWrapper</literal>'s
+                  <literal>forceLegacyNonListCollections</literal> property is
+                  set to <literal>false</literal> (default is
+                  <literal>true</literal> for better out-of-the-box backward
+                  compatibility).</para>
+                </listitem>
+
+                <listitem>
+                  <para>When wrapped with pure
+                  <literal>BeansWrapper</literal>, all values support
+                  <literal>?api</literal>. But again, avoid using it if
+                  there's another solution.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Custom <literal>TemplateModel</literal>-s can support
+                  <literal>?api</literal> by implementing the
+                  <literal>freemarker.template.TemplateModelWithAPISupport</literal>
+                  interface.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Using <literal>?api</literal> when it's not allowed in the
+          configuration or when the value doesn't support it will abort
+          template processing with error.</para>
+
+          <para>Whether a value supports <literal>?api</literal> can be
+          checked like
+          <literal><replaceable>value</replaceable>?has_api</literal>, which
+          returns a boolean value. Note that the result of
+          <literal>?has_api</literal> isn't influenced by the
+          <literal>api_builtin_enabled</literal> setting.</para>
+        </section>
+
         <section xml:id="ref_builtin_numType">
           <title>byte, double, float, int, long, short</title>
 
@@ -14027,13 +14299,13 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_hash</literal></td>
 
-                <td>hash</td>
+                <td>hash (including extended hash)</td>
               </tr>
 
               <tr>
                 <td><literal>is_hash_ex</literal></td>
 
-                <td>extended hash (i.e. supports <literal>?keys</literal> and
+                <td>extended hash (supports <literal>?keys</literal> and
                 <literal>?values</literal>)</td>
               </tr>
 
@@ -14046,7 +14318,14 @@ Sorted by name.last:
               <tr>
                 <td><literal>is_collection</literal></td>
 
-                <td>collection</td>
+                <td>collection (including extended collection)</td>
+              </tr>
+
+              <tr>
+                <td><literal>is_collection_ex</literal></td>
+
+                <td>extended collection (supports
+                <literal>?size</literal>)</td>
               </tr>
 
               <tr>
@@ -15822,21 +16101,21 @@ All rights reserved.</emphasis></programlisting>
               <primary>localization</primary>
             </indexterm>
 
-            <para>Whenever a template is loaded, it is assigned a locale. A
-            locale is a language and an optional country or dialect
-            identifier. A template is typically loaded by some code that the
-            programmer wrote and he chooses a locale for the template based on
-            some aspect. For example, when the
-            <literal>FreemarkerServlet</literal> loads templates, it always
-            requests the template with locale matching the language preference
-            of the browser that requested the web page.</para>
+            <para>A locale is a language and an optional country or dialect
+            identifier (plus also maybe a further variant identifier, like
+            <quote>MAC</quote>). Whenever a template is requested, a desired
+            locale is always specified (explicitly or implicitly), and
+            FreeMarke will try to find a variant of the template that matches
+            that locale. When a template includes or imports another template,
+            internally that will also be requested for a locale, for the
+            locale that the <literal>locale</literal> setting is set to, and
+            that's usually for the locale of the top-level template.</para>
 
-            <para>When a template includes another template, it attempts to
-            load a template with the same locale. Suppose your template was
-            loaded with locale <literal>en_US</literal>, which means U.S.
-            English. When you include another template:</para>
+            <para>Suppose your template was loaded with locale
+            <literal>en_US</literal>, which means U.S. English. When you
+            include another template:</para>
 
-            <programlisting role="template">&lt;include "footer.ftl"&gt;</programlisting>
+            <programlisting role="template">&lt;#include "footer.ftl"&gt;</programlisting>
 
             <para>the engine will in fact look for several templates, in this
             order:</para>
@@ -15847,7 +16126,7 @@ All rights reserved.</emphasis></programlisting>
               </listitem>
 
               <listitem>
-                <para><literal>footer_en.ftl</literal>, and finally</para>
+                <para><literal>footer_en.ftl</literal></para>
               </listitem>
 
               <listitem>
@@ -15855,15 +16134,23 @@ All rights reserved.</emphasis></programlisting>
               </listitem>
             </itemizedlist>
 
-            <para><phrase role="forProgrammers">Note that you can disable
-            localized lookup feature with the
-            <literal>setLocalizedLookup</literal> method of
-            <literal>Configuration</literal>.</phrase></para>
+            <para>and it will use the first one that exists.</para>
 
-            <para>When you use both acquisition and localized template lookup,
-            the template with more specific locale in a parent directory takes
-            precedence over template with less specific locale in a child
-            directory. Suppose you use the following include from
+            <para>Note that if how (and if) FreeMarker searches the localized
+            variations is configurable by the programmers, so we are just
+            describing the default behavior here.<phrase
+            role="forProgrammers"> You can disable localized lookup with the
+            <literal>localized_lookup</literal> setting
+            (<literal>Configuration.setLocalizedLookup(boolean)</literal>).
+            Also, you can define your own sequence of deduced template names
+            with the <literal>template_lookup_strategy</literal> setting
+            (<literal>Configuration.setTemplateLookupStrategy(TemplateLookupStrategy)</literal>).</phrase></para>
+
+            <para>When you use both acquisition (i.e., <literal>*</literal>
+            step in the path) and localized template lookup, the template with
+            more specific locale in a parent directory takes precedence over
+            template with less specific locale in a child directory. Suppose
+            you use the following include from
             <literal>/foo/bar/template.ftl</literal>:</para>
 
             <programlisting role="template">&lt;#include "*/footer.ftl"&gt;</programlisting>
@@ -17855,7 +18142,7 @@ There was no specific handler for node y
           when you want to pass it as a <literal>java.util.Locale</literal>
           object to a Java method. (The <literal>Locale</literal> object will
           be wrapped according the <literal>object_wrapper</literal> setting
-          value. Whether you can actually pass this value to a Java methods as
+          value. Whether you can actually pass this value to a Java method as
           a <literal>Locale</literal> object depends on the object wrapper,
           but an object wrapper that let you call Java methods directly is
           very unlikely to not support that.)</para>
@@ -20179,13 +20466,52 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Note: JSP 1.x was really bad as an MVC template engine
-            because it was not made for that, so I don't deal with that here.
-            We compare FreeMarker with the JSP 2.0 + JSTL combo.</para>
+            <para>We compare FreeMarker with the JSP 2.0 + JSTL combo
+            here.</para>
 
             <para>FreeMarker Pros:</para>
 
             <itemizedlist>
+              <listitem>
+                <para>Terser syntax. Consider this JSP (assuming
+                <literal>&lt;%@ taglib prefix="c"
+                uri="http://java.sun.com/jsp/jstl/core"
+                %&gt;</literal>):</para>
+
+                <programlisting role="template">&lt;c:if test="${t}"&gt;
+  True
+&lt;/c:if&gt;
+
+&lt;c:choose&gt;
+  &lt;c:when test="${n == 123}"&gt;
+      Do this
+  &lt;/c:when&gt;
+  &lt;c:otherwise&gt;
+      Do that
+  &lt;/c:otherwise&gt;
+&lt;/c:choose&gt;
+
+&lt;c:forEach var="i" items="${ls}"&gt;
+- ${i}
+&lt;/c:forEach&gt;</programlisting>
+
+                <para>and the equivalent FTL:</para>
+
+                <programlisting role="template">&lt;#if t&gt;
+  True
+&lt;/#if&gt;
+
+&lt;#if n == 123&gt;
+  Do this
+&lt;#else&gt;
+  Do that
+&lt;/#if&gt;
+
+&lt;#list ls as i&gt;
+- ${i}
+&lt;/#list&gt;</programlisting>
+              </listitem>
+
               <listitem>
                 <para>FreeMarker is not tied to Servlets, networking or the
                 Web; it is just a class library to generate text output by
@@ -20217,15 +20543,14 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Much easier to define ad-hoc macros and
-                functions.</para>
+                <para>Easier to define ad-hoc macros and functions.</para>
               </listitem>
 
               <listitem>
                 <para>No sweeping errors under the carpet. Missing variables
-                will cause an error by default, and not silently default to
-                arbitrary values. Also, <literal>null</literal>-s are not
-                treated silently as 0/false/empty string. <link
+                and <literal>null</literal>-s will not silently default to
+                <literal>0</literal>/<literal>false</literal>/empty-string,
+                but cause error. <link
                 linkend="faq_picky_about_missing_vars">See more about this
                 here...</link></para>
               </listitem>
@@ -20239,17 +20564,9 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Macros and functions are just variables (compare it to
-                how JSP custom tags work), so they can be easily passed around
-                as parameter values, put into the data-model, ...etc, just
-                like any other value.</para>
-              </listitem>
-
-              <listitem>
-                <para>Easier to read, more terse syntax. For example:
-                <literal>&lt;#if x&gt;...&lt;/#if&gt;</literal> instead of
-                <literal>&lt;c:if
-                test="${x}"&gt;...&lt;/c:if&gt;</literal></para>
+                <para>Macros and functions are just variables, so they can be
+                easily passed around as parameter values, put into the
+                data-model, etc., just like any other values.</para>
               </listitem>
 
               <listitem>
@@ -20271,15 +20588,16 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Since macros and function are just variables, incorrect
+                <para>Since macros and functions are just variables, incorrect
                 directive and parameter names and missing required parameters
                 can be detected only on runtime.</para>
               </listitem>
 
               <listitem>
                 <para>Its syntax doesn't follow the HTML/XML rules apart from
-                some visual similarity, which is confusing for new users.
-                (It's the price of the terseness...)</para>
+                some visual similarity, which is confusing for new users (it's
+                the price of the terseness). JSP doesn't follow it either, but
+                it's closer to it.</para>
               </listitem>
 
               <listitem>
@@ -20289,7 +20607,9 @@ End book</programlisting>
             </itemizedlist>
 
             <para>You may read this if you are considering replacing JSP with
-            FreeMarker: <xref linkend="pgui_misc_servlet_model2"/></para>
+            FreeMarker in an existing application or in a legacy framework
+            that only supports JSP: <xref
+            linkend="pgui_misc_servlet_model2"/></para>
           </answer>
         </qandaentry>
 
@@ -20543,7 +20863,10 @@ End book</programlisting>
                 <literal>boolean_format</literal> setting
                 (<literal>Configuration.setBooleanFormat</literal>) to reflect
                 that, and then since FreeMarker 2.3.20 you can just write
-                <literal>${<replaceable>someBoolean</replaceable>}</literal>.</para>
+                <literal>${<replaceable>someBoolean</replaceable>}</literal>.
+                (Note that this doesn't work for
+                <literal>true</literal>/<literal>false</literal> though - you
+                have to use <literal>?c</literal> there.)</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -20746,9 +21069,13 @@ End book</programlisting>
                 templates) should declare their arguments as
                 <literal>TemplateModel</literal>-s and the more specific sub
                 interfaces of that. After all, the object wrapping is about
-                apparently transforming the data-model to something that
-                serves the purpose of the presentation layer, and these
-                methods are part of the presentation layer.</para>
+                transforming the data-model to something that serves the
+                purpose of the presentation layer, and these methods are part
+                of the presentation layer. If you still need a plain Java type
+                there, you may turn to the
+                <literal>ObjectWrapperAndUnwrapper</literal> interface of the
+                current <literal>ObjectWrapper</literal> (can be get with
+                <literal>Environment.getObjectWrapper()</literal>).</para>
               </listitem>
 
               <listitem>
@@ -20761,15 +21088,16 @@ End book</programlisting>
                 responsibility of the <link
                 linkend="pgui_datamodel_objectWrapper">object wrapper</link>
                 to ensure the conversion of the arguments to the proper type.
-                If you use the <literal>DefaultObjectWrapper</literal> or the
-                <link
+                If you use the <link
+                linkend="pgui_datamodel_defaultObjectWrapper"><literal>DefaultObjectWrapper</literal></link>
+                or the <link
                 linkend="pgui_misc_beanwrapper"><literal>BeansWrapper</literal></link>
-                then this will happen automatically (but be sure you are using
-                at least FreeMarker 2.3.3). Furthermore if you use
-                <literal>BeansWrapper</literal>, then the method will surely
-                get exactly the same instance that was earlier wrapped (as far
-                as it was wrapped by the
-                <literal>BeansWrapper</literal>).</para>
+                then this will happen automatically. For
+                <literal>DefaultObjectWrapper</literal>, this mechanism works
+                much better, if you <link
+                linkend="topic.defaultObjectWrapperIcI">set its
+                <literal>incompatibleImprovements</literal> to
+                2.3.22</link>.</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -20797,72 +21125,28 @@ End book</programlisting>
             which is the same as <literal>user["password"]</literal>), and
             variable names are strings.</para>
 
-            <para>So FTL's hashes are not general purpose associate arrays
-            that could be used for looking up values with keys of arbitrary
-            type. FTL is presentation oriented language, and it has no feature
-            dedicated for that purpose. It has, however, methods. Methods are
-            part of the data-model, and they can do all kind of fancy
-            data-model related calculations, so of course you can add some
-            methods to the data-model for <literal>Map</literal> lookup. The
-            bad news is that the building of the data-model, as it's an
-            application specific issue, is the task of the programmers who use
-            FreeMarker, so it's their task to ensure that such methods are
-            present there to serve the template authors. (However, when
-            template authors need to call methods that are not about
-            presentation, then consider if the data-model is simple enough.
-            Maybe you should push some calculations back to the data-model
-            building phase. Ideally the data-model contains what should be
-            displayed, and not something that serves as the base of further
-            calculations.)</para>
+            <para>So until FTL has a type that supports non-String keys, you
+            will have to turn to the Java API of the <literal>Map</literal>.
+            You can do it like this:
+            <literal>myMap?api.get(nonStringKey)</literal>. However, for
+            <literal>?api</literal> to work, you may need to configured
+            FreeMarker a bit; <link linkend="ref_buitin_api_and_has_api">see
+            more here...</link></para>
 
-            <para>If you read the programmer's guide, then you know that
-            technically, the data-model is a tree of
-            <literal>freemarker.template.TemplateModel</literal> objects. The
-            building of the data-model usually (but not necessary) happens by
-            automatically wrapping (enclosing) plain Java objects into
-            <literal>TemplateModel</literal> objects. The object that does
-            this wrapping is the object wrapper, and it's specified when you
-            configure FreeMarker. FreeMarker comes with a few object wrapper
-            implementations out-of-the-box, and probably the most widely used
-            of them is <link
-            linkend="pgui_misc_beanwrapper"><literal>freemarker.ext.beans.BeansWrapper</literal></link>.
-            If you use an instance of this as the object wrapper, then
-            <literal>java.util.Map</literal>-s you put into the data-model
-            will also act as a method, so you can write
-            <literal>myMap(myKey)</literal> in the template, that will
-            internally call <literal>Map.get(myKey)</literal>. There will be
-            no restriction regarding the type of <literal>myKey</literal>, as
-            <literal>Map.get(Object key)</literal> has no such restriction. If
-            the value of <literal>myKey</literal> was wrapped with
-            <literal>BeansWrapper</literal> or other object wrapper whose
-            wrapped objects support unwrapping, or it is given as literal in
-            the template, then the value will be automatically unwrapped to
-            plain Java object before the actual invocation of the
-            <literal>Map.get(Object key)</literal> method, so it will not be
-            invoked with <literal>TemplateModel</literal>-s.</para>
-
-            <para>But there still will be a problem. Java's
-            <literal>Map</literal> is particular about the exact class of the
-            key, so for numerical keys calculated inside the templates you
-            will have to cast them to the proper Java type, otherwise the item
-            will not be found. For example if you use
-            <literal>Integer</literal> keys in a Map, then you have to write
-            <literal>${myMap.get(123?int)}</literal>. This is an ugly effect
-            caused by that FTL's deliberately simplified type system just has
-            a single numerical type, while Java distinguishes a lot of
-            numerical types. (Ideally, in the above case, the programmers
-            ensure that the <literal>get</literal> method automatically
-            converts the key to <literal>Integer</literal>, so it's not the
-            problem of the template author. This can be done with wrapper
-            customization, but the wrapper has to know that the particular
-            <literal>Map</literal> object uses <literal>Integer</literal>
-            keys, which assumes application specific knowledge.) Note that the
-            casting is not needed when the key value comes directly from the
-            data-model (i.e. you didn't modified its value with arithmetical
-            caluclations in the template), including the case when it's the
-            return value of a method, and it was of the proper class before
-            wrapping, because then the result of the unwrapping will be of the
-            original type.</para>
+            <para>Note that as Java's <literal>Map</literal> is particular
+            about the exact class of the key, at least for numerical keys
+            calculated inside the templates you will have to cast them to the
+            proper Java type, otherwise the item will not be found. For
+            example if you use <literal>Integer</literal> keys in a Map, then
+            you should write <literal>${myMap.get(numKey?int)}</literal>. This
+            is because of FTL's deliberately simplified type system has only a
+            single numerical type, while Java distinguishes a lot of numerical
+            types. Note that the casting is not needed when the key value
+            comes directly from the data-model (i.e. you didn't modified its
+            value with arithmetical calculations in the template), including
+            the case when it's the return value of a method, and it was of the
+            proper class before wrapping, because then the result of the
+            unwrapping will be of the original type.</para>
           </answer>
         </qandaentry>
 
@@ -20878,10 +21162,14 @@ End book</programlisting>
             <para>Certainly you are using <literal>BeansWrapper</literal> as
             your object wrapper, or a custom subclass of it, and the
             <literal>simpleMapWrapper</literal> property of that is left to
-            <literal>false</literal>. Unfortunatelly, it's the default (for
+            <literal>false</literal>. Unfortunately, it's the default (for
             backward compatibility), so you have to explicitly set it to
-            <literal>true</literal> where you create the object
-            wrapper.</para>
+            <literal>true</literal> where you create the object wrapper. Also,
+            at least since 2.3.22, applications should just use
+            <literal>DefaultObjectWrapper</literal> (with <link
+            linkend="topic.defaultObjectWrapperIcI">its
+            <literal>incompatibleImprovements</literal> set to 2.3.22</link> -
+            that's important), which never had this problem.</para>
           </answer>
         </qandaentry>
 
@@ -20923,8 +21211,8 @@ End book</programlisting>
             linkend="dgui_template_exp_seqenceop_slice">subsequence
             operator</link> instead of removing sequence items. However, be
             aware of the performance implications: these operations are fast,
-            but the hashes/sequences that are the result of many subseqent
-            applications of these operations (i.e. when you use the result of
+            but the hashes/sequences that are the result of many subsequent
+            applications of these operations (i.e., when you use the result of
             the operation as the input of yet another operation, and so on)
             will be slow to read.</para>
 
@@ -21565,11 +21853,71 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para/>
+              <para>New built-ins: <literal>api</literal> and
+              <literal>has_api</literal>.
+              <literal><replaceable>value</replaceable>?api</literal> provides
+              access to the API (usually, the Java API) of
+              <literal><replaceable>value</replaceable></literal>, like
+              <literal><replaceable>value</replaceable>?api.<replaceable>someJavaMethod()</replaceable></literal>,
+              if the value itself supports this extra feature. This meant to
+              be used rarely, when you need to call a Java method of an
+              object, but the simplistic view of the value that FreeMarker
+              exposes to the templates hides that, and there's no equivalent
+              built-in either. For example, when you put a
+              <literal>Map</literal> into the data-model (and you are using
+              the default object wrapper), <literal>myMap.myMethod()</literal>
+              in a template basically translates to <literal>((Method)
+              myMap.get("myMethod")).invoke(...)</literal> in Java, thus you
+              can't call <literal>myMethod</literal>. If, however, you write
+              <literal>myMap?api.myMethod()</literal> instead, that means
+              <literal>myMap.myMethod()</literal> in Java.</para>
+
+              <para><emphasis>You should avoid using <literal>api</literal>,
+              and rely on the capabilities of the FTL types and the related
+              built-ins as far as possible.</emphasis></para>
+
+              <para>Using <literal>?api</literal> also happens to offer a
+              workaround for the lack of non-<literal>String</literal>
+              <literal>Map</literal> key support in FTL's
+              <literal>[]</literal> operator (as in
+              <literal>myMap[key]</literal>), because now you can write
+              <literal>myMap?api.get(nonStringKey)</literal>.</para>
+
+              <para><literal>?api</literal> is not enabled by default and
+              isn't available for all values. <link
+              linkend="ref_buitin_api_and_has_api">See more
+              here...</link></para>
             </listitem>
 
             <listitem>
-              <para/>
+              <para>Error message quality improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Several improvements when calling custom JSP tags; see
+                  them in its own section later.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <literal>Map.get</literal> or
+                  <literal>Map.containsKey</literal> of a wrapped
+                  <literal>Map</literal> throws a
+                  <literal>ClassCastException</literal> or
+                  <literal>NullPointerException</literal>, the error will
+                  point to the causing FTL expression (with some explanation),
+                  rather than bubbling up as low level runtime error.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: When localized lookup or template
+                  acquisition has kicked in, error messages have still quoted
+                  the name used for requesting the template, rather that the
+                  actual template source name (like <literal>foo.ftl</literal>
+                  instead of <literal>foo_en.ftl</literal>, when the template
+                  was get as <literal>foo.ftl</literal>, but behind the scenes
+                  was loaded from <literal>foo_en.ftl</literal>).</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
@@ -21578,6 +21926,171 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Object wrapping improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>DefaultObjectWrapper</literal>, only with its
+                  <literal>incompatible_improvements</literal> set to 2.3.22
+                  (<link linkend="topic.defaultObjectWrapperIcI">see how
+                  here...</link>), or more precisely, with its new
+                  <literal>useAdaptersForContainers</literal> setting set to
+                  <literal>true</literal> (which defaults to
+                  <literal>true</literal> when
+                  <literal>incompatible_improvements</literal> is set to
+                  2.3.22): It doesn't copy <literal>Map</literal>-s,
+                  <literal>List</literal>-s, and arrays anymore when wrapping
+                  them into <literal>TemplateModel</literal>-s (which is the
+                  interface through with templates access all values), just
+                  wraps them into thin <literal>TemplateModel</literal>
+                  adapters, that will reach the original object for all
+                  operations. The wrapped values will be instances of the new
+                  <literal>DefaultMapAdapter</literal>,
+                  <literal>DefaultListAdapter</literal> and
+                  <literal>DefaultArrayAdapter</literal> classes, instead of
+                  the legacy (copying) <literal>SimpleHash</literal> and
+                  <literal>SimpleSequence</literal> classes. (Note that many
+                  projects use pure <literal>BeansWrapper</literal> instead of
+                  <literal>DefaultObjectWrapper</literal>, which has always
+                  used the adapter approach, albeit a different implementation
+                  of it. As the shortcomings of
+                  <literal>DefaultObjectWrapper</literal> are fixed now, it's
+                  always recommended over <literal>BeansWrapper</literal>, as
+                  <literal>BeansWrapper</literal> gives quite confusing
+                  multi-typed values and is substantially slower.)</para>
+
+                  <para>While keeping backward compatibility as much as
+                  possible was an important factor in this change, this is a
+                  quite deep change, so you may want to <link
+                  linkend="topic.defaultObjectWrapperSwitchToAdapters">review
+                  the consequences and reasons here...</link> (But again, this
+                  change is <emphasis>not</emphasis> active by default, so
+                  merely updating FreeMarker wont risk the stability of
+                  existing applications)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <literal>TemplateMethodModelEx
+                  BeansWrapper.wrap(Object object, Method method)</literal>
+                  for wrapping methods without wrapping their parent object
+                  and without going through overloaded method selection on
+                  invocation time.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/372/">372</link>]:
+                  <literal>ClassCastException</literal> when a
+                  <literal>SortedMap</literal> (typically, a
+                  <literal>TreeMap</literal>) is wrapped with
+                  <literal>DefaultObjectWrapper</literal> and then a 1
+                  character long string is get from it that doesn't exist. To
+                  fix the issue, if the wrapped <literal>Map</literal> is a
+                  <literal>SortedMap</literal> and it's wrapped by
+                  <literal>DefaultObjectWrapper</literal>, it won't try to
+                  fall back to a <literal>Character</literal> key after with
+                  the <literal>String</literal> key has got
+                  <literal>null</literal>. (This change should be backward
+                  compatible, because when a <literal>SortedMap</literal> has
+                  <literal>Character</literal> keys, the initial attempt with
+                  <literal>String</literal> key causes
+                  <literal>ClassCastException</literal>, thus, such
+                  <literal>SortedMap</literal>-s were never usable as FTL
+                  hashes.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="http://sourceforge.net/p/freemarker/bugs/368/">368</link>]:
+                  Only with <literal>incompatible_improvements</literal> set
+                  to 2.3.22 or with its new
+                  <literal>useAdaptersForContainers</literal> setting set to
+                  <literal>true</literal>: Key order and other behavioral
+                  peculiarities of <quote>custom</quote>
+                  <literal>Map</literal> types isn't lost anymore. The same
+                  stands for <literal>List</literal>-s too.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new setting,
+                  <literal>forceLegacyNonListCollections</literal>. This only
+                  matters when <literal>useAdaptersForContainers</literal> is
+                  <literal>true</literal>. Then, unless you set this to
+                  <literal>true</literal>,
+                  <literal>java.util.Collection</literal>-s that aren't
+                  <literal>List</literal>-s (like <literal>Set</literal>-s)
+                  will continue using <literal>SimpleSequence</literal> (i.e.,
+                  the copying approach) instead of the adapter approach. The
+                  default is <literal>false</literal>, at least until
+                  <literal>incompatible_improvements</literal> 2.4.0, because
+                  <literal>SimpleSequence</literal> gave indexed access to
+                  these non-<literal>List</literal>-s, like in
+                  <literal>mySet[2]</literal>, which is strange but some
+                  existing templates may utilize this, even if only
+                  accidentally. With
+                  <literal>forceLegacyNonListCollections</literal> set to
+                  <literal>false</literal>, indexed access won't be possible
+                  for <literal>Set</literal>-s and such anymore (nor will
+                  <literal>?first</literal> and <literal>?last</literal> work,
+                  but <literal>?size</literal> will still do), so you may want
+                  to retest old templates. On the other hand, you get the
+                  advantages of the adapter approach. Hence, in new projects
+                  it's highly recommended to set
+                  <literal>forceLegacyNonListCollections</literal> to
+                  <literal>false</literal>. (The adapter approach is
+                  implemented by
+                  <literal>DefaultNonListCollectionAdapter</literal>.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new, <emphasis>experimental</emphasis> FTL type
+                  interface,
+                  <literal>freemarker.template.TemplateCollectionModelEx</literal>,
+                  which adds the <literal>size()</literal>,
+                  <literal>isEmpty()</literal>, and <literal>boolean
+                  contains(TemplateModel)</literal> methods to the
+                  <literal>TemplateCollectionModel</literal> interface. This
+                  was added because when wrapping
+                  <literal>java.util.Collections</literal> these extra
+                  capabilities area available anyway, but FTL couldn't tap on
+                  them till now. While the exact interface details are marked
+                  as experimental, the feature itself is already utilized for
+                  <literal>?size</literal> when setting the
+                  <literal>forceLegacyNonListCollections</literal> property of
+                  <literal>DefaultObjectWrapper</literal> to
+                  <literal>false</literal> (see earlier).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new <emphasis>experimental</emphasis> interface,
+                  <literal>freemarker.template.ObjectWrapperAndUnwrapper</literal>.
+                  This extends <literal>ObjectWrapper</literal> with
+                  unwrapping functionality. This functionality has already
+                  existed for a long time in <literal>BeansWrapper</literal>
+                  and its subclasses, like in
+                  <literal>DefaultObjectWrapper</literal>, but it wasn't
+                  <quote>factored out</quote> into its own published interface
+                  that other <literal>ObjectWrapper</literal>-s could
+                  implement. This is useful for
+                  <literal>TemplateModel</literal> implementations that don't
+                  want to require a <literal>BeansWrapper</literal> (or its
+                  subclass), only the availability of the unwrapping
+                  functionality.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new <emphasis>experimental</emphasis> interfaces
+                  to implement <literal>?api</literal> (see it in the FTL
+                  section): <literal>TemplateModelWithAPISupport</literal>,
+                  <literal>ObjectAPIWrapper</literal>,
+                  <literal>RichObjectWrapper</literal>. Note that while the
+                  interfaces are experimental, <literal>?api</literal> itself
+                  isn't.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
             <listitem>
               <para><literal>FreemarkerServlet</literal> improvements:</para>
 
@@ -21590,6 +22103,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   Java method, for example: <literal>&lt;#assign
                   u=JspTaglibs["/WEB-INF/utils.tld"]&gt; ...
                   ${u.truncate(title, 25)}</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Error message was unhelpful when there was
+                  a type mismatch between the actual and the expected type of
+                  a custom tag parameter. This was a very frequent problem of
+                  users who call JSP taglibs from FTL (the typical
+                  "java.lang.IllegalArgumentException: argument type
+                  mismatch", without any FTL context). Now it's a proper error
+                  with explanation, solution tip, and FTL error
+                  position/quotation.</para>
                 </listitem>
 
                 <listitem>
@@ -21639,7 +22163,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para><literal>FreemarkerServlet</literal> now recognizes
                   the
                   <literal>org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern</literal>
-                  servlet context attribute, add entries to
+                  servlet context attribute, and adds entries to
                   <literal>MetaInfTldSources</literal> (introduced above) from
                   it.</para>
                 </listitem>
@@ -21654,11 +22178,135 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Added new servlet init-param,
+                  <literal>BufferSize</literal>. This sets the buffer size via
+                  <literal>HTTPServletResponse.setBufferSize()</literal> if
+                  the response state still allows that.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The <literal>TemplatePath</literal> servlet init-param
+                  now supports a new kind of path, that looks like
+                  <literal>classpath:com/example/myapp/templates</literal>.
+                  This is similar to the old
+                  <literal>class://com/example/myapp/templates</literal>, but
+                  it uses the Thread Context Class Loader of the thread that
+                  initializes <literal>FreemarkerSerlvet</literal>, and thus
+                  will work even if <literal>freemarker.jar</literal> is not
+                  local to the web application. <literal>class://</literal>
+                  had the problem that it uses the defining class loader of
+                  <literal>FreemarkerSerlvet</literal> itself (or of its
+                  subclass).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new servlet <literal>init-param</literal>,
+                  <literal>ExceptionOnMissingTemplate</literal>. Setting this
+                  to <literal>true</literal> changes the behavior on
+                  template-not-found errors to similar to what you experience
+                  with other kind of template exceptions (a HTTP 500
+                  <quote>Internal Server error</quote> response on most
+                  setups). When it's <literal>false</literal> (the legacy
+                  behavior), you only get a HTTP 404 <quote>Not found</quote>.
+                  While that's also how JSP views work, this turns out to be a
+                  problem, because some frameworks give 404 to the visitor too
+                  if the MVC view gives 404. But to get to the point where you
+                  forward to the MVC View, the visitor had to visit a valid
+                  URL, only that page misses its View, so its broken on the
+                  server side, so it should be a 500.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new overridable method:
+                  <literal>FreemarkerServlet.createDefaultObjectWrapper()</literal>.
+                  This can be used for what
+                  <literal>createObjectWrapper()</literal> is usually
+                  overridden for, but without unwillingly disabling the
+                  processing of the related init-params (like of
+                  <literal>object_wrapper</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Improved (or fixed) error logging: Now logs will
+                  always get into FreeMarker's own log, not only into the
+                  servlet container log. Also, earlier template-not-found and
+                  template parsing error details logs were sometimes lost,
+                  depending on the servlet container.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed, only active with
+                  <literal>incompatible_improvements</literal> set to 2.3.22
+                  or higher: Some kind of values, when put into the JSP
+                  <emphasis>page</emphasis> scope (via
+                  <literal>#global</literal> or via the JSP
+                  <literal>PageContext</literal> API) and later read back with
+                  the JSP <literal>PageContext</literal> API (typically in a
+                  custom JSP tag), might come back as FreeMarker
+                  <literal>TemplateModel</literal> objects instead of as
+                  objects with a standard Java type. Other Servlet scopes
+                  aren't affected. It's highly unlikely that something expects
+                  the presence of this bug. The affected values are of the FTL
+                  types listed below, and to trigger the bug, they either had
+                  to be created directly in the template (like as an FTL
+                  literal or with
+                  <literal>?date</literal>/<literal>time</literal>/<literal>datetime</literal>),
+                  or you had to use <literal>DefaultObjectWrapper</literal> or
+                  <literal>SimpleObjectWrapper</literal> (or a subclass of
+                  them):</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>FTL date/time/date-time values may came back as
+                      <literal>freemarker.template.SimpleDate</literal>-s, now
+                      they come back as <literal>java.util.Date</literal>-s
+                      instead.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>FTL sequence values may came back as
+                      <literal>SimpleSequence</literal>-s, now they come back
+                      as <literal>java.util.List</literal>-s as expected. This
+                      stands assuming that the
+                      <literal>object_wrapper</literal> configuration setting
+                      is a subclass of <literal>BeansWrapper</literal> (such
+                      as <literal>DefaultObjectWrapper</literal>), but that's
+                      practically always the case in applications that use
+                      FreeMarker's JSP extension (otherwise it can still work,
+                      but it depends on the quality and capabilities of the
+                      <literal>ObjectWrapper</literal> implementation).</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>FTL hash values may came back as
+                      <literal>SimpleHash</literal>-es, now they come back as
+                      <literal>java.util.Map</literal>-s as expected (again,
+                      assuming that the object wrapper is a subclass of
+                      <literal>BeansWrapper</literal>).</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>FTL collection values may came back as
+                      <literal>SimpleCollection</literal>-s, now they come
+                      back as <literal>java.util.Collection</literal>-s as
+                      expected (again, assuming that the object wrapper is a
+                      subclass of <literal>BeansWrapper</literal>).</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
                   <para>Bug fixed: Now <literal>*.tld</literal> files are
                   searched in <literal>WEB-INF/</literal> and in all its
                   subdirectories recursively. Earlier they were only searched
                   directly under <literal>WEB-INF/</literal> and
                   <literal>WEB-INF/lib/</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Leading and trailing whitespace in TLD-s
+                  inside the <literal>name</literal> and
+                  <literal>tag-class</literal> elements is now removed.</para>
                 </listitem>
 
                 <listitem>
@@ -21678,9 +22326,38 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Generally improved implementation quality at some
-                  parts (maintainability, error messages, performance bug
-                  fixes, test coverage).</para>
+                  <para>Bug fixed: Defaults set in an overridden
+                  <literal>FreemarkerServlet.createConfiguration</literal>
+                  won't be accidentally overwritten by
+                  <literal>FreemarkerServlet</literal>'s factory defaults
+                  anymore. This was a problem with theses settings only:
+                  <literal>template_exception_handler</literal>,
+                  <literal>log_template_exceptions</literal>,
+                  <literal>object_wrapper</literal>,
+                  <literal>template_loader</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: If you had multiple
+                  <literal>FreemarkerServlet</literal>-s with different
+                  configuration settings in the same servlet context, that
+                  could lead to malfunction. (Normally, you only have one,
+                  just like there's only one servlet that processes
+                  <literal>*.jsp</literal>.)</para>
+                </listitem>
+
+                <listitem>
+                  <para>Removed all the <literal>xsd</literal> files
+                  (<literal>web-app</literal> and <literal>taglib</literal>
+                  schemas) from the FreeMarker artifact and from the XML
+                  entity resolver, as they were unused during XML
+                  parsing.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Generally improved implementation quality
+                  (maintainability, error messages, performance bug fixes,
+                  test coverage) and better API documentation.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -21709,47 +22386,128 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>Logger.selectLoggerLibrary(int)</literal> as that
                   was inherently unreliable. The system property has
                   precedence over
-                  <literal>selectLoggerLibrary</literal>.</para>
+                  <literal>Logger.selectLoggerLibrary</literal>.</para>
                 </listitem>
 
                 <listitem>
                   <para>Generally improved implementation quality (more info
                   printed when something fails, etc.).</para>
                 </listitem>
+
+                <listitem>
+                  <para>New configuration setting:
+                  <literal>log_template_exceptions</literal>
+                  (<literal>Configuration.setLogTemplateExceptions(boolean)</literal>).
+                  This specifies if <literal>TemplateException</literal>-s
+                  thrown by template processing are logged by FreeMarker or
+                  not. The default is <literal>true</literal> for backward
+                  compatibility, but that results in logging the exception
+                  twice in properly written applications, because there the
+                  <literal>TemplateException</literal> thrown by the public
+                  FreeMarker API is also logged by the caller (even if only as
+                  the cause exception of a higher level exception). Hence, in
+                  modern applications it should be set to
+                  <literal>false</literal>. (Note that this setting has no
+                  effect on the logging of exceptions caught by
+                  <literal>#attempt</literal>/<literal>#recover</literal>;
+                  those are always logged.)</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Added
-              <literal>Environment.getCurrentDirectiveCallPlace()</literal>,
-              which returns a <literal>DirectiveCallPlace</literal> object
-              when called from a custom directive (i.e., from
-              <literal>TemplateDirectiveModel.execute()</literal>). The
-              <literal>DirectiveCallPlace</literal> objects lets you query
-              where the directive was called from (template, line, column). It
-              also lets you associate an arbitrary object to the directive
-              invocation inside the template, which can be used for
-              call-place-bound caching (like the minification of non-dynamic
-              nested content). See <literal>DirectiveCallPlace</literal> in
-              the Java API documentation for more.</para>
+              <para><literal>Environment</literal> and custom directive
+              related improvements:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added
+                  <literal>Environment.getCurrentDirectiveCallPlace()</literal>,
+                  which returns a <literal>DirectiveCallPlace</literal> object
+                  when called from a custom directive (i.e., from
+                  <literal>TemplateDirectiveModel.execute()</literal>). The
+                  <literal>DirectiveCallPlace</literal> objects lets you query
+                  where the directive was called from (template, line,
+                  column). It also lets you associate an arbitrary object to
+                  the directive invocation inside the template, which can be
+                  used for call-place-bound caching (like the minification of
+                  non-dynamic nested content). See
+                  <literal>DirectiveCallPlace</literal> in the Java API
+                  documentation for more.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added <literal>Environment.getMainTemplate()</literal>
+                  and <literal>Environment.getCurrentTemplate()</literal>.
+                  Deprecated the ambiguous (and often broken: [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>])
+                  <literal>Environment.getTemplate()</literal>. These can be
+                  useful for directives and methods that are called from
+                  templates to find out which template they were called
+                  from.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Added <literal>TemplateMethodModelEx
-              BeansWrapper.wrap(Object object, Method method)</literal> for
-              wrapping methods without wrapping their parent object and
-              without going through overloaded method selection on invocation
-              time.</para>
-            </listitem>
+              <para>Template loading:</para>
 
-            <listitem>
-              <para>Added <literal>Environment.getMainTemplate()</literal> and
-              <literal>Environment.getCurrentTemplate()</literal>. Deprecated
-              the ambiguous (and often broken: [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>])
-              <literal>Environment.getTemplate()</literal>. These can be
-              useful for directives and methods that are called from templates
-              to find out which template they were called from.</para>
+              <itemizedlist>
+                <listitem>
+                  <para>Added new <literal>Configuration</literal> setting,
+                  <literal>template_lookup_strategy</literal>
+                  (<literal>Configuration.setTemplateLookupStrategy(templateLookupStrategy)</literal>).
+                  This allows customizing what
+                  <literal>TemplateLoader</literal>-level names will be tried
+                  when a template is requested. With this you can define a
+                  custom localized lookup sequence instead of the default
+                  (which looks like: <literal>foo_de_LU_MAC.ftl,
+                  foo_de_LU.ftl, foo_de.ftl,</literal><literal>
+                  foo.ftl</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>ClassTemplateLoader</literal> now can be
+                  created by specifying a <literal>ClassLoader</literal>
+                  directly, rather than by specifying a base
+                  <literal>Class</literal>. That is, now there's
+                  <literal>ClassTemplateLoader(ClassLoader, String)</literal>
+                  constructor, and also a
+                  <literal>Configuration.setClassLoaderForTemplateLoading(ClassLoader,
+                  String)</literal> method.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new exception,
+                  <literal>TemplateNotFoundException</literal>, which is now
+                  used instead of <literal>TemplateNotFoundException</literal>
+                  when getting a template. As it extends
+                  <literal>TemplateNotFoundException</literal>, this change is
+                  backward compatible. The main goal was to counter the common
+                  misunderstanding that template paths are real file paths.
+                  Also, <literal>TemplateNotFoundException</literal> have
+                  <literal>getTemplateName()</literal> method that gives you
+                  the name of the missing template.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Template-s not have a
+                  <literal>getSourceName()</literal>, in additionally to
+                  <literal>getName()</literal>. These two return the same as
+                  far as no localized lookup or acquisition
+                  (<literal>*</literal> in the name) or other lookup strategy
+                  is involved. But when there is,
+                  <literal>getSourceName()</literal> gives the name of the
+                  actually loaded template inside the virtual file system that
+                  the <literal>TemplateLoader</literal> defines. On the other
+                  hand, <literal>getName()</literal> has always returned the
+                  name for which the template was requested (in canonicalized
+                  form), as that's the name that's used for pretty much
+                  everything (like for relative inclusion resolution). The
+                  location information in template exceptions is now using
+                  <literal>getSourceName()</literal>. </para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
@@ -21782,6 +22540,175 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               FreeMarker doesn't fail anymore when it has no permission to
               read Java system properties, like when used in unsigned applets.
               It just logs some warnings.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>HTML_DEBUG</literal> and <literal>DEBUG</literal>
+              <literal>TemplateExceptionHandler</literal> output now contains
+              a warning like <quote>HTML_DEBUG mode; use RETHROW in
+              production!</quote>, due to frequent misuse.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Notes</title>
+
+          <para xml:id="topic.defaultObjectWrapperSwitchToAdapters">The
+          consequences and reasons of introducing adapter approach for
+          container types in <literal>DefaultObjectWrapper</literal> when its
+          incompatibleImprovements is set to 2.3.22:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>With the new approach (the adapter approach), the key
+              order of <literal>Map</literal>-s is never lost. The copying
+              approach could only keep that for <literal>HashMap</literal>
+              subclasses (such as <literal>LinkedHashMap</literal>) and
+              <literal>SortedMap</literal>-s (such as
+              <literal>TreeMap</literal>), but not for more exotic
+              <literal>Map</literal>-s, like Guava's
+              <literal>ImmutableMap</literal>. Also, any other behavioral
+              peculiarities of the original <literal>Map</literal> (e.g., case
+              insensitive key lookup) is kept now.</para>
+            </listitem>
+
+            <listitem>
+              <para>The exact type and identity of the
+              <literal>Map</literal>/<literal>List</literal> is kept when the
+              wrapped value is passed back to a Java method from the template.
+              With the legacy approach the Java methods have received a
+              <literal>Map</literal> or <literal>List</literal> of a special
+              FreeMarker specific type (that acted as an adapter for the
+              <literal>TemplateModel</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>Performance characteristics change, mostly for the better,
+              but it depends on the application. If the template reads the
+              <emphasis>same(!)</emphasis> entry <emphasis>from the data
+              model</emphasis> roughly once or twice (or not at all), which is
+              typical, them the adapter approach gives better results,
+              otherwise the legacy copying approach is faster (as it can reuse
+              the wrapped entry from the previous read), though this slowdown
+              certainly not a concern for most applications. The performance
+              of the new adapter approach is more predictable, because it has
+              no initial <quote>spike</quote> to set up the container copy
+              (especially painful for huge collections), instead the
+              performance is linearly proportional to the number of data model
+              reads (and not to the number of collection entries).</para>
+            </listitem>
+
+            <listitem>
+              <para>If the
+              <literal>Map</literal>/<literal>List</literal>/array is changed
+              after it was wrapped, the change will now become visible in the
+              data-model. With the copying approach, the wrapped value was a
+              shallow-snapshot of the original
+              <literal>Map</literal>/<literal>List</literal>/array. While it's
+              unlikely that someone has deliberately utilized this, it's a
+              risk factor when switching to adapters.</para>
+            </listitem>
+
+            <listitem>
+              <para>It's theoretically possible that some code (mostly
+              <literal>TemplateDirectiveModel</literal> implementations)
+              mistakenly assumed that wrapped <literal>Map</literal>-s are
+              <literal>SimpleHash</literal>-es, and wrapped
+              <literal>List</literal>-s are
+              <literal>SimpleSequence</literal>-s, etc., instead of them just
+              being <literal>TemplateHashModel</literal>-s and
+              <literal>TemplateSequenceModel</literal>-s. Such code was always
+              wrong, but now it will indeed break, so it's a risk
+              factor.</para>
+            </listitem>
+
+            <listitem>
+              <para>As now the exact type of the wrapped original object is
+              used for overloaded method selection, the choice can be
+              different (and similar to what it would be with pure
+              <literal>BeansWrapper</literal>). It's difficult to find cases
+              where this matters. A change is most probable around arrays, as
+              with the copying approach they were unwrapped to
+              <literal>List</literal>-s, not to the original array. As the
+              overloaded method mechanism can convert between arrays and lists
+              (in both directions), it's usually not a problem. But, it
+              doesn't do conversion between different array types when the
+              overloaded method has various types on the parameter position of
+              the array, so that's a risk factor.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>SimpleHash</literal> and
+              <literal>SimpleSequence</literal> haven't become deprecated.
+              They are still used for hashes and sequences created in FTL, and
+              are recommended for values that are built specifically to be
+              used from templates, rather than wrapping an already existing
+              <literal>Map</literal> or <literal>List</literal> or
+              array.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>List</literal>-s and <literal>Map</literal>-s
+              that are exposed to templates in multiple threads are now under
+              greater stress regarding their correct operation under
+              multi-threaded read-only access. This is because the adapters
+              won't copy their contents into well known
+              <literal>List</literal> and <literal>Map</literal>
+              implementations (<literal>HashMap</literal>,
+              <literal>ArrayList</literal>, etc.) before accessing them from
+              multiple threads. So this is mostly a concern with custom
+              <literal>List</literal> and <literal>Map</literal>
+              implementations, which aren't as mature as the standard Java
+              classes. Note that this was always like so with pure
+              <literal>BeansWrapper</literal>, which is used by a lot of
+              projects/frameworks (like by Struts) for a long time, so it's
+              not an uncharted territory.</para>
+            </listitem>
+
+            <listitem>
+              <para>When the wrapped <literal>List</literal> is a
+              <literal>AbstractSequentialList</literal> (like a
+              <literal>LinkedList</literal>), the resulting adapter will
+              implement <literal>TemplateCollectionModel</literal> for more
+              efficient enumeration (<literal>#list</literal>-ing), in
+              additionally to <literal>TemplateSequenceModel</literal> of
+              course. <literal>TemplateCollectionModel</literal> allows FTL to
+              traverse the list without accessing elements by index. With the
+              legacy copying approach
+              <literal>TemplateCollectionModel</literal> wasn't implemented as
+              it wasn't needed for efficient enumeration there.</para>
+            </listitem>
+
+            <listitem>
+              <para>Iterators (when you put them directly into the data-model)
+              are wrapped into <literal>DefaultIteratorAdapter</literal>
+              instead of <literal>SimpleCollection</literal>. This has two
+              consequences:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>The wrapped <literal>Iterator</literal> is now
+                  unwrapped properly to the original Java object when it's
+                  passed to Java method from the template.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Wrapped <literal>Iterator</literal>-s (not to be
+                  confused with <literal>Iterable</literal>) aren't
+                  thread-safe anymore, to spare some synchronizations, after
+                  all, exposing the same <literal>Iterator</literal> to
+                  multiple parallel template executions doesn't make much
+                  sense. This shouldn't be a migration concern, as even
+                  earlier, only one of those template executions could succeed
+                  (the <quote>content</quote> of <literal>Iterator</literal>-s
+                  wasn't copied, so the one who first accessed it become the
+                  exclusive owner). The change is just that earlier it was
+                  guaranteed that the other threads will fail (that was the
+                  thread-safe about it), while now there are no such
+                  guarantees.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>
@@ -21835,6 +22762,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 &lt;/init-param&gt;</programlisting>
           </listitem>
         </itemizedlist>
+
+        <para>Some changes require the
+        <literal>incompatible_improvements</literal> of the
+        <literal>object_wrapper</literal> to be set. If you aren't setting the
+        <literal>object_wrapper</literal> anywhere, that's the same as the
+        <literal>incompatible_improvements</literal> of the
+        <literal>Configuration</literal>. Otherwise it has to be set of the
+        <literal>ObjectWrapper</literal> itself (if you are using a builder,
+        like <literal>new
+        DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build()</literal>,
+        if you are using a constructor, then <literal>new
+        DefaultObjectWrapper(Configuration.VERSION_2_3_21)</literal>, or if
+        you are using the <literal>object_wrapper</literal> property (a string
+        value) or FreemarkerSerlvet init-param, then
+        <literal>"DefaultObjectWrapper(2.3.21)"</literal>.)</para>
 
         <para>Note that we have changed our proprietary BSD-style license to
         Apache License, Version 2.0. See the <link linkend="app_license">new

@@ -199,7 +199,7 @@ public class TemplateException extends Exception {
                 // Line number blow 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
                     final Template template = templateObject.getTemplate();
-                    templateName = template != null ? template.getName() : null;
+                    templateName = template != null ? template.getSourceName() : null;
                     lineNumber = new Integer(templateObject.getBeginLine());
                     columnNumber = new Integer(templateObject.getBeginColumn());
                     endLineNumber = new Integer(templateObject.getEndLine());
@@ -464,8 +464,9 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Returns the name of the template where the error has occurred, or {@code null} if the information isn't
-     * available. This will be the full template name, regardless of how the template was invoked.
+     * Returns the source name ({@link Template#getSourceName()}) of the template where the error has occurred, or
+     * {@code null} if the information isn't available. This will be the full template name, regardless of how the
+     * template was invoked.
      * 
      * @since 2.3.21
      */

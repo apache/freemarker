@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 public class WebAppTestCase {
     
+    public static final String IGNORED_MASK = "[IGNORED]";
+
     private static final Logger LOG = LoggerFactory.getLogger(WebAppTestCase.class);
 
     private static final String ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN
@@ -56,8 +59,23 @@ public class WebAppTestCase {
         server.stop();
         server.join(); // TODO redundant?
     }
-    
+
     protected final String getResponseContent(String webAppName, String webAppRelURL) throws Exception {
+        HTTPResponse resp = getHTTPResponse(webAppName, webAppRelURL);
+        if (resp.getStatusCode() != HttpURLConnection.HTTP_OK) {
+            fail("Expected HTTP status " + HttpURLConnection.HTTP_OK + ", but got "
+                    + resp.getStatusCode() + " (message: " + resp.getStatusMessage() + ") for URI "
+                    + resp.getURI());
+        }
+        return resp.getContent();
+    }
+
+    protected final int getResponseStatusCode(String webAppName, String webAppRelURL) throws Exception {
+        HTTPResponse resp = getHTTPResponse(webAppName, webAppRelURL);
+        return resp.getStatusCode();
+    }
+    
+    protected final HTTPResponse getHTTPResponse(String webAppName, String webAppRelURL) throws Exception {
         if (webAppName.startsWith("/") || webAppName.endsWith("/")) {
             throw new IllegalArgumentException("\"webAppName\" can't start or end with \"/\": " + webAppName);
         }
@@ -74,20 +92,25 @@ public class WebAppTestCase {
         httpCon.connect();
         try {
             LOG.debug("HTTP GET: {}", uri);
+
+            final int responseCode = httpCon.getResponseCode();
             
-            final int httpStatusCode = httpCon.getResponseCode();
-            if (httpStatusCode != HttpURLConnection.HTTP_OK) {
-                fail("Expected HTTP status " + HttpURLConnection.HTTP_OK + ", but got "
-                        + httpStatusCode + " (message: " + httpCon.getResponseMessage() + ") for URI "
-                        + uri);
+            final String content;
+            if (responseCode == 200) {
+                InputStream in = httpCon.getInputStream();
+                try {
+                    content = IOUtils.toString(in, "UTF-8");
+                } finally {
+                    in.close();
+                }
+            } else {
+                content = null;
             }
             
-            InputStream in = httpCon.getInputStream();
-            try {            
-                return IOUtils.toString(in, "UTF-8");
-            } finally {
-                in.close();
-            }
+            return new HTTPResponse(
+                    responseCode, httpCon.getResponseMessage(),
+                    content,
+                    uri);
         } finally {
             httpCon.disconnect();
         }
@@ -105,31 +128,53 @@ public class WebAppTestCase {
 
     protected void assertOutputsEqual(String webAppName, String webAppRelURL1, final String webAppRelURL2)
             throws Exception {
-        String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL1));
-        String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL2));
+        String jspOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL1), true);
+        String ftlOutput = normalizeWS(getResponseContent(webAppName, webAppRelURL2), true);
         assertEquals(jspOutput, ftlOutput);
+    }
+
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL)
+            throws Exception {
+        assertExpectedEqualsOutput(webAppName, expectedFileName, webAppRelURL, true);
+    }
+
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL,
+            boolean compressWS) throws Exception {
+        assertExpectedEqualsOutput(webAppName, expectedFileName, webAppRelURL, compressWS, null);
     }
     
     /**
      * @param expectedFileName
      *            The name of the file that stores the expected content, relatively to
      *            {@code servketContext:/WEB-INF/expected}.
+     * @param ignoredParts
+     *            Parts that will be search-and-replaced with {@value #IGNORED_MASK} with both in the expected and
+     *            actual outputs.
      */
-    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL)
-            throws Exception {
-        final String actual = normalizeWS(getResponseContent(webAppName, webAppRelURL));
+    protected void assertExpectedEqualsOutput(String webAppName, String expectedFileName, String webAppRelURL,
+            boolean compressWS, List<Pattern> ignoredParts) throws Exception {
+        final String actual = normalizeWS(getResponseContent(webAppName, webAppRelURL), compressWS);
         final String expected;
         {
             final InputStream in = new URL(getWebAppDirURL(webAppName) + EXPECTED_DIR + expectedFileName).openStream();
             try {
-                expected = normalizeWS(IOUtils.toString(in, "utf-8"));
+                expected = normalizeWS(IOUtils.toString(in, "utf-8"), compressWS);
             } finally {
                 in.close();
             }
         }
-        assertEquals(expected, actual);
+        assertEquals(maskIgnored(expected, ignoredParts), maskIgnored(actual, ignoredParts));
     }
     
+    private String maskIgnored(String s, List<Pattern> ignoredParts) {
+        if (ignoredParts == null) return s;
+        
+        for (Pattern ignoredPart : ignoredParts) {
+            s = ignoredPart.matcher(s).replaceAll(IGNORED_MASK);
+        }
+        return s;
+    }
+
     protected synchronized void restartWebAppIfStarted(String webAppName) throws Exception {
         WebAppContext context = deployedWebApps.get(webAppName);
         if (context != null) {
@@ -138,14 +183,19 @@ public class WebAppTestCase {
         }
     }
     
+    private Pattern BR = Pattern.compile("\r\n|\r"); 
     private Pattern MULTI_LINE_WS = Pattern.compile("[\t ]*[\r\n][\t \r\n]*", Pattern.DOTALL); 
     private Pattern SAME_LINE_WS = Pattern.compile("[\t ]+", Pattern.DOTALL); 
     
-    private String normalizeWS(String s) {
-        return SAME_LINE_WS.matcher(
-                MULTI_LINE_WS.matcher(s).replaceAll("\n"))
-                .replaceAll(" ")
-                .trim();
+    private String normalizeWS(String s, boolean compressWS) {
+        if (compressWS) {
+            return SAME_LINE_WS.matcher(
+                    MULTI_LINE_WS.matcher(s).replaceAll("\n"))
+                    .replaceAll(" ")
+                    .trim();
+        } else {
+            return BR.matcher(s).replaceAll("\n");
+        }
     }
 
     private synchronized void ensureWebAppIsDeployed(String webAppName) throws Exception {
@@ -156,7 +206,7 @@ public class WebAppTestCase {
         final String webAppDirURL = getWebAppDirURL(webAppName);
         
         WebAppContext context = new WebAppContext(webAppDirURL, "/" + webAppName);
-        context.setParentLoaderPriority(true);
+        
         // Pattern of jar file names scanned for META-INF/*.tld:
         context.setAttribute(
                 ATTR_JETTY_CONTAINER_INCLUDE_JAR_PATTERN,
@@ -195,6 +245,37 @@ public class WebAppTestCase {
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to get grandparent URL for " + webXmlURL, e);
         }
+    }
+    
+    private static class HTTPResponse {
+        private final int statusCode;
+        private final String content;
+        private final String statusMessage;
+        private final URI uri;
+        
+        public HTTPResponse(int statusCode, String statusMessage, String content, URI uri) {
+            this.statusCode = statusCode;
+            this.content = content;
+            this.statusMessage = statusMessage;
+            this.uri = uri;
+        }
+        
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+        
+        public String getContent() {
+            return content;
+        }
+
+        public URI getURI() {
+            return uri;
+        }
+        
     }
     
 }

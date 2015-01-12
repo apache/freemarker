@@ -45,7 +45,7 @@ public class EventForwarding
         HttpSessionListener,
         HttpSessionAttributeListener
 {
-    private static final Logger logger = Logger.getLogger("freemarker.jsp");
+    private static final Logger LOG = Logger.getLogger("freemarker.jsp");
     
     private static final String ATTR_NAME = EventForwarding.class.getName();
     
@@ -86,7 +86,7 @@ public class EventForwarding
             added = true;
         }
         if(!added) {
-            logger.warn(
+            LOG.warn(
                 "Listener of class " + listener.getClass().getName() +
                 "wasn't registered as it doesn't implement any of the " +
                 "recognized listener interfaces.");

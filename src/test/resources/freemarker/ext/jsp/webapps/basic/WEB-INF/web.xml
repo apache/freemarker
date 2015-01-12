@@ -31,11 +31,17 @@
 			<param-name>ContentType</param-name>
 			<param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
 		</init-param>
+        <init-param>
+            <param-name>BufferSize</param-name>
+            <param-value>128 KB</param-value>
+        </init-param>
 
 		<!-- FreeMarker settings: -->
 		<init-param>
 			<param-name>incompatible_improvements</param-name>
-			<param-value>2.3.21</param-value>
+			<param-value>2.3.22</param-value>
+            <!-- Recommended to set to a high value. For the details, see the Java API docs of
+                 freemarker.template.Configuration#Configuration(Version). -->
 		</init-param>
 		<init-param>
 			<param-name>template_exception_handler</param-name>
@@ -62,23 +68,87 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+    <servlet>
+        <servlet-name>freemarker-2.3.0</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        
+        <!-- Specific parts: -->
+        <init-param>
+            <param-name>incompatible_improvements</param-name>
+            <param-value>2.3.0</param-value>
+        </init-param>
+        
+        <!-- Common parts: -->
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>locale</param-name>
+            <param-value>en_US</param-value>
+        </init-param>
+        <init-param>
+            <param-name>default_encoding</param-name>
+            <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
+        </init-param>
+        <init-param>
+            <param-name>template_exception_handler</param-name>
+            <!-- Some may prefer "html_debug" for development. -->
+            <param-value>rethrow</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>freemarker-2.3.22-future</servlet-name>
+        <servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+        
+        <!-- Specific parts: -->
+        <init-param>
+            <param-name>incompatible_improvements</param-name>
+            <param-value>2.3.22</param-value>
+        </init-param>
+        <init-param>
+            <param-name>object_wrapper</param-name>
+            <param-value>DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)</param-value>
+        </init-param>
+        
+        <!-- Common parts: -->
+        <init-param>
+            <param-name>TemplatePath</param-name>
+            <param-value>/</param-value>
+        </init-param>
+        <init-param>
+            <param-name>locale</param-name>
+            <param-value>en_US</param-value>
+        </init-param>
+        <init-param>
+            <param-name>default_encoding</param-name>
+            <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
+        </init-param>
+        <init-param>
+            <param-name>template_exception_handler</param-name>
+            <!-- Some may prefer "html_debug" for development. -->
+            <param-value>rethrow</param-value>
+        </init-param>
+    </servlet>
+
 	<servlet-mapping>
 		<servlet-name>freemarker</servlet-name>
 		<url-pattern>*.ftl</url-pattern>
 	</servlet-mapping>
 
-	<!-- Prevent the visiting of MVC Views from outside the servlet container. 
-		RequestDispatcher.forward/include should and will still work. Removing this 
-		may open security holes! -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>FreeMarker MVC Views</web-resource-name>
-			<url-pattern>*.ftl</url-pattern>
-			<url-pattern>*.jsp</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<!-- Nobody is allowed to visit these -->
-		</auth-constraint>
-	</security-constraint>
+    <!-- Prevent the visiting of MVC Views from outside the servlet container. 
+        RequestDispatcher.forward/include should and will still work. Removing this 
+        may open security holes! -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>FreeMarker MVC Views</web-resource-name>
+            <url-pattern>*.ftl</url-pattern>
+            <url-pattern>*.jsp</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- Nobody is allowed to visit these -->
+        </auth-constraint>
+    </security-constraint>
 
 </web-app>

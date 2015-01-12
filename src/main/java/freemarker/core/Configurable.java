@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
@@ -92,6 +93,10 @@ public class Configurable
     public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "new_builtin_class_resolver";
     /** @since 2.3.21 */
     public static final String SHOW_ERROR_TIPS_KEY = "show_error_tips";
+    /** @since 2.3.22 */
+    public static final String API_BUILTIN_ENABLED_KEY = "api_builtin_enabled";
+    /** @since 2.3.22 */
+    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = "log_template_exceptions";
 
     private Configurable parent;
     private Properties properties;
@@ -119,6 +124,8 @@ public class Configurable
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
+    private Boolean apiBuiltinEnabled;
+    private Boolean logTemplateExceptions;
     
     /**
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
@@ -152,6 +159,8 @@ public class Configurable
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         showErrorTips = Boolean.TRUE;
+        apiBuiltinEnabled = Boolean.FALSE;
+        logTemplateExceptions = Boolean.TRUE;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         
@@ -902,6 +911,54 @@ public class Configurable
             : (parent != null ? parent.getShowErrorTips() : true);
     }
     
+    /**
+     * Specifies if {@code ?api} can be used in templates. Defaults to {@code false} so that updating FreeMarker won't
+     * decrease the security of existing applications.
+     * 
+     * @since 2.3.22
+     */
+    public void setAPIBuiltinEnabled(boolean value) {
+        apiBuiltinEnabled = Boolean.valueOf(value);
+        properties.setProperty(API_BUILTIN_ENABLED_KEY, String.valueOf(value));
+    }
+
+    /**
+     * See {@link #setAPIBuiltinEnabled(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public boolean isAPIBuiltinEnabled() {
+        return apiBuiltinEnabled != null 
+                ? apiBuiltinEnabled.booleanValue()
+                : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    }
+    
+    /**
+     * Specifies if {@link TemplateException}-s thrown by template processing are logged by FreeMarker or not. The
+     * default is {@code true} for backward compatibility, but that results in logging the exception twice in properly
+     * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
+     * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
+     * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
+     * caught by {@code #attempt}/{@code #recover}; those are always logged, no mater what.
+     * 
+     * @since 2.3.22
+     */
+    public void setLogTemplateExceptions(boolean value) {
+        logTemplateExceptions = Boolean.valueOf(value);
+        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, String.valueOf(value));
+    }
+
+    /**
+     * See {@link #setLogTemplateExceptions(boolean)}
+     * 
+     * @since 2.3.22
+     */
+    public boolean getLogTemplateExceptions() {
+        return logTemplateExceptions != null 
+                ? logTemplateExceptions.booleanValue()
+                : (parent != null ? parent.getLogTemplateExceptions() : true);
+    }
+    
     private static final String ALLOWED_CLASSES = "allowed_classes";
     private static final String TRUSTED_TEMPLATES = "trusted_templates";
     
@@ -1051,6 +1108,11 @@ public class Configurable
      *       Since 2.3.21.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
+     *   <li><p>{@code api_builtin_enabled}:
+     *       See {@link #setAPIBuiltinEnabled(boolean)}.
+     *       Since 2.3.22.
+     *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
+     *       
      * </ul>
      * 
      * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
@@ -1126,6 +1188,11 @@ public class Configurable
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
      *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       
+     *   <li><p>{@code "template_lookup_strategy"}:
+     *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.
+     *       <br>String value: {@code "default"} (case insensitive) for {@link TemplateLookupStrategy#DEFAULT}, or else
+     *       interpreted as an <a href="#fm_obe">object builder expression</a>.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
@@ -1151,8 +1218,9 @@ public class Configurable
      *   </li>
      *   <li>
      *      <p>If you have no constructor arguments and property setters, and the <tt><i>className</i></tt> class has
-     *      a public static <tt>INSTANCE</tt> field, the value of that filed will be the value of the expression, and
-     *      the constructor won't be called.
+     *      a public static {@code INSTANCE} field, the value of that filed will be the value of the expression, and
+     *      the constructor won't be called. Note that if you use the backward compatible
+     *      syntax, where these's no parenthesis after the class name, then it will not look for {@code INSTANCE}.
      *   </li>
      *   <li>
      *      <p>If there exists a class named <tt><i>className</i>Builder</tt>, then that class will be instantiated
@@ -1282,6 +1350,8 @@ public class Configurable
                 setAutoFlush(StringUtil.getYesNo(value));
             } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
                 setShowErrorTips(StringUtil.getYesNo(value));
+            } else if (API_BUILTIN_ENABLED_KEY.equals(name)) {
+                setAPIBuiltinEnabled(StringUtil.getYesNo(value));
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
@@ -1412,7 +1482,7 @@ public class Configurable
         
         private UnknownSettingException(Environment env, String name, String correctedName) {
             super(env, new Object[] {
-                    "Unknown setting: ", new _DelayedJQuote(name),
+                    "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
                     correctedName == null
                             ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }
@@ -1429,7 +1499,7 @@ public class Configurable
         
         private SettingValueAssignmentException(Environment env, String name, String value, Throwable cause) {
             super(cause, env, new Object[] {
-                    "Failed to set setting ", new _DelayedJQuote(name),
+                    "Failed to set FreeMarker configuration setting ", new _DelayedJQuote(name),
                     " to value ", new _DelayedJQuote(value), "; see cause exception." });
         }
         

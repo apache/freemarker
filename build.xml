@@ -4,7 +4,6 @@
   xmlns:ivy="antlib:org.apache.ivy.ant"
   xmlns:javacc="http://javacc.dev.java.net/"
   xmlns:docgen="http://freemarker.org/docgen"
-  xmlns:emma="http://emma.sourceforge.net/emma"
   xmlns:bnd="http://www.aqute.biz/bnd"
   xmlns:u="http://freemarker.org/util"
 >
@@ -389,36 +388,12 @@
   <!-- ================================================================= -->
 
   <target name="test" depends="compileTest" description="Run test cases">
-    <ivy:cachepath conf="emma" pathid="ivy.dep.emma" />
-    <taskdef
-      resource="emma_ant.properties" classpathref="ivy.dep.emma"
-      uri="http://emma.sourceforge.net/emma" 
-    />
-    
-    <property name="coverage.dir" location="build/coverage" />
-    <property name="coverage.classes.dir" location="build/coverage/classes" />
-    <mkdir dir="${coverage.classes.dir}" />
-    <property name="coverage.instrumentationfile" location="${coverage.dir}/instrumentation" />
-    <emma:emma enabled="true">
-      <instr 
-        instrpath="build/classes" outdir="${coverage.classes.dir}" 
-        outfile="${coverage.instrumentationfile}" mode="copy">
-        <filter excludes="*_Stub" />
-      </instr>
-    </emma:emma>
-    <copy todir="${coverage.classes.dir}" overwrite="false">
-      <fileset dir="build/classes" />
-      <fileset dir="build/test-classes" />
-    </copy>
-    <property name="coverage.outfile" location="${coverage.dir}/coverage" />
-   
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
     <junit haltonfailure="on" fork="true" forkmode="once">
-      <sysproperty key="emma.coverage.out.file" value="${coverage.outfile}" />
       <classpath>
-        <pathelement path="${coverage.classes.dir}" />
-        <path refid="ivy.dep.emma" />
+        <pathelement path="build/test-classes" />
+        <pathelement path="build/classes" />
         <path refid="ivy.dep.run.test" />
       </classpath>
       <formatter type="plain" />
@@ -431,28 +406,6 @@
         </fileset>
       </batchtest>
     </junit>
-    
-    <property name="coverage.report.dir" location="build/coverage/report" />
-    <mkdir dir="${coverage.report.dir}" />
-    <delete dir="${coverage.report.dir}" />
-    <mkdir dir="${coverage.report.dir}" />
-    <echo message="${coverage.outfile}" />
-    <echo message="${coverage.instrumentationfile}" />
-    <emma:emma enabled="true">
-      <report>
-        <fileset dir="${basedir}">
-          <include name="build/coverage/instrumentation" />
-          <include name="build/coverage/coverage" />
-        </fileset>
-        <sourcepath>
-          <dirset dir="${basedir}">
-            <include name="src/main/java" />
-          </dirset>
-        </sourcepath>
-        <html outfile="${coverage.report.dir}/index.html" />
-        <xml outfile="${coverage.report.dir}/report.xml" />
-      </report>
-    </emma:emma>
   </target>
   
   <!-- ================================================================= -->

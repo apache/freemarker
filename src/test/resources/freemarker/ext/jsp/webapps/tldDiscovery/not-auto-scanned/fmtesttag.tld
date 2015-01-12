@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+  <tlib-version>3.0</tlib-version>
+  <short-name>FreeMarker-test-taglib</short-name>
+
+  <tag>
+    <name>testtag</name>
+    <tag-class>freemarker.ext.jsp.taglibmembers.TestTag</tag-class>
+    <body-content>JSP</body-content>
+  </tag>
+
+  <tag>
+    <name><!-- white space -->
+      simpletag<!-- white space -->
+    </name>
+    <tag-class><!-- white space -->
+      freemarker.ext.jsp.taglibmembers.TestSimpleTag<!-- white space -->
+    </tag-class>
+    <body-content>JSP</body-content>
+  </tag>
+</taglib>

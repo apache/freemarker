@@ -47,6 +47,7 @@ import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
@@ -62,24 +63,29 @@ import freemarker.template.TemplateSequenceModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
-import freemarker.template.utility.NullArgumentException;
+import freemarker.template.utility.RichObjectWrapper;
 import freemarker.template.utility.UndeclaredThrowableException;
 import freemarker.template.utility.WriteProtectable;
 
 /**
  * {@link ObjectWrapper} that is able to expose the Java API of arbitrary Java objects. This is also the superclass of
- * {@link DefaultObjectWrapper}. Note that instances of this class generally should be created with
+ * {@link DefaultObjectWrapper}. Note that instances of this class generally should be created with a
  * {@link BeansWrapperBuilder}, not with its public constructors.
  * 
  * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
  * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
  * was safely published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety. 
  */
-public class BeansWrapper implements ObjectWrapper, WriteProtectable
+public class BeansWrapper implements RichObjectWrapper, WriteProtectable
 {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
 
-    static final Object CAN_NOT_UNWRAP = new Object();
+    /**
+     * @deprecated Use {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead. It's not a public field
+     *             anyway.
+     */
+    static final Object CAN_NOT_UNWRAP = ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
+    
     private static final Class ITERABLE_CLASS;
     static {
         Class iterable;
@@ -260,6 +266,21 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly) {
+        this(bwConf, readOnly, true);
+    }
+    
+    /**
+     * Initializes the instance based on the the {@link BeansWrapperConfiguration} specified.
+     * 
+     * @param readOnly Makes the instance's configuration settings read-only via
+     *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
+     *     
+     * @param finalizeConstruction Decides if the construction if finalized now, or the caller will do some more
+     *     adjustments on the instance then call {@link #finalizeConstruction(boolean)} itself. 
+     * 
+     * @since 2.3.22
+     */
+    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly, boolean finalizeConstruction) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
         if (bwConf.getMethodAppearanceFineTuner() == null) {
             Class thisClass = this.getClass();
@@ -333,6 +354,18 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         modelCache = new BeansModelCache(BeansWrapper.this);
         setUseCache(bwConf.getUseModelCache());
 
+        finalizeConstruction(readOnly);
+    }
+
+    /**
+     * Meant to be called after {@link BeansWrapper#BeansWrapper(BeansWrapperConfiguration, boolean, boolean)} when
+     * its last argument was {@code false}; makes the instance read-only if necessary, then registers the model
+     * factories in the class introspector. No further changes should be done after calling this, if {@code readOnly}
+     * was {@code true}. 
+     * 
+     * @since 2.3.22
+     */
+    protected void finalizeConstruction(boolean readOnly) {
         if (readOnly) {
             writeProtect();
         }
@@ -735,12 +768,13 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     }
     
     /**
-     * Sets the null model. This model is returned from the
-     * {@link #wrap(Object)} method whenever the underlying object 
-     * reference is null. It defaults to null reference, which is dealt 
-     * with quite strictly on engine level, however you can substitute an 
-     * arbitrary (perhaps more lenient) model, such as 
-     * {@link freemarker.template.TemplateScalarModel#EMPTY_STRING}.
+     * Sets the null model. This model is returned from the {@link #wrap(Object)} method whenever the wrapped object is
+     * {@code null}. It defaults to {@code null}, which is dealt with quite strictly on engine level, however you can
+     * substitute an arbitrary (perhaps more lenient) model, like an empty string. For proper working, the
+     * {@code nullModel} should be an {@link AdapterTemplateModel} that returns {@code null} for
+     * {@link AdapterTemplateModel#getAdaptedObject(Class)}.
+     * 
+     * @deprecated Changing the {@code null} model can cause a lot of confusion; don't do it.
      */
     public void setNullModel(TemplateModel nullModel)
     {
@@ -771,7 +805,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
-        NullArgumentException.check("version", incompatibleImprovements);
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
@@ -839,6 +873,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      */
     public TemplateMethodModelEx wrap(Object object, Method method) {
         return new SimpleMethodModel(object, method, method.getParameterTypes(), this);
+    }
+    
+    public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
+        return new APIModel(obj, this);
     }
 
     /**
@@ -919,47 +957,52 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     {
         return unwrap(model, Object.class);
     }
-    
+
     /**
      * Attempts to unwrap a model into an object of the desired class. 
      * Generally, this method is the inverse of the {@link #wrap(Object)} 
-     * method. It recognizes a wide range of hint classes - all Java built-in
+     * method. It recognizes a wide range of target classes - all Java built-in
      * primitives, primitive wrappers, numbers, dates, sets, lists, maps, and
      * native arrays.
      * @param model the model to unwrap
-     * @param hint the class of the unwrapped result
+     * @param targetClass the class of the unwrapped result; {@code Object.class} of we don't know what the expected type is.
      * @return the unwrapped result of the desired class
      * @throws TemplateModelException if an attempted unwrapping fails.
+     * 
+     * @see #tryUnwrapTo(TemplateModel, Class)
      */
-    public Object unwrap(TemplateModel model, Class hint) 
+    public Object unwrap(TemplateModel model, Class targetClass) 
     throws TemplateModelException
     {
-        final Object obj = tryUnwrap(model, hint);
-        if(obj == CAN_NOT_UNWRAP) {
+        final Object obj = tryUnwrapTo(model, targetClass);
+        if(obj == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
           throw new TemplateModelException("Can not unwrap model of type " + 
-              model.getClass().getName() + " to type " + hint.getName());
+              model.getClass().getName() + " to type " + targetClass.getName());
         }
         return obj;
     }
 
     /**
-     * Same as {@link #tryUnwrap(TemplateModel, Class, int)} with 0 type flags argument.
+     * Same as {@link #tryUnwrapTo(TemplateModel, Class, int)} with 0 type flags argument.
+     * 
+     * @since 2.3.22
      */
-    Object tryUnwrap(TemplateModel model, Class hint) throws TemplateModelException
+    public Object tryUnwrapTo(TemplateModel model, Class targetClass) throws TemplateModelException
     {
-        return tryUnwrap(model, hint, 0);
+        return tryUnwrapTo(model, targetClass, 0);
     }
     
     /**
-     * @param typeFlags Used when unwrapping for overloaded methods and so the {@code hint} is possibly too generic.
-     *        Must be 0 when unwrapping parameter values for non-overloaded methods, also if {@link #is2321Bugfixed()}
-     *        is {@code false}.
-     * @return {@link #CAN_NOT_UNWRAP} or the unwrapped object.
+     * @param typeFlags
+     *            Used when unwrapping for overloaded methods and so the {@code targetClass} is possibly too generic.
+     *            Must be 0 when unwrapping parameter values for non-overloaded methods, also if
+     *            {@link #is2321Bugfixed()} is {@code false}.
+     * @return {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} or the unwrapped object.
      */
-    Object tryUnwrap(TemplateModel model, Class hint, int typeFlags) 
+    Object tryUnwrapTo(TemplateModel model, Class targetClass, int typeFlags) 
     throws TemplateModelException
     {
-        Object res = tryUnwrap(model, hint, typeFlags, null);
+        Object res = tryUnwrapTo(model, targetClass, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
             return OverloadedNumberUtil.addFallbackType((Number) res, typeFlags);
@@ -971,7 +1014,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
     /**
      * See {@try #tryUnwrap(TemplateModel, Class, int, boolean)}.
      */
-    private Object tryUnwrap(TemplateModel model, Class hint, int typeFlags, Map recursionStops) 
+    private Object tryUnwrapTo(final TemplateModel model, Class targetClass, final int typeFlags, final Map recursionStops) 
     throws TemplateModelException {
         if(model == null || model == nullModel) {
             return null;
@@ -979,37 +1022,37 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         
         final boolean is2321Bugfixed = is2321Bugfixed();
         
-        if (is2321Bugfixed && hint.isPrimitive()) {
-            hint = ClassUtil.primitiveClassToBoxingClass(hint);            
+        if (is2321Bugfixed && targetClass.isPrimitive()) {
+            targetClass = ClassUtil.primitiveClassToBoxingClass(targetClass);            
         }
         
         // This is for transparent interop with other wrappers (and ourselves)
-        // Passing the hint allows i.e. a Jython-aware method that declares a
+        // Passing the targetClass allows i.e. a Jython-aware method that declares a
         // PyObject as its argument to receive a PyObject from a JythonModel
         // passed as an argument to TemplateMethodModelEx etc.
         if(model instanceof AdapterTemplateModel) {
             Object wrapped = ((AdapterTemplateModel)model).getAdaptedObject(
-                    hint);
-            if(hint.isInstance(wrapped)) {
+                    targetClass);
+            if (targetClass == Object.class || targetClass.isInstance(wrapped)) {
                 return wrapped;
             }
             
             // Attempt numeric conversion: 
-            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
-                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
+            if (targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
+                Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
                 if(number != null) return number;
             }
         }
         
         if(model instanceof WrapperTemplateModel) {
             Object wrapped = ((WrapperTemplateModel)model).getWrappedObject();
-            if(hint.isInstance(wrapped)) {
+            if (targetClass == Object.class || targetClass.isInstance(wrapped)) {
                 return wrapped;
             }
             
             // Attempt numeric conversion: 
-            if(wrapped instanceof Number && ClassUtil.isNumerical(hint)) {
-                Number number = forceUnwrappedNumberToType((Number) wrapped, hint, is2321Bugfixed);
+            if(targetClass != Object.class && (wrapped instanceof Number && ClassUtil.isNumerical(targetClass))) {
+                Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass, is2321Bugfixed);
                 if(number != null) {
                     return number;
                 }
@@ -1017,95 +1060,97 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         }
         
         // Translation of generic template models to POJOs. First give priority
-        // to various model interfaces based on the hint class. This helps us
+        // to various model interfaces based on the targetClass. This helps us
         // select the appropriate interface in multi-interface models when we
         // know what is expected as the return type.
+        if (targetClass != Object.class) {
 
-        // Java 5: Also should check for CharSequence at the end
-        if(String.class == hint) {
-            if(model instanceof TemplateScalarModel) {
-                return ((TemplateScalarModel)model).getAsString();
+            // Java 5: Also should check for CharSequence at the end
+            if(String.class == targetClass) {
+                if(model instanceof TemplateScalarModel) {
+                    return ((TemplateScalarModel)model).getAsString();
+                }
+                // String is final, so no other conversion will work
+                return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
             }
-            // String is final, so no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-
-        // Primitive numeric types & Number.class and its subclasses
-        if(ClassUtil.isNumerical(hint)) {
-            if(model instanceof TemplateNumberModel) {
-                Number number = forceUnwrappedNumberToType(
-                        ((TemplateNumberModel)model).getAsNumber(), hint, is2321Bugfixed);
-                if(number != null) {
-                    return number;
+    
+            // Primitive numeric types & Number.class and its subclasses
+            if(ClassUtil.isNumerical(targetClass)) {
+                if(model instanceof TemplateNumberModel) {
+                    Number number = forceUnwrappedNumberToType(
+                            ((TemplateNumberModel)model).getAsNumber(), targetClass, is2321Bugfixed);
+                    if(number != null) {
+                        return number;
+                    }
                 }
             }
-        }
-        
-        if(boolean.class == hint || Boolean.class == hint) {
-            if(model instanceof TemplateBooleanModel) {
-                return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
+            
+            if(boolean.class == targetClass || Boolean.class == targetClass) {
+                if(model instanceof TemplateBooleanModel) {
+                    return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
+                }
+                // Boolean is final, no other conversion will work
+                return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
             }
-            // Boolean is final, no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-
-        if(Map.class == hint) {
-            if(model instanceof TemplateHashModel) {
-                return new HashAdapter((TemplateHashModel)model, this);
-            }
-        }
-        
-        if(List.class == hint) {
-            if(model instanceof TemplateSequenceModel) {
-                return new SequenceAdapter((TemplateSequenceModel)model, this);
-            }
-        }
-        
-        if(Set.class == hint) {
-            if(model instanceof TemplateCollectionModel) {
-                return new SetAdapter((TemplateCollectionModel)model, this);
-            }
-        }
-        
-        if(Collection.class == hint || ITERABLE_CLASS == hint) {
-            if(model instanceof TemplateCollectionModel) {
-                return new CollectionAdapter((TemplateCollectionModel)model, 
-                        this);
-            }
-            if(model instanceof TemplateSequenceModel) {
-                return new SequenceAdapter((TemplateSequenceModel)model, this);
-            }
-        }
-        
-        // TemplateSequenceModels can be converted to arrays
-        if(hint.isArray()) {
-            if(model instanceof TemplateSequenceModel) {
-                return unwrapSequenceToArray((TemplateSequenceModel) model, hint, true, recursionStops);
-            }
-            // array classes are final, no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-        
-        // Allow one-char strings to be coerced to characters
-        if(char.class == hint || hint == Character.class) {
-            if(model instanceof TemplateScalarModel) {
-                String s = ((TemplateScalarModel)model).getAsString();
-                if(s.length() == 1) {
-                    return new Character(s.charAt(0));
+    
+            if(Map.class == targetClass) {
+                if(model instanceof TemplateHashModel) {
+                    return new HashAdapter((TemplateHashModel)model, this);
                 }
             }
-            // Character is final, no other conversion will work
-            return CAN_NOT_UNWRAP;
-        }
-
-        if(Date.class.isAssignableFrom(hint) && model instanceof TemplateDateModel) {
-            Date date = ((TemplateDateModel)model).getAsDate();
-            if(hint.isInstance(date)) {
-                return date;
+            
+            if(List.class == targetClass) {
+                if(model instanceof TemplateSequenceModel) {
+                    return new SequenceAdapter((TemplateSequenceModel)model, this);
+                }
             }
-        }
+            
+            if(Set.class == targetClass) {
+                if(model instanceof TemplateCollectionModel) {
+                    return new SetAdapter((TemplateCollectionModel)model, this);
+                }
+            }
+            
+            if(Collection.class == targetClass || ITERABLE_CLASS == targetClass) {
+                if(model instanceof TemplateCollectionModel) {
+                    return new CollectionAdapter((TemplateCollectionModel)model, 
+                            this);
+                }
+                if(model instanceof TemplateSequenceModel) {
+                    return new SequenceAdapter((TemplateSequenceModel)model, this);
+                }
+            }
+            
+            // TemplateSequenceModels can be converted to arrays
+            if(targetClass.isArray()) {
+                if(model instanceof TemplateSequenceModel) {
+                    return unwrapSequenceToArray((TemplateSequenceModel) model, targetClass, true, recursionStops);
+                }
+                // array classes are final, no other conversion will work
+                return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
+            }
+            
+            // Allow one-char strings to be coerced to characters
+            if(char.class == targetClass || targetClass == Character.class) {
+                if(model instanceof TemplateScalarModel) {
+                    String s = ((TemplateScalarModel)model).getAsString();
+                    if(s.length() == 1) {
+                        return new Character(s.charAt(0));
+                    }
+                }
+                // Character is final, no other conversion will work
+                return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
+            }
+    
+            if(Date.class.isAssignableFrom(targetClass) && model instanceof TemplateDateModel) {
+                Date date = ((TemplateDateModel)model).getAsDate();
+                if(targetClass.isInstance(date)) {
+                    return date;
+                }
+            }
+        }  //  End: if (targetClass != Object.class)
         
-        // Since the hint class was of no help initially, now we use
+        // Since the targetClass was of no help initially, now we use
         // a quite arbitrary order in which we walk through the TemplateModel subinterfaces, and unwrapp them to
         // their "natural" Java correspondent. We still try exclude unwrappings that won't fit the target parameter
         // type(s). This is mostly important because of multi-typed FTL values that could be unwrapped on multiple ways.
@@ -1116,20 +1161,20 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_NUMBER) != 0)
                     && model instanceof TemplateNumberModel) {
                 Number number = ((TemplateNumberModel) model).getAsNumber();
-                if (itf != 0 || hint.isInstance(number)) {
+                if (itf != 0 || targetClass.isInstance(number)) {
                     return number;
                 }
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_DATE) != 0)
                     && model instanceof TemplateDateModel) {
                 Date date = ((TemplateDateModel) model).getAsDate();
-                if (itf != 0 || hint.isInstance(date)) {
+                if (itf != 0 || targetClass.isInstance(date)) {
                     return date;
                 }
             }
             if ((itf == 0 || (itf & (TypeFlags.ACCEPTS_STRING | TypeFlags.CHARACTER)) != 0)
                     && model instanceof TemplateScalarModel
-                    && (itf != 0 || hint.isAssignableFrom(String.class))) {
+                    && (itf != 0 || targetClass.isAssignableFrom(String.class))) {
                 String strVal = ((TemplateScalarModel) model).getAsString();
                 if (itf == 0 || (itf & TypeFlags.CHARACTER) == 0) {
                     return strVal;
@@ -1146,24 +1191,25 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
                     // It had to be unwrapped to Character, but the string length wasn't 1 => Fall through
                 }
             }
+            // Should be earlier than TemplateScalarModel, but we keep it here until FM 2.4 or such
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
                     && model instanceof TemplateBooleanModel
-                    && (itf != 0 || hint.isAssignableFrom(Boolean.class))) {
+                    && (itf != 0 || targetClass.isAssignableFrom(Boolean.class))) {
                 return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_MAP) != 0)
                     && model instanceof TemplateHashModel
-                    && (itf != 0 || hint.isAssignableFrom(HashAdapter.class))) {
+                    && (itf != 0 || targetClass.isAssignableFrom(HashAdapter.class))) {
                 return new HashAdapter((TemplateHashModel) model, this);
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_LIST) != 0)
                     && model instanceof TemplateSequenceModel 
-                    && (itf != 0 || hint.isAssignableFrom(SequenceAdapter.class))) {
+                    && (itf != 0 || targetClass.isAssignableFrom(SequenceAdapter.class))) {
                 return new SequenceAdapter((TemplateSequenceModel) model, this);
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_SET) != 0)
                     && model instanceof TemplateCollectionModel
-                    && (itf != 0 || hint.isAssignableFrom(SetAdapter.class))) {
+                    && (itf != 0 || targetClass.isAssignableFrom(SetAdapter.class))) {
                 return new SetAdapter((TemplateCollectionModel) model, this);
             }
             
@@ -1181,17 +1227,20 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             itf = 0; // start 2nd iteration
         } while (true);
 
-        // Last ditch effort - is maybe the model itself instance of the required type?
-        if (hint.isInstance(model)) {
+        // Last ditch effort - is maybe the model itself is an instance of the required type?
+        // Note that this will be always true for Object.class targetClass. 
+        if (targetClass.isInstance(model)) {
             return model;
         }
         
-        return CAN_NOT_UNWRAP;
+        return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
     }
 
     /**
-     * @param tryOnly if <tt>true</true>, if the conversion of an item fails, the method returns {@link #CAN_NOT_UNWRAP}
-     *     instead of throwing a {@link TemplateModelException}.
+     * @param tryOnly
+     *            If {@code true}, if the conversion of an item to the component type isn't possible, the method returns
+     *            {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead of throwing a
+     *            {@link TemplateModelException}.
      */
     Object unwrapSequenceToArray(TemplateSequenceModel seq, Class arrayClass, boolean tryOnly, Map recursionStops)
             throws TemplateModelException {
@@ -1210,10 +1259,10 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
             final int size = seq.size();
             for (int i = 0; i < size; i++) {
                 final TemplateModel seqItem = seq.get(i);
-                Object val = tryUnwrap(seqItem, componentType, 0, recursionStops);
-                if(val == CAN_NOT_UNWRAP) {
+                Object val = tryUnwrapTo(seqItem, componentType, 0, recursionStops);
+                if(val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     if (tryOnly) {
-                        return CAN_NOT_UNWRAP;
+                        return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
                     } else {
                         throw new _TemplateModelException(new Object[] {
                                 "Failed to convert ",  new _DelayedFTLTypeDescription(seq),
@@ -1400,7 +1449,7 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
         IllegalAccessException,
         TemplateModelException
     {
-        // TODO: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
+        // [2.4]: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
         // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
         return 
@@ -1649,15 +1698,28 @@ public class BeansWrapper implements ObjectWrapper, WriteProtectable
      * @since 2.3.21
      */
     public String toString() {
+        final String propsStr = toPropertiesString();
         return ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
-                + "(" + incompatibleImprovements + ") { "
-                + "simpleMapWrapper = " + simpleMapWrapper + ", "
-                + "exposureLevel = " + classIntrospector.getExposureLevel() + ", "
-                + "exposeFields = " + classIntrospector.getExposeFields() + ", "
-                + "sharedClassIntrospCache = "
-                + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none")
-                + ", ... "
-                + " }";
+                + "(" + incompatibleImprovements + ", "
+                + (propsStr.length() != 0 ? propsStr + ", ..." : "")
+                + ")";
+    }
+    
+    /**
+     * Returns the name-value pairs that describe the configuration of this {@link BeansWrapper}; called from
+     * {@link #toString()}. The expected format is like {@code "foo=bar, baaz=wombat"}. When overriding this, you should
+     * call the super method, and then insert the content before it with a following {@code ", "}, or after it with a
+     * preceding {@code ", "}.
+     * 
+     * @since 2.3.22
+     */
+    protected String toPropertiesString() {
+        // Start with "simpleMapWrapper", because the override in DefaultObjectWrapper expects it to be there!
+        return "simpleMapWrapper=" + simpleMapWrapper + ", "
+               + "exposureLevel=" + classIntrospector.getExposureLevel() + ", "
+               + "exposeFields=" + classIntrospector.getExposeFields() + ", "
+               + "sharedClassIntrospCache="
+               + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none");
     }
 
     private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {

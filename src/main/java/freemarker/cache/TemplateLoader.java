@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import freemarker.template.Configuration;
+import freemarker.template.TemplateNotFoundException;
 
 /**
  * FreeMarker loads template "files" through objects that implement this interface,
@@ -37,7 +38,7 @@ import freemarker.template.Configuration;
  * {@link TemplateLoader} loads the templates. For example, for a template loader that loads template from database
  * table {@code toString} could return something like
  * {@code "MyDatabaseTemplateLoader(user=\"cms\", table=\"mail_templates\")"}. This string will be shown in
- * template-not-found exception messages, next to the template name.
+ * {@link TemplateNotFoundException} exception messages, next to the template name.
  * 
  * <p>For those who has to dig deeper, note that the {@link TemplateLoader} is actually stored inside
  * the {@link TemplateCache} of the {@link Configuration}, and is normally only accessed directly
@@ -46,40 +47,41 @@ import freemarker.template.Configuration;
 public interface TemplateLoader {
 	
     /**
-     * Finds the object that acts as the source of the template with the
-     * given name. This method is called by the {@link TemplateCache} when a template
-     * is requested, before calling either {@link #getLastModified(Object)} or
-     * {@link #getReader(Object, String)}.
+     * Finds the template in the backing storage and returns an object that identifies the storage location where the
+     * template can be loaded from. See the return value for more information.
      *
-     * @param name the name of the template, already localized and normalized by
-     * the {@link freemarker.cache.TemplateCache cache}.
-     * It is completely up to the loader implementation to interpret
-     * the name, however it should expect to receive hierarchical paths where
-     * path components are separated by a slash (not backslash). Backslashes
-     * (or any other OS specific separator character) are not considered as separators by
-     * FreeMarker, and thus they will not be replaced with slash before passing to this method,
-     * so it's up to the template loader to handle them (say, be throwing and exception that
-     * tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
-     * typical mistake of Windows users).
-     * The passed names are always considered relative to some loader-defined root
-     * location (often referred as the "template root directory"), and will never start with
-     * a slash, nor will they contain a path component consisting of either a single or a double
-     * dot -- these are all resolved by the template cache before passing the name to the
-     * loader. As a side effect, paths that trivially reach outside template root directory,
-     * such as <tt>../my.ftl</tt>, will be rejected by the template cache, so they never
-     * reach the template loader. Note again, that if the path uses backslash as path separator
-     * instead of slash as (the template loader should not accept that), the normalization will
-     * not properly happen, as FreeMarker (the cache) recognizes only the slashes as separators.
+     * @param name
+     *            The name of the template, already localized and normalized by the
+     *            {@link freemarker.cache.TemplateCache cache}. It is completely up to the loader implementation to
+     *            interpret the name, however it should expect to receive hierarchical paths where path components are
+     *            separated by a slash (not backslash). Backslashes (or any other OS specific separator character) are
+     *            not considered as separators by FreeMarker, and thus they will not be replaced with slash before
+     *            passing to this method, so it's up to the template loader to handle them (say, be throwing and
+     *            exception that tells the user that the path (s)he has entered is invalid, as (s)he must use slash --
+     *            typical mistake of Windows users). The passed names are always considered relative to some
+     *            loader-defined root location (often referred as the "template root directory"), and will never start
+     *            with a slash, nor will they contain a path component consisting of either a single or a double dot --
+     *            these are all resolved by the template cache before passing the name to the loader. As a side effect,
+     *            paths that trivially reach outside template root directory, such as <tt>../my.ftl</tt>, will be
+     *            rejected by the template cache, so they never reach the template loader. Note again, that if the path
+     *            uses backslash as path separator instead of slash as (the template loader should not accept that), the
+     *            normalization will not properly happen, as FreeMarker (the cache) recognizes only the slashes as
+     *            separators.
      *
-     * @return an object representing the template source, which can be
-     * supplied in subsequent calls to {@link #getLastModified(Object)} and
-     * {@link #getReader(Object, String)}. Null must be returned if the source
-     * for the template can not be found (do not throw <code>FileNotFoundException</code>!).
-     * The returned object may will be compared with a cached template source
-     * object for equality, using the <code>equals</code> method. Thus,
-     * objects returned for the same physical source must be equivalent
-     * according to <code>equals</code> method, otherwise template caching
-     * can become very ineffective!
+     * @return An object representing the template source, which can be supplied in subsequent calls to
+     *         {@link #getLastModified(Object)} and {@link #getReader(Object, String)}, when those are called on the
+     *         same {@link TemplateLoader}. {@code null} must be returned if the source for the template doesn't exist;
+     *         don't throw exception then! The exact type of this object is up to the {@link TemplateLoader}
+     *         implementation. As this object is possibly compared with another template source for equality,
+     *         {@link Object#equals(Object)} (and thus {@link Object#hashCode()}) must be properly implemented.
+     *         Especially, template sources that refer to the same physical source must be equivalent, otherwise
+     *         template caching can become inefficient. This is only expected from {@link Object#equals(Object)} when
+     *         the compared template sources came from the same {@link TemplateLoader} instance.
+     * 
+     * @throws IOException
+     *             When an error occurs that makes it impossible to find out if the template exists, or to access the
+     *             existing template. Don't throw exception if the template doesn't exist, instead return with
+     *             {@code null} then!
      */
     public Object findTemplateSource(String name)
     throws
@@ -127,11 +129,12 @@ public interface TemplateLoader {
         IOException;
     
     /**
-     * Closes the template source. This is the last method that is called by
-     * the {@link TemplateCache} for a template source. {@link TemplateCache} ensures that
-     * this method will be called on every object that is returned from
-     * {@link #findTemplateSource(String)}.
-     * @param templateSource the template source that should be closed.
+     * Closes the template source. This is the last method that is called by the {@link TemplateCache} for a template
+     * source, except that {@link Object#equals(Object)} is might called later too. {@link TemplateCache} ensures that
+     * this method will be called on every object that is returned from {@link #findTemplateSource(String)}.
+     * 
+     * @param templateSource
+     *            the template source that should be closed.
      */
     public void closeTemplateSource(Object templateSource)
     throws

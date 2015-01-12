@@ -54,19 +54,32 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     // - If you add a new field, review all methods in this class
     
     /**
-     * @param incompatibleImprovements See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}.
-     *     Not {@code null}.
-     *     Note that the version will be normalized to the lowest version where the same incompatible
-     *     {@link BeansWrapper} improvements were already present, so for the returned instance
-     *     {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
+     * @param incompatibleImprovements
+     *            See the corresponding parameter of {@link BeansWrapper#BeansWrapper(Version)}. Not {@code null}. Note
+     *            that the version will be normalized to the lowest version where the same incompatible
+     *            {@link BeansWrapper} improvements were already present, so for the returned instance
+     *            {@link #getIncompatibleImprovements()} might returns a lower version than what you have specified.
+     * @param isIncompImprsNormalized
+     *            Tells if the {@code incompatibleImprovements} parameter contains an already normalized value. This
+     *            should only be {@code true} when the class that extends {@link BeansWrapper} also uses
+     *            {@link #incompatibleImprovements} and it adds further version where a change has occurred.
+     * 
+     * @since 2.3.22
      */
-    protected BeansWrapperConfiguration(Version incompatibleImprovements) {
+    protected BeansWrapperConfiguration(Version incompatibleImprovements, boolean isIncompImprsNormalized) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
-        incompatibleImprovements = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+        incompatibleImprovements = isIncompImprsNormalized ? incompatibleImprovements : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
         classIntrospectorFactory = new ClassIntrospectorBuilder(incompatibleImprovements);
+    }
+    
+    /**
+     * Same as {@link #BeansWrapperConfiguration(Version, boolean) BeansWrapperConfiguration(Version, false)}.
+     */
+    protected BeansWrapperConfiguration(Version incompatibleImprovements) {
+        this(incompatibleImprovements, false);
     }
 
     public int hashCode() {
@@ -82,6 +95,10 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         return result;
     }
 
+    /**
+     * Two {@link BeansWrapperConfiguration}-s are equal exactly if their classes are identical ({@code ==}), and their
+     * field values are equal.
+     */
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;

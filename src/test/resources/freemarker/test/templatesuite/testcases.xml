@@ -28,12 +28,25 @@
             url_escaping_charset CDATA #IMPLIED
             incompatible_improvements CDATA #IMPLIED
             time_zone CDATA #IMPLIED
+            api_builtin_enabled CDATA #IMPLIED
       >
 ]>
 
 <testCases>
    <setting input_encoding="UTF-8" output_encoding="UTF-8" />
    
+   <testCase name="api-builtins" noOutput="true">
+      <setting
+            object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)"
+            api_builtin_enabled="true"
+      />
+   </testCase>
+   <testCase name="api-builtins[#endTN]-bw" noOutput="true">
+      <setting
+            object_wrapper="BeansWrapper(2.3.0)"
+            api_builtin_enabled="true"
+      />
+   </testCase>
    <testCase name="arithmetic" />
    <testCase name="bean-maps"/>
    <testCase name="beans">
@@ -83,6 +96,9 @@
    <testCase name="iterators"/>
    <testCase name="lastcharacter"/>
    <testCase name="list" />
+   <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)" />
+   </testCase>
    <testCase name="listliteral" />
    <testCase name="localization" >
       <setting locale="en_AU"/>
@@ -124,6 +140,9 @@
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.DefaultObjectWrapper"/> 
+   </testCase>
+   <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
+      <setting object_wrapper="DefaultObjectWrapper(2.3.22, forceLegacyNonListCollections=false)"/> 
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-SimpleObjectWrapper" expected="sequence-builtins.txt">
       <setting object_wrapper="freemarker.template.SimpleObjectWrapper"/> 
@@ -237,5 +256,11 @@
    </testCase>
    <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow" noOutput="true">
       <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003021"/>
+   </testCase>
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-inc-dow-2.3.22" noOutput="true">
+      <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperInc2003022"/>
+   </testCase>
+   <testCase name="overloaded-methods-2-bwici-2.3.21[#endTN]-desc-dow-2.3.22" noOutput="true">
+      <setting object_wrapper="freemarker.ext.beans.DefaultObjectWrapperDesc2003022"/>
    </testCase>
 </testCases>

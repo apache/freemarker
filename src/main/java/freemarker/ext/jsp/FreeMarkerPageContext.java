@@ -49,13 +49,16 @@ import freemarker.ext.servlet.ServletContextHashModel;
 import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.AdapterTemplateModel;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -65,6 +68,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private static final Class OBJECT_CLASS = Object.class;
         
     private final Environment environment;
+    private final int incompatibleImprovements;
     private List tags = new ArrayList();
     private List outs = new ArrayList();
     private final GenericServlet servlet;
@@ -72,11 +76,13 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final ObjectWrapper wrapper;
+    private final ObjectWrapperAndUnwrapper unwrapper;
     private JspWriter jspOut;
     
     protected FreeMarkerPageContext() throws TemplateModelException
     {
         environment = Environment.getCurrentEnvironment();
+        incompatibleImprovements = environment.getConfiguration().getIncompatibleImprovements().intValue();
 
         TemplateModel appModel = environment.getGlobalVariable(
                 FreemarkerServlet.KEY_APPLICATION_PRIVATE);
@@ -103,10 +109,12 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         }
         if(requestModel instanceof HttpRequestHashModel) {
             HttpRequestHashModel reqHash = (HttpRequestHashModel)requestModel;
-            this.request = reqHash.getRequest();
-            this.session = request.getSession(false);
-            this.response = reqHash.getResponse();
-            this.wrapper = reqHash.getObjectWrapper();
+            request = reqHash.getRequest();
+            session = request.getSession(false);
+            response = reqHash.getResponse();
+            wrapper = reqHash.getObjectWrapper();
+            unwrapper = this.wrapper instanceof ObjectWrapperAndUnwrapper
+                    ? (ObjectWrapperAndUnwrapper) this.wrapper : null;
         }
         else  {
             throw new  TemplateModelException("Could not find an instance of " + 
@@ -185,26 +193,34 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         switch (scope) {
             case PAGE_SCOPE: {
                 try {
-                    TemplateModel m = environment.getGlobalNamespace().get(name);
-                    if (m instanceof AdapterTemplateModel) {
-                        return ((AdapterTemplateModel) m).getAdaptedObject(OBJECT_CLASS);
+                    final TemplateModel tm = environment.getGlobalNamespace().get(name);
+                    if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22 && unwrapper != null) {
+                        return unwrapper.unwrap(tm);
+                    } else { // Legacy behavior branch
+                        if (tm instanceof AdapterTemplateModel) {
+                            return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
+                        }
+                        if (tm instanceof WrapperTemplateModel) {
+                            return ((WrapperTemplateModel)tm).getWrappedObject();
+                        }
+                        if (tm instanceof TemplateScalarModel) {
+                            return ((TemplateScalarModel) tm).getAsString();
+                        }
+                        if (tm instanceof TemplateNumberModel) {
+                            return ((TemplateNumberModel) tm).getAsNumber();
+                        }
+                        if (tm instanceof TemplateBooleanModel) {
+                            return Boolean.valueOf(((TemplateBooleanModel) tm).getAsBoolean());
+                        }
+                        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_22
+                                && tm instanceof TemplateDateModel) {
+                            return ((TemplateDateModel) tm).getAsDate();
+                        }
+                        return tm;
                     }
-                    if (m instanceof WrapperTemplateModel) {
-                        return ((WrapperTemplateModel)m).getWrappedObject();
-                    }
-                    if (m instanceof TemplateScalarModel) {
-                        return ((TemplateScalarModel) m).getAsString();
-                    }
-                    if (m instanceof TemplateNumberModel) {
-                        return ((TemplateNumberModel) m).getAsNumber();
-                    }
-                    if (m instanceof TemplateBooleanModel) {
-                        return Boolean.valueOf(((TemplateBooleanModel) m).getAsBoolean());
-                    }
-                    return m;
                 }
                 catch (TemplateModelException e) {
-                    throw new UndeclaredThrowableException(e);
+                    throw new UndeclaredThrowableException("Failed to unwrapp FTL global variable", e);
                 }
             }
             case REQUEST_SCOPE: {

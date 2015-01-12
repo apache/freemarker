@@ -112,4 +112,5 @@ implements
     {
         return ((Collection)object).size();
     }
+    
 }

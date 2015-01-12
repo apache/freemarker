@@ -85,7 +85,7 @@ public final class Environment extends Configurable {
 
     private static final ThreadLocal threadEnv = new ThreadLocal();
 
-    private static final Logger LOGGER = Logger.getLogger("freemarker.runtime");
+    private static final Logger LOG = Logger.getLogger("freemarker.runtime");
     private static final Logger ATTEMPT_LOGGER = Logger.getLogger("freemarker.runtime.attempt");
 
     private static final Map JAVA_NUMBER_FORMATS = new HashMap();
@@ -241,19 +241,19 @@ public final class Environment extends Configurable {
 
     /**
      * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
-     * executing custom directive. This method currently only works for custom directives (
-     * {@link TemplateDirectiveModel} and {@link TemplateTransformModel}) and macro calls, though later it might change.
-     * This meant to be called from {@link TemplateDirectiveModel}-s to access information about the called of the
-     * directive.
+     * executing custom directive. This method currently only works calls made from templates with the {@code <@...>}
+     * syntax. This should only be called from the {@link TemplateDirectiveModel} that was invoked with {@code <@...>},
+     * otherwise it's return value is not defined by this API (it's usually {@code null}).
      * 
      * @since 2.3.22
      */
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
-        for (int i = instructionStack.size() -1; i >= 0; i--) {
-            TemplateElement te = (TemplateElement) instructionStack.get(i);
-            if (te instanceof UnifiedCall) {
-                return (UnifiedCall) te;
-            }
+        int ln = instructionStack.size();
+        if (ln == 0) return null;
+        TemplateElement te = (TemplateElement) instructionStack.get(ln - 1);
+        if (te instanceof UnifiedCall) return (UnifiedCall) te;
+        if (te instanceof Macro && ln > 1 && instructionStack.get(ln - 2) instanceof UnifiedCall) {
+            return (UnifiedCall) instructionStack.get(ln - 2);
         }
         return null;
     }
@@ -831,29 +831,30 @@ public final class Environment extends Configurable {
         return currentMacroContext;
     }
     
-    private void handleTemplateException(TemplateException te)
+    private void handleTemplateException(TemplateException templateException)
         throws TemplateException
     {
         // Logic to prevent double-handling of the exception in
         // nested visit() calls.
-        if(lastThrowable == te) {
-            throw te;
+        if(lastThrowable == templateException) {
+            throw templateException;
         }
-        lastThrowable = te;
+        lastThrowable = templateException;
 
-        // Log the exception
-        if(LOGGER.isErrorEnabled()) {
-            LOGGER.error("Error executing FreeMarker template", te);
+        // Log the exception, if logTemplateExceptions isn't false. However, even if it's false, if we are inside
+        // an #attempt block, it has to be logged, as it certainly won't bubble up to the caller of FreeMarker.
+        if(LOG.isErrorEnabled() && (isInAttemptBlock() || getLogTemplateExceptions())) {
+            LOG.error("Error executing FreeMarker template", templateException);
         }
 
         // Stop exception is not passed to the handler, but
         // explicitly rethrown.
-        if(te instanceof StopException) {
-            throw te;
+        if(templateException instanceof StopException) {
+            throw templateException;
         }
 
         // Finally, pass the exception to the handler
-        getTemplateExceptionHandler().handleTemplateException(te, this, out);
+        getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
     }
 
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
@@ -1668,7 +1669,7 @@ public final class Environment extends Configurable {
                 if (pw != null) pw.println(); else w.write('\n');
             }
         } catch (IOException e) {
-            LOGGER.error("Failed to print FTL stack trace", e);
+            LOG.error("Failed to print FTL stack trace", e);
         }
     }
     

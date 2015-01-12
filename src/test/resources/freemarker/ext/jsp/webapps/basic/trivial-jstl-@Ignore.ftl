@@ -1,3 +1,5 @@
+<#-- @Ignore: c:forEach fails because of EL context issues -->
+
 <#assign
     c = JspTaglibs["http://java.sun.com/jsp/jstl/core"]
     fn = JspTaglibs["http://java.sun.com/jsp/jstl/functions"]

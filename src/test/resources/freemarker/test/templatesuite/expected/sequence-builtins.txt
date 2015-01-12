@@ -1,5 +1,3 @@
-Size 0
-
 Sorting scalars:
 ----------------
 

@@ -29,7 +29,7 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-jsp-7.6.16.v20140903.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-security-7.6.16.v20140903.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-server-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-server-7.6.16.v20140903-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-servlet-7.6.16.v20140903.jar"/>
+	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-servlet-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-servlet-7.6.16.v20140903-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-util-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-util-7.6.16.v20140903-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-webapp-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-webapp-7.6.16.v20140903-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-xml-7.6.16.v20140903.jar"/>

@@ -1,35 +1,16 @@
-<html>
-<head>
-<title>FreeMarker: Extended List Test</title>
-</head>
-<body>
 
-<p>A simple test follows:</p>
+Size: 5
+Items: @0 aardvark, @1 bear, @2 cat, @3 dog, @4 elephant.
 
-<p>Hello, world!</p>
+Size: 3
+Items: @0 11, @1 22, @2 33.
 
-<p>A list of 8 animals follows:</p>
-<p>
-  aardvark, 
+Size: 3
+Items: @0 11, @1 22, @2 33.
 
-  kiwi, 
+Size: 3
+Items: @0 11, @1 22, @2 33.
 
-  gecko, 
+Size: failed
+Items: @0 11, @1 22, @2 33.
 
-  cat, 
-
-  dog, 
-
-  elephant, 
-
-  squirrel, 
-
-  zebra.
-</p>
-
-<p>The first animal is an aardvark, and the last is a 
-zebra.</p>
-
-<p>The end.</p>
-</body>
-</html>
