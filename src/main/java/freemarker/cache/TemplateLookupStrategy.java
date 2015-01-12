@@ -28,7 +28,8 @@ public interface TemplateLookupStrategy {
      * of the locale, considering {@code "_"} as the parts separator.
      * 
      * <p>
-     * If localized lookup is disabled, it will just delegate to {@link TemplateLoader#findTemplateSource(String)}.
+     * If localized lookup is disabled, it simply will not try to add any locale strings, so it just looks for
+     * {@code "foo.ftl"}.
      * 
      * @since 2.3.22
      */
