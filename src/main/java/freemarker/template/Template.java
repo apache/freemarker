@@ -749,7 +749,7 @@ public class Template extends Configurable {
      * @param line the line
      */
     public List containingElements(int column, int line) {
-        ArrayList elements = new ArrayList();
+        final ArrayList elements = new ArrayList();
         TemplateElement element = rootElement;
 mainloop:
         while (element.contains(column, line)) {
@@ -763,10 +763,7 @@ mainloop:
             }
             break;
         }
-        if (elements == null || elements.isEmpty()) {
-            return null;
-        }
-        return elements;
+        return elements.isEmpty() ? null : elements;
     }
 
     static public class WrongEncodingException extends ParseException {
