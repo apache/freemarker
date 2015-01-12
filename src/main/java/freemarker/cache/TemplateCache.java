@@ -808,6 +808,11 @@ public class TemplateCache
         }
 
         public TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException {
+            // Only one of the possible ways of making a name non-normalized, but is the easiest mistake to do:
+            if (name.startsWith("/")) {
+                throw new IllegalArgumentException("Non-normalized name, starts with \"/\": " + name);
+            }
+            
             return TemplateCache.this.lookupTemplateWithAcquisitionStrategy(name);
         }
         
