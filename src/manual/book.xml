@@ -22496,7 +22496,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>getName()</literal>. These two return the same as
                   far as no localized lookup or acquisition
                   (<literal>*</literal> in the name) or other lookup strategy
-                  is involved. But when there is,
+                  is actively involved. But when there is,
                   <literal>getSourceName()</literal> gives the name of the
                   actually loaded template inside the virtual file system that
                   the <literal>TemplateLoader</literal> defines. On the other
@@ -22504,8 +22504,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   name for which the template was requested (in canonicalized
                   form), as that's the name that's used for pretty much
                   everything (like for relative inclusion resolution). The
-                  location information in template exceptions is now using
-                  <literal>getSourceName()</literal>. </para>
+                  location information in template exceptions now uses
+                  <literal>getSourceName()</literal>, also
+                  <literal>TemplateException</literal> now has a
+                  <literal>getSourceName()</literal> method.</para>
                 </listitem>
               </itemizedlist>
             </listitem>

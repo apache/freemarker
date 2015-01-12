@@ -60,6 +60,7 @@ public class TemplateException extends Exception {
     private String blamedExpressionString;
     private boolean positionsCalculated;
     private String templateName;
+    private String templateSourceName;
     private Integer lineNumber; 
     private Integer columnNumber; 
     private Integer endLineNumber; 
@@ -199,7 +200,8 @@ public class TemplateException extends Exception {
                 // Line number blow 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
                     final Template template = templateObject.getTemplate();
-                    templateName = template != null ? template.getSourceName() : null;
+                    templateName = template != null ? template.getName() : null;
+                    templateSourceName = template != null ? template.getSourceName() : null;
                     lineNumber = new Integer(templateObject.getBeginLine());
                     columnNumber = new Integer(templateObject.getBeginColumn());
                     endLineNumber = new Integer(templateObject.getEndLine());
@@ -464,9 +466,12 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Returns the source name ({@link Template#getSourceName()}) of the template where the error has occurred, or
-     * {@code null} if the information isn't available. This will be the full template name, regardless of how the
-     * template was invoked.
+     * Returns the name ({@link Template#getName()}) of the template where the error has occurred, or {@code null} if
+     * the information isn't available. This shouldn't be used for showing the error position; use
+     * {@link #getTemplateSourceName()} instead.
+     * 
+     * @deprecated Use {@link #getTemplateSourceName()} instead, unless you are really sure that this is what you want.
+     *             This method isn't really deprecated, it's just marked so to warn users about this.
      * 
      * @since 2.3.21
      */
@@ -476,6 +481,21 @@ public class TemplateException extends Exception {
                 calculatePosition();
             }
             return templateName;
+        }
+    }
+
+    /**
+     * Returns the source name ({@link Template#getSourceName()}) of the template where the error has occurred, or
+     * {@code null} if the information isn't available. This is what should be used for showing the error position.
+     * 
+     * @since 2.3.22
+     */
+    public String getTemplateSourceName() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+            }
+            return templateSourceName;
         }
     }
     
