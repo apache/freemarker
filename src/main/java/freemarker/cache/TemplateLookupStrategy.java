@@ -16,7 +16,7 @@ import freemarker.template.Template;
  * Before you write your own lookup strategy, know that:
  * <ul>
  * <li>A template lookup strategy meant to operate solely with template names, not with {@link TemplateLoader}-s
- * directly. Basically, it's mapping between the template names that templates and API-s like
+ * directly. Basically, it's a mapping between the template names that templates and API-s like
  * {@link Configuration#getTemplate(String)} see, and those that the underlying {@link TemplateLoader} sees.
  * <li>A template lookup strategy doesn't influence the template's name ({@link Template#getName()}), which is the
  * normalized form of the template name as it was requested (with {@link Configuration#getTemplate(String)}, etc.). Its
@@ -74,7 +74,7 @@ public interface TemplateLookupStrategy {
                 buf.setLength(prefix.length());
                 String path = buf.append(localeName).append(suffix).toString();
                 TemplateLookupResult lookupResult = ctx.lookupWithAcquisitionStrategy(path);
-                if (lookupResult != null) {
+                if (lookupResult.isPositive()) {
                     return lookupResult;
                 }
                 
@@ -84,7 +84,7 @@ public interface TemplateLookupStrategy {
                 }
                 localeName = localeName.substring(0, lastUnderscore);
             }
-            return null;
+            return ctx.createNegativeLookupResult();
         }
     };
 
@@ -100,7 +100,8 @@ public interface TemplateLookupStrategy {
      *            The most important operation is {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}.
      * 
      * @return Usually the return value of {@link TemplateLookupContext#lookupWithAcquisitionStrategy(String)}, or
-     *         {@code null} if no matching template exists.
+     *         {@code TemplateLookupContext#createNegativeLookupResult()} if no matching template exists. Can't be
+     *         {@code null}.
      */
     TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
 

@@ -256,9 +256,9 @@ public class TemplateLookupStrategyTest {
 
         public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
             String lang = ctx.getTemplateLocale().getLanguage().toLowerCase();
-            TemplateLookupResult ts = ctx.lookupWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
-            if (ts != null) {
-                return ts;
+            TemplateLookupResult lookupResult = ctx.lookupWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
+            if (lookupResult.isPositive()) {
+                return lookupResult;
             }
             
             return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());

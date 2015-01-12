@@ -268,7 +268,7 @@ public class TemplateCache
                 newLookupResult = lookupTemplate(name, locale);
 
                 // Template source was removed
-                if (newLookupResult == null) {
+                if (!newLookupResult.isPositive()) {
                     if(debug) {
                         LOG.debug(debugName + " no source found.");
                     } 
@@ -314,7 +314,7 @@ public class TemplateCache
                 
                 newLookupResult = lookupTemplate(name, locale);
                 
-                if (newLookupResult == null) {
+                if (!newLookupResult.isPositive()) {
                     storeNegativeLookup(tk, cachedTemplate, null);
                     return null;
                 }
@@ -349,7 +349,7 @@ public class TemplateCache
             }
             throw e;
         } finally {
-            if (newLookupResult != null) {
+            if (newLookupResult != null && newLookupResult.isPositive()) {
                 loader.closeTemplateSource(newLookupResult.getTemplateSource());
             }
         }
@@ -598,7 +598,11 @@ public class TemplateCache
     }
 
     private TemplateLookupResult lookupTemplate(String name, Locale locale) throws IOException {
-        return templateLookupStrategy.lookup(new TemplateCacheTemplateLookupContext(name, locale));
+        final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(new TemplateCacheTemplateLookupContext(name, locale));
+        if (lookupResult == null) {
+            throw new NullPointerException("Lookup result shouldn't be null");
+        }
+        return lookupResult;
     }
 
     private TemplateLookupResult lookupTemplateWithAcquisitionStrategy(String path) throws IOException
@@ -652,7 +656,7 @@ public class TemplateCache
             }
             if(l == 0)
             {
-                return null;
+                return TemplateLookupResult.createNegativeResult();
             }
             l = basePath.lastIndexOf(SLASH, l - 2) + 1;
             buf.setLength(l);

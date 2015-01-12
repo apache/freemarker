@@ -24,7 +24,8 @@ public abstract class TemplateLookupContext {
      *            {@code /} or contains . or .. paths steps, or uses backslash ({@code \}) instead of {@code /}. A
      *            normalized name might contains "*" steps.
      * 
-     * @return The template source or {@code null} if the template doesn't exist.
+     * @return The result of the lookup. Not {@code null}; check {@link TemplateLookupResult#isPositive()} to see if the
+     *         lookup has found anything.
      */
     public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException;
 
@@ -46,6 +47,14 @@ public abstract class TemplateLookupContext {
      */
     public Locale getTemplateLocale() {
         return templateLocale;
+    }
+
+    /**
+     * Creates a not-found lookup result, then can be used as the return value of
+     * {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}.
+     */
+    public TemplateLookupResult createNegativeLookupResult() {
+        return TemplateLookupResult.createNegativeResult();
     }
     
 }
