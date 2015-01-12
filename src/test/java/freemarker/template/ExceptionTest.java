@@ -75,7 +75,8 @@ public class ExceptionTest extends TestCase {
             t.process(null, NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertEquals("foo_en.ftl", e.getTemplateName());
+            assertEquals("foo.ftl", e.getTemplateName());
+            assertEquals("foo_en.ftl", e.getTemplateSourceName());
             assertEquals(3, (int) e.getLineNumber());
             assertEquals(6, (int) e.getColumnNumber());
             assertEquals(3, (int) e.getEndLineNumber());

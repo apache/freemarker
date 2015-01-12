@@ -131,9 +131,11 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                 NodeModel nm = (NodeModel) get(i);
                 if (nm instanceof ElementModel) {
                     TemplateSequenceModel tsm = (TemplateSequenceModel) ((ElementModel) nm).get(key);
-                    int size = tsm == null ? 0 : tsm.size();
-                    for (int j=0; j < size; j++) {
-                        result.add(tsm.get(j));
+                    if (tsm != null) {
+                        int size = tsm.size();
+                        for (int j=0; j < size; j++) {
+                            result.add(tsm.get(j));
+                        }
                     }
                 }
             }

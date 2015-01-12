@@ -753,7 +753,7 @@ public class Template extends Configurable {
      * @param line the line
      */
     public TreePath containingElements(int column, int line) {
-        ArrayList elements = new ArrayList();
+        final ArrayList elements = new ArrayList();
         TemplateElement element = rootElement;
 mainloop:
         while (element.contains(column, line)) {
@@ -767,13 +767,14 @@ mainloop:
             }
             break;
         }
-        if (elements == null || elements.isEmpty()) {
+        if (elements.isEmpty()) {
             return null;
         }
         return new TreePath(elements.toArray());
     }
 
     static public class WrongEncodingException extends ParseException {
+        private static final long serialVersionUID = 1L;
 
         public String specifiedEncoding;
 
