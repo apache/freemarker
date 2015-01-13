@@ -22491,21 +22491,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Template-s not have a
-                  <literal>getSourceName()</literal>, in additionally to
-                  <literal>getName()</literal>. These two return the same as
-                  far as no localized lookup or acquisition
+                  <para><literal>Template</literal>-s now have a
+                  <literal>getSourceName()</literal> method, in additionally
+                  to <literal>getName()</literal>. These two return the same
+                  as far as no localized lookup or acquisition
                   (<literal>*</literal> in the name) or other lookup strategy
-                  is actively involved. But when there is,
-                  <literal>getSourceName()</literal> gives the name of the
-                  actually loaded template inside the virtual file system that
-                  the <literal>TemplateLoader</literal> defines. On the other
-                  hand, <literal>getName()</literal> has always returned the
-                  name for which the template was requested (in canonicalized
-                  form), as that's the name that's used for pretty much
-                  everything (like for relative inclusion resolution). The
-                  location information in template exceptions now uses
-                  <literal>getSourceName()</literal>, also
+                  was actively involved. But when it was,
+                  <literal>getSourceName()</literal> gives the name with which
+                  the template was actually loaded from the
+                  <literal>TemplateLoader</literal>, while
+                  <literal>getName()</literal> returns (and had always
+                  returned) the name with which the template was requested (in
+                  canonicalized form). <literal>getName()</literal> is used
+                  for everything (like for relative inclusion resolution),
+                  except for location information in error messages, which now
+                  uses <literal>getSourceName()</literal>. Also,
                   <literal>TemplateException</literal> now has a
                   <literal>getSourceName()</literal> method.</para>
                 </listitem>
