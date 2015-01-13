@@ -75,7 +75,7 @@ public class Template extends Configurable {
     private String encoding, defaultNS;
     private int actualTagSyntax;
     private final String name;
-    private final String sourceName;
+    private String sourceName;
     private final ArrayList lines = new ArrayList();
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
@@ -85,11 +85,10 @@ public class Template extends Configurable {
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(String name, String sourceName, Configuration cfg, boolean overloadSelector)
+    private Template(String name, Configuration cfg)
     {
         super(toNonNull(cfg));
         this.name = name;
-        this.sourceName = sourceName != null ? sourceName : name;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
     }
 
@@ -104,8 +103,7 @@ public class Template extends Configurable {
      * 
      * @param name
      *            The path of the template file relatively to the (virtual) directory that you use to store the
-     *            templates (except when the {@code sourceName} is different, but see that
-     *            {@link #Template(String, String, Reader, Configuration) elsewhere}). Shouldn't start with {@code '/'}.
+     *            templates (except if {@link #setSourceName(String)} is also used). Shouldn't start with {@code '/'}.
      *            Should use {@code '/'}, not {@code '\'}. Check {@link #getName()} to see how the name will be used.
      *            The name should be independent of the actual storage mechanism and physical location as far as
      *            possible. Even when the templates are stored straightforwardly in real files (they often aren't; see
@@ -122,24 +120,9 @@ public class Template extends Configurable {
      * 
      */
     public Template(String name, Reader reader, Configuration cfg) throws IOException {
-        this(name, null, reader, cfg);
+        this(name, reader, cfg, null);
     }
 
-    /**
-     * A seldom used constructor that adds {@code templateSourceName} to
-     * {@link #Template(String, Reader, Configuration)}. This is mostly for internal usage, though it's a published API,
-     * in case someone writes a custom caching/storage solution.
-     * 
-     * @param sourceName
-     *            See {@link #getSourceName()}. For convenience, this parameter can be {@code null}, which just means
-     *            that {@link #getSourceName()} will be the same as {@link #getName()}.
-     * 
-     * @since 2.3.22
-     */
-    public Template(String name, String sourceName, Reader reader, Configuration cfg) throws IOException {
-        this(name, sourceName, reader, cfg, null);
-    }
-    
     /**
      * Convenience constructor for {@link #Template(String, Reader, Configuration)
      * Template(name, new StringReader(reader), cfg)}.
@@ -162,21 +145,7 @@ public class Template extends Configurable {
      * @deprecated Use {@link #Template(String, Reader, Configuration)} instead.
      */
     public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(name, null, reader, cfg, encoding);
-    }
-    
-    /**
-     * Same as {@link #Template(String, Reader, Configuration, String)}, but adds the {@code sourceName} parameter.
-     * 
-     * @param sourceName See the similar parameter of {@link #Template(String, String, Reader, Configuration)}. 
-     * 
-     * @deprecated Use {@link #Template(String, String, Reader, Configuration)} instead.
-     * 
-     * @since 2.3.22
-     */
-    public Template(String name, String sourceName, Reader reader, Configuration cfg, String encoding)
-            throws IOException {
-        this(name, sourceName, cfg, true);
+        this(name, cfg);
         
         this.encoding = encoding;
         try {
@@ -234,7 +203,7 @@ public class Template extends Configurable {
      */
     // [2.4] remove this
     Template(String name, TemplateElement root, Configuration cfg) {
-        this(name, null, cfg, true);
+        this(name, cfg);
         this.rootElement = root;
         DebuggerService.registerTemplate(this);
     }
@@ -249,7 +218,7 @@ public class Template extends Configurable {
      * @param config the configuration to which this template belongs
      */
     static public Template getPlainTextTemplate(String name, String content, Configuration config) {
-        Template template = new Template(name, null, config, true);
+        Template template = new Template(name, config);
         template.rootElement = new TextBlock(content);
         template.actualTagSyntax = config.getTagSyntax();
         DebuggerService.registerTemplate(template);
@@ -473,9 +442,21 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     public String getSourceName() {
-        return sourceName;
+        return sourceName != null ? sourceName : getName();
     }
     
+    /**
+     * Setter pair of {@link #getSourceName()}.
+     * 
+     * @param sourceName
+     *            The source name of the template, or {@code null} it should be the same as {@link #getName()}.
+     *            
+     * @since 2.3.22
+     */
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
     /**
      * Returns the Configuration object associated with this template.
      */
@@ -508,6 +489,8 @@ public class Template extends Configurable {
     public String getEncoding() {
         return this.encoding;
     }
+    
+    
 
     /**
      * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
@@ -751,8 +734,7 @@ public class Template extends Configurable {
     public List containingElements(int column, int line) {
         final ArrayList elements = new ArrayList();
         TemplateElement element = rootElement;
-mainloop:
-        while (element.contains(column, line)) {
+        mainloop: while (element.contains(column, line)) {
             elements.add(element);
             for (Enumeration enumeration = element.children(); enumeration.hasMoreElements();) {
                 TemplateElement elem = (TemplateElement) enumeration.nextElement();
