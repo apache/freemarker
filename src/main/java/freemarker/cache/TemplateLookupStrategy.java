@@ -33,6 +33,8 @@ import freemarker.template.Template;
  * <p>
  * See {@link #DEFAULT} in the source code as an example implementation.
  * 
+ * @see Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)
+ * 
  * @since 2.3.22
  */
 public interface TemplateLookupStrategy {

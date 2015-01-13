@@ -2007,34 +2007,35 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Gets a template for inclusion; used with {@link #include(Template includedTemplate)}.
-     * The advantage over simply using <code>config.getTemplate(...)</code> is that it chooses
-     * the default encoding exactly as the <code>include</code> directive does, although that
-     * encoding selection mechanism is a historical baggage and considered to be harmful.
+     * Gets a template for inclusion; used for implementing {@link #include(Template includedTemplate)}. The advantage
+     * over simply using <code>config.getTemplate(...)</code> is that it chooses the default encoding exactly as the
+     * <code>include</code> directive does, although that encoding selection mechanism is a historical baggage and
+     * considered to be harmful.
      *
-     * @param name the name of the template, relatively to the template root directory
-     *          (not the to the directory of the currently executing template file).
-     *          (Note that you can use {@link freemarker.cache.TemplateCache#getFullTemplatePath}
-     *          to convert paths to template root relative paths.)
-     *          For more details see the identical parameter of
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * @param name
+     *            the name of the template, relatively to the template root directory (not the to the directory of the
+     *            currently executing template file). (Note that you can use
+     *            {@link freemarker.cache.TemplateCache#getFullTemplatePath} to convert paths to template root relative
+     *            paths.) For more details see the identical parameter of
+     *            {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * 
-     * @param encoding the charset of the obtained template. If {@code null},
-     *          the encoding of the top template that is currently being processed in this
-     *          {@link Environment} is used, which can lead to odd situations, so using
-     *          {@code null} is not recommended. In most applications, the value of
-     *          {@link Configuration#getEncoding(Locale)}
-     *          (or {@link Configuration#getDefaultEncoding()}) should be used here.
+     * @param encoding
+     *            the charset of the obtained template. If {@code null}, the encoding of the top template that is
+     *            currently being processed in this {@link Environment} is used, which can lead to odd situations, so
+     *            using {@code null} is not recommended. In most applications, the value of
+     *            {@link Configuration#getEncoding(Locale)} (or {@link Configuration#getDefaultEncoding()}) should be
+     *            used here.
      * 
-     * @param parse See identical parameter of
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     *          
-     * @param ignoreMissing See identical parameter of
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     *          
+     * @param parse
+     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * 
+     * @param ignoreMissing
+     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * 
      * @return Same as {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     * @throws IOException Same as exceptions thrown by
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * @throws IOException
+     *             Same as exceptions thrown by
+     *             {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * 
      * @since 2.3.21
      */

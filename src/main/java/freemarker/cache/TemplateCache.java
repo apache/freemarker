@@ -202,25 +202,44 @@ public class TemplateCache
      * <p>For the meaning of the parameters see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
      *
      * @return the loaded template, or {@code null} if the template was not found.
+     * 
+     * @since 2.3.22
+     */
+    public Template getTemplate(String name, Locale locale, Object customLookupCondition,
+            String encoding, boolean parseAsFTL)
+    throws IOException
+    {
+        NullArgumentException.check("name", name);
+        NullArgumentException.check("locale", locale);
+        NullArgumentException.check("encoding", encoding);
+        
+        name = normalizeName(name);
+        if(name == null) {
+            return null;
+        }
+        
+        return templateLoader != null
+                ? getTemplate(templateLoader, name, locale, customLookupCondition, encoding, parseAsFTL)
+                : null;
+    }    
+
+    /**
+     * Same as {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
+     * {@code customLookupCondition}.
      */
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
-    throws IOException
-    {
-        if (name == null) throw new NullArgumentException("name");
-        if (locale == null) throw new NullArgumentException("locale");
-        if (encoding == null) throw new NullArgumentException("encoding");
-        name = normalizeName(name);
-        if(name == null) return null;
-        
-        return templateLoader != null ? getTemplate(templateLoader, name, locale, encoding, parseAsFTL) : null;
-    }    
+    throws IOException {
+        return getTemplate(name, locale, null, encoding, parseAsFTL);
+    }
     
-    private Template getTemplate(TemplateLoader loader, String name, Locale locale, String encoding, boolean parse)
+    private Template getTemplate(
+            final TemplateLoader loader, final String name, final Locale locale, final Object customLookupCondition,
+            final String encoding, final boolean parseAsFTL)
     throws IOException
     {
-        boolean debug = LOG.isDebugEnabled();
-        final String debugName = debug ? buildDebugName(name, locale, encoding, parse) : null;
-        TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
+        final boolean debug = LOG.isDebugEnabled();
+        final String debugName = debug ? buildDebugName(name, locale, encoding, parseAsFTL) : null;
+        final TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parseAsFTL);
         
         CachedTemplate cachedTemplate;
         if(isStorageConcurrent) {
@@ -265,7 +284,7 @@ public class TemplateCache
                 cachedTemplate.lastChecked = now;
 
                 // Find the template source
-                newLookupResult = lookupTemplate(name, locale);
+                newLookupResult = lookupTemplate(name, locale, customLookupCondition);
 
                 // Template source was removed
                 if (!newLookupResult.isPositive()) {
@@ -312,7 +331,7 @@ public class TemplateCache
                 cachedTemplate = new CachedTemplate();
                 cachedTemplate.lastChecked = now;
                 
-                newLookupResult = lookupTemplate(name, locale);
+                newLookupResult = lookupTemplate(name, locale, customLookupCondition);
                 
                 if (!newLookupResult.isPositive()) {
                     storeNegativeLookup(tk, cachedTemplate, null);
@@ -331,7 +350,7 @@ public class TemplateCache
             }
             
             Template t = loadTemplate(
-                    loader, name, newLookupResult.getTemplateSourceName(), locale, encoding, parse, source);
+                    loader, name, newLookupResult.getTemplateSourceName(), locale, encoding, parseAsFTL, source);
             cachedTemplate.templateOrException = t;
             cachedTemplate.lastModified = lastModified == Long.MIN_VALUE
                     ? loader.getLastModified(source)
@@ -521,18 +540,22 @@ public class TemplateCache
             }
         }
     }
+
+    public void removeTemplate(
+            String name, Locale locale, String encoding, boolean parse) throws IOException {
+        removeTemplate(name, locale, null, encoding, parse);
+    }
     
     /**
-     * Removes an entry from the cache, hence forcing the re-loading of it when
-     * it's next time requested. It doesn't delete the template file itself.
-     * This is to give the application finer control over cache updating than
+     * Removes an entry from the cache, hence forcing the re-loading of it when it's next time requested. (It doesn't
+     * delete the template file itself.) This is to give the application finer control over cache updating than
      * {@link #setDelay(long)} alone does.
      * 
      * For the meaning of the parameters, see
-     * {@link #getTemplate(String, Locale, String, boolean)}.
+     * {@link #getTemplate(TemplateLoader, String, Locale, Object, String, boolean)}.
      */
     public void removeTemplate(
-            String name, Locale locale, String encoding, boolean parse)
+            String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
     throws IOException {
         if (name == null) {
             throw new IllegalArgumentException("Argument \"name\" can't be null");
@@ -549,7 +572,7 @@ public class TemplateCache
             String debugName = debug
                     ? buildDebugName(name, locale, encoding, parse)
                     : null;
-            TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
+            TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parse);
             
             if(isStorageConcurrent) {
                 storage.remove(tk);
@@ -598,8 +621,10 @@ public class TemplateCache
         }
     }
 
-    private TemplateLookupResult lookupTemplate(String name, Locale locale) throws IOException {
-        final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(new TemplateCacheTemplateLookupContext(name, locale));
+    private TemplateLookupResult lookupTemplate(String name, Locale locale, Object customLookupCondition)
+            throws IOException {
+        final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(
+                new TemplateCacheTemplateLookupContext(name, locale, customLookupCondition));
         if (lookupResult == null) {
             throw new NullPointerException("Lookup result shouldn't be null");
         }
@@ -744,13 +769,15 @@ public class TemplateCache
     {
         private final String name;
         private final Locale locale;
+        private final Object customLookupCondition;
         private final String encoding;
         private final boolean parse;
 
-        TemplateKey(String name, Locale locale, String encoding, boolean parse)
+        TemplateKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
         {
             this.name = name;
             this.locale = locale;
+            this.customLookupCondition = customLookupCondition;
             this.encoding = encoding;
             this.parse = parse;
         }
@@ -764,9 +791,16 @@ public class TemplateCache
                     parse == tk.parse &&
                     name.equals(tk.name) &&
                     locale.equals(tk.locale) &&
+                    nullSafeEquals(customLookupCondition, tk.customLookupCondition) &&
                     encoding.equals(tk.encoding);
             }
             return false;
+        }
+
+        private boolean nullSafeEquals(Object o1, Object o2) {
+            return o1 != null
+                ? (o2 != null ? o1.equals(o2) : false)
+                : o2 == null;
         }
 
         public int hashCode()
@@ -774,7 +808,8 @@ public class TemplateCache
             return
                 name.hashCode() ^
                 locale.hashCode() ^
-                encoding.hashCode() ^
+                locale.hashCode() ^
+                (customLookupCondition != null ? customLookupCondition.hashCode() : 0) ^
                 Boolean.valueOf(!parse).hashCode();
         }
     }
@@ -808,8 +843,8 @@ public class TemplateCache
     
     private class TemplateCacheTemplateLookupContext extends TemplateLookupContext {
 
-        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale) {
-            super(templateName, localizedLookup ? templateLocale : null);
+        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
+            super(templateName, localizedLookup ? templateLocale : null, customLookupCondition);
         }
 
         public TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException {

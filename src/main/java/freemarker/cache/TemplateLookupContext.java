@@ -15,6 +15,7 @@ public abstract class TemplateLookupContext {
     
     private final String templateName;
     private final Locale templateLocale;
+    private final Object customLookupCondition;
 
     /**
      * Finds the template source based on its <em>normalized</em> name; handles {@code *} steps (so called acquisition),
@@ -31,9 +32,10 @@ public abstract class TemplateLookupContext {
     public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException;
 
     /** Default visibility to prevent extending the class from outside this package. */
-    TemplateLookupContext(String templateName, Locale templateLocale) {
+    TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
         this.templateName = templateName;
         this.templateLocale = templateLocale;
+        this.customLookupCondition = customLookupCondition;
     }
 
     /**
@@ -49,6 +51,17 @@ public abstract class TemplateLookupContext {
      */
     public Locale getTemplateLocale() {
         return templateLocale;
+    }
+
+    /**
+     * Return the value of the {@code customLookupCondition} parameter of
+     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean, boolean)}. The interpretation of this
+     * value is up to the custom {@link TemplateLookupStrategy}. Usually, it's used similarly to as the default lookup
+     * strategy uses {@link #getTemplateLocale()}, that is, to look for a template variation that satisfies the
+     * condition, and then maybe fall back to more generic template if that's missing.
+     */
+    public Object getCustomLookupCondition() {
+        return customLookupCondition;
     }
 
     /**
