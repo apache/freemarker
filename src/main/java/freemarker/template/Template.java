@@ -769,13 +769,51 @@ public class Template extends Configurable {
         return elements.isEmpty() ? null : elements;
     }
 
+    /**
+     * Thrown by the {@link Template} constructors that specify a non-{@code null} encoding whoch doesn't match the
+     * encoding specified in the {@code #ftl} header of the template.
+     */
     static public class WrongEncodingException extends ParseException {
         private static final long serialVersionUID = 1L;
 
+        /** @deprecated Use {@link #getTemplateSpecifiedEncoding()} instead. */
         public String specifiedEncoding;
+        
+        private final String constructorSpecifiedEncoding;
 
-        public WrongEncodingException(String specifiedEncoding) {
-            this.specifiedEncoding = specifiedEncoding;
+        /**
+         * @deprecated Use {@link #WrongEncodingException(String, String)}.
+         */
+        public WrongEncodingException(String templateSpecifiedEncoding) {
+            this(templateSpecifiedEncoding, null);
+        }
+
+        /**
+         * @since 2.3.22
+         */
+        public WrongEncodingException(String templateSpecifiedEncoding, String constructorSpecifiedEncoding) {
+            this.specifiedEncoding = templateSpecifiedEncoding;
+            this.constructorSpecifiedEncoding = constructorSpecifiedEncoding;
+        }
+        
+        public String getMessage() {
+            return "Encoding specified inside the template (" + specifiedEncoding
+                    + ") doesn't match the encoding specified by the Template constructor"
+                    + (constructorSpecifiedEncoding != null ? " (" + constructorSpecifiedEncoding + ")." : ".");
+        }
+
+        /**
+         * @since 2.3.22
+         */
+        public String getTemplateSpecifiedEncoding() {
+            return specifiedEncoding;
+        }
+
+        /**
+         * @since 2.3.22
+         */
+        public String getConstructorSpecifiedEncoding() {
+            return constructorSpecifiedEncoding;
         }
 
     }

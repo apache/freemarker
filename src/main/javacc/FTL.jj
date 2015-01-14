@@ -2992,7 +2992,7 @@ void HeaderElement() :
                             }
                             String encoding = template.getEncoding();
                             if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
-                                throw new Template.WrongEncodingException(vs);
+                                throw new Template.WrongEncodingException(vs, encoding);
                             }
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE")) {
                             this.stripWhitespace = getBoolean(exp);
