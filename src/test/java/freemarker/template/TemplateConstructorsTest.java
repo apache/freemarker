@@ -48,6 +48,20 @@ public class TemplateConstructorsTest {
             assertEquals(READER_CONTENT, t.toString());
             assertEquals("UTF-16LE", t.getEncoding());
         }
+        {
+            Template t = new Template(name, sourceName, createReader(), cfg);
+            assertEquals(name, t.getName());
+            assertEquals(sourceName, t.getSourceName());
+            assertEquals(READER_CONTENT, t.toString());
+            assertNull(t.getEncoding());
+        }
+        {
+            Template t = new Template(name, sourceName, createReader(), cfg, encoding);
+            assertEquals(name, t.getName());
+            assertEquals(sourceName, t.getSourceName());
+            assertEquals(READER_CONTENT, t.toString());
+            assertEquals("UTF-16LE", t.getEncoding());
+        }
     }
     
     private final Reader createReader() {

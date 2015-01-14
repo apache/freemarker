@@ -435,15 +435,14 @@ public class TemplateCache
             if(parse)
             {
                 try {
-                    template = new Template(name, reader, config, encoding);
+                    template = new Template(name, sourceName, reader, config, encoding);
                 }
                 catch (Template.WrongEncodingException wee) {
                     encoding = wee.specifiedEncoding;
                     reader.close();
                     reader = loader.getReader(source, encoding);
-                    template = new Template(name, reader, config, encoding);
+                    template = new Template(name, sourceName, reader, config, encoding);
                 }
-                template.setSourceName(sourceName);
                 template.setLocale(locale);
             }
             else
