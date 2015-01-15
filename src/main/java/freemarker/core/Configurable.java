@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import freemarker.cache.TemplateLoader;
-import freemarker.cache.TemplateLookupStrategy;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
@@ -1191,8 +1190,8 @@ public class Configurable
      *       
      *   <li><p>{@code "template_lookup_strategy"}:
      *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.
-     *       <br>String value: {@code "default"} (case insensitive) for {@link TemplateLookupStrategy#DEFAULT}, or else
-     *       interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
+     *       <a href="#fm_obe">object builder expression</a>.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was

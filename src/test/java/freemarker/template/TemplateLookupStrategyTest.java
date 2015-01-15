@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -24,13 +25,13 @@ public class TemplateLookupStrategyTest {
     @Test
     public void testSetSetting() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        assertSame(Configuration.DEFAULT_LOOKUP_STRATEGY, cfg.getTemplateLookupStrategy());
 
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, MyTemplateLookupStrategy.class.getName() + "()");
         assertTrue(cfg.getTemplateLookupStrategy() instanceof MyTemplateLookupStrategy);
         
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, "dEfault");
-        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        assertSame(Configuration.DEFAULT_LOOKUP_STRATEGY, cfg.getTemplateLookupStrategy());
     }
     
     @Test
@@ -236,6 +237,23 @@ public class TemplateLookupStrategyTest {
         }
     }
     
+    @Test
+    @Ignore // Feature unfinished, #include would fail
+    public void testCustomLookupCondition() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        MockTemplateLoader tl = new MockTemplateLoader();
+        tl.putTemplate("@foo.com/t.ftl", "t at foo.com <#include 'i.ftl'>");
+        tl.putTemplate("@bar.com/t.ftl", "t at bar.com <#include 'i.ftl'>");
+        tl.putTemplate("@default/t.ftl", "t at default <#include 'i.ftl'>");
+        tl.putTemplate("@foo.com/i.ftl", "i at foo.com");
+        tl.putTemplate("@baaz.com/i.ftl", "i at baaz.com");
+        tl.putTemplate("@default/i.ftl", "i at default");
+        tl.putTemplate("sub/i.ftl", "");
+        tl.putTemplate("x/sub/i.ftl", "");
+        cfg.setTemplateLoader(tl);
+    }
+    
     private static class MockTemplateLoader extends StringTemplateLoader {
         
         private final List<String> templatesTried = new ArrayList<String>();
@@ -262,6 +280,35 @@ public class TemplateLookupStrategyTest {
             }
             
             return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
+        }
+        
+    }
+    
+    public static class DomainTemplateLookupStrategy implements TemplateLookupStrategy {
+        
+        public static final DomainTemplateLookupStrategy INSTANCE = new DomainTemplateLookupStrategy();
+
+        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+            String domain = (String) ctx.getCustomLookupCondition();
+            if (domain == null) {
+                throw new NullPointerException("The domain wasn't specified");
+            }
+            
+            final String templateName = ctx.getTemplateName();
+            
+            // Disallow addressing the domain roots directly:
+            if (templateName.startsWith("@")) {
+                return ctx.createNegativeLookupResult();
+            }
+            
+            TemplateLookupResult lookupResult = ctx.lookupWithLocalizedThenAcquisitionStrategy(
+                    "@" + domain + "/" + templateName,
+                    ctx.getTemplateLocale());
+            if (lookupResult.isPositive()) {
+                return lookupResult;
+            }
+            
+            return ctx.lookupWithAcquisitionStrategy("@default/" + templateName);
         }
         
     }

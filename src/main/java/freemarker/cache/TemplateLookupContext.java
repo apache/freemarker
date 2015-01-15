@@ -21,7 +21,7 @@ public abstract class TemplateLookupContext {
      * Finds the template source based on its <em>normalized</em> name; handles {@code *} steps (so called acquisition),
      * otherwise it just calls {@link TemplateLoader#findTemplateSource(String)}.
      * 
-     * @param name
+     * @param templateName
      *            Must be a normalized name, like {@code "foo/bar/baaz.ftl"}. A name is not normalized when, among
      *            others, it starts with {@code /}, or contains {@code .} or {@code ..} paths steps, or it uses
      *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" steps.
@@ -29,8 +29,19 @@ public abstract class TemplateLookupContext {
      * @return The result of the lookup. Not {@code null}; check {@link TemplateLookupResult#isPositive()} to see if the
      *         lookup has found anything.
      */
-    public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException;
+    public abstract TemplateLookupResult lookupWithAcquisitionStrategy(String templateName) throws IOException;
 
+    /**
+     * Finds the template source based on its <em>normalized</em> name; tries localized variations going from most
+     * specific to less specific, and for each variation it delegates to {@link #lookupWithAcquisitionStrategy(String)}.
+     * If {@code templateLocale} is {@code null} (typically, because {@link Configuration#getLocalizedLookup()} is
+     * {@code false})), then it's the same as calling {@link #lookupWithAcquisitionStrategy(String)} directly. This is
+     * the default strategy of FreeMarker 2.3, so for more information, see the description of the default value at
+     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)}.
+     */
+    public abstract TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(String templateName,
+            Locale templateLocale) throws IOException;
+    
     /** Default visibility to prevent extending the class from outside this package. */
     TemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
         this.templateName = templateName;

@@ -58,6 +58,7 @@ public class TemplateCache
     private static final String PARENT_DIR_PATH_PREFIX = "../";
     private static final String PARENT_DIR_PATH = "/../";
     private static final char SLASH = '/';
+    private static final String LOCALE_PART_SEPARATOR = "_";
     private static final Logger LOG = Logger.getLogger("freemarker.cache");
 
     /** Maybe {@code null}. */
@@ -119,22 +120,24 @@ public class TemplateCache
 
     /**
      * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
-     * {@link SoftCacheStorage} and {@link TemplateLookupStrategy#DEFAULT} parameters.
+     * {@link SoftCacheStorage} and the default {@link TemplateLookupStrategy} as described by
+     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)}.
      * 
      * @since 2.3.21
      */
-    public TemplateCache(TemplateLoader defaultTemplateLoader, Configuration config) {
-        this(defaultTemplateLoader, new SoftCacheStorage(), config);
+    public TemplateCache(TemplateLoader templateLoader, Configuration config) {
+        this(templateLoader, new SoftCacheStorage(), config);
     }
     
     /**
-     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
-     * {@link TemplateLookupStrategy#DEFAULT} parameter.
+     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with the
+     * default {@link TemplateLookupStrategy} as described by
+     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)}.
      * 
      * @since 2.3.21
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
-        this(templateLoader, cacheStorage, TemplateLookupStrategy.DEFAULT, config);
+        this(templateLoader, cacheStorage, _TemplateAPI.DEFAULT_LOOKUP_STRATEGY, config);
     }
     
     /**
@@ -853,6 +856,36 @@ public class TemplateCache
             }
             
             return TemplateCache.this.lookupTemplateWithAcquisitionStrategy(name);
+        }
+
+        public TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(final String templateName,
+                final Locale templateLocale) throws IOException {
+            
+                if (templateLocale == null) {
+                    return lookupWithAcquisitionStrategy(templateName);
+                }
+                
+                int lastDot = templateName.lastIndexOf('.');
+                String prefix = lastDot == -1 ? templateName : templateName.substring(0, lastDot);
+                String suffix = lastDot == -1 ? "" : templateName.substring(lastDot);
+                String localeName = LOCALE_PART_SEPARATOR + templateLocale.toString();
+                StringBuffer buf = new StringBuffer(templateName.length() + localeName.length());
+                buf.append(prefix);
+                tryLocaleNameVariations: while (true) {
+                    buf.setLength(prefix.length());
+                    String path = buf.append(localeName).append(suffix).toString();
+                    TemplateLookupResult lookupResult = lookupWithAcquisitionStrategy(path);
+                    if (lookupResult.isPositive()) {
+                        return lookupResult;
+                    }
+                    
+                    int lastUnderscore = localeName.lastIndexOf('_');
+                    if (lastUnderscore == -1) {
+                        break tryLocaleNameVariations;
+                    }
+                    localeName = localeName.substring(0, lastUnderscore);
+                }
+                return createNegativeLookupResult();
         }
         
     }

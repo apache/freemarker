@@ -218,10 +218,10 @@ public class ConfigurationTest extends TestCase {
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        assertSame(Configuration.DEFAULT_LOOKUP_STRATEGY, cfg.getTemplateLookupStrategy());
         
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        assertSame(Configuration.DEFAULT_LOOKUP_STRATEGY, cfg.getTemplateLookupStrategy());
         
         CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
@@ -229,7 +229,7 @@ public class ConfigurationTest extends TestCase {
         cfg.getTemplate("toCache1.ftl");
         assertEquals(1, cache.getSize());
         
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        cfg.setTemplateLookupStrategy(Configuration.DEFAULT_LOOKUP_STRATEGY);
         assertEquals(1, cache.getSize());
         
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
@@ -246,7 +246,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateLookupStrategy(myStrategy);
         assertEquals(1, cache.getSize());
         
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        cfg.setTemplateLookupStrategy(Configuration.DEFAULT_LOOKUP_STRATEGY);
         assertEquals(0, cache.getSize());
     }
     
