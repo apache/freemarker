@@ -22456,7 +22456,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Added new <literal>Configuration</literal> setting,
                   <literal>template_lookup_strategy</literal>
-                  (<literal>Configuration.setTemplateLookupStrategy(templateLookupStrategy)</literal>).
+                  (<literal>Configuration.setTemplateLookupStrategy(TemplateLookupStrategy)</literal>).
                   This allows customizing what
                   <literal>TemplateLoader</literal>-level names will be tried
                   when a template is requested. With this you can define a
@@ -22464,6 +22464,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (which looks like: <literal>foo_de_LU_MAC.ftl,
                   foo_de_LU.ftl, foo_de.ftl,</literal><literal>
                   foo.ftl</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new
+                  <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>
+                  parameter, <literal>Object customLookupCondition</literal>.
+                  This parameter can be used by custom a
+                  <literal>TemplateLookupStrategy</literal> to deduce the
+                  actual template name(s) from the requested name (similarly
+                  to as the default lookup strategy does that based on the
+                  locale). For example, on a multi-domain Web site, one may
+                  want to define some templates that are specialized to a
+                  domain, and thus use the domain name as the custom lookup
+                  condition. Then, when <literal>foo.ftl</literal> is
+                  requested, a custom
+                  <literal>TemplateLookupStrategy</literal> could first look
+                  for <literal>@somedomain.com/foo.ftl</literal>, and then for
+                  <literal>@default/foo.ftl</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -22485,9 +22503,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateNotFoundException</literal>, this change is
                   backward compatible. The main goal was to counter the common
                   misunderstanding that template paths are real file paths.
-                  Also, <literal>TemplateNotFoundException</literal> have
-                  <literal>getTemplateName()</literal> method that gives you
-                  the name of the missing template.</para>
+                  However, the new exception also has the benefit that it can
+                  give additional FreeMarker-specific information about the
+                  error, like right now it has
+                  <literal>getTemplateName()</literal> and
+                  <literal>getCustomLookupCondition()</literal>
+                  methods.</para>
                 </listitem>
 
                 <listitem>

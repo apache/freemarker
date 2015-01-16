@@ -12,10 +12,12 @@ import java.io.FileNotFoundException;
 public final class TemplateNotFoundException extends FileNotFoundException {
     
     private final String templateName;
+    private final Object customLookupCondition;
 
-    public TemplateNotFoundException(String templateName, String message) {
+    public TemplateNotFoundException(String templateName, Object customLookupCondition, String message) {
         super(message);
         this.templateName = templateName;
+        this.customLookupCondition = customLookupCondition;
     }
 
     /**
@@ -23,6 +25,15 @@ public final class TemplateNotFoundException extends FileNotFoundException {
      */
     public String getTemplateName() {
         return templateName;
+    }
+
+    /**
+     * The custom lookup condition with which the template was requested, or {@code null} if there's no such condition.
+     * See the {@code customLookupCondition} parameter of
+     * {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean, boolean)}.
+     */
+    public Object getCustomLookupCondition() {
+        return customLookupCondition;
     }
 
 }

@@ -1147,9 +1147,10 @@ public class Configuration extends Configurable implements Cloneable {
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
-     *            Can be {@code null} (though this also depends on the custom {@link TemplateLookupStrategy}). This
-     *            object will be used as part of a cache key, so it's expected to have a proper
-     *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. The expected type is up to the
+     *            Can be {@code null} (though the custom {@link TemplateLookupStrategy} might doesn't support that).
+     *            This object will be used as part of a cache key, so it must to have a proper
+     *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. It also should have reasonable
+     *            {@link Object#toString()}, as it's possibly quoted in error messages. The expected type is up to the
      *            custom {@link TemplateLookupStrategy}. See also:
      *            {@link TemplateLookupContext#getCustomLookupCondition()}.
      *
@@ -1193,7 +1194,10 @@ public class Configuration extends Configurable implements Cloneable {
                 msg = "Don't know where to load template " + StringUtil.jQuote(name)
                       + " from because the \"template_loader\" FreeMarker setting wasn't set.";
             } else {
-                msg = "Template " + StringUtil.jQuote(name) + " not found. "
+                msg = "Template " + StringUtil.jQuote(name) + " not found"
+                        + (customLookupCondition != null ? " (with custom lookup condition "
+                        + StringUtil.jQuote(customLookupCondition) + ")" : "")
+                        + ". "
                         + "The quoted name was interpreted by this template loader: ";
                 String tlDesc;
                 try {
@@ -1208,7 +1212,7 @@ public class Configuration extends Configurable implements Cloneable {
                             + "default value, which is most certainly not intended and the cause of this problem."; 
                 }
             }
-            throw new TemplateNotFoundException(name, msg);
+            throw new TemplateNotFoundException(name, customLookupCondition, msg);
         }
         return result;
     }

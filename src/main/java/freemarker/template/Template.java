@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
@@ -73,6 +74,7 @@ public class Template extends Configurable {
     private List imports = new Vector();
     private TemplateElement rootElement;
     private String encoding, defaultNS;
+    private Object customLookupCondition;
     private int actualTagSyntax;
     private final String name;
     private final String sourceName;
@@ -511,7 +513,28 @@ public class Template extends Configurable {
         return this.encoding;
     }
     
-    
+    /**
+     * Gets the custom lookup condition with which this template was found. See the {@code customLookupCondition}
+     * parameter of {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean, boolean)} for
+     * more explanation.
+     * 
+     * @since 2.3.22
+     */
+    public Object getCustomLookupCondition() {
+        return customLookupCondition;
+    }
+
+    /**
+     * Mostly only used internally; setter pair of {@link #getCustomLookupCondition()}. This meant to be called directly
+     * after instantiating the template with its constructor, after a successfull lookup that used this condition. So
+     * this should only be called from code that deals with creating new {@code Template} objects, like from
+     * {@link TemplateCache}.
+     * 
+     * @since 2.3.22
+     */
+    public void setCustomLookupCondition(Object customLookupCondition) {
+        this.customLookupCondition = customLookupCondition;
+    }
 
     /**
      * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's

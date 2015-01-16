@@ -236,7 +236,7 @@ public class TemplateCache
     }
     
     private Template getTemplate(
-            final TemplateLoader loader, final String name, final Locale locale, final Object customLookupCondition,
+            final TemplateLoader templateLoader, final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)
     throws IOException
     {
@@ -301,7 +301,7 @@ public class TemplateCache
                 // If the source didn't change and its last modified date
                 // also didn't change, return the cached version.
                 final Object newLookupResultSource = newLookupResult.getTemplateSource();
-                lastModified = loader.getLastModified(newLookupResultSource);
+                lastModified = templateLoader.getLastModified(newLookupResultSource);
                 boolean lastModifiedNotChanged = lastModified == cachedTemplate.lastModified;
                 boolean sourceEquals = newLookupResultSource.equals(cachedTemplate.source);
                 if (lastModifiedNotChanged && sourceEquals) {
@@ -352,14 +352,16 @@ public class TemplateCache
                 LOG.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(source));
             }
             
-            Template t = loadTemplate(
-                    loader, name, newLookupResult.getTemplateSourceName(), locale, encoding, parseAsFTL, source);
-            cachedTemplate.templateOrException = t;
+            Template template = loadTemplate(
+                    templateLoader, source,
+                    name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
+                    encoding, parseAsFTL);
+            cachedTemplate.templateOrException = template;
             cachedTemplate.lastModified = lastModified == Long.MIN_VALUE
-                    ? loader.getLastModified(source)
+                    ? templateLoader.getLastModified(source)
                     : lastModified;
             storeCached(tk, cachedTemplate);
-            return t;
+            return template;
         } catch(RuntimeException e) {
             if (cachedTemplate != null) {
                 storeNegativeLookup(tk, cachedTemplate, e);
@@ -372,7 +374,7 @@ public class TemplateCache
             throw e;
         } finally {
             if (newLookupResult != null && newLookupResult.isPositive()) {
-                loader.closeTemplateSource(newLookupResult.getTemplateSource());
+                templateLoader.closeTemplateSource(newLookupResult.getTemplateSource());
             }
         }
     }
@@ -427,54 +429,61 @@ public class TemplateCache
         }
     }
 
-    private Template loadTemplate(TemplateLoader loader, String name, String sourceName, Locale locale, String encoding,
-                                   boolean parse, Object source)
-    throws IOException
-    {
+    private Template loadTemplate(
+            final TemplateLoader templateLoader, final Object source,
+            final String name, final String sourceName, final Locale locale, final Object customLookupCondition,
+            final String initialEncoding, final boolean parseAsFTL) throws IOException {
         Template template;
-        Reader reader = loader.getReader(source, encoding);
-        try
+        String actualEncoding;
         {
-            if(parse)
-            {
+            if (parseAsFTL) {
                 try {
-                    template = new Template(name, sourceName, reader, config, encoding);
+                    final Reader reader = templateLoader.getReader(source, initialEncoding);
+                    try {
+                        template = new Template(name, sourceName, reader, config, initialEncoding);
+                    } finally {
+                        reader.close();
+                    }
+                    actualEncoding = initialEncoding;
+                } catch (Template.WrongEncodingException wee) {
+                    actualEncoding = wee.getTemplateSpecifiedEncoding();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Initial encoding \"" + initialEncoding + "\" was incorrect, re-reading with \""
+                                + actualEncoding + "\". Template: " + sourceName);
+                    }
+                    
+                    final Reader reader = templateLoader.getReader(source, actualEncoding);
+                    try {
+                        template = new Template(name, sourceName, reader, config, actualEncoding);
+                    } finally {
+                        reader.close();
+                    }
                 }
-                catch (Template.WrongEncodingException wee) {
-                    encoding = wee.specifiedEncoding;
+            } else {
+                // Read the contents into a StringWriter, then construct a single-text-block template from it.
+                final StringWriter sw = new StringWriter();
+                final char[] buf = new char[4096];
+                final Reader reader = templateLoader.getReader(source, initialEncoding);
+                try {
+                    fetchChars: while (true) {
+                        int charsRead = reader.read(buf);
+                        if (charsRead > 0) {
+                            sw.write(buf, 0, charsRead);
+                        } else if (charsRead < 0) {
+                            break fetchChars;
+                        }
+                    }
+                } finally {
                     reader.close();
-                    reader = loader.getReader(source, encoding);
-                    template = new Template(name, sourceName, reader, config, encoding);
-                }
-                template.setLocale(locale);
-            }
-            else
-            {
-                // Read the contents into a StringWriter, then construct a single-textblock
-                // template from it.
-                StringWriter sw = new StringWriter();
-                char[] buf = new char[4096];
-                for(;;)
-                {
-                    int charsRead = reader.read(buf);
-                    if (charsRead > 0)
-                    {
-                        sw.write(buf, 0, charsRead);
-                    }
-                    else if(charsRead == -1)
-                    {
-                        break;
-                    }
                 }
                 template = Template.getPlainTextTemplate(name, sw.toString(), config);
-                template.setLocale(locale);
+                actualEncoding = initialEncoding;
             }
-            template.setEncoding(encoding);
         }
-        finally
-        {
-            reader.close();
-        }
+        
+        template.setLocale(locale);
+        template.setCustomLookupCondition(customLookupCondition);
+        template.setEncoding(actualEncoding);
         return template;
     }
 

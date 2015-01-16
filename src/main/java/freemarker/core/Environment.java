@@ -2026,7 +2026,7 @@ public final class Environment extends Configurable {
      *            {@link Configuration#getEncoding(Locale)} (or {@link Configuration#getDefaultEncoding()}) should be
      *            used here.
      * 
-     * @param parse
+     * @param parseAsFTL
      *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * 
      * @param ignoreMissing
@@ -2039,17 +2039,25 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.21
      */
-    public Template getTemplateForInclusion(String name, String encoding, boolean parse, boolean ignoreMissing)
+    public Template getTemplateForInclusion(String name, String encoding, boolean parseAsFTL, boolean ignoreMissing)
     throws IOException
     {
+        final Template inheritedTemplate = getTemplate();
+        
         if (encoding == null) {
-            // This branch shouldn't exist... but we have to keep BC.
-            encoding = getTemplate().getEncoding();
+            // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
+            encoding = inheritedTemplate.getEncoding();
+            if (encoding == null) {
+                encoding = getConfiguration().getEncoding(this.getLocale());
+            }
         }
-        if (encoding == null) {
-            encoding = getConfiguration().getEncoding(this.getLocale());
-        }
-        return getConfiguration().getTemplate(name, getLocale(), encoding, parse, ignoreMissing);
+
+        Object customLookupCondition = inheritedTemplate.getCustomLookupCondition(); 
+        
+        return getConfiguration().getTemplate(
+                name, getLocale(), customLookupCondition,
+                encoding, parseAsFTL,
+                ignoreMissing);
     }
 
     /**
