@@ -49,6 +49,7 @@ import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.cache._CacheAPI;
@@ -226,6 +227,7 @@ public class Configuration extends Configurable implements Cloneable {
     
     private boolean templateLoaderExplicitlySet;
     private boolean templateLookupStrategyExplicitlySet;
+    private boolean templateNameFormatExplicitlySet;
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
@@ -447,9 +449,10 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     private void recreateTemplateCacheWith(
-            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy) {
+            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy,
+            TemplateNameFormat templateNameFormat) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage, templateLookupStrategy, this);
+        cache = new TemplateCache(loader, storage, templateLookupStrategy, templateNameFormat, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
@@ -470,7 +473,8 @@ public class Configuration extends Configurable implements Cloneable {
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();
             copy.recreateTemplateCacheWith(
-                    cache.getTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
+                    cache.getTemplateLoader(), cache.getCacheStorage(),
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException(e.getMessage());  // Java 5: use cause exc.
@@ -652,7 +656,8 @@ public class Configuration extends Configurable implements Cloneable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
-                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(), cache.getTemplateLookupStrategy());
+                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(),
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
             }
             templateLoaderExplicitlySet = true;
         }
@@ -699,13 +704,15 @@ public class Configuration extends Configurable implements Cloneable {
      */
     public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
         if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(), templateLookupStrategy);
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                    templateLookupStrategy, cache.getTemplateNameFormat());
         }
         templateLookupStrategyExplicitlySet = true;
     }
     
     /**
-     * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
+     * Tells if {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} (or equivalent) was already called on this
+     * instance.
      * 
      * @since 2.3.22
      */
@@ -718,6 +725,33 @@ public class Configuration extends Configurable implements Cloneable {
      */
     public TemplateLookupStrategy getTemplateLookupStrategy() {
         return cache.getTemplateLookupStrategy();
+    }
+    
+    /**
+     * @since 2.3.22
+     */
+    public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
+        if (cache.getTemplateNameFormat() != templateNameFormat) {
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                    cache.getTemplateLookupStrategy(), templateNameFormat);
+        }
+        templateNameFormatExplicitlySet = true;
+    }
+    
+    /**
+     * Tells if {@link #setTemplateNameFormat(TemplateNameFormat)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateNameFormatExplicitlySet() {
+        return templateNameFormatExplicitlySet;
+    }
+
+    /**
+     * The getter pair of {@link #setTemplateNameFormat(TemplateNameFormat)}.
+     */
+    public TemplateNameFormat getTemplateNameFormat() {
+        return cache.getTemplateNameFormat();
     }
 
     /**
@@ -735,7 +769,8 @@ public class Configuration extends Configurable implements Cloneable {
     public void setCacheStorage(CacheStorage storage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), storage, cache.getTemplateLookupStrategy());
+            recreateTemplateCacheWith(cache.getTemplateLoader(), storage,
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
         }
     }
     
@@ -953,7 +988,8 @@ public class Configuration extends Configurable implements Cloneable {
         if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
             if (!templateLoaderExplicitlySet) {
                 recreateTemplateCacheWith(
-                        getDefaultTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
+                        getDefaultTemplateLoader(), cache.getCacheStorage(),
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
             }
             if (!objectWrapperExplicitlySet) {
                 // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 

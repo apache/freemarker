@@ -53,10 +53,6 @@ public class TemplateCache
 {
     private static final String ASTERISKSTR = "*";
     private static final char ASTERISK = '*';
-    private static final String CURRENT_DIR_PATH_PREFIX = "./";
-    private static final String CURRENT_DIR_PATH = "/./";
-    private static final String PARENT_DIR_PATH_PREFIX = "../";
-    private static final String PARENT_DIR_PATH = "/../";
     private static final char SLASH = '/';
     private static final String LOCALE_PART_SEPARATOR = "_";
     private static final Logger LOG = Logger.getLogger("freemarker.cache");
@@ -67,6 +63,7 @@ public class TemplateCache
     /** Here we keep our cached templates */
     private final CacheStorage storage;
     private final TemplateLookupStrategy templateLookupStrategy;
+    private final TemplateNameFormat templateNameFormat;
     
     private final boolean isStorageConcurrent;
     /** The default refresh delay in milliseconds. */
@@ -119,9 +116,10 @@ public class TemplateCache
     }
 
     /**
-     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
-     * {@link SoftCacheStorage} and the default {@link TemplateLookupStrategy} as described by
-     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)}.
+     * Same as
+     * {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
+     * with {@link SoftCacheStorage} and the default {@link TemplateLookupStrategy} as described by
+     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)} and {@link TemplateNameFormat#DEFAULT_2_3_0}..
      * 
      * @since 2.3.21
      */
@@ -130,14 +128,15 @@ public class TemplateCache
     }
     
     /**
-     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with the
-     * default {@link TemplateLookupStrategy} as described by
-     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)}.
+     * Same as
+     * {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
+     * with the default {@link TemplateLookupStrategy} as described by
+     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)} and {@link TemplateNameFormat#DEFAULT_2_3_0}.
      * 
      * @since 2.3.21
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
-        this(templateLoader, cacheStorage, _TemplateAPI.DEFAULT_LOOKUP_STRATEGY, config);
+        this(templateLoader, cacheStorage, _TemplateAPI.DEFAULT_LOOKUP_STRATEGY, TemplateNameFormat.DEFAULT_2_3_0, config);
     }
     
     /**
@@ -154,7 +153,8 @@ public class TemplateCache
      * @since 2.3.22
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage,
-            TemplateLookupStrategy templateLookupStrategy, Configuration config) {
+            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+            Configuration config) {
         this.templateLoader = templateLoader;
         
         NullArgumentException.check("cacheStorage", cacheStorage);
@@ -165,6 +165,9 @@ public class TemplateCache
         NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
         this.templateLookupStrategy = templateLookupStrategy;
 
+        NullArgumentException.check("templateNameFormat", templateNameFormat);
+        this.templateNameFormat = templateNameFormat;
+        
         this.config = config;
     }
 
@@ -197,6 +200,13 @@ public class TemplateCache
     public TemplateLookupStrategy getTemplateLookupStrategy() {
         return templateLookupStrategy;
     }
+    
+    /**
+     * @since 2.3.22
+     */
+    public TemplateNameFormat getTemplateNameFormat() {
+        return templateNameFormat;
+    }
 
     /**
      * Retrieves the template with the given name (and according the specified further parameters) from the template
@@ -218,7 +228,7 @@ public class TemplateCache
         NullArgumentException.check("locale", locale);
         NullArgumentException.check("encoding", encoding);
         
-        name = normalizeName(name);
+        name = normalizeAbsoluteName(name);
         if(name == null) {
             return null;
         }
@@ -582,7 +592,7 @@ public class TemplateCache
         if (encoding == null) {
             throw new IllegalArgumentException("Argument \"encoding\" can't be null");
         }
-        name = normalizeName(name);
+        name = normalizeAbsoluteName(name);
         if(name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugName = debug
@@ -614,27 +624,24 @@ public class TemplateCache
      * {@link #getTemplate(String, Locale, String, boolean)}. This is mostly used when a template refers to another
      * template.
      * 
-     * @param targetTemplatePath If starts with "/" or contains "://", it's an absolute path and {@code currentDir}
-     *     will be ignored, otherwise it's interpreted as relative to {@code currentDir}
-     * @param currentTemplateDir must end with "/", might contains "://".  
+     * @param targetName
+     *            If starts with "/" or contains a scheme part ("://", or with {@link TemplateNameFormat#DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0}
+     *            even just a ":" that's not preceded by a "/") then it's an absolute name, otherwise it's a relative
+     *            path. Relative paths are interpreted relatively to the {@code baseName}. Absolute names are simply
+     *            returned as is, ignoring the {@code baseName}, except if the {@code baseName} has scheme part, and
+     *            the {@code targetName} hasn't, in which case it will get the schema of the {@code baseName}.
+     * @param baseName
+     *            Before 2.3.22, it had to end with "/" or else the method has malfunctioned. Starting from 2.3.22, if
+     *            it doesn't end with "/", it's parent directory will be used as the base path. Might starts with a
+     *            scheme part (like "foo://", or with {@link TemplateNameFormat#DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0} even just "foo:").
      */
-    public static String getFullTemplatePath(Environment env, String currentTemplateDir, String targetTemplatePath) {
-        if (!env.isClassicCompatible()) {
-            if (targetTemplatePath.indexOf("://") > 0) {
-                return targetTemplatePath;
-            } else if (targetTemplatePath.startsWith("/"))  {
-                int schemeSepIdx = currentTemplateDir.indexOf("://");
-                if (schemeSepIdx > 0) {
-                    return currentTemplateDir.substring(0, schemeSepIdx + 2) + targetTemplatePath;
-                } else {
-                    return targetTemplatePath.substring(1);
-                }
-            } else {
-                return currentTemplateDir + targetTemplatePath;
-            }
-        } else {
-            return targetTemplatePath;
+    public static String getFullTemplatePath(Environment env, String baseName, String targetName) {
+        if (env.isClassicCompatible()) {
+            // Early FM only had absolute names.
+            return targetName;
         }
+        
+        return env.getConfiguration().getTemplateNameFormat().toAbsoluteName(baseName, targetName);
     }
 
     private TemplateLookupResult lookupTemplate(String name, Locale locale, Object customLookupCondition)
@@ -737,44 +744,8 @@ public class TemplateCache
         return buf.toString();
     }
     
-    private static String normalizeName(String name) {
-        // Disallow 0 for security reasons.
-        if (name.indexOf(0) != -1) return null;
-
-        for(;;) {
-            int parentDirPathLoc = name.indexOf(PARENT_DIR_PATH);
-            if(parentDirPathLoc == 0) {
-                // If it starts with /../, then it reaches outside the template
-                // root.
-                return null;
-            }
-            if(parentDirPathLoc == -1) {
-                if(name.startsWith(PARENT_DIR_PATH_PREFIX)) {
-                    // Another attempt to reach out of template root.
-                    return null;
-                }
-                break;
-            }
-            int previousSlashLoc = name.lastIndexOf(SLASH, parentDirPathLoc - 1);
-            name = name.substring(0, previousSlashLoc + 1) +
-                   name.substring(parentDirPathLoc + PARENT_DIR_PATH.length());
-        }
-        for(;;) {
-            int currentDirPathLoc = name.indexOf(CURRENT_DIR_PATH);
-            if(currentDirPathLoc == -1) {
-                if(name.startsWith(CURRENT_DIR_PATH_PREFIX)) {
-                    name = name.substring(CURRENT_DIR_PATH_PREFIX.length());
-                }
-                break;
-            }
-            name = name.substring(0, currentDirPathLoc) +
-                   name.substring(currentDirPathLoc + CURRENT_DIR_PATH.length() - 1);
-        }
-        // Editing can leave us with a leading slash; strip it.
-        if(name.length() > 1 && name.charAt(0) == SLASH) {
-            name = name.substring(1);
-        }
-        return name;
+    private String normalizeAbsoluteName(String name) {
+        return templateNameFormat.normalizeAbsoluteName(name);
     }
 
     /**

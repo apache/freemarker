@@ -36,6 +36,7 @@ import freemarker.cache.StrongCacheStorage;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -522,6 +523,55 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1, cache.getSize());
         cfg.setLocalizedLookup(true);
         assertEquals(0, cache.getSize());
+    }
+
+    public void testChangingTemplateNameFormatClearsCache() throws Exception {
+        Configuration cfg = new Configuration();
+        cfg.setCacheStorage(new StrongCacheStorage());
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        
+        assertEquals(0, cache.getSize());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0);
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0);
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+        assertEquals(0, cache.getSize());
+    }
+
+    public void testChangingTemplateNameFormatHasEffect() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("a/b.ftl", "In a/b.ftl");
+        tl.putTemplate("b.ftl", "In b.ftl");
+        cfg.setTemplateLoader(tl);
+        
+        {
+            final Template template = cfg.getTemplate("a/./../b.ftl");
+            assertEquals("a/b.ftl", template.getName());
+            assertEquals("a/b.ftl", template.getSourceName());
+            assertEquals("In a/b.ftl", template.toString());
+        }
+        
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0);
+        
+        {
+            final Template template = cfg.getTemplate("a/./../b.ftl");
+            assertEquals("b.ftl", template.getName());
+            assertEquals("b.ftl", template.getSourceName());
+            assertEquals("In b.ftl", template.toString());
+        }
     }
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
