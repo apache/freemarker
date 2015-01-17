@@ -22538,6 +22538,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   parameters, in which case they use the same defaults as the
                   overloads where the parameter is omitted.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Changing the value of the
+                  <literal>localized_lookup</literal> setting now empties the
+                  template cache, so that old lookup results won't be
+                  reused.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 

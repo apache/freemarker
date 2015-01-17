@@ -499,6 +499,30 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateLoader(cfg.getTemplateLoader());
         assertEquals(1, cache.getSize());
     }
+
+    public void testChangingLocalizedLookupClearsCache() throws Exception {
+        Configuration cfg = new Configuration();
+        cfg.setCacheStorage(new StrongCacheStorage());
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        
+        assertEquals(0, cache.getSize());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(true);
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(false);
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(false);
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(true);
+        assertEquals(0, cache.getSize());
+    }
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);

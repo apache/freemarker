@@ -533,7 +533,10 @@ public class TemplateCache
     {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
-            this.localizedLookup = localizedLookup;
+            if (this.localizedLookup != localizedLookup) {
+                this.localizedLookup = localizedLookup;
+                clear();
+            }
         }
     }
 

@@ -1531,6 +1531,9 @@ public class Configuration extends Configurable implements Cloneable {
      * template names, use {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} with your custom
      * {@link TemplateLookupStrategy}.
      * 
+     * <p>Note that changing the value of this setting causes the template cache to be emptied so that old lookup
+     * results won't be reused (since 2.3.22). 
+     * 
      * <p>
      * Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe. While
      * setting it can't cause any serious problems, and in fact it works well on most hardware, it's not guaranteed that
