@@ -300,10 +300,9 @@ public class TaglibFactory implements TemplateHashModel {
 
     /**
      * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
-     * Usually, it should be the same {@link ObjectWrapper} that was created by
-     * {@link FreemarkerServlet#createObjectWrapper} to be used inside the templates. {@code null} value is only
-     * supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null} and an
-     * {@code intanceof} {@link BeansWrapper} (like a {@link DefaultObjectWrapper}).
+     * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
+     * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
+     * and an {@code intanceof} {@link BeansWrapper} (like typically, a {@link DefaultObjectWrapper}).
      * 
      * @since 2.3.22
      */
