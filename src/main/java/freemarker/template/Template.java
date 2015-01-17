@@ -464,15 +464,15 @@ public class Template extends Configurable {
     }
 
     /**
-     * The name that was actually used to load this template from a {@link TemplateLoader}. This is what should be shown
-     * in error messages as the error location. This is usually the same as {@link #getName()}, except when localized
-     * lookup, template acquisition ({@code *} step in the name), or other {@link TemplateLookupStrategy} kicks in.
-     * Because of those, it's possible that the name of the template isn't the same as its name according the
-     * {@link TemplateLoader}. For example, when you get a template with name {@code "foo.ftl"} then because of
-     * localized lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes. While
-     * the template name will be still the same as the requested template name ({@code "foo.ftl"}), errors should point
-     * to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to {@code name}, not to
-     * {@code sourceName}.
+     * The name that was actually used to load this template from the {@link TemplateLoader} (or from other custom
+     * storage mechanism). This is what should be shown in error messages as the error location. This is usually the
+     * same as {@link #getName()}, except when localized lookup, template acquisition ({@code *} step in the name), or
+     * other {@link TemplateLookupStrategy} transforms the requested name ({@link #getName()}) to a different final
+     * {@link TemplateLoader}-level name. For example, when you get a template with name {@code "foo.ftl"} then because
+     * of localized lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes.
+     * While the template name will be still the same as the requested template name ({@code "foo.ftl"}), errors should
+     * point to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to the {@code name}, not
+     * to the {@code sourceName}.
      * 
      * @since 2.3.22
      */

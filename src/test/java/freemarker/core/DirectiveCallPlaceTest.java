@@ -181,7 +181,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             Writer out = env.getOut();
             DirectiveCallPlace callPlace = env.getCurrentDirectiveCallPlace();
             out.write("[");
-            out.write(callPlace.getTemplate().getName());
+            out.write(callPlace.getTemplateSourceName());
             out.write(":");
             out.write(Integer.toString(callPlace.getBeginLine()));
             out.write(":");

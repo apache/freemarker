@@ -197,14 +197,14 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Despite its name it just returns the {@link #getParent()}. If
-     * {@link Configuration#getIncompatibleImprovements()} is at least 2.3.22, then that will be the same as
-     * {@link #getMainTemplate()}. Otherwise the returned value follows the {@link Environment} parent switchings that
-     * occur at {@code #include}/{@code #import} and {@code #nested} directive calls, that is, it's not very meaningful
-     * outside FreeMarker internals.  
+     * Despite its name it just returns {@link #getParent()}. If {@link Configuration#getIncompatibleImprovements()} is
+     * at least 2.3.22, then that will be the same as {@link #getMainTemplate()}. Otherwise the returned value follows
+     * the {@link Environment} parent switchings that occur at {@code #include}/{@code #import} and {@code #nested}
+     * directive calls, that is, it's not very meaningful outside FreeMarker internals.
      * 
-     * @deprecated Use {@link #getMainTemplate()} or {@link #getCurrentTemplate()} instead; the value returned by
-     *          this method is often not what you expect when it comes to macro/function invocations.  
+     * @deprecated Use {@link #getMainTemplate()} instead (or {@link #getCurrentNamespace()} and then
+     *             {@link Namespace#getTemplate()}); the value returned by this method is often not what you expect when
+     *             it comes to macro/function invocations.
      */
     public Template getTemplate() {
         return (Template)getParent();
@@ -214,7 +214,6 @@ public final class Environment extends Configurable {
      * Returns the topmost {@link Template}, with other words, the one for which this {@link Environment} was created.
      * That template will never change, like {@code #include} or macro calls don't change it.
      * 
-     * @see #getCurrentTemplate()
      * @see #getCurrentNamespace()
      * 
      * @since 2.3.22
@@ -222,19 +221,17 @@ public final class Environment extends Configurable {
     public Template getMainTemplate() {
         return mainNamespace.getTemplate();
     }
-
+    
     /**
-     * Returns the {@link Template} that we are "lexically" inside at moment.
-     * This template will change when entering an {@code #include} or calling a macro or function in another template,
-     * or returning to yet another template with {@code #nested}. As such, it's useful in
-     * {@link TemplateDirectiveModel} to find out if from where the directive was called. 
+     * Used only internally as of yet, no backward compatibility - Returns the {@link Template} that we are "lexically"
+     * inside at moment. This template will change when entering an {@code #include} or calling a macro or function in
+     * another template, or returning to yet another template with {@code #nested}. As such, it's useful in
+     * {@link TemplateDirectiveModel} to find out if from where the directive was called.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
-     * 
-     * @since 2.3.22
      */
-    public Template getCurrentTemplate() {
+    Template getCurrentTemplate() {
         int ln = instructionStack.size();
         return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
@@ -2246,7 +2243,7 @@ public final class Environment extends Configurable {
     
     public class Namespace extends SimpleHash {
         
-        private Template template;
+        private final Template template;
         
         Namespace() {
             this.template = Environment.this.getTemplate();

@@ -22427,24 +22427,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   when called from a custom directive (i.e., from
                   <literal>TemplateDirectiveModel.execute()</literal>). The
                   <literal>DirectiveCallPlace</literal> objects lets you query
-                  where the directive was called from (template, line,
-                  column). It also lets you associate an arbitrary object to
-                  the directive invocation inside the template, which can be
-                  used for call-place-bound caching (like the minification of
-                  non-dynamic nested content). See
+                  where the directive was called from (template source name,
+                  line, column). It also lets you associate an arbitrary
+                  object to the directive invocation inside the template,
+                  which can be used for call-place-bound caching (like the
+                  minification of non-dynamic nested content). See
                   <literal>DirectiveCallPlace</literal> in the Java API
                   documentation for more.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Added <literal>Environment.getMainTemplate()</literal>
-                  and <literal>Environment.getCurrentTemplate()</literal>.
-                  Deprecated the ambiguous (and often broken: [<link
+                  <para>Added
+                  <literal>Environment.getMainTemplate()</literal>. Deprecated
+                  the ambiguous (and often broken: [<link
                   xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>])
-                  <literal>Environment.getTemplate()</literal>. These can be
-                  useful for directives and methods that are called from
-                  templates to find out which template they were called
-                  from.</para>
+                  <literal>Environment.getTemplate()</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
