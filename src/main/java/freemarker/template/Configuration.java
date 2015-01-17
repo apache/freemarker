@@ -1057,30 +1057,31 @@ public class Configuration extends Configurable implements Cloneable {
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.
      * 
-     * <p>This is a shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, getLocale(), null, getEncoding(getLocale()), true, false)}; see more details there.
+     * <p>
+     * This is a shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, null, null, null, true, false)}; see more details there.
      * 
-     * <p>See {@link Configuration} for an example of basic usage.
+     * <p>
+     * See {@link Configuration} for an example of basic usage.
      */
     public Template getTemplate(String name) throws IOException {
-        Locale loc = getLocale();
-        return getTemplate(name, loc, getEncoding(loc), true);
+        return getTemplate(name, null, null, null, true, false);
     }
 
     /**
      * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, locale, null, getEncoding(locale), true, false)}.
+     * getTemplate(name, locale, null, null, true, false)}.
      */
     public Template getTemplate(String name, Locale locale) throws IOException {
-        return getTemplate(name, locale, getEncoding(locale), true);
+        return getTemplate(name, locale, null, null, true, false);
     }
 
     /**
      * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, getLocale(), null, encoding, true, false)}.
+     * getTemplate(name, null, null, encoding, true, false)}.
      */
     public Template getTemplate(String name, String encoding) throws IOException {
-        return getTemplate(name, getLocale(), encoding, true);
+        return getTemplate(name, null, null, encoding, true, false);
     }
 
     /**
@@ -1088,7 +1089,7 @@ public class Configuration extends Configurable implements Cloneable {
      * getTemplate(name, locale, null, encoding, true, false)}.
      */
     public Template getTemplate(String name, Locale locale, String encoding) throws IOException {
-        return getTemplate(name, locale, encoding, true);
+        return getTemplate(name, locale, null, encoding, true, false);
     }
     
     /**
@@ -1096,7 +1097,7 @@ public class Configuration extends Configurable implements Cloneable {
      * getTemplate(name, locale, null, encoding, parseAsFTL, false)}.
      */
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
-        return getTemplate(name, locale, encoding, parseAsFTL, false);
+        return getTemplate(name, locale, null, encoding, parseAsFTL, false);
     }
 
     /**
@@ -1122,32 +1123,33 @@ public class Configuration extends Configurable implements Cloneable {
      *
      * @param name
      *            The name or path of the template, which is not a real path, but interpreted inside the current
-     *            {@link TemplateLoader}. Can't be {@code null}. The exact syntax of the name is interpreted by the
-     *            underlying {@link TemplateLoader}, but the cache makes some assumptions. First, the name is expected
-     *            to be a hierarchical path, with path components separated by a slash character (not with backslash!).
-     *            The path (the name) given here must <em>not</em> begin with slash; it's always interpreted relative to
-     *            the "template root directory". Then, the {@code ..} and {@code .} path meta-elements will be resolved.
-     *            For example, if the name is {@code a/../b/./c.ftl}, then it will be simplified to {@code b/c.ftl}. The
+     *            {@link TemplateLoader}. Can't be {@code null}. The exact syntax of the name depends on the underlying
+     *            {@link TemplateLoader}, but the cache makes some assumptions. First, the name is expected to be a
+     *            hierarchical path, with path components separated by a slash character (not with backslash!). The path
+     *            (the name) given here must <em>not</em> begin with slash; it's always interpreted relative to the
+     *            "template root directory". Then, the {@code ..} and {@code .} path meta-elements will be resolved. For
+     *            example, if the name is {@code a/../b/./c.ftl}, then it will be simplified to {@code b/c.ftl}. The
      *            rules regarding this are the same as with conventional UN*X paths. The path must not reach outside the
      *            template root directory, that is, it can't be something like {@code "../templates/my.ftl"} (not even
-     *            if this path happens to be equivalent with {@code "/my.ftl"}). Further, the path is allowed to contain
-     *            at most one path element whose name is {@code *} (asterisk). This path meta-element triggers the
-     *            <i>acquisition mechanism</i>. If the template is not found in the location described by the
+     *            if this path happens to be equivalent with {@code "/my.ftl"}). Furthermore, the path is allowed to
+     *            contain at most one path element whose name is {@code *} (asterisk). This path meta-element triggers
+     *            the <i>acquisition mechanism</i>. If the template is not found in the location described by the
      *            concatenation of the path left to the asterisk (called base path) and the part to the right of the
      *            asterisk (called resource path), the cache will attempt to remove the rightmost path component from
      *            the base path ("go up one directory") and concatenate that with the resource path. The process is
      *            repeated until either a template is found, or the base path is completely exhausted.
      *
      * @param locale
-     *            The requested locale of the template. Can't be {@code null}. Assuming that you have specified
-     *            {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template, and the default
-     *            {@link TemplateLookupStrategy} is used and {@code #setLocalizedLookup(boolean) localized_lookup} is
-     *            {@code true}, the cache will first try to retrieve {@code myTemplate_en_US.html}, then
-     *            {@code myTemplate.en.ftl}, and finally {@code myTemplate.ftl}.
+     *            The requested locale of the template. Can be {@code null} since 2.3.22, in which case it defaults
+     *            {@link Configuration#getLocale()}. Assuming that you have specified {@code en_US} as the locale and
+     *            {@code myTemplate.ftl} as the name of the template, and the default {@link TemplateLookupStrategy} is
+     *            used and {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first
+     *            try to retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
+     *            {@code myTemplate.ftl}.
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
-     *            Can be {@code null} (though the custom {@link TemplateLookupStrategy} might doesn't support that).
+     *            Can be {@code null} (though it's up to the custom {@link TemplateLookupStrategy} if it allows that).
      *            This object will be used as part of a cache key, so it must to have a proper
      *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. It also should have reasonable
      *            {@link Object#toString()}, as it's possibly quoted in error messages. The expected type is up to the
@@ -1155,9 +1157,10 @@ public class Configuration extends Configurable implements Cloneable {
      *            {@link TemplateLookupContext#getCustomLookupCondition()}.
      *
      * @param encoding
-     *            The charset used to interpret the template source code bytes (if it's read from a binary source).
-     *            Can't be {@code null}. In most applications, the value of {@link Configuration#getEncoding(Locale)}
-     *            should be used here, where {@code Locale} is {@link Configuration#getLocale()}.
+     *            The charset used to interpret the template source code bytes (if it's read from a binary source). Can
+     *            be {@code null} since 2.3.22, will default to {@link Configuration#getEncoding(Locale)} where
+     *            {@code Locale} is the {@code locale} parameter (when {@code locale} was {@code null} too, the its
+     *            default value is used instead).
      *
      * @param parseAsFTL
      *            If {@code true}, the loaded template is parsed and interpreted normally, as a regular FreeMarker
@@ -1182,6 +1185,13 @@ public class Configuration extends Configurable implements Cloneable {
     public Template getTemplate(String name, Locale locale, Object customLookupCondition,
             String encoding, boolean parseAsFTL, boolean ignoreMissing)
             throws IOException {
+        if (locale == null) {
+            locale = getLocale();
+        }
+        if (encoding == null) {
+            encoding = getEncoding(locale);
+        }
+        
         Template result = cache.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
         if (result == null) {
             if (ignoreMissing) {
@@ -1272,7 +1282,6 @@ public class Configuration extends Configurable implements Cloneable {
             }
             return charset != null ? charset : defaultEncoding;
         }
-        
     }
 
     /**

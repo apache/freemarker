@@ -22530,6 +22530,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateException</literal> now has a
                   <literal>getSourceName()</literal> method.</para>
                 </listitem>
+
+                <listitem>
+                  <para><literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>
+                  overloads now accept <literal>null</literal> for the
+                  <literal>locale</literal> and <literal>encoding</literal>
+                  parameters, in which case they use the same defaults as the
+                  overloads where the parameter is omitted.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
