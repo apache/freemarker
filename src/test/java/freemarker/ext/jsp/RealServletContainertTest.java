@@ -110,6 +110,17 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
+    public void tldDiscoveryBasicDefultOverride() throws Exception {
+        try {
+            restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
+            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt",
+                    "tester?view=test1.ftl&viewServlet=freemarker-defaultOverride");
+        } finally {
+            JspTestFreemarkerServlet.resetToDefaults();
+        }
+    }
+    
+    @Test
     public void tldDiscoveryEmulatedProblems1() throws Exception {
         try {
             JspTestFreemarkerServlet.emulateNoJarURLConnections = true;
