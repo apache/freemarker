@@ -36,8 +36,8 @@ public abstract class TemplateLookupContext {
      * specific to less specific, and for each variation it delegates to {@link #lookupWithAcquisitionStrategy(String)}.
      * If {@code templateLocale} is {@code null} (typically, because {@link Configuration#getLocalizedLookup()} is
      * {@code false})), then it's the same as calling {@link #lookupWithAcquisitionStrategy(String)} directly. This is
-     * the default strategy of FreeMarker 2.3, so for more information, see the description of the default value at
-     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)}.
+     * the default strategy of FreeMarker (at least in 2.3.x), so for more information, see
+     * {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      */
     public abstract TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(String templateName,
             Locale templateLocale) throws IOException;

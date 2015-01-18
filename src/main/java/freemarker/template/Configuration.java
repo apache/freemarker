@@ -47,7 +47,6 @@ import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
-import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
@@ -205,14 +204,6 @@ public class Configuration extends Configurable implements Cloneable {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
     }
-    
-    static final TemplateLookupStrategy DEFAULT_LOOKUP_STRATEGY = new TemplateLookupStrategy() {
-
-        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
-            return ctx.lookupWithLocalizedThenAcquisitionStrategy(ctx.getTemplateName(), ctx.getTemplateLocale());
-        }
-
-    };
     
     private final static Object defaultConfigLock = new Object();
     private static Configuration defaultConfig;
@@ -682,23 +673,7 @@ public class Configuration extends Configurable implements Cloneable {
     
     /**
      * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
-     * effect the template cache will be emptied.
-     * 
-     * <p>
-     * The default lookup strategy, through an example: Assuming localized lookup is enabled and that a template is
-     * requested for the name {@code example.ftl} and {@code Locale("es", "ES", "Traditional_WIN")}, it will try the
-     * following template names, in this order: {@code "foo_en_AU_Traditional_WIN.ftl"},
-     * {@code "foo_en_AU_Traditional.ftl"}, {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. It stops
-     * at the first variation where it finds a template. (If the template name contains "*" steps, finding the template
-     * for the attempted localized variation happens with the template acquisition mechanism.)
-     * If localized lookup is disabled, it won't try to add any locale strings, so it just looks for {@code "foo.ftl"}.
-     * 
-     * <p>
-     * The generation of the localized name variation with the default lookup strategy, happens like this: It removes
-     * the file extension (the part starting with the <em>last</em> dot), then appends {@link Locale#toString()} after
-     * it, and puts back the extension. Then it starts to remove the parts from the end of the locale, considering
-     * {@code "_"} as the separator between the parts. It won't remove parts that are not part of the locale string
-     * (like if the requested template name is {@code foo_bar.ftl}, it won't remove the {@code "_bar"}).
+     * effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      * 
      * @since 2.3.22
      */
@@ -1655,7 +1630,7 @@ public class Configuration extends Configurable implements Cloneable {
                         value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(name)) {
                 setTemplateLookupStrategy(value.equalsIgnoreCase(DEFAULT)
-                        ? DEFAULT_LOOKUP_STRATEGY
+                        ? TemplateLookupStrategy.DEFAULT_2_3_0
                         : (TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
                         value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
             } else {

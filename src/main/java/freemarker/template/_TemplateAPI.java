@@ -16,7 +16,6 @@
 
 package freemarker.template;
 
-import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.TemplateObject;
 import freemarker.template.utility.NullArgumentException;
 
@@ -58,7 +57,5 @@ public class _TemplateAPI {
     public static void DefaultObjectWrapperFactory_clearInstanceCache() {
         DefaultObjectWrapperBuilder.clearInstanceCache();
     }
-    
-    public static final TemplateLookupStrategy DEFAULT_LOOKUP_STRATEGY = Configuration.DEFAULT_LOOKUP_STRATEGY; 
     
 }

@@ -26,13 +26,13 @@ public class TemplateLookupStrategyTest {
     @Test
     public void testSetSetting() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(Configuration.DEFAULT_LOOKUP_STRATEGY, cfg.getTemplateLookupStrategy());
+        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
 
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, MyTemplateLookupStrategy.class.getName() + "()");
         assertTrue(cfg.getTemplateLookupStrategy() instanceof MyTemplateLookupStrategy);
         
         cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, "dEfault");
-        assertSame(Configuration.DEFAULT_LOOKUP_STRATEGY, cfg.getTemplateLookupStrategy());
+        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
     }
     
     @Test

@@ -1,6 +1,7 @@
 package freemarker.cache;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -35,6 +36,34 @@ import freemarker.template.Template;
  */
 public interface TemplateLookupStrategy {
 
+    /**
+     * <p>
+     * The default lookup strategy of FreeMarker.
+     * 
+     * <p>
+     * Through an example: Assuming localized lookup is enabled and that a template is requested for the name
+     * {@code example.ftl} and {@code Locale("es", "ES", "Traditional_WIN")}, it will try the following template names,
+     * in this order: {@code "foo_en_AU_Traditional_WIN.ftl"}, {@code "foo_en_AU_Traditional.ftl"},
+     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. It stops at the first variation where it finds
+     * a template. (If the template name contains "*" steps, finding the template for the attempted localized variation
+     * happens with the template acquisition mechanism.) If localized lookup is disabled, it won't try to add any locale
+     * strings, so it just looks for {@code "foo.ftl"}.
+     * 
+     * <p>
+     * The generation of the localized name variation with the default lookup strategy, happens like this: It removes
+     * the file extension (the part starting with the <em>last</em> dot), then appends {@link Locale#toString()} after
+     * it, and puts back the extension. Then it starts to remove the parts from the end of the locale, considering
+     * {@code "_"} as the separator between the parts. It won't remove parts that are not part of the locale string
+     * (like if the requested template name is {@code foo_bar.ftl}, it won't remove the {@code "_bar"}).
+     */
+    TemplateLookupStrategy DEFAULT_2_3_0 = new TemplateLookupStrategy() {
+
+        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+            return ctx.lookupWithLocalizedThenAcquisitionStrategy(ctx.getTemplateName(), ctx.getTemplateLocale());
+        }
+
+    };
+    
     /**
      * Finds the template source that matches the template name, locale (if not {@code null}) and other parameters
      * specified in the {@link TemplateLookupContext}. See also the class-level {@link TemplateLookupStrategy}

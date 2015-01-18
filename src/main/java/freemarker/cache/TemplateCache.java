@@ -116,10 +116,8 @@ public class TemplateCache
     }
 
     /**
-     * Same as
-     * {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
-     * with {@link SoftCacheStorage} and the default {@link TemplateLookupStrategy} as described by
-     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)} and {@link TemplateNameFormat#DEFAULT_2_3_0}..
+     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} with a new {@link SoftCacheStorage}
+     * as the 2nd parameter.
      * 
      * @since 2.3.21
      */
@@ -130,13 +128,13 @@ public class TemplateCache
     /**
      * Same as
      * {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
-     * with the default {@link TemplateLookupStrategy} as described by
-     * {@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)} and {@link TemplateNameFormat#DEFAULT_2_3_0}.
+     * with {@link TemplateLookupStrategy#DEFAULT_2_3_0} and {@link TemplateNameFormat#DEFAULT_2_3_0}.
      * 
      * @since 2.3.21
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
-        this(templateLoader, cacheStorage, _TemplateAPI.DEFAULT_LOOKUP_STRATEGY, TemplateNameFormat.DEFAULT_2_3_0, config);
+        this(templateLoader, cacheStorage, TemplateLookupStrategy.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_3_0,
+                config);
     }
     
     /**
