@@ -10,7 +10,7 @@ public class TemplateNameFormatTest {
     @Test
     public void testToAbsoluteName() {
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
-                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0 }) {
+                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
             // Relative paths:
             // - No scheme:
             assertEquals("a/b", tnf.toAbsoluteName("a/", "b"));
@@ -39,7 +39,7 @@ public class TemplateNameFormatTest {
         }
         
         // Scheme names in 2.4 format:
-        final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0;
+        final TemplateNameFormat tnf = TemplateNameFormat.DEFAULT_2_4_0;
         assertEquals("s:b", tnf.toAbsoluteName("s:f", "b"));
         assertEquals("s:/b", tnf.toAbsoluteName("s:/f", "b"));
         assertEquals("s:b", tnf.toAbsoluteName("s:f", "/b"));
@@ -54,7 +54,7 @@ public class TemplateNameFormatTest {
     public void testNormalizeAbsoluteName() {
         // Normalizations that are the same in legacy and modern format:
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
-                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0 }) {
+                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
             for (String lead : new String[] { "", "/" }) {
                 assertEquals("foo", tnf.normalizeAbsoluteName(lead + "foo"));
                 assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./foo"));
@@ -78,7 +78,7 @@ public class TemplateNameFormatTest {
         // Normalizations that differ in legacy and modern format:
         
         final TemplateNameFormat tnf23 = TemplateNameFormat.DEFAULT_2_3_0;
-        final TemplateNameFormat tnf24 = TemplateNameFormat.DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0;
+        final TemplateNameFormat tnf24 = TemplateNameFormat.DEFAULT_2_4_0;
         
         // ".." and "."
         assertEquals("bar/foo", tnf23.normalizeAbsoluteName("bar/./../foo"));

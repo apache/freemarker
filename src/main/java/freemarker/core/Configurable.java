@@ -39,7 +39,6 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
@@ -68,6 +67,7 @@ public class Configurable
     static final String C_TRUE_FALSE = "true,false";
     
     private static final String DEFAULT = "default";
+    private static final String LEGACY_DEFAULT = "legacy_default";
     private static final String JVM_DEFAULT = "JVM default";
     
     public static final String LOCALE_KEY = "locale";
@@ -144,41 +144,60 @@ public class Configurable
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         parent = null;
+        properties = new Properties();
+        
         locale = Locale.getDefault();
+        properties.setProperty(LOCALE_KEY, locale.toString());
+        
         timeZone = TimeZone.getDefault();
+        properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
+        
         sqlDataAndTimeTimeZone = null;
+        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(sqlDataAndTimeTimeZone));
+        
         numberFormat = "number";
+        properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
+        
         timeFormat = "";
+        properties.setProperty(TIME_FORMAT_KEY, timeFormat);
+        
         dateFormat = "";
+        properties.setProperty(DATE_FORMAT_KEY, dateFormat);
+        
         dateTimeFormat = "";
+        properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
+        
         classicCompatible = new Integer(0);
-        templateExceptionHandler = TemplateExceptionHandler.DEBUG_HANDLER;
+        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
+        
+        templateExceptionHandler = _TemplateAPI.configuration_getDefaultTemplateExceptionHandler(
+                incompatibleImprovements);
+        properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
+        
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
+        properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
+        
         objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
+        // bug: setProperty missing
+        
         autoFlush = Boolean.TRUE;
+        properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
+        
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
+        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
+        
         showErrorTips = Boolean.TRUE;
+        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
+        
         apiBuiltinEnabled = Boolean.FALSE;
-        logTemplateExceptions = Boolean.TRUE;
+        properties.setProperty(API_BUILTIN_ENABLED_KEY, apiBuiltinEnabled.toString());
+        
+        logTemplateExceptions = Boolean.valueOf(
+                _TemplateAPI.configuration_getDefaultLogTemplateExceptions(incompatibleImprovements));
+        properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, logTemplateExceptions.toString());
+        
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
-        
-        properties = new Properties();
-        properties.setProperty(LOCALE_KEY, locale.toString());
-        properties.setProperty(TIME_FORMAT_KEY, timeFormat);
-        properties.setProperty(DATE_FORMAT_KEY, dateFormat);
-        properties.setProperty(DATETIME_FORMAT_KEY, dateTimeFormat);
-        properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
-        properties.setProperty(SQL_DATE_AND_TIME_TIME_ZONE_KEY, String.valueOf(sqlDataAndTimeTimeZone));
-        properties.setProperty(NUMBER_FORMAT_KEY, numberFormat);
-        properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
-        properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
-        properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
-        properties.setProperty(AUTO_FLUSH_KEY, autoFlush.toString());
-        properties.setProperty(NEW_BUILTIN_CLASS_RESOLVER_KEY, newBuiltinClassResolver.getClass().getName());
-        properties.setProperty(SHOW_ERROR_TIPS_KEY, showErrorTips.toString());
-        // as outputEncoding and urlEscapingCharset defaults to null, 
-        // they are not set
 
         setBooleanFormat(C_TRUE_FALSE);
         
@@ -198,7 +217,7 @@ public class Configurable
         properties = new Properties(parent.properties);
         customAttributes = new HashMap();
     }
-
+    
     protected Object clone() throws CloneNotSupportedException {
         Configurable copy = (Configurable)super.clone();
         copy.properties = new Properties(properties);
@@ -987,7 +1006,8 @@ public class Configurable
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
      *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
-     *       {@code "ignore"}  (means {@link TemplateExceptionHandler#IGNORE_HANDLER}).
+     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}),
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
@@ -1005,10 +1025,11 @@ public class Configurable
      *       values: {@code "DefaultObjectWrapper(2.3.21)"},
      *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
-     *       {@code "default"} (means {@link ObjectWrapper#DEFAULT_WRAPPER}
-     *       or {@link DefaultObjectWrapperBuilder#build()}),
-     *       {@code "simple"} (means {@link ObjectWrapper#SIMPLE_WRAPPER}),
-     *       {@code "beans"} (means {@link BeansWrapper#BEANS_WRAPPER}
+     *       {@code "default"} (starting with {@code incompatible_improvements 2.3.22} means the default of
+     *       {@link Configuration}, before that and for a non-{@link Configuration} means the deprecated
+     *       {@link ObjectWrapper#DEFAULT_WRAPPER}),
+     *       {@code "simple"} (means the deprecated {@link ObjectWrapper#SIMPLE_WRAPPER}),
+     *       {@code "beans"} (means the deprecated {@link BeansWrapper#BEANS_WRAPPER}
      *       or {@link BeansWrapperBuilder#build()}),
      *       {@code "jython"} (means {@link freemarker.ext.jython.JythonWrapper#DEFAULT_WRAPPER})
      *       
@@ -1186,12 +1207,19 @@ public class Configurable
      *       
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
-     *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
+     *       <a href="#fm_obe">object builder expression</a>.
      *       
      *   <li><p>{@code "template_lookup_strategy"}:
      *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>.
+     *       
+     *   <li><p>{@code "template_name_format"}:
+     *       See: {@link Configuration#setTemplateNameFormat(freemarker.cache.TemplateNameFormat)}.
+     *       <br>String value: {@code "default"} (case insensitive) for the default, {@code "default_2_3_0"}
+     *       for {@link freemarker.cache.TemplateNameFormat#DEFAULT_2_3_0}, {@code "default_2_4_0"} for
+     *       {@link freemarker.cache.TemplateNameFormat#DEFAULT_2_4_0}.
      * </ul>
      * 
      * <p><a name="fm_obe"></a>Regarding <em>object builder expressions</em> (used by the setting values where it was
@@ -1301,6 +1329,8 @@ public class Configurable
                     } else if ("rethrow".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.RETHROW_HANDLER);
+                    } else if (DEFAULT.equalsIgnoreCase(value) && this instanceof Configuration) {
+                        ((Configuration) this).unsetTemplateExceptionHandler();
                     } else {
                         throw invalidSettingValueException(name, value);
                     }
@@ -1323,6 +1353,14 @@ public class Configurable
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
                 if (DEFAULT.equalsIgnoreCase(value)) {
+                    if (this instanceof Configuration
+                            && ((Configuration) this).getIncompatibleImprovements().intValue()
+                                    >= _TemplateAPI.VERSION_INT_2_3_22) {
+                        ((Configuration) this).unsetObjectWrapper();
+                    } else {
+                        setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
+                    }
+                } else if (LEGACY_DEFAULT.equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
                 } else if ("simple".equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);

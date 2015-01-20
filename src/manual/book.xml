@@ -22546,6 +22546,61 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Configuration:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added
+                  <literal>Configuration.unset<replaceable>Xxx</replaceable></literal>
+                  and
+                  <literal>is<replaceable>Xxx</replaceable>ExplicitlySet</literal>
+                  methods for several settings. Unsetting a setting makes it
+                  behave as if
+                  <literal>set<replaceable>Xxx</replaceable></literal> was
+                  never called, thus the setting will use the default value
+                  that fits the current
+                  <literal>incompatible_improvements</literal> value and will
+                  be adjusted as <literal>incompatible_improvements</literal>
+                  is changed later.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When configuring FreeMarker from
+                  <literal>java.util.Properties</literal> (or with
+                  <literal>String</literal>-<literal>String</literal>
+                  name-value pairs in general):</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>When <literal>incompatible_improvements</literal>
+                      is 2.3.22 (or higher) the <literal>default</literal>
+                      setting value for the <literal>object_wrapper</literal>
+                      causes
+                      <literal>Configuration.unsetObjectWrapper()</literal> to
+                      be called, rather than setting the deprecated
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>
+                      singleton. The old value can still be forced with the
+                      <literal>legacy_default</literal> value.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>The <literal>default</literal> setting value is
+                      now recognized by
+                      <literal>template_exception_handler</literal>,
+                      <literal>template_storage</literal>,
+                      <literal>template_loader</literal> (and by the new
+                      <literal>template_lookup_strategy</literal> and
+                      <literal>template_name_format</literal>) settings, and
+                      it causes
+                      <literal>Configuration.unset<replaceable>Xxx</replaceable>()</literal>
+                      to be called.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed [<link
               xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
               active only with <literal>incompatible_improvements</literal>

@@ -41,7 +41,7 @@ import freemarker.log.Logger;
  * 
  * <p>
  * If you still need to create an instance, that should be done with an {@link DefaultObjectWrapperBuilder}, not with
- * its constructor, as that allow FreeMarker for reusing singletons. For new projects, it's recommended to set
+ * its constructor, as that allows FreeMarker to reuse singletons. For new projects, it's recommended to set
  * {@link DefaultObjectWrapperBuilder#setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} to
  * {@code false} - something that setting {@code incompatibleImprovements} to 2.3.22 won't do.
  * 

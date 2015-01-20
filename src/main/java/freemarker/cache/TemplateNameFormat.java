@@ -23,7 +23,7 @@ public abstract class TemplateNameFormat {
      * The default template name format when {@link Configuration#Configuration(Version) incompatible_improvements} is
      * below 2.4.0. As of FreeMarker 2.4.0, the default {@code incompatible_improvements} is still {@code 2.3.0}, and it
      * will certainly remain so for a very long time. In new projects it's highly recommended to use
-     * {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0} instead.
+     * {@link #DEFAULT_2_4_0} instead.
      */
     public static final TemplateNameFormat DEFAULT_2_3_0 = new TemplateNameFormat() {
 
@@ -90,7 +90,7 @@ public abstract class TemplateNameFormat {
     /**
      * The default template name format only when {@link Configuration#Configuration(Version) incompatible_improvements}
      * is set to 2.4.0 (or higher). This is not the out-of-the-box default format of FreeMarker 2.4.x, because the
-     * default {@code incompatible_improvements} is still 2.3.0.
+     * default {@code incompatible_improvements} is still 2.3.0 there.
      * 
      * <p>
      * Differences from the {@link #DEFAULT_2_3_0} format:
@@ -132,7 +132,7 @@ public abstract class TemplateNameFormat {
      * 
      * </ul>
      */
-    public static final TemplateNameFormat DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0 = new TemplateNameFormat() {
+    public static final TemplateNameFormat DEFAULT_2_4_0 = new TemplateNameFormat() {
 
         String toAbsoluteName(String baseName, String targetName) {
             if (findSchemeSectionEnd(targetName) != 0) {

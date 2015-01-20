@@ -16,7 +16,6 @@
 
 package freemarker.template;
 
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -41,7 +40,9 @@ public interface ObjectWrapper {
     /**
      * An {@link ObjectWrapper} that exposes the object methods and JavaBeans properties as hash elements, and has
      * custom handling for Java {@link Map}-s, {@link ResourceBundle}-s, etc. It doesn't treat
-     * {@link org.w3c.dom.Node}-s and Jython objects specially, however.
+     * {@link org.w3c.dom.Node}-s and Jython objects specially, however. As of 2.3.22, using
+     * {@link DefaultObjectWrapper} with its {@code incompatibleImprovements} property set to 2.3.22 (or higher) is
+     * recommended instead.
      * 
      * @deprecated Use {@link BeansWrapperBuilder#build()} instead; this instance isn't read-only
      *    and thus can't be trusted.
@@ -49,15 +50,11 @@ public interface ObjectWrapper {
     ObjectWrapper BEANS_WRAPPER = BeansWrapper.getDefaultInstance();
 
     /**
-     * The default object wrapper implementation, focusing on backward compatibility and out-of-the box extra features.
-     * Extends {@link BeansWrapper} with the special handling of {@link org.w3c.dom.Node}-s (for XML processing) and
-     * Jython objects. However, for backward compatibility, it also somewhat downgrades {@link BeansWrapper} by using   
-     * {@link SimpleHash} for {@link Map}-s, {@link SimpleSequence} for {@link List}-s and collections/arrays.
-     * Furthermore it uses {@link SimpleScalar}, {@link SimpleNumber} to wrap {@link String}-s and {@link Number}-s,
-     * although this is not considered to be harmful.    
+     * The legacy default object wrapper implementation, focusing on backward compatibility and out-of-the W3C DOM
+     * wrapping box extra features. See {@link DefaultObjectWrapper} for more information.
      * 
-     * @deprecated Use {@link BeansWrapperBuilder#build()} instead; this instance isn't
-     *    read-only and thus can't be trusted.
+     * @deprecated Use {@link DefaultObjectWrapperBuilder#build()} instead; this instance isn't read-only and thus can't
+     *             be trusted.
      */
     ObjectWrapper DEFAULT_WRAPPER = DefaultObjectWrapper.instance;
 

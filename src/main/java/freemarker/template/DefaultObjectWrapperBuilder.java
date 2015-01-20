@@ -39,6 +39,11 @@ public class DefaultObjectWrapperBuilder extends DefaultObjectWrapperConfigurati
             INSTANCE_CACHE = new WeakHashMap();
     private final static ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
     
+    /**
+     * Creates a builder that creates a {@link DefaultObjectWrapper} with the given {@code incompatibleImprovements};
+     * using at least 2.3.22 is highly recommended. See {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)} for
+     * more information about the impact of {@code incompatibleImprovements} values.
+     */
     public DefaultObjectWrapperBuilder(Version incompatibleImprovements) {
         super(incompatibleImprovements);
     }

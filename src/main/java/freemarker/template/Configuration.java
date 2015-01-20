@@ -134,6 +134,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
     public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
+    public static final String TEMPLATE_NAME_FORMAT_KEY = "template_name_format";
     
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -219,6 +220,8 @@ public class Configuration extends Configurable implements Cloneable {
     private boolean templateLoaderExplicitlySet;
     private boolean templateLookupStrategyExplicitlySet;
     private boolean templateNameFormatExplicitlySet;
+    private boolean cacheStorageExplicitlySet;
+    
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
@@ -434,7 +437,12 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     private void createTemplateCache() {
-        cache = new TemplateCache(getDefaultTemplateLoader(), this);
+        cache = new TemplateCache(
+                getDefaultTemplateLoader(),
+                getDefaultCacheStorage(),
+                getDefaultTemplateLookupStrategy(),
+                getDefaultTemplateNameFormat(),
+                this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(5000);
     }
@@ -453,6 +461,40 @@ public class Configuration extends Configurable implements Cloneable {
         return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21
                 ? _CacheAPI.createLegacyDefaultTemplateLoader()
                 : null;
+    }
+    
+    private TemplateLookupStrategy getDefaultTemplateLookupStrategy() {
+        return TemplateLookupStrategy.DEFAULT_2_3_0;
+    }
+    
+    private TemplateNameFormat getDefaultTemplateNameFormat() {
+        return TemplateNameFormat.DEFAULT_2_3_0;
+    }
+    
+    private CacheStorage getDefaultCacheStorage() {
+        return new SoftCacheStorage(); 
+    }
+
+    private TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
+        return getDefaultTemplateExceptionHandler(getIncompatibleImprovements());
+    }
+    
+    private boolean getDefaultLogTemplateExceptions() {
+        return getDefaultLogTemplateExceptions(getIncompatibleImprovements());
+    }
+    
+    private ObjectWrapper getDefaultObjectWrapper() {
+        return getDefaultObjectWrapper(getIncompatibleImprovements());
+    }
+    
+    // Package visible as Configurable needs this to initialize the field defaults.
+    final static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
+        return TemplateExceptionHandler.DEBUG_HANDLER;
+    }
+
+    // Package visible as Configurable needs this to initialize the field defaults.
+    final static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
+        return true;
     }
     
     public Object clone() {
@@ -655,6 +697,20 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateLoaderExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateLoader() {
+        if (templateLoaderExplicitlySet) {
+            setTemplateLoader(getDefaultTemplateLoader());
+            templateLoaderExplicitlySet = false;
+        }
+    }
+
+    /**
      * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
      * 
      * @since 2.3.22
@@ -666,8 +722,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
-    public TemplateLoader getTemplateLoader()
-    {
+    public TemplateLoader getTemplateLoader() {
         return cache.getTemplateLoader();
     }
     
@@ -684,6 +739,20 @@ public class Configuration extends Configurable implements Cloneable {
         }
         templateLookupStrategyExplicitlySet = true;
     }
+
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateLookupStrategyExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateLookupStrategy() {
+        if (templateLookupStrategyExplicitlySet) {
+            setTemplateLookupStrategy(getDefaultTemplateLookupStrategy());
+            templateLookupStrategyExplicitlySet = false;
+        }
+    }
     
     /**
      * Tells if {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} (or equivalent) was already called on this
@@ -694,7 +763,7 @@ public class Configuration extends Configurable implements Cloneable {
     public boolean isTemplateLookupStrategyExplicitlySet() {
         return templateLookupStrategyExplicitlySet;
     }
-
+    
     /**
      * The getter pair of {@link #setTemplateLookupStrategy(TemplateLookupStrategy)}.
      */
@@ -703,6 +772,9 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
+     * Sets the template name format used. The default is {@link TemplateNameFormat#DEFAULT_2_3_0}, while the
+     * recommended value for new projects is {@link TemplateNameFormat#DEFAULT_2_4_0}.
+     * 
      * @since 2.3.22
      */
     public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
@@ -711,6 +783,20 @@ public class Configuration extends Configurable implements Cloneable {
                     cache.getTemplateLookupStrategy(), templateNameFormat);
         }
         templateNameFormatExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateNameFormatExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateNameFormat() {
+        if (templateNameFormatExplicitlySet) {
+            setTemplateNameFormat(getDefaultTemplateNameFormat());
+            templateNameFormatExplicitlySet = false;
+        }
     }
     
     /**
@@ -746,7 +832,31 @@ public class Configuration extends Configurable implements Cloneable {
         synchronized (this) {
             recreateTemplateCacheWith(cache.getTemplateLoader(), storage,
                     cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+            cacheStorageExplicitlySet = true;
         }
+    }
+    
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isCacheStorageExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetCacheStorage() {
+        if (cacheStorageExplicitlySet) {
+            setCacheStorage(getDefaultCacheStorage());
+            cacheStorageExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setCacheStorage(CacheStorage)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isCacheStorageExplicitlySet() {
+        return cacheStorageExplicitlySet;
     }
     
     /**
@@ -896,6 +1006,20 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isObjectWrapperExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetObjectWrapper() {
+        if (objectWrapperExplicitlySet) {
+            setObjectWrapper(getDefaultObjectWrapper());
+            objectWrapperExplicitlySet = false;
+        }
+    }
+    
+    /**
      * Tells if {@link #setObjectWrapper(ObjectWrapper)} (or equivalent) was already called on this instance.
      * 
      * @since 2.3.22
@@ -910,6 +1034,20 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateExceptionHandler() {
+        if (templateExceptionHandlerExplicitlySet) {
+            setTemplateExceptionHandler(getDefaultTemplateExceptionHandler());
+            templateExceptionHandlerExplicitlySet = false;
+        }
+    }
+    
+    /**
      * Tells if {@link #setTemplateExceptionHandler(TemplateExceptionHandler)} (or equivalent) was already called on
      * this instance.
      * 
@@ -919,11 +1057,28 @@ public class Configuration extends Configurable implements Cloneable {
         return templateExceptionHandlerExplicitlySet;
     }    
     
+    /**
+     * @since 2.3.22
+     */
     public void setLogTemplateExceptions(boolean value) {
         super.setLogTemplateExceptions(value);
         logTemplateExceptionsExplicitlySet = true;
     }
 
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetLogTemplateExceptions() {
+        if (logTemplateExceptionsExplicitlySet) {
+            setLogTemplateExceptions(getDefaultLogTemplateExceptions());
+            logTemplateExceptionsExplicitlySet = false;
+        }
+    }
+    
     /**
      * Tells if {@link #setLogTemplateExceptions(boolean)} (or equivalent) was already called on this instance.
      * 
@@ -957,18 +1112,42 @@ public class Configuration extends Configurable implements Cloneable {
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
-        boolean hadLegacyTLOWDefaults
-                = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
-        this.incompatibleImprovements = incompatibleImprovements;
-        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (!this.incompatibleImprovements.equals(incompatibleImprovements)) {
+            this.incompatibleImprovements = incompatibleImprovements;
+            
             if (!templateLoaderExplicitlySet) {
-                recreateTemplateCacheWith(
-                        getDefaultTemplateLoader(), cache.getCacheStorage(),
-                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+                templateLoaderExplicitlySet = true; 
+                unsetTemplateLoader();
             }
+
+            if (!templateLookupStrategyExplicitlySet) {
+                templateLookupStrategyExplicitlySet = true;
+                unsetTemplateLookupStrategy();
+            }
+            
+            if (!templateNameFormatExplicitlySet) {
+                templateNameFormatExplicitlySet = true;
+                unsetTemplateNameFormat();
+            }
+            
+            if (!cacheStorageExplicitlySet) {
+                cacheStorageExplicitlySet = true;
+                unsetCacheStorage();
+            }
+            
+            if (!templateExceptionHandlerExplicitlySet) {
+                templateExceptionHandlerExplicitlySet = true;
+                unsetTemplateExceptionHandler();
+            }
+            
+            if (!logTemplateExceptionsExplicitlySet) {
+                logTemplateExceptionsExplicitlySet = true;
+                unsetLogTemplateExceptions();
+            }
+            
             if (!objectWrapperExplicitlySet) {
-                // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
-                super.setObjectWrapper(getDefaultObjectWrapper(incompatibleImprovements));
+                objectWrapperExplicitlySet = true;
+                unsetObjectWrapper();
             }
         }
     }
@@ -1574,7 +1753,9 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
             } else if (CACHE_STORAGE_KEY.equals(name)) {
-                if (value.indexOf('.') == -1) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetCacheStorage();
+                } if (value.indexOf('.') == -1) {
                     int strongSize = 0;
                     int softSize = 0;
                     Map map = StringUtil.parseNameValuePairList(
@@ -1626,13 +1807,29 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
                 setIncompatibleEnhancements(value);
             } else if (TEMPLATE_LOADER_KEY.equals(name)) {
-                setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                        value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetTemplateLoader();
+                } else {
+                    setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(name)) {
-                setTemplateLookupStrategy(value.equalsIgnoreCase(DEFAULT)
-                        ? TemplateLookupStrategy.DEFAULT_2_3_0
-                        : (TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
-                        value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetTemplateLookupStrategy();
+                } else {
+                    setTemplateLookupStrategy((TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
+                }
+            } else if (TEMPLATE_NAME_FORMAT_KEY.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetTemplateNameFormat();
+                } else if (value.equalsIgnoreCase("default_2_3_0")) {
+                    setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+                } else if (value.equalsIgnoreCase("default_2_4_0")) {
+                    setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+                } else {
+                    throw invalidSettingValueException(name, value);
+                }
             } else {
                 unknown = true;
             }

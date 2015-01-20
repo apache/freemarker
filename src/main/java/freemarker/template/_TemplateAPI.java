@@ -58,4 +58,13 @@ public class _TemplateAPI {
         DefaultObjectWrapperBuilder.clearInstanceCache();
     }
     
+    public static TemplateExceptionHandler configuration_getDefaultTemplateExceptionHandler(
+            Version incompatibleImprovements) {
+        return Configuration.getDefaultTemplateExceptionHandler(incompatibleImprovements);
+    }
+
+    public static boolean configuration_getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
+        return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
+    }
+    
 }

@@ -623,7 +623,7 @@ public class TemplateCache
      * template.
      * 
      * @param targetName
-     *            If starts with "/" or contains a scheme part ("://", or with {@link TemplateNameFormat#DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0}
+     *            If starts with "/" or contains a scheme part ("://", or with {@link TemplateNameFormat#DEFAULT_2_4_0}
      *            even just a ":" that's not preceded by a "/") then it's an absolute name, otherwise it's a relative
      *            path. Relative paths are interpreted relatively to the {@code baseName}. Absolute names are simply
      *            returned as is, ignoring the {@code baseName}, except if the {@code baseName} has scheme part, and
@@ -631,7 +631,7 @@ public class TemplateCache
      * @param baseName
      *            Before 2.3.22, it had to end with "/" or else the method has malfunctioned. Starting from 2.3.22, if
      *            it doesn't end with "/", it's parent directory will be used as the base path. Might starts with a
-     *            scheme part (like "foo://", or with {@link TemplateNameFormat#DEFAULT_INCOMPATIBLE_IMPROVEMENTS_2_4_0} even just "foo:").
+     *            scheme part (like "foo://", or with {@link TemplateNameFormat#DEFAULT_2_4_0} even just "foo:").
      */
     public static String getFullTemplatePath(Environment env, String baseName, String targetName) {
         if (env.isClassicCompatible()) {
