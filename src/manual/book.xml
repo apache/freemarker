@@ -22565,18 +22565,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                   <itemizedlist>
                     <listitem>
-                      <para>When <literal>incompatible_improvements</literal>
-                      is 2.3.22 (or higher) the <literal>default</literal>
-                      setting value for the <literal>object_wrapper</literal>
-                      causes
-                      <literal>Configuration.unsetObjectWrapper()</literal> to
-                      be called, rather than setting the deprecated
-                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>
-                      singleton. The old value can still be forced with the
-                      <literal>legacy_default</literal> value.</para>
-                    </listitem>
-
-                    <listitem>
                       <para>The <literal>default</literal> setting value is
                       now recognized by
                       <literal>template_exception_handler</literal>,
@@ -22587,6 +22575,30 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       it causes
                       <literal>Configuration.unset<replaceable>Xxx</replaceable>()</literal>
                       to be called.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Bug fixed: When setting
+                      <literal>object_wrapper</literal> to
+                      <literal>default</literal> (as opposed to not specifying
+                      it), it has ignored the
+                      <literal>incompatible_improvements</literal> and has
+                      always used
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>. This
+                      fix only has effects when
+                      <literal>incompatible_improvements</literal> is exactly
+                      2.3.21, as that's when the default object wrapper was
+                      changed from
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to the
+                      result of <literal>new
+                      DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build()</literal>,
+                      which is a bit different singleton, as it has read-only
+                      configuration settings and bug fixed overloaded method
+                      handling. To use
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>
+                      regardless of
+                      <literal>incompatible_improvements</literal> use the
+                      <literal>default_2_3_0</literal> value.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

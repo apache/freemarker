@@ -67,7 +67,7 @@ public class Configurable
     static final String C_TRUE_FALSE = "true,false";
     
     private static final String DEFAULT = "default";
-    private static final String LEGACY_DEFAULT = "legacy_default";
+    private static final String DEFAULT_2_3_0 = "default_2_3_0";
     private static final String JVM_DEFAULT = "JVM default";
     
     public static final String LOCALE_KEY = "locale";
@@ -170,7 +170,7 @@ public class Configurable
         classicCompatible = new Integer(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         
-        templateExceptionHandler = _TemplateAPI.configuration_getDefaultTemplateExceptionHandler(
+        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
                 incompatibleImprovements);
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
         
@@ -193,7 +193,7 @@ public class Configurable
         properties.setProperty(API_BUILTIN_ENABLED_KEY, apiBuiltinEnabled.toString());
         
         logTemplateExceptions = Boolean.valueOf(
-                _TemplateAPI.configuration_getDefaultLogTemplateExceptions(incompatibleImprovements));
+                _TemplateAPI.getDefaultLogTemplateExceptions(incompatibleImprovements));
         properties.setProperty(LOG_TEMPLATE_EXCEPTIONS_KEY, logTemplateExceptions.toString());
         
         // outputEncoding and urlEscapingCharset defaults to null,
@@ -1025,9 +1025,9 @@ public class Configurable
      *       values: {@code "DefaultObjectWrapper(2.3.21)"},
      *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
-     *       {@code "default"} (starting with {@code incompatible_improvements 2.3.22} means the default of
-     *       {@link Configuration}, before that and for a non-{@link Configuration} means the deprecated
-     *       {@link ObjectWrapper#DEFAULT_WRAPPER}),
+     *       {@code "default"} means the default of {@link Configuration} (note: this depends on the
+     *       {@code Configuration#Configuration(Version) incompatible_improvements}, but a bug existed in 2.3.21 where
+     *       that was ignored),
      *       {@code "simple"} (means the deprecated {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means the deprecated {@link BeansWrapper#BEANS_WRAPPER}
      *       or {@link BeansWrapperBuilder#build()}),
@@ -1353,15 +1353,13 @@ public class Configurable
                 }
             } else if (OBJECT_WRAPPER_KEY.equals(name)) {
                 if (DEFAULT.equalsIgnoreCase(value)) {
-                    if (this instanceof Configuration
-                            && ((Configuration) this).getIncompatibleImprovements().intValue()
-                                    >= _TemplateAPI.VERSION_INT_2_3_22) {
+                    if (this instanceof Configuration) {
                         ((Configuration) this).unsetObjectWrapper();
                     } else {
-                        setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
+                        setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_2_3_0));
                     }
-                } else if (LEGACY_DEFAULT.equalsIgnoreCase(value)) {
-                    setObjectWrapper(ObjectWrapper.DEFAULT_WRAPPER);
+                } else if (DEFAULT_2_3_0.equalsIgnoreCase(value)) {
+                    setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_2_3_0));
                 } else if ("simple".equalsIgnoreCase(value)) {
                     setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
                 } else if ("beans".equalsIgnoreCase(value)) {

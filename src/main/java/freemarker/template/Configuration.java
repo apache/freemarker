@@ -51,7 +51,6 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
-import freemarker.cache._CacheAPI;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
@@ -63,6 +62,7 @@ import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.servlet.FreemarkerServlet;
+import freemarker.log.Logger;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Constants;
@@ -122,6 +122,9 @@ import freemarker.template.utility.XmlEscape;
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
 public class Configuration extends Configurable implements Cloneable {
+    
+    private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
+    
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
@@ -458,21 +461,72 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     private TemplateLoader getDefaultTemplateLoader() {
-        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21
-                ? _CacheAPI.createLegacyDefaultTemplateLoader()
-                : null;
+        return createDefaultTemplateLoader(getIncompatibleImprovements(), getTemplateLoader());
+    }
+
+    static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
+        return createDefaultTemplateLoader(incompatibleImprovements, null);
+    }
+    
+    private static TemplateLoader createDefaultTemplateLoader(
+            Version incompatibleImprovements, TemplateLoader existingTemplateLoader) {
+        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+            if (existingTemplateLoader instanceof LegacyDefaultFileTemplateLoader) {
+                return existingTemplateLoader;
+            }
+            try {
+                return new LegacyDefaultFileTemplateLoader();
+            } catch(Exception e) {
+                CACHE_LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
+                        + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    private static class LegacyDefaultFileTemplateLoader extends FileTemplateLoader {
+
+        public LegacyDefaultFileTemplateLoader() throws IOException {
+            super();
+        }
+        
     }
     
     private TemplateLookupStrategy getDefaultTemplateLookupStrategy() {
+        return getDefaultTemplateLookupStrategy(getIncompatibleImprovements());
+    }
+    
+    static TemplateLookupStrategy getDefaultTemplateLookupStrategy(Version incompatibleImprovements) {
         return TemplateLookupStrategy.DEFAULT_2_3_0;
     }
     
     private TemplateNameFormat getDefaultTemplateNameFormat() {
+        return getDefaultTemplateNameFormat(getIncompatibleImprovements());
+    }
+    
+    static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
         return TemplateNameFormat.DEFAULT_2_3_0;
     }
     
     private CacheStorage getDefaultCacheStorage() {
-        return new SoftCacheStorage(); 
+        return createDefaultCacheStorage(getIncompatibleImprovements(), getCacheStorage()); 
+    }
+    
+    static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements, CacheStorage existingCacheStorage) {
+        if (existingCacheStorage instanceof DefaultSoftCacheStorage) {
+            return existingCacheStorage;
+        }
+        return new DefaultSoftCacheStorage(); 
+    }
+    
+    static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {
+        return createDefaultCacheStorage(incompatibleImprovements, null); 
+    }
+    
+    private static class DefaultSoftCacheStorage extends SoftCacheStorage {
+        // Nothing to override
     }
 
     private TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
@@ -723,6 +777,9 @@ public class Configuration extends Configurable implements Cloneable {
      * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
     public TemplateLoader getTemplateLoader() {
+        if (cache == null) {
+            return null;
+        }
         return cache.getTemplateLoader();
     }
     
@@ -768,6 +825,9 @@ public class Configuration extends Configurable implements Cloneable {
      * The getter pair of {@link #setTemplateLookupStrategy(TemplateLookupStrategy)}.
      */
     public TemplateLookupStrategy getTemplateLookupStrategy() {
+        if (cache == null) {
+            return null;
+        }
         return cache.getTemplateLookupStrategy();
     }
     
@@ -812,6 +872,9 @@ public class Configuration extends Configurable implements Cloneable {
      * The getter pair of {@link #setTemplateNameFormat(TemplateNameFormat)}.
      */
     public TemplateNameFormat getTemplateNameFormat() {
+        if (cache == null) {
+            return null;
+        }
         return cache.getTemplateNameFormat();
     }
 
@@ -827,11 +890,13 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the cache storage will re-create the template cache, so
      * all its content will be lost.
      */
-    public void setCacheStorage(CacheStorage storage) {
+    public void setCacheStorage(CacheStorage cacheStorage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), storage,
-                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+            if (getCacheStorage() != cacheStorage) {
+                recreateTemplateCacheWith(cache.getTemplateLoader(), cacheStorage,
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+            }
             cacheStorageExplicitlySet = true;
         }
     }
@@ -867,6 +932,9 @@ public class Configuration extends Configurable implements Cloneable {
     public CacheStorage getCacheStorage() {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
+            if (cache == null) {
+                return null;
+            }
             return cache.getCacheStorage();
         }
     }

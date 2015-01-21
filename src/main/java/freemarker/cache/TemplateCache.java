@@ -83,22 +83,9 @@ public class TemplateCache
      */
     public TemplateCache()
     {
-        this(createLegacyDefaultTemplateLoader());
+        this(_TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0));
     }
 
-    /**
-     * Creates the default {@link TemplateLoader} used in 2.3.0-compatible mode.
-     */
-    protected static TemplateLoader createLegacyDefaultTemplateLoader() {
-        try {
-            return new FileTemplateLoader();
-        } catch(Exception e) {
-            LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
-                    + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
-            return null;
-        }
-    }
-    
     /**
      * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
@@ -122,7 +109,7 @@ public class TemplateCache
      * @since 2.3.21
      */
     public TemplateCache(TemplateLoader templateLoader, Configuration config) {
-        this(templateLoader, new SoftCacheStorage(), config);
+        this(templateLoader, _TemplateAPI.createDefaultCacheStorage(Configuration.VERSION_2_3_0), config);
     }
     
     /**
@@ -133,7 +120,9 @@ public class TemplateCache
      * @since 2.3.21
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
-        this(templateLoader, cacheStorage, TemplateLookupStrategy.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_3_0,
+        this(templateLoader, cacheStorage,
+                _TemplateAPI.getDefaultTemplateLookupStrategy(Configuration.VERSION_2_3_0),
+                _TemplateAPI.getDefaultTemplateNameFormat(Configuration.VERSION_2_3_0),
                 config);
     }
     

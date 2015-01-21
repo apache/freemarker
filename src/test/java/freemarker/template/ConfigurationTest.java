@@ -31,6 +31,8 @@ import org.junit.Test;
 
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.NullCacheStorage;
+import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.cache.TemplateLookupContext;
@@ -107,6 +109,7 @@ public class ConfigurationTest extends TestCase {
 
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
         assertUses2322ObjectWrapper(cfg);
+        assertUsesNewTemplateLoader(cfg);
         
         // ---
         
@@ -122,6 +125,7 @@ public class ConfigurationTest extends TestCase {
         
         cfg = new Configuration(Configuration.VERSION_2_3_22);
         assertUses2322ObjectWrapper(cfg);
+        assertUsesNewTemplateLoader(cfg);
     }
 
     private void assertUses2322ObjectWrapper(Configuration cfg) {
@@ -141,9 +145,11 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isLogTemplateExceptionsExplicitlySet());
         assertFalse(cfg.getLogTemplateExceptions());
         //
-        cfg.unsetLogTemplateExceptions();
-        assertFalse(cfg.isLogTemplateExceptionsExplicitlySet());
-        assertTrue(cfg.getLogTemplateExceptions());
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetLogTemplateExceptions();
+            assertFalse(cfg.isLogTemplateExceptionsExplicitlySet());
+            assertTrue(cfg.getLogTemplateExceptions());
+        }
         
         assertFalse(cfg.isObjectWrapperExplicitlySet());
         assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
@@ -152,9 +158,11 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isObjectWrapperExplicitlySet());
         assertSame(ObjectWrapper.SIMPLE_WRAPPER, cfg.getObjectWrapper());
         //
-        cfg.unsetObjectWrapper();
-        assertFalse(cfg.isObjectWrapperExplicitlySet());
-        assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetObjectWrapper();
+            assertFalse(cfg.isObjectWrapperExplicitlySet());
+            assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        }
         
         assertFalse(cfg.isTemplateExceptionHandlerExplicitlySet());
         assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfg.getTemplateExceptionHandler());
@@ -163,20 +171,27 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isTemplateExceptionHandlerExplicitlySet());
         assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
         //
-        cfg.unsetTemplateExceptionHandler();
-        assertFalse(cfg.isTemplateExceptionHandlerExplicitlySet());
-        assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfg.getTemplateExceptionHandler());
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetTemplateExceptionHandler();
+            assertFalse(cfg.isTemplateExceptionHandlerExplicitlySet());
+            assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfg.getTemplateExceptionHandler());
+        }
         
         assertFalse(cfg.isTemplateLoaderExplicitlySet());
-        assertSame(FileTemplateLoader.class, cfg.getTemplateLoader().getClass());
+        assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
         //
         cfg.setTemplateLoader(null);
         assertTrue(cfg.isTemplateLoaderExplicitlySet());
         assertNull(cfg.getTemplateLoader());
         //
-        cfg.unsetTemplateLoader();
-        assertFalse(cfg.isTemplateLoaderExplicitlySet());
-        assertSame(FileTemplateLoader.class, cfg.getTemplateLoader().getClass());
+        for (int i = 0; i < 3; i++) {
+            if (i == 2) {
+                cfg.setTemplateLoader(cfg.getTemplateLoader());
+            }
+            cfg.unsetTemplateLoader();
+            assertFalse(cfg.isTemplateLoaderExplicitlySet());
+            assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
+        }
         
         assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
         assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
@@ -184,8 +199,10 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
         assertTrue(cfg.isTemplateLookupStrategyExplicitlySet());
         //
-        cfg.unsetTemplateLookupStrategy();
-        assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetTemplateLookupStrategy();
+            assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
+        }
         
         assertFalse(cfg.isTemplateNameFormatExplicitlySet());
         assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
@@ -194,9 +211,27 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isTemplateNameFormatExplicitlySet());
         assertSame(TemplateNameFormat.DEFAULT_2_4_0, cfg.getTemplateNameFormat());
         //
-        cfg.unsetTemplateNameFormat();
-        assertFalse(cfg.isTemplateNameFormatExplicitlySet());
-        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetTemplateNameFormat();
+            assertFalse(cfg.isTemplateNameFormatExplicitlySet());
+            assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        }
+        
+        assertFalse(cfg.isCacheStorageExplicitlySet());
+        assertTrue(cfg.getCacheStorage() instanceof SoftCacheStorage);
+        //
+        cfg.setCacheStorage(NullCacheStorage.INSTANCE);
+        assertTrue(cfg.isCacheStorageExplicitlySet());
+        assertSame(NullCacheStorage.INSTANCE, cfg.getCacheStorage());
+        //
+        for (int i = 0; i < 3; i++) {
+            if (i == 2) {
+                cfg.setCacheStorage(cfg.getCacheStorage());
+            }
+            cfg.unsetCacheStorage();
+            assertFalse(cfg.isCacheStorageExplicitlySet());
+            assertTrue(cfg.getCacheStorage() instanceof SoftCacheStorage);
+        }
     }
     
     public void testTemplateLoadingErrors() throws Exception {
@@ -668,6 +703,43 @@ public class ConfigurationTest extends TestCase {
         assertTrue(cfg.isTemplateNameFormatExplicitlySet());
         cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defauLt");
         assertFalse(cfg.isTemplateNameFormatExplicitlySet());
+    }
+
+    public void testObjectWrapperSetSetting() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        }
+        
+        {
+            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+            assertNotSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
+            assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
+            assertTrue(dow.getForceLegacyNonListCollections());
+        }
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult_2_3_0");
+            assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        }
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY,
+                    "DefaultObjectWrapper(2.3.21, useAdaptersForContainers=true, forceLegacyNonListCollections=false)");
+            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
+            assertEquals(Configuration.VERSION_2_3_21, dow.getIncompatibleImprovements());
+            assertFalse(dow.getForceLegacyNonListCollections());
+        }
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
+            assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
+            assertTrue(dow.getForceLegacyNonListCollections());
+        }
     }
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {

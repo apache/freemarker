@@ -16,6 +16,10 @@
 
 package freemarker.template;
 
+import freemarker.cache.CacheStorage;
+import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
+import freemarker.cache.TemplateNameFormat;
 import freemarker.core.TemplateObject;
 import freemarker.template.utility.NullArgumentException;
 
@@ -58,13 +62,29 @@ public class _TemplateAPI {
         DefaultObjectWrapperBuilder.clearInstanceCache();
     }
     
-    public static TemplateExceptionHandler configuration_getDefaultTemplateExceptionHandler(
+    public static TemplateExceptionHandler getDefaultTemplateExceptionHandler(
             Version incompatibleImprovements) {
         return Configuration.getDefaultTemplateExceptionHandler(incompatibleImprovements);
     }
 
-    public static boolean configuration_getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
+    public static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
         return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
+    }
+
+    public static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
+        return Configuration.createDefaultTemplateLoader(incompatibleImprovements);
+    }
+
+    public static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {
+        return Configuration.createDefaultCacheStorage(incompatibleImprovements);
+    }
+    
+    public static TemplateLookupStrategy getDefaultTemplateLookupStrategy(Version incompatibleImprovements) {
+        return Configuration.getDefaultTemplateLookupStrategy(incompatibleImprovements);
+    }
+    
+    public static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
+        return Configuration.getDefaultTemplateNameFormat(incompatibleImprovements);
     }
     
 }
