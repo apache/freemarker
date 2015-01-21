@@ -1025,9 +1025,10 @@ public class Configurable
      *       values: {@code "DefaultObjectWrapper(2.3.21)"},
      *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
-     *       {@code "default"} means the default of {@link Configuration} (note: this depends on the
+     *       {@code "default"} means the default of {@link Configuration} (the default depends on the
      *       {@code Configuration#Configuration(Version) incompatible_improvements}, but a bug existed in 2.3.21 where
      *       that was ignored),
+     *       {@code "default_2_3_0"} (means the deprecated {@link ObjectWrapper#DEFAULT_WRAPPER})
      *       {@code "simple"} (means the deprecated {@link ObjectWrapper#SIMPLE_WRAPPER}),
      *       {@code "beans"} (means the deprecated {@link BeansWrapper#BEANS_WRAPPER}
      *       or {@link BeansWrapperBuilder#build()}),
