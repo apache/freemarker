@@ -214,7 +214,7 @@ public class FileTemplateLoader implements TemplateLoader
     public String toString() {
         // We don't StringUtil.jQuote paths here, because on Windows there will be \\-s then that some may find
         // confusing.
-        return "FileTemplateLoader(baseDir=\"" + baseDir
+        return TemplateLoaderUtils.getClassNameForToString(this) + "(baseDir=\"" + baseDir
                 + "\", canonicalPath=\"" + canonicalPath + "\")";
     }
     
