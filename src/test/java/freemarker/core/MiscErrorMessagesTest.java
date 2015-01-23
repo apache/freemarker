@@ -18,6 +18,8 @@ package freemarker.core;
 
 import org.junit.Test;
 
+import freemarker.cache.TemplateNameFormat;
+import freemarker.template.Configuration;
 import freemarker.test.TemplateTest;
 
 public class MiscErrorMessagesTest extends TemplateTest {
@@ -25,6 +27,18 @@ public class MiscErrorMessagesTest extends TemplateTest {
     @Test
     public void stringIndexOutOfBounds() {
         assertErrorContains("${'foo'[10]}", "length", "3", "10", "String index out of");
-    }    
+    }
+    
+    @Test
+    public void wrongTemplateNameFormat() {
+        Configuration cfg = new Configuration();
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        setConfiguration(cfg);
+        
+        assertErrorContains("<#include 'foo:/bar:baaz'>", "Malformed template name", "':'");
+        assertErrorContains("<#include '../baaz'>", "Malformed template name", "root");
+        assertErrorContains("<#include '\u0000'>", "Malformed template name", "\\u0000");
+    }
+    
     
 }

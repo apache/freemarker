@@ -1322,7 +1322,8 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>
      * See {@link Configuration} for an example of basic usage.
      */
-    public Template getTemplate(String name) throws IOException {
+    public Template getTemplate(String name)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getTemplate(name, null, null, null, true, false);
     }
 
@@ -1330,7 +1331,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
      * getTemplate(name, locale, null, null, true, false)}.
      */
-    public Template getTemplate(String name, Locale locale) throws IOException {
+    public Template getTemplate(String name, Locale locale)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getTemplate(name, locale, null, null, true, false);
     }
 
@@ -1338,7 +1340,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
      * getTemplate(name, null, null, encoding, true, false)}.
      */
-    public Template getTemplate(String name, String encoding) throws IOException {
+    public Template getTemplate(String name, String encoding)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getTemplate(name, null, null, encoding, true, false);
     }
 
@@ -1346,7 +1349,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
      * getTemplate(name, locale, null, encoding, true, false)}.
      */
-    public Template getTemplate(String name, Locale locale, String encoding) throws IOException {
+    public Template getTemplate(String name, Locale locale, String encoding)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getTemplate(name, locale, null, encoding, true, false);
     }
     
@@ -1354,7 +1358,8 @@ public class Configuration extends Configurable implements Cloneable {
      * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
      * getTemplate(name, locale, null, encoding, parseAsFTL, false)}.
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
+    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getTemplate(name, locale, null, encoding, parseAsFTL, false);
     }
 
@@ -1365,7 +1370,7 @@ public class Configuration extends Configurable implements Cloneable {
      * @since 2.3.21
      */
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL, boolean ignoreMissing)
-            throws IOException {
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getTemplate(name, locale, null, encoding, parseAsFTL, ignoreMissing);
     }
     
@@ -1432,17 +1437,22 @@ public class Configuration extends Configurable implements Cloneable {
      * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
      * 
      * @throws TemplateNotFoundException
-     *             if the template could not be found.
-     * @throws IOException
-     *             if there was a problem with reading the template "file".
+     *             If the template could not be found. Note that this exception extends {@link IOException}.
+     * @throws MalformedTemplateNameException
+     *             If the template name given was in violation with the {@link TemplateNameFormat} in use. Note that
+     *             this exception extends {@link IOException}.
      * @throws ParseException
-     *             (extends <code>IOException</code>) if the template is syntactically bad.
+     *             (extends <code>IOException</code>) if the template is syntactically bad. Note that this exception
+     *             extends {@link IOException}.
+     * @throws IOException
+     *             If there was some other problem with reading the template "file". Note that the other exceptions
+     *             extend {@link IOException}, so this should be catched the last.
      * 
      * @since 2.3.22
      */
     public Template getTemplate(String name, Locale locale, Object customLookupCondition,
             String encoding, boolean parseAsFTL, boolean ignoreMissing)
-            throws IOException {
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         if (locale == null) {
             locale = getLocale();
         }

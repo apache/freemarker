@@ -7460,7 +7460,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           </section>
 
           <section>
-            <title>The template path (template name)</title>
+            <title>The template name (template path)</title>
 
             <indexterm>
               <primary>path</primary>
@@ -7475,19 +7475,43 @@ cfg.setTemplateLoader(mtl);</programlisting>
             </indexterm>
 
             <para>It is up to the template loader how it interprets template
-            paths (also known as template names). But to work together with
+            names (also known as template paths). But to work together with
             other components there are restrictions regarding the format of
             the path. In general, it is strongly recommended that template
             loaders use URL-style paths. The path must not use
-            <literal>/</literal>, <literal>./</literal> and
-            <literal>../</literal> and <literal>://</literal> with other
-            meaning than they have in URL paths (or in UN*X paths). The
-            characters <literal>*</literal> and <literal>?</literal> are also
-            reserved. FreeMarker always normalizes the paths before passing
-            them to the template loader, so the paths don't contain
-            <literal>/../</literal> or such, and are relative to the imaginary
-            template root directory (that is, they don't start with
-            <literal>/</literal>).</para>
+            <literal>/</literal> (path step separator) character, nor the
+            <literal>.</literal> (same-directory) and <literal>..</literal>
+            (parent directory) path steps with other meaning than they have in
+            URL paths (or in UN*X paths). The <literal>*</literal> (asterisk)
+            step is also reserved, and used for <quote>template
+            acquisition</quote> feature of FreeMarker.</para>
+
+            <para><literal>://</literal> (or with
+            <literal>template_name_format</literal> setting set to
+            <literal>DEFAULT_2_4_0</literal>, the <literal>:</literal> (colon)
+            character) is reserved for specifying a scheme part, similarly as
+            it works with URI-s. For example
+            <literal>someModule://foo/bar.ftl</literal> uses the
+            <literal>someModule</literal>, or assuming the
+            <literal>DEFAULT_2_4_0</literal> format,
+            <literal>classpath:foo/bar.ftl</literal> uses the
+            <literal>classpath</literal> scheme. Interpreting the scheme part
+            is completely up to the <literal>TemplateLoader</literal>. (The
+            FreeMarker core is only aware of the idea of schemes because
+            otherwise it couldn't resolve relative template names
+            properly.)</para>
+
+            <para>FreeMarker always normalizes the paths before passing them
+            to the <literal>TemplateLoader</literal>, so the paths don't
+            contain <literal>/../</literal> or such, and are relative to the
+            imaginary template root directory (that is, they don't start with
+            <literal>/</literal>). They don't contain the <literal>*</literal>
+            step either, as template acquisition happens in an earlier stage.
+            Furthermore, with <literal>template_name_format</literal> setting
+            set to <literal>DEFAULT_2_4_0</literal>, multiple consecutive
+            <literal>/</literal>-s will be normalized to a single
+            <literal>/</literal> (unless they are part of the
+            <literal>://</literal> scheme separator).</para>
 
             <para>Note that FreeMarker template path should always uses slash
             (not backslash) regardless of the host OS.</para>
@@ -22482,6 +22506,32 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>Added new <literal>Configuration</literal> setting,
+                  <literal>template_name_format</literal>
+                  (<literal>Configuration.setTemplateNameFormat(TemplateNameFormat)</literal>).
+                  This allows specifying the naming rules used by FreeMarker.
+                  For now, custom implementations aren't allowed, and you can
+                  only chose between
+                  <literal>TemplateNameFormat.DEFAULT_2_3_0</literal> (the
+                  default) and <literal>DEFAULT_2_4_0</literal> (recommended,
+                  at least for new projects). <literal>DEFAULT_2_4_0</literal>
+                  has several advantages, but isn't fully backward compatible
+                  (though most applications won't be affected). For typical
+                  mistakes like backing out of the root it gives
+                  <literal>MalformedTemplateNameFormatException</literal> with
+                  explanation instead of a generic
+                  <literal>TempalteNotFoundException</literal>. It allows
+                  scheme names to be terminated with <literal>:</literal>
+                  alone instead of a <literal>://</literal>, like in
+                  <literal>classpath:foo/bar.ftl</literal>. It fixes numerous
+                  legacy glitches (bugs), mostly related to the interpretation
+                  of <literal>..</literal> after special steps like
+                  <literal>.</literal> or <literal>*</literal>. See the full
+                  list of differences in the Java API documentation of
+                  <literal>TemplateNameFormat.DEFAULT_2_4_0</literal>.</para>
+                </listitem>
+
+                <listitem>
                   <para><literal>ClassTemplateLoader</literal> now can be
                   created by specifying a <literal>ClassLoader</literal>
                   directly, rather than by specifying a base
@@ -22594,11 +22644,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build()</literal>,
                       which is a bit different singleton, as it has read-only
                       configuration settings and bug fixed overloaded method
-                      handling. To use
+                      selection rules. To use
                       <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>
-                      regardless of
-                      <literal>incompatible_improvements</literal> use the
-                      <literal>default_2_3_0</literal> value.</para>
+                      regardless of the value of the
+                      <literal>incompatible_improvements</literal> setting,
+                      use the new <literal>default_2_3_0</literal>
+                      value.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

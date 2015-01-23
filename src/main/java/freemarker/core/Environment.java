@@ -37,9 +37,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import freemarker.cache.TemplateNameFormat;
+import freemarker.cache._CacheAPI;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleSequence;
@@ -2160,6 +2163,33 @@ public final class Environment extends Configurable {
             }
         }
         return (Namespace) loadedLibs.get(templateName);
+    }
+    
+    /**
+     * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
+     * name. This gives a full, even if non-normalized template name, that could be used for
+     * {@link Configuration#getTemplate(String)}. This is mostly used when a template refers to another template.
+     * 
+     * @param targetName
+     *            If starts with {@code "/"} or contains a scheme part ({@code "://"}, or with
+     *            {@link TemplateNameFormat#DEFAULT_2_4_0} even just a {@code ":"} that's not preceded by a {@code "/"})
+     *            then it's an absolute name, otherwise it's a relative path. Relative paths are interpreted relatively
+     *            to the {@code baseName}. Absolute names are simply returned as is, ignoring the {@code baseName},
+     *            except if the {@code baseName} has scheme part, and the {@code targetName} hasn't, in which case it
+     *            will get the schema of the {@code baseName}.
+     * @param baseName
+     *            If you want to specify a base directory here, it must end with {@code "/"}. If it doesn't end with
+     *            {@code "/"}, it's parent directory will be used as the base path. Might starts with a scheme part
+     *            (like {@code "foo://"}, or with {@link TemplateNameFormat#DEFAULT_2_4_0} even just {@code "foo:"}).
+     */
+    public String toFullTemplateName(String baseName, String targetName)
+            throws MalformedTemplateNameException {
+        if (isClassicCompatible()) {
+            // Early FM only had absolute names.
+            return targetName;
+        }
+        
+        return _CacheAPI.toAbsoluteName(getConfiguration().getTemplateNameFormat(), baseName, targetName);
     }
     
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {

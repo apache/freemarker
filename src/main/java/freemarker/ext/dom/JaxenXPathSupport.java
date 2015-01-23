@@ -44,7 +44,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import freemarker.cache.TemplateCache;
 import freemarker.core.CustomAttribute;
 import freemarker.core.Environment;
 import freemarker.template.ObjectWrapper;
@@ -196,7 +195,7 @@ class JaxenXPathSupport implements XPathSupport {
         String templatePath = env.getTemplate().getName();
         int lastSlash = templatePath.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath.substring(0, lastSlash + 1);
-        systemId = TemplateCache.getFullTemplatePath(env, templatePath, systemId);
+        systemId = env.toFullTemplateName(templatePath, systemId);
         Template raw = env.getConfiguration().getTemplate(systemId, env.getLocale(), encoding, false);
         return raw;
     }

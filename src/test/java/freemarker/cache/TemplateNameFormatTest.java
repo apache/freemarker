@@ -2,13 +2,17 @@ package freemarker.cache;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import freemarker.template.MalformedTemplateNameException;
 
 public class TemplateNameFormatTest {
 
     @Test
-    public void testToAbsoluteName() {
+    public void testToAbsoluteName() throws MalformedTemplateNameException {
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
                 TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
             // Relative paths:
@@ -51,156 +55,173 @@ public class TemplateNameFormatTest {
     }
 
     @Test
-    public void testNormalizeAbsoluteName() {
+    public void testNormalizeAbsoluteName() throws MalformedTemplateNameException {
         // Normalizations that are the same in legacy and modern format:
         for (TemplateNameFormat tnf : new TemplateNameFormat[] {
                 TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
-            for (String lead : new String[] { "", "/" }) {
-                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "foo"));
-                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./foo"));
-                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./././foo"));
-                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "bar/../foo"));
-                assertEquals("a/b/", tnf.normalizeAbsoluteName("a/b/"));
-                assertEquals("a/", tnf.normalizeAbsoluteName("a/b/../"));
-                assertEquals("a/c../..d/e*/*f", tnf.normalizeAbsoluteName("a/c../..d/e*/*f"));
-                assertEquals("", tnf.normalizeAbsoluteName(""));
-                assertEquals("foo/bar/*", tnf.normalizeAbsoluteName("foo/bar/*"));
-                assertEquals("schema://", tnf.normalizeAbsoluteName("schema://"));
-                assertNull(tnf.normalizeAbsoluteName(lead + "bar/../../x/foo"));
-                assertNull(tnf.normalizeAbsoluteName(lead + "../x"));
-                assertNull(tnf.normalizeAbsoluteName(lead + "../../../x"));
-                assertNull(tnf.normalizeAbsoluteName(lead + "foo\u0000"));
-            }
             assertEquals("", tnf.normalizeAbsoluteName(""));
-            assertNull(tnf.normalizeAbsoluteName("x://../../../foo"));
+            for (String lead : new String[] { "", "/" }) {
+            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "foo"));
+            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./foo"));
+            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./././foo"));
+            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "bar/../foo"));
+            assertEquals("a/b/", tnf.normalizeAbsoluteName("a/b/"));
+            assertEquals("a/", tnf.normalizeAbsoluteName("a/b/../"));
+            assertEquals("a/c../..d/e*/*f", tnf.normalizeAbsoluteName("a/c../..d/e*/*f"));
+            assertEquals("", tnf.normalizeAbsoluteName(""));
+            assertEquals("foo/bar/*", tnf.normalizeAbsoluteName("foo/bar/*"));
+            assertEquals("schema://", tnf.normalizeAbsoluteName("schema://"));
+            }
         }
         
         // Normalizations that differ in legacy and modern format:
         
-        final TemplateNameFormat tnf23 = TemplateNameFormat.DEFAULT_2_3_0;
-        final TemplateNameFormat tnf24 = TemplateNameFormat.DEFAULT_2_4_0;
+        for (String lead : new String[] { "", "/" }) {
+            assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(lead + "bar/../../x/foo");
+            assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(lead + "../x");
+            assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(lead + "../../../x");
+
+            {
+                final String name = lead + "foo\u0000";
+                assertNull(TemplateNameFormat.DEFAULT_2_3_0.normalizeAbsoluteName(name));
+                try {
+                    TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name);
+                    fail();
+                } catch (MalformedTemplateNameException e) {
+                    assertEquals(name, e.getTemplateName());
+                    assertTrue(e.getMalformednessDescription().toLowerCase().contains("null character"));
+                }
+            }
+        } // for lead
+        
+        assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24("x://../../../foo");
         
         // ".." and "."
-        assertEquals("bar/foo", tnf23.normalizeAbsoluteName("bar/./../foo"));
-        assertEquals("foo", tnf24.normalizeAbsoluteName("bar/./../foo"));
+        assertEqualsOn23AndOn24("bar/foo", "foo", "bar/./../foo");
         
-        // Even number of leading ".."-s bug: 
-        assertEquals("foo", tnf23.normalizeAbsoluteName("../../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("../../foo"));
-        //
-        assertEquals("foo", tnf23.normalizeAbsoluteName("../../../../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("../../../../foo"));
+        // Even number of leading ".."-s bug:
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("foo", "../../foo");
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("foo", "../../../../foo");
         
         // ".." and "*"
-        assertEquals("a/b/foo", tnf23.normalizeAbsoluteName("a/b/*/../foo"));
-        assertEquals("a/*/foo", tnf24.normalizeAbsoluteName("a/b/*/../foo"));
+        assertEqualsOn23AndOn24("a/b/foo", "a/*/foo", "a/b/*/../foo");
         //
-        assertEquals("a/foo", tnf23.normalizeAbsoluteName("a/b/*/../../foo"));
-        assertEquals("foo", tnf24.normalizeAbsoluteName("a/b/*/../../foo"));
+        assertEqualsOn23AndOn24("a/foo", "foo", "a/b/*/../../foo");
         //
-        assertEquals("foo", tnf23.normalizeAbsoluteName("a/b/*/../../../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("a/b/*/../../../foo"));
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("foo", "a/b/*/../../../foo");
         //
-        assertEquals("a/b/*/foo", tnf23.normalizeAbsoluteName("a/b/*/*/../foo"));
-        assertEquals("a/*/foo", tnf24.normalizeAbsoluteName("a/b/*/*/../foo"));
+        assertEqualsOn23AndOn24("a/b/*/foo", "a/*/foo", "a/b/*/*/../foo");
         //
-        assertEquals("a/b/*/c/foo", tnf23.normalizeAbsoluteName("a/b/*/c/*/../foo"));
-        assertEquals("a/b/*/foo", tnf24.normalizeAbsoluteName("a/b/*/c/*/../foo"));
+        assertEqualsOn23AndOn24("a/b/*/c/foo", "a/b/*/foo", "a/b/*/c/*/../foo");
         //
-        assertEquals("a/b/*/c/foo", tnf23.normalizeAbsoluteName("a/b/*/c/d/*/../../foo"));
-        assertEquals("a/b/*/foo", tnf24.normalizeAbsoluteName("a/b/*/c/d/*/../../foo"));
+        assertEqualsOn23AndOn24("a/b/*/c/foo", "a/b/*/foo", "a/b/*/c/d/*/../../foo");
         //
-        assertEquals("a/*//b/*/c/foo", tnf23.normalizeAbsoluteName("a/*//b/*/c/d/*/../../foo"));
-        assertEquals("a/*/b/*/foo", tnf24.normalizeAbsoluteName("a/*//b/*/c/d/*/../../foo"));
+        assertEqualsOn23AndOn24("a/*//b/*/c/foo", "a/*/b/*/foo", "a/*//b/*/c/d/*/../../foo");
         //
-        assertEquals("*", tnf23.normalizeAbsoluteName("a/../*"));
-        assertEquals("", tnf24.normalizeAbsoluteName("a/../*"));
+        assertEqualsOn23AndOn24("*", "", "a/../*");
         //
-        assertEquals("*/", tnf23.normalizeAbsoluteName("a/../*/"));
-        assertEquals("", tnf24.normalizeAbsoluteName("a/../*/"));
+        assertEqualsOn23AndOn24("*/", "", "a/../*/");
         
         // ".." and "scheme"
-        assertEquals("x:/foo", tnf23.normalizeAbsoluteName("x://../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("x://../foo"));
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("x:/foo", "x://../foo");
         //
-        assertEquals("foo", tnf23.normalizeAbsoluteName("x://../../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("x://../../foo"));
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("foo", "x://../../foo");
         //
-        assertEquals("x:../foo", tnf23.normalizeAbsoluteName("x:../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("x:../foo"));
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("x:../foo", "x:../foo");
         //
-        assertEquals("foo", tnf23.normalizeAbsoluteName("x:../../foo"));
-        assertNull(tnf24.normalizeAbsoluteName("x:../../foo"));
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("foo", "x:../../foo");
 
         // Tricky cases with terminating "/":
-        assertEquals("/", tnf23.normalizeAbsoluteName("/"));
-        assertEquals("", tnf24.normalizeAbsoluteName("/"));
+        assertEqualsOn23AndOn24("/", "", "/");
         // Terminating "/.." (produces terminating "/"):
-        assertEquals("foo/bar/..", tnf23.normalizeAbsoluteName("foo/bar/.."));
-        assertEquals("foo/", tnf24.normalizeAbsoluteName("foo/bar/.."));
+        assertEqualsOn23AndOn24("foo/bar/..", "foo/", "foo/bar/..");
         // Terminating "/." (produces terminating "/"):
-        assertEquals("foo/bar/.", tnf23.normalizeAbsoluteName("foo/bar/."));
-        assertEquals("foo/bar/", tnf24.normalizeAbsoluteName("foo/bar/."));
+        assertEqualsOn23AndOn24("foo/bar/.", "foo/bar/", "foo/bar/.");
         
         // Lonely "."
-        assertEquals(".", tnf23.normalizeAbsoluteName("."));
-        assertEquals("", tnf24.normalizeAbsoluteName("."));
+        assertEqualsOn23AndOn24(".", "", ".");
         // Lonely ".."
-        assertEquals("..", tnf23.normalizeAbsoluteName(".."));
-        assertNull(tnf24.normalizeAbsoluteName(".."));
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24("..", "..");
         // Lonely "*"
         
         // Eliminating redundant "//":
-        assertEquals("foo//bar", tnf23.normalizeAbsoluteName("foo//bar"));
-        assertEquals("foo/bar", tnf24.normalizeAbsoluteName("foo//bar"));
+        assertEqualsOn23AndOn24("foo//bar", "foo/bar", "foo//bar");
         //
-        assertEquals("///foo//bar///baaz////wombat", tnf23.normalizeAbsoluteName("////foo//bar///baaz////wombat"));
-        assertEquals("foo/bar/baaz/wombat", tnf24.normalizeAbsoluteName("////foo//bar///baaz////wombat"));
+        assertEqualsOn23AndOn24("///foo//bar///baaz////wombat", "foo/bar/baaz/wombat", "////foo//bar///baaz////wombat");
         //
-        assertEquals("scheme://foo", tnf23.normalizeAbsoluteName("scheme://foo"));
-        assertEquals("scheme://foo", tnf24.normalizeAbsoluteName("scheme://foo"));
+        assertEqualsOn23AndOn24("scheme://foo", "scheme://foo", "scheme://foo");
         //
-        assertEquals("scheme://foo//x/y", tnf23.normalizeAbsoluteName("scheme://foo//x/y"));
-        assertEquals("scheme://foo/x/y", tnf24.normalizeAbsoluteName("scheme://foo//x/y"));
+        assertEqualsOn23AndOn24("scheme://foo//x/y", "scheme://foo/x/y", "scheme://foo//x/y");
         //
-        assertEquals("scheme:///foo", tnf23.normalizeAbsoluteName("scheme:///foo"));
-        assertEquals("scheme://foo", tnf24.normalizeAbsoluteName("scheme:///foo"));
+        assertEqualsOn23AndOn24("scheme:///foo", "scheme://foo", "scheme:///foo");
         //
-        assertEquals("scheme:////foo", tnf23.normalizeAbsoluteName("scheme:////foo"));
-        assertEquals("scheme://foo", tnf24.normalizeAbsoluteName("scheme:////foo"));
+        assertEqualsOn23AndOn24("scheme:////foo", "scheme://foo", "scheme:////foo");
         
         // Eliminating redundant "*"-s:
-        assertEquals("a/*/*/b", tnf23.normalizeAbsoluteName("a/*/*/b"));
-        assertEquals("a/*/b", tnf24.normalizeAbsoluteName("a/*/*/b"));
+        assertEqualsOn23AndOn24("a/*/*/b", "a/*/b", "a/*/*/b");
         //
-        assertEquals("a/*/*/*/b", tnf23.normalizeAbsoluteName("a/*/*/*/b"));
-        assertEquals("a/*/b", tnf24.normalizeAbsoluteName("a/*/*/*/b"));
+        assertEqualsOn23AndOn24("a/*/*/*/b", "a/*/b", "a/*/*/*/b");
         //
-        assertEquals("*/*/b", tnf23.normalizeAbsoluteName("*/*/b"));
-        assertEquals("b", tnf24.normalizeAbsoluteName("*/*/b"));
+        assertEqualsOn23AndOn24("*/*/b", "b", "*/*/b");
         //
-        assertEquals("*/*/b", tnf23.normalizeAbsoluteName("/*/*/b"));
-        assertEquals("b", tnf24.normalizeAbsoluteName("/*/*/b"));
+        assertEqualsOn23AndOn24("*/*/b", "b", "/*/*/b");
         //
-        assertEquals("b/*/*", tnf23.normalizeAbsoluteName("b/*/*"));
-        assertEquals("b/*", tnf24.normalizeAbsoluteName("b/*/*"));
+        assertEqualsOn23AndOn24("b/*/*", "b/*", "b/*/*");
         //
-        assertEquals("b/*/*/*", tnf23.normalizeAbsoluteName("b/*/*/*"));
-        assertEquals("b/*", tnf24.normalizeAbsoluteName("b/*/*"));
+        assertEqualsOn23AndOn24("b/*/*/*", "b/*", "b/*/*/*");
         //
-        assertEquals("*/a/*/b/*/*/c", tnf23.normalizeAbsoluteName("*/a/*/b/*/*/c"));
-        assertEquals("a/*/b/*/c", tnf24.normalizeAbsoluteName("*/a/*/b/*/*/c"));
+        assertEqualsOn23AndOn24("*/a/*/b/*/*/c", "a/*/b/*/c", "*/a/*/b/*/*/c");
         
         // New kind of scheme handling:
+
+        assertEquals("s:a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName("s:a/b"));
+        assertEquals("s:a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName("s:/a/b"));
+        assertEquals("s://a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName("s://a/b"));
+        assertEquals("s://a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName("s:///a/b"));
+        assertEquals("s://a/b", TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName("s:////a/b"));
         
-        assertEquals("s:a/b", tnf24.normalizeAbsoluteName("s:a/b"));
-        assertEquals("s:a/b", tnf24.normalizeAbsoluteName("s:/a/b"));
-        assertEquals("s://a/b", tnf24.normalizeAbsoluteName("s://a/b"));
-        assertEquals("s://a/b", tnf24.normalizeAbsoluteName("s:///a/b"));
-        assertEquals("s://a/b", tnf24.normalizeAbsoluteName("s:////a/b"));
         // Illegal use a of ":":
-        assertNull(tnf24.normalizeAbsoluteName("a/b:c/d"));
-        assertNull(tnf24.normalizeAbsoluteName("a/b:/.."));
+        assertNormAbsNameThrowsColonExceptionOn24("a/b:c/d");
+        assertNormAbsNameThrowsColonExceptionOn24("a/b:/..");
+    }
+    
+    private void assertEqualsOn23AndOn24(String expected23, String expected24, String name)
+            throws MalformedTemplateNameException {
+        assertEquals(expected23, TemplateNameFormat.DEFAULT_2_3_0.normalizeAbsoluteName(name));
+        assertEquals(expected24, TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name));
     }
 
+    private void assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(final String name) throws MalformedTemplateNameException {
+        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24(null, name);
+    }
+
+    private void assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24(final String expected23, final String name) throws MalformedTemplateNameException {
+        assertEquals(expected23, TemplateNameFormat.DEFAULT_2_3_0.normalizeAbsoluteName(name));
+        try {
+            TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name);
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            assertEquals(name, e.getTemplateName());
+            assertBackingOutFromRootException(e);
+        }
+    }
+
+    private void assertNormAbsNameThrowsColonExceptionOn24(final String name) throws MalformedTemplateNameException {
+        try {
+            TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name);
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            assertEquals(name, e.getTemplateName());
+            assertColonException(e);
+        }
+    }
+    
+    private void assertBackingOutFromRootException(MalformedTemplateNameException e) {
+        assertTrue(e.getMessage().toLowerCase().contains("backing out"));
+    }
+
+    private void assertColonException(MalformedTemplateNameException e) {
+        assertTrue(e.getMessage().toLowerCase().contains("':'"));
+    }
+    
 }

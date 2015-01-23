@@ -18,7 +18,7 @@ package freemarker.core;
 
 import java.io.IOException;
 
-import freemarker.cache.TemplateCache;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -157,18 +157,24 @@ final class Include extends TemplateElement {
                 : ignoreMissingExp.evalToBoolean(env);
         
         final Template includedTemplate;
-        final String fullIncludedTemplatePath = TemplateCache.getFullTemplatePath(
-                env, baseDirectoryPath, includedTemplatePath);
+        final String fullIncludedTemplateName;
         try {
-            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplatePath, encoding, parse, ignoreMissing);
+            fullIncludedTemplateName = env.toFullTemplateName(baseDirectoryPath, includedTemplatePath);
+        } catch (MalformedTemplateNameException e) {
+            throw new _MiscTemplateException(e, env, new Object[] {
+                    "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",
+                    e.getMalformednessDescription() });
+        }
+        try {
+            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, encoding, parse, ignoreMissing);
         } catch (ParseException e) {
             throw new _MiscTemplateException(e, env, new Object[] {
                     "Error parsing included template ",
-                    new _DelayedJQuote(fullIncludedTemplatePath), ":\n",
+                    new _DelayedJQuote(fullIncludedTemplateName), ":\n",
                     new _DelayedGetMessage(e) });
         } catch (IOException e) {
             throw new _MiscTemplateException(e, env, new Object[] {
-                    "Error reading included file ", new _DelayedJQuote(fullIncludedTemplatePath), ":\n",
+                    "Error reading included file ", new _DelayedJQuote(fullIncludedTemplateName), ":\n",
                     new _DelayedGetMessage(e) });
         }
         if (includedTemplate != null) {

@@ -32,6 +32,7 @@ import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
@@ -215,8 +216,8 @@ public class TemplateCache
         NullArgumentException.check("locale", locale);
         NullArgumentException.check("encoding", encoding);
         
-        name = normalizeAbsoluteName(name);
-        if(name == null) {
+        name = templateNameFormat.normalizeAbsoluteName(name);
+        if (name == null) {
             return null;
         }
         
@@ -579,7 +580,7 @@ public class TemplateCache
         if (encoding == null) {
             throw new IllegalArgumentException("Argument \"encoding\" can't be null");
         }
-        name = normalizeAbsoluteName(name);
+        name = templateNameFormat.normalizeAbsoluteName(name);
         if(name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugName = debug
@@ -606,29 +607,19 @@ public class TemplateCache
     }    
 
     /**
-     * Resolves a path-like reference to a template (like the one used in {@code #include} or {@code #import}), assuming
-     * a current directory. This gives a full, even if non-normalized template name, that could be used for
-     * {@link #getTemplate(String, Locale, String, boolean)}. This is mostly used when a template refers to another
-     * template.
+     * @deprecated Use {@link Environment#toFullTemplateName(String, String)} instead, as that can throw
+     *             {@link MalformedTemplateNameException}, and is on a more logical place anyway.
      * 
-     * @param targetName
-     *            If starts with "/" or contains a scheme part ("://", or with {@link TemplateNameFormat#DEFAULT_2_4_0}
-     *            even just a ":" that's not preceded by a "/") then it's an absolute name, otherwise it's a relative
-     *            path. Relative paths are interpreted relatively to the {@code baseName}. Absolute names are simply
-     *            returned as is, ignoring the {@code baseName}, except if the {@code baseName} has scheme part, and
-     *            the {@code targetName} hasn't, in which case it will get the schema of the {@code baseName}.
-     * @param baseName
-     *            Before 2.3.22, it had to end with "/" or else the method has malfunctioned. Starting from 2.3.22, if
-     *            it doesn't end with "/", it's parent directory will be used as the base path. Might starts with a
-     *            scheme part (like "foo://", or with {@link TemplateNameFormat#DEFAULT_2_4_0} even just "foo:").
+     * @throws IllegalArgumentException
+     *             If the {@code baseName} or {@code targetName} is malformed according the {@link TemplateNameFormat}
+     *             in use.
      */
     public static String getFullTemplatePath(Environment env, String baseName, String targetName) {
-        if (env.isClassicCompatible()) {
-            // Early FM only had absolute names.
-            return targetName;
+        try {
+            return env.toFullTemplateName(baseName, targetName);
+        } catch (MalformedTemplateNameException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
-        
-        return env.getConfiguration().getTemplateNameFormat().toAbsoluteName(baseName, targetName);
     }
 
     private TemplateLookupResult lookupTemplate(String name, Locale locale, Object customLookupCondition)
@@ -731,10 +722,6 @@ public class TemplateCache
         return buf.toString();
     }
     
-    private String normalizeAbsoluteName(String name) {
-        return templateNameFormat.normalizeAbsoluteName(name);
-    }
-
     /**
      * This class holds a (name, locale) pair and is used as the key in
      * the cached templates map.
