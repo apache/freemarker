@@ -16,16 +16,14 @@
 
 package freemarker.template;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
 import org.junit.Test;
 
 import freemarker.cache.StringTemplateLoader;
-
 public class TemplateLanguageVersionTest {
 
     @Test
@@ -39,7 +37,7 @@ public class TemplateLanguageVersionTest {
             testDefaultWithVersion(new Version(2, 3, 23), Configuration.VERSION_2_3_21);
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("version"));
+            assertThat(e.getMessage(), containsString("version"));
         }
     }
 

@@ -17,6 +17,7 @@
 package freemarker.cache;
 
 import static freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -114,7 +115,8 @@ public class TemplateNameFormatTest {
                     fail();
                 } catch (MalformedTemplateNameException e) {
                     assertEquals(name, e.getTemplateName());
-                    assertTrue(e.getMalformednessDescription().toLowerCase().contains("null character"));
+                    
+                    assertThat(e.getMalformednessDescription(), containsStringIgnoringCase("null character"));
                 }
             }
         } // for lead
@@ -305,11 +307,11 @@ public class TemplateNameFormatTest {
     }
     
     private void assertBackingOutFromRootException(MalformedTemplateNameException e) {
-        assertTrue(e.getMessage().toLowerCase().contains("backing out"));
+        assertThat(e.getMessage(), containsStringIgnoringCase("backing out"));
     }
 
     private void assertColonException(MalformedTemplateNameException e) {
-        assertTrue(e.getMessage().toLowerCase().contains("':'"));
+        assertThat(e.getMessage(), containsString("':'"));
     }
     
 }

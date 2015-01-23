@@ -24,8 +24,7 @@ public final class Matchers {
         // Not meant to be instantiated
     }
 
-    public static Matcher<String> containsStringIgnoringCase(String substring)
-    {
+    public static Matcher<String> containsStringIgnoringCase(String substring) {
         return StringContainsIgnoringCase.containsStringIgnoringCase(substring);
     }
 

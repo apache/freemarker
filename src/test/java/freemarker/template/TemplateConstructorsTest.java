@@ -16,17 +16,14 @@
 
 package freemarker.template;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.junit.Test;
-
 public class TemplateConstructorsTest {
 
     private static final String READER_CONTENT = "From a reader...";
@@ -95,8 +92,8 @@ public class TemplateConstructorsTest {
                 new Template(name, sourceName, createReaderForceUTF8(), cfg, encoding);
                 fail();
             } catch (Template.WrongEncodingException e) {
-                assertTrue(e.getMessage().contains("utf-8"));
-                assertTrue(e.getMessage().contains(encoding));
+                assertThat(e.getMessage(), containsString("utf-8"));
+                assertThat(e.getMessage(), containsString(encoding));
             }
         }
     }

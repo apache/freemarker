@@ -22,7 +22,6 @@ import java.util.List;
 import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
-import freemarker.template.Version;
 
 public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     

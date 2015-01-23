@@ -130,7 +130,7 @@
     
     <!-- Note: Ant doesn't contain junit.jar any more -->
     <dependency org="junit" name="junit" rev="4.12" conf="test->default" />
-    <dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" conf="test->default" />
+    <dependency org="org.hamcrest" name="hamcrest-library" rev="1.3" conf="test->default" />
 
     <dependency org="ch.qos.logback" name="logback-classic" rev="1.1.2" conf="test->default" />
 

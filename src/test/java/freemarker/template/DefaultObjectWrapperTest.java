@@ -16,12 +16,9 @@
 
 package freemarker.template;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -322,7 +319,7 @@ public class DefaultObjectWrapperTest {
             new DefaultObjectWrapper(new Version(99, 9, 9));
             fail();
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("version"));
+            assertThat(e.getMessage(), containsString("version"));
         }
     }
     
@@ -559,7 +556,7 @@ public class DefaultObjectWrapperTest {
                 it.next();
                 fail();
             } catch (TemplateModelException e) {
-                assertTrue(e.getMessage().contains("no more"));
+                assertThat(e.getMessage(), containsString("no more"));
             }
         }
 
@@ -589,8 +586,8 @@ public class DefaultObjectWrapperTest {
 
     private void assertArrayAdapterClass(String adapterCompType, TemplateModel adaptedArray) {
         assertTrue(adaptedArray instanceof DefaultArrayAdapter);
-        assertTrue(adaptedArray.getClass().getName()
-                .contains("$" + adapterCompType.substring(0, 1).toUpperCase() + adapterCompType.substring(1)));
+        assertThat(adaptedArray.getClass().getName(),
+                containsString("$" + adapterCompType.substring(0, 1).toUpperCase() + adapterCompType.substring(1)));
     }
 
     @SuppressWarnings("boxing")
@@ -713,7 +710,7 @@ public class DefaultObjectWrapperTest {
                 assertFalse(coll.contains(OW22_FUTURE.wrap(1)));
                 fail();
             } catch (TemplateModelException e) {
-                assertTrue(e.getMessage().contains("Integer"));
+                assertThat(e.getMessage(), containsString("Integer"));
             }
 
             assertRoundtrip(OW22_FUTURE, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
@@ -768,7 +765,7 @@ public class DefaultObjectWrapperTest {
                 it.next();
                 fail();
             } catch (TemplateModelException e) {
-                assertTrue(e.getMessage().contains("no more"));
+                assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
             }
         }
     }
@@ -839,14 +836,14 @@ public class DefaultObjectWrapperTest {
             itIt.next();
             fail();
         } catch (TemplateModelException e) {
-            assertTrue(e.getMessage().contains("no more"));
+            assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
         }
 
         try {
             itIt2.hasNext();
             fail();
         } catch (TemplateModelException e) {
-            assertTrue(e.getMessage().contains("can be listed only once"));
+            assertThat(e.getMessage(), containsString("can be listed only once"));
         }
 
         TemplateModelIterator itIt3 = coll.iterator();
@@ -854,7 +851,7 @@ public class DefaultObjectWrapperTest {
             itIt3.hasNext();
             fail();
         } catch (TemplateModelException e) {
-            assertTrue(e.getMessage().contains("can be listed only once"));
+            assertThat(e.getMessage(), containsString("can be listed only once"));
         }
     }
     
@@ -877,7 +874,7 @@ public class DefaultObjectWrapperTest {
             try {
                 ((TemplateHashModel) ow.wrap(sortedMapC)).get("a");
             } catch (TemplateModelException e) {
-                assertTrue(e.getMessage().contains("String key"));
+                assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
             }
             
             assertNull(((TemplateHashModel) ow.wrap(hashMapS)).get("b"));
@@ -886,7 +883,7 @@ public class DefaultObjectWrapperTest {
             try {
                 ((TemplateHashModel) ow.wrap(sortedMapC)).get("b");
             } catch (TemplateModelException e) {
-                assertTrue(e.getMessage().contains("String key"));
+                assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
             }
         }
     }

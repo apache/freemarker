@@ -16,9 +16,8 @@
 
 package freemarker.template;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +47,7 @@ public class SimpleObjetWrapperTest {
             map.getAPI();
             fail();
         } catch (TemplateException e) {
-            assertTrue(e.getMessage().contains("?api"));
+            assertThat(e.getMessage(), containsString("?api"));
         }
     }
 
@@ -83,7 +82,7 @@ public class SimpleObjetWrapperTest {
             sow.wrap(doc);
             fail();
         } catch (TemplateModelException e) {
-            assertTrue(e.getMessage().contains("won't wrap"));
+            assertThat(e.getMessage(), containsString("won't wrap"));
         }
     }
     
@@ -94,7 +93,7 @@ public class SimpleObjetWrapperTest {
             sow.wrap(new File("/x"));
             fail();
         } catch (TemplateModelException e) {
-            assertTrue(e.getMessage().contains("won't wrap"));
+            assertThat(e.getMessage(), containsString("won't wrap"));
         }
     }
     

@@ -16,7 +16,9 @@
 
 package freemarker.template;
 
-import java.io.FileNotFoundException;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -239,24 +241,24 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.getTemplate("missing.ftl");
             fail();
-        } catch (FileNotFoundException e) {
-            assertTrue(e.getMessage().contains("wasn't set") && e.getMessage().contains("default"));
+        } catch (TemplateNotFoundException e) {
+            assertThat(e.getMessage(), allOf(containsString("wasn't set"), containsString("default")));
         }
         
         cfg = new Configuration(Configuration.VERSION_2_3_21);
         try {
             cfg.getTemplate("missing.ftl");
             fail();
-        } catch (FileNotFoundException e) {
-            assertTrue(e.getMessage().contains("wasn't set") && !e.getMessage().contains("default"));
+        } catch (TemplateNotFoundException e) {
+            assertThat(e.getMessage(), allOf(containsString("wasn't set"), not(containsString("default"))));
         }
         
         cfg.setClassForTemplateLoading(this.getClass(), "nosuchpackage");
         try {
             cfg.getTemplate("missing.ftl");
             fail();
-        } catch (IOException e) {
-            assertTrue(!e.getMessage().contains("wasn't set"));
+        } catch (TemplateNotFoundException e) {
+            assertThat(e.getMessage(), not(containsString("wasn't set")));
         }
     }
     
@@ -286,13 +288,13 @@ public class ConfigurationTest extends TestCase {
         try {
             new Configuration(new Version(999, 1, 2));
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("upgrade"));
+            assertThat(e.getMessage(), containsString("upgrade"));
         }
         
         try {
             new Configuration(new Version(2, 2, 2));
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("2.3.0"));
+            assertThat(e.getMessage(), containsString("2.3.0"));
         }
     }
     
@@ -302,7 +304,7 @@ public class ConfigurationTest extends TestCase {
             new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertTrue(e.getMessage().contains("Tip:"));
+            assertThat(e.getMessage(), containsString("Tip:"));
         }
         
         cfg.setShowErrorTips(false);
@@ -310,7 +312,7 @@ public class ConfigurationTest extends TestCase {
             new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertFalse(e.getMessage().contains("Tip:"));
+            assertThat(e.getMessage(), not(containsString("Tip:")));
         }
     }
     
@@ -973,7 +975,7 @@ public class ConfigurationTest extends TestCase {
                 new Template(null, "${1?api}", cfg).process(null, NullWriter.INSTANCE);
                 fail();
             } catch (TemplateException e) {
-                assertTrue(e.getMessage().contains(Configurable.API_BUILTIN_ENABLED_KEY));
+                assertThat(e.getMessage(), containsString(Configurable.API_BUILTIN_ENABLED_KEY));
             }
         }
         

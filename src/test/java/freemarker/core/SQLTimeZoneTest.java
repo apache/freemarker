@@ -16,8 +16,7 @@
 
 package freemarker.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.sql.Time;
 import java.sql.Timestamp;

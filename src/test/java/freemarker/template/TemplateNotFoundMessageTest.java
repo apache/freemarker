@@ -16,8 +16,8 @@
 
 package freemarker.template;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,25 +49,25 @@ public class TemplateNotFoundMessageTest {
         final File baseDir = new File(System.getProperty("user.home"));
         final String errMsg = failWith(new FileTemplateLoader(baseDir));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains(baseDir.toString()));
-        assertTrue(errMsg.contains("FileTemplateLoader"));
+        assertThat(errMsg, containsString(baseDir.toString()));
+        assertThat(errMsg, containsString("FileTemplateLoader"));
     }
 
     @Test
     public void testClassTemplateLoader() throws IOException {
         final String errMsg = failWith(new ClassTemplateLoader(this.getClass(), "foo/bar"));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("ClassTemplateLoader"));
-        assertTrue(errMsg.contains("foo/bar"));
+        assertThat(errMsg, containsString("ClassTemplateLoader"));
+        assertThat(errMsg, containsString("foo/bar"));
     }
 
     @Test
     public void testWebappTemplateLoader() throws IOException {
         final String errMsg = failWith(new WebappTemplateLoader(new MockServletContext(), "WEB-INF/templates"));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("WebappTemplateLoader"));
-        assertTrue(errMsg.contains("MyApp"));
-        assertTrue(errMsg.contains("WEB-INF/templates"));
+        assertThat(errMsg, containsString("WebappTemplateLoader"));
+        assertThat(errMsg, containsString("MyApp"));
+        assertThat(errMsg, containsString("WEB-INF/templates"));
     }
 
     @Test
@@ -78,10 +78,10 @@ public class TemplateNotFoundMessageTest {
         tl.putTemplate("ccc", "C");
         final String errMsg = failWith(tl);
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("StringTemplateLoader"));
-        assertTrue(errMsg.contains("aaa"));
-        assertTrue(errMsg.contains("bbb"));
-        assertTrue(errMsg.contains("ccc"));
+        assertThat(errMsg, containsString("StringTemplateLoader"));
+        assertThat(errMsg, containsString("aaa"));
+        assertThat(errMsg, containsString("bbb"));
+        assertThat(errMsg, containsString("ccc"));
     }
     
     @Test
@@ -91,12 +91,12 @@ public class TemplateNotFoundMessageTest {
                 new ClassTemplateLoader(this.getClass(), "foo/bar")
         }));
         showErrorMessage(errMsg);
-        assertTrue(errMsg.contains("MultiTemplateLoader"));
-        assertTrue(errMsg.contains("WebappTemplateLoader"));
-        assertTrue(errMsg.contains("MyApp"));
-        assertTrue(errMsg.contains("WEB-INF/templates"));
-        assertTrue(errMsg.contains("ClassTemplateLoader"));
-        assertTrue(errMsg.contains("foo/bar"));
+        assertThat(errMsg, containsString("MultiTemplateLoader"));
+        assertThat(errMsg, containsString("WebappTemplateLoader"));
+        assertThat(errMsg, containsString("MyApp"));
+        assertThat(errMsg, containsString("WEB-INF/templates"));
+        assertThat(errMsg, containsString("ClassTemplateLoader"));
+        assertThat(errMsg, containsString("foo/bar"));
     }
 
     private void showErrorMessage(String errMsg) {

@@ -16,7 +16,7 @@
 
 package freemarker.core;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -27,7 +27,6 @@ import org.junit.Test;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.Version;
 
 public class EncodingOverrideTest {
 
