@@ -22517,7 +22517,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   at least for new projects). <literal>DEFAULT_2_4_0</literal>
                   has several advantages, but isn't fully backward compatible
                   (though most applications won't be affected). For typical
-                  mistakes like backing out of the root it gives
+                  mistakes like using backslash instead of slash, or backing
+                  out of the root, it gives
                   <literal>MalformedTemplateNameFormatException</literal> with
                   explanation instead of a generic
                   <literal>TempalteNotFoundException</literal>. It allows

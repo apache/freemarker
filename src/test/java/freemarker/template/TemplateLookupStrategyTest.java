@@ -8,18 +8,16 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.test.MonitoredTemplateLoader;
 
 public class TemplateLookupStrategyTest {
 
@@ -39,7 +37,7 @@ public class TemplateLookupStrategyTest {
     public void testCustomStrategy() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         
-        MockTemplateLoader tl = new MockTemplateLoader();
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTemplate("test.ftl", "");
         tl.putTemplate("aa/test.ftl", "");
         cfg.setTemplateLoader(tl);
@@ -53,8 +51,8 @@ public class TemplateLookupStrategyTest {
             fail();
         } catch (TemplateNotFoundException e) {
             assertEquals("missing.ftl", e.getTemplateName());
-            assertEquals(ImmutableList.of("aa/missing.ftl", "missing.ftl"), tl.templatesTried);
-            tl.templatesTried.clear();
+            assertEquals(ImmutableList.of("aa/missing.ftl", "missing.ftl"), tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -64,8 +62,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("aa/test.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(ImmutableList.of("aa/test.ftl"), tl.templatesTried);
-            tl.templatesTried.clear();
+            assertEquals(ImmutableList.of("aa/test.ftl"), tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
     }
@@ -74,7 +72,7 @@ public class TemplateLookupStrategyTest {
     public void testDefaultStrategy() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         
-        MockTemplateLoader tl = new MockTemplateLoader();
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTemplate("test.ftl", "");
         tl.putTemplate("test_aa.ftl", "");
         tl.putTemplate("test_aa_BB.ftl", "");
@@ -94,8 +92,8 @@ public class TemplateLookupStrategyTest {
                             "missing_aa_BB.ftl",
                             "missing_aa.ftl",
                             "missing.ftl"),
-                    tl.templatesTried);
-            tl.templatesTried.clear();
+                    tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -107,8 +105,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("missing.ftl", e.getTemplateName());
             assertEquals(
                     ImmutableList.of("missing_xx.ftl", "missing.ftl"),
-                    tl.templatesTried);
-            tl.templatesTried.clear();
+                    tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -120,8 +118,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("missing.ftl", e.getTemplateName());
             assertEquals(
                     ImmutableList.of("missing.ftl"),
-                    tl.templatesTried);
-            tl.templatesTried.clear();
+                    tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
         cfg.setLocalizedLookup(true);
@@ -133,8 +131,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("_a_b_.ftl", e.getTemplateName());
             assertEquals(
                     ImmutableList.of("_a_b__xx_YY.ftl", "_a_b__xx.ftl", "_a_b_.ftl"),
-                    tl.templatesTried);
-            tl.templatesTried.clear();
+                    tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
 
@@ -146,9 +144,9 @@ public class TemplateLookupStrategyTest {
                 assertEquals("test_aa_BB_CC_DD.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
-                assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.templatesTried);
+                assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.getTemplatesTried());
                 assertNull(t.getCustomLookupCondition());
-                tl.templatesTried.clear();
+                tl.clear();
                 cfg.clearTemplateCache();
             }
             
@@ -159,8 +157,8 @@ public class TemplateLookupStrategyTest {
                 assertEquals("test_aa_BB_CC.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
-                assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.templatesTried);
-                tl.templatesTried.clear();
+                assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.getTemplatesTried());
+                tl.clear();
                 cfg.clearTemplateCache();
             }
             
@@ -173,8 +171,8 @@ public class TemplateLookupStrategyTest {
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(
                         ImmutableList.of("test_aa_BB_XX_XX.ftl", "test_aa_BB_XX.ftl", "test_aa_BB.ftl"),
-                        tl.templatesTried);
-                tl.templatesTried.clear();
+                        tl.getTemplatesTried());
+                tl.clear();
                 cfg.clearTemplateCache();
             }
     
@@ -188,8 +186,8 @@ public class TemplateLookupStrategyTest {
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(
                         ImmutableList.of("test.ftl"),
-                        tl.templatesTried);
-                tl.templatesTried.clear();
+                        tl.getTemplatesTried());
+                tl.clear();
                 cfg.clearTemplateCache();
                 cfg.setLocalizedLookup(true);
             }
@@ -203,8 +201,8 @@ public class TemplateLookupStrategyTest {
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(
                         ImmutableList.of("test_aa_XX_XX_XX.ftl", "test_aa_XX_XX.ftl", "test_aa_XX.ftl", "test_aa.ftl"),
-                        tl.templatesTried);
-                tl.templatesTried.clear();
+                        tl.getTemplatesTried());
+                tl.clear();
                 cfg.clearTemplateCache();
             }
             
@@ -218,8 +216,8 @@ public class TemplateLookupStrategyTest {
                 assertEquals(
                         ImmutableList.of(
                                 "test_xx_XX_XX_XX.ftl", "test_xx_XX_XX.ftl", "test_xx_XX.ftl", "test_xx.ftl", "test.ftl"),
-                        tl.templatesTried);
-                tl.templatesTried.clear();
+                        tl.getTemplatesTried());
+                tl.clear();
                 cfg.clearTemplateCache();
             }
             
@@ -233,8 +231,8 @@ public class TemplateLookupStrategyTest {
                 assertEquals(
                         ImmutableList.of(
                             "test_xx_BB_CC_DD.ftl", "test_xx_BB_CC.ftl", "test_xx_BB.ftl", "test_xx.ftl", "test.ftl"),
-                        tl.templatesTried);
-                tl.templatesTried.clear();
+                        tl.getTemplatesTried());
+                tl.clear();
                 cfg.clearTemplateCache();
             }
         }
@@ -244,7 +242,7 @@ public class TemplateLookupStrategyTest {
     public void testAcquisition() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         
-        MockTemplateLoader tl = new MockTemplateLoader();
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTemplate("t.ftl", "");
         tl.putTemplate("sub/i.ftl", "");
         tl.putTemplate("x/sub/i.ftl", "");
@@ -262,8 +260,8 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                         "x/y/sub/i_xx.ftl", "x/sub/i_xx.ftl", "sub/i_xx.ftl",
                         "x/y/sub/i.ftl", "x/sub/i.ftl"),
-                    tl.templatesTried);
-            tl.templatesTried.clear();
+                    tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
 
@@ -277,8 +275,8 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                         "a/b/sub/i_xx.ftl", "a/sub/i_xx.ftl", "sub/i_xx.ftl",
                         "a/b/sub/i.ftl", "a/sub/i.ftl", "sub/i.ftl"),
-                    tl.templatesTried);
-            tl.templatesTried.clear();
+                    tl.getTemplatesTried());
+            tl.clear();
             cfg.clearTemplateCache();
         }
     }
@@ -303,7 +301,7 @@ public class TemplateLookupStrategyTest {
         final String t2XxLocaleExpectedOutput = "i3_xx at foo.com";
         final String t2OtherLocaleExpectedOutput = "i3 at foo.com";
         
-        MockTemplateLoader tl = new MockTemplateLoader();
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTemplate("@foo.com/t.ftl", tAtFooComContent);
         tl.putTemplate("@bar.com/t.ftl", tAtBarComContent);
         tl.putTemplate("@default/t.ftl", tAtDefaultContent);
@@ -330,15 +328,15 @@ public class TemplateLookupStrategyTest {
             assertEquals(tAtFooComContent, t.toString());
             assertEquals(
                     ImmutableList.of("@foo.com/t_xx.ftl", "@foo.com/t.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             assertOutputEquals(tAtFooComWithoutIncludeContent + iAtFooComContent, t);
             assertEquals(
                     ImmutableList.of("@foo.com/i_xx.ftl", "@foo.com/i.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
 
@@ -353,17 +351,17 @@ public class TemplateLookupStrategyTest {
             assertEquals(tAtBarComContent, t.toString());
             assertEquals(
                     ImmutableList.of("@bar.com/t_xx.ftl", "@bar.com/t.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             assertOutputEquals(tAtBarComWithoutIncludeContent + iXxAtDefaultContent, t);
             assertEquals(
                     ImmutableList.of(
                             "@bar.com/i_xx.ftl", "@bar.com/i.ftl",
                             "@default/i_xx.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -380,15 +378,15 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "@baaz.com/t_xx_YY.ftl", "@baaz.com/t_xx.ftl", "@baaz.com/t.ftl",
                             "@default/t_xx_YY.ftl", "@default/t_xx.ftl", "@default/t.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             assertOutputEquals(tAtDefaultWithoutIncludeContent + iAtBaazComContent, t);
             assertEquals(
                     ImmutableList.of("@baaz.com/i_xx_YY.ftl", "@baaz.com/i_xx.ftl", "@baaz.com/i.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -405,9 +403,9 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "@nosuch.com/i_xx_YY.ftl", "@nosuch.com/i_xx.ftl", "@nosuch.com/i.ftl",
                             "@default/i_xx_YY.ftl", "@default/i_xx.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
 
@@ -423,9 +421,9 @@ public class TemplateLookupStrategyTest {
             assertEquals(iAtDefaultContent, t.toString());
             assertEquals(
                     ImmutableList.of("@nosuch.com/i.ftl", "@default/i.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.setLocalizedLookup(true);
             cfg.clearTemplateCache();
         }
@@ -440,9 +438,9 @@ public class TemplateLookupStrategyTest {
                             "@foo.com/t2_xx.ftl", "@foo.com/t2.ftl",
                             "@foo.com/i2_xx.ftl", "@foo.com/i2.ftl", "@default/i2_xx.ftl", "@default/i2.ftl",
                             "@foo.com/i3_xx.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -456,9 +454,9 @@ public class TemplateLookupStrategyTest {
                             "@foo.com/t2_yy.ftl", "@foo.com/t2.ftl",
                             "@foo.com/i2_yy.ftl", "@foo.com/i2.ftl", "@default/i2_yy.ftl", "@default/i2.ftl",
                             "@foo.com/i3_yy.ftl", "@foo.com/i3.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -473,9 +471,9 @@ public class TemplateLookupStrategyTest {
                             "@foo.com/t2.ftl",
                             "@foo.com/i2.ftl", "@default/i2.ftl",
                             "@foo.com/i3.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.setLocalizedLookup(true);
             cfg.clearTemplateCache();
         }
@@ -486,9 +484,9 @@ public class TemplateLookupStrategyTest {
             cfg.getTemplate("i3.ftl", locale, domain, "utf-8", true, false); 
             assertEquals(
                     ImmutableList.of("@foo.com/i3_xx.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -505,9 +503,9 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "@bar.com/i3_xx.ftl", "@bar.com/i3.ftl",
                             "@default/i3_xx.ftl", "@default/i3.ftl"),
-                    tl.templatesTried);
+                    tl.getTemplatesTried());
             
-            tl.templatesTried.clear();
+            tl.clear();
             cfg.clearTemplateCache();
         }
         
@@ -522,18 +520,6 @@ public class TemplateLookupStrategyTest {
         StringWriter sw = new StringWriter(); 
         t.process(null, sw);
         assertEquals(expectedContent, sw.toString());
-    }
-    
-    private static class MockTemplateLoader extends StringTemplateLoader {
-        
-        private final List<String> templatesTried = new ArrayList<String>();
-        
-        @Override
-        public Object findTemplateSource(String name) {
-            templatesTried.add(name);
-            return super.findTemplateSource(name);
-        }
-        
     }
     
     public static class MyTemplateLookupStrategy implements TemplateLookupStrategy {

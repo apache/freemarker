@@ -110,6 +110,10 @@ public abstract class TemplateNameFormat {
      * <li>Malformed paths throw {@link MalformedTemplateNameException} instead of acting like if the template wasn't
      * found.
      * 
+     * <li>{@code "\"} (backslash) is not allowed in template names, and causes {@link MalformedTemplateNameException}
+     * with clear description. With {@link #DEFAULT_2_3_0} you would certainly end up with a
+     * {@link TemplateNotFoundException} whose reason is hard to figure out.
+     * 
      * <li>Template names might end with {@code /}, like {@code "foo/"}, and the presence or lack of the terminating
      * {@code /} is seen as significant. While their actual interpretation is up to the {@link TemplateLoader},
      * operations that manipulate template names assume that the last step refers to a "directory" as opposed to a
@@ -165,6 +169,12 @@ public abstract class TemplateNameFormat {
             // Disallow 0 for security reasons.
             if (name.indexOf(0) != -1) {
                 throw new MalformedTemplateNameException(name, "Null character (\\u0000) in the name; possible attack attempt");
+            }
+
+            if (name.indexOf('\\') != -1) {
+                throw new MalformedTemplateNameException(
+                        name,
+                        "Backslash (\"\\\") is not allowed in template names. Use slash (\"/\") instead.");
             }
             
             // Split name to a scheme and a path:

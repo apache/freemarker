@@ -1,13 +1,22 @@
 package freemarker.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static freemarker.test.hamcerst.Matchers.*;
+import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.util.Locale;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
+import freemarker.core.ParseException;
+import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.Template;
+import freemarker.template.TemplateNotFoundException;
+import freemarker.test.MonitoredTemplateLoader;
+
 
 public class TemplateNameFormatTest {
 
@@ -183,6 +192,69 @@ public class TemplateNameFormatTest {
         // Illegal use a of ":":
         assertNormAbsNameThrowsColonExceptionOn24("a/b:c/d");
         assertNormAbsNameThrowsColonExceptionOn24("a/b:/..");
+    }
+    
+    @Test
+    public void assertBackslashNotSpecialWith23() throws MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
+        tl.putTemplate("foo\\bar.ftl", "");
+        cfg.setTemplateLoader(tl);
+
+        {
+            final String name = "foo\\bar.ftl";
+            
+            Template t = cfg.getTemplate(name, Locale.US);
+            assertEquals(name, t.getName());
+            assertEquals(name, t.getSourceName());
+            assertEquals(
+                    ImmutableList.of(
+                            "foo\\bar_en_US.ftl",
+                            "foo\\bar_en.ftl",
+                            name),
+                    tl.getTemplatesTried());
+            tl.clear();
+        }
+
+        try {
+            cfg.getTemplate("foo\\missing.ftl", Locale.US);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            assertEquals("foo\\missing.ftl", e.getTemplateName());
+            assertEquals(
+                    ImmutableList.of(
+                            "foo\\missing_en_US.ftl",
+                            "foo\\missing_en.ftl",
+                            "foo\\missing.ftl"),
+                    tl.getTemplatesTried());
+            tl.clear();
+            cfg.clearTemplateCache();
+        }
+        
+        {
+            final String name = "foo/bar\\..\\bar.ftl";
+            try {
+                cfg.getTemplate(name, Locale.US);
+                fail();
+            } catch (TemplateNotFoundException e) {
+                assertEquals(name, e.getTemplateName());
+            }
+        }
+        
+    }
+
+    @Test
+    public void assertBackslashNotAllowedWith24() throws MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        try {
+            cfg.getTemplate("././foo\\bar.ftl", Locale.US);
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            assertThat(e.getMessage(), containsStringIgnoringCase("backslash"));
+        }
+        
     }
     
     private void assertEqualsOn23AndOn24(String expected23, String expected24, String name)

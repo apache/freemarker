@@ -34,7 +34,6 @@
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-webapp-7.6.16.v20140903.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/jetty-webapp-7.6.16.v20140903-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jetty-xml-7.6.16.v20140903.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/js-1.6R1.jar"/>
-	<classpathentry exported="true" kind="lib" path="ide-dependencies/junit-4.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/jython-2.5.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/org.apache.jasper.glassfish-2.1.0.v201110031002.jar"/>
 	<classpathentry exported="true" kind="lib" path="ide-dependencies/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar" sourcepath="D:/Temp/git_fm/!non-git/jetty/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803-sources.jar"/>
@@ -53,5 +52,6 @@
 	<classpathentry kind="lib" path="ide-dependencies/commons-lang-2.3.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/displaytag-1.2.jar"/>
 	<classpathentry kind="lib" path="ide-dependencies/jcl-over-slf4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="ide-dependencies/junit-4.12.jar"/>
 	<classpathentry kind="output" path=".bin/"/>
 </classpath>
