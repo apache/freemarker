@@ -1495,8 +1495,9 @@ public class StringUtil {
     }
 
     /**
-     * Tries to run toString(), but if that fails, returns a {@code "[toString failed: " + e + "]"} instead.
-     * Also, it returns {@code null} for {@code null} parameter.
+     * Tries to run {@code toString()}, but if that fails, returns a
+     * {@code "[com.example.SomeClass.toString() failed: " + e + "]"} instead. Also, it returns {@code null} for
+     * {@code null} parameter.
      * 
      * @since 2.3.20
      */
@@ -1506,18 +1507,18 @@ public class StringUtil {
         try {
             return object.toString();
         } catch (Throwable e) {
-            return failedToStringSubstitute(e);
+            return failedToStringSubstitute(object, e);
         }
     }
 
-    private static String failedToStringSubstitute(Throwable e) {
+    private static String failedToStringSubstitute(Object object, Throwable e) {
         String eStr;
         try {
             eStr = e.toString();
         } catch (Throwable e2) {
             eStr = ClassUtil.getShortClassNameOfObject(e);
         }
-        return "[toString() failed: " + eStr + "]";
+        return "[" + ClassUtil.getShortClassNameOfObject(object) +".toString() failed: " + eStr + "]";
     }
     
 }

@@ -162,6 +162,11 @@ public abstract class TemplateNameFormat {
             }
             return name;
         }
+        
+        public String toString() {
+            return "TemplateNameFormat.DEFAULT_2_3_0";
+        }
+        
     }
 
     private static final class Default020400 extends TemplateNameFormat {
@@ -387,6 +392,10 @@ public abstract class TemplateNameFormat {
             }
             
             return name;
+        }
+        
+        public String toString() {
+            return "TemplateNameFormat.DEFAULT_2_4_0";
         }
     }
 

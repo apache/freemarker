@@ -91,11 +91,15 @@ public abstract class TemplateLookupStrategy {
      *         {@code null}.
      */
     public abstract TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
-
+    
     private static class Default020300 extends TemplateLookupStrategy {
         
         public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
             return ctx.lookupWithLocalizedThenAcquisitionStrategy(ctx.getTemplateName(), ctx.getTemplateLocale());
+        }
+        
+        public String toString() {
+            return "TemplateLookupStrategy.DEFAULT_2_3_0";
         }
         
     }

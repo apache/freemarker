@@ -1475,20 +1475,16 @@ public class Configuration extends Configurable implements Cloneable {
                 msg = "Template " + StringUtil.jQuote(name) + " not found"
                         + (customLookupCondition != null ? " (with custom lookup condition "
                         + StringUtil.jQuote(customLookupCondition) + ")" : "")
-                        + ". "
-                        + "The quoted name was interpreted by this template loader: ";
-                String tlDesc;
-                try {
-                    tlDesc = tl.toString();
-                } catch (Throwable e) {
-                    tlDesc = tl.getClass().getName() + " object (toString failed)";
-                }
-                msg += tlDesc + ".";
-                
-                if (!templateLoaderExplicitlySet) {
-                    msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
-                            + "default value, which is most certainly not intended and the cause of this problem."; 
-                }
+                        + ". The quoted name was interpreted by this TemplateLoader: "
+                        + StringUtil.tryToString(tl)
+                        + ". The name might was transformed by this TemplateLookupStrategy: "
+                        + StringUtil.tryToString(getTemplateLookupStrategy()
+                        + "."
+                        + (!templateLoaderExplicitlySet
+                                ? " Note that the \"template_loader\" FreeMarker setting "
+                                  + "(Configuration.setTemplateLoader) wasn't set, so it's on its default value, "
+                                  + "which is most certainly not intended and the cause of this problem."
+                                : ""));
             }
             throw new TemplateNotFoundException(name, customLookupCondition, msg);
         }
