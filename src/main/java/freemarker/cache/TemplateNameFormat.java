@@ -61,14 +61,14 @@ public abstract class TemplateNameFormat {
      * the {@link TemplateLoader} to which the normalized names are passed to decide which of these scheme separation
      * conventions are valid (maybe both).</li>
      * 
-     * <li>{@code ":"} is not allowed in template names, except as the scheme separator.
+     * <li>{@code ":"} is not allowed in template names, except as the scheme separator (see previous point).
      * 
      * <li>Malformed paths throw {@link MalformedTemplateNameException} instead of acting like if the template wasn't
      * found.
      * 
-     * <li>{@code "\"} (backslash) is not allowed in template names, and causes {@link MalformedTemplateNameException}
-     * with clear description. With {@link #DEFAULT_2_3_0} you would certainly end up with a
-     * {@link TemplateNotFoundException} whose reason is hard to figure out.
+     * <li>{@code "\"} (backslash) is not allowed in template names, and causes {@link MalformedTemplateNameException}.
+     * With {@link #DEFAULT_2_3_0} you would certainly end up with a {@link TemplateNotFoundException} (or worse,
+     * it would work, but steps like {@code ".."} wouldn't be normalized by FreeMarker).
      * 
      * <li>Template names might end with {@code /}, like {@code "foo/"}, and the presence or lack of the terminating
      * {@code /} is seen as significant. While their actual interpretation is up to the {@link TemplateLoader},
@@ -123,44 +123,47 @@ public abstract class TemplateNameFormat {
             }
         }
     
-        String normalizeAbsoluteName(String name) {
+        String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
-            if (name.indexOf(0) != -1) return null;
+            checkNameHasNoNullCharacter(name);
+            
+            // The legacy algorithm haven't considered schemes, so the name is in effect a path.
+            // Also, note that `path` will be repeatedly replaced below, while `name` is final.
+            String path = name;
             
             for(;;) {
-                int parentDirPathLoc = name.indexOf("/../");
+                int parentDirPathLoc = path.indexOf("/../");
                 if(parentDirPathLoc == 0) {
                     // If it starts with /../, then it reaches outside the template
                     // root.
-                    return null;
+                    throw newRootLeavingException(name);
                 }
                 if(parentDirPathLoc == -1) {
-                    if(name.startsWith("../")) {
-                        // Another attempt to reach out of template root.
-                        return null;
+                    if(path.startsWith("../")) {
+                        throw newRootLeavingException(name);
                     }
                     break;
                 }
-                int previousSlashLoc = name.lastIndexOf('/', parentDirPathLoc - 1);
-                name = name.substring(0, previousSlashLoc + 1) +
-                       name.substring(parentDirPathLoc + "/../".length());
+                int previousSlashLoc = path.lastIndexOf('/', parentDirPathLoc - 1);
+                path = path.substring(0, previousSlashLoc + 1) +
+                       path.substring(parentDirPathLoc + "/../".length());
             }
             for(;;) {
-                int currentDirPathLoc = name.indexOf("/./");
+                int currentDirPathLoc = path.indexOf("/./");
                 if(currentDirPathLoc == -1) {
-                    if(name.startsWith("./")) {
-                        name = name.substring("./".length());
+                    if(path.startsWith("./")) {
+                        path = path.substring("./".length());
                     }
                     break;
                 }
-                name = name.substring(0, currentDirPathLoc) +
-                       name.substring(currentDirPathLoc + "/./".length() - 1);
+                path = path.substring(0, currentDirPathLoc) +
+                       path.substring(currentDirPathLoc + "/./".length() - 1);
             }
             // Editing can leave us with a leading slash; strip it.
-            if(name.length() > 1 && name.charAt(0) == '/') {
-                name = name.substring(1);
+            if(path.length() > 1 && path.charAt(0) == '/') {
+                path = path.substring(1);
             }
-            return name;
+            return path;
         }
         
         public String toString() {
@@ -197,10 +200,7 @@ public abstract class TemplateNameFormat {
     
         String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
-            if (name.indexOf(0) != -1) {
-                throw new MalformedTemplateNameException(name,
-                        "Null character (\\u0000) in the name; possible attack attempt");
-            }
+            checkNameHasNoNullCharacter(name);
     
             if (name.indexOf('\\') != -1) {
                 throw new MalformedTemplateNameException(
@@ -233,16 +233,13 @@ public abstract class TemplateNameFormat {
             
             path = removeDotSteps(path);
             
-            path = resolveDotDotSteps(path);
-            if (path == null) {
-                throw new MalformedTemplateNameException(name, "Backing out from the root directory is not allowed");
-            }
+            path = resolveDotDotSteps(path, name);
     
             path = removeRedundantStarSteps(path);
             
             return scheme == null ? path : scheme + path;
         }
-    
+
         private int findSchemeSectionEnd(String name) {
             int schemeColonIdx = name.indexOf(":");
             if (schemeColonIdx == -1 || name.lastIndexOf('/', schemeColonIdx - 1) != -1) {
@@ -258,33 +255,33 @@ public abstract class TemplateNameFormat {
             }
         }
     
-        private String removeRedundantSlashes(String name) {
+        private String removeRedundantSlashes(String path) {
             String prevName;
             do {
-                prevName = name;
-                name = StringUtil.replace(name, "//", "/");
-            } while (prevName != name);
-            return name.startsWith("/") ? name.substring(1) : name;
+                prevName = path;
+                path = StringUtil.replace(path, "//", "/");
+            } while (prevName != path);
+            return path.startsWith("/") ? path.substring(1) : path;
         }
     
-        private String removeDotSteps(String name) {
-            int nextFromIdx = name.length() - 1;
+        private String removeDotSteps(String path) {
+            int nextFromIdx = path.length() - 1;
             findDotSteps: while (true) {
-                final int dotIdx = name.lastIndexOf('.', nextFromIdx);
+                final int dotIdx = path.lastIndexOf('.', nextFromIdx);
                 if (dotIdx < 0) {
-                    return name;
+                    return path;
                 }
                 nextFromIdx = dotIdx - 1;
                 
-                if (dotIdx != 0 && name.charAt(dotIdx - 1) != '/') {
+                if (dotIdx != 0 && path.charAt(dotIdx - 1) != '/') {
                     // False alarm
                     continue findDotSteps;
                 }
                 
                 final boolean slashRight;
-                if (dotIdx + 1 == name.length()) {
+                if (dotIdx + 1 == path.length()) {
                     slashRight = false;
-                } else if (name.charAt(dotIdx + 1) == '/') {
+                } else if (path.charAt(dotIdx + 1) == '/') {
                     slashRight = true;
                 } else {
                     // False alarm
@@ -292,27 +289,27 @@ public abstract class TemplateNameFormat {
                 }
                 
                 if (slashRight) { // "foo/./bar" or "./bar" 
-                    name = name.substring(0, dotIdx) + name.substring(dotIdx + 2);
+                    path = path.substring(0, dotIdx) + path.substring(dotIdx + 2);
                 } else { // "foo/." or "."
-                    name = name.substring(0, name.length() - 1);
+                    path = path.substring(0, path.length() - 1);
                 }
             }
         }
     
         /**
-         * @return {@code null} if the path backs out from the template loader root directory
+         * @param name The original name, needed for exception error messages.
          */
-        private String resolveDotDotSteps(String name) {
+        private String resolveDotDotSteps(String path, final String name) throws MalformedTemplateNameException {
             int nextFromIdx = 0;
             findDotDotSteps: while (true) {
-                final int dotDotIdx = name.indexOf("..", nextFromIdx);
+                final int dotDotIdx = path.indexOf("..", nextFromIdx);
                 if (dotDotIdx < 0) {
-                    return name;
+                    return path;
                 }
     
                 if (dotDotIdx == 0) {
-                   return null;
-                } else if (name.charAt(dotDotIdx - 1) != '/') {
+                    throw newRootLeavingException(name);
+                } else if (path.charAt(dotDotIdx - 1) != '/') {
                     // False alarm
                     nextFromIdx = dotDotIdx + 3;
                     continue findDotDotSteps;
@@ -320,9 +317,9 @@ public abstract class TemplateNameFormat {
                 // Here we know that it has a preceding "/".
                 
                 final boolean slashRight;
-                if (dotDotIdx + 2 == name.length()) {
+                if (dotDotIdx + 2 == path.length()) {
                     slashRight = false;
-                } else if (name.charAt(dotDotIdx + 2) == '/') {
+                } else if (path.charAt(dotDotIdx + 2) == '/') {
                     slashRight = true;
                 } else {
                     // False alarm
@@ -336,17 +333,17 @@ public abstract class TemplateNameFormat {
                     int searchSlashBacwardsFrom = dotDotIdx - 2; // before the "/.."
                     scanBackwardsForSlash: while (true) {
                         if (searchSlashBacwardsFrom == -1) {
-                            return null;
+                            throw newRootLeavingException(name);
                         }
-                        previousSlashIdx = name.lastIndexOf('/', searchSlashBacwardsFrom);
+                        previousSlashIdx = path.lastIndexOf('/', searchSlashBacwardsFrom);
                         if (previousSlashIdx == -1) {
-                            if (searchSlashBacwardsFrom == 0 && name.charAt(0) == '*') {
+                            if (searchSlashBacwardsFrom == 0 && path.charAt(0) == '*') {
                                 // "*/.."
-                                return null;
+                                throw newRootLeavingException(name);
                             }
                             break scanBackwardsForSlash;
                         }
-                        if (name.charAt(previousSlashIdx + 1) == '*' && name.charAt(previousSlashIdx + 2) == '/') {
+                        if (path.charAt(previousSlashIdx + 1) == '*' && path.charAt(previousSlashIdx + 2) == '/') {
                             skippedStarStep = true;
                             searchSlashBacwardsFrom = previousSlashIdx - 1; 
                         } else {
@@ -357,41 +354,41 @@ public abstract class TemplateNameFormat {
                 
                 // Note: previousSlashIdx is possibly -1
                 // Removed part in {}: "a/{b/*/../}c" or "a/{b/*/..}"
-                name = name.substring(0, previousSlashIdx + 1)
+                path = path.substring(0, previousSlashIdx + 1)
                         + (skippedStarStep ? "*/" : "")
-                        + name.substring(dotDotIdx + (slashRight ? 3 : 2));
+                        + path.substring(dotDotIdx + (slashRight ? 3 : 2));
                 nextFromIdx = previousSlashIdx + 1;
             }
         }
     
-        private String removeRedundantStarSteps(String name) {
+        private String removeRedundantStarSteps(String path) {
             String prevName;
             removeDoubleStarSteps: do {
-                int supiciousIdx = name.indexOf("*/*");
+                int supiciousIdx = path.indexOf("*/*");
                 if (supiciousIdx == -1) {
                     break removeDoubleStarSteps;
                 }
         
-                prevName = name;
+                prevName = path;
                 
                 // Is it delimited on both sided by "/" or by the string boundaires? 
-                if ((supiciousIdx == 0 || name.charAt(supiciousIdx - 1) == '/')
-                        && (supiciousIdx + 3 == name.length() || name.charAt(supiciousIdx + 3) == '/')) {
-                    name = name.substring(0, supiciousIdx) + name.substring(supiciousIdx + 2); 
+                if ((supiciousIdx == 0 || path.charAt(supiciousIdx - 1) == '/')
+                        && (supiciousIdx + 3 == path.length() || path.charAt(supiciousIdx + 3) == '/')) {
+                    path = path.substring(0, supiciousIdx) + path.substring(supiciousIdx + 2); 
                 }
-            } while (prevName != name);
+            } while (prevName != path);
             
             // An initial "*" step is redundant:
-            if (name.startsWith("*")) {
-                if (name.length() == 1) {
-                    name = "";
-                } else if (name.charAt(1) == '/') {
-                    name = name.substring(2); 
+            if (path.startsWith("*")) {
+                if (path.length() == 1) {
+                    path = "";
+                } else if (path.charAt(1) == '/') {
+                    path = path.substring(2); 
                 }
                 // else: it's wasn't a "*" step.
             }
             
-            return name;
+            return path;
         }
         
         public String toString() {
@@ -399,4 +396,15 @@ public abstract class TemplateNameFormat {
         }
     }
 
+    private static void checkNameHasNoNullCharacter(final String name) throws MalformedTemplateNameException {
+        if (name.indexOf(0) != -1) {
+            throw new MalformedTemplateNameException(name,
+                    "Null character (\\u0000) in the name; possible attack attempt");
+        }
+    }
+    
+    private static MalformedTemplateNameException newRootLeavingException(final String name) {
+        return new MalformedTemplateNameException(name, "Backing out from the root directory is not allowed");
+    }
+    
 }

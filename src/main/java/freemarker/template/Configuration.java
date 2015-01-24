@@ -45,6 +45,7 @@ import freemarker.cache.MruCacheStorage;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
+import freemarker.cache.TemplateCache.MaybeMissingTemplate;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupStrategy;
@@ -160,7 +161,7 @@ public class Configuration extends Configurable implements Cloneable {
 
     /** FreeMarker version 2.3.22 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_22 = new Version(2, 3, 22);
-    
+
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -1460,8 +1461,9 @@ public class Configuration extends Configurable implements Cloneable {
             encoding = getEncoding(locale);
         }
         
-        Template result = cache.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
-        if (result == null) {
+        final MaybeMissingTemplate maybeTemp = cache.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
+        final Template temp = maybeTemp.getTemplate();
+        if (temp == null) {
             if (ignoreMissing) {
                 return null;
             }
@@ -1470,27 +1472,67 @@ public class Configuration extends Configurable implements Cloneable {
             String msg; 
             if (tl == null) {
                 msg = "Don't know where to load template " + StringUtil.jQuote(name)
-                      + " from because the \"template_loader\" FreeMarker setting wasn't set.";
+                      + " from because the \"template_loader\" FreeMarker "
+                      + "setting wasn't set (Configuration.setTemplateLoader), so it's null.";
             } else {
-                msg = "Template " + StringUtil.jQuote(name) + " not found"
-                        + (customLookupCondition != null ? " (with custom lookup condition "
-                        + StringUtil.jQuote(customLookupCondition) + ")" : "")
-                        + ". The quoted name was interpreted by this TemplateLoader: "
-                        + StringUtil.tryToString(tl)
-                        + ". The name might was transformed by this TemplateLookupStrategy: "
-                        + StringUtil.tryToString(getTemplateLookupStrategy()
+                final String missingTempNormName = maybeTemp.getMissingTemplateNormalizedName();
+                final String missingTempReason = maybeTemp.getMissingTemplateReason();
+                final TemplateLookupStrategy templateLookupStrategy = getTemplateLookupStrategy();
+                msg = "Template not found for name " + StringUtil.jQuote(name)
+                        + (missingTempNormName != null && name != null
+                                && !removeInitialSlash(name).equals(missingTempNormName)
+                                ? " (normalized: " + StringUtil.jQuote(missingTempNormName) + ")"
+                                : "")
+                        + (customLookupCondition != null ? " and custom lookup condition "
+                        + StringUtil.jQuote(customLookupCondition) : "")
                         + "."
+                        + (missingTempReason != null
+                                ? "\nReason given: " + ensureSentenceIsClosed(missingTempReason)
+                                : "")
+                        + "\nThe name was interpreted by this TemplateLoader: "
+                        + StringUtil.tryToString(tl) + "."
+                        + (!isKnownNonConfusingLookupStrategy(templateLookupStrategy)
+                                ? "\n(Before that, the name was possibly changed by this lookup strategy: "
+                                  + StringUtil.tryToString(templateLookupStrategy) + ".)"
+                                : "")
+                        // Suspected reasons or warning:
                         + (!templateLoaderExplicitlySet
-                                ? " Note that the \"template_loader\" FreeMarker setting "
-                                  + "(Configuration.setTemplateLoader) wasn't set, so it's on its default value, "
-                                  + "which is most certainly not intended and the cause of this problem."
-                                : ""));
+                                ? "\nWarning: The \"template_loader\" FreeMarker setting "
+                                  + "wasn't set (Configuration.setTemplateLoader), and using the default value "
+                                  + "is most certainly not intended and dangerous, and can be the cause of this error."
+                                : "")
+                        + (missingTempReason == null && name.indexOf('\\') != -1
+                                ? "\nWarning: The name contains backslash (\"\\\") instead of slash (\"/\"); "
+                                    + "template names should use slash only."
+                                : "");
             }
-            throw new TemplateNotFoundException(name, customLookupCondition, msg);
+            
+            String normName = maybeTemp.getMissingTemplateNormalizedName();
+            throw new TemplateNotFoundException(
+                    normName != null ? normName : name,
+                    customLookupCondition,
+                    msg);
         }
-        return result;
+        return temp;
     }
     
+    private boolean isKnownNonConfusingLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
+        return templateLookupStrategy == TemplateLookupStrategy.DEFAULT_2_3_0;
+    }
+
+    private String removeInitialSlash(String name) {
+        return name.startsWith("/") ? name.substring(1) : name;
+    }
+
+    private String ensureSentenceIsClosed(String s) {
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        
+        final char lastChar = s.charAt(s.length() - 1);
+        return lastChar == '.' || lastChar == '!' || lastChar == '?' ? s : s + ".";
+    }
+
     /**
      * Sets the charset used for decoding byte sequences to character sequences when
      * reading template files in a locale for which no explicit encoding

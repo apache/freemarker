@@ -34,6 +34,7 @@ import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
+import freemarker.template.TemplateNotFoundException;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -204,11 +205,25 @@ public class TemplateCache
      * All parameters must be non-{@code null}, except {@code customLookupCondition}. For the meaning of the parameters
      * see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
      *
-     * @return the loaded template, or {@code null} if the template was not found.
+     * @return A {@link MaybeMissingTemplate} object that contains the {@link Template}, or a
+     *         {@link MaybeMissingTemplate} object that contains {@code null} as the {@link Template} and information
+     *         about the missing template. The return value itself is never {@code null}.
+     * 
+     * @throws MalformedTemplateNameException
+     *             If the {@code name} was malformed according the current {@link TemplateNameFormat}. However, if the
+     *             {@link TemplateNameFormat} is {@link TemplateNameFormat#DEFAULT_2_3_0} and
+     *             {@link Configuration#getIncompatibleImprovements()} is less than 2.4.0, then instead of throwing this
+     *             exception, a {@link MaybeMissingTemplate} will be returned, similarly as if the template were missing
+     *             (the {@link MaybeMissingTemplate#getMissingTemplateReason()} will describe the real error).
+     * 
+     * @throws IOException
+     *             If reading the template has failed from a reason other than the template is missing. This method
+     *             should never be a {@link TemplateNotFoundException}, as that condition is indicated in the return
+     *             value.
      * 
      * @since 2.3.22
      */
-    public Template getTemplate(String name, Locale locale, Object customLookupCondition,
+    public MaybeMissingTemplate getTemplate(String name, Locale locale, Object customLookupCondition,
             String encoding, boolean parseAsFTL)
     throws IOException
     {
@@ -216,23 +231,35 @@ public class TemplateCache
         NullArgumentException.check("locale", locale);
         NullArgumentException.check("encoding", encoding);
         
-        name = templateNameFormat.normalizeAbsoluteName(name);
-        if (name == null) {
-            return null;
+        try {
+            name = templateNameFormat.normalizeAbsoluteName(name);
+        } catch (MalformedTemplateNameException e) {
+            // If we don't have to emulate backward compatible behavior, then just rethrow it: 
+            if (templateNameFormat != TemplateNameFormat.DEFAULT_2_3_0
+                    || config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_4_0) {
+                throw e;
+            }
+            return new MaybeMissingTemplate(null, e);
         }
         
-        return templateLoader != null
-                ? getTemplate(templateLoader, name, locale, customLookupCondition, encoding, parseAsFTL)
-                : null;
+        if (templateLoader == null) {
+            return new MaybeMissingTemplate(name, "The TemplateLoader was null.");
+        }
+        
+        Template template = getTemplate(templateLoader, name, locale, customLookupCondition, encoding, parseAsFTL);
+        return template != null ? new MaybeMissingTemplate(template) : new MaybeMissingTemplate(name, (String) null);
     }    
 
     /**
-     * Same as {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
+     * Similar to {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
      * {@code customLookupCondition}.
+     * 
+     * @deprecated Use {@link #getTemplate(String, Locale, Object, String, boolean)}, which can return more detailed
+     *             result when the template is missing.
      */
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
     throws IOException {
-        return getTemplate(name, locale, null, encoding, parseAsFTL);
+        return getTemplate(name, locale, null, encoding, parseAsFTL).getTemplate();
     }
     
     private Template getTemplate(
@@ -241,7 +268,9 @@ public class TemplateCache
     throws IOException
     {
         final boolean debug = LOG.isDebugEnabled();
-        final String debugName = debug ? buildDebugName(name, locale, encoding, parseAsFTL) : null;
+        final String debugName = debug
+                ? buildDebugName(name, locale, customLookupCondition, encoding, parseAsFTL)
+                : null;
         final TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parseAsFTL);
         
         CachedTemplate cachedTemplate;
@@ -584,7 +613,7 @@ public class TemplateCache
         if(name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugName = debug
-                    ? buildDebugName(name, locale, encoding, parse)
+                    ? buildDebugName(name, locale, customLookupCondition, encoding, parse)
                     : null;
             TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parse);
             
@@ -599,11 +628,13 @@ public class TemplateCache
         }
     }
 
-    private String buildDebugName(String name, Locale locale, String encoding,
+    private String buildDebugName(String name, Locale locale, Object customLookupCondition, String encoding,
             boolean parse) {
-        return StringUtil.jQuoteNoXSS(name) + "["
-                + StringUtil.jQuoteNoXSS(locale) + "," + encoding
-                + (parse ? ",parsed]" : ",unparsed]");
+        return StringUtil.jQuoteNoXSS(name) + "("
+                + StringUtil.jQuoteNoXSS(locale)
+                + (customLookupCondition != null ? ", cond=" + StringUtil.jQuoteNoXSS(customLookupCondition) : "")
+                + ", " + encoding
+                + (parse ? ", parsed)" : ", unparsed]");
     }    
 
     /**
@@ -854,6 +885,71 @@ public class TemplateCache
                     localeName = localeName.substring(0, lastUnderscore);
                 }
                 return createNegativeLookupResult();
+        }
+        
+    }
+    
+    /**
+     * Used for the return value of {@link TemplateCache#getTemplate(String, Locale, Object, String, boolean)}.
+     * 
+     * @since 2.3.22
+     */
+    public final static class MaybeMissingTemplate {
+        
+        private final Template template;
+        private final String missingTemplateNormalizedName;
+        private final String missingTemplateReason;
+        private final MalformedTemplateNameException missingTemplateCauseException;
+        
+        private MaybeMissingTemplate(Template template) {
+            this.template = template;
+            this.missingTemplateNormalizedName = null;
+            this.missingTemplateReason = null;
+            this.missingTemplateCauseException = null;
+        }
+        
+        private MaybeMissingTemplate(String normalizedName, MalformedTemplateNameException missingTemplateCauseException) {
+            this.template = null;
+            this.missingTemplateNormalizedName = normalizedName;
+            this.missingTemplateReason = null;
+            this.missingTemplateCauseException = missingTemplateCauseException;
+        }
+        
+        private MaybeMissingTemplate(String normalizedName, String missingTemplateReason) {
+            this.template = null;
+            this.missingTemplateNormalizedName = normalizedName;
+            this.missingTemplateReason = missingTemplateReason;
+            this.missingTemplateCauseException = null;
+        }
+        
+        /**
+         * The {@link Template} if it wasn't missing, otherwise {@code null}.
+         */
+        public Template getTemplate() {
+            return template;
+        }
+
+        /**
+         * When the template was missing, this <em>possibly</em> contains the explanation, or {@code null}. If the
+         * template wasn't missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always
+         * {@code null}.
+         */
+        public String getMissingTemplateReason() {
+            return missingTemplateReason != null
+                    ? missingTemplateReason
+                    : (missingTemplateCauseException != null
+                            ? missingTemplateCauseException.getMalformednessDescription()
+                            : null);
+        }
+        
+        /**
+         * When the template was missing, this <em>possibly</em> contains the explanation, or {@code null}. If the
+         * template wasn't missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always
+         * {@code null}. When the template is missing, it will be {@code null} for example if the normalization itself
+         * was unsuccessful.
+         */
+        public String getMissingTemplateNormalizedName() {
+            return missingTemplateNormalizedName;
         }
         
     }

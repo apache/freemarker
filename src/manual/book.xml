@@ -20858,7 +20858,7 @@ End book</programlisting>
           <question>
             <para>FreeMarker can't find my templates
             (<literal>TemplateNotFoundException</literal> or
-            <literal>FileNotFoundException</literal>, <quote>Template ... not
+            <literal>FileNotFoundException</literal>, <quote>Template not
             found</quote> error message)</para>
           </question>
 
@@ -20892,8 +20892,8 @@ End book</programlisting>
                 using an old FreeMarker version, so update it. Getting
                 <literal>FileNotFoundException</literal> instead of
                 <literal>TemplateNotFoundException</literal> is also a sign of
-                that. (If the <literal>TemplateLoader</literal> in the error
-                message is like
+                that, and so you will get less helpful error messages. (If the
+                <literal>TemplateLoader</literal> in the error message is like
                 <literal>foo.SomeTemplateLoader@64f6106c</literal> and so
                 doesn't show some relevant parameters, you may should ask the
                 author to define a nicer
@@ -20915,16 +20915,16 @@ End book</programlisting>
                 <para>Know that when you are including/importing a template
                 from another template, if you don't start the template name
                 with <literal>/</literal>, it will be interpreted relatively
-                to the directory of the including template.</para>
+                to the directory of the including template. The error message
+                contains the full (resolved) name, so you should notice this
+                there.</para>
               </listitem>
 
               <listitem>
                 <para>Check that you aren't using <literal>\</literal>
-                (backslash) instead of <literal>/</literal> (slash). Note that
-                setting the <literal>template_name_format</literal>
-                configuration setting to <literal>DEFAULT_2_4_0</literal> will
-                catch that frequent overlook, and some more, and report them
-                clearly, so it's highly recommended.</para>
+                (backslash) instead of <literal>/</literal> (slash).
+                (FreeMarker 2.3.22 and later will warn you about that in the
+                error message.)</para>
               </listitem>
 
               <listitem>
@@ -22019,6 +22019,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   was get as <literal>foo.ftl</literal>, but behind the scenes
                   was loaded from <literal>foo_en.ftl</literal>).</para>
                 </listitem>
+
+                <listitem>
+                  <para><quote>Template not found</quote> errors are now more
+                  detailed, giving hints about accidentally using
+                  <literal>\</literal> instead of <literal>/</literal>, or
+                  backing out of the <literal>TemplateLoader</literal>'s root
+                  directory.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
@@ -22597,11 +22605,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (though most applications won't be affected). For typical
                   mistakes like using backslash instead of slash, or backing
                   out of the root, it gives
-                  <literal>MalformedTemplateNameFormatException</literal> with
-                  explanation instead of a generic
-                  <literal>TempalteNotFoundException</literal>. It allows
-                  scheme names to be terminated with <literal>:</literal>
-                  alone instead of a <literal>://</literal>, like in
+                  <literal>MalformedTemplateNameFormatException</literal>
+                  instead of <literal>TempalteNotFoundException</literal>. It
+                  allows scheme names to be terminated with
+                  <literal>:</literal> alone, instead of a
+                  <literal>://</literal> (which is also supported), like in
                   <literal>classpath:foo/bar.ftl</literal>. It fixes numerous
                   legacy glitches (bugs), mostly related to the interpretation
                   of <literal>..</literal> after special steps like

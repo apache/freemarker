@@ -22,8 +22,11 @@ import java.net.URL;
 import java.util.Locale;
 
 import junit.framework.TestCase;
+import freemarker.core.ParseException;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
+import freemarker.template.TemplateNotFoundException;
 import freemarker.template.Version;
 
 public class TemplateCacheTest extends TestCase
@@ -364,6 +367,34 @@ public class TemplateCacheTest extends TestCase
             assertEquals("t2.ftl", t.getSourceName());
             assertEquals("UTF-16LE", t.getEncoding());
             assertEquals("Foo", t.toString());
+        }
+    }
+    
+    public void testTemplateNameFormatExceptionAndBackwardCompatibility() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        assertNull(cfg.getTemplate("../x", null, null, null, true, true));
+        try {
+            cfg.getTemplate("../x");
+            fail();
+        } catch (TemplateNotFoundException e) {
+            // expected
+        }
+        
+        // [2.4] Test it with IcI 2.4
+        
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        try {
+            cfg.getTemplate("../x", null, null, null, true, true);
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            // expected
+        }
+        try {
+            cfg.getTemplate("../x");
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            // expected
         }
     }
     

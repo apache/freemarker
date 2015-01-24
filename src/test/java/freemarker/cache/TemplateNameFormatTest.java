@@ -87,41 +87,36 @@ public class TemplateNameFormatTest {
                 TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
             assertEquals("", tnf.normalizeAbsoluteName(""));
             for (String lead : new String[] { "", "/" }) {
-            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "foo"));
-            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./foo"));
-            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./././foo"));
-            assertEquals("foo", tnf.normalizeAbsoluteName(lead + "bar/../foo"));
-            assertEquals("a/b/", tnf.normalizeAbsoluteName("a/b/"));
-            assertEquals("a/", tnf.normalizeAbsoluteName("a/b/../"));
-            assertEquals("a/c../..d/e*/*f", tnf.normalizeAbsoluteName("a/c../..d/e*/*f"));
-            assertEquals("", tnf.normalizeAbsoluteName(""));
-            assertEquals("foo/bar/*", tnf.normalizeAbsoluteName("foo/bar/*"));
-            assertEquals("schema://", tnf.normalizeAbsoluteName("schema://"));
-            }
-        }
-        
-        // Normalizations that differ in legacy and modern format:
-        
-        for (String lead : new String[] { "", "/" }) {
-            assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(lead + "bar/../../x/foo");
-            assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(lead + "../x");
-            assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(lead + "../../../x");
+                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "foo"));
+                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./foo"));
+                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "./././foo"));
+                assertEquals("foo", tnf.normalizeAbsoluteName(lead + "bar/../foo"));
+                assertEquals("a/b/", tnf.normalizeAbsoluteName("a/b/"));
+                assertEquals("a/", tnf.normalizeAbsoluteName("a/b/../"));
+                assertEquals("a/c../..d/e*/*f", tnf.normalizeAbsoluteName("a/c../..d/e*/*f"));
+                assertEquals("", tnf.normalizeAbsoluteName(""));
+                assertEquals("foo/bar/*", tnf.normalizeAbsoluteName("foo/bar/*"));
+                assertEquals("schema://", tnf.normalizeAbsoluteName("schema://"));
+                
+                assertThrowsWithBackingOutException(lead + "bar/../../x/foo", tnf);
+                assertThrowsWithBackingOutException(lead + "../x", tnf);
+                assertThrowsWithBackingOutException(lead + "../../../x", tnf);
+                assertThrowsWithBackingOutException(lead + "../../../x", tnf);
+                assertThrowsWithBackingOutException("x://../../../foo", tnf);
+                
+                {
+                    final String name = lead + "foo\u0000";
+                    try {
+                        tnf.normalizeAbsoluteName(name);
+                        fail();
+                    } catch (MalformedTemplateNameException e) {
+                        assertEquals(name, e.getTemplateName());
 
-            {
-                final String name = lead + "foo\u0000";
-                assertNull(TemplateNameFormat.DEFAULT_2_3_0.normalizeAbsoluteName(name));
-                try {
-                    TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name);
-                    fail();
-                } catch (MalformedTemplateNameException e) {
-                    assertEquals(name, e.getTemplateName());
-                    
-                    assertThat(e.getMalformednessDescription(), containsStringIgnoringCase("null character"));
+                        assertThat(e.getMalformednessDescription(), containsStringIgnoringCase("null character"));
+                    }
                 }
             }
-        } // for lead
-        
-        assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24("x://../../../foo");
+        }
         
         // ".." and "."
         assertEqualsOn23AndOn24("bar/foo", "foo", "bar/./../foo");
@@ -281,14 +276,15 @@ public class TemplateNameFormatTest {
         assertEquals(expected24, TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name));
     }
 
-    private void assertNormAbsNameIsNullOn23ButThrowsBackOutExcOn24(final String name) throws MalformedTemplateNameException {
-        assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24(null, name);
+    private void assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24(final String expected23, final String name)
+            throws MalformedTemplateNameException {
+        assertEquals(expected23, TemplateNameFormat.DEFAULT_2_3_0.normalizeAbsoluteName(name));
+        assertThrowsWithBackingOutException(name, TemplateNameFormat.DEFAULT_2_4_0);
     }
 
-    private void assertNormAbsNameEqualsOn23ButThrowsBackOutExcOn24(final String expected23, final String name) throws MalformedTemplateNameException {
-        assertEquals(expected23, TemplateNameFormat.DEFAULT_2_3_0.normalizeAbsoluteName(name));
+    private void assertThrowsWithBackingOutException(final String name, final TemplateNameFormat tnf) {
         try {
-            TemplateNameFormat.DEFAULT_2_4_0.normalizeAbsoluteName(name);
+            tnf.normalizeAbsoluteName(name);
             fail();
         } catch (MalformedTemplateNameException e) {
             assertEquals(name, e.getTemplateName());
