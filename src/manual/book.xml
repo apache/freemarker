@@ -21069,16 +21069,18 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>On JSP pages you quote all parameter (attribute) values, it
-            does not mater if the type of the parameter is string or boolean
-            or number. But since custom tags are accessible in FTL templates
-            as plain user-defined FTL directives, you have to use the FTL
-            syntax rules inside the custom tags, not the JSP rules. Thus,
-            according to FTL rules, you must not quote boolean and numerical
-            parameter values, or they are interpreted as string values, and
-            this will cause a type mismatch error when FreeMarker tries to
-            pass the value to the custom tag that expects non-string
-            value.</para>
+            <para>Fist of all, update FreeMarker, because 2.3.22 and later
+            gives a much more helpfull error message, that pretty much answers
+            the question. Anyway, the reason is as folows. On JSP pages you
+            quote all parameter (attribute) values, it does not mater if the
+            type of the parameter is string or boolean or number. But since
+            custom tags are accessible in FTL templates as plain user-defined
+            FTL directives, you have to use the FTL syntax rules inside the
+            custom tags, not the JSP rules. Thus, according to FTL rules, you
+            must not quote boolean and numerical parameter values, or they are
+            interpreted as string values, and this will cause a type mismatch
+            error when FreeMarker tries to pass the value to the custom tag
+            that expects non-string value.</para>
 
             <para>For example, the <literal>flush</literal> parameter to
             Struts Tiles <literal>insert</literal> tag is boolean. In JSP the
