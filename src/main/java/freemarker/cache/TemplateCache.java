@@ -638,7 +638,7 @@ public class TemplateCache
         // Shortcut in case there is no acquisition
         if(asterisk == -1)
         {
-            return TemplateLookupResult.from(path, modifyForConfIcI(templateLoader.findTemplateSource(path)));
+            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
@@ -657,7 +657,7 @@ public class TemplateCache
             tokpath.add(pathToken);
         }
         if (lastAsterisk == -1) {  // if there was no real "*" step after all
-            return TemplateLookupResult.from(path, modifyForConfIcI(templateLoader.findTemplateSource(path)));
+            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
@@ -676,7 +676,7 @@ public class TemplateCache
                 LOG.debug("Trying to find template source "
                         + StringUtil.jQuoteNoXSS(fullPath));
             }
-            Object templateSource = modifyForConfIcI(templateLoader.findTemplateSource(fullPath));
+            Object templateSource = modifyForConfIcI(findTemplateSourceAndLog(fullPath));
             if(templateSource != null)
             {
                 return TemplateLookupResult.from(fullPath, templateSource);
@@ -688,6 +688,15 @@ public class TemplateCache
             l = basePath.lastIndexOf(SLASH, l - 2) + 1;
             buf.setLength(l);
         }
+    }
+
+    private Object findTemplateSourceAndLog(String path) throws IOException {
+        final Object result = templateLoader.findTemplateSource(path);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("TemplateLoader.findTemplateSource(" +  StringUtil.jQuote(path) + "): "
+                    + (result == null ? "Not found" : "Found"));
+        }
+        return result;
     }
 
     /**
