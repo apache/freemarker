@@ -50,7 +50,7 @@ import freemarker.template.Template;
  * 
  * @since 2.3.22
  */
-public interface TemplateLookupStrategy {
+public abstract class TemplateLookupStrategy {
 
     /**
      * <p>
@@ -72,13 +72,7 @@ public interface TemplateLookupStrategy {
      * {@code "_"} as the separator between the parts. It won't remove parts that are not part of the locale string
      * (like if the requested template name is {@code foo_bar.ftl}, it won't remove the {@code "_bar"}).
      */
-    TemplateLookupStrategy DEFAULT_2_3_0 = new TemplateLookupStrategy() {
-
-        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
-            return ctx.lookupWithLocalizedThenAcquisitionStrategy(ctx.getTemplateName(), ctx.getTemplateLocale());
-        }
-
-    };
+    public static final TemplateLookupStrategy DEFAULT_2_3_0 = new Default020300();
     
     /**
      * Finds the template source that matches the template name, locale (if not {@code null}) and other parameters
@@ -96,6 +90,14 @@ public interface TemplateLookupStrategy {
      *         {@code TemplateLookupContext#createNegativeLookupResult()} if no matching template exists. Can't be
      *         {@code null}.
      */
-    TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
+    public abstract TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
 
+    private static class Default020300 extends TemplateLookupStrategy {
+        
+        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+            return ctx.lookupWithLocalizedThenAcquisitionStrategy(ctx.getTemplateName(), ctx.getTemplateLocale());
+        }
+        
+    }
+    
 }

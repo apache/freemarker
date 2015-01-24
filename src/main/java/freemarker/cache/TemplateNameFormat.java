@@ -40,67 +40,7 @@ public abstract class TemplateNameFormat {
      * will certainly remain so for a very long time. In new projects it's highly recommended to use
      * {@link #DEFAULT_2_4_0} instead.
      */
-    public static final TemplateNameFormat DEFAULT_2_3_0 = new TemplateNameFormat() {
-
-        String toAbsoluteName(String baseName, String targetName) {
-            if (targetName.indexOf("://") > 0) {
-                return targetName;
-            } else if (targetName.startsWith("/"))  {
-                int schemeSepIdx = baseName.indexOf("://");
-                if (schemeSepIdx > 0) {
-                    return baseName.substring(0, schemeSepIdx + 2) + targetName;
-                } else {
-                    return targetName.substring(1);
-                }
-            } else {
-                if (!baseName.endsWith("/")) {
-                    baseName = baseName.substring(0, baseName.lastIndexOf("/") + 1);
-                }
-                return baseName + targetName;
-            }
-        }
-
-        String normalizeAbsoluteName(String name) {
-            // Disallow 0 for security reasons.
-            if (name.indexOf(0) != -1) return null;
-            
-            for(;;) {
-                int parentDirPathLoc = name.indexOf("/../");
-                if(parentDirPathLoc == 0) {
-                    // If it starts with /../, then it reaches outside the template
-                    // root.
-                    return null;
-                }
-                if(parentDirPathLoc == -1) {
-                    if(name.startsWith("../")) {
-                        // Another attempt to reach out of template root.
-                        return null;
-                    }
-                    break;
-                }
-                int previousSlashLoc = name.lastIndexOf('/', parentDirPathLoc - 1);
-                name = name.substring(0, previousSlashLoc + 1) +
-                       name.substring(parentDirPathLoc + "/../".length());
-            }
-            for(;;) {
-                int currentDirPathLoc = name.indexOf("/./");
-                if(currentDirPathLoc == -1) {
-                    if(name.startsWith("./")) {
-                        name = name.substring("./".length());
-                    }
-                    break;
-                }
-                name = name.substring(0, currentDirPathLoc) +
-                       name.substring(currentDirPathLoc + "/./".length() - 1);
-            }
-            // Editing can leave us with a leading slash; strip it.
-            if(name.length() > 1 && name.charAt(0) == '/') {
-                name = name.substring(1);
-            }
-            return name;
-        } 
-        
-    };
+    public static final TemplateNameFormat DEFAULT_2_3_0 = new Default020300();
     
     /**
      * The default template name format only when {@link Configuration#Configuration(Version) incompatible_improvements}
@@ -154,8 +94,77 @@ public abstract class TemplateNameFormat {
      * 
      * </ul>
      */
-    public static final TemplateNameFormat DEFAULT_2_4_0 = new TemplateNameFormat() {
+    public static final TemplateNameFormat DEFAULT_2_4_0 = new Default020400();
+    
+    abstract String toAbsoluteName(String baseName, String targetName) throws MalformedTemplateNameException;
+    
+    /**
+     * @return For backward compatibility only, {@code null} is allowed and will be treated as if the template doesn't
+     *         exist (despite that a normalizer doesn't access the storage, so it's not its duty to decide that).
+     */
+    abstract String normalizeAbsoluteName(String name) throws MalformedTemplateNameException;
 
+    private static final class Default020300 extends TemplateNameFormat {
+        String toAbsoluteName(String baseName, String targetName) {
+            if (targetName.indexOf("://") > 0) {
+                return targetName;
+            } else if (targetName.startsWith("/"))  {
+                int schemeSepIdx = baseName.indexOf("://");
+                if (schemeSepIdx > 0) {
+                    return baseName.substring(0, schemeSepIdx + 2) + targetName;
+                } else {
+                    return targetName.substring(1);
+                }
+            } else {
+                if (!baseName.endsWith("/")) {
+                    baseName = baseName.substring(0, baseName.lastIndexOf("/") + 1);
+                }
+                return baseName + targetName;
+            }
+        }
+    
+        String normalizeAbsoluteName(String name) {
+            // Disallow 0 for security reasons.
+            if (name.indexOf(0) != -1) return null;
+            
+            for(;;) {
+                int parentDirPathLoc = name.indexOf("/../");
+                if(parentDirPathLoc == 0) {
+                    // If it starts with /../, then it reaches outside the template
+                    // root.
+                    return null;
+                }
+                if(parentDirPathLoc == -1) {
+                    if(name.startsWith("../")) {
+                        // Another attempt to reach out of template root.
+                        return null;
+                    }
+                    break;
+                }
+                int previousSlashLoc = name.lastIndexOf('/', parentDirPathLoc - 1);
+                name = name.substring(0, previousSlashLoc + 1) +
+                       name.substring(parentDirPathLoc + "/../".length());
+            }
+            for(;;) {
+                int currentDirPathLoc = name.indexOf("/./");
+                if(currentDirPathLoc == -1) {
+                    if(name.startsWith("./")) {
+                        name = name.substring("./".length());
+                    }
+                    break;
+                }
+                name = name.substring(0, currentDirPathLoc) +
+                       name.substring(currentDirPathLoc + "/./".length() - 1);
+            }
+            // Editing can leave us with a leading slash; strip it.
+            if(name.length() > 1 && name.charAt(0) == '/') {
+                name = name.substring(1);
+            }
+            return name;
+        }
+    }
+
+    private static final class Default020400 extends TemplateNameFormat {
         String toAbsoluteName(String baseName, String targetName) {
             if (findSchemeSectionEnd(targetName) != 0) {
                 return targetName;
@@ -180,13 +189,14 @@ public abstract class TemplateNameFormat {
                 return baseName + targetName;
             }
         }
-
+    
         String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
             if (name.indexOf(0) != -1) {
-                throw new MalformedTemplateNameException(name, "Null character (\\u0000) in the name; possible attack attempt");
+                throw new MalformedTemplateNameException(name,
+                        "Null character (\\u0000) in the name; possible attack attempt");
             }
-
+    
             if (name.indexOf('\\') != -1) {
                 throw new MalformedTemplateNameException(
                         name,
@@ -222,12 +232,12 @@ public abstract class TemplateNameFormat {
             if (path == null) {
                 throw new MalformedTemplateNameException(name, "Backing out from the root directory is not allowed");
             }
-
+    
             path = removeRedundantStarSteps(path);
             
             return scheme == null ? path : scheme + path;
         }
-        
+    
         private int findSchemeSectionEnd(String name) {
             int schemeColonIdx = name.indexOf(":");
             if (schemeColonIdx == -1 || name.lastIndexOf('/', schemeColonIdx - 1) != -1) {
@@ -242,7 +252,7 @@ public abstract class TemplateNameFormat {
                 }
             }
         }
-
+    
         private String removeRedundantSlashes(String name) {
             String prevName;
             do {
@@ -251,7 +261,7 @@ public abstract class TemplateNameFormat {
             } while (prevName != name);
             return name.startsWith("/") ? name.substring(1) : name;
         }
-
+    
         private String removeDotSteps(String name) {
             int nextFromIdx = name.length() - 1;
             findDotSteps: while (true) {
@@ -283,7 +293,7 @@ public abstract class TemplateNameFormat {
                 }
             }
         }
-
+    
         /**
          * @return {@code null} if the path backs out from the template loader root directory
          */
@@ -294,7 +304,7 @@ public abstract class TemplateNameFormat {
                 if (dotDotIdx < 0) {
                     return name;
                 }
-
+    
                 if (dotDotIdx == 0) {
                    return null;
                 } else if (name.charAt(dotDotIdx - 1) != '/') {
@@ -348,7 +358,7 @@ public abstract class TemplateNameFormat {
                 nextFromIdx = previousSlashIdx + 1;
             }
         }
-
+    
         private String removeRedundantStarSteps(String name) {
             String prevName;
             removeDoubleStarSteps: do {
@@ -378,15 +388,6 @@ public abstract class TemplateNameFormat {
             
             return name;
         }
-        
-    };
-    
-    abstract String toAbsoluteName(String baseName, String targetName) throws MalformedTemplateNameException;
-    
-    /**
-     * @return For backward compatibility only, {@code null} is allowed and will be treated as if the template doesn't
-     *         exist (despite that a normalizer doesn't access the storage, so it's not its duty to decide that).
-     */
-    abstract String normalizeAbsoluteName(String name) throws MalformedTemplateNameException;
+    }
 
 }

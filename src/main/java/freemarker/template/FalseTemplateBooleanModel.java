@@ -16,25 +16,17 @@
 
 package freemarker.template;
 
-
 /**
- * "boolean" template language data type; same as in Java; either {@code true} or {@code false}.
+ * Used for the {@link TemplateBooleanModel#TRUE} singleton. 
  */
-public interface TemplateBooleanModel extends TemplateModel {
-
-    /**
-     * @return whether to interpret this object as true or false in a boolean context
-     */
-    boolean getAsBoolean() throws TemplateModelException;
+final class FalseTemplateBooleanModel implements SerializableTemplateBooleanModel {
     
-    /**
-     * A singleton object to represent boolean false
-     */
-    TemplateBooleanModel FALSE = new FalseTemplateBooleanModel();
+    public boolean getAsBoolean() {
+        return false;
+    }
 
-    /**
-     * A singleton object to represent boolean true
-     */
-    TemplateBooleanModel TRUE = new TrueTemplateBooleanModel();
+    private Object readResolve() {
+        return FALSE;
+    }
     
 }

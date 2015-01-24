@@ -534,7 +534,7 @@ public class TemplateLookupStrategyTest {
         assertEquals(expectedContent, sw.toString());
     }
     
-    public static class MyTemplateLookupStrategy implements TemplateLookupStrategy {
+    public static class MyTemplateLookupStrategy extends TemplateLookupStrategy {
         
         public static final MyTemplateLookupStrategy INSTANCE = new MyTemplateLookupStrategy();
         
@@ -552,7 +552,7 @@ public class TemplateLookupStrategyTest {
         
     }
     
-    public static class DomainTemplateLookupStrategy implements TemplateLookupStrategy {
+    public static class DomainTemplateLookupStrategy extends TemplateLookupStrategy {
         
         public static final DomainTemplateLookupStrategy INSTANCE = new DomainTemplateLookupStrategy();
 
