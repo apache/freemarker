@@ -702,11 +702,6 @@ public class TemplateCache
         for(;;)
         {
             String fullPath = buf.append(resourcePath).toString();
-            if(debug)
-            {
-                LOG.debug("Trying to find template source "
-                        + StringUtil.jQuoteNoXSS(fullPath));
-            }
             Object templateSource = modifyForConfIcI(findTemplateSourceAndLog(fullPath));
             if(templateSource != null)
             {
