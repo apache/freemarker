@@ -2140,7 +2140,9 @@ TemplateElement Assign() :
     )
     nameExp = IdentifierOrStringLiteral()
     {
-        varName = (nameExp instanceof StringLiteral) ? ((StringLiteral) nameExp).getAsString() : nameExp.toString();
+        varName = (nameExp instanceof StringLiteral)
+                ? ((StringLiteral) nameExp).getAsString()
+                : ((Identifier) nameExp).getName();
     }
     (
     	(
@@ -2158,7 +2160,7 @@ TemplateElement Assign() :
 	            {
 	                varName = (nameExp instanceof StringLiteral)
 	                		? ((StringLiteral) nameExp).getAsString()
-	                		: nameExp.toString();
+	                		: ((Identifier) nameExp).getName();
 	            }
 	            <EQUALS>
 	            exp = Expression()
@@ -2316,7 +2318,9 @@ Macro Macro() :
     }
     nameExp = IdentifierOrStringLiteral()
     {
-        name = (nameExp instanceof StringLiteral) ? ((StringLiteral) nameExp).getAsString() : nameExp.toString();
+        name = (nameExp instanceof StringLiteral)
+                ? ((StringLiteral) nameExp).getAsString()
+                : ((Identifier) nameExp).getName();
     }
     [<OPEN_PAREN>]
     (
