@@ -15181,29 +15181,33 @@ m2: &amp;lt;test&amp;gt;</programlisting>
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#flush&gt;</literal>
-</programlisting>
+          <programlisting role="metaTemplate"><literal>&lt;#flush&gt;</literal></programlisting>
         </section>
 
         <section>
           <title>Description</title>
 
-          <para>When FreeMarker generates the output it typically stockpiles
-          the generated output and send it to the client in one or in a few
-          big pieces. This act of sending is called flushing (as flushing the
-          toilet). Although flushing happens automatically, sometimes you want
-          to force it on certain points of the template processing, and this
-          is what <literal>flush</literal> directive does. If it is needed,
-          then the programmer could tell it to you; typically you should not
-          use this directive. The mechanism of automatic flushing and the
-          precise effect of <literal>flush</literal> directive are under the
-          control of the programmer.</para>
+          <para>When FreeMarker generates the output, it's usually not sent
+          immediately to the final receiving party (like a web browser or a
+          destination file), but is accumulated in a buffer, then it's sent
+          out in bigger chunks. The exact rules of the buffering is not
+          decided by FreeMarker, but by the embedding software. Sending out
+          the content accumulated in the buffer is called flushing. Although
+          flushing happens automatically, sometimes you want to force it on
+          certain points of the template processing, and this is what the
+          <literal>flush</literal> directive does. Whether it's needed at
+          certain points should be decided by a programmer, not a
+          designer.</para>
 
-          <para><phrase role="forProgrammers">Flush simply calls the flush
-          method of the currently used java.io.Writer instance. The whole
-          buffering and flushing mechanism is implemented in the writer (what
-          you have passed as the parameter of the
+          <para>Note that while <literal>flush</literal> tells the embedding
+          software that we want to flush, that might as well decides to ignore
+          this request. It's not in the hands of FreeMarker.</para>
+
+          <para><phrase role="forProgrammers">Flush simply calls the
+          <literal>flush()</literal> method of the currently used
+          <literal>java.io.Writer</literal> instance. The whole buffering and
+          flushing mechanism is implemented in the <literal>Writer</literal>
+          (that you have passed as the parameter of the
           <literal>Template.process</literal> method); FreeMarker does not
           deal with it.</phrase></para>
         </section>
@@ -17296,8 +17300,7 @@ ${1.2}</programlisting>
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#stop&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#stop&gt;</literal>
 or
 <literal>&lt;#stop <replaceable>reason</replaceable>&gt;</literal>
 </programlisting>
@@ -17307,8 +17310,8 @@ or
           <itemizedlist spacing="compact">
             <listitem>
               <para><literal><replaceable>reason</replaceable></literal>:
-              Informative message about the reason of termination. Expression
-              evaluates to string.</para>
+              Informative message that describes the reason of the terminating
+              error. Expression, must evaluate to a string.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -17316,11 +17319,15 @@ or
         <section>
           <title>Description</title>
 
-          <para>Aborts the processing of template. This is something like an
-          emergency brake: don't use it in normal situations. <phrase
-          role="forProgrammers">Aborting happens by throwing a
+          <para>Aborts template processing with the given (optional) error
+          message. <emphasis>This must not be used for ending template
+          processing in normal situations!</emphasis> The caller of the
+          FreeMarker template will see this as a failed template rendering,
+          not as a normally finished one.</para>
+
+          <para><phrase role="forProgrammers">This directive throws a
           <literal>StopException</literal>, and the
-          <literal>StopException</literal> will hold the value of reason
+          <literal>StopException</literal> will hold the value of the reason
           parameter.</phrase></para>
         </section>
       </section>
