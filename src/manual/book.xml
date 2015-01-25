@@ -2455,7 +2455,8 @@ autumn
             contain letters (including non-Latin letters), digits (including
             non-Latin digits), underline (<literal>_</literal>), dollar
             (<literal>$</literal>), at sign (<literal>@</literal>).
-            Furthermore, the first character can't be a digit. Starting from
+            Furthermore, the first character can't be a ASCII digit
+            (<literal>0</literal>-<literal>9</literal>). Starting from
             FreeMarker 2.3.22, the variable name can also contain minus
             (<literal>-</literal>), dot (<literal>.</literal>), and colon
             (<literal>:</literal>) at any position, but these must be escaped
@@ -2521,14 +2522,14 @@ autumn
             regarding the variable name as with top-level variables (name can
             contain only letters, digits, <literal>_</literal>,
             <literal>$</literal>, <literal>@</literal> but can't start with
-            digit, also starting from 2.3.22 you can also use
-            <literal>\-</literal>, <literal>\.</literal> and
-            <literal>\:</literal>). There are no such restrictions when you
-            use the square bracket syntax, since the name is the result of an
-            arbitrary expression. (Note, that to help the FreeMarker XML
-            support, if the subvariable name is <literal>*</literal>
-            (asterisk) or <literal>**</literal>, then you do not have to use
-            square bracket syntax.)</para>
+            <literal>0</literal>-<literal>9</literal>, also starting from
+            2.3.22 you can also use <literal>\-</literal>,
+            <literal>\.</literal> and <literal>\:</literal>). There are no
+            such restrictions when you use the square bracket syntax, since
+            the name is the result of an arbitrary expression. (Note, that to
+            help the FreeMarker XML support, if the subvariable name is
+            <literal>*</literal> (asterisk) or <literal>**</literal>, then you
+            do not have to use square bracket syntax.)</para>
 
             <para>As with the top-level variables, trying to access a
             non-existent subvariable causes an error and aborts the processing
@@ -21117,6 +21118,13 @@ End book</programlisting>
                 "foo" = 1&gt;</literal>. So you can write things like
                 <literal>&lt;#assign "a+b" = 1&gt;</literal> and
                 <literal>&lt;#macro "a+b"&gt;</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>Unfortunately, you can't use such a variable (that
+                contains special characters other than <literal>-</literal>,
+                <literal>.</literal> and <literal>:</literal>) name as macro
+                parameter name.</para>
               </listitem>
             </itemizedlist>
           </answer>
