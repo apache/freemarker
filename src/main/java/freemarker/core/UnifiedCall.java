@@ -142,6 +142,15 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
         }
+        if (bodyParameterNames != null && !bodyParameterNames.isEmpty()) {
+            sb.append("; ");
+            for (int i = 0; i < bodyParameterNames.size(); i++) {
+                if (i != 0) {
+                    sb.append(", ");
+                }
+                sb.append(CoreUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
+            }
+        }
         if (canonical) {
             if (nestedBlock == null) {
                 sb.append("/>");

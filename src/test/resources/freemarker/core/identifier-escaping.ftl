@@ -5,7 +5,7 @@
 <#macro "m-b2"></#macro>
 <#macro "m/b2"></#macro>
 
-<@m\-a data\-color="red"; loop\-var>${loop\-var}</@>
+<@m\-a data\-color="red"; loop\-var, loopVar2>${loop\-var}</@>
 
 <#function f\-a p\-a>
     <#return p\-a + " works">

@@ -1,5 +1,5 @@
 <#macro m\-a data\-color><#local \.namespace = 123><a-b>${data\-color}<#nested \.namespace></a-b></#macro><#macro m\-b2 ></#macro><#macro "m/b2" ></#macro>
-<@m\-a data\-color="red">${loop\-var}</@m\-a>
+<@m\-a data\-color="red"; loop\-var, loopVar2>${loop\-var}</@m\-a>
 
 <#function f\-a(p\-a)><#return p\-a + " works"/></#function>${f\-a("f-a")}
 
