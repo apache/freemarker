@@ -2451,10 +2451,20 @@ autumn
             aborts template processing (unless programmers has configured
             FreeMarker differently).</para>
 
-            <para>In this expression the variable name can contain only
-            letters (including non-Latin letters), digits (including non-Latin
-            digits), underline (_), dollar ($), at sign (@) and hash (#).
-            Furthermore, the name must not start with a digit.</para>
+            <para>In this kind of expression, the variable name can only
+            contain letters (including non-Latin letters), digits (including
+            non-Latin digits), underline (<literal>_</literal>), dollar
+            (<literal>$</literal>), at sign (<literal>@</literal>).
+            Furthermore, the first character can't be a digit. Starting from
+            FreeMarker 2.3.22, the variable name can also contain minus
+            (<literal>-</literal>), dot (<literal>.</literal>), and colon
+            (<literal>:</literal>) at any position, but these must be escaped
+            with a preceding backslash (<literal>\</literal>), or else they
+            would be interpreted as operators. For example, to read the
+            variable whose name is <quote>data-id</quote>, the expression is
+            <literal>data\-id</literal>, as <literal>data-id</literal> would
+            be interpreted as <quote>data minus id</quote>. (Note that these
+            escapes only work in identifiers, not in string literals.)</para>
           </section>
 
           <section xml:id="dgui_template_exp_var_hash">
@@ -2509,12 +2519,16 @@ autumn
 
             <para>When you use the dot syntax, the same restrictions apply
             regarding the variable name as with top-level variables (name can
-            contain only letters, digits, _, $, @, etc.). There are no such
-            restrictions when you use the square bracket syntax, since the
-            name is the result of an arbitrary expression. (Note, that to help
-            the FreeMarker XML support, if the subvariable name is
-            <literal>*</literal> (asterisk) or <literal>**</literal>, then you
-            do not have to use square bracket syntax.)</para>
+            contain only letters, digits, <literal>_</literal>,
+            <literal>$</literal>, <literal>@</literal> but can't start with
+            digit, also starting from 2.3.22 you can also use
+            <literal>\-</literal>, <literal>\.</literal> and
+            <literal>\:</literal>). There are no such restrictions when you
+            use the square bracket syntax, since the name is the result of an
+            arbitrary expression. (Note, that to help the FreeMarker XML
+            support, if the subvariable name is <literal>*</literal>
+            (asterisk) or <literal>**</literal>, then you do not have to use
+            square bracket syntax.)</para>
 
             <para>As with the top-level variables, trying to access a
             non-existent subvariable causes an error and aborts the processing
@@ -16455,10 +16469,14 @@ or
           <itemizedlist spacing="compact">
             <listitem>
               <para><literal><replaceable>name</replaceable></literal>: name
-              of macro variable. It's not an expression. However, it can be
-              written as a string literal, which is useful if the macro name
-              contains reserved characters, for example <literal>&lt;#macro
-              "foo-bar"&gt;<replaceable>...</replaceable></literal>. Note that
+              of macro variable. It's not an expression. It follows the same
+              syntax as <link linkend="dgui_template_exp_var_toplevel">like
+              top-level variable references</link>, like
+              <literal>myMacro</literal> or <literal>my\-macro</literal>.
+              However, it can also be written as a string literal, which is
+              useful if the macro name contains characters that can't be
+              specified in an identifier, for example <literal>&lt;#macro
+              "foo~bar"&gt;<replaceable>...</replaceable></literal>. Note that
               this string literal does not expand interpolations (as
               <literal>"${foo}"</literal>).</para>
             </listitem>
@@ -16471,7 +16489,10 @@ or
               optionally followed by <literal>=</literal> and the default
               value (that's an expression). The default value can even be
               another parameter, for example <literal>&lt;#macro section title
-              label=title&gt;</literal>.</para>
+              label=title&gt;</literal>. The parameter name uses the same
+              syntax as <link linkend="dgui_template_exp_var_toplevel">like
+              top-level variable references</link>, so the same features and
+              restrictions apply.</para>
             </listitem>
 
             <listitem>
@@ -16481,7 +16502,7 @@ or
                   <primary>variable number of parameters</primary>
                 </indexterm><literal><replaceable>paramN</replaceable></literal>,
               the last parameter may optionally has 3 trailing dots
-              (<literal>...</literal>), which indicates the macro takes a
+              (<literal>...</literal>), which indicates that the macro takes a
               variable number of parameters and the parameters that doesn't
               match any other parameters will be collected in this last
               parameter (also called the catch-all parameter). When the macro
@@ -16490,7 +16511,9 @@ or
               hash containing all of the undeclared key/value pairs passed to
               the macro. When the macro is called using positional parameters,
               <literal><replaceable>paramN</replaceable></literal> will be the
-              sequence of the extra parameter values.</para>
+              sequence of the extra parameter values. (Inside the macro, to
+              find out which was the case, you can use
+              <literal><replaceable>myCatchAllParam</replaceable>?is_sequence</literal>.)</para>
             </listitem>
 
             <listitem>
@@ -16645,7 +16668,7 @@ or
           <programlisting role="template">&lt;#macro m a b ext...&gt;
   a = ${a}
   b = ${b}
-  &lt;#if ext?is_enumerable&gt;
+  &lt;#if ext?is_sequence&gt;
     &lt;#list ext as e&gt;
       ${e_index} = ${e}
     &lt;/#list&gt;
@@ -16658,7 +16681,7 @@ or
 
 &lt;@m 1 2 3 4 5 /&gt;
 
-&lt;@m a=1 b=2 c=3 d=4 e=5 /&gt;</programlisting>
+&lt;@m a=1 b=2 c=3 d=4 e=5 data\-foo=6 myns\:bar=7 /&gt;</programlisting>
 
           <para>Output:</para>
 
@@ -16670,9 +16693,19 @@ or
 
   a = 1
   b = 2
+      c = 3
       d = 4
       e = 5
-      c = 3</programlisting>
+      data-foo=6
+      myns:bar=7</programlisting>
+
+          <warning>
+            <para>Currently, named catch-all parameters are unordered, that
+            is, you don't know what order will they be enumerated. That is,
+            they aren't returned in the same order as they were passed in
+            (that above example output shows them in the same order for
+            understandability only).</para>
+          </warning>
 
           <section>
             <title>nested</title>
@@ -21023,17 +21056,19 @@ End book</programlisting>
 
         <qandaentry xml:id="faq_strange_variable_name">
           <question>
-            <para>How can I use variable (macro) names that contain space,
-            dash or other special characters?</para>
+            <para>How can I use variable names (macro name, parameter name)
+            that contain minus sign (<literal>-</literal>), colon
+            (<literal>:</literal>), dot (<literal>.</literal>), or or other
+            special characters?</para>
           </question>
 
           <answer>
-            <para>If you have a variable with strange name, such as
-            <literal>foo-bar</literal>, FreeMarker will misunderstand what do
-            you mean when you use it like <literal>${foo-bar}</literal>. In
-            the case just shown, it will believe that you want subtract the
-            value of <literal>bar</literal> from <literal>foo</literal>. This
-            FAQ entry explains how to handle situations like this.</para>
+            <para>If you have a variable with strange name like
+            <quote>foo-bar</quote>, FreeMarker will misunderstand what do you
+            mean if you just enter it like in <literal>${foo-bar}</literal>.
+            In this case it will believe that you want to subtract the value
+            of <literal>bar</literal> from <literal>foo</literal>. This FAQ
+            entry explains how to handle situations like this.</para>
 
             <para>First of all it should be clean that these are just
             syntactical problems. FreeMarker has no limitations regarding the
@@ -21041,30 +21076,49 @@ End book</programlisting>
             variable names, but sometimes you need to use syntactical
             tricks.</para>
 
-            <para>If you want to read the variable: Use the square bracket
-            syntax. An example of square bracket syntax is
-            <literal>baaz["foo"]</literal>, which is equivalent with
-            <literal>baaz.foo</literal>. As the subvariable name with the
-            square bracket syntax is a string literal (in fact, an arbitrary
-            expression, so it can be dynamic to), it let you write
-            <literal>baaz["foo-bar"]</literal>. But what's with top-level
-            variable? Those are accessible through special hash variable
-            <literal>.vars</literal>. For example, <literal>foo</literal> is
-            equivalent to <literal>.vars["foo"]</literal>. So you can also
-            write <literal>.vars["foo-bar"]</literal>. Naturally, this trick
-            works with macro invocations too:
-            <literal>&lt;@.vars["foo-bar"]/&gt;</literal></para>
+            <para>If the special character is one of minus sign
+            (<literal>-</literal>, UCS 0x2D) or dot (<literal>.</literal>, UCS
+            0x2E) or colon (<literal>:</literal>, UCS 0x3A), then all you have
+            to do is putting a backslash (<literal>\</literal>) before these
+            characters, like in <literal>foo\-bar</literal>. Then FreeMarker
+            will know that you didn't mean the operator with the same symbol.
+            This works everywhere where you specify unquoted identifiers, like
+            for macro and function names, parameter names, and all kind of
+            variable references in general. (Note that these escapes only work
+            in identifiers, not in string literals.)</para>
 
-            <para>If you want to create or modify the variable: All directives
-            that let you create or modify a variable (such as
-            <literal>assign</literal>, <literal>local</literal>,
-            <literal>global</literal>, <literal>macro</literal>,
-            <literal>function</literal>, etc.) allows the quotation of the
-            destination variable name. For example, <literal>&lt;#assign foo =
-            1&gt;</literal> is the same as <literal>&lt;#assign "foo" =
-            1&gt;</literal>. So you can write things like <literal>&lt;#assign
-            "foo-bar" = 1&gt;</literal> and <literal>&lt;#macro
-            "foo-bar"&gt;</literal>.</para>
+            <para>When the special character is not one of minus sign, dot, or
+            colon, then it gets trickier. Let's say the problematic variable
+            name is <quote>a+b</quote>. Then:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>If you want to read the variable: If it's a subvariable
+                of something, you can write
+                <literal>something["a+b"]</literal> (remember,
+                <literal>something.x</literal> is equivalent with
+                <literal>something["x"])</literal>. If it's a top-level
+                variable, those are accessible through special hash variable
+                <literal>.vars</literal>, so you can write
+                <literal>.vars["a+b"]</literal>. Naturally, this trick works
+                with macro and function invocations too:
+                <literal>&lt;@.vars["a+b"]/&gt;</literal>,
+                <literal>.vars["a+b"](1, 2)</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>If you want to create or modify the variable: All
+                directives that let you create or modify a variable (such as
+                <literal>assign</literal>, <literal>local</literal>,
+                <literal>global</literal>, <literal>macro</literal>,
+                <literal>function</literal>, etc.) allows the quotation of the
+                destination variable name. For example, <literal>&lt;#assign
+                foo = 1&gt;</literal> is the same as <literal>&lt;#assign
+                "foo" = 1&gt;</literal>. So you can write things like
+                <literal>&lt;#assign "a+b" = 1&gt;</literal> and
+                <literal>&lt;#macro "a+b"&gt;</literal>.</para>
+              </listitem>
+            </itemizedlist>
           </answer>
         </qandaentry>
 
@@ -21228,15 +21282,16 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>The ``hash'' type of the FreeMarker Template Language (FTL)
-            is not the same as Java's <literal>Map</literal>. FTL's hash is an
-            associative array too, but it uses string keys exclusively. This
-            is because it was introduced for subvariables (as
-            <literal>password</literal> in <literal>user.password</literal>,
-            which is the same as <literal>user["password"]</literal>), and
-            variable names are strings.</para>
+            <para>The <quote>hash</quote> type of the FreeMarker Template
+            Language (FTL) is not the same as Java's <literal>Map</literal>.
+            FTL's hash is an associative array too, but it uses string keys
+            exclusively. This is because it was introduced for subvariables
+            (as <literal>password</literal> in
+            <literal>user.password</literal>, which is the same as
+            <literal>user["password"]</literal>), and variable names are
+            strings.</para>
 
-            <para>So until FTL has a type that supports non-String keys, you
+            <para>So until FTL has a type that supports non-string keys, you
             will have to turn to the Java API of the <literal>Map</literal>.
             You can do it like this:
             <literal>myMap?api.get(nonStringKey)</literal>. However, for
@@ -21998,6 +22053,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               isn't available for all values. <link
               linkend="ref_buitin_api_and_has_api">See more
               here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Identifiers (like <literal>someVariable</literal>) can now
+              contain minus (<literal>-</literal>), dot
+              (<literal>.</literal>), and colon (<literal>:</literal>) at any
+              position, but <emphasis>must be escaped with a preceding
+              backslash</emphasis> (<literal>\</literal>), or else they would
+              be interpreted as operators. For example, to read the variable
+              whose name is <quote>data-id</quote>, the expression is
+              <literal>data\-id</literal>, as <literal>data-id</literal> would
+              be interpreted as <quote>data minus id</quote>. This also works
+              for named macro parameters, which is useful when you want to
+              accept arbitrary HTML attributes in a catch-all parameter, like
+              in <literal>&lt;@box class="someCssClass" data\-id=product.id
+              /&gt;</literal>. (When you enumerate the catch-all hash inside
+              the macro, the key string you get is just
+              <literal>"data-id"</literal> of course.)</para>
             </listitem>
 
             <listitem>
