@@ -388,17 +388,58 @@ public class StringUtil {
         return escapes;
     }
 
-    public static String FTLStringLiteralEnc(String s)
+    /**
+     * Escapes a string according the FTL string literal escaping rules, assuming the literal is quoted with
+     * {@code quotation}; it doesn't add the quotation marks itself.
+     * 
+     * @param quotation
+     *            Either {@code '"'} or {@code '\''}. It's assumed that the string literal whose part we calculate is
+     *            enclosed within this kind of quotation mark. Thus, the other kind of quotation character will not be
+     *            escaped in the result.
+     *
+     * @since 2.3.22
+     */
+    public static String FTLStringLiteralEnc(String s, char quotation) {
+        return FTLStringLiteralEnc(s, quotation, false);
+    }
+    
+    /**
+     * Escapes a string according the FTL string literal escaping rules; it doesn't add the quotation marks. As this
+     * method doesn't know if the string literal is quoted with reuglar quotation marks or apostrophe quute, it will
+     * escape both.
+     * 
+     * @see #FTLStringLiteralEnc(String, char)
+     */
+    public static String FTLStringLiteralEnc(String s) {
+        return FTLStringLiteralEnc(s, (char) 0, false);
+    }
+
+    private static String FTLStringLiteralEnc(String s, char quotation, boolean addQuotation)
     {
+        final int ln = s.length();
+        final int escLn = ESCAPES.length;
+        
+        final char otherQuotation;
+        if (quotation == 0) {
+            otherQuotation = 0;
+        } else if (quotation == '"') {
+            otherQuotation = '\'';
+        } else if (quotation == '\'') {
+            otherQuotation = '"';
+        } else {
+            throw new IllegalArgumentException("Unsupported quotation character: " + quotation);
+        }
+        
         StringBuffer buf = null;
-        int l = s.length();
-        int el = ESCAPES.length;
-        for(int i = 0; i < l; i++)
+        for(int i = 0; i < ln; i++)
         {
             char c = s.charAt(i);
-            if(c < el)
+            if(c < escLn)
             {
                 char escape = ESCAPES[c];
+                if (escape == otherQuotation) {
+                    escape = 0;
+                }
                 switch(escape)
                 {
                     case 0:
@@ -411,7 +452,10 @@ public class StringUtil {
                     case 1:
                     {
                         if (buf == null) {
-                            buf = new StringBuffer(s.length() + 3);
+                            buf = new StringBuffer(s.length() + 3 + (addQuotation ? 2 : 0));
+                            if (addQuotation) {
+                                buf.append(quotation);
+                            }
                             buf.append(s.substring(0, i));
                         }
                         // hex encoding for characters below 0x20
@@ -426,7 +470,10 @@ public class StringUtil {
                     default:
                     {
                         if (buf == null) {
-                            buf = new StringBuffer(s.length() + 2);
+                            buf = new StringBuffer(s.length() + 2 + (addQuotation ? 2 : 0));
+                            if (addQuotation) {
+                                buf.append(quotation);
+                            }
                             buf.append(s.substring(0, i));
                         }
                         buf.append('\\');
@@ -439,7 +486,15 @@ public class StringUtil {
                 }
             }
         }
-        return buf == null ? s : buf.toString();
+        
+        if (buf == null) {
+            return addQuotation ? quotation + s + quotation : s;
+        } else {
+            if (addQuotation) {
+                buf.append(quotation);
+            }
+            return buf.toString();
+        }
     }
 
     /**
@@ -867,6 +922,27 @@ public class StringUtil {
         return b.toString();
     }
     
+    /**
+     * Creates a <em>quoted</em> FTL string literal from a string, using escaping where necessary. The result either
+     * uses regular quotation marks (UCS 0x22) or apostrophe-quotes (UCS 0x27), depending on the string content.
+     * (Currently, apostrophe-quotes will be chosen exactly when the string contains regular quotation character and
+     * doesn't contain apostrophe-quote character.)
+     *
+     * @param s
+     *            The value that should be converted to an FTL string literal whose evaluated value equals to {@code s}
+     *
+     * @since 2.3.22
+     */
+    public static String ftlQuote(String s) {
+        char quotation;
+        if (s.indexOf('"') != -1 && s.indexOf('\'') == -1) {
+            quotation = '\'';
+        } else {
+            quotation = '\"';
+        }
+        return FTLStringLiteralEnc(s, quotation, true);
+    }
+
     /**
      * Escapes the <code>String</code> with the escaping rules of Java language
      * string literals, so it's safe to insert the value into a string literal.

@@ -84,7 +84,7 @@ final class PropertySetting extends TemplateElement {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
-        sb.append(key);
+        sb.append(CoreUtils.toFTLTopLevelTragetIdentifier(key));
         sb.append('=');
         sb.append(value.getCanonicalForm());
         if (canonical) sb.append("/>");

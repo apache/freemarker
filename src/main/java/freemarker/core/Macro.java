@@ -95,7 +95,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
-        sb.append(name);
+        sb.append(CoreUtils.toFTLTopLevelTragetIdentifier(name));
         sb.append(function ? '(' : ' ');
         int argCnt = paramNames.length;
         for (int i = 0; i < argCnt; i++) {
@@ -107,7 +107,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 }
             }
             String argName = paramNames[i];
-            sb.append(argName);
+            sb.append(CoreUtils.toFTLTopLevelIdentifierReference(argName));
             if (paramDefaults != null && paramDefaults.get(argName) != null) {
                 sb.append('=');
                 Expression defaultExpr = (Expression) paramDefaults.get(argName);

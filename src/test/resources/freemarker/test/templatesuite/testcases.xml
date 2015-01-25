@@ -85,6 +85,7 @@
    <testCase name="identifier" >
       <setting strict_syntax="N" />
    </testCase>
+   <testCase name="identifier-escaping" />
    <testCase name="import">
       <setting auto_import="import_lib.ftl as my"/>
    </testCase>

@@ -52,9 +52,9 @@ public abstract class FileTestCase extends TestCase {
         }
     }
 
-    protected void assertExpectedFileEqualsString(String testCaseFileName, String actualContent) {
+    protected void assertExpectedFileEqualsString(String expectedFileName, String actualContent) {
         try {
-            final File expectedFile = getExpectedFileFor(testCaseFileName);
+            final File expectedFile = getExpectedFileFor(expectedFileName);
             
             AssertionFailedError assertionExcepton = null;
             boolean successful = false;
@@ -68,7 +68,7 @@ public abstract class FileTestCase extends TestCase {
             }
             
             if (!successful) {
-                File actualFile = getActualFileFor(testCaseFileName);
+                File actualFile = getActualFileFor(expectedFileName);
                 saveString(actualFile, actualContent);
                 reportActualFileSaved(actualFile);
                 

@@ -810,7 +810,22 @@ TOKEN:
     |
     <USING : "using">
     |
-    <ID: <NAME_START_CHAR> (<NAME_START_CHAR>|<ASCII_DIGIT>)*>
+    <ID: <ID_START_CHAR> (<ID_START_CHAR>|<ASCII_DIGIT>)*> {
+        // Remove backslashes from Token.image:
+        final String s = matchedToken.image;
+        if (s.indexOf('\\') != -1) {
+            final int srcLn = s.length(); 
+            final char[] newS = new char[srcLn - 1];
+            int dstIdx = 0;
+            for (int srcIdx = 0; srcIdx < srcLn; srcIdx++) {
+                final char c = s.charAt(srcIdx);
+                if (c != '\\') {
+                    newS[dstIdx++] = c;
+                }
+            }
+            matchedToken.image = new String(newS, 0, dstIdx);
+        }
+    }
     |
     <OPEN_MISPLACED_INTERPOLATION : "${" | "#{">
     {
@@ -827,7 +842,7 @@ TOKEN:
         }
     }
     |
-    <#NAME_START_CHAR:
+    <#NON_ESCAPED_ID_START_CHAR:
         [
             "$",
             "@" - "Z",
@@ -843,6 +858,10 @@ TOKEN:
             "\uf900" - "\ufaff"
         ]
     >
+    |
+    <#ESCAPED_ID_CHAR: "\\" ["-", ".", ":"] >
+    |
+    <#ID_START_CHAR: <NON_ESCAPED_ID_START_CHAR>|<ESCAPED_ID_CHAR>>
     |
     <#ASCII_DIGIT: ["0" - "9"] >
 }

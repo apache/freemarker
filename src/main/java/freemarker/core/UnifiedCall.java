@@ -137,7 +137,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 Map.Entry entry = (Map.Entry) entries.get(i);
                 Expression argExp = (Expression) entry.getValue();
                 sb.append(' ');
-                sb.append(entry.getKey());
+                sb.append(CoreUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
                 sb.append('=');
                 MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }

@@ -97,9 +97,28 @@ public class StringUtilTest extends TestCase {
         assertEsc("->", "-\\>", "-\\u003E");
     }
 
+    public void testFTLEscaping() {
+        assertFTLEsc("", "", "", "", "\"\"");
+        assertFTLEsc("\'", "\\'", "'", "\\'", "\"'\"");
+        assertFTLEsc("\"", "\\\"", "\\\"", "\"", "'\"'");
+        assertFTLEsc("\"", "\\\"", "\\\"", "\"", "'\"'");
+        assertFTLEsc("foo", "foo", "foo", "foo", "\"foo\"");
+        assertFTLEsc("foo's", "foo\\'s", "foo's", "foo\\'s", "\"foo's\"");
+        assertFTLEsc("foo \"", "foo \\\"", "foo \\\"", "foo \"", "'foo \"'");
+        assertFTLEsc("foo's \"", "foo\\'s \\\"", "foo's \\\"", "foo\\'s \"", "\"foo's \\\"\"");
+        assertFTLEsc("foo\nb\u0000c", "foo\\nb\\x0000c", "foo\\nb\\x0000c", "foo\\nb\\x0000c", "\"foo\\nb\\x0000c\"");
+    }
+    
     private void assertEsc(String s, String javaScript, String json) {
         assertEquals(javaScript, StringUtil.jsStringEnc(s, false));
         assertEquals(json, StringUtil.jsStringEnc(s, true));
+    }
+
+    private void assertFTLEsc(String s, String partAny, String partQuot, String partApos, String quoted) {
+        assertEquals(partAny, StringUtil.FTLStringLiteralEnc(s));
+        assertEquals(partQuot, StringUtil.FTLStringLiteralEnc(s, '\"'));
+        assertEquals(partApos, StringUtil.FTLStringLiteralEnc(s, '\''));
+        assertEquals(quoted, StringUtil.ftlQuote(s));
     }
     
 }
