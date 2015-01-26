@@ -21071,11 +21071,10 @@ End book</programlisting>
             of <literal>bar</literal> from <literal>foo</literal>. This FAQ
             entry explains how to handle situations like this.</para>
 
-            <para>First of all it should be clean that these are just
-            syntactical problems. FreeMarker has no limitations regarding the
-            characters used in variable names, nor regarding the length of the
-            variable names, but sometimes you need to use syntactical
-            tricks.</para>
+            <para>First of all it should be clear that these are just
+            syntactical problems, as otherwise FreeMarker has no limitations
+            regarding the characters used in variable names, nor regarding the
+            length of them.</para>
 
             <para>If the special character is one of minus sign
             (<literal>-</literal>, UCS 0x2D) or dot (<literal>.</literal>, UCS
@@ -21099,8 +21098,8 @@ End book</programlisting>
                 <literal>something["a+b"]</literal> (remember,
                 <literal>something.x</literal> is equivalent with
                 <literal>something["x"])</literal>. If it's a top-level
-                variable, those are accessible through special hash variable
-                <literal>.vars</literal>, so you can write
+                variable, those are accessible through the special hash
+                variable ,<literal>.vars</literal>, so you can write
                 <literal>.vars["a+b"]</literal>. Naturally, this trick works
                 with macro and function invocations too:
                 <literal>&lt;@.vars["a+b"]/&gt;</literal>,
@@ -21121,9 +21120,9 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>Unfortunately, you can't use such a variable (that
+                <para>Unfortunately, you can't use such a variable name (that
                 contains special characters other than <literal>-</literal>,
-                <literal>.</literal> and <literal>:</literal>) name as macro
+                <literal>.</literal> and <literal>:</literal>) as macro
                 parameter name.</para>
               </listitem>
             </itemizedlist>
