@@ -37,9 +37,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import freemarker.cache.TemplateNameFormat;
+import freemarker.cache._CacheAPI;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.SimpleSequence;
@@ -197,14 +200,14 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Despite its name it just returns the {@link #getParent()}. If
-     * {@link Configuration#getIncompatibleImprovements()} is at least 2.3.22, then that will be the same as
-     * {@link #getMainTemplate()}. Otherwise the returned value follows the {@link Environment} parent switchings that
-     * occur at {@code #include}/{@code #import} and {@code #nested} directive calls, that is, it's not very meaningful
-     * outside FreeMarker internals.  
+     * Despite its name it just returns {@link #getParent()}. If {@link Configuration#getIncompatibleImprovements()} is
+     * at least 2.3.22, then that will be the same as {@link #getMainTemplate()}. Otherwise the returned value follows
+     * the {@link Environment} parent switchings that occur at {@code #include}/{@code #import} and {@code #nested}
+     * directive calls, that is, it's not very meaningful outside FreeMarker internals.
      * 
-     * @deprecated Use {@link #getMainTemplate()} or {@link #getCurrentTemplate()} instead; the value returned by
-     *          this method is often not what you expect when it comes to macro/function invocations.  
+     * @deprecated Use {@link #getMainTemplate()} instead (or {@link #getCurrentNamespace()} and then
+     *             {@link Namespace#getTemplate()}); the value returned by this method is often not what you expect when
+     *             it comes to macro/function invocations.
      */
     public Template getTemplate() {
         return (Template)getParent();
@@ -214,7 +217,6 @@ public final class Environment extends Configurable {
      * Returns the topmost {@link Template}, with other words, the one for which this {@link Environment} was created.
      * That template will never change, like {@code #include} or macro calls don't change it.
      * 
-     * @see #getCurrentTemplate()
      * @see #getCurrentNamespace()
      * 
      * @since 2.3.22
@@ -222,19 +224,17 @@ public final class Environment extends Configurable {
     public Template getMainTemplate() {
         return mainNamespace.getTemplate();
     }
-
+    
     /**
-     * Returns the {@link Template} that we are "lexically" inside at moment.
-     * This template will change when entering an {@code #include} or calling a macro or function in another template,
-     * or returning to yet another template with {@code #nested}. As such, it's useful in
-     * {@link TemplateDirectiveModel} to find out if from where the directive was called. 
+     * Used only internally as of yet, no backward compatibility - Returns the {@link Template} that we are "lexically"
+     * inside at moment. This template will change when entering an {@code #include} or calling a macro or function in
+     * another template, or returning to yet another template with {@code #nested}. As such, it's useful in
+     * {@link TemplateDirectiveModel} to find out if from where the directive was called.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
-     * 
-     * @since 2.3.22
      */
-    public Template getCurrentTemplate() {
+    Template getCurrentTemplate() {
         int ln = instructionStack.size();
         return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
@@ -2007,48 +2007,57 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Gets a template for inclusion; used with {@link #include(Template includedTemplate)}.
-     * The advantage over simply using <code>config.getTemplate(...)</code> is that it chooses
-     * the default encoding exactly as the <code>include</code> directive does, although that
-     * encoding selection mechanism is a historical baggage and considered to be harmful.
+     * Gets a template for inclusion; used for implementing {@link #include(Template includedTemplate)}. The advantage
+     * over simply using <code>config.getTemplate(...)</code> is that it chooses the default encoding exactly as the
+     * <code>include</code> directive does, although that encoding selection mechanism is a historical baggage and
+     * considered to be harmful.
      *
-     * @param name the name of the template, relatively to the template root directory
-     *          (not the to the directory of the currently executing template file).
-     *          (Note that you can use {@link freemarker.cache.TemplateCache#getFullTemplatePath}
-     *          to convert paths to template root relative paths.)
-     *          For more details see the identical parameter of
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * @param name
+     *            the name of the template, relatively to the template root directory (not the to the directory of the
+     *            currently executing template file). (Note that you can use
+     *            {@link freemarker.cache.TemplateCache#getFullTemplatePath} to convert paths to template root relative
+     *            paths.) For more details see the identical parameter of
+     *            {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * 
-     * @param encoding the charset of the obtained template. If {@code null},
-     *          the encoding of the top template that is currently being processed in this
-     *          {@link Environment} is used, which can lead to odd situations, so using
-     *          {@code null} is not recommended. In most applications, the value of
-     *          {@link Configuration#getEncoding(Locale)}
-     *          (or {@link Configuration#getDefaultEncoding()}) should be used here.
+     * @param encoding
+     *            the charset of the obtained template. If {@code null}, the encoding of the top template that is
+     *            currently being processed in this {@link Environment} is used, which can lead to odd situations, so
+     *            using {@code null} is not recommended. In most applications, the value of
+     *            {@link Configuration#getEncoding(Locale)} (or {@link Configuration#getDefaultEncoding()}) should be
+     *            used here.
      * 
-     * @param parse See identical parameter of
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     *          
-     * @param ignoreMissing See identical parameter of
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     *          
+     * @param parseAsFTL
+     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * 
+     * @param ignoreMissing
+     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * 
      * @return Same as {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     * @throws IOException Same as exceptions thrown by
-     *          {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * @throws IOException
+     *             Same as exceptions thrown by
+     *             {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
      * 
      * @since 2.3.21
      */
-    public Template getTemplateForInclusion(String name, String encoding, boolean parse, boolean ignoreMissing)
+    public Template getTemplateForInclusion(String name, String encoding, boolean parseAsFTL, boolean ignoreMissing)
     throws IOException
     {
+        final Template inheritedTemplate = getTemplate();
+        
         if (encoding == null) {
-            // This branch shouldn't exist... but we have to keep BC.
-            encoding = getTemplate().getEncoding();
+            // This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
+            encoding = inheritedTemplate.getEncoding();
+            if (encoding == null) {
+                encoding = getConfiguration().getEncoding(this.getLocale());
+            }
         }
-        if (encoding == null) {
-            encoding = getConfiguration().getEncoding(this.getLocale());
-        }
-        return getConfiguration().getTemplate(name, getLocale(), encoding, parse, ignoreMissing);
+
+        Object customLookupCondition = inheritedTemplate.getCustomLookupCondition(); 
+        
+        return getConfiguration().getTemplate(
+                name, getLocale(), customLookupCondition,
+                encoding, parseAsFTL,
+                ignoreMissing);
     }
 
     /**
@@ -2156,6 +2165,33 @@ public final class Environment extends Configurable {
         return (Namespace) loadedLibs.get(templateName);
     }
     
+    /**
+     * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
+     * name. This gives a full, even if non-normalized template name, that could be used for
+     * {@link Configuration#getTemplate(String)}. This is mostly used when a template refers to another template.
+     * 
+     * @param targetName
+     *            If starts with {@code "/"} or contains a scheme part ({@code "://"}, or with
+     *            {@link TemplateNameFormat#DEFAULT_2_4_0} even just a {@code ":"} that's not preceded by a {@code "/"})
+     *            then it's an absolute name, otherwise it's a relative path. Relative paths are interpreted relatively
+     *            to the {@code baseName}. Absolute names are simply returned as is, ignoring the {@code baseName},
+     *            except if the {@code baseName} has scheme part, and the {@code targetName} hasn't, in which case it
+     *            will get the schema of the {@code baseName}.
+     * @param baseName
+     *            If you want to specify a base directory here, it must end with {@code "/"}. If it doesn't end with
+     *            {@code "/"}, it's parent directory will be used as the base path. Might starts with a scheme part
+     *            (like {@code "foo://"}, or with {@link TemplateNameFormat#DEFAULT_2_4_0} even just {@code "foo:"}).
+     */
+    public String toFullTemplateName(String baseName, String targetName)
+            throws MalformedTemplateNameException {
+        if (isClassicCompatible()) {
+            // Early FM only had absolute names.
+            return targetName;
+        }
+        
+        return _CacheAPI.toAbsoluteName(getConfiguration().getTemplateNameFormat(), baseName, targetName);
+    }
+    
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {
         Writer prevOut = out;
         try {
@@ -2237,7 +2273,7 @@ public final class Environment extends Configurable {
     
     public class Namespace extends SimpleHash {
         
-        private Template template;
+        private final Template template;
         
         Namespace() {
             this.template = Environment.this.getTemplate();

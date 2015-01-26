@@ -15,9 +15,8 @@
  */
 
 package freemarker.ext.beans;
-
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -36,8 +35,8 @@ public class ErrorMessagesTest {
         } catch (TemplateModelException e) {
             e.printStackTrace();
             final String msg = e.getMessage();
-            assertTrue(msg.contains("\"foo\""));
-            assertTrue(msg.contains("existing sub-variable"));
+            assertThat(msg, containsString("\"foo\""));
+            assertThat(msg, containsString("existing sub-variable"));
         }
         assertNull(thm.get("bar"));
     }

@@ -137,9 +137,18 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 Map.Entry entry = (Map.Entry) entries.get(i);
                 Expression argExp = (Expression) entry.getValue();
                 sb.append(' ');
-                sb.append(entry.getKey());
+                sb.append(CoreUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
                 sb.append('=');
                 MessageUtil.appendExpressionAsUntearable(sb, argExp);
+            }
+        }
+        if (bodyParameterNames != null && !bodyParameterNames.isEmpty()) {
+            sb.append("; ");
+            for (int i = 0; i < bodyParameterNames.size(); i++) {
+                if (i != 0) {
+                    sb.append(", ");
+                }
+                sb.append(CoreUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
             }
         }
         if (canonical) {
@@ -325,6 +334,10 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
             this.customData = customData;
         }
         
+    }
+    
+    public String getTemplateSourceName() {
+        return getTemplate().getSourceName();
     }
     
 }

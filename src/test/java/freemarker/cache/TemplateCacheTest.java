@@ -22,7 +22,11 @@ import java.net.URL;
 import java.util.Locale;
 
 import junit.framework.TestCase;
+import freemarker.core.ParseException;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.Template;
+import freemarker.template.TemplateNotFoundException;
 import freemarker.template.Version;
 
 public class TemplateCacheTest extends TestCase
@@ -269,7 +273,131 @@ public class TemplateCacheTest extends TestCase
             assertEquals(Boolean.FALSE, templateLoader.getLastTemplateSourceModification());
         }
     }
+    
+    public void testWrongEncodingReload() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setLocale(Locale.US);
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Foo");
+        tl.putTemplate("utf-8.ftl", "Bar");
+        cfg.setTemplateLoader(tl);
+        
+        {
+            Template t = cfg.getTemplate("utf-8.ftl", "Utf-8");
+            assertEquals("utf-8.ftl", t.getName());
+            assertEquals("utf-8_en.ftl", t.getSourceName());
+            assertEquals("Utf-8", t.getEncoding());
+            assertEquals("Foo", t.toString());
+        }
+        
+        {
+            Template t = cfg.getTemplate("utf-8.ftl", "Utf-16");
+            assertEquals("utf-8.ftl", t.getName());
+            assertEquals("utf-8_en.ftl", t.getSourceName());
+            assertEquals("utf-8", t.getEncoding());
+            assertEquals("Foo", t.toString());
+        }
+    }
 
+    public void testEncodingSelection() throws IOException {
+        Locale hungary = new Locale("hu", "HU"); 
+                
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setDefaultEncoding("utf-8");
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("t.ftl", "Foo");
+        tl.putTemplate("t_de.ftl", "Vuu");
+        tl.putTemplate("t2.ftl", "<#ftl encoding='UTF-16LE'>Foo");
+        tl.putTemplate("t2_de.ftl", "<#ftl encoding='UTF-16BE'>Vuu");
+        cfg.setTemplateLoader(tl);
+
+        // No locale-to-encoding mapping exists yet:
+        {
+            Template t = cfg.getTemplate("t.ftl", Locale.GERMANY);
+            assertEquals("t.ftl", t.getName());
+            assertEquals("t_de.ftl", t.getSourceName());
+            assertEquals("utf-8", t.getEncoding());
+            assertEquals("Vuu", t.toString());
+        }
+        
+        cfg.setEncoding(Locale.GERMANY, "ISO-8859-1");
+        cfg.setEncoding(hungary, "ISO-8859-2");
+        {
+            Template t = cfg.getTemplate("t.ftl", Locale.CHINESE);
+            assertEquals("t.ftl", t.getName());
+            assertEquals("t.ftl", t.getSourceName());
+            assertEquals("utf-8", t.getEncoding());
+            assertEquals("Foo", t.toString());
+        }
+        {
+            Template t = cfg.getTemplate("t.ftl", Locale.GERMANY);
+            assertEquals("t.ftl", t.getName());
+            assertEquals("t_de.ftl", t.getSourceName());
+            assertEquals("ISO-8859-1", t.getEncoding());
+            assertEquals("Vuu", t.toString());
+        }
+        {
+            Template t = cfg.getTemplate("t.ftl", hungary);
+            assertEquals("t.ftl", t.getName());
+            assertEquals("t.ftl", t.getSourceName());
+            assertEquals("ISO-8859-2", t.getEncoding());
+            assertEquals("Foo", t.toString());
+        }
+        
+        // #ftl header overrides:
+        {
+            Template t = cfg.getTemplate("t2.ftl", Locale.CHINESE);
+            assertEquals("t2.ftl", t.getName());
+            assertEquals("t2.ftl", t.getSourceName());
+            assertEquals("UTF-16LE", t.getEncoding());
+            assertEquals("Foo", t.toString());
+        }
+        {
+            Template t = cfg.getTemplate("t2.ftl", Locale.GERMANY);
+            assertEquals("t2.ftl", t.getName());
+            assertEquals("t2_de.ftl", t.getSourceName());
+            assertEquals("UTF-16BE", t.getEncoding());
+            assertEquals("Vuu", t.toString());
+        }
+        {
+            Template t = cfg.getTemplate("t2.ftl", hungary);
+            assertEquals("t2.ftl", t.getName());
+            assertEquals("t2.ftl", t.getSourceName());
+            assertEquals("UTF-16LE", t.getEncoding());
+            assertEquals("Foo", t.toString());
+        }
+    }
+    
+    public void testTemplateNameFormatExceptionAndBackwardCompatibility() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        assertNull(cfg.getTemplate("../x", null, null, null, true, true));
+        try {
+            cfg.getTemplate("../x");
+            fail();
+        } catch (TemplateNotFoundException e) {
+            // expected
+        }
+        
+        // [2.4] Test it with IcI 2.4
+        
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        try {
+            cfg.getTemplate("../x", null, null, null, true, true);
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            // expected
+        }
+        try {
+            cfg.getTemplate("../x");
+            fail();
+        } catch (MalformedTemplateNameException e) {
+            // expected
+        }
+    }
+    
     private static class MonitoredClassTemplateLoader extends ClassTemplateLoader {
         
         private Boolean lastTemplateSourceModification;

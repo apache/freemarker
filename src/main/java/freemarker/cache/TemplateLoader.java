@@ -72,11 +72,13 @@ public interface TemplateLoader {
      *         {@link #getLastModified(Object)} and {@link #getReader(Object, String)}, when those are called on the
      *         same {@link TemplateLoader}. {@code null} must be returned if the source for the template doesn't exist;
      *         don't throw exception then! The exact type of this object is up to the {@link TemplateLoader}
-     *         implementation. As this object is possibly compared with another template source for equality,
-     *         {@link Object#equals(Object)} (and thus {@link Object#hashCode()}) must be properly implemented.
-     *         Especially, template sources that refer to the same physical source must be equivalent, otherwise
-     *         template caching can become inefficient. This is only expected from {@link Object#equals(Object)} when
-     *         the compared template sources came from the same {@link TemplateLoader} instance.
+     *         implementation. As this object is possibly used as hash key in caches, and is surly compared with another
+     *         template source for equality, <b>it must have a proper {@link Object#equals(Object)} and
+     *         {@link Object#hashCode()}) implementation</b>. Especially, template sources that refer to the same
+     *         physical source must be equivalent, otherwise template caching can become inefficient. This is only
+     *         expected from {@link Object#equals(Object)} when the compared template sources came from the same
+     *         {@link TemplateLoader} instance. Also, it must not influence the equality if the source is open or
+     *         closed ({@link #closeTemplateSource(Object)}). 
      * 
      * @throws IOException
      *             When an error occurs that makes it impossible to find out if the template exists, or to access the

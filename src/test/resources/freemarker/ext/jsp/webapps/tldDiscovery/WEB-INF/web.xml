@@ -68,6 +68,60 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
+  <servlet>
+    <servlet-name>freemarker-defaultOverride</servlet-name>
+    <servlet-class>freemarker.ext.jsp.JspTestFreemarkerServletWithDefaultOverride</servlet-class>
+
+    <!-- FreemarkerServlet settings: -->
+    <init-param>
+      <param-name>TemplatePath</param-name>
+      <param-value>/</param-value>
+    </init-param>
+    <init-param>
+      <param-name>NoCache</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ContentType</param-name>
+      <param-value>text/html; charset=UTF-8</param-value> <!-- Forces UTF-8 output encoding! -->
+    </init-param>
+    <init-param>
+      <param-name>ClasspathTlds</param-name>
+      <param-value>
+        freemarker/ext/jsp/tldDiscovery-ClassPathTlds-2.tld,
+      </param-value>
+    </init-param>
+
+    <!-- FreeMarker settings: -->
+    <init-param>
+      <param-name>incompatible_improvements</param-name>
+      <param-value>2.3.22</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_exception_handler</param-name>
+      <!-- Some may prefer "html_debug" for development. -->
+      <param-value>rethrow</param-value>
+    </init-param>
+    <init-param>
+      <param-name>template_update_delay</param-name>
+      <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
+    </init-param>
+    <init-param>
+      <param-name>default_encoding</param-name>
+      <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
+    </init-param>
+    <init-param>
+      <param-name>locale</param-name>
+      <param-value>en_US</param-value>
+    </init-param>
+    <init-param>
+      <param-name>number_format</param-name>
+      <param-value>0.##########</param-value>
+    </init-param>
+
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>tester</servlet-name>
     <url-pattern>/tester</url-pattern>

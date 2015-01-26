@@ -16,6 +16,8 @@
 
 package freemarker.cache;
 
+import freemarker.template.MalformedTemplateNameException;
+
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
@@ -23,8 +25,13 @@ package freemarker.cache;
  */ 
 public class _CacheAPI {
 
-    public static TemplateLoader createLegacyDefaultTemplateLoader() {
-        return TemplateCache.createLegacyDefaultTemplateLoader();
+    public _CacheAPI() {
+        // TODO Auto-generated constructor stub
     }
     
+    public static String toAbsoluteName(TemplateNameFormat templateNameFormat, String baseName, String targetName)
+            throws MalformedTemplateNameException {
+        return templateNameFormat.toAbsoluteName(baseName, targetName);
+    }
+
 }

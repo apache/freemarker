@@ -16,11 +16,14 @@
 
 package freemarker.template;
 
-import java.io.FileNotFoundException;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -30,11 +33,14 @@ import org.junit.Test;
 
 import freemarker.cache.CacheStorageWithGetSize;
 import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.NullCacheStorage;
+import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.StrongCacheStorage;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -94,6 +100,19 @@ public class ConfigurationTest extends TestCase {
         assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
         assertSame(StringTemplateLoader.class, cfg.getTemplateLoader().getClass());
         
+        cfg.unsetObjectWrapper();
+        assertUsesNewObjectWrapper(cfg);
+        cfg.unsetTemplateLoader();
+        assertUsesNewTemplateLoader(cfg);
+
+        cfg.setIncompatibleImprovements(oldVersion);
+        assertUsesLegacyObjectWrapper(cfg);
+        assertUsesLegacyTemplateLoader(cfg);
+
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+        assertUses2322ObjectWrapper(cfg);
+        assertUsesNewTemplateLoader(cfg);
+        
         // ---
         
         cfg = new Configuration(newVersion);
@@ -107,10 +126,114 @@ public class ConfigurationTest extends TestCase {
         // ---
         
         cfg = new Configuration(Configuration.VERSION_2_3_22);
+        assertUses2322ObjectWrapper(cfg);
+        assertUsesNewTemplateLoader(cfg);
+    }
+
+    private void assertUses2322ObjectWrapper(Configuration cfg) {
         Object ow = cfg.getObjectWrapper();
         assertEquals(DefaultObjectWrapper.class, ow.getClass());
         assertEquals(Configuration.VERSION_2_3_22,
                 ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+    }
+    
+    public void testUnsetAndIsExplicitlySet() {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        
+        assertFalse(cfg.isLogTemplateExceptionsExplicitlySet());
+        assertTrue(cfg.getLogTemplateExceptions());
+        //
+        cfg.setLogTemplateExceptions(false);
+        assertTrue(cfg.isLogTemplateExceptionsExplicitlySet());
+        assertFalse(cfg.getLogTemplateExceptions());
+        //
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetLogTemplateExceptions();
+            assertFalse(cfg.isLogTemplateExceptionsExplicitlySet());
+            assertTrue(cfg.getLogTemplateExceptions());
+        }
+        
+        assertFalse(cfg.isObjectWrapperExplicitlySet());
+        assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        //
+        cfg.setObjectWrapper(ObjectWrapper.SIMPLE_WRAPPER);
+        assertTrue(cfg.isObjectWrapperExplicitlySet());
+        assertSame(ObjectWrapper.SIMPLE_WRAPPER, cfg.getObjectWrapper());
+        //
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetObjectWrapper();
+            assertFalse(cfg.isObjectWrapperExplicitlySet());
+            assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        }
+        
+        assertFalse(cfg.isTemplateExceptionHandlerExplicitlySet());
+        assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfg.getTemplateExceptionHandler());
+        //
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        assertTrue(cfg.isTemplateExceptionHandlerExplicitlySet());
+        assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
+        //
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetTemplateExceptionHandler();
+            assertFalse(cfg.isTemplateExceptionHandlerExplicitlySet());
+            assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfg.getTemplateExceptionHandler());
+        }
+        
+        assertFalse(cfg.isTemplateLoaderExplicitlySet());
+        assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
+        //
+        cfg.setTemplateLoader(null);
+        assertTrue(cfg.isTemplateLoaderExplicitlySet());
+        assertNull(cfg.getTemplateLoader());
+        //
+        for (int i = 0; i < 3; i++) {
+            if (i == 2) {
+                cfg.setTemplateLoader(cfg.getTemplateLoader());
+            }
+            cfg.unsetTemplateLoader();
+            assertFalse(cfg.isTemplateLoaderExplicitlySet());
+            assertTrue(cfg.getTemplateLoader() instanceof FileTemplateLoader);
+        }
+        
+        assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
+        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
+        //
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
+        assertTrue(cfg.isTemplateLookupStrategyExplicitlySet());
+        //
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetTemplateLookupStrategy();
+            assertFalse(cfg.isTemplateLookupStrategyExplicitlySet());
+        }
+        
+        assertFalse(cfg.isTemplateNameFormatExplicitlySet());
+        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        //
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        assertTrue(cfg.isTemplateNameFormatExplicitlySet());
+        assertSame(TemplateNameFormat.DEFAULT_2_4_0, cfg.getTemplateNameFormat());
+        //
+        for (int i = 0; i < 2; i++) {
+            cfg.unsetTemplateNameFormat();
+            assertFalse(cfg.isTemplateNameFormatExplicitlySet());
+            assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        }
+        
+        assertFalse(cfg.isCacheStorageExplicitlySet());
+        assertTrue(cfg.getCacheStorage() instanceof SoftCacheStorage);
+        //
+        cfg.setCacheStorage(NullCacheStorage.INSTANCE);
+        assertTrue(cfg.isCacheStorageExplicitlySet());
+        assertSame(NullCacheStorage.INSTANCE, cfg.getCacheStorage());
+        //
+        for (int i = 0; i < 3; i++) {
+            if (i == 2) {
+                cfg.setCacheStorage(cfg.getCacheStorage());
+            }
+            cfg.unsetCacheStorage();
+            assertFalse(cfg.isCacheStorageExplicitlySet());
+            assertTrue(cfg.getCacheStorage() instanceof SoftCacheStorage);
+        }
     }
     
     public void testTemplateLoadingErrors() throws Exception {
@@ -118,24 +241,24 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.getTemplate("missing.ftl");
             fail();
-        } catch (FileNotFoundException e) {
-            assertTrue(e.getMessage().contains("wasn't set") && e.getMessage().contains("default"));
+        } catch (TemplateNotFoundException e) {
+            assertThat(e.getMessage(), allOf(containsString("wasn't set"), containsString("default")));
         }
         
         cfg = new Configuration(Configuration.VERSION_2_3_21);
         try {
             cfg.getTemplate("missing.ftl");
             fail();
-        } catch (FileNotFoundException e) {
-            assertTrue(e.getMessage().contains("wasn't set") && !e.getMessage().contains("default"));
+        } catch (TemplateNotFoundException e) {
+            assertThat(e.getMessage(), allOf(containsString("wasn't set"), not(containsString("default"))));
         }
         
         cfg.setClassForTemplateLoading(this.getClass(), "nosuchpackage");
         try {
             cfg.getTemplate("missing.ftl");
             fail();
-        } catch (IOException e) {
-            assertTrue(!e.getMessage().contains("wasn't set"));
+        } catch (TemplateNotFoundException e) {
+            assertThat(e.getMessage(), not(containsString("wasn't set")));
         }
     }
     
@@ -165,13 +288,13 @@ public class ConfigurationTest extends TestCase {
         try {
             new Configuration(new Version(999, 1, 2));
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("upgrade"));
+            assertThat(e.getMessage(), containsString("upgrade"));
         }
         
         try {
             new Configuration(new Version(2, 2, 2));
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("2.3.0"));
+            assertThat(e.getMessage(), containsString("2.3.0"));
         }
     }
     
@@ -181,7 +304,7 @@ public class ConfigurationTest extends TestCase {
             new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertTrue(e.getMessage().contains("Tip:"));
+            assertThat(e.getMessage(), containsString("Tip:"));
         }
         
         cfg.setShowErrorTips(false);
@@ -189,10 +312,293 @@ public class ConfigurationTest extends TestCase {
             new Template(null, "${x}", cfg).process(null, NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertFalse(e.getMessage().contains("Tip:"));
+            assertThat(e.getMessage(), not(containsString("Tip:")));
         }
     }
+    
+    @Test
+    @SuppressWarnings("boxing")
+    public void testGetTemplateOverloads() throws IOException, TemplateException {
+        final Locale hu = new Locale("hu", "HU");
+        final String latin1 = "ISO-8859-1";
+        final String latin2 = "ISO-8859-2";
+        final String utf8 = "utf-8";
+        final String tFtl = "t.ftl";
+        final String tEnFtl = "t_en.ftl";
+        final String tUtf8Ftl = "t-utf8.ftl";
+        final Integer custLookupCond = 123;
+        
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        cfg.setLocale(Locale.GERMAN);
+        cfg.setDefaultEncoding(latin1);
+        cfg.setEncoding(hu, latin2);
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate(tFtl, "${1}");
+        tl.putTemplate(tEnFtl, "${1}");
+        tl.putTemplate(tUtf8Ftl, "<#ftl encoding='utf-8'>");
+        cfg.setTemplateLoader(tl);
+        
+        // 1 args:
+        {
+            Template t = cfg.getTemplate(tFtl);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tUtf8Ftl);
+            assertEquals(tUtf8Ftl, t.getName());
+            assertEquals(tUtf8Ftl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+        }
+        
+        // 2 args overload 1:
+        {
+            Template t = cfg.getTemplate(tFtl, Locale.GERMAN);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, (Locale) null);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, Locale.US);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tEnFtl, t.getSourceName());
+            assertEquals(Locale.US, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tUtf8Ftl, Locale.US);
+            assertEquals(tUtf8Ftl, t.getName());
+            assertEquals(tUtf8Ftl, t.getSourceName());
+            assertEquals(Locale.US, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin2, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tUtf8Ftl, hu);
+            assertEquals(tUtf8Ftl, t.getName());
+            assertEquals(tUtf8Ftl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+        }
+        
+        // 2 args overload 2:
+        {
+            Template t = cfg.getTemplate(tFtl, utf8);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, (String) null);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+        }
+        
+        // 3 args:
+        {
+            Template t = cfg.getTemplate(tFtl, hu, utf8);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, null);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin2, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, null, utf8);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, null, null);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        
+        // 4 args:
+        {
+            Template t = cfg.getTemplate(tFtl, hu, utf8, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("${1}", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, utf8, true);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, null, utf8, true);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, null, true);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin2, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        
+        // 5 args:
+        {
+            Template t = cfg.getTemplate(tFtl, hu, utf8, false, true);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("${1}", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, utf8, true, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, null, utf8, true, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, null, true, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertNull(t.getCustomLookupCondition());
+            assertEquals(latin2, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        try {
+            cfg.getTemplate("missing.ftl", hu, utf8, true, false);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            // Expected
+        }
+        assertNull(cfg.getTemplate("missing.ftl", hu, utf8, true, true));
+        
+        // 6 args:
+        {
+            Template t = cfg.getTemplate(tFtl, hu, custLookupCond, utf8, true, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertEquals(custLookupCond, t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, custLookupCond, utf8, false, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertEquals(custLookupCond, t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("${1}", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, null, custLookupCond, utf8, true, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertEquals(custLookupCond, t.getCustomLookupCondition());
+            assertEquals(utf8, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        {
+            Template t = cfg.getTemplate(tFtl, hu, custLookupCond, null, true, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(hu, t.getLocale());
+            assertEquals(custLookupCond, t.getCustomLookupCondition());
+            assertEquals(latin2, t.getEncoding());
+            assertOutputEquals("1", t);
+        }
+        try {
+            cfg.getTemplate("missing.ftl", hu, custLookupCond, utf8, true, false);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            // Expected
+        }
+        assertNull(cfg.getTemplate("missing.ftl", hu, custLookupCond, utf8, true, true));
+    }
 
+    private void assertOutputEquals(final String expectedContent, final Template t) throws TemplateException,
+            IOException {
+        StringWriter sw = new StringWriter();
+        t.process(null, sw);
+        assertEquals(expectedContent, sw.toString());
+    }
+    
     public void testSetTemplateLoaderAndCache() throws Exception {
         Configuration cfg = new Configuration();
         
@@ -215,13 +621,135 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateLoader(cfg.getTemplateLoader());
         assertEquals(1, cache.getSize());
     }
+
+    public void testChangingLocalizedLookupClearsCache() throws Exception {
+        Configuration cfg = new Configuration();
+        cfg.setCacheStorage(new StrongCacheStorage());
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        
+        assertEquals(0, cache.getSize());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(true);
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(false);
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(false);
+        assertEquals(1, cache.getSize());
+        cfg.setLocalizedLookup(true);
+        assertEquals(0, cache.getSize());
+    }
+
+    public void testChangingTemplateNameFormatClearsCache() throws Exception {
+        Configuration cfg = new Configuration();
+        cfg.setCacheStorage(new StrongCacheStorage());
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        
+        assertEquals(0, cache.getSize());
+        
+        cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        assertEquals(0, cache.getSize());
+        cfg.getTemplate("toCache1.ftl");
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        assertEquals(1, cache.getSize());
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+        assertEquals(0, cache.getSize());
+    }
+
+    public void testChangingTemplateNameFormatHasEffect() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("a/b.ftl", "In a/b.ftl");
+        tl.putTemplate("b.ftl", "In b.ftl");
+        cfg.setTemplateLoader(tl);
+        
+        {
+            final Template template = cfg.getTemplate("a/./../b.ftl");
+            assertEquals("a/b.ftl", template.getName());
+            assertEquals("a/b.ftl", template.getSourceName());
+            assertEquals("In a/b.ftl", template.toString());
+        }
+        
+        cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+        
+        {
+            final Template template = cfg.getTemplate("a/./../b.ftl");
+            assertEquals("b.ftl", template.getName());
+            assertEquals("b.ftl", template.getSourceName());
+            assertEquals("In b.ftl", template.toString());
+        }
+    }
+
+    public void testTemplateNameFormatSetSetting() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defAult_2_4_0");
+        assertSame(TemplateNameFormat.DEFAULT_2_4_0, cfg.getTemplateNameFormat());
+        cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defaUlt_2_3_0");
+        assertSame(TemplateNameFormat.DEFAULT_2_3_0, cfg.getTemplateNameFormat());
+        assertTrue(cfg.isTemplateNameFormatExplicitlySet());
+        cfg.setSetting(Configuration.TEMPLATE_NAME_FORMAT_KEY, "defauLt");
+        assertFalse(cfg.isTemplateNameFormatExplicitlySet());
+    }
+
+    public void testObjectWrapperSetSetting() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_20);
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        }
+        
+        {
+            cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_22);
+            assertNotSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
+            assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
+            assertTrue(dow.getForceLegacyNonListCollections());
+        }
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult_2_3_0");
+            assertSame(ObjectWrapper.DEFAULT_WRAPPER, cfg.getObjectWrapper());
+        }
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY,
+                    "DefaultObjectWrapper(2.3.21, useAdaptersForContainers=true, forceLegacyNonListCollections=false)");
+            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
+            assertEquals(Configuration.VERSION_2_3_21, dow.getIncompatibleImprovements());
+            assertFalse(dow.getForceLegacyNonListCollections());
+        }
+        
+        {
+            cfg.setSetting(Configuration.OBJECT_WRAPPER_KEY, "defAult");
+            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
+            assertEquals(Configuration.VERSION_2_3_22, dow.getIncompatibleImprovements());
+            assertTrue(dow.getForceLegacyNonListCollections());
+        }
+    }
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
         
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertSame(TemplateLookupStrategy.DEFAULT, cfg.getTemplateLookupStrategy());
+        assertSame(TemplateLookupStrategy.DEFAULT_2_3_0, cfg.getTemplateLookupStrategy());
         
         CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
@@ -229,7 +757,7 @@ public class ConfigurationTest extends TestCase {
         cfg.getTemplate("toCache1.ftl");
         assertEquals(1, cache.getSize());
         
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
         assertEquals(1, cache.getSize());
         
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
@@ -246,7 +774,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setTemplateLookupStrategy(myStrategy);
         assertEquals(1, cache.getSize());
         
-        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT);
+        cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
         assertEquals(0, cache.getSize());
     }
     
@@ -447,7 +975,7 @@ public class ConfigurationTest extends TestCase {
                 new Template(null, "${1?api}", cfg).process(null, NullWriter.INSTANCE);
                 fail();
             } catch (TemplateException e) {
-                assertTrue(e.getMessage().contains(Configurable.API_BUILTIN_ENABLED_KEY));
+                assertThat(e.getMessage(), containsString(Configurable.API_BUILTIN_ENABLED_KEY));
             }
         }
         

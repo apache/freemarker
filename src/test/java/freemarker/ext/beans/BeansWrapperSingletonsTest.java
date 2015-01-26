@@ -16,6 +16,9 @@
 
 package freemarker.ext.beans;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.lang.ref.Reference;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,7 +58,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
             new BeansWrapperBuilder(new Version(2, 3, 23));
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("upgrade"));
+            assertThat(e.getMessage(), containsString("upgrade"));
         }
 
         BeansWrapperBuilder pa1;
@@ -155,7 +158,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
                 bw.setExposeFields(true);  // can't modify the settings of a (potential) singleton
                 fail();
             } catch (IllegalStateException e) {
-                assertTrue(e.getMessage().contains("modify"));
+                assertThat(e.getMessage(), containsString("modify"));
             }
             
             assertSame(bw, getBeansWrapperWithSetting(Configuration.VERSION_2_3_20, true));

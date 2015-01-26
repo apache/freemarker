@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package freemarker.cache;
 
 import java.io.IOException;
@@ -30,68 +46,34 @@ import freemarker.template.Template;
  * applications, yet it can be confusing.)
  * </ul>
  * 
- * <p>
- * See {@link #DEFAULT} in the source code as an example implementation.
+ * @see Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)
  * 
  * @since 2.3.22
  */
-public interface TemplateLookupStrategy {
+public abstract class TemplateLookupStrategy {
 
     /**
-     * The default template lookup strategy. Assuming localized lookup is enabled (see
-     * {@link Configuration#setLocalizedLookup(boolean)}) and that a template is requested for the name
+     * <p>
+     * The default lookup strategy of FreeMarker.
+     * 
+     * <p>
+     * Through an example: Assuming localized lookup is enabled and that a template is requested for the name
      * {@code example.ftl} and {@code Locale("es", "ES", "Traditional_WIN")}, it will try the following template names,
      * in this order: {@code "foo_en_AU_Traditional_WIN.ftl"}, {@code "foo_en_AU_Traditional.ftl"},
-     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}
+     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. It stops at the first variation where it finds
+     * a template. (If the template name contains "*" steps, finding the template for the attempted localized variation
+     * happens with the template acquisition mechanism.) If localized lookup is disabled, it won't try to add any locale
+     * strings, so it just looks for {@code "foo.ftl"}.
      * 
      * <p>
-     * More precisely, it removes the file extension (the part starting with the <em>last</em> dot), then appends
-     * {@link Locale#toString()} after it, and puts back the extension. Then it starts to remove the parts from the end
-     * of the locale, considering {@code "_"} as the separator between the parts. It won't remove parts that are not
-     * part of the locale string (like if the requested template name is {@code foo_bar.ftl}, it won't remove the
-     * {@code "_bar"}).
-     * 
-     * <p>
-     * If localized lookup is disabled, it won't try to add any locale strings, so it just looks for {@code "foo.ftl"}.
-     * 
-     * @since 2.3.22
+     * The generation of the localized name variation with the default lookup strategy, happens like this: It removes
+     * the file extension (the part starting with the <em>last</em> dot), then appends {@link Locale#toString()} after
+     * it, and puts back the extension. Then it starts to remove the parts from the end of the locale, considering
+     * {@code "_"} as the separator between the parts. It won't remove parts that are not part of the locale string
+     * (like if the requested template name is {@code foo_bar.ftl}, it won't remove the {@code "_bar"}).
      */
-    public static final TemplateLookupStrategy DEFAULT = new TemplateLookupStrategy() {
-
-        private static final String LOCALE_SEPARATOR = "_";
-        
-        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
-            final String templateName = ctx.getTemplateName();
-            
-            if (ctx.getTemplateLocale() == null) {
-                return ctx.lookupWithAcquisitionStrategy(templateName);
-            }
-            
-            // Localized lookup:
-            int lastDot = templateName.lastIndexOf('.');
-            String prefix = lastDot == -1 ? templateName : templateName.substring(0, lastDot);
-            String suffix = lastDot == -1 ? "" : templateName.substring(lastDot);
-            String localeName = LOCALE_SEPARATOR + ctx.getTemplateLocale().toString();
-            StringBuffer buf = new StringBuffer(templateName.length() + localeName.length());
-            buf.append(prefix);
-            tryLocaleNameVariations: while (true) {
-                buf.setLength(prefix.length());
-                String path = buf.append(localeName).append(suffix).toString();
-                TemplateLookupResult lookupResult = ctx.lookupWithAcquisitionStrategy(path);
-                if (lookupResult.isPositive()) {
-                    return lookupResult;
-                }
-                
-                int lastUnderscore = localeName.lastIndexOf('_');
-                if (lastUnderscore == -1) {
-                    break tryLocaleNameVariations;
-                }
-                localeName = localeName.substring(0, lastUnderscore);
-            }
-            return ctx.createNegativeLookupResult();
-        }
-    };
-
+    public static final TemplateLookupStrategy DEFAULT_2_3_0 = new Default020300();
+    
     /**
      * Finds the template source that matches the template name, locale (if not {@code null}) and other parameters
      * specified in the {@link TemplateLookupContext}. See also the class-level {@link TemplateLookupStrategy}
@@ -108,6 +90,18 @@ public interface TemplateLookupStrategy {
      *         {@code TemplateLookupContext#createNegativeLookupResult()} if no matching template exists. Can't be
      *         {@code null}.
      */
-    TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
-
+    public abstract TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException;
+    
+    private static class Default020300 extends TemplateLookupStrategy {
+        
+        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+            return ctx.lookupWithLocalizedThenAcquisitionStrategy(ctx.getTemplateName(), ctx.getTemplateLocale());
+        }
+        
+        public String toString() {
+            return "TemplateLookupStrategy.DEFAULT_2_3_0";
+        }
+        
+    }
+    
 }

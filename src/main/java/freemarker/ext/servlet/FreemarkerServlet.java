@@ -140,27 +140,27 @@ import freemarker.template.utility.StringUtil;
  * "Internal server error" response (and maybe logs the event into the container log). See "Error handling" later for
  * more!</li>
  * 
- * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items which
- * are either: {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, {@value #META_INF_TLD_LOCATION_CLASSPATH}
+ * <li><strong>{@value #INIT_PARAM_META_INF_TLD_LOCATIONS}</strong> (since 2.3.22): Comma separated list of items, each
+ * is either {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}, or {@value #META_INF_TLD_LOCATION_CLASSPATH}
  * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example
  * {@code <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or
  * {@code <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
- * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to not set, in which case
- * {@link TaglibFactory} will behave as if it was {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS}. Note that this
- * can be also specified with the {@value #SYSTEM_PROPERTY_META_INF_TLD_SOURCES} system property. If both the init-param
- * and the system property exists, the sources listed in the system property will be added after those specified by the
- * init-param. This is where the special entry, {@value #META_INF_TLD_LOCATION_CLEAR} comes handy, as it will remove all
- * previous list items. (An intended usage of the system property is setting it to {@code clear, classpath} in the
- * Eclipse run configuration if you are running the application without putting the dependency jar-s into
- * {@code WEB-INF/lib}.) Also, note that further {@code classpath:<pattern>} items are added automatically at the end of
- * this list based on Jetty's {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context
- * attribute.</li>
+ * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to a list that contains
+ * {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS} only (can be overridden with
+ * {@link #createDefaultMetaInfTldSources()}). Note that this can be also specified with the
+ * {@value #SYSTEM_PROPERTY_META_INF_TLD_SOURCES} system property. If both the init-param and the system property
+ * exists, the sources listed in the system property will be added after those specified by the init-param. This is
+ * where the special entry, {@value #META_INF_TLD_LOCATION_CLEAR} comes handy, as it will remove all previous list
+ * items. (An intended usage of the system property is setting it to {@code clear, classpath} in the Eclipse run
+ * configuration if you are running the application without putting the dependency jar-s into {@code WEB-INF/lib}.)
+ * Also, note that further {@code classpath:<pattern>} items are added automatically at the end of this list based on
+ * Jetty's {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context attribute.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_CLASSPATH_TLDS}</strong> (since 2.3.22): Comma separated list of paths; see
- * {@link TaglibFactory#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to no paths.
- * Note that this can be also specified with the {@value #SYSTEM_PROPERTY_CLASSPATH_TLDS} system property. If both the
- * init-param and the system property exists, the items listed in system property will be added after those specified by
- * the init-param.</li>
+ * {@link TaglibFactory#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to no paths
+ * (can be overidden with {@link #createDefaultClassPathTlds()}). Note that this can also be specified with the
+ * {@value #SYSTEM_PROPERTY_CLASSPATH_TLDS} system property. If both the init-param and the system property exists, the
+ * items listed in system property will be added after those specified by the init-param.</li>
  * 
  * <li><strong>"Debug"</strong>: Deprecated, has no effect since 2.3.22. (Earlier it has enabled/disabled sending
  * debug-level log messages to the servlet container log, but this servlet doesn't log debug level messages into the
@@ -222,7 +222,7 @@ import freemarker.template.utility.StringUtil;
  * {@code rethrow} for production. The {@code html_debug} (and {@code debug}) handlers will print error details to the
  * page and then commit the HTTP response with response code 200 "OK", thus, the server wont be able roll back the
  * response and send back an HTTP 500 page. This is so that the template developers will see the error without digging
- * the logs. 
+ * the logs.
  * 
  * </ul>
  */
@@ -384,7 +384,7 @@ public class FreemarkerServlet extends HttpServlet
 
     // Init-param values:
     private String templatePath;
-    private boolean nocache;
+    private boolean noCache;
     private Integer bufferSize;
     private boolean exceptionOnMissingTemplate;
     
@@ -466,6 +466,9 @@ public class FreemarkerServlet extends HttpServlet
                 throw new InitParamValueException(INIT_PARAM_TEMPLATE_PATH, templatePath, e);
             }
         }
+        
+        metaInfTldSources = createDefaultMetaInfTldSources();
+        classpathTlds = createDefaultClassPathTlds();
 
         // Process all other init-params:
         Enumeration initpnames = getServletConfig().getInitParameterNames();
@@ -524,7 +527,7 @@ public class FreemarkerServlet extends HttpServlet
                                 "Not one of the supported values.");
                     }
                 } else if (name.equals(INIT_PARAM_NO_CACHE)) {
-                    nocache = StringUtil.getYesNo(value);
+                    noCache = StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_BUFFER_SIZE)) {
                     bufferSize = new Integer(parseSize(value));
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
@@ -541,7 +544,12 @@ public class FreemarkerServlet extends HttpServlet
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {;
                     metaInfTldSources = parseAsMetaInfTldLocations(value);
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {;
-                    classpathTlds = parseCommaSeparatedList(value);
+                    List newClasspathTlds = new ArrayList();
+                    if (classpathTlds != null) {
+                        newClasspathTlds.addAll(classpathTlds);
+                    }
+                    newClasspathTlds.addAll(parseCommaSeparatedList(value));
+                    classpathTlds = newClasspathTlds;
                 } else {
                     config.setSetting(name, value);
                 }
@@ -897,13 +905,10 @@ public class FreemarkerServlet extends HttpServlet
         taglibFactory.setObjectWrapper(objectWrapper);
         
         {
-            List/*<MetaInfTldSources>*/ mergedMetaInfTldSources = new ArrayList();
+            List/*<MetaInfTldSource>*/ mergedMetaInfTldSources = new ArrayList();
 
             if (metaInfTldSources != null) {
                 mergedMetaInfTldSources.addAll(metaInfTldSources);
-            } else {
-                // Needed so that if we will merge in Jetty stuff, the source list will contain this.
-                mergedMetaInfTldSources.add(WebInfPerLibJarMetaInfTldSource.INSTANCE);
             }
             
             String sysPropVal = SecurityUtilities.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
@@ -962,6 +967,36 @@ public class FreemarkerServlet extends HttpServlet
         return taglibFactory;        
     }
 
+    /**
+     * Creates the default of the {@value #INIT_PARAM_CLASSPATH_TLDS} init-param; if this init-param is specified, it
+     * will be appended <em>after</em> the default, not replace it.
+     * 
+     * <p>
+     * The implementation in {@link FreemarkerServlet} returns {@link TaglibFactory#DEFAULT_CLASSPATH_TLDS}.
+     * 
+     * @return A {@link List} of {@link String}-s; not {@code null}.
+     * 
+     * @since 2.3.22
+     */
+    protected List/*<MetaInfTldSource>*/ createDefaultClassPathTlds() {
+        return TaglibFactory.DEFAULT_CLASSPATH_TLDS;
+    }
+
+    /**
+     * Creates the default of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param; if this init-param is
+     * specified, it will completelly <em>replace</em> the default value.
+     * 
+     * <p>
+     * The implementation in {@link FreemarkerServlet} returns {@link TaglibFactory#DEFAULT_META_INF_TLD_SOURCES}.
+     * 
+     * @return A {@link List} of {@link MetaInfTldSource}-s; not {@code null}.
+     * 
+     * @since 2.3.22
+     */
+    protected List/*<MetaInfTldSource>*/ createDefaultMetaInfTldSources() {
+        return TaglibFactory.DEFAULT_META_INF_TLD_SOURCES;
+    }
+    
     void initializeSessionAndInstallModel(HttpServletRequest request,
             HttpServletResponse response, HttpSessionHashModel sessionModel, 
             HttpSession session)
@@ -1257,7 +1292,7 @@ public class FreemarkerServlet extends HttpServlet
      */
     private void setBrowserCachingPolicy(HttpServletResponse res)
     {
-        if (nocache)
+        if (noCache)
         {
             // HTTP/1.1 + IE extensions
             res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, "

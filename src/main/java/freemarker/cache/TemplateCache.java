@@ -32,7 +32,9 @@ import freemarker.core.BugException;
 import freemarker.core.Environment;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
+import freemarker.template.TemplateNotFoundException;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
@@ -53,11 +55,8 @@ public class TemplateCache
 {
     private static final String ASTERISKSTR = "*";
     private static final char ASTERISK = '*';
-    private static final String CURRENT_DIR_PATH_PREFIX = "./";
-    private static final String CURRENT_DIR_PATH = "/./";
-    private static final String PARENT_DIR_PATH_PREFIX = "../";
-    private static final String PARENT_DIR_PATH = "/../";
     private static final char SLASH = '/';
+    private static final String LOCALE_PART_SEPARATOR = "_";
     private static final Logger LOG = Logger.getLogger("freemarker.cache");
 
     /** Maybe {@code null}. */
@@ -66,6 +65,7 @@ public class TemplateCache
     /** Here we keep our cached templates */
     private final CacheStorage storage;
     private final TemplateLookupStrategy templateLookupStrategy;
+    private final TemplateNameFormat templateNameFormat;
     
     private final boolean isStorageConcurrent;
     /** The default refresh delay in milliseconds. */
@@ -85,22 +85,9 @@ public class TemplateCache
      */
     public TemplateCache()
     {
-        this(createLegacyDefaultTemplateLoader());
+        this(_TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0));
     }
 
-    /**
-     * Creates the default {@link TemplateLoader} used in 2.3.0-compatible mode.
-     */
-    protected static TemplateLoader createLegacyDefaultTemplateLoader() {
-        try {
-            return new FileTemplateLoader();
-        } catch(Exception e) {
-            LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
-                    + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
-            return null;
-        }
-    }
-    
     /**
      * @deprecated Use {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} instead.
      */
@@ -118,23 +105,27 @@ public class TemplateCache
     }
 
     /**
-     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
-     * {@link SoftCacheStorage} and {@link TemplateLookupStrategy#DEFAULT} parameters.
+     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, Configuration)} with a new {@link SoftCacheStorage}
+     * as the 2nd parameter.
      * 
      * @since 2.3.21
      */
-    public TemplateCache(TemplateLoader defaultTemplateLoader, Configuration config) {
-        this(defaultTemplateLoader, new SoftCacheStorage(), config);
+    public TemplateCache(TemplateLoader templateLoader, Configuration config) {
+        this(templateLoader, _TemplateAPI.createDefaultCacheStorage(Configuration.VERSION_2_3_0), config);
     }
     
     /**
-     * Same as {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, Configuration)} with
-     * {@link TemplateLookupStrategy#DEFAULT} parameter.
+     * Same as
+     * {@link #TemplateCache(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat, Configuration)}
+     * with {@link TemplateLookupStrategy#DEFAULT_2_3_0} and {@link TemplateNameFormat#DEFAULT_2_3_0}.
      * 
      * @since 2.3.21
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage, Configuration config) {
-        this(templateLoader, cacheStorage, TemplateLookupStrategy.DEFAULT, config);
+        this(templateLoader, cacheStorage,
+                _TemplateAPI.getDefaultTemplateLookupStrategy(Configuration.VERSION_2_3_0),
+                _TemplateAPI.getDefaultTemplateNameFormat(Configuration.VERSION_2_3_0),
+                config);
     }
     
     /**
@@ -151,7 +142,8 @@ public class TemplateCache
      * @since 2.3.22
      */
     public TemplateCache(TemplateLoader templateLoader, CacheStorage cacheStorage,
-            TemplateLookupStrategy templateLookupStrategy, Configuration config) {
+            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+            Configuration config) {
         this.templateLoader = templateLoader;
         
         NullArgumentException.check("cacheStorage", cacheStorage);
@@ -162,6 +154,9 @@ public class TemplateCache
         NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
         this.templateLookupStrategy = templateLookupStrategy;
 
+        NullArgumentException.check("templateNameFormat", templateNameFormat);
+        this.templateNameFormat = templateNameFormat;
+        
         this.config = config;
     }
 
@@ -194,33 +189,89 @@ public class TemplateCache
     public TemplateLookupStrategy getTemplateLookupStrategy() {
         return templateLookupStrategy;
     }
+    
+    /**
+     * @since 2.3.22
+     */
+    public TemplateNameFormat getTemplateNameFormat() {
+        return templateNameFormat;
+    }
 
     /**
-     * Retrieves the template with the given name (and according the specified further parameters) from the
-     * template cache, loading it into the cache first if it's missing/staled.
+     * Retrieves the template with the given name (and according the specified further parameters) from the template
+     * cache, loading it into the cache first if it's missing/staled.
      * 
-     * <p>For the meaning of the parameters see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
+     * <p>
+     * All parameters must be non-{@code null}, except {@code customLookupCondition}. For the meaning of the parameters
+     * see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
      *
-     * @return the loaded template, or {@code null} if the template was not found.
+     * @return A {@link MaybeMissingTemplate} object that contains the {@link Template}, or a
+     *         {@link MaybeMissingTemplate} object that contains {@code null} as the {@link Template} and information
+     *         about the missing template. The return value itself is never {@code null}.
+     * 
+     * @throws MalformedTemplateNameException
+     *             If the {@code name} was malformed according the current {@link TemplateNameFormat}. However, if the
+     *             {@link TemplateNameFormat} is {@link TemplateNameFormat#DEFAULT_2_3_0} and
+     *             {@link Configuration#getIncompatibleImprovements()} is less than 2.4.0, then instead of throwing this
+     *             exception, a {@link MaybeMissingTemplate} will be returned, similarly as if the template were missing
+     *             (the {@link MaybeMissingTemplate#getMissingTemplateReason()} will describe the real error).
+     * 
+     * @throws IOException
+     *             If reading the template has failed from a reason other than the template is missing. This method
+     *             should never be a {@link TemplateNotFoundException}, as that condition is indicated in the return
+     *             value.
+     * 
+     * @since 2.3.22
+     */
+    public MaybeMissingTemplate getTemplate(String name, Locale locale, Object customLookupCondition,
+            String encoding, boolean parseAsFTL)
+    throws IOException
+    {
+        NullArgumentException.check("name", name);
+        NullArgumentException.check("locale", locale);
+        NullArgumentException.check("encoding", encoding);
+        
+        try {
+            name = templateNameFormat.normalizeAbsoluteName(name);
+        } catch (MalformedTemplateNameException e) {
+            // If we don't have to emulate backward compatible behavior, then just rethrow it: 
+            if (templateNameFormat != TemplateNameFormat.DEFAULT_2_3_0
+                    || config.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_4_0) {
+                throw e;
+            }
+            return new MaybeMissingTemplate(null, e);
+        }
+        
+        if (templateLoader == null) {
+            return new MaybeMissingTemplate(name, "The TemplateLoader was null.");
+        }
+        
+        Template template = getTemplate(templateLoader, name, locale, customLookupCondition, encoding, parseAsFTL);
+        return template != null ? new MaybeMissingTemplate(template) : new MaybeMissingTemplate(name, (String) null);
+    }    
+
+    /**
+     * Similar to {@link #getTemplate(String, Locale, Object, String, boolean)} with {@code null}
+     * {@code customLookupCondition}.
+     * 
+     * @deprecated Use {@link #getTemplate(String, Locale, Object, String, boolean)}, which can return more detailed
+     *             result when the template is missing.
      */
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
-    throws IOException
-    {
-        if (name == null) throw new NullArgumentException("name");
-        if (locale == null) throw new NullArgumentException("locale");
-        if (encoding == null) throw new NullArgumentException("encoding");
-        name = normalizeName(name);
-        if(name == null) return null;
-        
-        return templateLoader != null ? getTemplate(templateLoader, name, locale, encoding, parseAsFTL) : null;
-    }    
+    throws IOException {
+        return getTemplate(name, locale, null, encoding, parseAsFTL).getTemplate();
+    }
     
-    private Template getTemplate(TemplateLoader loader, String name, Locale locale, String encoding, boolean parse)
+    private Template getTemplate(
+            final TemplateLoader templateLoader, final String name, final Locale locale, final Object customLookupCondition,
+            final String encoding, final boolean parseAsFTL)
     throws IOException
     {
-        boolean debug = LOG.isDebugEnabled();
-        final String debugName = debug ? buildDebugName(name, locale, encoding, parse) : null;
-        TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
+        final boolean debug = LOG.isDebugEnabled();
+        final String debugName = debug
+                ? buildDebugName(name, locale, customLookupCondition, encoding, parseAsFTL)
+                : null;
+        final TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parseAsFTL);
         
         CachedTemplate cachedTemplate;
         if(isStorageConcurrent) {
@@ -265,7 +316,7 @@ public class TemplateCache
                 cachedTemplate.lastChecked = now;
 
                 // Find the template source
-                newLookupResult = lookupTemplate(name, locale);
+                newLookupResult = lookupTemplate(name, locale, customLookupCondition);
 
                 // Template source was removed
                 if (!newLookupResult.isPositive()) {
@@ -279,7 +330,7 @@ public class TemplateCache
                 // If the source didn't change and its last modified date
                 // also didn't change, return the cached version.
                 final Object newLookupResultSource = newLookupResult.getTemplateSource();
-                lastModified = loader.getLastModified(newLookupResultSource);
+                lastModified = templateLoader.getLastModified(newLookupResultSource);
                 boolean lastModifiedNotChanged = lastModified == cachedTemplate.lastModified;
                 boolean sourceEquals = newLookupResultSource.equals(cachedTemplate.source);
                 if (lastModifiedNotChanged && sourceEquals) {
@@ -312,7 +363,7 @@ public class TemplateCache
                 cachedTemplate = new CachedTemplate();
                 cachedTemplate.lastChecked = now;
                 
-                newLookupResult = lookupTemplate(name, locale);
+                newLookupResult = lookupTemplate(name, locale, customLookupCondition);
                 
                 if (!newLookupResult.isPositive()) {
                     storeNegativeLookup(tk, cachedTemplate, null);
@@ -330,14 +381,16 @@ public class TemplateCache
                 LOG.debug("Loading template for " + debugName + " from " + StringUtil.jQuoteNoXSS(source));
             }
             
-            Template t = loadTemplate(
-                    loader, name, newLookupResult.getTemplateSourceName(), locale, encoding, parse, source);
-            cachedTemplate.templateOrException = t;
+            Template template = loadTemplate(
+                    templateLoader, source,
+                    name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
+                    encoding, parseAsFTL);
+            cachedTemplate.templateOrException = template;
             cachedTemplate.lastModified = lastModified == Long.MIN_VALUE
-                    ? loader.getLastModified(source)
+                    ? templateLoader.getLastModified(source)
                     : lastModified;
             storeCached(tk, cachedTemplate);
-            return t;
+            return template;
         } catch(RuntimeException e) {
             if (cachedTemplate != null) {
                 storeNegativeLookup(tk, cachedTemplate, e);
@@ -350,7 +403,7 @@ public class TemplateCache
             throw e;
         } finally {
             if (newLookupResult != null && newLookupResult.isPositive()) {
-                loader.closeTemplateSource(newLookupResult.getTemplateSource());
+                templateLoader.closeTemplateSource(newLookupResult.getTemplateSource());
             }
         }
     }
@@ -405,54 +458,61 @@ public class TemplateCache
         }
     }
 
-    private Template loadTemplate(TemplateLoader loader, String name, String sourceName, Locale locale, String encoding,
-                                   boolean parse, Object source)
-    throws IOException
-    {
+    private Template loadTemplate(
+            final TemplateLoader templateLoader, final Object source,
+            final String name, final String sourceName, final Locale locale, final Object customLookupCondition,
+            final String initialEncoding, final boolean parseAsFTL) throws IOException {
         Template template;
-        Reader reader = loader.getReader(source, encoding);
-        try
+        String actualEncoding;
         {
-            if(parse)
-            {
+            if (parseAsFTL) {
                 try {
-                    template = new Template(name, sourceName, reader, config, encoding);
+                    final Reader reader = templateLoader.getReader(source, initialEncoding);
+                    try {
+                        template = new Template(name, sourceName, reader, config, initialEncoding);
+                    } finally {
+                        reader.close();
+                    }
+                    actualEncoding = initialEncoding;
+                } catch (Template.WrongEncodingException wee) {
+                    actualEncoding = wee.getTemplateSpecifiedEncoding();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Initial encoding \"" + initialEncoding + "\" was incorrect, re-reading with \""
+                                + actualEncoding + "\". Template: " + sourceName);
+                    }
+                    
+                    final Reader reader = templateLoader.getReader(source, actualEncoding);
+                    try {
+                        template = new Template(name, sourceName, reader, config, actualEncoding);
+                    } finally {
+                        reader.close();
+                    }
                 }
-                catch (Template.WrongEncodingException wee) {
-                    encoding = wee.specifiedEncoding;
+            } else {
+                // Read the contents into a StringWriter, then construct a single-text-block template from it.
+                final StringWriter sw = new StringWriter();
+                final char[] buf = new char[4096];
+                final Reader reader = templateLoader.getReader(source, initialEncoding);
+                try {
+                    fetchChars: while (true) {
+                        int charsRead = reader.read(buf);
+                        if (charsRead > 0) {
+                            sw.write(buf, 0, charsRead);
+                        } else if (charsRead < 0) {
+                            break fetchChars;
+                        }
+                    }
+                } finally {
                     reader.close();
-                    reader = loader.getReader(source, encoding);
-                    template = new Template(name, sourceName, reader, config, encoding);
-                }
-                template.setLocale(locale);
-            }
-            else
-            {
-                // Read the contents into a StringWriter, then construct a single-textblock
-                // template from it.
-                StringWriter sw = new StringWriter();
-                char[] buf = new char[4096];
-                for(;;)
-                {
-                    int charsRead = reader.read(buf);
-                    if (charsRead > 0)
-                    {
-                        sw.write(buf, 0, charsRead);
-                    }
-                    else if(charsRead == -1)
-                    {
-                        break;
-                    }
                 }
                 template = Template.getPlainTextTemplate(name, sw.toString(), config);
-                template.setLocale(locale);
+                actualEncoding = initialEncoding;
             }
-            template.setEncoding(encoding);
         }
-        finally
-        {
-            reader.close();
-        }
+        
+        template.setLocale(locale);
+        template.setCustomLookupCondition(customLookupCondition);
+        template.setEncoding(actualEncoding);
         return template;
     }
 
@@ -500,7 +560,10 @@ public class TemplateCache
     {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
-            this.localizedLookup = localizedLookup;
+            if (this.localizedLookup != localizedLookup) {
+                this.localizedLookup = localizedLookup;
+                clear();
+            }
         }
     }
 
@@ -520,18 +583,22 @@ public class TemplateCache
             }
         }
     }
+
+    public void removeTemplate(
+            String name, Locale locale, String encoding, boolean parse) throws IOException {
+        removeTemplate(name, locale, null, encoding, parse);
+    }
     
     /**
-     * Removes an entry from the cache, hence forcing the re-loading of it when
-     * it's next time requested. It doesn't delete the template file itself.
-     * This is to give the application finer control over cache updating than
+     * Removes an entry from the cache, hence forcing the re-loading of it when it's next time requested. (It doesn't
+     * delete the template file itself.) This is to give the application finer control over cache updating than
      * {@link #setDelay(long)} alone does.
      * 
      * For the meaning of the parameters, see
-     * {@link #getTemplate(String, Locale, String, boolean)}.
+     * {@link #getTemplate(TemplateLoader, String, Locale, Object, String, boolean)}.
      */
     public void removeTemplate(
-            String name, Locale locale, String encoding, boolean parse)
+            String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
     throws IOException {
         if (name == null) {
             throw new IllegalArgumentException("Argument \"name\" can't be null");
@@ -542,13 +609,13 @@ public class TemplateCache
         if (encoding == null) {
             throw new IllegalArgumentException("Argument \"encoding\" can't be null");
         }
-        name = normalizeName(name);
+        name = templateNameFormat.normalizeAbsoluteName(name);
         if(name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugName = debug
-                    ? buildDebugName(name, locale, encoding, parse)
+                    ? buildDebugName(name, locale, customLookupCondition, encoding, parse)
                     : null;
-            TemplateKey tk = new TemplateKey(name, locale, encoding, parse);
+            TemplateKey tk = new TemplateKey(name, locale, customLookupCondition, encoding, parse);
             
             if(isStorageConcurrent) {
                 storage.remove(tk);
@@ -561,44 +628,35 @@ public class TemplateCache
         }
     }
 
-    private String buildDebugName(String name, Locale locale, String encoding,
+    private String buildDebugName(String name, Locale locale, Object customLookupCondition, String encoding,
             boolean parse) {
-        return StringUtil.jQuoteNoXSS(name) + "["
-                + StringUtil.jQuoteNoXSS(locale) + "," + encoding
-                + (parse ? ",parsed]" : ",unparsed]");
+        return StringUtil.jQuoteNoXSS(name) + "("
+                + StringUtil.jQuoteNoXSS(locale)
+                + (customLookupCondition != null ? ", cond=" + StringUtil.jQuoteNoXSS(customLookupCondition) : "")
+                + ", " + encoding
+                + (parse ? ", parsed)" : ", unparsed]");
     }    
 
     /**
-     * Resolves a path-like reference to a template (like the one used in {@code #include} or {@code #import}), assuming
-     * a current directory. This gives a full, even if non-normalized template name, that could be used for
-     * {@link #getTemplate(String, Locale, String, boolean)}. This is mostly used when a template refers to another
-     * template.
+     * @deprecated Use {@link Environment#toFullTemplateName(String, String)} instead, as that can throw
+     *             {@link MalformedTemplateNameException}, and is on a more logical place anyway.
      * 
-     * @param targetTemplatePath If starts with "/" or contains "://", it's an absolute path and {@code currentDir}
-     *     will be ignored, otherwise it's interpreted as relative to {@code currentDir}
-     * @param currentTemplateDir must end with "/", might contains "://".  
+     * @throws IllegalArgumentException
+     *             If the {@code baseName} or {@code targetName} is malformed according the {@link TemplateNameFormat}
+     *             in use.
      */
-    public static String getFullTemplatePath(Environment env, String currentTemplateDir, String targetTemplatePath) {
-        if (!env.isClassicCompatible()) {
-            if (targetTemplatePath.indexOf("://") > 0) {
-                return targetTemplatePath;
-            } else if (targetTemplatePath.startsWith("/"))  {
-                int schemeSepIdx = currentTemplateDir.indexOf("://");
-                if (schemeSepIdx > 0) {
-                    return currentTemplateDir.substring(0, schemeSepIdx + 2) + targetTemplatePath;
-                } else {
-                    return targetTemplatePath.substring(1);
-                }
-            } else {
-                return currentTemplateDir + targetTemplatePath;
-            }
-        } else {
-            return targetTemplatePath;
+    public static String getFullTemplatePath(Environment env, String baseName, String targetName) {
+        try {
+            return env.toFullTemplateName(baseName, targetName);
+        } catch (MalformedTemplateNameException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
-    private TemplateLookupResult lookupTemplate(String name, Locale locale) throws IOException {
-        final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(new TemplateCacheTemplateLookupContext(name, locale));
+    private TemplateLookupResult lookupTemplate(String name, Locale locale, Object customLookupCondition)
+            throws IOException {
+        final TemplateLookupResult lookupResult = templateLookupStrategy.lookup(
+                new TemplateCacheTemplateLookupContext(name, locale, customLookupCondition));
         if (lookupResult == null) {
             throw new NullPointerException("Lookup result shouldn't be null");
         }
@@ -611,7 +669,7 @@ public class TemplateCache
         // Shortcut in case there is no acquisition
         if(asterisk == -1)
         {
-            return TemplateLookupResult.from(path, modifyForConfIcI(templateLoader.findTemplateSource(path)));
+            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
         }
         StringTokenizer tok = new StringTokenizer(path, "/");
         int lastAsterisk = -1;
@@ -630,7 +688,7 @@ public class TemplateCache
             tokpath.add(pathToken);
         }
         if (lastAsterisk == -1) {  // if there was no real "*" step after all
-            return TemplateLookupResult.from(path, modifyForConfIcI(templateLoader.findTemplateSource(path)));
+            return TemplateLookupResult.from(path, modifyForConfIcI(findTemplateSourceAndLog(path)));
         }
         String basePath = concatPath(tokpath, 0, lastAsterisk);
         String resourcePath = concatPath(tokpath, lastAsterisk + 1, tokpath.size());
@@ -644,12 +702,7 @@ public class TemplateCache
         for(;;)
         {
             String fullPath = buf.append(resourcePath).toString();
-            if(debug)
-            {
-                LOG.debug("Trying to find template source "
-                        + StringUtil.jQuoteNoXSS(fullPath));
-            }
-            Object templateSource = modifyForConfIcI(templateLoader.findTemplateSource(fullPath));
+            Object templateSource = modifyForConfIcI(findTemplateSourceAndLog(fullPath));
             if(templateSource != null)
             {
                 return TemplateLookupResult.from(fullPath, templateSource);
@@ -661,6 +714,15 @@ public class TemplateCache
             l = basePath.lastIndexOf(SLASH, l - 2) + 1;
             buf.setLength(l);
         }
+    }
+
+    private Object findTemplateSourceAndLog(String path) throws IOException {
+        final Object result = templateLoader.findTemplateSource(path);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("TemplateLoader.findTemplateSource(" +  StringUtil.jQuote(path) + "): "
+                    + (result == null ? "Not found" : "Found"));
+        }
+        return result;
     }
 
     /**
@@ -695,46 +757,6 @@ public class TemplateCache
         return buf.toString();
     }
     
-    private static String normalizeName(String name) {
-        // Disallow 0 for security reasons.
-        if (name.indexOf(0) != -1) return null;
-
-        for(;;) {
-            int parentDirPathLoc = name.indexOf(PARENT_DIR_PATH);
-            if(parentDirPathLoc == 0) {
-                // If it starts with /../, then it reaches outside the template
-                // root.
-                return null;
-            }
-            if(parentDirPathLoc == -1) {
-                if(name.startsWith(PARENT_DIR_PATH_PREFIX)) {
-                    // Another attempt to reach out of template root.
-                    return null;
-                }
-                break;
-            }
-            int previousSlashLoc = name.lastIndexOf(SLASH, parentDirPathLoc - 1);
-            name = name.substring(0, previousSlashLoc + 1) +
-                   name.substring(parentDirPathLoc + PARENT_DIR_PATH.length());
-        }
-        for(;;) {
-            int currentDirPathLoc = name.indexOf(CURRENT_DIR_PATH);
-            if(currentDirPathLoc == -1) {
-                if(name.startsWith(CURRENT_DIR_PATH_PREFIX)) {
-                    name = name.substring(CURRENT_DIR_PATH_PREFIX.length());
-                }
-                break;
-            }
-            name = name.substring(0, currentDirPathLoc) +
-                   name.substring(currentDirPathLoc + CURRENT_DIR_PATH.length() - 1);
-        }
-        // Editing can leave us with a leading slash; strip it.
-        if(name.length() > 1 && name.charAt(0) == SLASH) {
-            name = name.substring(1);
-        }
-        return name;
-    }
-
     /**
      * This class holds a (name, locale) pair and is used as the key in
      * the cached templates map.
@@ -743,13 +765,15 @@ public class TemplateCache
     {
         private final String name;
         private final Locale locale;
+        private final Object customLookupCondition;
         private final String encoding;
         private final boolean parse;
 
-        TemplateKey(String name, Locale locale, String encoding, boolean parse)
+        TemplateKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
         {
             this.name = name;
             this.locale = locale;
+            this.customLookupCondition = customLookupCondition;
             this.encoding = encoding;
             this.parse = parse;
         }
@@ -763,9 +787,16 @@ public class TemplateCache
                     parse == tk.parse &&
                     name.equals(tk.name) &&
                     locale.equals(tk.locale) &&
+                    nullSafeEquals(customLookupCondition, tk.customLookupCondition) &&
                     encoding.equals(tk.encoding);
             }
             return false;
+        }
+
+        private boolean nullSafeEquals(Object o1, Object o2) {
+            return o1 != null
+                ? (o2 != null ? o1.equals(o2) : false)
+                : o2 == null;
         }
 
         public int hashCode()
@@ -773,7 +804,8 @@ public class TemplateCache
             return
                 name.hashCode() ^
                 locale.hashCode() ^
-                encoding.hashCode() ^
+                locale.hashCode() ^
+                (customLookupCondition != null ? customLookupCondition.hashCode() : 0) ^
                 Boolean.valueOf(!parse).hashCode();
         }
     }
@@ -807,8 +839,8 @@ public class TemplateCache
     
     private class TemplateCacheTemplateLookupContext extends TemplateLookupContext {
 
-        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale) {
-            super(templateName, localizedLookup ? templateLocale : null);
+        TemplateCacheTemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition) {
+            super(templateName, localizedLookup ? templateLocale : null, customLookupCondition);
         }
 
         public TemplateLookupResult lookupWithAcquisitionStrategy(String name) throws IOException {
@@ -818,6 +850,101 @@ public class TemplateCache
             }
             
             return TemplateCache.this.lookupTemplateWithAcquisitionStrategy(name);
+        }
+
+        public TemplateLookupResult lookupWithLocalizedThenAcquisitionStrategy(final String templateName,
+                final Locale templateLocale) throws IOException {
+            
+                if (templateLocale == null) {
+                    return lookupWithAcquisitionStrategy(templateName);
+                }
+                
+                int lastDot = templateName.lastIndexOf('.');
+                String prefix = lastDot == -1 ? templateName : templateName.substring(0, lastDot);
+                String suffix = lastDot == -1 ? "" : templateName.substring(lastDot);
+                String localeName = LOCALE_PART_SEPARATOR + templateLocale.toString();
+                StringBuffer buf = new StringBuffer(templateName.length() + localeName.length());
+                buf.append(prefix);
+                tryLocaleNameVariations: while (true) {
+                    buf.setLength(prefix.length());
+                    String path = buf.append(localeName).append(suffix).toString();
+                    TemplateLookupResult lookupResult = lookupWithAcquisitionStrategy(path);
+                    if (lookupResult.isPositive()) {
+                        return lookupResult;
+                    }
+                    
+                    int lastUnderscore = localeName.lastIndexOf('_');
+                    if (lastUnderscore == -1) {
+                        break tryLocaleNameVariations;
+                    }
+                    localeName = localeName.substring(0, lastUnderscore);
+                }
+                return createNegativeLookupResult();
+        }
+        
+    }
+    
+    /**
+     * Used for the return value of {@link TemplateCache#getTemplate(String, Locale, Object, String, boolean)}.
+     * 
+     * @since 2.3.22
+     */
+    public final static class MaybeMissingTemplate {
+        
+        private final Template template;
+        private final String missingTemplateNormalizedName;
+        private final String missingTemplateReason;
+        private final MalformedTemplateNameException missingTemplateCauseException;
+        
+        private MaybeMissingTemplate(Template template) {
+            this.template = template;
+            this.missingTemplateNormalizedName = null;
+            this.missingTemplateReason = null;
+            this.missingTemplateCauseException = null;
+        }
+        
+        private MaybeMissingTemplate(String normalizedName, MalformedTemplateNameException missingTemplateCauseException) {
+            this.template = null;
+            this.missingTemplateNormalizedName = normalizedName;
+            this.missingTemplateReason = null;
+            this.missingTemplateCauseException = missingTemplateCauseException;
+        }
+        
+        private MaybeMissingTemplate(String normalizedName, String missingTemplateReason) {
+            this.template = null;
+            this.missingTemplateNormalizedName = normalizedName;
+            this.missingTemplateReason = missingTemplateReason;
+            this.missingTemplateCauseException = null;
+        }
+        
+        /**
+         * The {@link Template} if it wasn't missing, otherwise {@code null}.
+         */
+        public Template getTemplate() {
+            return template;
+        }
+
+        /**
+         * When the template was missing, this <em>possibly</em> contains the explanation, or {@code null}. If the
+         * template wasn't missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always
+         * {@code null}.
+         */
+        public String getMissingTemplateReason() {
+            return missingTemplateReason != null
+                    ? missingTemplateReason
+                    : (missingTemplateCauseException != null
+                            ? missingTemplateCauseException.getMalformednessDescription()
+                            : null);
+        }
+        
+        /**
+         * When the template was missing, this <em>possibly</em> contains the explanation, or {@code null}. If the
+         * template wasn't missing (i.e., when {@link #getTemplate()} return non-{@code null}) this is always
+         * {@code null}. When the template is missing, it will be {@code null} for example if the normalization itself
+         * was unsuccessful.
+         */
+        public String getMissingTemplateNormalizedName() {
+            return missingTemplateNormalizedName;
         }
         
     }

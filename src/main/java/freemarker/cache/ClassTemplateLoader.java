@@ -166,7 +166,7 @@ public class ClassTemplateLoader extends URLTemplateLoader {
      * @since 2.3.21
      */
     public String toString() {
-        return "ClassTemplateLoader("
+        return TemplateLoaderUtils.getClassNameForToString(this) + "("
                 + (resourceLoaderClass != null
                         ? "resourceLoaderClass=" + resourceLoaderClass.getName()
                         : "classLoader=" + StringUtil.jQuote(classLoader))

@@ -93,6 +93,23 @@ import freemarker.template.utility.StringUtil;
  */
 public class TaglibFactory implements TemplateHashModel {
 
+    /**
+     * The default of {@link #getClasspathTlds()}; an empty list.
+     * 
+     * @since 2.3.22
+     */
+    public static final List DEFAULT_CLASSPATH_TLDS = Collections.EMPTY_LIST;
+    
+    /**
+     * The default of {@link #getMetaInfTldSources()}; a list that contains
+     * {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}, which gives the behavior described in the JSP 2.2
+     * specification.
+     * 
+     * @since 2.3.22
+     */
+    public static final List/*<? extends MetaInfTldSource>*/ DEFAULT_META_INF_TLD_SOURCES
+            = Collections.singletonList(WebInfPerLibJarMetaInfTldSource.INSTANCE);
+
     private static final Logger LOG = Logger.getLogger("freemarker.jsp");
 
     private static final int URL_TYPE_FULL = 0;
@@ -109,9 +126,8 @@ public class TaglibFactory implements TemplateHashModel {
     private final ServletContext servletContext;
 
     private ObjectWrapper objectWrapper;
-    private List/*<MetaInfTldSource>*/ metaInfTldSources
-            = Collections.singletonList(WebInfPerLibJarMetaInfTldSource.INSTANCE);
-    private List/*<String>*/ classpathTlds = Collections.EMPTY_LIST;
+    private List/*<MetaInfTldSource>*/ metaInfTldSources = DEFAULT_META_INF_TLD_SOURCES;
+    private List/*<String>*/ classpathTlds = DEFAULT_CLASSPATH_TLDS;
     
     boolean test_emulateNoUrlToFileConversions = false;
     boolean test_emulateNoJarURLConnections = false;
@@ -284,10 +300,9 @@ public class TaglibFactory implements TemplateHashModel {
 
     /**
      * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
-     * Usually, it should be the same {@link ObjectWrapper} that was created by
-     * {@link FreemarkerServlet#createObjectWrapper} to be used inside the templates. {@code null} value is only
-     * supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null} and an
-     * {@code intanceof} {@link BeansWrapper} (like a {@link DefaultObjectWrapper}).
+     * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
+     * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
+     * and an {@code intanceof} {@link BeansWrapper} (like typically, a {@link DefaultObjectWrapper}).
      * 
      * @since 2.3.22
      */
@@ -323,8 +338,9 @@ public class TaglibFactory implements TemplateHashModel {
      * 
      * @since 2.3.22
      */
-    public void setMetaInfTldSources(List/*<MetaInfTldSource>*/ metaInfTldSources) {
+    public void setMetaInfTldSources(List/*<? extends MetaInfTldSource>*/ metaInfTldSources) {
         checkNotStarted();
+        NullArgumentException.check("metaInfTldSources", metaInfTldSources);
         this.metaInfTldSources = metaInfTldSources;
     }
 
@@ -355,6 +371,7 @@ public class TaglibFactory implements TemplateHashModel {
      */
     public void setClasspathTlds(List/*<String>*/ classpathTlds) {
         checkNotStarted();
+        NullArgumentException.check("classpathTlds", classpathTlds);
         this.classpathTlds = classpathTlds;
     }
 

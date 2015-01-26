@@ -171,9 +171,10 @@ public class WebappTemplateLoader implements TemplateLoader
      * @since 2.3.21
      */
     public String toString() {
-        return "WebappTemplateLoader(subdirPath=" + StringUtil.jQuote(subdirPath) + ", servletContext={contextPath="
-                + StringUtil.jQuote(getContextPath()) + ", displayName="
-                + StringUtil.jQuote(servletContext.getServletContextName()) + "})";
+        return TemplateLoaderUtils.getClassNameForToString(this)
+                + "(subdirPath=" + StringUtil.jQuote(subdirPath)
+                + ", servletContext={contextPath=" + StringUtil.jQuote(getContextPath())
+                + ", displayName=" + StringUtil.jQuote(servletContext.getServletContextName()) + "})";
     }
 
     /** Gets the context path if we are on Servlet 2.5+, or else returns failure description string. */

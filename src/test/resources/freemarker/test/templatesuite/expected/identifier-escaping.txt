@@ -1,0 +1,39 @@
+
+<a-b>red123</a-b>
+
+f-a works
+
+dash-dash-dash etc.
+dash-dash-dash etc.
+propVal
+propVal
+
+List: 123
+
+Switch: OK
+ESCAPED
+
+
+as1
+as2
+as3
+as4
+as5
+
+<catchAll x=1 y=2 a:b.c=5 data-foo=4 z=3 />
+
+---.: = dash-dash-dash etc.
+@as@_a = as1
+as/b = as3
+as'c = as4
+as"d = as5
+as-c = as2
+catchAll = ...
+dumpNS = ...
+f-a = ...
+hash = ...
+ls:a = ...
+m/b2 = ...
+m-a = ...
+m-b2 = ...
+sw-a = ...

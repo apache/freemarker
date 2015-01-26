@@ -63,7 +63,7 @@ final class BodyInstruction extends TemplateElement {
         if (bodyParameters != null) {
             for (int i = 0; i<bodyParameters.size(); i++) {
                 sb.append(' ');
-                sb.append(bodyParameters.get(i));
+                sb.append(((Expression) bodyParameters.get(i)).getCanonicalForm());
             }
         }
         if (canonical) sb.append('>');

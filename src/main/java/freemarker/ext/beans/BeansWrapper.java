@@ -72,9 +72,14 @@ import freemarker.template.utility.WriteProtectable;
  * {@link DefaultObjectWrapper}. Note that instances of this class generally should be created with a
  * {@link BeansWrapperBuilder}, not with its public constructors.
  * 
- * <p>This class is only thread-safe after you have finished calling its setter methods, and then safely published
- * it (see JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that
- * was safely published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety. 
+ * <p>
+ * As of 2.3.22, using {@link BeansWrapper} unextended is not recommended. Instead, {@link DefaultObjectWrapper} with
+ * its {@code incompatibleImprovements} property set to 2.3.22 (or higher) is the recommended {@link ObjectWrapper}.
+ * 
+ * <p>
+ * This class is only thread-safe after you have finished calling its setter methods, and then safely published it (see
+ * JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that was safely
+ * published and then left unmodified. Using {@link BeansWrapperBuilder} also guarantees thread safety.
  */
 public class BeansWrapper implements RichObjectWrapper, WriteProtectable
 {

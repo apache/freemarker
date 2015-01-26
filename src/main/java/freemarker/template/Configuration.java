@@ -45,11 +45,13 @@ import freemarker.cache.MruCacheStorage;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.SoftCacheStorage;
 import freemarker.cache.TemplateCache;
+import freemarker.cache.TemplateCache.MaybeMissingTemplate;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.cache.TemplateNameFormat;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
-import freemarker.cache._CacheAPI;
 import freemarker.core.BugException;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
@@ -61,6 +63,7 @@ import freemarker.core._SettingEvaluationEnvironment;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.servlet.FreemarkerServlet;
+import freemarker.log.Logger;
 import freemarker.template.utility.CaptureOutput;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.Constants;
@@ -120,6 +123,9 @@ import freemarker.template.utility.XmlEscape;
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
 public class Configuration extends Configurable implements Cloneable {
+    
+    private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
+    
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
@@ -132,6 +138,7 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String TAG_SYNTAX_KEY = "tag_syntax";
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
     public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
+    public static final String TEMPLATE_NAME_FORMAT_KEY = "template_name_format";
     
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
     /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
@@ -154,8 +161,8 @@ public class Configuration extends Configurable implements Cloneable {
 
     /** FreeMarker version 2.3.22 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_22 = new Version(2, 3, 22);
-    
-    /** The default of {@link #getIncompatibleImprovements()}, currently {@code new Version(2, 3, 0)}. */
+
+    /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */
     public static final String DEFAULT_INCOMPATIBLE_ENHANCEMENTS = DEFAULT_INCOMPATIBLE_IMPROVEMENTS.toString();
@@ -216,6 +223,9 @@ public class Configuration extends Configurable implements Cloneable {
     
     private boolean templateLoaderExplicitlySet;
     private boolean templateLookupStrategyExplicitlySet;
+    private boolean templateNameFormatExplicitlySet;
+    private boolean cacheStorageExplicitlySet;
+    
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
@@ -431,24 +441,115 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     private void createTemplateCache() {
-        cache = new TemplateCache(getDefaultTemplateLoader(), this);
+        cache = new TemplateCache(
+                getDefaultTemplateLoader(),
+                getDefaultCacheStorage(),
+                getDefaultTemplateLookupStrategy(),
+                getDefaultTemplateNameFormat(),
+                this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(5000);
     }
     
     private void recreateTemplateCacheWith(
-            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy) {
+            TemplateLoader loader, CacheStorage storage, TemplateLookupStrategy templateLookupStrategy,
+            TemplateNameFormat templateNameFormat) {
         TemplateCache oldCache = cache;
-        cache = new TemplateCache(loader, storage, templateLookupStrategy, this);
+        cache = new TemplateCache(loader, storage, templateLookupStrategy, templateNameFormat, this);
         cache.clear(); // for fully BC behavior
         cache.setDelay(oldCache.getDelay());
         cache.setLocalizedLookup(localizedLookup);
     }
     
     private TemplateLoader getDefaultTemplateLoader() {
-        return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21
-                ? _CacheAPI.createLegacyDefaultTemplateLoader()
-                : null;
+        return createDefaultTemplateLoader(getIncompatibleImprovements(), getTemplateLoader());
+    }
+
+    static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
+        return createDefaultTemplateLoader(incompatibleImprovements, null);
+    }
+    
+    private static TemplateLoader createDefaultTemplateLoader(
+            Version incompatibleImprovements, TemplateLoader existingTemplateLoader) {
+        if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+            if (existingTemplateLoader instanceof LegacyDefaultFileTemplateLoader) {
+                return existingTemplateLoader;
+            }
+            try {
+                return new LegacyDefaultFileTemplateLoader();
+            } catch(Exception e) {
+                CACHE_LOG.warn("Couldn't create legacy default TemplateLoader which accesses the current directory. "
+                        + "(Use new Configuration(Configuration.VERSION_2_3_21) or higher to avoid this.)", e);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    private static class LegacyDefaultFileTemplateLoader extends FileTemplateLoader {
+
+        public LegacyDefaultFileTemplateLoader() throws IOException {
+            super();
+        }
+        
+    }
+    
+    private TemplateLookupStrategy getDefaultTemplateLookupStrategy() {
+        return getDefaultTemplateLookupStrategy(getIncompatibleImprovements());
+    }
+    
+    static TemplateLookupStrategy getDefaultTemplateLookupStrategy(Version incompatibleImprovements) {
+        return TemplateLookupStrategy.DEFAULT_2_3_0;
+    }
+    
+    private TemplateNameFormat getDefaultTemplateNameFormat() {
+        return getDefaultTemplateNameFormat(getIncompatibleImprovements());
+    }
+    
+    static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
+        return TemplateNameFormat.DEFAULT_2_3_0;
+    }
+    
+    private CacheStorage getDefaultCacheStorage() {
+        return createDefaultCacheStorage(getIncompatibleImprovements(), getCacheStorage()); 
+    }
+    
+    static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements, CacheStorage existingCacheStorage) {
+        if (existingCacheStorage instanceof DefaultSoftCacheStorage) {
+            return existingCacheStorage;
+        }
+        return new DefaultSoftCacheStorage(); 
+    }
+    
+    static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {
+        return createDefaultCacheStorage(incompatibleImprovements, null); 
+    }
+    
+    private static class DefaultSoftCacheStorage extends SoftCacheStorage {
+        // Nothing to override
+    }
+
+    private TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
+        return getDefaultTemplateExceptionHandler(getIncompatibleImprovements());
+    }
+    
+    private boolean getDefaultLogTemplateExceptions() {
+        return getDefaultLogTemplateExceptions(getIncompatibleImprovements());
+    }
+    
+    private ObjectWrapper getDefaultObjectWrapper() {
+        return getDefaultObjectWrapper(getIncompatibleImprovements());
+    }
+    
+    // Package visible as Configurable needs this to initialize the field defaults.
+    final static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
+        return TemplateExceptionHandler.DEBUG_HANDLER;
+    }
+
+    // Package visible as Configurable needs this to initialize the field defaults.
+    final static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
+        return true;
     }
     
     public Object clone() {
@@ -460,7 +561,8 @@ public class Configuration extends Configurable implements Cloneable {
             copy.autoImports = (ArrayList) autoImports.clone();
             copy.autoIncludes = (ArrayList) autoIncludes.clone();
             copy.recreateTemplateCacheWith(
-                    cache.getTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
+                    cache.getTemplateLoader(), cache.getCacheStorage(),
+                    cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new BugException(e.getMessage());  // Java 5: use cause exc.
@@ -642,12 +744,27 @@ public class Configuration extends Configurable implements Cloneable {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
             if (cache.getTemplateLoader() != templateLoader) {
-                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(), cache.getTemplateLookupStrategy());
+                recreateTemplateCacheWith(templateLoader, cache.getCacheStorage(),
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
             }
             templateLoaderExplicitlySet = true;
         }
     }
     
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateLoaderExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateLoader() {
+        if (templateLoaderExplicitlySet) {
+            setTemplateLoader(getDefaultTemplateLoader());
+            templateLoaderExplicitlySet = false;
+        }
+    }
+
     /**
      * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
      * 
@@ -660,38 +777,106 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * The getter pair of {@link #setTemplateLoader(TemplateLoader)}.
      */
-    public TemplateLoader getTemplateLoader()
-    {
+    public TemplateLoader getTemplateLoader() {
+        if (cache == null) {
+            return null;
+        }
         return cache.getTemplateLoader();
     }
     
     /**
-     * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name;
-     * as a side effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT}.
+     * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
+     * effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      * 
      * @since 2.3.22
      */
     public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
         if (cache.getTemplateLookupStrategy() != templateLookupStrategy) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(), templateLookupStrategy);
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                    templateLookupStrategy, cache.getTemplateNameFormat());
         }
         templateLookupStrategyExplicitlySet = true;
     }
+
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateLookupStrategyExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateLookupStrategy() {
+        if (templateLookupStrategyExplicitlySet) {
+            setTemplateLookupStrategy(getDefaultTemplateLookupStrategy());
+            templateLookupStrategyExplicitlySet = false;
+        }
+    }
     
     /**
-     * Tells if {@link #setTemplateLoader(TemplateLoader)} (or equivalent) was already called on this instance.
+     * Tells if {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} (or equivalent) was already called on this
+     * instance.
      * 
      * @since 2.3.22
      */
     public boolean isTemplateLookupStrategyExplicitlySet() {
         return templateLookupStrategyExplicitlySet;
     }
-
+    
     /**
      * The getter pair of {@link #setTemplateLookupStrategy(TemplateLookupStrategy)}.
      */
     public TemplateLookupStrategy getTemplateLookupStrategy() {
+        if (cache == null) {
+            return null;
+        }
         return cache.getTemplateLookupStrategy();
+    }
+    
+    /**
+     * Sets the template name format used. The default is {@link TemplateNameFormat#DEFAULT_2_3_0}, while the
+     * recommended value for new projects is {@link TemplateNameFormat#DEFAULT_2_4_0}.
+     * 
+     * @since 2.3.22
+     */
+    public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
+        if (cache.getTemplateNameFormat() != templateNameFormat) {
+            recreateTemplateCacheWith(cache.getTemplateLoader(), cache.getCacheStorage(),
+                    cache.getTemplateLookupStrategy(), templateNameFormat);
+        }
+        templateNameFormatExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateNameFormatExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateNameFormat() {
+        if (templateNameFormatExplicitlySet) {
+            setTemplateNameFormat(getDefaultTemplateNameFormat());
+            templateNameFormatExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setTemplateNameFormat(TemplateNameFormat)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isTemplateNameFormatExplicitlySet() {
+        return templateNameFormatExplicitlySet;
+    }
+
+    /**
+     * The getter pair of {@link #setTemplateNameFormat(TemplateNameFormat)}.
+     */
+    public TemplateNameFormat getTemplateNameFormat() {
+        if (cache == null) {
+            return null;
+        }
+        return cache.getTemplateNameFormat();
     }
 
     /**
@@ -706,11 +891,38 @@ public class Configuration extends Configurable implements Cloneable {
      * <p>Note that setting the cache storage will re-create the template cache, so
      * all its content will be lost.
      */
-    public void setCacheStorage(CacheStorage storage) {
+    public void setCacheStorage(CacheStorage cacheStorage) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
-            recreateTemplateCacheWith(cache.getTemplateLoader(), storage, cache.getTemplateLookupStrategy());
+            if (getCacheStorage() != cacheStorage) {
+                recreateTemplateCacheWith(cache.getTemplateLoader(), cacheStorage,
+                        cache.getTemplateLookupStrategy(), cache.getTemplateNameFormat());
+            }
+            cacheStorageExplicitlySet = true;
         }
+    }
+    
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isCacheStorageExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetCacheStorage() {
+        if (cacheStorageExplicitlySet) {
+            setCacheStorage(getDefaultCacheStorage());
+            cacheStorageExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setCacheStorage(CacheStorage)} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.22
+     */
+    public boolean isCacheStorageExplicitlySet() {
+        return cacheStorageExplicitlySet;
     }
     
     /**
@@ -721,6 +933,9 @@ public class Configuration extends Configurable implements Cloneable {
     public CacheStorage getCacheStorage() {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
         synchronized (this) {
+            if (cache == null) {
+                return null;
+            }
             return cache.getCacheStorage();
         }
     }
@@ -860,6 +1075,20 @@ public class Configuration extends Configurable implements Cloneable {
     }
     
     /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isObjectWrapperExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetObjectWrapper() {
+        if (objectWrapperExplicitlySet) {
+            setObjectWrapper(getDefaultObjectWrapper());
+            objectWrapperExplicitlySet = false;
+        }
+    }
+    
+    /**
      * Tells if {@link #setObjectWrapper(ObjectWrapper)} (or equivalent) was already called on this instance.
      * 
      * @since 2.3.22
@@ -874,6 +1103,20 @@ public class Configuration extends Configurable implements Cloneable {
     }
 
     /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetTemplateExceptionHandler() {
+        if (templateExceptionHandlerExplicitlySet) {
+            setTemplateExceptionHandler(getDefaultTemplateExceptionHandler());
+            templateExceptionHandlerExplicitlySet = false;
+        }
+    }
+    
+    /**
      * Tells if {@link #setTemplateExceptionHandler(TemplateExceptionHandler)} (or equivalent) was already called on
      * this instance.
      * 
@@ -883,11 +1126,28 @@ public class Configuration extends Configurable implements Cloneable {
         return templateExceptionHandlerExplicitlySet;
     }    
     
+    /**
+     * @since 2.3.22
+     */
     public void setLogTemplateExceptions(boolean value) {
         super.setLogTemplateExceptions(value);
         logTemplateExceptionsExplicitlySet = true;
     }
 
+    /**
+     * Resets the setting to its default, as it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isTemplateExceptionHandlerExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.22
+     */
+    public void unsetLogTemplateExceptions() {
+        if (logTemplateExceptionsExplicitlySet) {
+            setLogTemplateExceptions(getDefaultLogTemplateExceptions());
+            logTemplateExceptionsExplicitlySet = false;
+        }
+    }
+    
     /**
      * Tells if {@link #setLogTemplateExceptions(boolean)} (or equivalent) was already called on this instance.
      * 
@@ -921,17 +1181,42 @@ public class Configuration extends Configurable implements Cloneable {
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
-        boolean hadLegacyTLOWDefaults
-                = this.incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21; 
-        this.incompatibleImprovements = incompatibleImprovements;
-        if (hadLegacyTLOWDefaults != incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_21) {
+        if (!this.incompatibleImprovements.equals(incompatibleImprovements)) {
+            this.incompatibleImprovements = incompatibleImprovements;
+            
             if (!templateLoaderExplicitlySet) {
-                recreateTemplateCacheWith(
-                        getDefaultTemplateLoader(), cache.getCacheStorage(), cache.getTemplateLookupStrategy());
+                templateLoaderExplicitlySet = true; 
+                unsetTemplateLoader();
             }
+
+            if (!templateLookupStrategyExplicitlySet) {
+                templateLookupStrategyExplicitlySet = true;
+                unsetTemplateLookupStrategy();
+            }
+            
+            if (!templateNameFormatExplicitlySet) {
+                templateNameFormatExplicitlySet = true;
+                unsetTemplateNameFormat();
+            }
+            
+            if (!cacheStorageExplicitlySet) {
+                cacheStorageExplicitlySet = true;
+                unsetCacheStorage();
+            }
+            
+            if (!templateExceptionHandlerExplicitlySet) {
+                templateExceptionHandlerExplicitlySet = true;
+                unsetTemplateExceptionHandler();
+            }
+            
+            if (!logTemplateExceptionsExplicitlySet) {
+                logTemplateExceptionsExplicitlySet = true;
+                unsetLogTemplateExceptions();
+            }
+            
             if (!objectWrapperExplicitlySet) {
-                // We use `super.` so that `objectWrapperWasSet` will not be set to `true`. 
-                super.setObjectWrapper(getDefaultObjectWrapper(incompatibleImprovements));
+                objectWrapperExplicitlySet = true;
+                unsetObjectWrapper();
             }
         }
     }
@@ -1031,108 +1316,154 @@ public class Configuration extends Configurable implements Cloneable {
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.
      * 
-     * <p>This is a shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
-     * getTemplate(name, getLocale(), getEncoding(getLocale()), true, false)}; see more details there.
+     * <p>
+     * This is a shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, null, null, null, true, false)}; see more details there.
      * 
-     * <p>See {@link Configuration} for an example of basic usage.
+     * <p>
+     * See {@link Configuration} for an example of basic usage.
      */
-    public Template getTemplate(String name) throws IOException {
-        Locale loc = getLocale();
-        return getTemplate(name, loc, getEncoding(loc), true);
+    public Template getTemplate(String name)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        return getTemplate(name, null, null, null, true, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
-     * getTemplate(name, locale, getEncoding(locale), true, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, locale, null, null, true, false)}.
      */
-    public Template getTemplate(String name, Locale locale) throws IOException {
-        return getTemplate(name, locale, getEncoding(locale), true);
+    public Template getTemplate(String name, Locale locale)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        return getTemplate(name, locale, null, null, true, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
-     * getTemplate(name, getLocale(), encoding, true, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, null, null, encoding, true, false)}.
      */
-    public Template getTemplate(String name, String encoding) throws IOException {
-        return getTemplate(name, getLocale(), encoding, true);
+    public Template getTemplate(String name, String encoding)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        return getTemplate(name, null, null, encoding, true, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
-     * getTemplate(name, locale, encoding, true, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, locale, null, encoding, true, false)}.
      */
-    public Template getTemplate(String name, Locale locale, String encoding) throws IOException {
-        return getTemplate(name, locale, encoding, true);
+    public Template getTemplate(String name, Locale locale, String encoding)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        return getTemplate(name, locale, null, encoding, true, false);
     }
     
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, String, boolean, boolean)
-     * getTemplate(name, locale, encoding, parseAsFTL, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, locale, null, encoding, parseAsFTL, false)}.
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL) throws IOException {
-        return getTemplate(name, locale, encoding, parseAsFTL, false);
+    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        return getTemplate(name, locale, null, encoding, parseAsFTL, false);
     }
 
     /**
-     * Retrieves the template with the given name (and according the specified further parameters) from the template
-     * cache, loading it into the cache first if it's missing/staled.
-     * 
-     * <p>This method is thread-safe. 
-     * 
-     * <p>See {@link Configuration} for an example of basic usage.
-     *
-     * @param name The name or path of the template, which is not a real path,
-     *     but interpreted inside the current {@link TemplateLoader}.
-     *     Can't be {@code null}. The exact syntax of the name
-     *     is interpreted by the underlying {@link TemplateLoader}, but the
-     *     cache makes some assumptions. First, the name is expected to be
-     *     a hierarchical path, with path components separated by a slash
-     *     character (not with backslash!). The path (the name) given here must <em>not</em> begin with slash;
-     *     it's always interpreted relative to the "template root directory".
-     *     Then, the {@code ..} and {@code .} path meta-elements will be resolved.
-     *     For example, if the name is {@code a/../b/./c.ftl}, then it will be
-     *     simplified to {@code b/c.ftl}. The rules regarding this are the same as with conventional
-     *     UN*X paths. The path must not reach outside the template root directory, that is,
-     *     it can't be something like {@code "../templates/my.ftl"} (not even if this path
-     *     happens to be equivalent with {@code "/my.ftl"}).
-     *     Further, the path is allowed to contain at most
-     *     one path element whose name is {@code *} (asterisk). This path meta-element triggers the
-     *     <i>acquisition mechanism</i>. If the template is not found in
-     *     the location described by the concatenation of the path left to the
-     *     asterisk (called base path) and the part to the right of the asterisk
-     *     (called resource path), the cache will attempt to remove the rightmost
-     *     path component from the base path ("go up one directory") and concatenate
-     *     that with the resource path. The process is repeated until either a
-     *     template is found, or the base path is completely exhausted.
-     *
-     * @param locale The requested locale of the template. Can't be {@code null}.
-     *     Assuming you have specified {@code en_US} as the locale and
-     *     {@code myTemplate.ftl} as the name of the template, the cache will
-     *     first try to retrieve {@code myTemplate_en_US.html}, then
-     *     {@code myTemplate.en.ftl}, and finally {@code myTemplate.ftl}.
-     *
-     * @param encoding The charset used to interpret the template source code bytes. Can't be {@code null}.
-     *
-     * @param parseAsFTL If {@code true}, the loaded template is parsed and interpreted normally,
-     *     as a regular FreeMarker template. If {@code false}, the loaded template is
-     *     treated as a static text, so <code>${...}</code>, {@code <#...>} etc. will not have special meaning
-     *     in it.
-     *     
-     * @param ignoreMissing If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template
-     *     doesn't exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
-     * 
-     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
-     * 
-     * @throws TemplateNotFoundException if the template could not be found.
-     * @throws IOException if there was a problem with reading the template "file".
-     * @throws ParseException (extends <code>IOException</code>) if the template is syntactically bad.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
+     * getTemplate(name, locale, null, encoding, parseAsFTL, ignoreMissing)}.
      * 
      * @since 2.3.21
      */
     public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL, boolean ignoreMissing)
-            throws IOException {
-        Template result = cache.getTemplate(name, locale, encoding, parseAsFTL);
-        if (result == null) {
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        return getTemplate(name, locale, null, encoding, parseAsFTL, ignoreMissing);
+    }
+    
+    /**
+     * Retrieves the template with the given name (and according the specified further parameters) from the template
+     * cache, loading it into the cache first if it's missing/staled.
+     * 
+     * <p>
+     * This method is thread-safe.
+     * 
+     * <p>
+     * See {@link Configuration} for an example of basic usage.
+     *
+     * @param name
+     *            The name or path of the template, which is not a real path, but interpreted inside the current
+     *            {@link TemplateLoader}. Can't be {@code null}. The exact syntax of the name depends on the underlying
+     *            {@link TemplateLoader}, but the cache makes some assumptions. First, the name is expected to be a
+     *            hierarchical path, with path components separated by a slash character (not with backslash!). The path
+     *            (the name) given here must <em>not</em> begin with slash; it's always interpreted relative to the
+     *            "template root directory". Then, the {@code ..} and {@code .} path meta-elements will be resolved. For
+     *            example, if the name is {@code a/../b/./c.ftl}, then it will be simplified to {@code b/c.ftl}. The
+     *            rules regarding this are the same as with conventional UN*X paths. The path must not reach outside the
+     *            template root directory, that is, it can't be something like {@code "../templates/my.ftl"} (not even
+     *            if this path happens to be equivalent with {@code "/my.ftl"}). Furthermore, the path is allowed to
+     *            contain at most one path element whose name is {@code *} (asterisk). This path meta-element triggers
+     *            the <i>acquisition mechanism</i>. If the template is not found in the location described by the
+     *            concatenation of the path left to the asterisk (called base path) and the part to the right of the
+     *            asterisk (called resource path), the cache will attempt to remove the rightmost path component from
+     *            the base path ("go up one directory") and concatenate that with the resource path. The process is
+     *            repeated until either a template is found, or the base path is completely exhausted.
+     *
+     * @param locale
+     *            The requested locale of the template. Can be {@code null} since 2.3.22, in which case it defaults
+     *            {@link Configuration#getLocale()}. Assuming that you have specified {@code en_US} as the locale and
+     *            {@code myTemplate.ftl} as the name of the template, and the default {@link TemplateLookupStrategy} is
+     *            used and {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first
+     *            try to retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
+     *            {@code myTemplate.ftl}.
+     * 
+     * @param customLookupCondition
+     *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
+     *            Can be {@code null} (though it's up to the custom {@link TemplateLookupStrategy} if it allows that).
+     *            This object will be used as part of a cache key, so it must to have a proper
+     *            {@link Object#equals(Object)} and {@link Object#hashCode()} method. It also should have reasonable
+     *            {@link Object#toString()}, as it's possibly quoted in error messages. The expected type is up to the
+     *            custom {@link TemplateLookupStrategy}. See also:
+     *            {@link TemplateLookupContext#getCustomLookupCondition()}.
+     *
+     * @param encoding
+     *            The charset used to interpret the template source code bytes (if it's read from a binary source). Can
+     *            be {@code null} since 2.3.22, will default to {@link Configuration#getEncoding(Locale)} where
+     *            {@code Locale} is the {@code locale} parameter (when {@code locale} was {@code null} too, the its
+     *            default value is used instead).
+     *
+     * @param parseAsFTL
+     *            If {@code true}, the loaded template is parsed and interpreted normally, as a regular FreeMarker
+     *            template. If {@code false}, the loaded template is treated as a static text, so <code>${...}</code>,
+     *            {@code <#...>} etc. will not have special meaning in it.
+     * 
+     * @param ignoreMissing
+     *            If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template doesn't
+     *            exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
+     * 
+     * @return the requested template; maybe {@code null} when the {@code ignoreMissing} parameter is {@code true}.
+     * 
+     * @throws TemplateNotFoundException
+     *             If the template could not be found. Note that this exception extends {@link IOException}.
+     * @throws MalformedTemplateNameException
+     *             If the template name given was in violation with the {@link TemplateNameFormat} in use. Note that
+     *             this exception extends {@link IOException}.
+     * @throws ParseException
+     *             (extends <code>IOException</code>) if the template is syntactically bad. Note that this exception
+     *             extends {@link IOException}.
+     * @throws IOException
+     *             If there was some other problem with reading the template "file". Note that the other exceptions
+     *             extend {@link IOException}, so this should be catched the last.
+     * 
+     * @since 2.3.22
+     */
+    public Template getTemplate(String name, Locale locale, Object customLookupCondition,
+            String encoding, boolean parseAsFTL, boolean ignoreMissing)
+            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
+        if (locale == null) {
+            locale = getLocale();
+        }
+        if (encoding == null) {
+            encoding = getEncoding(locale);
+        }
+        
+        final MaybeMissingTemplate maybeTemp = cache.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
+        final Template temp = maybeTemp.getTemplate();
+        if (temp == null) {
             if (ignoreMissing) {
                 return null;
             }
@@ -1141,28 +1472,67 @@ public class Configuration extends Configurable implements Cloneable {
             String msg; 
             if (tl == null) {
                 msg = "Don't know where to load template " + StringUtil.jQuote(name)
-                      + " from because the \"template_loader\" FreeMarker setting wasn't set.";
+                      + " from because the \"template_loader\" FreeMarker "
+                      + "setting wasn't set (Configuration.setTemplateLoader), so it's null.";
             } else {
-                msg = "Template " + StringUtil.jQuote(name) + " not found. "
-                        + "The quoted name was interpreted by this template loader: ";
-                String tlDesc;
-                try {
-                    tlDesc = tl.toString();
-                } catch (Throwable e) {
-                    tlDesc = tl.getClass().getName() + " object (toString failed)";
-                }
-                msg += tlDesc + ".";
-                
-                if (!templateLoaderExplicitlySet) {
-                    msg += " Note that the \"template_loader\" FreeMarker setting wasn't set, so it's on its "
-                            + "default value, which is most certainly not intended and the cause of this problem."; 
-                }
+                final String missingTempNormName = maybeTemp.getMissingTemplateNormalizedName();
+                final String missingTempReason = maybeTemp.getMissingTemplateReason();
+                final TemplateLookupStrategy templateLookupStrategy = getTemplateLookupStrategy();
+                msg = "Template not found for name " + StringUtil.jQuote(name)
+                        + (missingTempNormName != null && name != null
+                                && !removeInitialSlash(name).equals(missingTempNormName)
+                                ? " (normalized: " + StringUtil.jQuote(missingTempNormName) + ")"
+                                : "")
+                        + (customLookupCondition != null ? " and custom lookup condition "
+                        + StringUtil.jQuote(customLookupCondition) : "")
+                        + "."
+                        + (missingTempReason != null
+                                ? "\nReason given: " + ensureSentenceIsClosed(missingTempReason)
+                                : "")
+                        + "\nThe name was interpreted by this TemplateLoader: "
+                        + StringUtil.tryToString(tl) + "."
+                        + (!isKnownNonConfusingLookupStrategy(templateLookupStrategy)
+                                ? "\n(Before that, the name was possibly changed by this lookup strategy: "
+                                  + StringUtil.tryToString(templateLookupStrategy) + ".)"
+                                : "")
+                        // Suspected reasons or warning:
+                        + (!templateLoaderExplicitlySet
+                                ? "\nWarning: The \"template_loader\" FreeMarker setting "
+                                  + "wasn't set (Configuration.setTemplateLoader), and using the default value "
+                                  + "is most certainly not intended and dangerous, and can be the cause of this error."
+                                : "")
+                        + (missingTempReason == null && name.indexOf('\\') != -1
+                                ? "\nWarning: The name contains backslash (\"\\\") instead of slash (\"/\"); "
+                                    + "template names should use slash only."
+                                : "");
             }
-            throw new TemplateNotFoundException(name, msg);
+            
+            String normName = maybeTemp.getMissingTemplateNormalizedName();
+            throw new TemplateNotFoundException(
+                    normName != null ? normName : name,
+                    customLookupCondition,
+                    msg);
         }
-        return result;
+        return temp;
     }
     
+    private boolean isKnownNonConfusingLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
+        return templateLookupStrategy == TemplateLookupStrategy.DEFAULT_2_3_0;
+    }
+
+    private String removeInitialSlash(String name) {
+        return name.startsWith("/") ? name.substring(1) : name;
+    }
+
+    private String ensureSentenceIsClosed(String s) {
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        
+        final char lastChar = s.charAt(s.length() - 1);
+        return lastChar == '.' || lastChar == '!' || lastChar == '?' ? s : s + ".";
+    }
+
     /**
      * Sets the charset used for decoding byte sequences to character sequences when
      * reading template files in a locale for which no explicit encoding
@@ -1185,7 +1555,7 @@ public class Configuration extends Configurable implements Cloneable {
     /**
      * Gets the default encoding for converting bytes to characters when
      * reading template files in a locale for which no explicit encoding
-     * was specified. Defaults to default system encoding.
+     * was specified. Defaults to the default system encoding.
      */
     public String getDefaultEncoding() {
         return defaultEncoding;
@@ -1218,7 +1588,6 @@ public class Configuration extends Configurable implements Cloneable {
             }
             return charset != null ? charset : defaultEncoding;
         }
-        
     }
 
     /**
@@ -1349,6 +1718,7 @@ public class Configuration extends Configurable implements Cloneable {
      * If a shared variable with these names already exist, it will be replaced
      * with those from the map.
      *
+     * @see #setSharedVaribles(Map)
      * @see #setSharedVariable(String,Object)
      * @see #setSharedVariable(String,TemplateModel)
      */
@@ -1463,9 +1833,13 @@ public class Configuration extends Configurable implements Cloneable {
      * With the default {@link TemplateLookupStrategy}, localized lookup works like this: Let's say your locale setting
      * is {@code Locale("en", "AU")}, and you call {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}.
      * Then FreeMarker will look for the template under these names, stopping at the first that exists:
-     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. See {@link TemplateLookupStrategy#DEFAULT} for
-     * a more details. If you need to generate different template names, use
-     * {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} with your custom {@link TemplateLookupStrategy}.
+     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. See the description of the default value at
+     * {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} for a more details. If you need to generate different
+     * template names, use {@link #setTemplateLookupStrategy(TemplateLookupStrategy)} with your custom
+     * {@link TemplateLookupStrategy}.
+     * 
+     * <p>Note that changing the value of this setting causes the template cache to be emptied so that old lookup
+     * results won't be reused (since 2.3.22). 
      * 
      * <p>
      * Historical note: Despite what the API documentation said earlier, this method is <em>not</em> thread-safe. While
@@ -1495,7 +1869,9 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
                 setWhitespaceStripping(StringUtil.getYesNo(value));
             } else if (CACHE_STORAGE_KEY.equals(name)) {
-                if (value.indexOf('.') == -1) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetCacheStorage();
+                } if (value.indexOf('.') == -1) {
                     int strongSize = 0;
                     int softSize = 0;
                     Map map = StringUtil.parseNameValuePairList(
@@ -1547,13 +1923,29 @@ public class Configuration extends Configurable implements Cloneable {
             } else if (INCOMPATIBLE_ENHANCEMENTS.equals(name)) {
                 setIncompatibleEnhancements(value);
             } else if (TEMPLATE_LOADER_KEY.equals(name)) {
-                setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                        value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetTemplateLoader();
+                } else {
+                    setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateLoader.class, _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(name)) {
-                setTemplateLookupStrategy(value.equalsIgnoreCase(DEFAULT)
-                        ? TemplateLookupStrategy.DEFAULT
-                        : (TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
-                        value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetTemplateLookupStrategy();
+                } else {
+                    setTemplateLookupStrategy((TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateLookupStrategy.class, _SettingEvaluationEnvironment.getCurrent()));
+                }
+            } else if (TEMPLATE_NAME_FORMAT_KEY.equals(name)) {
+                if (value.equalsIgnoreCase(DEFAULT)) {
+                    unsetTemplateNameFormat();
+                } else if (value.equalsIgnoreCase("default_2_3_0")) {
+                    setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_3_0);
+                } else if (value.equalsIgnoreCase("default_2_4_0")) {
+                    setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
+                } else {
+                    throw invalidSettingValueException(name, value);
+                }
             } else {
                 unknown = true;
             }

@@ -34,6 +34,7 @@ import java.util.Vector;
 
 import javax.swing.tree.TreePath;
 
+import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
@@ -75,6 +76,7 @@ public class Template extends Configurable {
     private List imports = new Vector();
     private TemplateElement rootElement;
     private String encoding, defaultNS;
+    private Object customLookupCondition;
     private int actualTagSyntax;
     private final String name;
     private final String sourceName;
@@ -91,12 +93,40 @@ public class Template extends Configurable {
     {
         super(toNonNull(cfg));
         this.name = name;
-        this.sourceName = sourceName != null ? sourceName : name;
+        this.sourceName = sourceName;
         this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
     }
 
     private static Configuration toNonNull(Configuration cfg) {
         return cfg != null ? cfg : Configuration.getDefaultConfiguration();
+    }
+
+    /**
+     * Same as {@link #Template(String, String, Reader, Configuration)} with {@code null} {@code sourceName} parameter.
+     */
+    public Template(String name, Reader reader, Configuration cfg) throws IOException {
+        this(name, null, reader, cfg);
+    }
+
+    /**
+     * Convenience constructor for {@link #Template(String, Reader, Configuration)
+     * Template(name, new StringReader(reader), cfg)}.
+     * 
+     * @since 2.3.20
+     */
+    public Template(String name, String sourceCode, Configuration cfg) throws IOException {
+        this(name, new StringReader(sourceCode), cfg);
+    }
+
+    /**
+     * Convenience constructor for {@link #Template(String, String, Reader, Configuration, String) Template(name, null,
+     * reader, cfg, encoding)}.
+     * 
+     * @deprecated In most applications, use {@link #Template(String, Reader, Configuration)} instead, which doesn't
+     *             specify the encoding.
+     */
+    public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
+        this(name, null, reader, cfg, encoding);
     }
 
     /**
@@ -106,15 +136,18 @@ public class Template extends Configurable {
      * 
      * @param name
      *            The path of the template file relatively to the (virtual) directory that you use to store the
-     *            templates (except when the {@code sourceName} is different, but see that
-     *            {@link #Template(String, String, Reader, Configuration) elsewhere}). Shouldn't start with {@code '/'}.
-     *            Should use {@code '/'}, not {@code '\'}. Check {@link #getName()} to see how the name will be used.
-     *            The name should be independent of the actual storage mechanism and physical location as far as
-     *            possible. Even when the templates are stored straightforwardly in real files (they often aren't; see
-     *            {@link TemplateLoader}), the name shouldn't be an absolute file path. Like if the template is stored
-     *            in {@code "/www/templates/forum/main.ftl"}, and you are using {@code "/www/templates/"} as the
-     *            template root directory via {@link Configuration#setDirectoryForTemplateLoading(java.io.File)}, then
-     *            the template name will be {@code "forum/main.ftl"}.
+     *            templates (except if {@link #Template(String, String, Reader, Configuration, String) sourceName} is
+     *            differs from it). Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}. Check
+     *            {@link #getName()} to see how the name will be used. The name should be independent of the actual
+     *            storage mechanism and physical location as far as possible. Even when the templates are stored
+     *            straightforwardly in real files (they often aren't; see {@link TemplateLoader}), the name shouldn't be
+     *            an absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and
+     *            you are using {@code "/www/templates/"} as the template root directory via
+     *            {@link Configuration#setDirectoryForTemplateLoading(java.io.File)}, then the template name will be
+     *            {@code "forum/main.ftl"}.
+     * @param sourceName
+     *            See {@link #getSourceName()} for the meaning. Can be {@code null}, in which case
+     *            {@link #getSourceName()} will return the same as {@link #getName()}.
      * @param reader
      *            The character stream to read from. It will always be closed ({@link Reader#close()}) by this method.
      * @param cfg
@@ -122,62 +155,33 @@ public class Template extends Configurable {
      *            {@link Configuration} object is used, which is highly discouraged, because it can easily lead to
      *            erroneous, unpredictable behavior. (See more {@link Configuration#getDefaultConfiguration() here...})
      * 
-     */
-    public Template(String name, Reader reader, Configuration cfg) throws IOException {
-        this(name, null, reader, cfg);
-    }
-
-    /**
-     * A seldom used constructor that adds {@code templateSourceName} to
-     * {@link #Template(String, Reader, Configuration)}. This is mostly for internal usage, though it's a published API,
-     * in case someone writes a custom caching/storage solution.
-     * 
-     * @param sourceName
-     *            See {@link #getSourceName()}. For convenience, this parameter can be {@code null}, which just means
-     *            that {@link #getSourceName()} will be the same as {@link #getName()}.
-     * 
      * @since 2.3.22
      */
-    public Template(String name, String sourceName, Reader reader, Configuration cfg) throws IOException {
-        this(name, sourceName, reader, cfg, null);
-    }
+   public Template(
+           String name, String sourceName, Reader reader, Configuration cfg) throws IOException {
+       this(name, sourceName, reader, cfg, null);
+   }
     
     /**
-     * Convenience constructor for {@link #Template(String, Reader, Configuration)
-     * Template(name, new StringReader(reader), cfg)}.
-     */
-    public Template(String name, String sourceCode, Configuration cfg) throws IOException {
-        this(name, new StringReader(sourceCode), cfg, null);
-    }
-
-    /**
-     * Same as {@link #Template(String, Reader, Configuration)}, but also specifies the template's encoding.
+     * Same as {@link #Template(String, String, Reader, Configuration)}, but also specifies the template's encoding (not
+     * recommended).
      *
-     * @param encoding This is the encoding that we are supposed to be using. But it's not really necessary because we
-     *        have a {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
-     *        {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding will
-     *        be this. But this behavior of said directives is considered to be harmful, and will be probably phased
-     *        out. Until that, it's better to leave this on {@code null}, so that the encoding will come from the
-     *        {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header with
-     *        encoding, they must match, or else a {@link WrongEncodingException} is thrown. 
-     *        
-     * @deprecated Use {@link #Template(String, Reader, Configuration)} instead.
-     */
-    public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(name, null, reader, cfg, encoding);
-    }
-    
-    /**
-     * Same as {@link #Template(String, Reader, Configuration, String)}, but adds the {@code sourceName} parameter.
+     * @param encoding
+     *            This is the encoding that we are supposed to be using. But it's not really necessary because we have a
+     *            {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
+     *            {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding
+     *            will be this. But this behavior of said directives is considered to be harmful, and will be probably
+     *            phased out. Until that, it's better to leave this on {@code null}, so that the encoding will come from
+     *            the {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header
+     *            with encoding, they must match, or else a {@link WrongEncodingException} is thrown.
      * 
-     * @param sourceName See the similar parameter of {@link #Template(String, String, Reader, Configuration)}. 
-     * 
-     * @deprecated Use {@link #Template(String, String, Reader, Configuration)} instead.
+     * @deprecated In most applications, use {@link #Template(String, String, Reader, Configuration)} instead, which
+     *             doesn't specify the encoding.
      * 
      * @since 2.3.22
      */
-    public Template(String name, String sourceName, Reader reader, Configuration cfg, String encoding)
-            throws IOException {
+    public Template(
+            String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(name, sourceName, cfg, true);
         
         this.encoding = encoding;
@@ -206,7 +210,7 @@ public class Template extends Configurable {
             }
         }
         catch(ParseException e) {
-            e.setTemplateName(sourceName);
+            e.setTemplateName(getSourceName());
             throw e;
         }
         finally {
@@ -462,22 +466,22 @@ public class Template extends Configurable {
     }
 
     /**
-     * The name that was actually used to load this template from a {@link TemplateLoader}. This is what should be shown
-     * in error messages as the error location. This is usually the same as {@link #getName()}, except when localized
-     * lookup, template acquisition ({@code *} step in the name), or other {@link TemplateLookupStrategy} kicks in.
-     * Because of those, it's possible that the name of the template isn't the same as its name according the
-     * {@link TemplateLoader}. For example, when you get a template with name {@code "foo.ftl"} then because of
-     * localized lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes. While
-     * the template name will be still the same as the requested template name ({@code "foo.ftl"}), errors should point
-     * to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to {@code name}, not to
-     * {@code sourceName}.
+     * The name that was actually used to load this template from the {@link TemplateLoader} (or from other custom
+     * storage mechanism). This is what should be shown in error messages as the error location. This is usually the
+     * same as {@link #getName()}, except when localized lookup, template acquisition ({@code *} step in the name), or
+     * other {@link TemplateLookupStrategy} transforms the requested name ({@link #getName()}) to a different final
+     * {@link TemplateLoader}-level name. For example, when you get a template with name {@code "foo.ftl"} then because
+     * of localized lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes.
+     * While the template name will be still the same as the requested template name ({@code "foo.ftl"}), errors should
+     * point to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to the {@code name}, not
+     * to the {@code sourceName}.
      * 
      * @since 2.3.22
      */
     public String getSourceName() {
-        return sourceName;
+        return sourceName != null ? sourceName : getName();
     }
-    
+
     /**
      * Returns the Configuration object associated with this template.
      */
@@ -509,6 +513,29 @@ public class Template extends Configurable {
      */
     public String getEncoding() {
         return this.encoding;
+    }
+    
+    /**
+     * Gets the custom lookup condition with which this template was found. See the {@code customLookupCondition}
+     * parameter of {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean, boolean)} for
+     * more explanation.
+     * 
+     * @since 2.3.22
+     */
+    public Object getCustomLookupCondition() {
+        return customLookupCondition;
+    }
+
+    /**
+     * Mostly only used internally; setter pair of {@link #getCustomLookupCondition()}. This meant to be called directly
+     * after instantiating the template with its constructor, after a successfull lookup that used this condition. So
+     * this should only be called from code that deals with creating new {@code Template} objects, like from
+     * {@link TemplateCache}.
+     * 
+     * @since 2.3.22
+     */
+    public void setCustomLookupCondition(Object customLookupCondition) {
+        this.customLookupCondition = customLookupCondition;
     }
 
     /**
@@ -755,8 +782,7 @@ public class Template extends Configurable {
     public TreePath containingElements(int column, int line) {
         final ArrayList elements = new ArrayList();
         TemplateElement element = rootElement;
-mainloop:
-        while (element.contains(column, line)) {
+        mainloop: while (element.contains(column, line)) {
             elements.add(element);
             for (Enumeration enumeration = element.children(); enumeration.hasMoreElements();) {
                 TemplateElement elem = (TemplateElement) enumeration.nextElement();
@@ -773,13 +799,51 @@ mainloop:
         return new TreePath(elements.toArray());
     }
 
+    /**
+     * Thrown by the {@link Template} constructors that specify a non-{@code null} encoding whoch doesn't match the
+     * encoding specified in the {@code #ftl} header of the template.
+     */
     static public class WrongEncodingException extends ParseException {
         private static final long serialVersionUID = 1L;
 
+        /** @deprecated Use {@link #getTemplateSpecifiedEncoding()} instead. */
         public String specifiedEncoding;
+        
+        private final String constructorSpecifiedEncoding;
 
-        public WrongEncodingException(String specifiedEncoding) {
-            this.specifiedEncoding = specifiedEncoding;
+        /**
+         * @deprecated Use {@link #WrongEncodingException(String, String)}.
+         */
+        public WrongEncodingException(String templateSpecifiedEncoding) {
+            this(templateSpecifiedEncoding, null);
+        }
+
+        /**
+         * @since 2.3.22
+         */
+        public WrongEncodingException(String templateSpecifiedEncoding, String constructorSpecifiedEncoding) {
+            this.specifiedEncoding = templateSpecifiedEncoding;
+            this.constructorSpecifiedEncoding = constructorSpecifiedEncoding;
+        }
+        
+        public String getMessage() {
+            return "Encoding specified inside the template (" + specifiedEncoding
+                    + ") doesn't match the encoding specified by the Template constructor"
+                    + (constructorSpecifiedEncoding != null ? " (" + constructorSpecifiedEncoding + ")." : ".");
+        }
+
+        /**
+         * @since 2.3.22
+         */
+        public String getTemplateSpecifiedEncoding() {
+            return specifiedEncoding;
+        }
+
+        /**
+         * @since 2.3.22
+         */
+        public String getConstructorSpecifiedEncoding() {
+            return constructorSpecifiedEncoding;
         }
 
     }

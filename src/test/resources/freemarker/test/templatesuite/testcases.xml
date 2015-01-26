@@ -82,9 +82,11 @@
    <testCase name="hashliteral">
       <setting incompatible_improvements="min, 2.3.20, 2.3.21, max" /> 
    </testCase>
-   <testCase name="identifier" >
+   <testCase name="non-strict-syntax" >
       <setting strict_syntax="N" />
    </testCase>
+   <testCase name="identifier-non-ascii" />
+   <testCase name="identifier-escaping" />
    <testCase name="import">
       <setting auto_import="import_lib.ftl as my"/>
    </testCase>

@@ -16,6 +16,9 @@
 
 package freemarker.template;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,7 +33,6 @@ import junit.framework.TestCase;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.core.ParseException;
 import freemarker.template.utility.NullWriter;
-
 public class ExceptionTest extends TestCase {
     
     public ExceptionTest(String name) {
@@ -81,8 +83,8 @@ public class ExceptionTest extends TestCase {
             assertEquals(6, (int) e.getColumnNumber());
             assertEquals(3, (int) e.getEndLineNumber());
             assertEquals(19, (int) e.getEndColumnNumber());
-            assertTrue(e.getMessage().contains("foo_en.ftl"));
-            assertTrue(e.getMessage().contains("noSuchVariable"));
+            assertThat(e.getMessage(), containsString("foo_en.ftl"));
+            assertThat(e.getMessage(), containsString("noSuchVariable"));
         }
     }
 
@@ -104,8 +106,8 @@ public class ExceptionTest extends TestCase {
             assertEquals(5, (int) e.getColumnNumber());
             assertEquals(3, (int) e.getEndLineNumber());
             assertEquals(20, (int) e.getEndColumnNumber());
-            assertTrue(e.getMessage().contains("foo_en.ftl"));
-            assertTrue(e.getMessage().contains("noSuchDirective"));
+            assertThat(e.getMessage(), containsString("foo_en.ftl"));
+            assertThat(e.getMessage(), containsString("noSuchDirective"));
         }
     }
     

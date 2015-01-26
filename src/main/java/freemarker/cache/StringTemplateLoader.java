@@ -144,7 +144,8 @@ public class StringTemplateLoader implements TemplateLoader {
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("StringTemplateLoader(Map { ");
+        sb.append(TemplateLoaderUtils.getClassNameForToString(this));
+        sb.append("(Map { ");
         int cnt = 0;
         for (Iterator it = templates.keySet().iterator(); it.hasNext(); ) {
             cnt++;

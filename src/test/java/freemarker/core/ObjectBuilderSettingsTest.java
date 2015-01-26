@@ -16,13 +16,9 @@
 
 package freemarker.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -43,7 +39,6 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
-import freemarker.template.Version;
 import freemarker.template.utility.WriteProtectable;
 
 public class ObjectBuilderSettingsTest {
@@ -469,7 +464,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("\",\""));
+            assertThat(e.getMessage(), containsString("\",\""));
         }
 
         try {
@@ -478,7 +473,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("must precede named"));
+            assertThat(e.getMessage(), containsStringIgnoringCase("must precede named"));
         }
 
 
@@ -488,7 +483,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("\";\""));
+            assertThat(e.getMessage(), containsString("\";\""));
         }
         
         try {
@@ -497,7 +492,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("\")\""));
+            assertThat(e.getMessage(), containsString("\")\""));
         }
         
         try {
@@ -506,7 +501,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("${...}"));
+            assertThat(e.getMessage(), containsString("${...}"));
         }
         
         try {
@@ -515,7 +510,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("#{...}"));
+            assertThat(e.getMessage(), containsString("#{...}"));
         }
     }
 
@@ -527,7 +522,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("Failed to get class"));
+            assertThat(e.getMessage(), containsStringIgnoringCase("Failed to get class"));
         }
         
         try {
@@ -536,7 +531,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("constructor"));
+            assertThat(e.getMessage(), containsStringIgnoringCase("constructor"));
         }
         
         try {
@@ -545,7 +540,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("no writeable JavaBeans property called \"x\""));
+            assertThat(e.getMessage(), containsStringIgnoringCase("no writeable JavaBeans property called \"x\""));
         }
         
         try {
@@ -554,7 +549,7 @@ public class ObjectBuilderSettingsTest {
                     Object.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("twice"));
+            assertThat(e.getMessage(), containsString("twice"));
         }
         
         try {
@@ -563,7 +558,7 @@ public class ObjectBuilderSettingsTest {
                     ObjectWrapper.class, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertTrue(e.getMessage().contains("is not a(n) " + ObjectWrapper.class.getName()));
+            assertThat(e.getMessage(), containsString("is not a(n) " + ObjectWrapper.class.getName()));
         }
     }
     

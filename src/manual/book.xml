@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22-nightly</subtitle>
+  <subtitle>For FreeMarker 2.3.22 Release Candidate 1</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -2451,10 +2451,21 @@ autumn
             aborts template processing (unless programmers has configured
             FreeMarker differently).</para>
 
-            <para>In this expression the variable name can contain only
-            letters (including non-Latin letters), digits (including non-Latin
-            digits), underline (_), dollar ($), at sign (@) and hash (#).
-            Furthermore, the name must not start with a digit.</para>
+            <para>In this kind of expression, the variable name can only
+            contain letters (including non-Latin letters), digits (including
+            non-Latin digits), underline (<literal>_</literal>), dollar
+            (<literal>$</literal>), at sign (<literal>@</literal>).
+            Furthermore, the first character can't be a ASCII digit
+            (<literal>0</literal>-<literal>9</literal>). Starting from
+            FreeMarker 2.3.22, the variable name can also contain minus
+            (<literal>-</literal>), dot (<literal>.</literal>), and colon
+            (<literal>:</literal>) at any position, but these must be escaped
+            with a preceding backslash (<literal>\</literal>), or else they
+            would be interpreted as operators. For example, to read the
+            variable whose name is <quote>data-id</quote>, the expression is
+            <literal>data\-id</literal>, as <literal>data-id</literal> would
+            be interpreted as <quote>data minus id</quote>. (Note that these
+            escapes only work in identifiers, not in string literals.)</para>
           </section>
 
           <section xml:id="dgui_template_exp_var_hash">
@@ -2509,10 +2520,14 @@ autumn
 
             <para>When you use the dot syntax, the same restrictions apply
             regarding the variable name as with top-level variables (name can
-            contain only letters, digits, _, $, @, etc.). There are no such
-            restrictions when you use the square bracket syntax, since the
-            name is the result of an arbitrary expression. (Note, that to help
-            the FreeMarker XML support, if the subvariable name is
+            contain only letters, digits, <literal>_</literal>,
+            <literal>$</literal>, <literal>@</literal> but can't start with
+            <literal>0</literal>-<literal>9</literal>, also starting from
+            2.3.22 you can also use <literal>\-</literal>,
+            <literal>\.</literal> and <literal>\:</literal>). There are no
+            such restrictions when you use the square bracket syntax, since
+            the name is the result of an arbitrary expression. (Note, that to
+            help the FreeMarker XML support, if the subvariable name is
             <literal>*</literal> (asterisk) or <literal>**</literal>, then you
             do not have to use square bracket syntax.)</para>
 
@@ -7460,7 +7475,7 @@ cfg.setTemplateLoader(mtl);</programlisting>
           </section>
 
           <section>
-            <title>The template path (template name)</title>
+            <title>The template name (template path)</title>
 
             <indexterm>
               <primary>path</primary>
@@ -7475,19 +7490,43 @@ cfg.setTemplateLoader(mtl);</programlisting>
             </indexterm>
 
             <para>It is up to the template loader how it interprets template
-            paths (also known as template names). But to work together with
+            names (also known as template paths). But to work together with
             other components there are restrictions regarding the format of
             the path. In general, it is strongly recommended that template
             loaders use URL-style paths. The path must not use
-            <literal>/</literal>, <literal>./</literal> and
-            <literal>../</literal> and <literal>://</literal> with other
-            meaning than they have in URL paths (or in UN*X paths). The
-            characters <literal>*</literal> and <literal>?</literal> are also
-            reserved. FreeMarker always normalizes the paths before passing
-            them to the template loader, so the paths don't contain
-            <literal>/../</literal> or such, and are relative to the imaginary
-            template root directory (that is, they don't start with
-            <literal>/</literal>).</para>
+            <literal>/</literal> (path step separator) character, nor the
+            <literal>.</literal> (same-directory) and <literal>..</literal>
+            (parent directory) path steps with other meaning than they have in
+            URL paths (or in UN*X paths). The <literal>*</literal> (asterisk)
+            step is also reserved, and used for <quote>template
+            acquisition</quote> feature of FreeMarker.</para>
+
+            <para><literal>://</literal> (or with
+            <literal>template_name_format</literal> setting set to
+            <literal>DEFAULT_2_4_0</literal>, the <literal>:</literal> (colon)
+            character) is reserved for specifying a scheme part, similarly as
+            it works with URI-s. For example
+            <literal>someModule://foo/bar.ftl</literal> uses the
+            <literal>someModule</literal>, or assuming the
+            <literal>DEFAULT_2_4_0</literal> format,
+            <literal>classpath:foo/bar.ftl</literal> uses the
+            <literal>classpath</literal> scheme. Interpreting the scheme part
+            is completely up to the <literal>TemplateLoader</literal>. (The
+            FreeMarker core is only aware of the idea of schemes because
+            otherwise it couldn't resolve relative template names
+            properly.)</para>
+
+            <para>FreeMarker always normalizes the paths before passing them
+            to the <literal>TemplateLoader</literal>, so the paths don't
+            contain <literal>/../</literal> or such, and are relative to the
+            imaginary template root directory (that is, they don't start with
+            <literal>/</literal>). They don't contain the <literal>*</literal>
+            step either, as template acquisition happens in an earlier stage.
+            Furthermore, with <literal>template_name_format</literal> setting
+            set to <literal>DEFAULT_2_4_0</literal>, multiple consecutive
+            <literal>/</literal>-s will be normalized to a single
+            <literal>/</literal> (unless they are part of the
+            <literal>://</literal> scheme separator).</para>
 
             <para>Note that FreeMarker template path should always uses slash
             (not backslash) regardless of the host OS.</para>
@@ -15157,29 +15196,33 @@ m2: &amp;lt;test&amp;gt;</programlisting>
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#flush&gt;</literal>
-</programlisting>
+          <programlisting role="metaTemplate"><literal>&lt;#flush&gt;</literal></programlisting>
         </section>
 
         <section>
           <title>Description</title>
 
-          <para>When FreeMarker generates the output it typically stockpiles
-          the generated output and send it to the client in one or in a few
-          big pieces. This act of sending is called flushing (as flushing the
-          toilet). Although flushing happens automatically, sometimes you want
-          to force it on certain points of the template processing, and this
-          is what <literal>flush</literal> directive does. If it is needed,
-          then the programmer could tell it to you; typically you should not
-          use this directive. The mechanism of automatic flushing and the
-          precise effect of <literal>flush</literal> directive are under the
-          control of the programmer.</para>
+          <para>When FreeMarker generates the output, it's usually not sent
+          immediately to the final receiving party (like a web browser or a
+          destination file), but is accumulated in a buffer, then it's sent
+          out in bigger chunks. The exact rules of the buffering is not
+          decided by FreeMarker, but by the embedding software. Sending out
+          the content accumulated in the buffer is called flushing. Although
+          flushing happens automatically, sometimes you want to force it on
+          certain points of the template processing, and this is what the
+          <literal>flush</literal> directive does. Whether it's needed at
+          certain points should be decided by a programmer, not a
+          designer.</para>
 
-          <para><phrase role="forProgrammers">Flush simply calls the flush
-          method of the currently used java.io.Writer instance. The whole
-          buffering and flushing mechanism is implemented in the writer (what
-          you have passed as the parameter of the
+          <para>Note that while <literal>flush</literal> tells the embedding
+          software that we want to flush, that might as well decides to ignore
+          this request. It's not in the hands of FreeMarker.</para>
+
+          <para><phrase role="forProgrammers">Flush simply calls the
+          <literal>flush()</literal> method of the currently used
+          <literal>java.io.Writer</literal> instance. The whole buffering and
+          flushing mechanism is implemented in the <literal>Writer</literal>
+          (that you have passed as the parameter of the
           <literal>Template.process</literal> method); FreeMarker does not
           deal with it.</phrase></para>
         </section>
@@ -16427,10 +16470,14 @@ or
           <itemizedlist spacing="compact">
             <listitem>
               <para><literal><replaceable>name</replaceable></literal>: name
-              of macro variable. It's not an expression. However, it can be
-              written as a string literal, which is useful if the macro name
-              contains reserved characters, for example <literal>&lt;#macro
-              "foo-bar"&gt;<replaceable>...</replaceable></literal>. Note that
+              of macro variable. It's not an expression. It follows the same
+              syntax as <link linkend="dgui_template_exp_var_toplevel">like
+              top-level variable references</link>, like
+              <literal>myMacro</literal> or <literal>my\-macro</literal>.
+              However, it can also be written as a string literal, which is
+              useful if the macro name contains characters that can't be
+              specified in an identifier, for example <literal>&lt;#macro
+              "foo~bar"&gt;<replaceable>...</replaceable></literal>. Note that
               this string literal does not expand interpolations (as
               <literal>"${foo}"</literal>).</para>
             </listitem>
@@ -16443,7 +16490,10 @@ or
               optionally followed by <literal>=</literal> and the default
               value (that's an expression). The default value can even be
               another parameter, for example <literal>&lt;#macro section title
-              label=title&gt;</literal>.</para>
+              label=title&gt;</literal>. The parameter name uses the same
+              syntax as <link linkend="dgui_template_exp_var_toplevel">like
+              top-level variable references</link>, so the same features and
+              restrictions apply.</para>
             </listitem>
 
             <listitem>
@@ -16453,7 +16503,7 @@ or
                   <primary>variable number of parameters</primary>
                 </indexterm><literal><replaceable>paramN</replaceable></literal>,
               the last parameter may optionally has 3 trailing dots
-              (<literal>...</literal>), which indicates the macro takes a
+              (<literal>...</literal>), which indicates that the macro takes a
               variable number of parameters and the parameters that doesn't
               match any other parameters will be collected in this last
               parameter (also called the catch-all parameter). When the macro
@@ -16462,7 +16512,9 @@ or
               hash containing all of the undeclared key/value pairs passed to
               the macro. When the macro is called using positional parameters,
               <literal><replaceable>paramN</replaceable></literal> will be the
-              sequence of the extra parameter values.</para>
+              sequence of the extra parameter values. (Inside the macro, to
+              find out which was the case, you can use
+              <literal><replaceable>myCatchAllParam</replaceable>?is_sequence</literal>.)</para>
             </listitem>
 
             <listitem>
@@ -16617,7 +16669,7 @@ or
           <programlisting role="template">&lt;#macro m a b ext...&gt;
   a = ${a}
   b = ${b}
-  &lt;#if ext?is_enumerable&gt;
+  &lt;#if ext?is_sequence&gt;
     &lt;#list ext as e&gt;
       ${e_index} = ${e}
     &lt;/#list&gt;
@@ -16630,7 +16682,7 @@ or
 
 &lt;@m 1 2 3 4 5 /&gt;
 
-&lt;@m a=1 b=2 c=3 d=4 e=5 /&gt;</programlisting>
+&lt;@m a=1 b=2 c=3 d=4 e=5 data\-foo=6 myns\:bar=7 /&gt;</programlisting>
 
           <para>Output:</para>
 
@@ -16642,9 +16694,19 @@ or
 
   a = 1
   b = 2
+      c = 3
       d = 4
       e = 5
-      c = 3</programlisting>
+      data-foo=6
+      myns:bar=7</programlisting>
+
+          <warning>
+            <para>Currently, named catch-all parameters are unordered, that
+            is, you don't know what order will they be enumerated. That is,
+            they aren't returned in the same order as they were passed in
+            (that above example output shows them in the same order for
+            understandability only).</para>
+          </warning>
 
           <section>
             <title>nested</title>
@@ -17272,8 +17334,7 @@ ${1.2}</programlisting>
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#stop&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#stop&gt;</literal>
 or
 <literal>&lt;#stop <replaceable>reason</replaceable>&gt;</literal>
 </programlisting>
@@ -17283,8 +17344,8 @@ or
           <itemizedlist spacing="compact">
             <listitem>
               <para><literal><replaceable>reason</replaceable></literal>:
-              Informative message about the reason of termination. Expression
-              evaluates to string.</para>
+              Informative message that describes the reason of the terminating
+              error. Expression, must evaluate to a string.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -17292,11 +17353,15 @@ or
         <section>
           <title>Description</title>
 
-          <para>Aborts the processing of template. This is something like an
-          emergency brake: don't use it in normal situations. <phrase
-          role="forProgrammers">Aborting happens by throwing a
+          <para>Aborts template processing with the given (optional) error
+          message. <emphasis>This must not be used for ending template
+          processing in normal situations!</emphasis> The caller of the
+          FreeMarker template will see this as a failed template rendering,
+          not as a normally finished one.</para>
+
+          <para><phrase role="forProgrammers">This directive throws a
           <literal>StopException</literal>, and the
-          <literal>StopException</literal> will hold the value of reason
+          <literal>StopException</literal> will hold the value of the reason
           parameter.</phrase></para>
         </section>
       </section>
@@ -20473,6 +20538,16 @@ End book</programlisting>
 
             <itemizedlist>
               <listitem>
+                <para>FreeMarker is not tied to Servlets or networking/Web; it
+                is just a class library to generate text output by merging a
+                template with Java objects (the data-model). You can execute
+                templates anywhere and anytime; no HTTP request forwarding or
+                similar tricks needed, no Servlet environment needed at all.
+                Because of this you can easily integrate it into any
+                system.</para>
+              </listitem>
+
+              <listitem>
                 <para>Terser syntax. Consider this JSP (assuming
                 <literal>&lt;%@ taglib prefix="c"
                 uri="http://java.sun.com/jsp/jstl/core"
@@ -20513,19 +20588,10 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>FreeMarker is not tied to Servlets, networking or the
-                Web; it is just a class library to generate text output by
-                merging a template with Java objects (the data-model). You can
-                execute templates anywhere and anytime; no HTTP request
-                forwarding or similar tricks needed, no Servlet environment
-                needed at all. Because of this you can easily integrate it
-                into any system.</para>
-              </listitem>
-
-              <listitem>
                 <para>No servlet specific scopes and other highly technical
-                things in templates. It was made for MVC from the beginning,
-                it focuses only on the presentation.</para>
+                things in templates (unless, of course, you expose them into
+                the data-model deliberately). It was made for MVC from the
+                beginning, it focuses only on the presentation.</para>
               </listitem>
 
               <listitem>
@@ -20535,11 +20601,10 @@ End book</programlisting>
 
               <listitem>
                 <para>Locale-sensitive number and date formatting by default.
-                Since we mostly output for a human audience all you need to do
-                is just write <literal>${x}</literal> rather than
-                <literal>&lt;fmt:formatNumber value="${x}" /&gt;</literal>.
-                You can easily switch this behavior and output non-localized
-                numbers by default.</para>
+                When you output for a human audience, all you need to do is
+                just write <literal>${x}</literal> rather than
+                <literal>&lt;fmt:formatNumber value="${x}"
+                /&gt;</literal>.</para>
               </listitem>
 
               <listitem>
@@ -20582,15 +20647,9 @@ End book</programlisting>
               <listitem>
                 <para>Not a ``standard''. There are fewer tools and IDE
                 integrations, fewer developers knows it and there's much less
-                industry support in general. (However, JSP tag libraries can
-                work in FreeMarker templates with the proper setup, unless
-                they are using <literal>.tag</literal> files.)</para>
-              </listitem>
-
-              <listitem>
-                <para>Since macros and functions are just variables, incorrect
-                directive and parameter names and missing required parameters
-                can be detected only on runtime.</para>
+                industry support in general. (However, most JSP tag libraries
+                can work in FreeMarker templates with the proper setup, unless
+                they are base on <literal>.tag</literal> files.)</para>
               </listitem>
 
               <listitem>
@@ -20598,6 +20657,12 @@ End book</programlisting>
                 some visual similarity, which is confusing for new users (it's
                 the price of the terseness). JSP doesn't follow it either, but
                 it's closer to it.</para>
+              </listitem>
+
+              <listitem>
+                <para>Since macros and functions are just variables, incorrect
+                directive and parameter names and missing required parameters
+                can be detected only on runtime.</para>
               </listitem>
 
               <listitem>
@@ -20720,48 +20785,6 @@ End book</programlisting>
           </answer>
         </qandaentry>
 
-        <qandaentry xml:id="faq_check_version">
-          <question>
-            <para>The documentation writes about feature
-            <replaceable>X</replaceable>, but it seems that FreeMarker doesn't
-            know that, or it behaves in a different way as documented, or a
-            bug that was supposedly fixed is still present.</para>
-          </question>
-
-          <answer>
-            <para>Are you sure that you are using the documentation written
-            for the same version of FreeMarker that you actually use?
-            Especially, note that our online documentation is for the latest
-            usable FreeMarker release. You may use an older release.</para>
-
-            <para>Are you sure that the Java class loader finds the same
-            <literal>freemarker.jar</literal> that you expect to use? Maybe
-            there is an older version of <literal>freemarker.jar</literal>
-            around, which has higher priority. To check this, try to print the
-            version number in a template with <literal>${.version}</literal>.
-            If it dies with ``Unknown built-in variable: version'' error
-            message, then you use a release before 2.3-final or 2.2.8, but you
-            can still try to get the version number in the Java code of your
-            application with
-            <literal>Configuration.getVersionNumber()</literal>. If this
-            method is not present either, then you are using an early
-            2.3-preview, or a version before 2.2.6.</para>
-
-            <para>If you suspect that the problem is that you have multiple
-            <literal>freemarker.jar</literal>-s, the typical culprit is that
-            some module has a Maven dependency with group ID
-            <literal>freemarker</literal>, as opposed to
-            <literal>org.freemarker</literal>, while you have declared a
-            dependency on <literal>org.freemarker</literal>. In this case you
-            will have to exclude the <literal>freemarker</literal>
-            dependency.</para>
-
-            <para>If you think that the documentation or FreeMarker is wrong,
-            please report it using the bug tracker, or the mailing list. Thank
-            you!</para>
-          </answer>
-        </qandaentry>
-
         <qandaentry xml:id="faq_number_grouping">
           <question>
             <para>Why does FreeMarker print the numbers with strange
@@ -20853,7 +20876,7 @@ End book</programlisting>
                 common practice was writing
                 <literal>${<replaceable>someBoolean</replaceable>?string}</literal>,
                 however that's dangerous because its output depends on the
-                boolean format settings, whose default is
+                current boolean format setting, whose default is
                 <literal>"true"</literal>/<literal>"false"</literal>.)</para>
               </listitem>
 
@@ -20869,6 +20892,127 @@ End book</programlisting>
                 have to use <literal>?c</literal> there.)</para>
               </listitem>
             </itemizedlist>
+          </answer>
+        </qandaentry>
+
+        <qandaentry xml:id="faq_template_not_found">
+          <question>
+            <para>FreeMarker can't find my templates
+            (<literal>TemplateNotFoundException</literal> or
+            <literal>FileNotFoundException</literal>, <quote>Template not
+            found</quote> error message)</para>
+          </question>
+
+          <answer>
+            <para>Firs of all, you should know that FreeMarker doesn't load
+            templates from file system paths directly. Instead, it uses a
+            simple virtual file system that might reads non-filesystem
+            resources (templates from inside jar-s, from inside a database
+            table, etc.). What that virtual file is decided by a configuration
+            setting,
+            <literal>Configuration.setTemplateLoader(TemplateLoader)</literal>.
+            Even if the <literal>TemplateLoader</literal> your are using maps
+            to the file system, it will have a base directory that contains
+            all the templates, and that will be the root of your virtual file
+            system that you can't reach out from (i.e., absolute paths will be
+            still relative to the virtual file system root).</para>
+
+            <para>Tips to solve the problem:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>If you are the one who configure FreeMarker, be sure
+                that you set a proper
+                <literal>TemplateLoader</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>Otherwise see if the template-not-found error's message
+                contains the description of the
+                <literal>TemplateLoader</literal> used. If it doesn't, you are
+                using an old FreeMarker version, so update it. Getting
+                <literal>FileNotFoundException</literal> instead of
+                <literal>TemplateNotFoundException</literal> is also a sign of
+                that, and so you will get less helpful error messages. (If the
+                <literal>TemplateLoader</literal> in the error message is like
+                <literal>foo.SomeTemplateLoader@64f6106c</literal> and so
+                doesn't show some relevant parameters, you may should ask the
+                author to define a nicer
+                <literal>toString()</literal>.)</para>
+              </listitem>
+
+              <listitem>
+                <para>A frequent mistake is using a
+                <literal>FileTemplateLoader</literal> for a Servlet-based web
+                application, instead of a
+                <literal>WebappTemplateLoader</literal>. It may works in one
+                environment, but not in another, as the Servlet specification
+                makes no promises about your resources being accessible as
+                plain files, not even when the <literal>war</literal> file is
+                extracted.</para>
+              </listitem>
+
+              <listitem>
+                <para>Know that when you are including/importing a template
+                from another template, if you don't start the template name
+                with <literal>/</literal>, it will be interpreted relatively
+                to the directory of the including template. The error message
+                contains the full (resolved) name, so you should notice this
+                there.</para>
+              </listitem>
+
+              <listitem>
+                <para>Check that you aren't using <literal>\</literal>
+                (backslash) instead of <literal>/</literal> (slash).
+                (FreeMarker 2.3.22 and later will warn you about that in the
+                error message.)</para>
+              </listitem>
+
+              <listitem>
+                <para>As a last resort, turn on debug level logging (in the
+                logging framework that you are using) for the category
+                <literal>freemarker.cache</literal>, to see more of what's
+                going on.</para>
+              </listitem>
+            </itemizedlist>
+          </answer>
+        </qandaentry>
+
+        <qandaentry xml:id="faq_check_version">
+          <question>
+            <para>The documentation writes about feature
+            <replaceable>X</replaceable>, but it seems that FreeMarker doesn't
+            know that, or it behaves in a different way as documented, or a
+            bug that was supposedly fixed is still present.</para>
+          </question>
+
+          <answer>
+            <para>Are you sure that you are using the documentation written
+            for the same version of FreeMarker that you actually use?
+            Especially, note that our online documentation is for the latest
+            stable FreeMarker release. You may use an older release; update
+            it.</para>
+
+            <para>Are you sure that the Java class loader finds the same
+            <literal>freemarker.jar</literal> that you expect to use? Maybe
+            there is an older version of <literal>freemarker.jar</literal>
+            around, which shadows the never. To check this, try to print the
+            version number in a template with <literal>${.version}</literal>.
+            (If it dies with ``Unknown built-in variable: version'' error
+            message, then you use a very, very old release.).</para>
+
+            <para>If you suspect that the problem is that you have multiple
+            <literal>freemarker.jar</literal>-s, the typical culprit is that
+            some module has a Maven or Ivy dependency with the old
+            <literal>freemarker</literal> group ID, as opposed to the more
+            modern <literal>org.freemarker</literal> group ID. Because of the
+            different group ID-s these aren't seen as conflicting artifacts by
+            Maven or Ivy, and so both version gets in. In this case you have
+            to exclude the <literal>freemarker</literal> dependency.</para>
+
+            <para>If you think that the documentation or FreeMarker is wrong,
+            please report it using the bug tracker, or the mailing list. Thank
+            you!</para>
           </answer>
         </qandaentry>
 
@@ -20905,7 +21049,7 @@ End book</programlisting>
             but for your convenience try to chose variable names that can be
             used with the simple variable reference expressions (see it <link
             linkend="dgui_template_exp_var_toplevel">here</link>). If you have
-            to choose a more extreme variable name, that's not a bid problem
+            to choose a more extreme variable name, that's not a big problem
             either: <link linkend="faq_strange_variable_name">see
             here</link>.</para>
           </answer>
@@ -20913,49 +21057,75 @@ End book</programlisting>
 
         <qandaentry xml:id="faq_strange_variable_name">
           <question>
-            <para>How can I use variable (macro) names that contain space,
-            dash or other special characters?</para>
+            <para>How can I use variable names (macro name, parameter name)
+            that contain minus sign (<literal>-</literal>), colon
+            (<literal>:</literal>), dot (<literal>.</literal>), or or other
+            special characters?</para>
           </question>
 
           <answer>
-            <para>If you have a variable with strange name, such as
-            <literal>foo-bar</literal>, FreeMarker will misinterpret what do
-            you want when you write thing as <literal>${foo-bar}</literal>. In
-            this concrete case, it will believe that you want subtract the
-            value of <literal>bar</literal> from <literal>foo</literal>. This
-            FAQ entry explains how to handle situations like this.</para>
+            <para>If you have a variable with strange name like
+            <quote>foo-bar</quote>, FreeMarker will misunderstand what do you
+            mean if you just enter it like in <literal>${foo-bar}</literal>.
+            In this case it will believe that you want to subtract the value
+            of <literal>bar</literal> from <literal>foo</literal>. This FAQ
+            entry explains how to handle situations like this.</para>
 
-            <para>First of all it should be clean that these are just
-            syntactical problems. FreeMarker has no limitations regarding the
-            characters used in variable names, nor regarding the length of the
-            variable names, but sometimes you need to use syntactical
-            tricks.</para>
+            <para>First of all it should be clear that these are just
+            syntactical problems, as otherwise FreeMarker has no limitations
+            regarding the characters used in variable names, nor regarding the
+            length of them.</para>
 
-            <para>If you want to read the variable: Use the square bracket
-            syntax. An example of square bracket syntax is
-            <literal>baaz["foo"]</literal>, which is equivalent with
-            <literal>baaz.foo</literal>. As the subvariable name with the
-            square bracket syntax is a string literal (in fact, arbitrary
-            expression), it let you write <literal>baaz["foo-bar"]</literal>.
-            Now you may say that it can be used for hash subvariables only.
-            Yes, but top-level variables are accessible through special hash
-            variable <literal>.vars</literal>. For example,
-            <literal>foo</literal> is equivalent with
-            <literal>.vars["foo"]</literal>. So you can also write
-            <literal>.vars["foo-bar"]</literal>. Naturally, this trick works
-            with macro invocations too:
-            <literal>&lt;@.vars["foo-bar"]/&gt;</literal></para>
+            <para>If the special character is one of minus sign
+            (<literal>-</literal>, UCS 0x2D) or dot (<literal>.</literal>, UCS
+            0x2E) or colon (<literal>:</literal>, UCS 0x3A), then all you have
+            to do is putting a backslash (<literal>\</literal>) before these
+            characters, like in <literal>foo\-bar</literal>. Then FreeMarker
+            will know that you didn't mean the operator with the same symbol.
+            This works everywhere where you specify unquoted identifiers, like
+            for macro and function names, parameter names, and all kind of
+            variable references in general. (Note that these escapes only work
+            in identifiers, not in string literals.)</para>
 
-            <para>If you want to create or modify the variable: All directives
-            that let you create or modify a variable (such as
-            <literal>assign</literal>, <literal>local</literal>,
-            <literal>global</literal>, <literal>macro</literal>,
-            <literal>function</literal>, etc.) allows the quotation of the
-            destination variable name. For example, <literal>&lt;#assign foo =
-            1&gt;</literal> is the same as <literal>&lt;#assign "foo" =
-            1&gt;</literal>. So you can write things like <literal>&lt;#assign
-            "foo-bar" = 1&gt;</literal> and <literal>&lt;#macro
-            "foo-bar"&gt;</literal>.</para>
+            <para>When the special character is not one of minus sign, dot, or
+            colon, then it gets trickier. Let's say the problematic variable
+            name is <quote>a+b</quote>. Then:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>If you want to read the variable: If it's a subvariable
+                of something, you can write
+                <literal>something["a+b"]</literal> (remember,
+                <literal>something.x</literal> is equivalent with
+                <literal>something["x"])</literal>. If it's a top-level
+                variable, those are accessible through the special hash
+                variable ,<literal>.vars</literal>, so you can write
+                <literal>.vars["a+b"]</literal>. Naturally, this trick works
+                with macro and function invocations too:
+                <literal>&lt;@.vars["a+b"]/&gt;</literal>,
+                <literal>.vars["a+b"](1, 2)</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>If you want to create or modify the variable: All
+                directives that let you create or modify a variable (such as
+                <literal>assign</literal>, <literal>local</literal>,
+                <literal>global</literal>, <literal>macro</literal>,
+                <literal>function</literal>, etc.) allows the quotation of the
+                destination variable name. For example, <literal>&lt;#assign
+                foo = 1&gt;</literal> is the same as <literal>&lt;#assign
+                "foo" = 1&gt;</literal>. So you can write things like
+                <literal>&lt;#assign "a+b" = 1&gt;</literal> and
+                <literal>&lt;#macro "a+b"&gt;</literal>.</para>
+              </listitem>
+
+              <listitem>
+                <para>Unfortunately, you can't use such a variable name (that
+                contains special characters other than <literal>-</literal>,
+                <literal>.</literal> and <literal>:</literal>) as macro
+                parameter name.</para>
+              </listitem>
+            </itemizedlist>
           </answer>
         </qandaentry>
 
@@ -20967,16 +21137,18 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>On JSP pages you quote all parameter (attribute) values, it
-            does not mater if the type of the parameter is string or boolean
-            or number. But since custom tags are accessible in FTL templates
-            as plain user-defined FTL directives, you have to use the FTL
-            syntax rules inside the custom tags, not the JSP rules. Thus,
-            according to FTL rules, you must not quote boolean and numerical
-            parameter values, or they are interpreted as string values, and
-            this will cause a type mismatch error when FreeMarker tries to
-            pass the value to the custom tag that expects non-string
-            value.</para>
+            <para>Fist of all, update FreeMarker, because 2.3.22 and later
+            gives a much more helpfull error message, that pretty much answers
+            the question. Anyway, the reason is as folows. On JSP pages you
+            quote all parameter (attribute) values, it does not mater if the
+            type of the parameter is string or boolean or number. But since
+            custom tags are accessible in FTL templates as plain user-defined
+            FTL directives, you have to use the FTL syntax rules inside the
+            custom tags, not the JSP rules. Thus, according to FTL rules, you
+            must not quote boolean and numerical parameter values, or they are
+            interpreted as string values, and this will cause a type mismatch
+            error when FreeMarker tries to pass the value to the custom tag
+            that expects non-string value.</para>
 
             <para>For example, the <literal>flush</literal> parameter to
             Struts Tiles <literal>insert</literal> tag is boolean. In JSP the
@@ -21117,15 +21289,16 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>The ``hash'' type of the FreeMarker Template Language (FTL)
-            is not the same as Java's <literal>Map</literal>. FTL's hash is an
-            associative array too, but it uses string keys exclusively. This
-            is because it was introduced for subvariables (as
-            <literal>password</literal> in <literal>user.password</literal>,
-            which is the same as <literal>user["password"]</literal>), and
-            variable names are strings.</para>
+            <para>The <quote>hash</quote> type of the FreeMarker Template
+            Language (FTL) is not the same as Java's <literal>Map</literal>.
+            FTL's hash is an associative array too, but it uses string keys
+            exclusively. This is because it was introduced for subvariables
+            (as <literal>password</literal> in
+            <literal>user.password</literal>, which is the same as
+            <literal>user["password"]</literal>), and variable names are
+            strings.</para>
 
-            <para>So until FTL has a type that supports non-String keys, you
+            <para>So until FTL has a type that supports non-string keys, you
             will have to turn to the Java API of the <literal>Map</literal>.
             You can do it like this:
             <literal>myMap?api.get(nonStringKey)</literal>. However, for
@@ -21836,9 +22009,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_22">
-        <title>2.3.22</title>
+        <title>2.3.22 Release Candidate 1</title>
 
-        <para>Date of release: FIXME</para>
+        <para>Date of release: 2015-01-28</para>
 
         <para>Note that since 2.3.22 is designed to be fully backward
         compatible with the previous 2.3.x releases, <emphasis>some of the
@@ -21890,6 +22063,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Identifiers (like <literal>someVariable</literal>) can now
+              contain minus (<literal>-</literal>), dot
+              (<literal>.</literal>), and colon (<literal>:</literal>) at any
+              position, but <emphasis>must be escaped with a preceding
+              backslash</emphasis> (<literal>\</literal>), or else they would
+              be interpreted as operators. For example, to read the variable
+              whose name is <quote>data-id</quote>, the expression is
+              <literal>data\-id</literal>, as <literal>data-id</literal> would
+              be interpreted as <quote>data minus id</quote>. This also works
+              for named macro parameters, which is useful when you want to
+              accept arbitrary HTML attributes in a catch-all parameter, like
+              in <literal>&lt;@box class="someCssClass" data\-id=product.id
+              /&gt;</literal>. (When you enumerate the catch-all hash inside
+              the macro, the key string you get is just
+              <literal>"data-id"</literal> of course.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added many missing UNICODE letters and digits to the set
+              of legal identifier characters, like Korean letters (bug fixed:
+              [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/129/">129</link>])</para>
+            </listitem>
+
+            <listitem>
               <para>Error message quality improvements:</para>
 
               <itemizedlist>
@@ -21916,6 +22114,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   instead of <literal>foo_en.ftl</literal>, when the template
                   was get as <literal>foo.ftl</literal>, but behind the scenes
                   was loaded from <literal>foo_en.ftl</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para><quote>Template not found</quote> errors are now more
+                  detailed, giving hints about accidentally using
+                  <literal>\</literal> instead of <literal>/</literal>, or
+                  backing out of the <literal>TemplateLoader</literal>'s root
+                  directory.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -22427,24 +22633,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   when called from a custom directive (i.e., from
                   <literal>TemplateDirectiveModel.execute()</literal>). The
                   <literal>DirectiveCallPlace</literal> objects lets you query
-                  where the directive was called from (template, line,
-                  column). It also lets you associate an arbitrary object to
-                  the directive invocation inside the template, which can be
-                  used for call-place-bound caching (like the minification of
-                  non-dynamic nested content). See
+                  where the directive was called from (template source name,
+                  line, column). It also lets you associate an arbitrary
+                  object to the directive invocation inside the template,
+                  which can be used for call-place-bound caching (like the
+                  minification of non-dynamic nested content). See
                   <literal>DirectiveCallPlace</literal> in the Java API
                   documentation for more.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Added <literal>Environment.getMainTemplate()</literal>
-                  and <literal>Environment.getCurrentTemplate()</literal>.
-                  Deprecated the ambiguous (and often broken: [<link
+                  <para>Added
+                  <literal>Environment.getMainTemplate()</literal>. Deprecated
+                  the ambiguous (and often broken: [<link
                   xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>])
-                  <literal>Environment.getTemplate()</literal>. These can be
-                  useful for directives and methods that are called from
-                  templates to find out which template they were called
-                  from.</para>
+                  <literal>Environment.getTemplate()</literal>.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -22456,7 +22659,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Added new <literal>Configuration</literal> setting,
                   <literal>template_lookup_strategy</literal>
-                  (<literal>Configuration.setTemplateLookupStrategy(templateLookupStrategy)</literal>).
+                  (<literal>Configuration.setTemplateLookupStrategy(TemplateLookupStrategy)</literal>).
                   This allows customizing what
                   <literal>TemplateLoader</literal>-level names will be tried
                   when a template is requested. With this you can define a
@@ -22464,6 +22667,51 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   (which looks like: <literal>foo_de_LU_MAC.ftl,
                   foo_de_LU.ftl, foo_de.ftl,</literal><literal>
                   foo.ftl</literal>).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new
+                  <literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>
+                  parameter, <literal>Object customLookupCondition</literal>.
+                  This parameter can be used by custom a
+                  <literal>TemplateLookupStrategy</literal> to deduce the
+                  actual template name(s) from the requested name (similarly
+                  to as the default lookup strategy does that based on the
+                  locale). For example, on a multi-domain Web site, one may
+                  want to define some templates that are specialized to a
+                  domain, and thus use the domain name as the custom lookup
+                  condition. Then, when <literal>foo.ftl</literal> is
+                  requested, a custom
+                  <literal>TemplateLookupStrategy</literal> could first look
+                  for <literal>@somedomain.com/foo.ftl</literal>, and then for
+                  <literal>@default/foo.ftl</literal>.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Added new <literal>Configuration</literal> setting,
+                  <literal>template_name_format</literal>
+                  (<literal>Configuration.setTemplateNameFormat(TemplateNameFormat)</literal>).
+                  This allows specifying the naming rules used by FreeMarker.
+                  For now, custom implementations aren't allowed, and you can
+                  only chose between
+                  <literal>TemplateNameFormat.DEFAULT_2_3_0</literal> (the
+                  default) and <literal>DEFAULT_2_4_0</literal> (recommended,
+                  at least for new projects). <literal>DEFAULT_2_4_0</literal>
+                  has several advantages, but isn't fully backward compatible
+                  (though most applications won't be affected). For typical
+                  mistakes like using backslash instead of slash, or backing
+                  out of the root, it gives
+                  <literal>MalformedTemplateNameFormatException</literal>
+                  instead of <literal>TempalteNotFoundException</literal>. It
+                  allows scheme names to be terminated with
+                  <literal>:</literal> alone, instead of a
+                  <literal>://</literal> (which is also supported), like in
+                  <literal>classpath:foo/bar.ftl</literal>. It fixes numerous
+                  legacy glitches (bugs), mostly related to the interpretation
+                  of <literal>..</literal> after special steps like
+                  <literal>.</literal> or <literal>*</literal>. See the full
+                  list of differences in the Java API documentation of
+                  <literal>TemplateNameFormat.DEFAULT_2_4_0</literal>.</para>
                 </listitem>
 
                 <listitem>
@@ -22485,70 +22733,171 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>TemplateNotFoundException</literal>, this change is
                   backward compatible. The main goal was to counter the common
                   misunderstanding that template paths are real file paths.
-                  Also, <literal>TemplateNotFoundException</literal> have
-                  <literal>getTemplateName()</literal> method that gives you
-                  the name of the missing template.</para>
+                  However, the new exception also has the benefit that it can
+                  give additional FreeMarker-specific information about the
+                  error, like right now it has
+                  <literal>getTemplateName()</literal> and
+                  <literal>getCustomLookupCondition()</literal>
+                  methods.</para>
                 </listitem>
 
                 <listitem>
-                  <para>Template-s not have a
-                  <literal>getSourceName()</literal>, in additionally to
-                  <literal>getName()</literal>. These two return the same as
-                  far as no localized lookup or acquisition
+                  <para><literal>Template</literal>-s now have a
+                  <literal>getSourceName()</literal> method, in additionally
+                  to <literal>getName()</literal>. These two return the same
+                  as far as no localized lookup or acquisition
                   (<literal>*</literal> in the name) or other lookup strategy
-                  is actively involved. But when there is,
-                  <literal>getSourceName()</literal> gives the name of the
-                  actually loaded template inside the virtual file system that
-                  the <literal>TemplateLoader</literal> defines. On the other
-                  hand, <literal>getName()</literal> has always returned the
-                  name for which the template was requested (in canonicalized
-                  form), as that's the name that's used for pretty much
-                  everything (like for relative inclusion resolution). The
-                  location information in template exceptions now uses
-                  <literal>getSourceName()</literal>, also
+                  was actively involved. But when it was,
+                  <literal>getSourceName()</literal> gives the name with which
+                  the template was actually loaded from the
+                  <literal>TemplateLoader</literal>, while
+                  <literal>getName()</literal> returns (and had always
+                  returned) the name with which the template was requested (in
+                  canonicalized form). <literal>getName()</literal> is used
+                  for everything (like for relative inclusion resolution),
+                  except for location information in error messages, which now
+                  uses <literal>getSourceName()</literal>. Also,
                   <literal>TemplateException</literal> now has a
                   <literal>getSourceName()</literal> method.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>Configuration.getTemplate(<replaceable>...</replaceable>)</literal>
+                  overloads now accept <literal>null</literal> for the
+                  <literal>locale</literal> and <literal>encoding</literal>
+                  parameters, in which case they use the same defaults as the
+                  overloads where the parameter is omitted.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
-              active only with <literal>incompatible_improvements</literal>
-              set to 2.3.22 (or higher): <literal>#include</literal> and
-              <literal>#nested</literal> doesn't change the parent
-              <literal>Template</literal> (see
-              <literal>Configurable.getParent()</literal>) of the
-              <literal>Environment</literal> anymore to the
-              <literal>Template</literal> that's included or where
-              <literal>#nested</literal> <quote>returns</quote> to. Thus, the
-              parent of <literal>Environment</literal> will be now always the
-              main <literal>Template</literal>. (The main
-              <literal>Template</literal> is the <literal>Template</literal>
-              whose <literal>process</literal> or
-              <literal>createProcessingEnvironment</literal> method was called
-              to initiate the output generation.) Note that this only matters
-              if you have set settings directly on <literal>Template</literal>
-              objects, and almost nobody does that. Also note that macro calls
-              have never changed the <literal>Environment</literal> parent to
-              the <literal>Template</literal> that contains the macro
-              definition, so there's no change there now.</para>
+              <para>Configuration:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Added
+                  <literal>Configuration.unset<replaceable>Xxx</replaceable></literal>
+                  and
+                  <literal>is<replaceable>Xxx</replaceable>ExplicitlySet</literal>
+                  methods for several settings. Unsetting a setting makes it
+                  behave as if
+                  <literal>set<replaceable>Xxx</replaceable></literal> was
+                  never called, thus the setting will use the default value
+                  that fits the current
+                  <literal>incompatible_improvements</literal> value and will
+                  be adjusted as <literal>incompatible_improvements</literal>
+                  is changed later.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When configuring FreeMarker from
+                  <literal>java.util.Properties</literal> (or with
+                  <literal>String</literal>-<literal>String</literal>
+                  name-value pairs in general):</para>
+
+                  <itemizedlist>
+                    <listitem>
+                      <para>The <literal>default</literal> setting value is
+                      now recognized by
+                      <literal>template_exception_handler</literal>,
+                      <literal>template_storage</literal>,
+                      <literal>template_loader</literal> (and by the new
+                      <literal>template_lookup_strategy</literal> and
+                      <literal>template_name_format</literal>) settings, and
+                      it causes
+                      <literal>Configuration.unset<replaceable>Xxx</replaceable>()</literal>
+                      to be called.</para>
+                    </listitem>
+
+                    <listitem>
+                      <para>Bug fixed: When setting
+                      <literal>object_wrapper</literal> to
+                      <literal>default</literal> (as opposed to not specifying
+                      it), it has ignored the
+                      <literal>incompatible_improvements</literal> and has
+                      always used
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>. This
+                      fix only has effects when
+                      <literal>incompatible_improvements</literal> is exactly
+                      2.3.21, as that's when the default object wrapper was
+                      changed from
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal> to the
+                      result of <literal>new
+                      DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_21).build()</literal>,
+                      which is a bit different singleton, as it has read-only
+                      configuration settings and bug fixed overloaded method
+                      selection rules. To use
+                      <literal>ObjectWrapper.DEFAULT_WRAPPER</literal>
+                      regardless of the value of the
+                      <literal>incompatible_improvements</literal> setting,
+                      use the new <literal>default_2_3_0</literal>
+                      value.</para>
+                    </listitem>
+                  </itemizedlist>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed: Changing the value of the
+                  <literal>localized_lookup</literal> setting now empties the
+                  template cache, so that old lookup results won't be
+                  reused.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
 
             <listitem>
-              <para>Bug fixed [<link
-              xlink:href="https://sourceforge.net/p/freemarker/bugs/419/">419</link>]:
-              FreeMarker doesn't fail anymore when it has no permission to
-              read Java system properties, like when used in unsigned applets.
-              It just logs some warnings.</para>
-            </listitem>
+              <para>Miscellaneous:</para>
 
-            <listitem>
-              <para><literal>HTML_DEBUG</literal> and <literal>DEBUG</literal>
-              <literal>TemplateExceptionHandler</literal> output now contains
-              a warning like <quote>HTML_DEBUG mode; use RETHROW in
-              production!</quote>, due to frequent misuse.</para>
+              <itemizedlist>
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/145/">145</link>],
+                  active only with
+                  <literal>incompatible_improvements</literal> set to 2.3.22
+                  (or higher): <literal>#include</literal> and
+                  <literal>#nested</literal> doesn't change the parent
+                  <literal>Template</literal> (see
+                  <literal>Configurable.getParent()</literal>) of the
+                  <literal>Environment</literal> anymore to the
+                  <literal>Template</literal> that's included or where
+                  <literal>#nested</literal> <quote>returns</quote> to. Thus,
+                  the parent of <literal>Environment</literal> will be now
+                  always the main <literal>Template</literal>. (The main
+                  <literal>Template</literal> is the
+                  <literal>Template</literal> whose <literal>process</literal>
+                  or <literal>createProcessingEnvironment</literal> method was
+                  called to initiate the output generation.) Note that this
+                  only matters if you have set settings directly on
+                  <literal>Template</literal> objects, and almost nobody does
+                  that. Also note that macro calls have never changed the
+                  <literal>Environment</literal> parent to the
+                  <literal>Template</literal> that contains the macro
+                  definition, so there's no change there now.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Bug fixed [<link
+                  xlink:href="https://sourceforge.net/p/freemarker/bugs/419/">419</link>]:
+                  FreeMarker doesn't fail anymore when it has no permission to
+                  read Java system properties, like when used in unsigned
+                  applets. It just logs some warnings.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>HTML_DEBUG</literal> and
+                  <literal>DEBUG</literal>
+                  <literal>TemplateExceptionHandler</literal> output now
+                  contains a warning like <quote>HTML_DEBUG mode; use RETHROW
+                  in production!</quote>, due to frequent misuse.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Some fixes and improvements in template canonical form
+                  output, and as a consequence of that, in FTL stack trace
+                  instruction displaying.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

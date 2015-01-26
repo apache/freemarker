@@ -89,7 +89,7 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
 
     public String getCanonicalForm() {
-        return "\"" + StringUtil.FTLStringLiteralEnc(value) + "\""; 
+        return StringUtil.ftlQuote(value); 
     }
     
     String getNodeTypeSymbol() {
