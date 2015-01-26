@@ -20,7 +20,7 @@ final class CoreUtils {
         char quotationType = 0;
         scanForQuotationType: for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
-            if (!(i == 0 ? Character.isJavaIdentifierStart(c) : Character.isJavaIdentifierPart(c)) && c != '@') {
+            if (!(i == 0 ? StringUtil.isFTLIdentifierStart(c) : StringUtil.isFTLIdentifierPart(c)) && c != '@') {
                 if ((quotationType == 0 || quotationType == '\\') && (c == '-' || c == '.' || c == ':')) {
                     quotationType = '\\';
                 } else {

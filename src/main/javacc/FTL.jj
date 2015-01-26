@@ -844,6 +844,7 @@ TOKEN:
     |
     <#NON_ESCAPED_ID_START_CHAR:
         [
+            // This was generated on JDK 1.8.0_20 Win64 with src/main/misc/identifierChars/IdentifierCharGenerator.java
 			"$", 
 			"@" - "Z", 
 			"_", 
@@ -973,7 +974,8 @@ TOKEN:
 			"\uFFC2" - "\uFFC7", 
 			"\uFFCA" - "\uFFCF", 
 			"\uFFD2" - "\uFFD7", 
-			"\uFFDA" - "\uFFDC"        ]
+			"\uFFDA" - "\uFFDC" 
+        ]
     >
     |
     <#ESCAPED_ID_CHAR: "\\" ["-", ".", ":"] >
