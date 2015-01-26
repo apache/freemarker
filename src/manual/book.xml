@@ -22082,6 +22082,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added many missing UNICODE letters and digits to the set
+              of legal identifier characters, like Korean letters (bug fixed:
+              [<link
+              xlink:href="https://sourceforge.net/p/freemarker/bugs/129/">129</link>])</para>
+            </listitem>
+
+            <listitem>
               <para>Error message quality improvements:</para>
 
               <itemizedlist>
