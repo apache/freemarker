@@ -280,15 +280,19 @@ class BuiltInsForStringsBasic {
                         startIndex += separatorString.length();
                     }
                 } else {
-                    Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
-                    final Matcher matcher = pattern.matcher(s);
-                    if (matcher.find()) {
-                        startIndex = matcher.end();
-                        while (matcher.find(matcher.start() + 1)) {
-                            startIndex = matcher.end();
-                        }
+                    if (separatorString.length() == 0) {
+                        startIndex = s.length();
                     } else {
-                        startIndex = -1;
+                        Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
+                        final Matcher matcher = pattern.matcher(s);
+                        if (matcher.find()) {
+                            startIndex = matcher.end();
+                            while (matcher.find(matcher.start() + 1)) {
+                                startIndex = matcher.end();
+                            }
+                        } else {
+                            startIndex = -1;
+                        }
                     }
                 } 
                 return startIndex == -1 ? SimpleScalar.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
@@ -366,15 +370,19 @@ class BuiltInsForStringsBasic {
                         stopIndex = s.toLowerCase().lastIndexOf(separatorString.toLowerCase());
                     }
                 } else {
-                    Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
-                    final Matcher matcher = pattern.matcher(s);
-                    if (matcher.find()) {
-                        stopIndex = matcher.start();
-                        while (matcher.find(stopIndex + 1)) {
-                            stopIndex = matcher.start();
-                        }
+                    if (separatorString.length() == 0) {
+                        stopIndex = s.length();
                     } else {
-                        stopIndex = -1;
+                        Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
+                        final Matcher matcher = pattern.matcher(s);
+                        if (matcher.find()) {
+                            stopIndex = matcher.start();
+                            while (matcher.find(stopIndex + 1)) {
+                                stopIndex = matcher.start();
+                            }
+                        } else {
+                            stopIndex = -1;
+                        }
                     }
                 } 
                 return stopIndex == -1 ? new SimpleScalar(s) : new SimpleScalar(s.substring(0, stopIndex));

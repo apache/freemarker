@@ -38,6 +38,8 @@
 <@assertEquals expected='aa' actual='aaabb'?keep_before_last('[ab]{3}', 'r') />
 <@assertEquals expected='aaabbx' actual='aaabbxbabe'?keep_before_last('[ab]{3}', 'r') />
 <@assertEquals expected='xxxaa' actual='xxxaaayyy'?keep_before_last('a+', 'r') />
+<@assertEquals expected='foobar' actual='foobar'?keep_before_last('') />
+<@assertEquals expected='foobar' actual='foobar'?keep_before_last('', 'r') />
 <@assertFails message='"m" flag'>
     ${'x'?keep_before_last('x', 'm')}
 </@assertFails>
@@ -90,6 +92,8 @@
 <@assertEquals expected='e' actual='aaabbxbabe'?keep_after_last('[ab]{3}', 'r') />
 <@assertEquals expected='12345' actual='aaabb12345'?keep_after_last('[ab]{3}', 'r') />
 <@assertEquals expected='yyy' actual='xxxaaayyy'?keep_after_last('a+', 'r') />
+<@assertEquals expected='' actual='foobar'?keep_after_last('') />
+<@assertEquals expected='' actual='foobar'?keep_after_last('', 'r') />
 <@assertFails message='"m" flag'>
     ${'x'?keep_after_last('x', 'm')}
 </@assertFails>
