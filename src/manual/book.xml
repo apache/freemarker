@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22 Release Candidate 1</subtitle>
+  <subtitle>For FreeMarker 2.3.22 Release Candidate 2 Nightly</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -22071,9 +22071,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_22">
-        <title>2.3.22 Release Candidate 1</title>
+        <title>2.3.22 Release Candidate 2 Nightly</title>
 
-        <para>Date of release: 2015-01-28</para>
+        <para>Date of release: 2015-02-[TODO]</para>
 
         <para>Note that since 2.3.22 is designed to be fully backward
         compatible with the previous 2.3.x releases, <emphasis>some of the
