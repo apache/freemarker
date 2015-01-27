@@ -30,6 +30,7 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import freemarker.log.Logger;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.ClassUtil;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
@@ -99,12 +100,13 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
             if(jspctx instanceof FreeMarkerJspApplicationContext) {
                 elContext = ((FreeMarkerJspApplicationContext)jspctx).createNewELContext(this);
                 elContext.putContext(JspContext.class, this);
-            }
-            else {
+            } else {
                 throw new UnsupportedOperationException(
-                        "Can not create an ELContext using a foreign JspApplicationContext\n" +
-                        "Consider dropping a private instance of JSP 2.1 API JAR file in\n" +
-                        "your WEB-INF/lib directory and then try again.");
+                        "Can not create an ELContext using a foreign JspApplicationContext (of class "
+                        + ClassUtil.getShortClassNameOfObject(jspctx) + ").\n" +
+                        "Hint: The cause of this is often that you are trying to use JSTL tags/functions in FTL. "
+                        + "In that case, know that that's not really suppored, and you are supposed to use FTL "
+                        + "constrcuts instead, like #list instead of JSTL's forEach, etc.");
             }
         }
         return elContext;
