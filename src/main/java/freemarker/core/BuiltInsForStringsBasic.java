@@ -151,7 +151,7 @@ class BuiltInsForStringsBasic {
                             : RegexpHelper.RE_FLAG_REGEXP;
                   
                     if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                        RegexpHelper.checkNonRegexpFlags(key, flags, true);
+                        RegexpHelper.checkOnlyHasNonRegexpFlags(key, flags, true);
                         if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
                             startsWithPrefix = s.startsWith(checkedPrefix);
                         } else {
@@ -226,7 +226,7 @@ class BuiltInsForStringsBasic {
                 
                 int startIndex;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                    RegexpHelper.checkNonRegexpFlags(key, flags, true);
+                    RegexpHelper.checkOnlyHasNonRegexpFlags(key, flags, true);
                     if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
                         startIndex = s.indexOf(separatorString);
                     } else {
@@ -240,6 +240,53 @@ class BuiltInsForStringsBasic {
                     final Matcher matcher = pattern.matcher(s);
                     if (matcher.find()) {
                         startIndex = matcher.end();
+                    } else {
+                        startIndex = -1;
+                    }
+                } 
+                return startIndex == -1 ? SimpleScalar.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
+            }
+        }
+        
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new KeepAfterMethod(s);
+        }
+        
+    }
+    
+    static class keep_after_lastBI extends BuiltInForString {
+        class KeepAfterMethod implements TemplateMethodModelEx {
+            private String s;
+
+            KeepAfterMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String separatorString = getStringMethodArg(args, 0);
+                long flags = argCnt > 1 ? RegexpHelper.parseFlagString(getStringMethodArg(args, 1)) : 0;
+                
+                int startIndex;
+                if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
+                    RegexpHelper.checkOnlyHasNonRegexpFlags(key, flags, true);
+                    if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
+                        startIndex = s.lastIndexOf(separatorString);
+                    } else {
+                        startIndex = s.toLowerCase().lastIndexOf(separatorString.toLowerCase());
+                    }
+                    if (startIndex >= 0) {
+                        startIndex += separatorString.length();
+                    }
+                } else {
+                    Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
+                    final Matcher matcher = pattern.matcher(s);
+                    if (matcher.find()) {
+                        startIndex = matcher.end();
+                        while (matcher.find(matcher.start() + 1)) {
+                            startIndex = matcher.end();
+                        }
                     } else {
                         startIndex = -1;
                     }
@@ -270,7 +317,7 @@ class BuiltInsForStringsBasic {
                 
                 int stopIndex;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                    RegexpHelper.checkNonRegexpFlags(key, flags, true);
+                    RegexpHelper.checkOnlyHasNonRegexpFlags(key, flags, true);
                     if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
                         stopIndex = s.indexOf(separatorString);
                     } else {
@@ -281,6 +328,51 @@ class BuiltInsForStringsBasic {
                     final Matcher matcher = pattern.matcher(s);
                     if (matcher.find()) {
                         stopIndex = matcher.start();
+                    } else {
+                        stopIndex = -1;
+                    }
+                } 
+                return stopIndex == -1 ? new SimpleScalar(s) : new SimpleScalar(s.substring(0, stopIndex));
+            }
+        }
+        
+        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+            return new KeepUntilMethod(s);
+        }
+        
+    }
+    
+    // TODO
+    static class keep_before_lastBI extends BuiltInForString {
+        class KeepUntilMethod implements TemplateMethodModelEx {
+            private String s;
+
+            KeepUntilMethod(String s) {
+                this.s = s;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                int argCnt = args.size();
+                checkMethodArgCount(argCnt, 1, 2);
+                String separatorString = getStringMethodArg(args, 0);
+                long flags = argCnt > 1 ? RegexpHelper.parseFlagString(getStringMethodArg(args, 1)) : 0;
+                
+                int stopIndex;
+                if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
+                    RegexpHelper.checkOnlyHasNonRegexpFlags(key, flags, true);
+                    if ((flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) == 0) {
+                        stopIndex = s.lastIndexOf(separatorString);
+                    } else {
+                        stopIndex = s.toLowerCase().lastIndexOf(separatorString.toLowerCase());
+                    }
+                } else {
+                    Pattern pattern = RegexpHelper.getPattern(separatorString, (int) flags);
+                    final Matcher matcher = pattern.matcher(s);
+                    if (matcher.find()) {
+                        stopIndex = matcher.start();
+                        while (matcher.find(stopIndex + 1)) {
+                            stopIndex = matcher.start();
+                        }
                     } else {
                         stopIndex = -1;
                     }

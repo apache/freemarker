@@ -2813,7 +2813,11 @@ CDEF</programlisting>
               <link
               linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
               <link
-              linkend="ref_builtin_keep_after"><literal>keep_after</literal></link></para>
+              linkend="ref_builtin_keep_after"><literal>keep_after</literal></link>,
+              <link
+              linkend="ref_builtin_keep_before_last"><literal>keep_before_last</literal></link>,
+              <link
+              linkend="ref_builtin_keep_after_last"><literal>keep_after_last</literal></link></para>
             </note>
           </section>
         </section>
@@ -10349,7 +10353,17 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_keep_after_last">keep_after_last</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_keep_before">keep_before</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_keep_before_last">keep_before_last</link></para>
           </listitem>
 
           <listitem>
@@ -11117,6 +11131,32 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <programlisting role="output">bar</programlisting>
         </section>
 
+        <section xml:id="ref_builtin_keep_after_last">
+          <title>keep_after_last</title>
+
+          <indexterm>
+            <primary>keep_after_last built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_keep_after"><literal>keep_after</literal></link>,
+          but keeps the part after the last occurrence of the parameter,
+          rather than after the first. Example:</para>
+
+          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">txt</programlisting>
+
+          <para>while with <literal>keep_after</literal> you would get
+          <literal>bar.txt</literal>.</para>
+        </section>
+
         <section xml:id="ref_builtin_keep_before">
           <title>keep_before</title>
 
@@ -11150,6 +11190,32 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <para>will print</para>
 
           <programlisting role="output">foo</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_keep_before_last">
+          <title>keep_before_last</title>
+
+          <indexterm>
+            <primary>keep_before_last built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
+          but keeps the part before the last occurrence of the parameter,
+          rather than after the first. Example:</para>
+
+          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">foo.bar</programlisting>
+
+          <para>while with <literal>keep_before</literal> you would get
+          <literal>foo</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_last_index_of">
@@ -11682,7 +11748,7 @@ foobar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_substring">
-          <title>substring</title>
+          <title>substring (deprecated)</title>
 
           <indexterm>
             <primary>substring built-in</primary>
@@ -11721,7 +11787,11 @@ foobar</programlisting>
             <link
             linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
             <link
-            linkend="ref_builtin_keep_after"><literal>keep_after</literal></link></para>
+            linkend="ref_builtin_keep_after"><literal>keep_after</literal></link>,
+            <link
+            linkend="ref_builtin_keep_before_last"><literal>keep_before_last</literal></link>,
+            <link
+            linkend="ref_builtin_keep_after_last"><literal>keep_after_last</literal></link></para>
           </note>
 
           <para>Synopsis:
@@ -12282,7 +12352,39 @@ rif: foo XYr baar</programlisting>
               </tr>
 
               <tr>
+                <td><literal>keep_after_last</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
                 <td><literal>keep_before</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>keep_before_last</literal></td>
 
                 <td>Yes</td>
 
@@ -22140,6 +22242,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               /&gt;</literal>. (When you enumerate the catch-all hash inside
               the macro, the key string you get is just
               <literal>"data-id"</literal> of course.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>?keep_before_last</literal> and
+              <literal>?keep_after_last</literal>. Example:
+              <literal>"foo.bar.txt"?keep_before_last</literal> returns
+              <literal>"foo.bar"</literal>,
+              <literal>"foo.bar.txt"?keep_after_last</literal> returns
+              <literal>"txt"</literal> (since 2.3.22-rc02).</para>
             </listitem>
 
             <listitem>
