@@ -2757,7 +2757,7 @@ J</programlisting>
             <para>You can a slice a string in the same way as you <link
             linkend="dgui_template_exp_seqenceop_slice">slice a
             sequence</link> (see there), only here instead of sequence items
-            you work with characters.</para>
+            you work with characters. Some differences are:</para>
 
             <itemizedlist>
               <listitem>
@@ -11693,11 +11693,13 @@ foobar</programlisting>
           </indexterm>
 
           <note>
-            <para>This built-in is deprecated since FreeMarker 2.3.21 by
-            slicing expressions:
-            <literal><replaceable>exp</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
+            <para>This built-in is deprecated since FreeMarker 2.3.21 by <link
+            linkend="dgui_template_exp_stringop_slice">slicing
+            expressions</link>, like
+            <literal><replaceable>str</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>,
+            <literal><replaceable>str</replaceable>[<replaceable>from</replaceable>..]</literal>,
             and
-            <literal><replaceable>exp</replaceable>[<replaceable>from</replaceable>..]</literal>.</para>
+            <literal><replaceable>str</replaceable>[<replaceable>from</replaceable>..*<replaceable>maxLength</replaceable>]</literal>.</para>
 
             <para>A warning if you are processing XML: Since slicing
             expressions work both for sequences and strings, and since XML
@@ -11708,6 +11710,18 @@ foobar</programlisting>
             <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
             as without <literal>?string</literal> it would slice the node
             sequence instead of the text value of the node.</para>
+          </note>
+
+          <note>
+            <para>Some of the typical use-cases of string slicing is covered
+            by convenient built-ins: <link
+            linkend="ref_builtin_remove_beginning"><literal>remove_beginning</literal></link>,
+            <link
+            linkend="ref_builtin_remove_ending"><literal>remove_ending</literal></link>,
+            <link
+            linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
+            <link
+            linkend="ref_builtin_keep_after"><literal>keep_after</literal></link></para>
           </note>
 
           <para>Synopsis:
@@ -12249,6 +12263,54 @@ rif: foo XYr baar</programlisting>
                 <td>Yes</td>
 
                 <td>No</td>
+              </tr>
+
+              <tr>
+                <td><literal>keep_after</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>keep_before</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>ensure_starts_with</literal></td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
               </tr>
             </tbody>
           </informaltable>
