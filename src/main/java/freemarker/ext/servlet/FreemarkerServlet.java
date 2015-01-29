@@ -38,6 +38,7 @@ import javax.servlet.http.HttpSession;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.WebappTemplateLoader;
 import freemarker.core.Configurable;
@@ -55,6 +56,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNotFoundException;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.SecurityUtilities;
 import freemarker.template.utility.StringUtil;
 
@@ -109,6 +111,10 @@ import freemarker.template.utility.StringUtil;
  * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
  * you want to load templates from the specified package accessible through the Thread Context Class Loader of the
  * thread that initializes this servlet.<br>
+ * If {@code incompatible_improvements} is set to 2.3.22 (or higher), you can specify multiple comma separated locations
+ * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}.
+ * This internally creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't
+ * set to at least 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
  * For backward compatibility (not recommended!), you can also use the {@code class://} prefix, like in
  * <tt>class://com/example/templates</tt> format, which is similar to {@code classpath:}, except that it uses the
  * defining class loader of this servlet's class. This can cause template not found errors, if that class (in
@@ -428,12 +434,12 @@ public class FreemarkerServlet extends HttpServlet
         config = createConfiguration();
         
         // Only override what's coming from the config if it was explicitly specified: 
-        final String iciInitParamValue = getInitParameter(Configuration.INCOMPATIBLE_IMPROVEMENTS);
+        final String iciInitParamValue = getInitParameter(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY);
         if (iciInitParamValue != null) {
             try {
-                config.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS, iciInitParamValue);
+                config.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY, iciInitParamValue);
             } catch (Exception e) {
-                throw new InitParamValueException(Configuration.INCOMPATIBLE_IMPROVEMENTS, iciInitParamValue, e);
+                throw new InitParamValueException(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY, iciInitParamValue, e);
             }
         }
         
@@ -622,8 +628,10 @@ public class FreemarkerServlet extends HttpServlet
      * @param templatePath the template path to create a loader for
      * @return a newly created template loader
      */
-    protected TemplateLoader createTemplateLoader(final String templatePath) throws IOException
+    protected TemplateLoader createTemplateLoader(String templatePath) throws IOException
     {
+        templatePath = templatePath.trim();
+        
         if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_CLASS)) {
             String packagePath = templatePath.substring(TEMPLATE_PATH_PREFIX_CLASS.length());
             packagePath = normalizeToAbsolutePackagePath(packagePath);
@@ -644,6 +652,25 @@ public class FreemarkerServlet extends HttpServlet
         } else if (templatePath.startsWith(TEMPLATE_PATH_PREFIX_FILE)) {
                 String filePath = templatePath.substring(TEMPLATE_PATH_PREFIX_FILE.length());
                 return new FileTemplateLoader(new File(filePath));
+        } else if (templatePath.startsWith("[")
+                && getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
+            if (!templatePath.endsWith("]")) {
+                // B.C. constraint: Can't throw any checked exceptions.
+                throw new RuntimeException("Failed to parse template path; closing \"]\" is missing.");
+            }
+            List pathItems;
+            try {
+                pathItems = parseCommaSeparatedList(templatePath.substring(1, templatePath.length() - 1));
+            } catch (ParseException e) {
+                // B.C. constraint: Can't throw any checked exceptions.
+                throw new RuntimeException("Failed to parse template path; see cause exception.", e);
+            }
+            TemplateLoader[] templateLoaders = new TemplateLoader[pathItems.size()];
+            for (int i = 0; i < pathItems.size(); i++) {
+                String pathItem = (String) pathItems.get(i);
+                templateLoaders[i] = createTemplateLoader(pathItem);
+            }
+            return new MultiTemplateLoader(templateLoaders);
         } else {
             return new WebappTemplateLoader(this.getServletContext(), templatePath);
         }

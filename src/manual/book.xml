@@ -22692,6 +22692,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
+                  <para>If <literal>incompatible_improvements</literal> is set
+                  to 2.3.22, the <literal>TemplatePath</literal> servlet
+                  init-param supports specifying multiple comma separated
+                  paths inside
+                  <literal>[<replaceable>...</replaceable>]</literal>, like
+                  <literal>&lt;param-value&gt;[ WEB-INF/templates,
+                  classpath:com/example/myapp/templates
+                  ]&lt;/param-value&gt;</literal>. This internally creates a
+                  <literal>freemarker.cache.MultiTemplateLoader</literal>.</para>
+                </listitem>
+
+                <listitem>
                   <para>Added new servlet <literal>init-param</literal>,
                   <literal>ExceptionOnMissingTemplate</literal>. Setting this
                   to <literal>true</literal> changes the behavior on

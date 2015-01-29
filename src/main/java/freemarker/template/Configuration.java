@@ -413,7 +413,7 @@ public class Configuration extends Configurable implements Cloneable {
      *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
      *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
-     *         <li><p>
+     *       <li><p>
      *           When using {@link FreemarkerServlet} with custom JSP tag libraries: Fixes bug where some kind of
      *           values, when put into the JSP <em>page</em> scope (via {@code #global} or via the JSP
      *           {@code PageContext} API) and later read back with the JSP {@code PageContext} API (typically in a
@@ -442,7 +442,11 @@ public class Configuration extends Configurable implements Cloneable {
      *             {@link java.util.Collection}-s as expected (again, assuming that the object wrapper is a subclass of
      *             {@link BeansWrapper}).</li>
      *           </ul>
-     *         </li>
+     *       </li>
+     *       <li><p>
+     *           When using {@link FreemarkerServlet}: An initial {@code [} in the {@code TemplatePath} init-param
+     *           has special meaning; it's used for specifying multiple comma separated locations, like in
+     *           {@code <param-value>[ WEB-INF/templates, classpath:com/example/myapp/templates ]</param-value>}
      *     </ul>
      *   </li>
      * </ul>

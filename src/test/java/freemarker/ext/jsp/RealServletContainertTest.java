@@ -65,6 +65,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     private static final String WEBAPP_TLD_DISCOVERY = "tldDiscovery";
     private static final String WEBAPP_ERRORS = "errors";
     private static final String WEBAPP_CONFIG = "config";
+    private static final String WEBAPP_MULTIPLE_LOADERS = "multipleLoaders";
 
     @Test
     public void basicTrivial() throws Exception {
@@ -268,6 +269,14 @@ public class RealServletContainertTest extends WebAppTestCase {
                 "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults1FreemarkerServlet"));
         assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
                 "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults2FreemarkerServlet"));
+    }
+    
+    @Test
+    public void testMultipleLoaders() throws Exception {
+       assertEquals("In test.ftl",
+               getResponseContent(WEBAPP_MULTIPLE_LOADERS, "tester?view=test.ftl")); 
+       assertEquals("In classpath-test.ftl",
+               getResponseContent(WEBAPP_MULTIPLE_LOADERS, "tester?view=classpath-test.ftl")); 
     }
 
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {
