@@ -21,8 +21,12 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -43,6 +47,7 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.cache.TemplateNameFormat;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
+import freemarker.core._CoreAPI;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.utility.DateUtil;
@@ -985,6 +990,58 @@ public class ConfigurationTest extends TestCase {
                 .process(Collections.singletonMap("m", new HashMap()), NullWriter.INSTANCE);
     }
     
+    @Test
+    public void testGetSettingNames() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        List<String> names = new ArrayList<String>(cfg.getSettingNames()); 
+        List<String> cfgableNames = new ArrayList<String>(_CoreAPI.getConfigurableSettingNames(cfg));
+        assertStartsWith(names, cfgableNames);
+        
+        String prevName = null;
+        for (int i = cfgableNames.size(); i < names.size(); i++) {
+            String name = names.get(i);
+            if (prevName != null) {
+                assertThat(name, greaterThan(prevName));
+                assertTrue("No field was found for " + name, keyFieldExists(name));
+            }
+            prevName = name;
+        }
+    }
+    
+    @SuppressWarnings("boxing")
+    private void assertStartsWith(List<String> list, List<String> headList) {
+        int index = 0;
+        for (String name : headList) {
+            assertThat(index, lessThan(list.size()));
+            assertEquals(name, list.get(index));
+            index++;
+        }
+    }
+    
+    private boolean keyFieldExists(String name) throws Exception {
+        Field field;
+        try {
+            field = Configuration.class.getField(name.toUpperCase() + "_KEY");
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+        assertEquals(name, field.get(null));
+        return true;
+    }
+    
+    @Test
+    public void testGetSettingNamesCoversAllSettingNames() throws Exception {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        Collection<String> names = cfg.getSettingNames();
+        
+        for (Field f : Configurable.class.getFields()) {
+            if (f.getName().endsWith("_KEY")) {
+                final Object name = f.get(null);
+                assertTrue("Missing setting name: " + name, names.contains(name));
+            }
+        }
+    }
+
     private static class MyScalarModel implements TemplateScalarModel {
 
         public String getAsString() throws TemplateModelException {

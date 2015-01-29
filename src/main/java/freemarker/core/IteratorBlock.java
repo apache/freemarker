@@ -73,14 +73,14 @@ final class IteratorBlock extends TemplateElement {
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
         if (isForEach) {
-            buf.append(CoreUtils.toFTLTopLevelIdentifierReference(loopVariableName));
+            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVariableName));
             buf.append(" in ");
             buf.append(listExpression.getCanonicalForm());
         }
         else {
             buf.append(listExpression.getCanonicalForm());
             buf.append(" as ");
-            buf.append(CoreUtils.toFTLTopLevelIdentifierReference(loopVariableName));
+            buf.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(loopVariableName));
         }
         if (canonical) {
             buf.append(">");

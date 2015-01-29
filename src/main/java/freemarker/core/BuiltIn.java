@@ -260,26 +260,34 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
-            StringBuffer buf = new StringBuffer(
-                    "Unknown built-in: " + StringUtil.jQuote(key) + ". "
-                    + "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
-                    + "you're using FreeMarker " + Configuration.getVersion() + ".\n" 
-                    + "The alphabetical list of built-ins:");
-            List names = new ArrayList(builtins.keySet().size());
-            names.addAll(builtins.keySet());
-            Collections.sort(names);
-            char lastLetter = 0;
-            for (Iterator it = names.iterator(); it.hasNext();) {
-                String name = (String) it.next();
-                char firstChar = name.charAt(0);
-                if (firstChar != lastLetter) {
-                    lastLetter = firstChar;
-                    buf.append('\n');
-                }
-                buf.append(name);
-                
-                if (it.hasNext()) {
-                    buf.append(", ");
+            StringBuffer buf = new StringBuffer("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
+            
+            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(key);
+            if (!underscoredName.equals(key) && builtins.containsKey(underscoredName)) {
+                buf.append("Supporting camelCase built-in names is planned for FreeMarker 2.4.0; check if an update is "
+                        + "available, and if it indeed supports camel case. "
+                        + "Until that, use \"").append(underscoredName).append("\".");
+            } else {
+                buf.append(
+                        "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
+                        + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
+                        + "The alphabetical list of built-ins:");
+                List names = new ArrayList(builtins.keySet().size());
+                names.addAll(builtins.keySet());
+                Collections.sort(names);
+                char lastLetter = 0;
+                for (Iterator it = names.iterator(); it.hasNext();) {
+                    String name = (String) it.next();
+                    char firstChar = name.charAt(0);
+                    if (firstChar != lastLetter) {
+                        lastLetter = firstChar;
+                        buf.append('\n');
+                    }
+                    buf.append(name);
+                    
+                    if (it.hasNext()) {
+                        buf.append(", ");
+                    }
                 }
             }
             throw new ParseException(buf.toString(), target);

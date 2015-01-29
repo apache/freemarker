@@ -45,7 +45,7 @@ final class Identifier extends Expression {
     }
 
     public String getCanonicalForm() {
-        return CoreUtils.toFTLTopLevelIdentifierReference(name);
+        return _CoreStringUtils.toFTLTopLevelIdentifierReference(name);
     }
     
     String getName() {

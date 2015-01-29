@@ -60,6 +60,8 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
+import freemarker.core._SortedArraySet;
+import freemarker.core._UnmodifiableCompositeSet;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.servlet.FreemarkerServlet;
@@ -127,6 +129,7 @@ public class Configuration extends Configurable implements Cloneable {
     private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
     
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
+    
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
     public static final String STRICT_SYNTAX_KEY = "strict_syntax";
@@ -139,10 +142,29 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
     public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
     public static final String TEMPLATE_NAME_FORMAT_KEY = "template_name_format";
-    
+    public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = "incompatible_improvements";
+    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
-    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
+    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
+    
+    private static final String[] SETTING_NAMES = new String[] {
+        // Must be sorted alphabetically!
+        AUTO_IMPORT_KEY,
+        AUTO_INCLUDE_KEY,
+        CACHE_STORAGE_KEY,
+        DEFAULT_ENCODING_KEY,
+        INCOMPATIBLE_IMPROVEMENTS_KEY,
+        LOCALIZED_LOOKUP_KEY,
+        STRICT_SYNTAX_KEY,
+        TAG_SYNTAX_KEY,
+        TEMPLATE_LOADER_KEY,
+        TEMPLATE_LOOKUP_STRATEGY_KEY,
+        TEMPLATE_NAME_FORMAT_KEY,
+        TEMPLATE_UPDATE_DELAY_KEY,
+        WHITESPACE_STRIPPING_KEY
+    };
+    
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
@@ -1957,6 +1979,12 @@ public class Configuration extends Configurable implements Cloneable {
         }
     }
 
+    // [Java 5] Add type param. [FM 2.4] It must return the camelCase names, then make it public.
+    Set/*<String>*/ getSettingNames() {
+        return new _UnmodifiableCompositeSet(
+                _CoreAPI.getConfigurableSettingNames(this), new _SortedArraySet(SETTING_NAMES)); 
+    }
+    
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
             return DEFAULT_ENCODING_KEY;

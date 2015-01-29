@@ -16,12 +16,15 @@
 
 package freemarker.core;
 
+import java.util.Arrays;
+
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template.utility.StringUtil;
 
 /**
  * An instruction that sets a property of the template rendering
@@ -31,6 +34,20 @@ final class PropertySetting extends TemplateElement {
 
     private final String key;
     private final Expression value;
+    
+    static final String[] SETTING_NAMES = new String[] {
+            Configurable.BOOLEAN_FORMAT_KEY,
+            Configurable.CLASSIC_COMPATIBLE_KEY,
+            Configurable.DATE_FORMAT_KEY,
+            Configurable.DATETIME_FORMAT_KEY,
+            Configurable.LOCALE_KEY,
+            Configurable.NUMBER_FORMAT_KEY,
+            Configurable.OUTPUT_ENCODING_KEY,
+            Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
+            Configurable.TIME_FORMAT_KEY,
+            Configurable.TIME_ZONE_KEY,
+            Configurable.URL_ESCAPING_CHARSET_KEY
+    };
 
     PropertySetting(String key, Expression value) {
         this.key = key;
@@ -43,23 +60,29 @@ final class PropertySetting extends TemplateElement {
     {
         super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
         
-        if (!key.equals(Configurable.LOCALE_KEY) &&
-            !key.equals(Configurable.NUMBER_FORMAT_KEY) &&
-            !key.equals(Configurable.TIME_FORMAT_KEY) &&
-            !key.equals(Configurable.DATE_FORMAT_KEY) &&
-            !key.equals(Configurable.DATETIME_FORMAT_KEY) &&
-            !key.equals(Configurable.TIME_ZONE_KEY) &&
-            !key.equals(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY) &&
-            !key.equals(Configurable.BOOLEAN_FORMAT_KEY) &&
-            !key.equals(Configurable.CLASSIC_COMPATIBLE_KEY) &&
-            !key.equals(Configurable.URL_ESCAPING_CHARSET_KEY) &&
-            !key.equals(Configurable.OUTPUT_ENCODING_KEY)
-            ) 
-        {
+        if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Unknown setting name: ");
+            sb.append(StringUtil.jQuote(key)).append(".");
+            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(key);
+            if (!underscoredName.equals(key) && Arrays.binarySearch(SETTING_NAMES, underscoredName) >= 0) {
+                sb.append(" Supporting camelCase setting names is planned for FreeMarker 2.4.0; check if an update is "
+                            + "available, and if it indeed supports camel case. "
+                            + "Until that, use \"").append(underscoredName).append("\".");
+            } else if (((Configurable) template).getSettingNames().contains(key)
+                    || ((Configurable) template).getSettingNames().contains(underscoredName)) {
+                sb.append(" The setting name is recognized, but changing this setting in a template isn't supported.");                
+            } else {
+                sb.append(" The allowed setting names are: ");
+                for (int i = 0; i < SETTING_NAMES.length; i++) {
+                    if (i != 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(SETTING_NAMES[i]);
+                }
+            }
             throw new ParseException(
-                    "Invalid setting name, or it's not allowed to change "
-                    + "the value of the setting with FTL: "
-                    + key,
+                    sb.toString(),
                     template, beginLine, beginColumn, endLine, endColumn);
         }
     }
@@ -84,7 +107,7 @@ final class PropertySetting extends TemplateElement {
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol());
         sb.append(' ');
-        sb.append(CoreUtils.toFTLTopLevelTragetIdentifier(key));
+        sb.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(key));
         sb.append('=');
         sb.append(value.getCanonicalForm());
         if (canonical) sb.append("/>");

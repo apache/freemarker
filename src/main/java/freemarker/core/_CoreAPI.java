@@ -99,4 +99,11 @@ public class _CoreAPI {
         Environment.outputInstructionStack(instructionStackSnapshot, terseMode, pw);
     }
     
+    /**
+     * [FM 2.4] getSettingNames() becomes to public; remove this.
+     */
+    public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable) {
+        return cfgable.getSettingNames();
+    }
+    
 }

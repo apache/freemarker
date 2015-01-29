@@ -22402,6 +22402,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   backing out of the <literal>TemplateLoader</literal>'s root
                   directory.</para>
                 </listitem>
+
+                <listitem>
+                  <para>The <literal>#setting</literal> directive gives more
+                  helpful error message when the setting name is not
+                  recognized, and lists the allowed setting names when
+                  appropriate.</para>
+                </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
