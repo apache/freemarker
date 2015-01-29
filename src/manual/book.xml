@@ -1936,7 +1936,8 @@ The average of the price of a python and an elephant is:
             <listitem>
               <para><link
               linkend="dgui_template_exp_builtin">Built-ins</link>:
-              <literal>name?upper_case</literal></para>
+              <literal>name?upper_case</literal>,
+              <literal>path?ensure_starts_with('/')</literal></para>
             </listitem>
 
             <listitem>
@@ -3305,14 +3306,33 @@ ${-1.999?int}</programlisting>
             <primary>built-in</primary>
           </indexterm>
 
-          <para>Built-ins provide, as the name suggest, certain built-in
-          functionality that is always available. Typically, a built-in
-          provides a different version of a variable, or some information
-          about the variable in question. The syntax for accessing a built-in
-          is like that of accessing a subvariable in a hash, except that you
-          use the question mark instead of a dot. For example, to get the
-          upper case version of a string:
-          <literal>user?upper_case</literal>.</para>
+          <para>Built-ins are like methods that are added to the objects by
+          FreeMarker. To prevent name clashes with actual methods and other
+          sub-variables, instead of dot (<literal>.</literal>), you separate
+          them from the parent object with question mark
+          (<literal>?</literal>). For example, if you want to ensure that
+          <literal>path</literal> has an initial <literal>/</literal> then you
+          could write <literal>path?ensure_starts_with('/')</literal>. The
+          Java object behind <literal>path</literal> (a
+          <literal>String</literal> most certainly) doesn't have such method,
+          FreeMarker adds it. For brevity, if the method has no parameters,
+          you must omit the <literal>()</literal>, like, to get the length of
+          <literal>path</literal>, you have to write
+          <literal>path?length</literal>, <emphasis>not</emphasis>
+          <literal>path?length()</literal>. The other reason why built-ins are
+          crucial is that normally (though it depends on configuration
+          settings), FreeMarker doesn't expose the Java API of the objects. So
+          despite that Java's <literal>String</literal> has a
+          <literal>length()</literal> method, it's hidden from the template,
+          you <emphasis>have to</emphasis> use <literal>path?length</literal>
+          instead. The advantage of that is that thus the template doesn't
+          depend on the exactly type of the underlying Java objects. (Like
+          <literal>path</literal> it's maybe a
+          <literal>java.nio.Path</literal> behind the scenes, but if the
+          programmers has configure FreeMarker to expose
+          <literal>Path</literal> objects as FTL strings, the template won't
+          be aware of that, and <literal>?length</literal> will work, despite
+          that <literal>java.nio.Path</literal> has no similar method.)</para>
 
           <para>You can find the complete <link linkend="ref_builtins">list of
           built-ins in the Reference</link>. For now, just a few of the more
@@ -3350,6 +3370,11 @@ ${-1.999?int}</programlisting>
                   and trailing <link
                   linkend="gloss.whiteSpace">white-spaces</link></para>
                 </listitem>
+
+                <listitem>
+                  <para><literal>length</literal>: The length of the
+                  string</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -3360,18 +3385,6 @@ ${-1.999?int}</programlisting>
                 <listitem>
                   <para><literal>size</literal>: The number of elements in the
                   sequence</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Built-ins to use with numbers:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>int</literal>: The integer part of a number
-                  (e.g. <literal>-1.9?int</literal> is
-                  <literal>-1</literal>)</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -3434,11 +3447,11 @@ Horse</programlisting>
           returns a string which repeats the first parameter the number of
           times specified by the second parameter.</para>
 
-          <programlisting role="template">${repeat("What", 3)}</programlisting>
+          <programlisting role="template">${repeat("Foo", 3)}</programlisting>
 
           <para>will print:</para>
 
-          <programlisting role="output">WhatWhatWhat</programlisting>
+          <programlisting role="output">FooFooFoo</programlisting>
 
           <para>Here <literal>repeat</literal> was evaluated to the method
           variable (according to how you <link
@@ -3449,11 +3462,11 @@ Horse</programlisting>
           <para>I would like to emphasize that method calls are just plain
           expressions, like everything else. So this:</para>
 
-          <programlisting role="template">${repeat(repeat("x", 2), 3) + repeat("What", 4)?upper_case}</programlisting>
+          <programlisting role="template">${repeat(repeat("x", 2), 3) + repeat("Foo", 4)?upper_case}</programlisting>
 
           <para>will print this:</para>
 
-          <programlisting role="output">xxxxxxWHATWHATWHATWHAT</programlisting>
+          <programlisting role="output">xxxxxxFOOFOOFOOFOO</programlisting>
         </section>
 
         <section xml:id="dgui_template_exp_missing">
@@ -3718,13 +3731,13 @@ Creating mouse...
           <para>Parentheses can be used to group any expressions. Some
           examples:</para>
 
-          <programlisting role="template">                                   &lt;#-- Output will be: --&gt;
-${3 * 2 + 2}                       &lt;#-- 8 --&gt;
-${3 * (2 + 2)}                     &lt;#-- 12 --&gt;
-${3 * ((2 + 2) * (1 / 2))}         &lt;#-- 6 --&gt;
-${"green " + "mouse"?upper_case}   &lt;#-- green MOUSE --&gt;
-${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
-&lt;#if !( color = "red" || color = "green")&gt;
+          <programlisting role="template">                               &lt;#-- Output will be: --&gt;
+${3 * 2 + 2}                   &lt;#-- 8 --&gt;
+${3 * (2 + 2)}                 &lt;#-- 12 --&gt;
+${3 * ((2 + 2) * (1 / 2))}     &lt;#-- 6 --&gt;
+${"green " + "mouse"?upper_case}    &lt;#-- green MOUSE --&gt;
+${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
+&lt;#if !(color == "red" || color == "green")&gt;
   The color is nor red nor green
 &lt;/#if&gt;</programlisting>
 
@@ -8276,7 +8289,7 @@ env.process();</programlisting>
             visible by default, but it can be achieved by setting the exposure
             level (see later). Note that this is usually a bad practice; try
             to use <link linkend="ref_builtins">the built-ins</link> (like
-            <literal>foo?size</literal>, <literal>foo?upper</literal>,
+            <literal>foo?size</literal>, <literal>foo?upper_case</literal>,
             <literal>foo?replace('_', '-')</literal> ...etc) instead of the
             Java API.</para>
           </listitem>
