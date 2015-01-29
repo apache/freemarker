@@ -1877,4 +1877,70 @@ public class StringUtil {
         return "[" + ClassUtil.getShortClassNameOfObject(object) +".toString() failed: " + eStr + "]";
     }
     
+    /**
+     * Converts {@code 1}, {@code 2}, {@code 3} and so forth to {@code "A"}, {@code "B"}, {@code "C"} and so fort. When
+     * reaching {@code "Z"}, it continues like {@code "AA"}, {@code "AB"}, etc. The lowest supported number is 1, but
+     * there's no upper limit.
+     * 
+     * @throws IllegalArgumentException
+     *             If the argument is 0 or less.
+     * 
+     * @since 2.3.22
+     */
+    public static String toUpperABC(int n) {
+        return toABC(n, 'A');
+    }
+
+    /**
+     * Same as {@link #toUpperABC(int)}, but produces lower case result, like {@code "ab"}.
+     * 
+     * @since 2.3.22
+     */
+    public static String toLowerABC(int n) {
+        return toABC(n, 'a');
+    }
+
+    /**
+     * @param oneDigit
+     *            The character that stands for the value 1.
+     */
+    private static String toABC(final int n, char oneDigit) {
+        if (n < 1) {
+            throw new IllegalArgumentException("Can't convert 0 or negative "
+                    + "numbers to latin-number: " + n);
+        }
+        
+        // First find out how many "digits" will we need. We start from A, then
+        // try AA, then AAA, etc. (Note that the smallest digit is "A", which is
+        // 1, not 0. Hence this isn't like a usual 26-based number-system):
+        int reached = 1;
+        int weight = 1;
+        while (true) {
+            int nextWeight = weight * 26;
+            int nextReached = reached + nextWeight;
+            if (nextReached <= n) {
+                // So we will have one more digit
+                weight = nextWeight;
+                reached = nextReached;
+            } else {
+                // No more digits
+                break;
+            }
+        }
+        
+        // Increase the digits of the place values until we get as close
+        // to n as possible (but don't step over it).
+        StringBuffer sb = new StringBuffer();
+        while (weight != 0) {
+            // digitIncrease: how many we increase the digit which is already 1
+            final int digitIncrease = (n - reached) / weight;
+            sb.append((char) (oneDigit + digitIncrease));
+            reached += digitIncrease * weight;
+            
+            weight /= 26;
+        }
+        
+        return sb.toString();
+    }    
+    
 }

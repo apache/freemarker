@@ -209,6 +209,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("left_pad", new BuiltInsForStringsBasic.padBI(true));
         builtins.put("length", new BuiltInsForStringsBasic.lengthBI());
         builtins.put("long", new longBI());
+        builtins.put("lower_abc", new BuiltInsForNumbers.lower_abcBI());
         builtins.put("lower_case", new BuiltInsForStringsBasic.lower_caseBI());
         builtins.put("namespace", new BuiltInsForMultipleTypes.namespaceBI());
         builtins.put("new", new NewBI());
@@ -242,6 +243,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("time_if_unknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
         builtins.put("trim", new BuiltInsForStringsBasic.trimBI());
         builtins.put("uncap_first", new BuiltInsForStringsBasic.uncap_firstBI());
+        builtins.put("upper_abc", new BuiltInsForNumbers.upper_abcBI());
         builtins.put("upper_case", new BuiltInsForStringsBasic.upper_caseBI());
         builtins.put("url", new BuiltInsForStringsEncoding.urlBI());
         builtins.put("url_path", new BuiltInsForStringsEncoding.urlPathBI());

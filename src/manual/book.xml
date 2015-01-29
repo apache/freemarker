@@ -10393,6 +10393,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_lower_abc">lower_abc</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_lower_case">lower_case</link></para>
           </listitem>
 
@@ -10543,6 +10548,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           <listitem>
             <para><link
             linkend="ref_builtin_uncap_first">uncap_first</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_upper_abc">upper_abc</link></para>
           </listitem>
 
           <listitem>
@@ -12565,6 +12575,48 @@ rif: foo XYr baar</programlisting>
           always return <literal>false</literal>.</para>
         </section>
 
+        <section xml:id="ref_builtin_lower_abc">
+          <title>lower_abc</title>
+
+          <indexterm>
+            <primary>lower_abc built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ABC</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>alphabetical ordinals</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Converts <literal>1</literal>, <literal>2</literal>,
+          <literal>3</literal>, etc., to the string <literal>"a"</literal>,
+          <literal>"b"</literal>, <literal>"c"</literal>, etc. When reaching
+          <literal>"z"</literal>, it continues like <literal>"aa"</literal>,
+          <literal>"ab"</literal>, etc. This is the same logic that you can
+          see in column labels in spreadsheet applications (like Excel or
+          Calc). The lowest allowed number is <literal>1</literal>. There's no
+          upper limit. If the number is <literal>0</literal> or less or it
+          isn't an integer number then the template processing will be aborted
+          with error.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#list 1..30 as n&gt;${n?lower_abc} &lt;/#list&gt;</programlisting>
+
+          <para>Prints:</para>
+
+          <programlisting role="output">a b c d e f g h i j k l m n o p q r s t u v w x y z aa ab ac ad </programlisting>
+
+          <para>See also: <link
+          linkend="ref_builtin_upper_abc"><literal>upper_abc</literal></link></para>
+        </section>
+
         <section xml:id="ref_builtin_rounding">
           <title>round, floor, ceiling</title>
 
@@ -12803,6 +12855,32 @@ German people write: ${12345678}</programlisting>
 
           <programlisting role="output">US people write:     12,345,678.00
 German people write: 12.345.678,00</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_upper_abc">
+          <title>upper_abc</title>
+
+          <indexterm>
+            <primary>upper_abc built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ABC</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>alphabetical ordinals</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_lower_abc"><literal>lower_abc</literal></link>,
+          but converts to upper case letters, like <literal>"A"</literal>,
+          <literal>"B"</literal>, <literal>"C"</literal>, …,
+          <literal>"AA"</literal>, <literal>"AB"</literal>, etc.</para>
         </section>
       </section>
 
@@ -22242,6 +22320,21 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               /&gt;</literal>. (When you enumerate the catch-all hash inside
               the macro, the key string you get is just
               <literal>"data-id"</literal> of course.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>?lower_abc</literal> and
+              <literal>?upper_abc</literal>. This converts
+              <literal>1</literal>, <literal>2</literal>,
+              <literal>3</literal>, etc., to the string
+              <literal>"a"</literal>, <literal>"b"</literal>,
+              <literal>"c"</literal>, etc. (or for <literal>"A"</literal>,
+              <literal>"B"</literal>, <literal>"C"</literal>, etc.). When
+              reaching <literal>"z"</literal>, it continues like
+              <literal>"aa"</literal>, <literal>"ab"</literal>, etc. This is
+              the same logic that you can see in column labels in spreadsheet
+              applications (like Excel or Calc). <link
+              linkend="ref_builtin_lower_abc">More details...</link></para>
             </listitem>
 
             <listitem>

@@ -21,12 +21,11 @@ import java.math.BigInteger;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
+
 public class NumberUtilTest extends TestCase {
 
-    public NumberUtilTest(String name) {
-        super(name);
-    }
-    
+    @Test
     public void testGetSignum() {
         assertEquals(1, NumberUtil.getSignum(Double.valueOf(Double.POSITIVE_INFINITY)));
         assertEquals(1, NumberUtil.getSignum(Double.valueOf(3)));
@@ -77,6 +76,7 @@ public class NumberUtilTest extends TestCase {
         assertEquals(-1, NumberUtil.getSignum(BigInteger.valueOf(-3)));
     }
     
+    @Test
     public void testIsBigDecimalInteger() {
         BigDecimal n1 = new BigDecimal("1.125");
         if (n1.precision() != 4 || n1.scale() != 3) {
@@ -107,6 +107,106 @@ public class NumberUtilTest extends TestCase {
             assertEquals(n.doubleValue() == n.longValue(), NumberUtil.isIntegerBigDecimal(n));
         }
         
+    }
+    
+    @Test
+    public void testToIntExcact() {
+        for (int n : new int[] { Integer.MIN_VALUE, Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE, Integer.MAX_VALUE }) {
+            if (n != Integer.MIN_VALUE && n != Integer.MAX_VALUE) {
+                assertEquals(n, NumberUtil.toIntExact(Byte.valueOf((byte) n)));
+                assertEquals(n, NumberUtil.toIntExact(Short.valueOf((short) n)));
+                assertEquals(n, NumberUtil.toIntExact(Float.valueOf(n)));
+            }
+            assertEquals(n, NumberUtil.toIntExact(Integer.valueOf(n)));
+            assertEquals(n, NumberUtil.toIntExact(Long.valueOf(n)));
+            assertEquals(n, NumberUtil.toIntExact(Double.valueOf(n)));
+            assertEquals(n, NumberUtil.toIntExact(BigDecimal.valueOf(n)));
+            assertEquals(n, NumberUtil.toIntExact(BigDecimal.valueOf(n * 10L).divide(BigDecimal.TEN)));
+            assertEquals(n, NumberUtil.toIntExact(BigInteger.valueOf(n)));
+        }
+
+        try {
+            NumberUtil.toIntExact(Long.valueOf(Integer.MIN_VALUE - 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(Long.valueOf(Integer.MAX_VALUE + 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+
+        try {
+            NumberUtil.toIntExact(Float.valueOf(1.00001f));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(Float.valueOf(Integer.MIN_VALUE - 129L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(Float.valueOf(Integer.MAX_VALUE));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        
+        try {
+            NumberUtil.toIntExact(Double.valueOf(1.00001));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(Double.valueOf(Integer.MIN_VALUE - 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(Double.valueOf(Integer.MAX_VALUE + 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        
+        try {
+            NumberUtil.toIntExact(new BigDecimal("100.000001"));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(BigDecimal.valueOf(Integer.MIN_VALUE - 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(BigDecimal.valueOf(Integer.MAX_VALUE + 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        
+        try {
+            NumberUtil.toIntExact(BigInteger.valueOf(Integer.MIN_VALUE - 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            NumberUtil.toIntExact(BigInteger.valueOf(Integer.MAX_VALUE + 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
     }
 
 }
