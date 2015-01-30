@@ -28,10 +28,6 @@
         description="for building FreeMarker with default dependencies"
     />
 
-    <conf name="build.j2se1.5" extends="build.base"
-        description="for building FreeMarker parts that require J2SE 5"
-    />
-
     <conf name="build.jsp1.2" extends="build.base"
         description="for building FreeMarker with JSP 1.2 support"
     />
