@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+
+	<servlet>
+		<servlet-name>tester</servlet-name>
+		<servlet-class>freemarker.test.servlet.Model2TesterServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>tester</servlet-name>
+		<url-pattern>/tester</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>freemarker</servlet-name>
+		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+
+		<!-- FreemarkerServlet settings: -->
+		<init-param>
+			<param-name>TemplatePath</param-name>
+			<param-value>[ WEB-INF/templates, classpath:freemarker/ext/jsp/templates ]</param-value>
+		</init-param>
+        <init-param>
+            <param-name>incompatible_improvements</param-name>
+            <param-value>2.3.22</param-value>
+        </init-param>
+		<init-param>
+			<param-name>template_exception_handler</param-name>
+			<!-- Some may prefer "html_debug" for development. -->
+			<param-value>rethrow</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_encoding</param-name>
+			<param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
+		</init-param>
+        <init-param>
+            <param-name>locale</param-name>
+            <param-value>en_US</param-value>
+        </init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>freemarker</servlet-name>
+		<url-pattern>*.ftl</url-pattern>
+	</servlet-mapping>
+
+    <!-- Prevent the visiting of MVC Views from outside the servlet container. 
+        RequestDispatcher.forward/include should and will still work. Removing this 
+        may open security holes! -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>FreeMarker MVC Views</web-resource-name>
+            <url-pattern>*.ftl</url-pattern>
+            <url-pattern>*.jsp</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- Nobody is allowed to visit these -->
+        </auth-constraint>
+    </security-constraint>
+
+</web-app>

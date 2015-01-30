@@ -151,7 +151,7 @@ implements
         
         try
         {
-            if (isMethodsShadowItems())
+            if (wrapper.isMethodsShadowItems())
             {
                 Object fd = classInfo.get(key);
                 if(fd != null)
@@ -202,10 +202,6 @@ implements
                     new _DelayedFTLTypeDescription(this)
             });
         }
-    }
-
-    protected boolean isMethodsShadowItems() {
-        return wrapper.isMethodsShadowItems();
     }
 
     private void logNoSuchKey(String key, Map keyMap)

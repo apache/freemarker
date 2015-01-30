@@ -19,6 +19,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,7 +86,10 @@ public class Configurable
     public static final String BOOLEAN_FORMAT_KEY = "boolean_format";
     public static final String OUTPUT_ENCODING_KEY = "output_encoding";
     public static final String URL_ESCAPING_CHARSET_KEY = "url_escaping_charset";
+    /** @deprecated Use {@link #STRICT_BEAN_MODELS_KEY} instead. */
     public static final String STRICT_BEAN_MODELS = "strict_bean_models";
+    /** @since 2.3.22 */
+    public static final String STRICT_BEAN_MODELS_KEY = STRICT_BEAN_MODELS;
     /** @since 2.3.17 */
     public static final String AUTO_FLUSH_KEY = "auto_flush";
     /** @since 2.3.17 */
@@ -96,6 +100,30 @@ public class Configurable
     public static final String API_BUILTIN_ENABLED_KEY = "api_builtin_enabled";
     /** @since 2.3.22 */
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = "log_template_exceptions";
+    
+    private static final String[] SETTING_NAMES = new String[] {
+        // Must be sorted alphabetically!
+        API_BUILTIN_ENABLED_KEY,
+        ARITHMETIC_ENGINE_KEY,
+        AUTO_FLUSH_KEY,
+        BOOLEAN_FORMAT_KEY,
+        CLASSIC_COMPATIBLE_KEY,
+        DATE_FORMAT_KEY,
+        DATETIME_FORMAT_KEY,
+        LOCALE_KEY,
+        LOG_TEMPLATE_EXCEPTIONS_KEY,
+        NEW_BUILTIN_CLASS_RESOLVER_KEY,
+        NUMBER_FORMAT_KEY,
+        OBJECT_WRAPPER_KEY,
+        OUTPUT_ENCODING_KEY,
+        SHOW_ERROR_TIPS_KEY,
+        SQL_DATE_AND_TIME_TIME_ZONE_KEY,
+        STRICT_BEAN_MODELS,
+        TEMPLATE_EXCEPTION_HANDLER_KEY,
+        TIME_FORMAT_KEY,
+        TIME_ZONE_KEY,
+        URL_ESCAPING_CHARSET_KEY
+    };
 
     private Configurable parent;
     private Properties properties;
@@ -466,7 +494,15 @@ public class Configurable
     }
 
     /**
-     * Sets the number format used to convert numbers to strings.
+     * Sets the default number format used to convert numbers to strings. Currently, this is either a
+     * {@link java.text.DecimalFormat} pattern (like {@code "0.##"}), or one of the following special values:
+     * <ul>
+     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
+     *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
+     *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
+     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
+     * </ul>
+     * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
         NullArgumentException.check("numberFormat", numberFormat);
@@ -475,8 +511,7 @@ public class Configurable
     }
 
     /**
-     * Returns the default number format used to convert numbers to strings.
-     * Defaults to <tt>"number"</tt>
+     * Getter pair of {@link #setNumberFormat(String)}. 
      */
     public String getNumberFormat() {
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
@@ -1432,6 +1467,12 @@ public class Configurable
             throw unknownSettingException(name);
         }
     }
+    
+    /** Returns the possible setting names. */
+    // [Java 5] Add type param. [FM 2.4] It must return the camelCase names, then make it public.
+    Set/*<String>*/ getSettingNames() {
+        return new _SortedArraySet(SETTING_NAMES); 
+    }
 
     private TimeZone parseTimeZoneSettingValue(String value) {
         TimeZone tz;
@@ -1486,7 +1527,24 @@ public class Configurable
     }
     
     protected TemplateException unknownSettingException(String name) {
-        return new UnknownSettingException(getEnvironment(), name, getCorrectedNameForUnknownSetting(name));
+        final String explanation;
+        final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(name);
+        if (!underscoredName.equals(name)) {
+            Collection/*<String>*/ names = this instanceof Configuration
+                    ? _TemplateAPI.getConfigurationSettingNames((Configuration) this)
+                    : getSettingNames();
+            if (names.contains(underscoredName)) {
+                explanation = "Supporting camelCase setting names is planned for FreeMarker 2.4.0; "
+                        + "check if an update is available, and if it indeed supports camel case. "
+                        + "Until that, use \"" + underscoredName + "\".";
+            } else {
+                explanation = null;
+            }
+        } else {
+            explanation = null;
+        }
+        return new UnknownSettingException(
+                getEnvironment(), name, explanation, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
@@ -1515,10 +1573,11 @@ public class Configurable
      * The setting name was not recognized. 
      */
     public static class UnknownSettingException extends _MiscTemplateException {
-        
-        private UnknownSettingException(Environment env, String name, String correctedName) {
+
+        private UnknownSettingException(Environment env, String name, String explanation, String correctedName) {
             super(env, new Object[] {
                     "Unknown FreeMarker configuration setting: ", new _DelayedJQuote(name),
+                    explanation == null ? (Object) "" : new Object[] { ". ", explanation }, 
                     correctedName == null
                             ? (Object) "" : new Object[] { ". You may meant: ", new _DelayedJQuote(correctedName) } });
         }

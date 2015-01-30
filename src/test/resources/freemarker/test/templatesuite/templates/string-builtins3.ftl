@@ -24,6 +24,32 @@
     ${'x'?keep_before()}
 </@assertFails>
 
+<@assertEquals expected='' actual=''?keep_before_last('f') />
+<@assertEquals expected='ff' actual='fff'?keep_before_last('f') />
+<@assertEquals expected='' actual='foo'?keep_before_last('f') />
+<@assertEquals expected='' actual='f'?keep_before_last('f') />
+<@assertEquals expected='a.b' actual='a.b.txt'?keep_before_last('.') />
+<@assertEquals expected='ab' actual='ab'?keep_before_last('.') />
+<@assertEquals expected='a' actual='ab'?keep_before_last('.', 'r') />
+<@assertEquals expected='ab' actual='ab'?keep_before_last(r'\.', 'r') />
+<@assertEquals expected='af' actual='afFf'?keep_before_last('F') />
+<@assertEquals expected='afF' actual='afFf'?keep_before_last('F', 'i') />
+<@assertEquals expected='1a2' actual='1a2b3'?keep_before_last('[ab]', 'r') />
+<@assertEquals expected='aa' actual='aaabb'?keep_before_last('[ab]{3}', 'r') />
+<@assertEquals expected='aaabbx' actual='aaabbxbabe'?keep_before_last('[ab]{3}', 'r') />
+<@assertEquals expected='xxxaa' actual='xxxaaayyy'?keep_before_last('a+', 'r') />
+<@assertEquals expected='foobar' actual='foobar'?keep_before_last('') />
+<@assertEquals expected='foobar' actual='foobar'?keep_before_last('', 'r') />
+<@assertFails message='"m" flag'>
+    ${'x'?keep_before_last('x', 'm')}
+</@assertFails>
+<@assertFails message='3'>
+    ${'x'?keep_before_last('x', 'i', 'x')}
+</@assertFails>
+<@assertFails message='none'>
+    ${'x'?keep_before_last()}
+</@assertFails>
+
 <@assertEquals expected='' actual='foo'?keep_after('x') />
 <@assertEquals expected='o' actual='foo'?keep_after('o') />
 <@assertEquals expected='oo' actual='foo'?keep_after('f') />
@@ -48,6 +74,34 @@
 </@assertFails>
 <@assertFails message='none'>
     ${'x'?keep_after()}
+</@assertFails>
+
+<@assertEquals expected='' actual=''?keep_after_last('f') />
+<@assertEquals expected='' actual='fff'?keep_after_last('f') />
+<@assertEquals expected='' actual='oof'?keep_after_last('f') />
+<@assertEquals expected='' actual='f'?keep_after_last('f') />
+<@assertEquals expected='txt' actual='a.b.txt'?keep_after_last('.') />
+<@assertEquals expected='' actual='ab'?keep_after_last('.') />
+<@assertEquals expected='' actual='ab'?keep_after_last('.', 'r') />
+<@assertEquals expected='' actual='ab'?keep_after_last(r'\.', 'r') />
+<@assertEquals expected='fa' actual='fFfa'?keep_after_last('F') />
+<@assertEquals expected='a' actual='fFfa'?keep_after_last('F', 'i') />
+<@assertEquals expected='3' actual='1a2b3'?keep_after_last('[ab]', 'r') />
+<@assertEquals expected='' actual='aaabb'?keep_after_last('[ab]{3}', 'r') />
+<@assertEquals expected='x' actual='aaabbx'?keep_after_last('[ab]{3}', 'r') />
+<@assertEquals expected='e' actual='aaabbxbabe'?keep_after_last('[ab]{3}', 'r') />
+<@assertEquals expected='12345' actual='aaabb12345'?keep_after_last('[ab]{3}', 'r') />
+<@assertEquals expected='yyy' actual='xxxaaayyy'?keep_after_last('a+', 'r') />
+<@assertEquals expected='' actual='foobar'?keep_after_last('') />
+<@assertEquals expected='' actual='foobar'?keep_after_last('', 'r') />
+<@assertFails message='"m" flag'>
+    ${'x'?keep_after_last('x', 'm')}
+</@assertFails>
+<@assertFails message='3'>
+    ${'x'?keep_after_last('x', 'i', 'x')}
+</@assertFails>
+<@assertFails message='none'>
+    ${'x'?keep_after_last()}
 </@assertFails>
 
 <@assertEquals expected='foo' actual='foo'?remove_beginning('x') />
@@ -118,4 +172,36 @@
 </@assertFails>
 <@assertFails message='none'>
     ${'x'?ensure_ends_with()}
+</@assertFails>
+
+<@assertEquals expected='a' actual=1?lower_abc />
+<@assertEquals expected='b' actual=2?lower_abc />
+<@assertEquals expected='z' actual=26?lower_abc />
+<@assertEquals expected='aa' actual=27?lower_abc />
+<@assertEquals expected='ab' actual=28?lower_abc />
+<@assertEquals expected='cv' actual=100?lower_abc />
+<@assertFails messageRegexp='0|at least 1']>
+    ${0?lower_abc}
+</@assertFails>
+<@assertFails messageRegexp='0|at least 1'>
+    ${-1?lower_abc}
+</@assertFails>
+<@assertFails messageRegexp='1.00001|integer'>
+    ${1.00001?lower_abc}
+</@assertFails>
+
+<@assertEquals expected='A' actual=1?upper_abc />
+<@assertEquals expected='B' actual=2?upper_abc />
+<@assertEquals expected='Z' actual=26?upper_abc />
+<@assertEquals expected='AA' actual=27?upper_abc />
+<@assertEquals expected='AB' actual=28?upper_abc />
+<@assertEquals expected='CV' actual=100?upper_abc />
+<@assertFails messageRegexp='0|at least 1']>
+    ${0?upper_abc}
+</@assertFails>
+<@assertFails messageRegexp='0|at least 1'>
+    ${-1?upper_abc}
+</@assertFails>
+<@assertFails messageRegexp='1.00001|integer'>
+    ${1.00001?upper_abc}
 </@assertFails>

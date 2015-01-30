@@ -263,29 +263,27 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
     private static volatile boolean ftmaDeprecationWarnLogged;
     
     /**
-     * Initializes the instance based on the the {@link BeansWrapperConfiguration} specified.
-     * 
-     * @param readOnly makes the instance's configuration settings read-only via
-     *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
+     * Same as {@link #BeansWrapper(BeansWrapperConfiguration, boolean, boolean)} with {@code true}
+     * {@code finalizeConstruction} argument.
      * 
      * @since 2.3.21
      */
-    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly) {
-        this(bwConf, readOnly, true);
+    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean writeProtected) {
+        this(bwConf, writeProtected, true);
     }
     
     /**
      * Initializes the instance based on the the {@link BeansWrapperConfiguration} specified.
      * 
-     * @param readOnly Makes the instance's configuration settings read-only via
+     * @param writeProtected Makes the instance's configuration settings read-only via
      *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
      *     
-     * @param finalizeConstruction Decides if the construction if finalized now, or the caller will do some more
-     *     adjustments on the instance then call {@link #finalizeConstruction(boolean)} itself. 
+     * @param finalizeConstruction Decides if the construction is finalized now, or the caller will do some more
+     *     adjustments on the instance and then call {@link #finalizeConstruction(boolean)} itself. 
      * 
      * @since 2.3.22
      */
-    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean readOnly, boolean finalizeConstruction) {
+    protected BeansWrapper(BeansWrapperConfiguration bwConf, boolean writeProtected, boolean finalizeConstruction) {
         // Backward-compatibility hack for "finetuneMethodAppearance" overrides to work:
         if (bwConf.getMethodAppearanceFineTuner() == null) {
             Class thisClass = this.getClass();
@@ -338,7 +336,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         outerIdentity = bwConf.getOuterIdentity() != null ? bwConf.getOuterIdentity() : this;
         strict = bwConf.isStrict();
         
-        if (!readOnly) {
+        if (!writeProtected) {
             // As this is not a read-only BeansWrapper, the classIntrospector will be possibly replaced for a few times,
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
@@ -359,19 +357,19 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         modelCache = new BeansModelCache(BeansWrapper.this);
         setUseCache(bwConf.getUseModelCache());
 
-        finalizeConstruction(readOnly);
+        finalizeConstruction(writeProtected);
     }
 
     /**
      * Meant to be called after {@link BeansWrapper#BeansWrapper(BeansWrapperConfiguration, boolean, boolean)} when
      * its last argument was {@code false}; makes the instance read-only if necessary, then registers the model
-     * factories in the class introspector. No further changes should be done after calling this, if {@code readOnly}
-     * was {@code true}. 
+     * factories in the class introspector. No further changes should be done after calling this, if
+     * {@code writeProtected} was {@code true}. 
      * 
      * @since 2.3.22
      */
-    protected void finalizeConstruction(boolean readOnly) {
-        if (readOnly) {
+    protected void finalizeConstruction(boolean writeProtected) {
+        if (writeProtected) {
             writeProtect();
         }
         
@@ -987,11 +985,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable
         return obj;
     }
 
-    /**
-     * Same as {@link #tryUnwrapTo(TemplateModel, Class, int)} with 0 type flags argument.
-     * 
-     * @since 2.3.22
-     */
     public Object tryUnwrapTo(TemplateModel model, Class targetClass) throws TemplateModelException
     {
         return tryUnwrapTo(model, targetClass, 0);

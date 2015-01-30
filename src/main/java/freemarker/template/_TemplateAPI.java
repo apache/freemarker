@@ -16,6 +16,8 @@
 
 package freemarker.template;
 
+import java.util.Set;
+
 import freemarker.cache.CacheStorage;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
@@ -86,6 +88,13 @@ public class _TemplateAPI {
     
     public static TemplateNameFormat getDefaultTemplateNameFormat(Version incompatibleImprovements) {
         return Configuration.getDefaultTemplateNameFormat(incompatibleImprovements);
+    }
+    
+    /**
+     * [FM 2.4] getSettingNames() becomes to public; remove this.
+     */
+    public static Set/*<String>*/ getConfigurationSettingNames(Configuration cfg) {
+        return cfg.getSettingNames();
     }
     
 }

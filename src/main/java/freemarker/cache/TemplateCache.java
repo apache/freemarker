@@ -262,6 +262,15 @@ public class TemplateCache
         return getTemplate(name, locale, null, encoding, parseAsFTL).getTemplate();
     }
     
+    /**
+     * Returns the deprecated default template loader of FreeMarker 2.3.0.
+     * 
+     * @deprecated The {@link TemplateLoader} should be always specified by the constructor caller.
+     */
+    protected static TemplateLoader createLegacyDefaultTemplateLoader() {
+        return _TemplateAPI.createDefaultTemplateLoader(Configuration.VERSION_2_3_0);        
+    }
+    
     private Template getTemplate(
             final TemplateLoader templateLoader, final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)

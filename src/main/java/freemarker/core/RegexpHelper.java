@@ -170,10 +170,10 @@ final class RegexpHelper {
     }
 
     static void checkNonRegexpFlags(String biName, long flags) throws _TemplateModelException {
-        checkNonRegexpFlags(biName, flags, false);
+        checkOnlyHasNonRegexpFlags(biName, flags, false);
     }
     
-    static void checkNonRegexpFlags(String biName, long flags, boolean strict)
+    static void checkOnlyHasNonRegexpFlags(String biName, long flags, boolean strict)
             throws _TemplateModelException {
         if (!strict && !flagWarningsEnabled) return;
         

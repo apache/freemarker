@@ -60,6 +60,8 @@ import freemarker.core._ConcurrentMapFactory;
 import freemarker.core._CoreAPI;
 import freemarker.core._ObjectBuilderSettingEvaluator;
 import freemarker.core._SettingEvaluationEnvironment;
+import freemarker.core._SortedArraySet;
+import freemarker.core._UnmodifiableCompositeSet;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.servlet.FreemarkerServlet;
@@ -127,6 +129,7 @@ public class Configuration extends Configurable implements Cloneable {
     private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
     
     private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
+    
     public static final String DEFAULT_ENCODING_KEY = "default_encoding"; 
     public static final String LOCALIZED_LOOKUP_KEY = "localized_lookup";
     public static final String STRICT_SYNTAX_KEY = "strict_syntax";
@@ -139,10 +142,29 @@ public class Configuration extends Configurable implements Cloneable {
     public static final String TEMPLATE_LOADER_KEY = "template_loader";
     public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "template_lookup_strategy";
     public static final String TEMPLATE_NAME_FORMAT_KEY = "template_name_format";
-    
+    public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = "incompatible_improvements";
+    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
     public static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
-    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS} instead. */
+    /** @deprecated Use {@link #INCOMPATIBLE_IMPROVEMENTS_KEY} instead. */
     public static final String INCOMPATIBLE_ENHANCEMENTS = "incompatible_enhancements";
+    
+    private static final String[] SETTING_NAMES = new String[] {
+        // Must be sorted alphabetically!
+        AUTO_IMPORT_KEY,
+        AUTO_INCLUDE_KEY,
+        CACHE_STORAGE_KEY,
+        DEFAULT_ENCODING_KEY,
+        INCOMPATIBLE_IMPROVEMENTS_KEY,
+        LOCALIZED_LOOKUP_KEY,
+        STRICT_SYNTAX_KEY,
+        TAG_SYNTAX_KEY,
+        TEMPLATE_LOADER_KEY,
+        TEMPLATE_LOOKUP_STRATEGY_KEY,
+        TEMPLATE_NAME_FORMAT_KEY,
+        TEMPLATE_UPDATE_DELAY_KEY,
+        WHITESPACE_STRIPPING_KEY
+    };
+    
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
@@ -373,12 +395,13 @@ public class Configuration extends Configurable implements Cloneable {
      *       <li><p>
      *          {@link DefaultObjectWrapper} has some substantial changes with {@code incompatibleImprovements} 2.3.22;
      *          check them out at {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}. It's important to know
-     *          that if you set the {@code object_wrapper} setting, rather than leaving it on its default value, the
-     *          {@code object_wrapper} won't inherit the {@code incompatibleImprovements} of the {@link Configuration}.
-     *          In that case, if you want the 2.3.22 improvements of {@link DefaultObjectWrapper}, you have to set it
-     *          in the {@link DefaultObjectWrapper} object itself too! (Note that it's OK to use a
-     *          {@link DefaultObjectWrapper} with a different {@code incompatibleImprovements} version number
-     *          than that of the {@link Configuration}, if that's really what you want.)
+     *          that if you set the {@code object_wrapper} setting (to an other value than {@code "default"}), rather
+     *          than leaving it on its default value, the {@code object_wrapper} won't inherit the
+     *          {@code incompatibleImprovements} of the {@link Configuration}. In that case, if you want the 2.3.22
+     *          improvements of {@link DefaultObjectWrapper}, you have to set it in the {@link DefaultObjectWrapper}
+     *          object itself too! (Note that it's OK to use a {@link DefaultObjectWrapper} with a different
+     *          {@code incompatibleImprovements} version number than that of the {@link Configuration}, if that's
+     *          really what you want.)
      *       </li>
      *       <li><p>
      *          {@code #include} and {@code #nested} doesn't change the parent {@link Template} (see
@@ -387,40 +410,57 @@ public class Configuration extends Configurable implements Cloneable {
      *          always the main {@link Template}. (The main {@link Template} is the {@link Template} whose
      *          {@code process} or {@code createProcessingEnvironment} method was called to initiate the output
      *          generation.)
-     *          Note all this only matters if you have set settings directly on {@link Template} objects, and almost
+     *                  Note all this only matters if you have set settings directly on {@link Template} objects, and almost
      *          nobody does that. Also note that macro calls have never changed the {@link Environment} parent to the
      *          {@link Template} that contains the macro definition, so there's no change there.   
      *       </li>
-     *         <li><p>
-     *           When using {@link FreemarkerServlet} with custom JSP tag libraries: Fixes bug where some kind of
-     *           values, when put into the JSP <em>page</em> scope (via {@code #global} or via the JSP
-     *           {@code PageContext} API) and later read back with the JSP {@code PageContext} API (typically in a
-     *           custom JSP tag), might come back as FreeMarker {@link TemplateModel} objects instead of as objects with
-     *           a standard Java type. Other Servlet scopes aren't affected. It's highly unlikely that something expects
-     *           the presence of this bug. The affected values are of the FTL types listed below, and to trigger the
-     *           bug, they either had to be created directly in the template (like as an FTL literal or with
-     *           {@code ?date}/{@code time}/{@code datetime}), or you had to use {@link DefaultObjectWrapper}
-     *           or {@link SimpleObjectWrapper} (or a subclass of them):
-     *           <ul>
-     *             <li>FTL date/time/date-time values may came back as {@link SimpleDate}-s, now they come back as
-     *             {@link java.util.Date java.util.Date}-s instead.</li>
+     *       <li><p>
+     *          When using {@link FreemarkerServlet}:
+     *          <ul>
+     *             <li>
+     *               <p>When using custom JSP tag libraries: Fixes bug where some kind of
+     *               values, when put into the JSP <em>page</em> scope (via {@code #global} or via the JSP
+     *               {@code PageContext} API) and later read back with the JSP {@code PageContext} API (typically in a
+     *               custom JSP tag), might come back as FreeMarker {@link TemplateModel} objects instead of as objects
+     *               with a standard Java type. Other Servlet scopes aren't affected. It's highly unlikely that
+     *               something expects the presence of this bug. The affected values are of the FTL types listed below,
+     *               and to trigger the bug, they either had to be created directly in the template (like as an FTL
+     *               literal or with {@code ?date}/{@code time}/{@code datetime}), or you had to use
+     *               {@link DefaultObjectWrapper} or {@link SimpleObjectWrapper} (or a subclass of them):
+     *               
+     *               <ul>
+     *                 <li>FTL date/time/date-time values may came back as {@link SimpleDate}-s, now they come back as
+     *                 {@link java.util.Date java.util.Date}-s instead.</li>
      *             
-     *             <li>FTL sequence values may came back as {@link SimpleSequence}-s, now they come back as
-     *             {@link java.util.List}-s as expected. This at least stands assuming that the
-     *             {@link Configuration#setSetting(String, String) object_wrapper} configuration setting is a subclass
-     *             of {@link BeansWrapper} (such as {@link DefaultObjectWrapper}), but that's practically always the
-     *             case in applications that use FreeMarker's JSP extension (otherwise it can still work, but it depends
-     *             on the quality and capabilities of the {@link ObjectWrapper} implementation).</li>
+     *                 <li>FTL sequence values may came back as {@link SimpleSequence}-s, now they come back as
+     *                 {@link java.util.List}-s as expected. This at least stands assuming that the
+     *                 {@link Configuration#setSetting(String, String) object_wrapper} configuration setting is a
+     *                 subclass of {@link BeansWrapper} (such as {@link DefaultObjectWrapper}, which is the default),
+     *                 but that's practically always the case in applications that use FreeMarker's JSP extension
+     *                 (otherwise it can still work, but it depends on the quality and capabilities of the
+     *                 {@link ObjectWrapper} implementation).</li>
      *             
-     *             <li>FTL hash values may came back as {@link SimpleHash}-es, now they come back as
-     *             {@link java.util.Map}-s as expected (again, assuming that the object wrapper is a subclass of
-     *             {@link BeansWrapper}).</li>
+     *                 <li>FTL hash values may came back as {@link SimpleHash}-es, now they come back as
+     *                 {@link java.util.Map}-s as expected (again, assuming that the object wrapper is a subclass of
+     *                 {@link BeansWrapper}, like preferably {@link DefaultObjectWrapper}, which is also the default).
+     *                 </li>
      *             
-     *             <li>FTL collection values may came back as {@link SimpleCollection}-s, now they come back as
-     *             {@link java.util.Collection}-s as expected (again, assuming that the object wrapper is a subclass of
-     *             {@link BeansWrapper}).</li>
-     *           </ul>
-     *         </li>
+     *                 <li>FTL collection values may came back as {@link SimpleCollection}-s, now they come back as
+     *                 {@link java.util.Collection}-s as expected (again, assuming that the object wrapper is a subclass
+     *                 of {@link BeansWrapper}, like preferably {@link DefaultObjectWrapper}).</li>
+     *               </ul>
+     *             </li>
+     *             <li><p>
+     *               Initial {@code "["} in the {@code TemplatePath} init-param
+     *               has special meaning; it's used for specifying multiple comma separated locations, like in
+     *               {@code <param-value>[ WEB-INF/templates, classpath:com/example/myapp/templates ]</param-value>}
+     *             </li>
+     *             <li><p>
+     *               Initial <tt>"{"</tt> in the {@code TemplatePath} init-param is reserved for future purposes, and
+     *               thus will throw exception.
+     *             </li>
+     *          </ul>
+     *       </li>
      *     </ul>
      *   </li>
      * </ul>
@@ -1957,6 +1997,12 @@ public class Configuration extends Configurable implements Cloneable {
         }
     }
 
+    // [Java 5] Add type param. [FM 2.4] It must return the camelCase names, then make it public.
+    Set/*<String>*/ getSettingNames() {
+        return new _UnmodifiableCompositeSet(
+                _CoreAPI.getConfigurableSettingNames(this), new _SortedArraySet(SETTING_NAMES)); 
+    }
+    
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
             return DEFAULT_ENCODING_KEY;

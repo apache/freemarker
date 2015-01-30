@@ -57,7 +57,7 @@ class EscapeBlock extends TemplateElement {
         StringBuffer sb = new StringBuffer();
         if (canonical) sb.append('<');
         sb.append(getNodeTypeSymbol())
-                .append(' ').append(CoreUtils.toFTLTopLevelIdentifierReference(variable))
+                .append(' ').append(_CoreStringUtils.toFTLTopLevelIdentifierReference(variable))
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>').append(nestedBlock.getCanonicalForm()).append("</").append(getNodeTypeSymbol()).append('>');

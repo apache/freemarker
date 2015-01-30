@@ -22,6 +22,7 @@ import java.util.Date;
 
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
@@ -29,11 +30,52 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.utility.NumberUtil;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A holder for builtins that operate exclusively on number left-hand value.
  */
 class BuiltInsForNumbers {
+
+    private static abstract class abcBI extends BuiltInForNumber {
+
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+            final int n;
+            try {
+                n = NumberUtil.toIntExact(num);
+            } catch (ArithmeticException e) {
+                throw new _TemplateModelException(target, new Object[] {
+                        "The left side operand value isn't compatible with ?", key, ": ",
+                        e.getMessage() });
+         
+            }
+            if (n <= 0) {
+                throw new _TemplateModelException(target, new Object[] {
+                        "The left side operand of to ?", key, " must be at least 1, but was ",
+                        new Integer(n), "." });
+            }
+            return new SimpleScalar(toABC(n));
+        }
+
+        protected abstract String toABC(int n);
+        
+    }
+
+    static class lower_abcBI extends abcBI {
+
+        protected String toABC(int n) {
+            return StringUtil.toLowerABC(n);
+        }
+        
+    }
+
+    static class upper_abcBI extends abcBI {
+
+        protected String toABC(int n) {
+            return StringUtil.toUpperABC(n);
+        }
+        
+    }
     
     static class absBI extends BuiltInForNumber {
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {

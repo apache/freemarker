@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22 Release Candidate 1</subtitle>
+  <subtitle>For FreeMarker 2.3.22 Release Candidate 2 Nightly</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -1936,7 +1936,8 @@ The average of the price of a python and an elephant is:
             <listitem>
               <para><link
               linkend="dgui_template_exp_builtin">Built-ins</link>:
-              <literal>name?upper_case</literal></para>
+              <literal>name?upper_case</literal>,
+              <literal>path?ensure_starts_with('/')</literal></para>
             </listitem>
 
             <listitem>
@@ -2757,7 +2758,7 @@ J</programlisting>
             <para>You can a slice a string in the same way as you <link
             linkend="dgui_template_exp_seqenceop_slice">slice a
             sequence</link> (see there), only here instead of sequence items
-            you work with characters.</para>
+            you work with characters. Some differences are:</para>
 
             <itemizedlist>
               <listitem>
@@ -2813,7 +2814,11 @@ CDEF</programlisting>
               <link
               linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
               <link
-              linkend="ref_builtin_keep_after"><literal>keep_after</literal></link></para>
+              linkend="ref_builtin_keep_after"><literal>keep_after</literal></link>,
+              <link
+              linkend="ref_builtin_keep_before_last"><literal>keep_before_last</literal></link>,
+              <link
+              linkend="ref_builtin_keep_after_last"><literal>keep_after_last</literal></link></para>
             </note>
           </section>
         </section>
@@ -3301,14 +3306,33 @@ ${-1.999?int}</programlisting>
             <primary>built-in</primary>
           </indexterm>
 
-          <para>Built-ins provide, as the name suggest, certain built-in
-          functionality that is always available. Typically, a built-in
-          provides a different version of a variable, or some information
-          about the variable in question. The syntax for accessing a built-in
-          is like that of accessing a subvariable in a hash, except that you
-          use the question mark instead of a dot. For example, to get the
-          upper case version of a string:
-          <literal>user?upper_case</literal>.</para>
+          <para>Built-ins are like methods that are added to the objects by
+          FreeMarker. To prevent name clashes with actual methods and other
+          sub-variables, instead of dot (<literal>.</literal>), you separate
+          them from the parent object with question mark
+          (<literal>?</literal>). For example, if you want to ensure that
+          <literal>path</literal> has an initial <literal>/</literal> then you
+          could write <literal>path?ensure_starts_with('/')</literal>. The
+          Java object behind <literal>path</literal> (a
+          <literal>String</literal> most certainly) doesn't have such method,
+          FreeMarker adds it. For brevity, if the method has no parameters,
+          you must omit the <literal>()</literal>, like, to get the length of
+          <literal>path</literal>, you have to write
+          <literal>path?length</literal>, <emphasis>not</emphasis>
+          <literal>path?length()</literal>. The other reason why built-ins are
+          crucial is that normally (though it depends on configuration
+          settings), FreeMarker doesn't expose the Java API of the objects. So
+          despite that Java's <literal>String</literal> has a
+          <literal>length()</literal> method, it's hidden from the template,
+          you <emphasis>have to</emphasis> use <literal>path?length</literal>
+          instead. The advantage of that is that thus the template doesn't
+          depend on the exactly type of the underlying Java objects. (Like
+          <literal>path</literal> it's maybe a
+          <literal>java.nio.Path</literal> behind the scenes, but if the
+          programmers has configure FreeMarker to expose
+          <literal>Path</literal> objects as FTL strings, the template won't
+          be aware of that, and <literal>?length</literal> will work, despite
+          that <literal>java.nio.Path</literal> has no similar method.)</para>
 
           <para>You can find the complete <link linkend="ref_builtins">list of
           built-ins in the Reference</link>. For now, just a few of the more
@@ -3346,6 +3370,11 @@ ${-1.999?int}</programlisting>
                   and trailing <link
                   linkend="gloss.whiteSpace">white-spaces</link></para>
                 </listitem>
+
+                <listitem>
+                  <para><literal>length</literal>: The length of the
+                  string</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -3356,18 +3385,6 @@ ${-1.999?int}</programlisting>
                 <listitem>
                   <para><literal>size</literal>: The number of elements in the
                   sequence</para>
-                </listitem>
-              </itemizedlist>
-            </listitem>
-
-            <listitem>
-              <para>Built-ins to use with numbers:</para>
-
-              <itemizedlist>
-                <listitem>
-                  <para><literal>int</literal>: The integer part of a number
-                  (e.g. <literal>-1.9?int</literal> is
-                  <literal>-1</literal>)</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -3430,11 +3447,11 @@ Horse</programlisting>
           returns a string which repeats the first parameter the number of
           times specified by the second parameter.</para>
 
-          <programlisting role="template">${repeat("What", 3)}</programlisting>
+          <programlisting role="template">${repeat("Foo", 3)}</programlisting>
 
           <para>will print:</para>
 
-          <programlisting role="output">WhatWhatWhat</programlisting>
+          <programlisting role="output">FooFooFoo</programlisting>
 
           <para>Here <literal>repeat</literal> was evaluated to the method
           variable (according to how you <link
@@ -3445,11 +3462,11 @@ Horse</programlisting>
           <para>I would like to emphasize that method calls are just plain
           expressions, like everything else. So this:</para>
 
-          <programlisting role="template">${repeat(repeat("x", 2), 3) + repeat("What", 4)?upper_case}</programlisting>
+          <programlisting role="template">${repeat(repeat("x", 2), 3) + repeat("Foo", 4)?upper_case}</programlisting>
 
           <para>will print this:</para>
 
-          <programlisting role="output">xxxxxxWHATWHATWHATWHAT</programlisting>
+          <programlisting role="output">xxxxxxFOOFOOFOOFOO</programlisting>
         </section>
 
         <section xml:id="dgui_template_exp_missing">
@@ -3714,13 +3731,13 @@ Creating mouse...
           <para>Parentheses can be used to group any expressions. Some
           examples:</para>
 
-          <programlisting role="template">                                   &lt;#-- Output will be: --&gt;
-${3 * 2 + 2}                       &lt;#-- 8 --&gt;
-${3 * (2 + 2)}                     &lt;#-- 12 --&gt;
-${3 * ((2 + 2) * (1 / 2))}         &lt;#-- 6 --&gt;
-${"green " + "mouse"?upper_case}   &lt;#-- green MOUSE --&gt;
-${("green " + "mouse")?upper_case} &lt;#-- GREEN MOUSE --&gt;
-&lt;#if !( color = "red" || color = "green")&gt;
+          <programlisting role="template">                               &lt;#-- Output will be: --&gt;
+${3 * 2 + 2}                   &lt;#-- 8 --&gt;
+${3 * (2 + 2)}                 &lt;#-- 12 --&gt;
+${3 * ((2 + 2) * (1 / 2))}     &lt;#-- 6 --&gt;
+${"green " + "mouse"?upper_case}    &lt;#-- green MOUSE --&gt;
+${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
+&lt;#if !(color == "red" || color == "green")&gt;
   The color is nor red nor green
 &lt;/#if&gt;</programlisting>
 
@@ -8272,7 +8289,7 @@ env.process();</programlisting>
             visible by default, but it can be achieved by setting the exposure
             level (see later). Note that this is usually a bad practice; try
             to use <link linkend="ref_builtins">the built-ins</link> (like
-            <literal>foo?size</literal>, <literal>foo?upper</literal>,
+            <literal>foo?size</literal>, <literal>foo?upper_case</literal>,
             <literal>foo?replace('_', '-')</literal> ...etc) instead of the
             Java API.</para>
           </listitem>
@@ -10349,7 +10366,17 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_keep_after_last">keep_after_last</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_keep_before">keep_before</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_keep_before_last">keep_before_last</link></para>
           </listitem>
 
           <listitem>
@@ -10375,6 +10402,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_numType">long</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_lower_abc">lower_abc</link></para>
           </listitem>
 
           <listitem>
@@ -10529,6 +10561,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           <listitem>
             <para><link
             linkend="ref_builtin_uncap_first">uncap_first</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_upper_abc">upper_abc</link></para>
           </listitem>
 
           <listitem>
@@ -11117,6 +11154,32 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <programlisting role="output">bar</programlisting>
         </section>
 
+        <section xml:id="ref_builtin_keep_after_last">
+          <title>keep_after_last</title>
+
+          <indexterm>
+            <primary>keep_after_last built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_keep_after"><literal>keep_after</literal></link>,
+          but keeps the part after the last occurrence of the parameter,
+          rather than after the first. Example:</para>
+
+          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">txt</programlisting>
+
+          <para>while with <literal>keep_after</literal> you would get
+          <literal>bar.txt</literal>.</para>
+        </section>
+
         <section xml:id="ref_builtin_keep_before">
           <title>keep_before</title>
 
@@ -11150,6 +11213,32 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           <para>will print</para>
 
           <programlisting role="output">foo</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_keep_before_last">
+          <title>keep_before_last</title>
+
+          <indexterm>
+            <primary>keep_before_last built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is available since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
+          but keeps the part before the last occurrence of the parameter,
+          rather than after the first. Example:</para>
+
+          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+
+          <para>will print</para>
+
+          <programlisting role="output">foo.bar</programlisting>
+
+          <para>while with <literal>keep_before</literal> you would get
+          <literal>foo</literal>.</para>
         </section>
 
         <section xml:id="ref_builtin_last_index_of">
@@ -11682,7 +11771,7 @@ foobar</programlisting>
         </section>
 
         <section xml:id="ref_builtin_substring">
-          <title>substring</title>
+          <title>substring (deprecated)</title>
 
           <indexterm>
             <primary>substring built-in</primary>
@@ -11693,11 +11782,13 @@ foobar</programlisting>
           </indexterm>
 
           <note>
-            <para>This built-in is deprecated since FreeMarker 2.3.21 by
-            slicing expressions:
-            <literal><replaceable>exp</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>
+            <para>This built-in is deprecated since FreeMarker 2.3.21 by <link
+            linkend="dgui_template_exp_stringop_slice">slicing
+            expressions</link>, like
+            <literal><replaceable>str</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>,
+            <literal><replaceable>str</replaceable>[<replaceable>from</replaceable>..]</literal>,
             and
-            <literal><replaceable>exp</replaceable>[<replaceable>from</replaceable>..]</literal>.</para>
+            <literal><replaceable>str</replaceable>[<replaceable>from</replaceable>..*<replaceable>maxLength</replaceable>]</literal>.</para>
 
             <para>A warning if you are processing XML: Since slicing
             expressions work both for sequences and strings, and since XML
@@ -11708,6 +11799,22 @@ foobar</programlisting>
             <literal><replaceable>exp</replaceable>?string[<replaceable>from</replaceable>..]</literal>,
             as without <literal>?string</literal> it would slice the node
             sequence instead of the text value of the node.</para>
+          </note>
+
+          <note>
+            <para>Some of the typical use-cases of string slicing is covered
+            by convenient built-ins: <link
+            linkend="ref_builtin_remove_beginning"><literal>remove_beginning</literal></link>,
+            <link
+            linkend="ref_builtin_remove_ending"><literal>remove_ending</literal></link>,
+            <link
+            linkend="ref_builtin_keep_before"><literal>keep_before</literal></link>,
+            <link
+            linkend="ref_builtin_keep_after"><literal>keep_after</literal></link>,
+            <link
+            linkend="ref_builtin_keep_before_last"><literal>keep_before_last</literal></link>,
+            <link
+            linkend="ref_builtin_keep_after_last"><literal>keep_after_last</literal></link></para>
           </note>
 
           <para>Synopsis:
@@ -12250,6 +12357,86 @@ rif: foo XYr baar</programlisting>
 
                 <td>No</td>
               </tr>
+
+              <tr>
+                <td><literal>keep_after</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>keep_after_last</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>keep_before</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>keep_before_last</literal></td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
+
+              <tr>
+                <td><literal>ensure_starts_with</literal></td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Ignored</td>
+              </tr>
             </tbody>
           </informaltable>
         </section>
@@ -12399,6 +12586,48 @@ rif: foo XYr baar</programlisting>
           the value of <literal>someNumber</literal> is NaN or not. Of course,
           if the underlying number is not of floating point type, this will
           always return <literal>false</literal>.</para>
+        </section>
+
+        <section xml:id="ref_builtin_lower_abc">
+          <title>lower_abc</title>
+
+          <indexterm>
+            <primary>lower_abc built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ABC</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>alphabetical ordinals</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Converts <literal>1</literal>, <literal>2</literal>,
+          <literal>3</literal>, etc., to the string <literal>"a"</literal>,
+          <literal>"b"</literal>, <literal>"c"</literal>, etc. When reaching
+          <literal>"z"</literal>, it continues like <literal>"aa"</literal>,
+          <literal>"ab"</literal>, etc. This is the same logic that you can
+          see in column labels in spreadsheet applications (like Excel or
+          Calc). The lowest allowed number is <literal>1</literal>. There's no
+          upper limit. If the number is <literal>0</literal> or less or it
+          isn't an integer number then the template processing will be aborted
+          with error.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">&lt;#list 1..30 as n&gt;${n?lower_abc} &lt;/#list&gt;</programlisting>
+
+          <para>Prints:</para>
+
+          <programlisting role="output">a b c d e f g h i j k l m n o p q r s t u v w x y z aa ab ac ad </programlisting>
+
+          <para>See also: <link
+          linkend="ref_builtin_upper_abc"><literal>upper_abc</literal></link></para>
         </section>
 
         <section xml:id="ref_builtin_rounding">
@@ -12639,6 +12868,32 @@ German people write: ${12345678}</programlisting>
 
           <programlisting role="output">US people write:     12,345,678.00
 German people write: 12.345.678,00</programlisting>
+        </section>
+
+        <section xml:id="ref_builtin_upper_abc">
+          <title>upper_abc</title>
+
+          <indexterm>
+            <primary>upper_abc built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>ABC</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>alphabetical ordinals</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in exists since FreeMarker 2.3.22.</para>
+          </note>
+
+          <para>Same as <link
+          linkend="ref_builtin_lower_abc"><literal>lower_abc</literal></link>,
+          but converts to upper case letters, like <literal>"A"</literal>,
+          <literal>"B"</literal>, <literal>"C"</literal>, …,
+          <literal>"AA"</literal>, <literal>"AB"</literal>, etc.</para>
         </section>
       </section>
 
@@ -13379,7 +13634,8 @@ ${colors?join(", ")}</programlisting>
 
             <listitem>
               <para>Empty value, defaults to <literal>""</literal> (empty
-              string): The value used if the sequence contains 0 value.</para>
+              string): The value used if the sequence contains no
+              items.</para>
             </listitem>
 
             <listitem>
@@ -14692,8 +14948,7 @@ May 16, 2011
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#assign <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#assign <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal>
 or
 <literal>&lt;#assign <replaceable>name1</replaceable>=<replaceable>value1</replaceable> <replaceable>name2</replaceable>=<replaceable>value2</replaceable> <replaceable>... nameN</replaceable>=<replaceable>valueN</replaceable>&gt;</literal>
 or
@@ -14705,8 +14960,7 @@ or
 or
 <literal>&lt;#assign <replaceable>name</replaceable> in <replaceable>namespacehash</replaceable>&gt;
   <replaceable>capture this</replaceable>
-&lt;/#assign&gt;</literal>
-</programlisting>
+&lt;/#assign&gt;</literal></programlisting>
 
           <para>Where:</para>
 
@@ -14718,7 +14972,10 @@ or
               name contains reserved characters, for example
               <literal>&lt;#assign "foo-bar" = 1&gt;</literal>. Note that this
               string literal does not expand interpolations (as
-              <literal>"${foo}"</literal>).</para>
+              <literal>"${foo}"</literal>); if you need to assign to a
+              dynamically constructed name, the you have to use <link
+              linkend="faq_assign_to_dynamic_variable_name">this
+              trick</link>.</para>
             </listitem>
 
             <listitem>
@@ -15793,8 +16050,7 @@ or
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#import <replaceable>path</replaceable> as <replaceable>hash</replaceable>&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#import <replaceable>path</replaceable> as <replaceable>hash</replaceable>&gt;</literal>
 </programlisting>
 
           <para>Where:</para>
@@ -15811,7 +16067,10 @@ or
             <listitem>
               <para><literal><replaceable>hash</replaceable></literal>: The
               unquoted name of hash variable by which you can access the
-              namespace. Not an expression.</para>
+              namespace. Not an expression. (If you have to import into a
+              dynamically constructed name, you have to use <link
+              linkend="faq_assign_to_dynamic_variable_name">this
+              trick</link>.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -21065,11 +21324,11 @@ End book</programlisting>
 
           <answer>
             <para>If you have a variable with strange name like
-            <quote>foo-bar</quote>, FreeMarker will misunderstand what do you
-            mean if you just enter it like in <literal>${foo-bar}</literal>.
-            In this case it will believe that you want to subtract the value
-            of <literal>bar</literal> from <literal>foo</literal>. This FAQ
-            entry explains how to handle situations like this.</para>
+            <quote>foo-bar</quote>, FreeMarker will misunderstand what you
+            mean if you just use it like in <literal>${foo-bar}</literal>. In
+            this case, it will believe that you want to subtract the value of
+            <literal>bar</literal> from <literal>foo</literal>. This FAQ entry
+            explains how to handle situations like this.</para>
 
             <para>First of all it should be clear that these are just
             syntactical problems, as otherwise FreeMarker has no limitations
@@ -21080,12 +21339,13 @@ End book</programlisting>
             (<literal>-</literal>, UCS 0x2D) or dot (<literal>.</literal>, UCS
             0x2E) or colon (<literal>:</literal>, UCS 0x3A), then all you have
             to do is putting a backslash (<literal>\</literal>) before these
-            characters, like in <literal>foo\-bar</literal>. Then FreeMarker
-            will know that you didn't mean the operator with the same symbol.
-            This works everywhere where you specify unquoted identifiers, like
-            for macro and function names, parameter names, and all kind of
-            variable references in general. (Note that these escapes only work
-            in identifiers, not in string literals.)</para>
+            characters, like in <literal>foo\-bar</literal> (since FreeMarker
+            2.3.22). Then FreeMarker will know that you didn't mean the
+            operator with the same symbol. This works everywhere where you
+            specify unquoted identifiers, like for macro and function names,
+            parameter names, and all kind of variable references in general.
+            (Note that these escapes only work in identifiers, not in string
+            literals.)</para>
 
             <para>When the special character is not one of minus sign, dot, or
             colon, then it gets trickier. Let's say the problematic variable
@@ -21096,7 +21356,7 @@ End book</programlisting>
                 <para>If you want to read the variable: If it's a subvariable
                 of something, you can write
                 <literal>something["a+b"]</literal> (remember,
-                <literal>something.x</literal> is equivalent with
+                <literal>something.x</literal> is equivalent to
                 <literal>something["x"])</literal>. If it's a top-level
                 variable, those are accessible through the special hash
                 variable ,<literal>.vars</literal>, so you can write
@@ -21138,8 +21398,8 @@ End book</programlisting>
 
           <answer>
             <para>Fist of all, update FreeMarker, because 2.3.22 and later
-            gives a much more helpfull error message, that pretty much answers
-            the question. Anyway, the reason is as folows. On JSP pages you
+            gives a much more helpful error message, that pretty much answers
+            the question. Anyway, the reason is as follows. On JSP pages you
             quote all parameter (attribute) values, it does not mater if the
             type of the parameter is string or boolean or number. But since
             custom tags are accessible in FTL templates as plain user-defined
@@ -21644,6 +21904,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
+        <qandaentry xml:id="faq_assign_to_dynamic_variable_name">
+          <question>
+            <para>How to assign to (or <literal>#import</literal> into) a
+            dynamically constructed variable name (like to name that's stored
+            in another variable)?</para>
+          </question>
+
+          <answer>
+            <para>If you really can't avoid doing that (you should, as it's
+            confusing), you can solve that with constructing the appropriate
+            FTL source code dynamically in a string, then using the <link
+            linkend="ref_builtin_interpret"><literal>interpret</literal>
+            built-in</link>. For example, if you want to assign to the
+            variable whose name is stored in the <literal>varName</literal>
+            variable:</para>
+
+            <programlisting role="template">&lt;@"&lt;#assign ${varName}='example'&gt;"?interpret /&gt;</programlisting>
+          </answer>
+        </qandaentry>
+
         <qandaentry xml:id="faq_template_uploading_security">
           <question>
             <indexterm>
@@ -21675,13 +21955,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <listitem>
                 <para>Data-model and wrapping
-                (<literal>Configuration.setObjectWrapper</literal>): By
-                default the data-model gives access to the full public API of
-                the Java objects that you have put into the data-model (with
-                some exceptions). To avoid that, you have to construct the
-                data-model so that it only exposes the things that are
-                necessary for the template. For that, use
-                <literal>SimpleObjectWrapper</literal> and create the
+                (<literal>Configuration.setObjectWrapper</literal>): The
+                data-model might gives access to the public Java API of some
+                objects that you have put into the data-model. By default, for
+                objects that aren't instances of a the bunch of specially
+                handler types (<literal>String</literal>,
+                <literal>Number</literal>, <literal>Boolean</literal>,
+                <literal>Date</literal>, <literal>Map</literal>,
+                <literal>List</literal>, array, and a few others), their
+                public Java API will be exposed. To avoid that, you have to
+                construct the data-model so that it only exposes the things
+                that are really necessary for the template. For that, you may
+                want to use <literal>SimpleObjectWrapper</literal> (via
+                <literal>Configuration.setObjectWrapper</literal> or the
+                <literal>object_wrapper</literal> setting) and then create the
                 data-model purely from <literal>Map</literal>-s,
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
@@ -21729,7 +22016,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 will be run. To avoid these, you should use a
                 <literal>TemplateClassResolver</literal> that restricts the
                 accessible classes (possibly based on which template asks for
-                them).</para>
+                them), such as
+                <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.</para>
               </listitem>
             </itemizedlist>
           </answer>
@@ -22009,9 +22297,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_22">
-        <title>2.3.22 Release Candidate 1</title>
+        <title>2.3.22 Release Candidate 2 Nightly</title>
 
-        <para>Date of release: 2015-01-28</para>
+        <para>Date of release: 2015-02-[TODO]</para>
 
         <para>Note that since 2.3.22 is designed to be fully backward
         compatible with the previous 2.3.x releases, <emphasis>some of the
@@ -22081,6 +22369,30 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added <literal>?lower_abc</literal> and
+              <literal>?upper_abc</literal>. This converts
+              <literal>1</literal>, <literal>2</literal>,
+              <literal>3</literal>, etc., to the string
+              <literal>"a"</literal>, <literal>"b"</literal>,
+              <literal>"c"</literal>, etc. (or for <literal>"A"</literal>,
+              <literal>"B"</literal>, <literal>"C"</literal>, etc.). When
+              reaching <literal>"z"</literal>, it continues like
+              <literal>"aa"</literal>, <literal>"ab"</literal>, etc. This is
+              the same logic that you can see in column labels in spreadsheet
+              applications (like Excel or Calc). <link
+              linkend="ref_builtin_lower_abc">More details...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added <literal>?keep_before_last</literal> and
+              <literal>?keep_after_last</literal>. Example:
+              <literal>"foo.bar.txt"?keep_before_last</literal> returns
+              <literal>"foo.bar"</literal>,
+              <literal>"foo.bar.txt"?keep_after_last</literal> returns
+              <literal>"txt"</literal> (since 2.3.22-rc02).</para>
+            </listitem>
+
+            <listitem>
               <para>Added many missing UNICODE letters and digits to the set
               of legal identifier characters, like Korean letters (bug fixed:
               [<link
@@ -22122,6 +22434,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>\</literal> instead of <literal>/</literal>, or
                   backing out of the <literal>TemplateLoader</literal>'s root
                   directory.</para>
+                </listitem>
+
+                <listitem>
+                  <para>The <literal>#setting</literal> directive gives more
+                  helpful error message when the setting name is not
+                  recognized, and lists the allowed setting names when
+                  appropriate.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -22403,6 +22722,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   had the problem that it uses the defining class loader of
                   <literal>FreemarkerSerlvet</literal> itself (or of its
                   subclass).</para>
+                </listitem>
+
+                <listitem>
+                  <para>If <literal>incompatible_improvements</literal> is set
+                  to 2.3.22, the <literal>TemplatePath</literal> servlet
+                  init-param supports specifying multiple comma separated
+                  paths inside
+                  <literal>[<replaceable>...</replaceable>]</literal>, like
+                  <literal>&lt;param-value&gt;[ WEB-INF/templates,
+                  classpath:com/example/myapp/templates
+                  ]&lt;/param-value&gt;</literal>. This internally creates a
+                  <literal>freemarker.cache.MultiTemplateLoader</literal>.</para>
                 </listitem>
 
                 <listitem>

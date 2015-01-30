@@ -46,7 +46,7 @@ final class Dot extends Expression {
     }
 
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + getNodeTypeSymbol() + CoreUtils.toFTLAfterDotIdentifierReference(key);
+        return target.getCanonicalForm() + getNodeTypeSymbol() + _CoreStringUtils.toFTLIdentifierReferenceAfterDot(key);
     }
     
     String getNodeTypeSymbol() {

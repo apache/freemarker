@@ -77,7 +77,6 @@ public final class SimpleMethodModel extends SimpleMethod
         }
         catch(Exception e)
         {
-            if (e instanceof TemplateModelException) throw (TemplateModelException) e;
             throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
         }
     }

@@ -201,12 +201,15 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("json_string", new BuiltInsForStringsEncoding.json_stringBI());
         builtins.put("keep_after", new BuiltInsForStringsBasic.keep_afterBI());
         builtins.put("keep_before", new BuiltInsForStringsBasic.keep_beforeBI());
+        builtins.put("keep_after_last", new BuiltInsForStringsBasic.keep_after_lastBI());
+        builtins.put("keep_before_last", new BuiltInsForStringsBasic.keep_before_lastBI());
         builtins.put("keys", new BuiltInsForHashes.keysBI());
         builtins.put("last_index_of", new BuiltInsForStringsBasic.index_ofBI(true));
         builtins.put("last", new lastBI());
         builtins.put("left_pad", new BuiltInsForStringsBasic.padBI(true));
         builtins.put("length", new BuiltInsForStringsBasic.lengthBI());
         builtins.put("long", new longBI());
+        builtins.put("lower_abc", new BuiltInsForNumbers.lower_abcBI());
         builtins.put("lower_case", new BuiltInsForStringsBasic.lower_caseBI());
         builtins.put("namespace", new BuiltInsForMultipleTypes.namespaceBI());
         builtins.put("new", new NewBI());
@@ -240,6 +243,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         builtins.put("time_if_unknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
         builtins.put("trim", new BuiltInsForStringsBasic.trimBI());
         builtins.put("uncap_first", new BuiltInsForStringsBasic.uncap_firstBI());
+        builtins.put("upper_abc", new BuiltInsForNumbers.upper_abcBI());
         builtins.put("upper_case", new BuiltInsForStringsBasic.upper_caseBI());
         builtins.put("url", new BuiltInsForStringsEncoding.urlBI());
         builtins.put("url_path", new BuiltInsForStringsEncoding.urlPathBI());
@@ -256,26 +260,34 @@ abstract class BuiltIn extends Expression implements Cloneable {
     static BuiltIn newBuiltIn(int incompatibleImprovements, Expression target, String key) throws ParseException {
         BuiltIn bi = (BuiltIn) builtins.get(key);
         if (bi == null) {
-            StringBuffer buf = new StringBuffer(
-                    "Unknown built-in: " + StringUtil.jQuote(key) + ". "
-                    + "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
-                    + "you're using FreeMarker " + Configuration.getVersion() + ".\n" 
-                    + "The alphabetical list of built-ins:");
-            List names = new ArrayList(builtins.keySet().size());
-            names.addAll(builtins.keySet());
-            Collections.sort(names);
-            char lastLetter = 0;
-            for (Iterator it = names.iterator(); it.hasNext();) {
-                String name = (String) it.next();
-                char firstChar = name.charAt(0);
-                if (firstChar != lastLetter) {
-                    lastLetter = firstChar;
-                    buf.append('\n');
-                }
-                buf.append(name);
-                
-                if (it.hasNext()) {
-                    buf.append(", ");
+            StringBuffer buf = new StringBuffer("Unknown built-in: ").append(StringUtil.jQuote(key)).append(". ");
+            
+            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(key);
+            if (!underscoredName.equals(key) && builtins.containsKey(underscoredName)) {
+                buf.append("Supporting camelCase built-in names is planned for FreeMarker 2.4.0; check if an update is "
+                        + "available, and if it indeed supports camel case. "
+                        + "Until that, use \"").append(underscoredName).append("\".");
+            } else {
+                buf.append(
+                        "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
+                        + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
+                        + "The alphabetical list of built-ins:");
+                List names = new ArrayList(builtins.keySet().size());
+                names.addAll(builtins.keySet());
+                Collections.sort(names);
+                char lastLetter = 0;
+                for (Iterator it = names.iterator(); it.hasNext();) {
+                    String name = (String) it.next();
+                    char firstChar = name.charAt(0);
+                    if (firstChar != lastLetter) {
+                        lastLetter = firstChar;
+                        buf.append('\n');
+                    }
+                    buf.append(name);
+                    
+                    if (it.hasNext()) {
+                        buf.append(", ");
+                    }
                 }
             }
             throw new ParseException(buf.toString(), target);

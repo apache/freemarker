@@ -104,7 +104,7 @@ final class Assignment extends TemplateElement {
             buf.append(' ');
         }
         
-        buf.append(CoreUtils.toFTLTopLevelTragetIdentifier(variableName));
+        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(variableName));
         
         buf.append(" = ");
         buf.append(value.getCanonicalForm());

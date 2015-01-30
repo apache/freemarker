@@ -94,7 +94,7 @@ public final class LibraryLoad extends TemplateElement {
         buf.append(' ');
         buf.append(templateName.getCanonicalForm());
         buf.append(" as ");
-        buf.append(CoreUtils.toFTLTopLevelTragetIdentifier(namespace));
+        buf.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(namespace));
         if (canonical) buf.append("/>");
         return buf.toString();
     }

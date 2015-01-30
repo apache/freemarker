@@ -137,7 +137,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 Map.Entry entry = (Map.Entry) entries.get(i);
                 Expression argExp = (Expression) entry.getValue();
                 sb.append(' ');
-                sb.append(CoreUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
+                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
                 sb.append('=');
                 MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
@@ -148,7 +148,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 if (i != 0) {
                     sb.append(", ");
                 }
-                sb.append(CoreUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
+                sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) bodyParameterNames.get(i)));
             }
         }
         if (canonical) {
@@ -286,7 +286,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return customDataHolder.customData;
     }
 
-    protected CustomDataHolder createNewCustomData(Object provierIdentity, ObjectFactory objectFactory)
+    private CustomDataHolder createNewCustomData(Object provierIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
         CustomDataHolder customDataHolder;
         Object customData;

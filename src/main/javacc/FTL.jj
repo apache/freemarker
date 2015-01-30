@@ -613,8 +613,11 @@ TOKEN:
                 }
 
                 String tip = null;
-                if (!dn.toLowerCase().equals(dn)) {
-                    tip = "Directive names are all-lower-case.";
+                if (dn.equals("elseIf") || dn.equals("forEach") || dn.equals("noParse") || dn.equals("noEscape")) {
+                    tip = "Supporting camelCase directive names is planned for FreeMarker 2.4.0; check if an update is "
+                            + "available, and if it indeed supports camel case. Until that, use all-lowercase.";
+                } else if (!dn.toLowerCase().equals(dn)) {
+                    tip = "In FreeMarker 2.3.x, directive names are all-lower-case.";
                 } else if (dn.equals("set")) {
                     tip = "Use #assign or #local or #global, depending on the intented scope (#assign is template-scope).";
                 } else if (dn.equals("else_if")) {
