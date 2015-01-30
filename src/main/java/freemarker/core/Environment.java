@@ -2181,6 +2181,8 @@ public final class Environment extends Configurable {
      *            If you want to specify a base directory here, it must end with {@code "/"}. If it doesn't end with
      *            {@code "/"}, it's parent directory will be used as the base path. Might starts with a scheme part
      *            (like {@code "foo://"}, or with {@link TemplateNameFormat#DEFAULT_2_4_0} even just {@code "foo:"}).
+     * 
+     * @since 2.3.22
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {

@@ -13634,7 +13634,8 @@ ${colors?join(", ")}</programlisting>
 
             <listitem>
               <para>Empty value, defaults to <literal>""</literal> (empty
-              string): The value used if the sequence contains 0 value.</para>
+              string): The value used if the sequence contains no
+              items.</para>
             </listitem>
 
             <listitem>
@@ -14947,8 +14948,7 @@ May 16, 2011
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#assign <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#assign <replaceable>name</replaceable>=<replaceable>value</replaceable>&gt;</literal>
 or
 <literal>&lt;#assign <replaceable>name1</replaceable>=<replaceable>value1</replaceable> <replaceable>name2</replaceable>=<replaceable>value2</replaceable> <replaceable>... nameN</replaceable>=<replaceable>valueN</replaceable>&gt;</literal>
 or
@@ -14960,8 +14960,7 @@ or
 or
 <literal>&lt;#assign <replaceable>name</replaceable> in <replaceable>namespacehash</replaceable>&gt;
   <replaceable>capture this</replaceable>
-&lt;/#assign&gt;</literal>
-</programlisting>
+&lt;/#assign&gt;</literal></programlisting>
 
           <para>Where:</para>
 
@@ -14973,7 +14972,10 @@ or
               name contains reserved characters, for example
               <literal>&lt;#assign "foo-bar" = 1&gt;</literal>. Note that this
               string literal does not expand interpolations (as
-              <literal>"${foo}"</literal>).</para>
+              <literal>"${foo}"</literal>); if you need to assign to a
+              dynamically constructed name, the you have to use <link
+              linkend="faq_assign_to_dynamic_variable_name">this
+              trick</link>.</para>
             </listitem>
 
             <listitem>
@@ -16048,8 +16050,7 @@ or
         <section>
           <title>Synopsis</title>
 
-          <programlisting role="metaTemplate">
-<literal>&lt;#import <replaceable>path</replaceable> as <replaceable>hash</replaceable>&gt;</literal>
+          <programlisting role="metaTemplate"><literal>&lt;#import <replaceable>path</replaceable> as <replaceable>hash</replaceable>&gt;</literal>
 </programlisting>
 
           <para>Where:</para>
@@ -16066,7 +16067,10 @@ or
             <listitem>
               <para><literal><replaceable>hash</replaceable></literal>: The
               unquoted name of hash variable by which you can access the
-              namespace. Not an expression.</para>
+              namespace. Not an expression. (If you have to import into a
+              dynamically constructed name, you have to use <link
+              linkend="faq_assign_to_dynamic_variable_name">this
+              trick</link>.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -21320,11 +21324,11 @@ End book</programlisting>
 
           <answer>
             <para>If you have a variable with strange name like
-            <quote>foo-bar</quote>, FreeMarker will misunderstand what do you
-            mean if you just enter it like in <literal>${foo-bar}</literal>.
-            In this case it will believe that you want to subtract the value
-            of <literal>bar</literal> from <literal>foo</literal>. This FAQ
-            entry explains how to handle situations like this.</para>
+            <quote>foo-bar</quote>, FreeMarker will misunderstand what you
+            mean if you just use it like in <literal>${foo-bar}</literal>. In
+            this case, it will believe that you want to subtract the value of
+            <literal>bar</literal> from <literal>foo</literal>. This FAQ entry
+            explains how to handle situations like this.</para>
 
             <para>First of all it should be clear that these are just
             syntactical problems, as otherwise FreeMarker has no limitations
@@ -21335,12 +21339,13 @@ End book</programlisting>
             (<literal>-</literal>, UCS 0x2D) or dot (<literal>.</literal>, UCS
             0x2E) or colon (<literal>:</literal>, UCS 0x3A), then all you have
             to do is putting a backslash (<literal>\</literal>) before these
-            characters, like in <literal>foo\-bar</literal>. Then FreeMarker
-            will know that you didn't mean the operator with the same symbol.
-            This works everywhere where you specify unquoted identifiers, like
-            for macro and function names, parameter names, and all kind of
-            variable references in general. (Note that these escapes only work
-            in identifiers, not in string literals.)</para>
+            characters, like in <literal>foo\-bar</literal> (since FreeMarker
+            2.3.22). Then FreeMarker will know that you didn't mean the
+            operator with the same symbol. This works everywhere where you
+            specify unquoted identifiers, like for macro and function names,
+            parameter names, and all kind of variable references in general.
+            (Note that these escapes only work in identifiers, not in string
+            literals.)</para>
 
             <para>When the special character is not one of minus sign, dot, or
             colon, then it gets trickier. Let's say the problematic variable
@@ -21351,7 +21356,7 @@ End book</programlisting>
                 <para>If you want to read the variable: If it's a subvariable
                 of something, you can write
                 <literal>something["a+b"]</literal> (remember,
-                <literal>something.x</literal> is equivalent with
+                <literal>something.x</literal> is equivalent to
                 <literal>something["x"])</literal>. If it's a top-level
                 variable, those are accessible through the special hash
                 variable ,<literal>.vars</literal>, so you can write
@@ -21393,8 +21398,8 @@ End book</programlisting>
 
           <answer>
             <para>Fist of all, update FreeMarker, because 2.3.22 and later
-            gives a much more helpfull error message, that pretty much answers
-            the question. Anyway, the reason is as folows. On JSP pages you
+            gives a much more helpful error message, that pretty much answers
+            the question. Anyway, the reason is as follows. On JSP pages you
             quote all parameter (attribute) values, it does not mater if the
             type of the parameter is string or boolean or number. But since
             custom tags are accessible in FTL templates as plain user-defined
@@ -21899,6 +21904,26 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           </answer>
         </qandaentry>
 
+        <qandaentry xml:id="faq_assign_to_dynamic_variable_name">
+          <question>
+            <para>How to assign to (or <literal>#import</literal> into) a
+            dynamically constructed variable name (like to name that's stored
+            in another variable)?</para>
+          </question>
+
+          <answer>
+            <para>If you really can't avoid doing that (you should, as it's
+            confusing), you can solve that with constructing the appropriate
+            FTL source code dynamically in a string, then using the <link
+            linkend="ref_builtin_interpret"><literal>interpret</literal>
+            built-in</link>. For example, if you want to assign to the
+            variable whose name is stored in the <literal>varName</literal>
+            variable:</para>
+
+            <programlisting role="template">&lt;@"&lt;#assign ${varName}='example'&gt;"?interpret /&gt;</programlisting>
+          </answer>
+        </qandaentry>
+
         <qandaentry xml:id="faq_template_uploading_security">
           <question>
             <indexterm>
@@ -21930,13 +21955,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
               <listitem>
                 <para>Data-model and wrapping
-                (<literal>Configuration.setObjectWrapper</literal>): By
-                default the data-model gives access to the full public API of
-                the Java objects that you have put into the data-model (with
-                some exceptions). To avoid that, you have to construct the
-                data-model so that it only exposes the things that are
-                necessary for the template. For that, use
-                <literal>SimpleObjectWrapper</literal> and create the
+                (<literal>Configuration.setObjectWrapper</literal>): The
+                data-model might gives access to the public Java API of some
+                objects that you have put into the data-model. By default, for
+                objects that aren't instances of a the bunch of specially
+                handler types (<literal>String</literal>,
+                <literal>Number</literal>, <literal>Boolean</literal>,
+                <literal>Date</literal>, <literal>Map</literal>,
+                <literal>List</literal>, array, and a few others), their
+                public Java API will be exposed. To avoid that, you have to
+                construct the data-model so that it only exposes the things
+                that are really necessary for the template. For that, you may
+                want to use <literal>SimpleObjectWrapper</literal> (via
+                <literal>Configuration.setObjectWrapper</literal> or the
+                <literal>object_wrapper</literal> setting) and then create the
                 data-model purely from <literal>Map</literal>-s,
                 <literal>List</literal>-s, <literal>Array</literal>-s,
                 <literal>String</literal>-s, <literal>Number</literal>-s,
@@ -21984,7 +22016,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 will be run. To avoid these, you should use a
                 <literal>TemplateClassResolver</literal> that restricts the
                 accessible classes (possibly based on which template asks for
-                them).</para>
+                them), such as
+                <literal>TemplateClassResolver.ALLOWS_NOTHING_RESOLVER</literal>.</para>
               </listitem>
             </itemizedlist>
           </answer>

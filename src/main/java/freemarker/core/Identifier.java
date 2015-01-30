@@ -48,6 +48,9 @@ final class Identifier extends Expression {
         return _CoreStringUtils.toFTLTopLevelIdentifierReference(name);
     }
     
+    /**
+     * The name of the identifier without any escaping or other syntactical distortions. 
+     */
     String getName() {
         return name;
     }

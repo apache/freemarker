@@ -19,6 +19,7 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -493,7 +494,15 @@ public class Configurable
     }
 
     /**
-     * Sets the number format used to convert numbers to strings.
+     * Sets the default number format used to convert numbers to strings. Currently, this is either a
+     * {@link java.text.DecimalFormat} pattern (like {@code "0.##"}), or one of the following special values:
+     * <ul>
+     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
+     *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
+     *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
+     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
+     * </ul>
+     * <p>Defaults to <tt>"number"</tt>.
      */
     public void setNumberFormat(String numberFormat) {
         NullArgumentException.check("numberFormat", numberFormat);
@@ -502,8 +511,7 @@ public class Configurable
     }
 
     /**
-     * Returns the default number format used to convert numbers to strings.
-     * Defaults to <tt>"number"</tt>
+     * Getter pair of {@link #setNumberFormat(String)}. 
      */
     public String getNumberFormat() {
         return numberFormat != null ? numberFormat : parent.getNumberFormat();

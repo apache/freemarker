@@ -621,11 +621,14 @@ public class FreemarkerServlet extends HttpServlet
     }
 
     /**
-     * Create the template loader. The default implementation will create a
-     * {@link ClassTemplateLoader} if the template path starts with "class://",
-     * a {@link FileTemplateLoader} if the template path starts with "file://",
-     * and a {@link WebappTemplateLoader} otherwise.
-     * @param templatePath the template path to create a loader for
+     * Create the template loader. The default implementation will create a {@link ClassTemplateLoader} if the template
+     * path starts with {@code "class://"}, a {@link FileTemplateLoader} if the template path starts with
+     * {@code "file://"}, and a {@link WebappTemplateLoader} otherwise. Also, if
+     * {@link Configuration#Configuration(freemarker.template.Version) incompatible_improvements} is 2.3.22 or higher,
+     * it will create a {@link MultiTemplateLoader} if the template path starts with {@code "["}.
+     * 
+     * @param templatePath
+     *            the template path to create a loader for
      * @return a newly created template loader
      */
     protected TemplateLoader createTemplateLoader(String templatePath) throws IOException
@@ -671,6 +674,9 @@ public class FreemarkerServlet extends HttpServlet
                 templateLoaders[i] = createTemplateLoader(pathItem);
             }
             return new MultiTemplateLoader(templateLoaders);
+        } else if (templatePath.startsWith("{")
+                && getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_22) {
+            throw new RuntimeException("Template paths startin with \"{\" are reseved for future purposes");
         } else {
             return new WebappTemplateLoader(this.getServletContext(), templatePath);
         }

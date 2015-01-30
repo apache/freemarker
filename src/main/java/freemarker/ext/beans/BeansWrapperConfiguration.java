@@ -62,7 +62,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      * @param isIncompImprsNormalized
      *            Tells if the {@code incompatibleImprovements} parameter contains an already normalized value. This
      *            should only be {@code true} when the class that extends {@link BeansWrapper} also uses
-     *            {@link #incompatibleImprovements} and it adds further version where a change has occurred.
+     *            {@link #incompatibleImprovements} and it adds further versions where a change has occurred.
      * 
      * @since 2.3.22
      */

@@ -98,14 +98,14 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * 
      * @since 2.3.21
      */
-    protected DefaultObjectWrapper(BeansWrapperConfiguration bwCfg, boolean readOnly) {
-        super(bwCfg, readOnly, false);
+    protected DefaultObjectWrapper(BeansWrapperConfiguration bwCfg, boolean writeProtected) {
+        super(bwCfg, writeProtected, false);
         DefaultObjectWrapperConfiguration dowDowCfg = bwCfg instanceof DefaultObjectWrapperConfiguration
                 ? (DefaultObjectWrapperConfiguration) bwCfg
                 : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
         useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
         forceLegacyNonListCollections = dowDowCfg.getForceLegacyNonListCollections();
-        finalizeConstruction(readOnly);
+        finalizeConstruction(writeProtected);
     }
 
     /**
@@ -114,8 +114,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      * 
      * @since 2.3.22
      */
-    protected DefaultObjectWrapper(DefaultObjectWrapperConfiguration dowCfg, boolean readOnly) {
-        this((BeansWrapperConfiguration) dowCfg, readOnly);
+    protected DefaultObjectWrapper(DefaultObjectWrapperConfiguration dowCfg, boolean writeProtected) {
+        this((BeansWrapperConfiguration) dowCfg, writeProtected);
     }
     
     static {
@@ -327,10 +327,11 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
         _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         Version bwIcI = BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         return incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_22
+                || bwIcI.intValue() >= _TemplateAPI.VERSION_INT_2_3_22
                 ? bwIcI : Configuration.VERSION_2_3_22;
     }
 
-    public String toPropertiesString() {
+    protected String toPropertiesString() {
         String bwProps = super.toPropertiesString();
         
         // Remove simpleMapWrapper, as its irrelevant for this wrapper:

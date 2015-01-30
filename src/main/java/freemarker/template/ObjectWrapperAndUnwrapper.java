@@ -40,6 +40,8 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      * desired class, nor it can be {@code null}.
      * 
      * @see #tryUnwrapTo(TemplateModel, Class)
+     * 
+     * @since 2.3.22
      */
     Object CANT_UNWRAP_TO_TARGET_CLASS = new Object();
 
@@ -54,12 +56,14 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      *             If the unwrapping fails from any reason.
      * 
      * @see #tryUnwrapTo(TemplateModel, Class)
+     * 
+     * @since 2.3.22
      */
     Object unwrap(TemplateModel tm) throws TemplateModelException;
 
     /**
-     * Attempts to unwrap a {@link TemplateModel} to a plain Java object that's the instance of the given class or is
-     * {@code null}.
+     * Attempts to unwrap a {@link TemplateModel} to a plain Java object that's the instance of the given class (or is
+     * {@code null}).
      * 
      * @param targetClass
      *            The class that the return value must be an instance of (except when the return value is {@code null}).
@@ -77,6 +81,8 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      *             {@link #CANT_UNWRAP_TO_TARGET_CLASS} return value.
      * 
      * @see #unwrap(TemplateModel)
+     * 
+     * @since 2.3.22
      */
     Object tryUnwrapTo(TemplateModel tm, Class targetClass) throws TemplateModelException;
 

@@ -286,7 +286,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         return customDataHolder.customData;
     }
 
-    protected CustomDataHolder createNewCustomData(Object provierIdentity, ObjectFactory objectFactory)
+    private CustomDataHolder createNewCustomData(Object provierIdentity, ObjectFactory objectFactory)
             throws CallPlaceCustomDataInitializationException {
         CustomDataHolder customDataHolder;
         Object customData;

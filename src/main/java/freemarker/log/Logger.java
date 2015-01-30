@@ -563,7 +563,7 @@ public abstract class Logger {
      * Don't use {@link freemarker.template.utility.StringUtil#tryToString(Object)} here, as it might depends on the
      * logger, hence interfering with the initialization.
      */
-    public static String tryToString(Object object) {
+    private static String tryToString(Object object) {
         if (object == null) return null;
         try {
             return object.toString();
