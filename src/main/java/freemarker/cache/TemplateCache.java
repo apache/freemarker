@@ -272,7 +272,8 @@ public class TemplateCache
     }
     
     private Template getTemplate(
-            final TemplateLoader templateLoader, final String name, final Locale locale, final Object customLookupCondition,
+            final TemplateLoader templateLoader,
+            final String name, final Locale locale, final Object customLookupCondition,
             final String encoding, final boolean parseAsFTL)
     throws IOException
     {
@@ -821,7 +822,7 @@ public class TemplateCache
 
     /**
      * This class holds the cached template and associated information
-     * (the source object, and the last-checked and last-modified timestamps).
+     * (the source object (already closed), and the last-checked and last-modified time stamps).
      * It is used as the value in the cached templates map. Note: this class
      * is Serializable to allow custom 3rd party CacheStorage implementations 
      * to serialize/replicate them (see tracker issue #1926150); FreeMarker 
