@@ -192,7 +192,7 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
         Template t = new Template("foo", "", createConfiguration(Configuration.VERSION_2_3_21));
         final Environment env = t.createProcessingEnvironment(null, null);
         assertSame(t, env.getMainTemplate());
-        assertSame(t, env.getCurrentTemplate());
+        assertSame(t.getUnboundTemplate(), env.getCurrentTemplate());
     }
     
     private Configuration createConfiguration(Version version2321) {
@@ -209,8 +209,8 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 Writer out = env.getOut();
-                final String r = "<t=" + env.getTemplate().getName() + " ct=" + env.getCurrentTemplate().getName() + " mt="
-                        + env.getMainTemplate().getName() + ">";
+                final String r = "<t=" + env.getTemplate().getName() + " ct=" + env.getCurrentTemplate().getSourceName()
+                        + " mt=" + env.getMainTemplate().getName() + ">";
                 out.write(r);
                 env.setGlobalVariable("lastTNamesResult", new SimpleScalar(r));
             }

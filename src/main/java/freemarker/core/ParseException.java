@@ -129,14 +129,16 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
+     * @deprecated Use {@link #ParseException(String, UnboundTemplate, int, int, int, int)} instead.
      * @since 2.3.21
-     */
+     /
     public ParseException(String description, Template template,
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber) {
         this(description, template, lineNumber, columnNumber, endLineNumber, endColumnNumber, null);      
     }
 
     /**
+     * @deprecated Use {@link #ParseException(String, UnboundTemplate, int, int, int, int, Throwable)} instead.
      * @since 2.3.21
      */
     public ParseException(String description, Template template,
@@ -150,7 +152,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
     
     /**
-     * @deprecated Use {@link #ParseException(String, Template, int, int, int, int)} instead, as IDE-s need the end
+     * @deprecated Use {@link #ParseException(String, UnboundTemplate, int, int, int, int)} instead, as IDE-s need the end
      * position of the error too.
      * @since 2.3.20
      */
@@ -159,8 +161,8 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
-     * @deprecated Use {@link #ParseException(String, Template, int, int, int, int, Throwable)} instead, as IDE-s need
-     * the end position of the error too.
+     * @deprecated Use {@link #ParseException(String, UnboundTemplate, int, int, int, int, Throwable)} instead, as
+     * IDE-s need the end position of the error too.
      * @since 2.3.20
      */
     public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
@@ -172,6 +174,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
+     * @deprecated Use {@link #ParseException(String, UnboundTemplate, Token)} instead.
      * @since 2.3.20
      */
     public ParseException(String description, Template template, Token tk) {
@@ -179,6 +182,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
     }
 
     /**
+     * @deprecated Use {@link #ParseException(String, UnboundTemplate, Token, Throwable)} instead.
      * @since 2.3.20
      */
     public ParseException(String description, Template template, Token tk, Throwable cause) {
@@ -189,6 +193,45 @@ public class ParseException extends java.io.IOException implements FMParserConst
                         cause);
     }
 
+    /**
+     * @since 2.4.0
+     */
+    public ParseException(String description, UnboundTemplate template,
+            int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber) {
+        this(description, template, lineNumber, columnNumber, endLineNumber, endColumnNumber, null);      
+    }
+
+    /**
+     * @since 2.4.0
+     */
+    public ParseException(String description, UnboundTemplate template,
+            int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
+            Throwable cause) {
+        this(description,
+                template == null ? null : template.getSourceName(),
+                        lineNumber, columnNumber,
+                        endLineNumber, endColumnNumber,
+                        cause);      
+    }
+    
+    /**
+     * @since 2.4.0
+     */
+    public ParseException(String description, UnboundTemplate template, Token tk) {
+        this(description, template, tk, null);
+    }
+
+    /**
+     * @since 2.4.0
+     */
+    public ParseException(String description, UnboundTemplate template, Token tk, Throwable cause) {
+        this(description,
+                template == null ? null : template.getSourceName(),
+                        tk.beginLine, tk.beginColumn,
+                        tk.endLine, tk.endColumn,
+                        cause);
+    }
+    
     /**
      * @since 2.3.20
      */
@@ -201,7 +244,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, TemplateObject tobj, Throwable cause) {
         this(description,
-                tobj.getTemplate() == null ? null : tobj.getTemplate().getName(),
+                tobj.getTemplate() == null ? null : tobj.getTemplate().getSourceName(),
                         tobj.beginLine, tobj.beginColumn,
                         tobj.endLine, tobj.endColumn,
                         cause);

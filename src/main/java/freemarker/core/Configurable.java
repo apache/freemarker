@@ -1471,6 +1471,10 @@ public class Configurable
     /** Returns the possible setting names. */
     // [Java 5] Add type param. [FM 2.4] It must return the camelCase names, then make it public.
     Set/*<String>*/ getSettingNames() {
+        return getConfigurableSettingNames(); 
+    }
+    
+    static Set<String> getConfigurableSettingNames() {
         return new _SortedArraySet(SETTING_NAMES); 
     }
 

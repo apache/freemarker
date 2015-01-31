@@ -34,7 +34,7 @@ public class DebugBreak extends TemplateElement
     
     protected void accept(Environment env) throws TemplateException, IOException
     {
-        if(!DebuggerService.suspendEnvironment(env, this.getTemplate().getName(), nestedBlock.getBeginLine()))
+        if(!DebuggerService.suspendEnvironment(env, this.getTemplate().getSourceName(), nestedBlock.getBeginLine()))
         {
             nestedBlock.accept(env);
         }

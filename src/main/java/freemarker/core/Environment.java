@@ -229,14 +229,14 @@ public final class Environment extends Configurable {
      * Used only internally as of yet, no backward compatibility - Returns the {@link Template} that we are "lexically"
      * inside at moment. This template will change when entering an {@code #include} or calling a macro or function in
      * another template, or returning to yet another template with {@code #nested}. As such, it's useful in
-     * {@link TemplateDirectiveModel} to find out if from where the directive was called.
+     * {@link TemplateDirectiveModel} to find out if from where the directive was called from.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
      */
-    Template getCurrentTemplate() {
+    UnboundTemplate getCurrentTemplate() {
         int ln = instructionStack.size();
-        return ln == 0 ? getMainTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
+        return ln == 0 ? getMainTemplate().getUnboundTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
 
     /**

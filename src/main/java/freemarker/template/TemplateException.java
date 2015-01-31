@@ -30,6 +30,7 @@ import freemarker.core.InvalidReferenceException;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core.TemplateObject;
+import freemarker.core.UnboundTemplate;
 import freemarker.core._CoreAPI;
 import freemarker.core._ErrorDescriptionBuilder;
 import freemarker.template.utility.CollectionUtils;
@@ -197,10 +198,11 @@ public class TemplateException extends Exception {
                         : (
                                 ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length != 0
                                 ? ftlInstructionStackSnapshot[0] : null);
-                // Line number blow 0 means no info, negative means position in ?eval-ed value that we won't use here.
+                // Line number below 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
-                    final Template template = templateObject.getTemplate();
-                    templateName = template != null ? template.getName() : null;
+                    final UnboundTemplate template = templateObject.getTemplate();
+                    // [UT_DEFERRED] Was template.getName():
+                    templateName = template != null ? template.getSourceName() : null;
                     templateSourceName = template != null ? template.getSourceName() : null;
                     lineNumber = new Integer(templateObject.getBeginLine());
                     columnNumber = new Integer(templateObject.getBeginColumn());

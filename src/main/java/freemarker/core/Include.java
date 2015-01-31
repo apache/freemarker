@@ -44,7 +44,7 @@ final class Include extends TemplateElement {
      * @param encodingExp the encoding to be used or null, if it's the default.
      * @param parseExp whether the template should be parsed (or is raw text)
      */
-    Include(Template template,
+    Include(UnboundTemplate template,
             Expression includedTemplatePathExp,
             Expression encodingExp, Expression parseExp, Expression ignoreMissingExp) throws ParseException {
         this.baseDirectoryPath = getBaseDirectoryPath(template);

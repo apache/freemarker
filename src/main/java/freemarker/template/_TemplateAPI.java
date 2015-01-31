@@ -53,7 +53,7 @@ public class _TemplateAPI {
     }
     
     public static int getTemplateLanguageVersionAsInt(TemplateObject to) {
-        return getTemplateLanguageVersionAsInt(to.getTemplate());
+        return to.getTemplate().getTemplateLanguageVersion().intValue();
     }
 
     public static int getTemplateLanguageVersionAsInt(Template t) {

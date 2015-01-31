@@ -18,7 +18,6 @@ package freemarker.core;
 
 import java.util.ArrayList;
 
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -49,7 +48,7 @@ class MessageUtil {
     // Can't be instantiated
     private MessageUtil() { }
         
-    static String formatLocationForSimpleParsingError(Template template, int line, int column) {
+    static String formatLocationForSimpleParsingError(UnboundTemplate template, int line, int column) {
         return formatLocation("in", template, line, column);
     }
 
@@ -57,7 +56,7 @@ class MessageUtil {
         return formatLocation("in", templateSourceName, line, column);
     }
 
-    static String formatLocationForDependentParsingError(Template template, int line, int column) {
+    static String formatLocationForDependentParsingError(UnboundTemplate template, int line, int column) {
         return formatLocation("on", template, line, column);
     }
 
@@ -65,12 +64,12 @@ class MessageUtil {
         return formatLocation("on", templateSourceName, line, column);
     }
 
-    static String formatLocationForEvaluationError(Template template, int line, int column) {
+    static String formatLocationForEvaluationError(UnboundTemplate template, int line, int column) {
         return formatLocation("at", template, line, column);
     }
 
     static String formatLocationForEvaluationError(Macro macro, int line, int column) {
-        Template t = macro.getTemplate();
+        UnboundTemplate t = macro.getTemplate();
         return formatLocation("at", t != null ? t.getSourceName() : null, macro.getName(), macro.isFunction(), line, column);
     }
     
@@ -78,7 +77,7 @@ class MessageUtil {
         return formatLocation("at", templateSourceName, line, column);
     }
 
-    private static String formatLocation(String preposition, Template template, int line, int column) {
+    private static String formatLocation(String preposition, UnboundTemplate template, int line, int column) {
         return formatLocation(preposition, template != null ? template.getSourceName() : null, line, column);
     }
     

@@ -16,21 +16,14 @@
 
 package freemarker.template;
 
-import java.io.BufferedReader;
-import java.io.FilterReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
@@ -38,13 +31,9 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
-import freemarker.core.LibraryLoad;
-import freemarker.core.Macro;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
-import freemarker.core.TextBlock;
-import freemarker.core.TokenMgrError;
-import freemarker.debug.impl.DebuggerService;
+import freemarker.core.UnboundTemplate;
 
 /**
  * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
@@ -70,29 +59,20 @@ public class Template extends Configurable {
      *  Template API-s earlier than the parsing was finished. */
     private transient FMParser parser;
 
-    private Map macros = new HashMap();
-    private List imports = new Vector();
-    private TemplateElement rootElement;
-    private String encoding, defaultNS;
-    private Object customLookupCondition;
-    private int actualTagSyntax;
+    private final UnboundTemplate unboundTemplate;
     private final String name;
-    private final String sourceName;
-    private final ArrayList lines = new ArrayList();
-    private Map prefixToNamespaceURILookup = new HashMap();
-    private Map namespaceURIToPrefixLookup = new HashMap();
-    private Version templateLanguageVersion;
+    private String encoding;
+    private Object customLookupCondition;
 
     /**
      * A prime constructor to which all other constructors should
      * delegate directly or indirectly.
      */
-    private Template(String name, String sourceName, Configuration cfg, boolean overloadSelector)
+    private Template(UnboundTemplate unboundTemplate, String name, Configuration cfg)
     {
         super(toNonNull(cfg));
+        this.unboundTemplate = unboundTemplate; 
         this.name = name;
-        this.sourceName = sourceName;
-        this.templateLanguageVersion = normalizeTemplateLanguageVersion(toNonNull(cfg).getIncompatibleImprovements());
     }
 
     private static Configuration toNonNull(Configuration cfg) {
@@ -180,43 +160,8 @@ public class Template extends Configurable {
      */
     public Template(
             String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(name, sourceName, cfg, true);
-        
+        this(new UnboundTemplate(reader, toNonNull(cfg), sourceName, encoding), name, cfg);
         this.encoding = encoding;
-        try {
-            if (!(reader instanceof BufferedReader)) {
-                reader = new BufferedReader(reader, 0x1000);
-            }
-            reader = new LineTableBuilder(reader);
-            
-            try {
-                parser = new FMParser(this, reader,
-                        getConfiguration().getStrictSyntaxMode(),
-                        getConfiguration().getWhitespaceStripping(),
-                        getConfiguration().getTagSyntax(),
-                        getConfiguration().getIncompatibleImprovements().intValue());
-                this.rootElement = parser.Root();
-                this.actualTagSyntax = parser._getLastTagSyntax();
-            }
-            catch (TokenMgrError exc) {
-                // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
-                // to ParseException
-                throw exc.toParseException(this);
-            }
-            finally {
-                parser = null;
-            }
-        }
-        catch(ParseException e) {
-            e.setTemplateName(getSourceName());
-            throw e;
-        }
-        finally {
-            reader.close();
-        }
-        DebuggerService.registerTemplate(this);
-        namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
-        prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
     }
 
     /**
@@ -232,18 +177,6 @@ public class Template extends Configurable {
     }
 
     /**
-     * Only meant to be used internally.
-     * 
-     * @deprecated Has problems setting actualTagSyntax and templateLanguageVersion; will be removed in 2.4.
-     */
-    // [2.4] remove this
-    Template(String name, TemplateElement root, Configuration cfg) {
-        this(name, null, cfg, true);
-        this.rootElement = root;
-        DebuggerService.registerTemplate(this);
-    }
-    
-    /**
      * Returns a trivial template, one that is just a single block of
      * plain text, no dynamic content. (Used by the cache module to create
      * unparsed templates.)
@@ -253,23 +186,7 @@ public class Template extends Configurable {
      * @param config the configuration to which this template belongs
      */
     static public Template getPlainTextTemplate(String name, String content, Configuration config) {
-        Template template = new Template(name, null, config, true);
-        template.rootElement = new TextBlock(content);
-        template.actualTagSyntax = config.getTagSyntax();
-        DebuggerService.registerTemplate(template);
-        return template;
-    }
-
-    private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        int v = incompatibleImprovements.intValue();
-        if (v < _TemplateAPI.VERSION_INT_2_3_19) {
-            return Configuration.VERSION_2_3_0;
-        } else if (v > _TemplateAPI.VERSION_INT_2_3_21) {
-            return Configuration.VERSION_2_3_21;
-        } else { // if 2.3.19 or 2.3.20 or 2.3.21
-            return incompatibleImprovements;
-        }
+        return new Template(UnboundTemplate.getPlainTextTemplate(name, content, config), name, config);
     }
 
     /**
@@ -431,6 +348,14 @@ public class Template extends Configurable {
         return sw.toString();
     }
 
+    /**
+     * Returns the {@link UnboundTemplate} that this {@link Template} is based on.
+     * 
+     * @since 2.4.0
+     */
+    public UnboundTemplate getUnboundTemplate() {
+        return unboundTemplate;
+    }
 
     /**
      * The usually path-like (or URL-like) identifier of the template, or possibly {@code null} for non-stored
@@ -477,7 +402,7 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     public String getSourceName() {
-        return sourceName != null ? sourceName : getName();
+        return unboundTemplate.getSourceName();
     }
 
     /**
@@ -489,11 +414,13 @@ public class Template extends Configurable {
     
     /**
      * Return the template language (FTL) version used by this template.
-     * For now (2.3.21) this is the same as {@link Configuration#getIncompatibleImprovements()}, except
+     * For now (2.4.0) this is the same as {@link Configuration#getIncompatibleImprovements()}, except
      * that it's normalized to the lowest version where the template language was changed.
+     * 
+     * @since 2.4.0
      */
-    Version getTemplateLanguageVersion() {
-        return templateLanguageVersion;
+    public Version getTemplateLanguageVersion() {
+        return unboundTemplate.getTemplateLanguageVersion();
     }
 
     /**
@@ -501,7 +428,6 @@ public class Template extends Configurable {
      * included files. Usually you don't set this value manually,
      * instead it's assigned to the template upon loading.
      */
-
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
@@ -544,38 +470,44 @@ public class Template extends Configurable {
      * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
      */
     public int getActualTagSyntax() {
-        return actualTagSyntax;
+        return unboundTemplate.getActualTagSyntax();
     }
 
     /**
      * Dump the raw template in canonical form.
      */
     public void dump(PrintStream ps) {
-        ps.print(rootElement.getCanonicalForm());
+        unboundTemplate.dump(ps);
     }
 
     /**
      * Dump the raw template in canonical form.
      */
     public void dump(Writer out) throws IOException {
-        out.write(rootElement.getCanonicalForm());
+        unboundTemplate.dump(out);
     }
 
+    /**!!T
     /**
      * Called by code internally to maintain
-     * a table of macros
-     */
+     * a table of macros.
+     * 
+     * @deprecated Modifying already created template is dangerous and might won't be supported.
+     *x/
     public void addMacro(Macro macro) {
         macros.put(macro.getName(), macro);
     }
 
     /**
      * Called by code internally to maintain
-     * a list of imports
-     */
+     * a list of imports.
+     * 
+     * @deprecated Modifying already created template is dangerous and might won't be supported.
+     *x/
     public void addImport(LibraryLoad ll) {
         imports.add(ll);
     }
+    */
 
     /**
      * Returns the template source at the location specified by the coordinates given, or {@code null} if unavailable.
@@ -585,165 +517,56 @@ public class Template extends Configurable {
      * @param endLine the last line of the requested source, 1-based
      * @see freemarker.core.TemplateObject#getSource()
      */
-    public String getSource(int beginColumn,
-                            int beginLine,
-                            int endColumn,
-                            int endLine)
-    {
-        if (beginLine < 1 || endLine < 1) return null;  // dynamically ?eval-ed expressions has no source available
-        
-        // Our container is zero-based.
-        --beginLine;
-        --beginColumn;
-        --endColumn;
-        --endLine;
-        StringBuffer buf = new StringBuffer();
-        for (int i = beginLine ; i<=endLine; i++) {
-            if (i < lines.size()) {
-                buf.append(lines.get(i));
-            }
-        }
-        int lastLineLength = lines.get(endLine).toString().length();
-        int trailingCharsToDelete = lastLineLength - endColumn -1;
-        buf.delete(0, beginColumn);
-        buf.delete(buf.length() - trailingCharsToDelete, buf.length());
-        return buf.toString();
+    public String getSource(int beginColumn, int beginLine, int endColumn, int endLine) {
+        return unboundTemplate.getSource(beginColumn, beginLine, endColumn, endLine);
     }
 
     /**
-     * This is a helper class that builds up the line table
-     * info for us.
-     */
-    private class LineTableBuilder extends FilterReader {
-
-        StringBuffer lineBuf = new StringBuffer();
-        int lastChar;
-
-        /**
-         * @param r the character stream to wrap
-         */
-        LineTableBuilder(Reader r) {
-            super(r);
-        }
-
-        public int read() throws IOException {
-            int c = in.read();
-            handleChar(c);
-            return c;
-        }
-
-        public int read(char cbuf[], int off, int len) throws IOException {
-            int numchars = in.read(cbuf, off, len);
-            for (int i=off; i < off+numchars; i++) {
-                char c = cbuf[i];
-                handleChar(c);
-            }
-            return numchars;
-        }
-
-        public void close() throws IOException {
-            if (lineBuf.length() >0) {
-                lines.add(lineBuf.toString());
-                lineBuf.setLength(0);
-            }
-            super.close();
-        }
-
-        private void handleChar(int c) {
-            if (c == '\n' || c == '\r') {
-                if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
-                    int lastIndex = lines.size() -1;
-                    String lastLine = (String) lines.get(lastIndex);
-                    lines.set(lastIndex, lastLine + '\n');
-                } else {
-                    lineBuf.append((char) c);
-                    lines.add(lineBuf.toString());
-                    lineBuf.setLength(0);
-                }
-            }
-            else if (c == '\t') {
-                int numSpaces = 8 - (lineBuf.length() %8);
-                for (int i=0; i<numSpaces; i++) {
-                    lineBuf.append(' ');
-                }
-            }
-            else {
-                lineBuf.append((char) c);
-            }
-            lastChar = c;
-        }
-    }
-
-    /**
-     *  @return the root TemplateElement object.
+     * @return the root TemplateElement object.
+     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
      */
     public TemplateElement getRootTreeNode() {
-        return rootElement;
+        return unboundTemplate.getRootTreeNode();
     }
     
+    /**
+     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
+     */
     public Map getMacros() {
-        return macros;
+        return unboundTemplate.getMacros();
     }
 
+    /**
+     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
+     */
     public List getImports() {
-        return imports;
+        return unboundTemplate.getImports();
     }
 
     /**
      * This is used internally.
+     * @deprecated Modifying already created template is dangerous and might won't be supported.
      */
     public void addPrefixNSMapping(String prefix, String nsURI) {
-        if (nsURI.length() == 0) {
-            throw new IllegalArgumentException("Cannot map empty string URI");
-        }
-        if (prefix.length() == 0) {
-            throw new IllegalArgumentException("Cannot map empty string prefix");
-        }
-        if (prefix.equals(NO_NS_PREFIX)) {
-            throw new IllegalArgumentException("The prefix: " + prefix + " cannot be registered, it's reserved for special internal use.");
-        }
-        if (prefixToNamespaceURILookup.containsKey(prefix)) {
-            throw new IllegalArgumentException("The prefix: '" + prefix + "' was repeated. This is illegal.");
-        }
-        if (namespaceURIToPrefixLookup.containsKey(nsURI)) {
-            throw new IllegalArgumentException("The namespace URI: " + nsURI + " cannot be mapped to 2 different prefixes.");
-        }
-        if (prefix.equals(DEFAULT_NAMESPACE_PREFIX)) {
-            this.defaultNS = nsURI;
-        } else {
-            prefixToNamespaceURILookup.put(prefix, nsURI);
-            namespaceURIToPrefixLookup.put(nsURI, prefix);
-        }
+        unboundTemplate.addPrefixNSMapping(prefix, nsURI);
     }
     
     public String getDefaultNS() {
-        return this.defaultNS;
+        return unboundTemplate.getDefaultNS();
     }
     
     /**
      * @return the NamespaceUri mapped to this prefix in this template. (Or null if there is none.)
      */
     public String getNamespaceForPrefix(String prefix) {
-        if (prefix.equals("")) {
-            return defaultNS == null ? "" : defaultNS;
-        }
-        return (String) prefixToNamespaceURILookup.get(prefix);
+        return unboundTemplate.getNamespaceForPrefix(prefix);
     }
     
     /**
      * @return the prefix mapped to this nsURI in this template. (Or null if there is none.)
      */
     public String getPrefixForNamespace(String nsURI) {
-        if (nsURI == null) {
-            return null;
-        }
-        if (nsURI.length() == 0) {
-            return defaultNS == null ? "" : NO_NS_PREFIX;
-        }
-        if (nsURI.equals(defaultNS)) {
-            return "";
-        }
-        return (String) namespaceURIToPrefixLookup.get(nsURI);
+        return unboundTemplate.getPrefixForNamespace(nsURI);
     }
     
     /**
@@ -752,21 +575,7 @@ public class Template extends Configurable {
      * passed in as parameters.
      */
     public String getPrefixedName(String localName, String nsURI) {
-        if (nsURI == null || nsURI.length() == 0) {
-            if (defaultNS != null) {
-                return NO_NS_PREFIX + ":" + localName;
-            } else {
-                return localName;
-            }
-        } 
-        if (nsURI.equals(defaultNS)) {
-            return localName;
-        } 
-        String prefix = getPrefixForNamespace(nsURI);
-        if (prefix == null) {
-            return null;
-        }
-        return prefix + ":" + localName;
+        return unboundTemplate.getPrefixedName(localName, nsURI);
     }
     
     /**
@@ -774,26 +583,15 @@ public class Template extends Configurable {
      * column and line numbers.
      * @param column the column     
      * @param line the line
+     * 
+     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
      */
     public List containingElements(int column, int line) {
-        final ArrayList elements = new ArrayList();
-        TemplateElement element = rootElement;
-        mainloop: while (element.contains(column, line)) {
-            elements.add(element);
-            for (Enumeration enumeration = element.children(); enumeration.hasMoreElements();) {
-                TemplateElement elem = (TemplateElement) enumeration.nextElement();
-                if (elem.contains(column, line)) {
-                    element = elem;
-                    continue mainloop;
-                }
-            }
-            break;
-        }
-        return elements.isEmpty() ? null : elements;
+        return unboundTemplate.containingElements(column, line);
     }
 
     /**
-     * Thrown by the {@link Template} constructors that specify a non-{@code null} encoding whoch doesn't match the
+     * Thrown by the {@link Template} constructors that specify a non-{@code null} encoding which doesn't match the
      * encoding specified in the {@code #ftl} header of the template.
      */
     static public class WrongEncodingException extends ParseException {

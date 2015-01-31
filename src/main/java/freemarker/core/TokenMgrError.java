@@ -16,7 +16,7 @@
 
 package freemarker.core;
 
-import freemarker.template.Template;
+
 
 /**
  * Exception thrown on lower (lexical) level parsing errors. Shouldn't reach normal FreeMarker users, as FreeMarker
@@ -238,7 +238,19 @@ public class TokenMgrError extends Error
        return detail;
    }
 
+   /**!!T
+   /**
+    * @deprecated Use {@link #toParseException(UnboundTemplate)} instead. 
+    *-/
    public ParseException toParseException(Template template) {
+       toParseException(template.getUnboundTemplate());
+   }
+   */
+   
+   /**
+    * @since 2.4.0
+    */
+   public ParseException toParseException(UnboundTemplate template) {
        return new ParseException(getDetail(),
                template,
                getLineNumber() != null ? getLineNumber().intValue() : 0,

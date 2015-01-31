@@ -37,7 +37,7 @@ public final class LibraryLoad extends TemplateElement {
      * @param templateName the name of the template to be included.
      * @param namespace the namespace to assign this library to
      */
-    LibraryLoad(Template template,
+    LibraryLoad(UnboundTemplate template,
             Expression templateName,
             String namespace)
     {

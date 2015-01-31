@@ -18,7 +18,6 @@ package freemarker.core;
 
 import java.util.Arrays;
 
-import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
@@ -54,7 +53,7 @@ final class PropertySetting extends TemplateElement {
         this.value = value;
     }
 
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
+    void setLocation(UnboundTemplate template, int beginColumn, int beginLine, int endColumn, int endLine)
     throws
         ParseException
     {
@@ -69,8 +68,8 @@ final class PropertySetting extends TemplateElement {
                 sb.append(" Supporting camelCase setting names is planned for FreeMarker 2.4.0; check if an update is "
                             + "available, and if it indeed supports camel case. "
                             + "Until that, use \"").append(underscoredName).append("\".");
-            } else if (((Configurable) template).getSettingNames().contains(key)
-                    || ((Configurable) template).getSettingNames().contains(underscoredName)) {
+            } else if (Configurable.getConfigurableSettingNames().contains(key)
+                    || Configurable.getConfigurableSettingNames().contains(underscoredName)) {
                 sb.append(" The setting name is recognized, but changing this setting in a template isn't supported.");                
             } else {
                 sb.append(" The allowed setting names are: ");

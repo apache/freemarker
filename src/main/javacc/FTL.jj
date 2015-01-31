@@ -38,7 +38,7 @@ import java.util.*;
 public class FMParser {
 
     // Necessary for adding macros and setting location info.
-    private Template template;
+    private UnboundTemplate template;
 
     // variables that keep track of whether we are in a loop or a switch.
     private int loopNesting, switchNesting;
@@ -69,7 +69,7 @@ public class FMParser {
      * @param strictEscapeSyntax
      *            Whether FreeMarker directives must start with a #
      */
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
+    public FMParser(UnboundTemplate template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
         this(reader);
         setTemplate(template);
         token_source.setParser(this);
@@ -77,12 +77,12 @@ public class FMParser {
         this.stripWhitespace = stripWhitespace;
     }
 
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
+    public FMParser(UnboundTemplate template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
         this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax,
                 Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
     }
 
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
+    public FMParser(UnboundTemplate template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
             int tagSyntax, int incompatibleImprovements) {
         this(template, reader, strictEscapeSyntax, stripWhitespace);
         switch (tagSyntax) {
@@ -106,12 +106,12 @@ public class FMParser {
         this(null, new StringReader(template), true, true);
     }
 
-    void setTemplate(Template template)
+    void setTemplate(UnboundTemplate template)
     {
         this.template = template;
     }
 
-    Template getTemplate()
+    UnboundTemplate getTemplate()
     {
         return template;
     }
@@ -314,7 +314,7 @@ TOKEN_MGR_DECLS:
         this.parser = parser;
     }
 
-    Template getTemplate() {
+    UnboundTemplate getTemplate() {
         return parser != null ? parser.getTemplate() : null;
     }
 

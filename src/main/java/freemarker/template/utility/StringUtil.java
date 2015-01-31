@@ -528,7 +528,7 @@ public class StringUtil {
         do {
             buf.append(s.substring(bidx, idx));
             if (idx >= lidx) {
-                throw new ParseException("The last character of string literal is backslash", 0,0);
+                throw new ParseException("The last character of string literal is backslash", 0, 0);
             }
             char c = s.charAt(idx + 1);
             switch (c) {

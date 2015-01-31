@@ -16,7 +16,6 @@
 
 package freemarker.core;
 
-import freemarker.template.Template;
 
 /**
  * <b>Internal API - subject to change:</b> Represent a node in the parsed template (either a {@link Expression} or a
@@ -27,7 +26,7 @@ import freemarker.template.Template;
  */
 public abstract class TemplateObject {
     
-    private Template template;
+    private UnboundTemplate template;
     int beginColumn, beginLine, endColumn, endLine;
     
     /** This is needed for an ?eval hack; the expression AST nodes will be the descendants of the template, however,
@@ -35,35 +34,35 @@ public abstract class TemplateObject {
      *  by a negative line numbers, starting from this constant as line 1. */
     static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
-    final void setLocation(Template template, Token begin, Token end)
+    final void setLocation(UnboundTemplate template, Token begin, Token end)
     throws
         ParseException
     {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(Template template, Token begin, TemplateObject end)
+    final void setLocation(UnboundTemplate template, Token begin, TemplateObject end)
     throws
         ParseException
     {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(Template template, TemplateObject begin, Token end)
+    final void setLocation(UnboundTemplate template, TemplateObject begin, Token end)
     throws
         ParseException
     {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(Template template, TemplateObject begin, TemplateObject end)
+    final void setLocation(UnboundTemplate template, TemplateObject begin, TemplateObject end)
     throws
         ParseException
     {
         setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
+    void setLocation(UnboundTemplate template, int beginColumn, int beginLine, int endColumn, int endLine)
     throws
         ParseException
     {
@@ -161,7 +160,7 @@ public abstract class TemplateObject {
         return true;
     }
 
-    public Template getTemplate()
+    public UnboundTemplate getTemplate()
     {
         return template;
     }

@@ -18,7 +18,6 @@ package freemarker.core;
 
 import freemarker.ext.beans.BeanModel;
 import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
@@ -50,7 +49,7 @@ abstract public class Expression extends TemplateObject {
 
     // Hook in here to set the constant value if possible.
     
-    void setLocation(Template template, int beginColumn, int beginLine, int endColumn, int endLine)
+    void setLocation(UnboundTemplate template, int beginColumn, int beginLine, int endColumn, int endLine)
     throws
         ParseException
     {

@@ -204,7 +204,9 @@ public class _ErrorDescriptionBuilder {
     }
 
     private void appendParts(StringBuffer sb, Object[] parts) {
-        Template template = this.template != null ? this.template : (blamed != null ? blamed.getTemplate() : null); 
+        UnboundTemplate template = this.template != null
+                ? this.template.getUnboundTemplate()
+                : (blamed != null ? blamed.getTemplate() : null); 
         for (int i = 0; i < parts.length; i++) {
             Object partObj = parts[i];
             if (partObj instanceof Object[]) {
