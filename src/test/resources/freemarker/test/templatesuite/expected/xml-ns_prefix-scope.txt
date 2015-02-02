@@ -1,0 +1,11 @@
+//e: e in NS namespace-test, e in NS namespace-test
+//n:e: e in NS foo, e in NS foo
+//bar:e: e in NS bar, e in NS bar
+
+Included:
+//n:e: e in NS foo, e in NS foo
+//n:e: e in NS foo, e in NS foo
+
+Imported:
+//n:e: e in NS bar, e in NS bar
+//n:e: e in NS bar, e in NS bar
