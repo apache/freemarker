@@ -523,6 +523,42 @@ public class TemplateLookupStrategyTest {
         
     }
     
+    @Test
+    public void testNonparsed() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
+        tl.putTemplate("test.txt", "");
+        tl.putTemplate("test_aa.txt", "");
+        cfg.setTemplateLoader(tl);
+        
+        try {
+            cfg.getTemplate("missing.txt", new Locale("aa", "BB"), null, false);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            assertEquals("missing.txt", e.getTemplateName());
+            assertEquals(
+                    ImmutableList.of(
+                            "missing_aa_BB.txt",
+                            "missing_aa.txt",
+                            "missing.txt"),
+                    tl.getTemplatesTried());
+            tl.clear();
+            cfg.clearTemplateCache();
+        }
+        
+        {
+            Template t = cfg.getTemplate("test.txt", new Locale("aa", "BB"), null, false);
+            assertEquals("test.txt", t.getName());
+            assertEquals("test_aa.txt", t.getSourceName());
+            assertEquals(
+                    ImmutableList.of(
+                            "test_aa_BB.txt",
+                            "test_aa.txt"),
+                    tl.getTemplatesTried());
+        }
+    }
+    
     private String toCanonicalFTL(String ftl, Configuration cfg) throws IOException {
         return new Template(null, ftl, cfg).toString();        
     }
