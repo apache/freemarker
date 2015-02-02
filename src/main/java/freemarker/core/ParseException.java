@@ -143,7 +143,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
             Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         lineNumber, columnNumber,
                         endLineNumber, endColumnNumber,
                         cause);      
@@ -165,7 +165,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         lineNumber, columnNumber,
                         0, 0,
                         cause);      
@@ -183,7 +183,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, Template template, Token tk, Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         tk.beginLine, tk.beginColumn,
                         tk.endLine, tk.endColumn,
                         cause);
@@ -201,7 +201,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, TemplateObject tobj, Throwable cause) {
         this(description,
-                tobj.getTemplate() == null ? null : tobj.getTemplate().getName(),
+                tobj.getTemplate() == null ? null : tobj.getTemplate().getSourceName(),
                         tobj.beginLine, tobj.beginColumn,
                         tobj.endLine, tobj.endColumn,
                         cause);

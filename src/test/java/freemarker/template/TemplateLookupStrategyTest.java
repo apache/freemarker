@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.core.ParseException;
 import freemarker.test.MonitoredTemplateLoader;
 
 public class TemplateLookupStrategyTest {
@@ -556,6 +557,23 @@ public class TemplateLookupStrategyTest {
                             "test_aa_BB.txt",
                             "test_aa.txt"),
                     tl.getTemplatesTried());
+        }
+    }
+
+    @Test
+    public void testParseError() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
+        tl.putTemplate("test.ftl", "");
+        tl.putTemplate("test_aa.ftl", "<#wrong>");
+        cfg.setTemplateLoader(tl);
+        
+        try {
+            cfg.getTemplate("test.ftl", new Locale("aa", "BB"));
+            fail();
+        } catch (ParseException e) {
+            assertEquals("test_aa.ftl", e.getTemplateName());
         }
     }
     
