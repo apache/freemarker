@@ -6967,6 +6967,12 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
 cfg = new Configuration(Configuration.VERSION_2_3_22);
 ...
 cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
+
+          <para>or if you are configuring FreeMarker with
+          <literal>java.util.Properties</literal> instead (and let's say it's
+          also a <literal>.properties</literal> file):</para>
+
+          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.22)</programlisting>
         </section>
       </section>
     </chapter>
@@ -23200,11 +23206,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   or <literal>createProcessingEnvironment</literal> method was
                   called to initiate the output generation.) Note that this
                   only matters if you have set settings directly on
-                  <literal>Template</literal> objects, and almost nobody does
-                  that. Also note that macro calls have never changed the
-                  <literal>Environment</literal> parent to the
-                  <literal>Template</literal> that contains the macro
-                  definition, so there's no change there now.</para>
+                  <literal>Template</literal> objects (not to be confused with
+                  setting settings in templates via
+                  <literal>#setting</literal>, which just modifies the
+                  <literal>Environment</literal>, and so isn't affected by
+                  this fix), and almost nobody does that. Also note that macro
+                  calls have never changed the <literal>Environment</literal>
+                  parent to the <literal>Template</literal> that contains the
+                  macro definition, so there's no change there now.</para>
                 </listitem>
 
                 <listitem>
