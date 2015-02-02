@@ -23105,6 +23105,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   parameters, in which case they use the same defaults as the
                   overloads where the parameter is omitted.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Debugger SPI implementators, attention: The
+                  <literal>DebugBreak</literal> instruction will now send the
+                  <literal>sourceName</literal> of the template to the
+                  <literal>suspendEnvironmentSpi</literal> callback, rather
+                  than its <literal>name</literal>. You should also use the
+                  <literal>sourceName</literal> in
+                  <literal>registerTemplateSpi</literal> and such, not the
+                  <literal>name</literal>. </para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
