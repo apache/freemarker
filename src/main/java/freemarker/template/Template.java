@@ -575,16 +575,18 @@ public class Template extends Configurable {
     }
 
     /**
-     * Called by code internally to maintain
-     * a table of macros
+     * Called by code internally to maintain a table of macros
+     * 
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public void addMacro(Macro macro) {
         macros.put(macro.getName(), macro);
     }
 
     /**
-     * Called by code internally to maintain
-     * a list of imports
+     * Called by code internally to maintain a list of imports
+     * 
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public void addImport(LibraryLoad ll) {
         imports.add(ll);
@@ -704,6 +706,8 @@ public class Template extends Configurable {
 
     /**
      * This is used internally.
+     * 
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public void addPrefixNSMapping(String prefix, String nsURI) {
         if (nsURI.length() == 0) {
