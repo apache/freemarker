@@ -555,6 +555,8 @@ public class Template extends Configurable {
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
      * returns whatever the default is in the current configuration, so it's maybe
      * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * 
+     * @since 2.3.20
      */
     public int getActualTagSyntax() {
         return actualTagSyntax;
