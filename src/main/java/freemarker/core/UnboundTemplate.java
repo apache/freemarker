@@ -13,6 +13,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import freemarker.cache.TemplateLoader;
@@ -43,6 +44,9 @@ public class UnboundTemplate {
     private final String sourceName;
     private final Configuration cfg;
     
+    /** Attributes added via {@code <#ftl attributes=...>}. */
+    private HashMap<String, Object> customAttributes;
+    
     private Map macros = new HashMap();
     private List imports = new Vector();
     private TemplateElement rootElement;
@@ -68,14 +72,14 @@ public class UnboundTemplate {
      * @param cfg
      *            The FreeMarker configuration settings; some of them influences parsing, also the resulting
      *            {@link UnboundTemplate} will be bound to this.
-     * @param encodingToCheck
+     * @param assumedEncoding
      *            This is the name of the charset that we are supposed to be using. This is only needed to check if the
      *            encoding specified in the {@code #ftl} header (if any) matches this. If this is non-{@code null} and
      *            they don't match, a {@link WrongEncodingException} will be thrown by the parser.
      * @param sourceName
      *            Shown in error messages as the template "file" location.
      */
-    public UnboundTemplate(Reader reader, Configuration cfg, String encodingToCheck, String sourceName)
+    public UnboundTemplate(Reader reader, Configuration cfg, String assumedEncoding, String sourceName)
             throws IOException {
         this(sourceName, cfg);
 
@@ -86,7 +90,8 @@ public class UnboundTemplate {
             reader = new LineTableBuilder(reader);
 
             try {
-                parser = new FMParser(this, reader,
+                parser = new FMParser(this,
+                        reader, assumedEncoding,
                         cfg.getStrictSyntaxMode(),
                         cfg.getWhitespaceStripping(),
                         cfg.getTagSyntax(),
@@ -111,7 +116,7 @@ public class UnboundTemplate {
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
     }
     
-    static public UnboundTemplate getPlainTextTemplate(String sourceName, String content, Configuration config) {
+    static public UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
         UnboundTemplate template = new UnboundTemplate(sourceName, config);
         template.rootElement = new TextBlock(content);
         template.actualTagSyntax = config.getTagSyntax();
@@ -295,6 +300,28 @@ public class UnboundTemplate {
         }
     }
 
+    /**
+     * Used internally by the parser.
+     */
+    void setCustomAttribute(String key, Object value) {
+        HashMap<String, Object> attrs = customAttributes;
+        if (attrs == null) {
+            attrs = new HashMap<String, Object>();
+            customAttributes = attrs;
+        }
+        attrs.put(key, value);
+    }
+
+    Object getCustomAttribute(String name) {
+        HashMap<String, Object> attrs = customAttributes;
+        return attrs != null ? attrs.get(name) : null;
+    }
+
+    Set<String> getCustomAttributeNames() {
+        HashMap<String, Object> attrs = customAttributes;
+        return attrs != null ? attrs.keySet() : Collections.<String>emptySet();
+    }
+    
     /**
      * @return the root TemplateElement object.
      */

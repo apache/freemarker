@@ -181,7 +181,7 @@ public class Template extends Configurable {
      * argument.
      */
     static public Template getPlainTextTemplate(String name, String content, Configuration config) {
-        return new Template(UnboundTemplate.getPlainTextTemplate(name, content, config), name, config);
+        return getPlainTextTemplate(name, null, content, config);
     }
     
     /**
@@ -199,7 +199,7 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        Template template = new Template(name, sourceName, config, true);
+        return new Template(UnboundTemplate.createPlainTextTemplate(sourceName, content, config), name, config);
     }
 
     /**
@@ -507,7 +507,6 @@ public class Template extends Configurable {
      * Called by code internally to maintain a table of macros
      * 
      * @deprecated Should only be used internally, and might will be removed later.
-     * @deprecated Modifying already created template is dangerous and might won't be supported.
      *x/
     public void addMacro(Macro macro) {
         macros.put(macro.getName(), macro);
@@ -517,7 +516,6 @@ public class Template extends Configurable {
      * Called by code internally to maintain a list of imports
      * 
      * @deprecated Should only be used internally, and might will be removed later.
-     * @deprecated Modifying already created template is dangerous and might won't be supported.
      *x/
     public void addImport(LibraryLoad ll) {
         imports.add(ll);
@@ -561,7 +559,6 @@ public class Template extends Configurable {
     /**
      * This is used internally.
      * 
-     * @deprecated Modifying already created template is dangerous and might won't be supported.
      * @deprecated Should only be used internally, and might will be removed later.
      */
     public void addPrefixNSMapping(String prefix, String nsURI) {

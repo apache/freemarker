@@ -226,7 +226,7 @@ class EvalUtil
                     env != null
                         ? env.getArithmeticEngine()
                         : (leftExp != null
-                            ? leftExp.getTemplate().getArithmeticEngine()
+                            ? leftExp.getTemplate().getConfiguration().getArithmeticEngine()
                             : ArithmeticEngine.BIGDECIMAL_ENGINE);
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);

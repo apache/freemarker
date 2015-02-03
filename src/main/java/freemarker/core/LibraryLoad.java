@@ -49,7 +49,7 @@ public final class LibraryLoad extends TemplateElement {
         final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToString(env);
         final String fullImportedTemplateName;
         try {
-            fullImportedTemplateName = env.toFullTemplateName(getTemplate().getName(), importedTemplateName);
+            fullImportedTemplateName = env.toFullTemplateName(env.getCurrentTemplate().getName(), importedTemplateName);
         } catch (MalformedTemplateNameException e) {
             throw new _MiscTemplateException(e, env, new Object[] {
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",

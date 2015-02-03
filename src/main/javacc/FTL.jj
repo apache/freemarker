@@ -39,10 +39,12 @@ public class FMParser {
 
     // Necessary for adding macros and setting location info.
     private UnboundTemplate template;
+    private String assumedEncoding;
+    private boolean stripWhitespace, stripText;
 
     // variables that keep track of whether we are in a loop or a switch.
     private int loopNesting, switchNesting;
-    private boolean inMacro, inFunction, stripWhitespace, stripText;
+    private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
     private int incompatibleImprovements;
@@ -59,32 +61,22 @@ public class FMParser {
         return parser;
     }
 
-    /**
-     * Constructs a new parser object.
-     * 
-     * @param template
-     *            The template associated with this parser.
-     * @param reader
-     *            The character stream to use as input
-     * @param strictEscapeSyntax
-     *            Whether FreeMarker directives must start with a #
-     */
-    public FMParser(UnboundTemplate template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
-        this(reader);
-        setTemplate(template);
-        token_source.setParser(this);
-        token_source.strictEscapeSyntax = strictEscapeSyntax;
-        this.stripWhitespace = stripWhitespace;
-    }
-
-    public FMParser(UnboundTemplate template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
-        this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax,
-                Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
-    }
-
-    public FMParser(UnboundTemplate template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
+    FMParser(
+            UnboundTemplate template,
+            Reader reader, String assumedEncoding,
+            boolean strictEscapeSyntax, boolean stripWhitespace,
             int tagSyntax, int incompatibleImprovements) {
-        this(template, reader, strictEscapeSyntax, stripWhitespace);
+        this(reader);
+        this.assumedEncoding = assumedEncoding;
+        
+        setTemplate(template);
+        
+        token_source.setParser(this);
+        
+        token_source.strictEscapeSyntax = strictEscapeSyntax;
+        
+        this.stripWhitespace = stripWhitespace;
+        
         switch (tagSyntax) {
         case Configuration.AUTO_DETECT_TAG_SYNTAX:
             token_source.autodetectTagSyntax = true;
@@ -98,12 +90,9 @@ public class FMParser {
         default:
             throw new IllegalArgumentException("Illegal argument for tagSyntax");
         }
+        
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
-    }
-
-    public FMParser(String template) {
-        this(null, new StringReader(template), true, true);
     }
 
     void setTemplate(UnboundTemplate template)
@@ -1469,7 +1458,7 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(template.getArithmeticEngine().toNumber(s));
+        Expression result = new NumberLiteral(template.getConfiguration().getArithmeticEngine().toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
@@ -3014,7 +3003,7 @@ Token UnparsedContent(Token start, StringBuffer buf) :
     {
         buf.setLength(buf.length() - t.image.length());
         if (!t.image.endsWith(";")
-                && _TemplateAPI.getTemplateLanguageVersionAsInt(template) >= _TemplateAPI.VERSION_INT_2_3_21) {
+                && template.getTemplateLanguageVersion().intValue() >= _TemplateAPI.VERSION_INT_2_3_21) {
             throw new ParseException("Unclosed \"" + start.image + "\"", template, start);
         }
         return t;
@@ -3141,9 +3130,8 @@ void HeaderElement() :
                             if (vs == null) {
                                 throw new ParseException("Expecting an encoding string.", exp);
                             }
-                            String encoding = template.getEncoding();
-                            if (encoding != null && !encoding.equalsIgnoreCase(vs)) {
-                                throw new Template.WrongEncodingException(vs, encoding);
+                            if (assumedEncoding != null && !assumedEncoding.equalsIgnoreCase(vs)) {
+                                throw new Template.WrongEncodingException(vs, assumedEncoding);
                             }
                         } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE")) {
                             this.stripWhitespace = getBoolean(exp);

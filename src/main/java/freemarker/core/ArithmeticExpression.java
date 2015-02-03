@@ -51,7 +51,7 @@ final class ArithmeticExpression extends Expression {
         ArithmeticEngine ae = 
             env != null 
                 ? env.getArithmeticEngine()
-                : getTemplate().getArithmeticEngine();
+                : getTemplate().getConfiguration().getArithmeticEngine();
         switch (operator) {
             case TYPE_SUBSTRACTION : 
                 return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));

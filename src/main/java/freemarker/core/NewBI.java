@@ -20,7 +20,6 @@ import java.util.List;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.ObjectWrapper;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
@@ -46,7 +45,7 @@ class NewBI extends BuiltIn
     TemplateModel _eval(Environment env)
             throws TemplateException 
     {
-        return new ConstructorFunction(target.evalAndCoerceToString(env), env, target.getTemplate());
+        return new ConstructorFunction(target.evalAndCoerceToString(env), env);
     }
 
     class ConstructorFunction implements TemplateMethodModelEx {
@@ -54,9 +53,9 @@ class NewBI extends BuiltIn
         private final Class cl;
         private final Environment env;
         
-        public ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
+        public ConstructorFunction(String classname, Environment env) throws TemplateException {
             this.env = env;
-            cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
+            cl = env.getNewBuiltinClassResolver().resolve(classname, env, env.getCurrentTemplate());
             if (!TemplateModel.class.isAssignableFrom(cl)) {
                 throw new _MiscTemplateException(NewBI.this, env, new Object[] {
                         "Class ", cl.getName(), " does not implement freemarker.template.TemplateModel" });

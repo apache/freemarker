@@ -56,10 +56,6 @@ public class _TemplateAPI {
         return to.getTemplate().getTemplateLanguageVersion().intValue();
     }
 
-    public static int getTemplateLanguageVersionAsInt(Template t) {
-        return t.getTemplateLanguageVersion().intValue();
-    }
-    
     /** For unit testing only */
     public static void DefaultObjectWrapperFactory_clearInstanceCache() {
         DefaultObjectWrapperBuilder.clearInstanceCache();

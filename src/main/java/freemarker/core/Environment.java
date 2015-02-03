@@ -234,9 +234,11 @@ public final class Environment extends Configurable {
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
      */
-    UnboundTemplate getCurrentTemplate() {
-        int ln = instructionStack.size();
-        return ln == 0 ? getMainTemplate().getUnboundTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
+    Template getCurrentTemplate() {
+        // TODO
+        return getTemplate();
+        //int ln = instructionStack.size();
+        //return ln == 0 ? getMainTemplate().getUnboundTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
 
     /**

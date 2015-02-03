@@ -122,7 +122,7 @@ final class Include extends TemplateElement {
         final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToString(env);
         final String fullIncludedTemplateName;
         try {
-            fullIncludedTemplateName = env.toFullTemplateName(getTemplate().getName(), includedTemplateName);
+            fullIncludedTemplateName = env.toFullTemplateName(env.getCurrentTemplate().getName(), includedTemplateName);
         } catch (MalformedTemplateNameException e) {
             throw new _MiscTemplateException(e, env, new Object[] {
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",
