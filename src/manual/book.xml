@@ -22419,16 +22419,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>When <literal>Map.get</literal> or
-                  <literal>Map.containsKey</literal> of a wrapped
-                  <literal>Map</literal> throws a
-                  <literal>ClassCastException</literal> or
-                  <literal>NullPointerException</literal>, the error will
-                  point to the causing FTL expression (with some explanation),
-                  rather than bubbling up as low level runtime error.</para>
-                </listitem>
-
-                <listitem>
                   <para>Bug fixed: When localized lookup or template
                   acquisition has kicked in, error messages have still quoted
                   the name used for requesting the template, rather that the
@@ -22451,6 +22441,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   helpful error message when the setting name is not
                   recognized, and lists the allowed setting names when
                   appropriate (since RC02).</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a bad special variable
+                  (<literal>.<replaceable>name</replaceable></literal>) name
+                  is encountered, the list of available names is shown in the
+                  error message.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <literal>Map.get</literal> or
+                  <literal>Map.containsKey</literal> of a wrapped
+                  <literal>Map</literal> throws a
+                  <literal>ClassCastException</literal> or
+                  <literal>NullPointerException</literal>, the error will
+                  point to the causing FTL expression (with some explanation),
+                  rather than bubbling up as low level runtime error.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
