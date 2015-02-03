@@ -405,6 +405,11 @@ public class TemplateTestCase extends FileTestCase {
             NodeModel nm = NodeModel.parse(is);
             dataModel.put("doc", nm);
         }
+        else if (simpleTestName.equals("xml-ns_prefix-scope")) {
+            InputSource is = new InputSource(getClass().getResourceAsStream("models/xml-ns_prefix-scope.xml"));
+            NodeModel nm = NodeModel.parse(is);
+            dataModel.put("doc", nm);
+        }
         
         else if (simpleTestName.startsWith("sequence-builtins")) {
             Set abcSet = new TreeSet();

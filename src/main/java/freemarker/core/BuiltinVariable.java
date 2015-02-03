@@ -16,6 +16,7 @@
 
 package freemarker.core;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import freemarker.template.Configuration;
@@ -26,6 +27,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.StringUtil;
 
 /**
  * A reference to a built-in identifier, such as .root
@@ -50,33 +52,53 @@ final class BuiltinVariable extends Expression {
     static final String OUTPUT_ENCODING = "output_encoding";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
+    
+    static final String[] SPEC_VAR_NAMES = new String[] {
+        CURRENT_NODE,
+        DATA_MODEL,
+        ERROR,
+        GLOBALS,
+        LANG,
+        LOCALE,
+        LOCALE_OBJECT,
+        LOCALS,
+        MAIN,
+        NAMESPACE,
+        NODE,
+        NOW,
+        OUTPUT_ENCODING,
+        PASS,
+        TEMPLATE_NAME,
+        URL_ESCAPING_CHARSET,
+        VARS,
+        VERSION
+    };
 
     private final String name;
 
     BuiltinVariable(String name) throws ParseException {
-        name = name.intern();
-        this.name = name;
-        if (name != TEMPLATE_NAME 
-            && name != NAMESPACE
-            && name != MAIN
-            && name != GLOBALS
-            && name != LOCALS
-            && name != LANG
-            && name != LOCALE
-            && name != LOCALE_OBJECT
-            && name != DATA_MODEL
-            && name != CURRENT_NODE
-            && name != NODE
-            && name != PASS
-            && name != VARS
-            && name != VERSION
-            && name != OUTPUT_ENCODING
-            && name != URL_ESCAPING_CHARSET
-            && name != ERROR
-            && name != NOW)
-        {
-            throw new ParseException("Unknown built-in variable: " + name, this);
+        if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Unknown special variable name: ");
+            sb.append(StringUtil.jQuote(name)).append(".");
+            final String underscoredName = _CoreStringUtils.camelCaseToUnderscored(name);
+            if (!underscoredName.equals(name) && Arrays.binarySearch(SPEC_VAR_NAMES, underscoredName) >= 0) {
+                sb.append(" Supporting camelCase special variable names is planned for FreeMarker 2.4.0; check if an "
+                            + "update is available, and if it indeed supports camel case. "
+                            + "Until that, use \"").append(underscoredName).append("\".");
+            } else {
+                sb.append(" The allowed special variable names are: ");
+                for (int i = 0; i < SPEC_VAR_NAMES.length; i++) {
+                    if (i != 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(SPEC_VAR_NAMES[i]);
+                }
+            }
+            throw new ParseException(sb.toString(), this);
         }
+        
+        this.name = name.intern();
     }
 
     TemplateModel _eval(Environment env) throws TemplateException {
