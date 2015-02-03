@@ -22307,6 +22307,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: 2015-02-[TODO]</para>
 
+        <para>To find changes since RC01, search for <quote>since
+        RC02</quote>!</para>
+
         <para>Note that since 2.3.22 is designed to be fully backward
         compatible with the previous 2.3.x releases, <emphasis>some of the
         improvements and fixes described below are only activated when you
@@ -22386,7 +22389,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"aa"</literal>, <literal>"ab"</literal>, etc. This is
               the same logic that you can see in column labels in spreadsheet
               applications (like Excel or Calc). <link
-              linkend="ref_builtin_lower_abc">More details...</link></para>
+              linkend="ref_builtin_lower_abc">More details...</link> (since
+              RC02)</para>
             </listitem>
 
             <listitem>
@@ -22395,7 +22399,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"foo.bar.txt"?keep_before_last</literal> returns
               <literal>"foo.bar"</literal>,
               <literal>"foo.bar.txt"?keep_after_last</literal> returns
-              <literal>"txt"</literal> (since 2.3.22-rc02).</para>
+              <literal>"txt"</literal> (since RC02).</para>
             </listitem>
 
             <listitem>
@@ -22446,7 +22450,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>The <literal>#setting</literal> directive gives more
                   helpful error message when the setting name is not
                   recognized, and lists the allowed setting names when
-                  appropriate.</para>
+                  appropriate (since RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23114,7 +23118,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   than its <literal>name</literal>. You should also use the
                   <literal>sourceName</literal> in
                   <literal>registerTemplateSpi</literal> and such, not the
-                  <literal>name</literal>. </para>
+                  <literal>name</literal> (since RC02).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Fixed some bugs in 2.3.22-rc01, where still name was
+                  used instead of <literal>templateName</literal>, and where
+                  assumptions were made about the template name format instead
+                  of using the <literal>TemplateNameFormat</literal> setting
+                  (since RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
