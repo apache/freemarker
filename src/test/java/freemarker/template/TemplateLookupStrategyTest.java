@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
+import freemarker.core.ParseException;
 import freemarker.test.MonitoredTemplateLoader;
 
 public class TemplateLookupStrategyTest {
@@ -521,6 +522,59 @@ public class TemplateLookupStrategyTest {
             cfg.clearTemplateCache();
         }
         
+    }
+    
+    @Test
+    public void testNonparsed() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
+        tl.putTemplate("test.txt", "");
+        tl.putTemplate("test_aa.txt", "");
+        cfg.setTemplateLoader(tl);
+        
+        try {
+            cfg.getTemplate("missing.txt", new Locale("aa", "BB"), null, false);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            assertEquals("missing.txt", e.getTemplateName());
+            assertEquals(
+                    ImmutableList.of(
+                            "missing_aa_BB.txt",
+                            "missing_aa.txt",
+                            "missing.txt"),
+                    tl.getTemplatesTried());
+            tl.clear();
+            cfg.clearTemplateCache();
+        }
+        
+        {
+            Template t = cfg.getTemplate("test.txt", new Locale("aa", "BB"), null, false);
+            assertEquals("test.txt", t.getName());
+            assertEquals("test_aa.txt", t.getSourceName());
+            assertEquals(
+                    ImmutableList.of(
+                            "test_aa_BB.txt",
+                            "test_aa.txt"),
+                    tl.getTemplatesTried());
+        }
+    }
+
+    @Test
+    public void testParseError() throws IOException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
+        tl.putTemplate("test.ftl", "");
+        tl.putTemplate("test_aa.ftl", "<#wrong>");
+        cfg.setTemplateLoader(tl);
+        
+        try {
+            cfg.getTemplate("test.ftl", new Locale("aa", "BB"));
+            fail();
+        } catch (ParseException e) {
+            assertEquals("test_aa.ftl", e.getTemplateName());
+        }
     }
     
     private String toCanonicalFTL(String ftl, Configuration cfg) throws IOException {

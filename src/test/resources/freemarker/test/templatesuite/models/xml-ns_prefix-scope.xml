@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="http://freemarker.org/test/namespace-test"
+    xmlns:foo="http://freemarker.org/test/foo"
+    xmlns:bar="http://freemarker.org/test/bar">
+  <e>e in NS namespace-test</e>
+  <foo:e>e in NS foo</foo:e>
+  <bar:e>e in NS bar</bar:e>
+</root>
