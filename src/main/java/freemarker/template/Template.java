@@ -177,16 +177,29 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns a trivial template, one that is just a single block of
-     * plain text, no dynamic content. (Used by the cache module to create
-     * unparsed templates.)
-     * @param name the path of the template file relative to the directory what you use to store
-     *        the templates. See {@link #getName} for more details.
-     * @param content the block of text that this template represents
-     * @param config the configuration to which this template belongs
+     * Same as {@link #getPlainTextTemplate(String, String, String, Configuration)} with {@code null} {@code sourceName}
+     * argument.
      */
     static public Template getPlainTextTemplate(String name, String content, Configuration config) {
         return new Template(UnboundTemplate.getPlainTextTemplate(name, content, config), name, config);
+    }
+    
+    /**
+     * Creates a {@link Template} that only contains a single block of static text, no dynamic content.
+     * 
+     * @param name
+     *            See {@link #getName} for more details.
+     * @param sourceName
+     *            See {@link #getSourceName} for more details. If {@code null}, it will be the same as the {@code name}.
+     * @param content
+     *            the block of text that this template represents
+     * @param config
+     *            the configuration to which this template belongs
+     * 
+     * @since 2.3.22
+     */
+    static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
+        Template template = new Template(name, sourceName, config, true);
     }
 
     /**
@@ -468,6 +481,8 @@ public class Template extends Configurable {
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
      * returns whatever the default is in the current configuration, so it's maybe
      * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * 
+     * @since 2.3.20
      */
     public int getActualTagSyntax() {
         return unboundTemplate.getActualTagSyntax();
@@ -489,9 +504,9 @@ public class Template extends Configurable {
 
     /**!!T
     /**
-     * Called by code internally to maintain
-     * a table of macros.
+     * Called by code internally to maintain a table of macros
      * 
+     * @deprecated Should only be used internally, and might will be removed later.
      * @deprecated Modifying already created template is dangerous and might won't be supported.
      *x/
     public void addMacro(Macro macro) {
@@ -499,9 +514,9 @@ public class Template extends Configurable {
     }
 
     /**
-     * Called by code internally to maintain
-     * a list of imports.
+     * Called by code internally to maintain a list of imports
      * 
+     * @deprecated Should only be used internally, and might will be removed later.
      * @deprecated Modifying already created template is dangerous and might won't be supported.
      *x/
     public void addImport(LibraryLoad ll) {
@@ -545,7 +560,9 @@ public class Template extends Configurable {
 
     /**
      * This is used internally.
+     * 
      * @deprecated Modifying already created template is dangerous and might won't be supported.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public void addPrefixNSMapping(String prefix, String nsURI) {
         unboundTemplate.addPrefixNSMapping(prefix, nsURI);

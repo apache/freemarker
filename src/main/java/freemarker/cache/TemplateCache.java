@@ -515,7 +515,7 @@ public class TemplateCache
                 } finally {
                     reader.close();
                 }
-                template = Template.getPlainTextTemplate(name, sw.toString(), config);
+                template = Template.getPlainTextTemplate(name, sourceName, sw.toString(), config);
                 actualEncoding = initialEncoding;
             }
         }

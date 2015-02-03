@@ -2378,9 +2378,15 @@ Include Include() :
             } else if (attString.equalsIgnoreCase("ignore_missing")) {
             	ignoreMissingExp = exp;
             } else {
+                String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
                 throw new ParseException(
                 		"Unsupported named #include parameter: \"" + attString + "\". Supported parameters are: "
-                		+ "\"parse\", \"encoding\", \"ignore_missing\".",
+                		+ "\"parse\", \"encoding\", \"ignore_missing\"."
+                		+ (correctedName == null
+                		      ? ""
+                		      : " Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
+	                              + "check if an update is available, and if it indeed supports camel "
+	                              + "case."),
                 		template, att);
             }
         }
@@ -3182,7 +3188,26 @@ void HeaderElement() :
                             } catch (TemplateModelException tme) {
                             }
                         } else {
-                            throw new ParseException("Unknown FTL header parameter: " + key.image, template, key);
+                            String correctName;
+	                        if (ks.equals("stripWhitespace")) {
+	                            correctName = "strip_whitespace";
+	                        } else if (ks.equals("stripText")) {
+	                            correctName = "strip_text";
+	                        } else if (ks.equals("strictSyntax")) {
+	                            correctName = "strict_syntax"; 
+	                        } else if (ks.equals("nsPrefixes")) {
+	                           correctName = "ns_prefixes";
+	                        } else {
+	                           correctName = null;
+	                        }
+                            throw new ParseException(
+                                    "Unknown FTL header parameter: " + key.image
+                                    + (correctName == null
+                                            ? ""
+                                            : ". Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
+                                              + "check if an update is available, and if it indeed supports camel "
+                                              + "case. Until that, use " + correctName + " instead."),
+                                    template, key);
                         }
                     }
                 }

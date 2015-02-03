@@ -194,6 +194,7 @@
    <testCase name="xmlns5">
       <setting object_wrapper="freemarker.ext.beans.BeansWrapper"/>
    </testCase>   
+   <testCase name="xml-ns_prefix-scope" template="xml-ns_prefix-scope-main.ftl" />
    <testCase name="hashconcat"/>
    <testCase name="new-defaultresolver" />
    <testCase name="new-unrestricted">

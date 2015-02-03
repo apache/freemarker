@@ -6967,6 +6967,12 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
 cfg = new Configuration(Configuration.VERSION_2_3_22);
 ...
 cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
+
+          <para>or if you are configuring FreeMarker with
+          <literal>java.util.Properties</literal> instead (and let's say it's
+          also a <literal>.properties</literal> file):</para>
+
+          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.22)</programlisting>
         </section>
       </section>
     </chapter>
@@ -22301,6 +22307,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
         <para>Date of release: 2015-02-[TODO]</para>
 
+        <para>To find changes since RC01, search for <quote>since
+        RC02</quote>!</para>
+
         <para>Note that since 2.3.22 is designed to be fully backward
         compatible with the previous 2.3.x releases, <emphasis>some of the
         improvements and fixes described below are only activated when you
@@ -22380,7 +22389,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"aa"</literal>, <literal>"ab"</literal>, etc. This is
               the same logic that you can see in column labels in spreadsheet
               applications (like Excel or Calc). <link
-              linkend="ref_builtin_lower_abc">More details...</link></para>
+              linkend="ref_builtin_lower_abc">More details...</link> (since
+              RC02)</para>
             </listitem>
 
             <listitem>
@@ -22389,7 +22399,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>"foo.bar.txt"?keep_before_last</literal> returns
               <literal>"foo.bar"</literal>,
               <literal>"foo.bar.txt"?keep_after_last</literal> returns
-              <literal>"txt"</literal> (since 2.3.22-rc02).</para>
+              <literal>"txt"</literal> (since RC02).</para>
             </listitem>
 
             <listitem>
@@ -22406,16 +22416,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 <listitem>
                   <para>Several improvements when calling custom JSP tags; see
                   them in its own section later.</para>
-                </listitem>
-
-                <listitem>
-                  <para>When <literal>Map.get</literal> or
-                  <literal>Map.containsKey</literal> of a wrapped
-                  <literal>Map</literal> throws a
-                  <literal>ClassCastException</literal> or
-                  <literal>NullPointerException</literal>, the error will
-                  point to the causing FTL expression (with some explanation),
-                  rather than bubbling up as low level runtime error.</para>
                 </listitem>
 
                 <listitem>
@@ -22440,7 +22440,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>The <literal>#setting</literal> directive gives more
                   helpful error message when the setting name is not
                   recognized, and lists the allowed setting names when
-                  appropriate.</para>
+                  appropriate (since RC02).</para>
+                </listitem>
+
+                <listitem>
+                  <para>When a bad special variable
+                  (<literal>.<replaceable>name</replaceable></literal>) name
+                  is encountered, the list of available names is shown in the
+                  error message.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <literal>Map.get</literal> or
+                  <literal>Map.containsKey</literal> of a wrapped
+                  <literal>Map</literal> throws a
+                  <literal>ClassCastException</literal> or
+                  <literal>NullPointerException</literal>, the error will
+                  point to the causing FTL expression (with some explanation),
+                  rather than bubbling up as low level runtime error.</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23099,6 +23116,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   parameters, in which case they use the same defaults as the
                   overloads where the parameter is omitted.</para>
                 </listitem>
+
+                <listitem>
+                  <para>Debugger SPI implementators, attention: The
+                  <literal>DebugBreak</literal> instruction will now send the
+                  <literal>sourceName</literal> of the template to the
+                  <literal>suspendEnvironmentSpi</literal> callback, rather
+                  than its <literal>name</literal>. You should also use the
+                  <literal>sourceName</literal> in
+                  <literal>registerTemplateSpi</literal> and such, not the
+                  <literal>name</literal> (since RC02).</para>
+                </listitem>
+
+                <listitem>
+                  <para>Fixed some bugs in 2.3.22-rc01, where still name was
+                  used instead of <literal>templateName</literal>, and where
+                  assumptions were made about the template name format instead
+                  of using the <literal>TemplateNameFormat</literal> setting
+                  (since RC02).</para>
+                </listitem>
               </itemizedlist>
             </listitem>
 
@@ -23200,11 +23236,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   or <literal>createProcessingEnvironment</literal> method was
                   called to initiate the output generation.) Note that this
                   only matters if you have set settings directly on
-                  <literal>Template</literal> objects, and almost nobody does
-                  that. Also note that macro calls have never changed the
-                  <literal>Environment</literal> parent to the
-                  <literal>Template</literal> that contains the macro
-                  definition, so there's no change there now.</para>
+                  <literal>Template</literal> objects (not to be confused with
+                  setting settings in templates via
+                  <literal>#setting</literal>, which just modifies the
+                  <literal>Environment</literal>, and so isn't affected by
+                  this fix), and almost nobody does that. Also note that macro
+                  calls have never changed the <literal>Environment</literal>
+                  parent to the <literal>Template</literal> that contains the
+                  macro definition, so there's no change there now.</para>
                 </listitem>
 
                 <listitem>

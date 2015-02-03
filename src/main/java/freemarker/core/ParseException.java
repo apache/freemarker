@@ -145,7 +145,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
             Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         lineNumber, columnNumber,
                         endLineNumber, endColumnNumber,
                         cause);      
@@ -167,7 +167,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, Template template, int lineNumber, int columnNumber, Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         lineNumber, columnNumber,
                         0, 0,
                         cause);      
@@ -187,7 +187,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, Template template, Token tk, Throwable cause) {
         this(description,
-                template == null ? null : template.getName(),
+                template == null ? null : template.getSourceName(),
                         tk.beginLine, tk.beginColumn,
                         tk.endLine, tk.endColumn,
                         cause);

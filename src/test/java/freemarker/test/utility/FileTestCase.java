@@ -23,15 +23,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Test case that needs to compare a string to a reference (expected) text file, or two text files. 
@@ -84,32 +83,21 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private void multilineAssertEquals(String expected, String actual) {
-        LineNumberReader expLines = new LineNumberReader(new StringReader(expected));
-        LineNumberReader actLines = new LineNumberReader(new StringReader(actual));
-        String expLine = "", actLine = "";
-        while (true) {
-            try {
-                expLine = expLines.readLine();
-                actLine = actLines.readLine();
-            } catch (IOException e) {
-                // Shouldn't occur
-                throw new RuntimeException(e);
-            }
-            if (expLine == null || actLine == null) {
-                if (expLine == null && actLine == null) {
-                    int lineNumDif = expLines.getLineNumber() - actLines.getLineNumber();
-                    if (lineNumDif != 0) {
-                        fail(lineNumDif > 0
-                                ? "The actual text has " + lineNumDif + " less lines than of the expected text."
-                        		: "The actual text has " + -lineNumDif + " more lines than of the expected text.");
-                    } else {
-                        return;
-                    }
-                }
-            } else {
-                assertEquals("Line " + expLines.getLineNumber() + ": ", expLine, actLine);
-            }
-        } 
+        String normExpected = normalizeNewLines(expected);
+        final String normActual = normalizeNewLines(actual);
+        
+        // Ignore final line-break difference:
+        if (normActual.endsWith("\n") && !normExpected.endsWith("\n")) {
+            normExpected += "\n";
+        } else if (!normActual.endsWith("\n") && normExpected.endsWith("\n")) {
+            normExpected = normExpected.substring(0, normExpected.length() -  1);
+        }
+        
+        assertEquals(normExpected, normActual);
+    }
+    
+    private String normalizeNewLines(String s) {
+        return StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
 
     private void saveString(File actualFile, String actualContents) throws IOException {

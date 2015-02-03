@@ -24,7 +24,8 @@ public class _DelayedGetMessage extends _DelayedConversionToString  {
     }
 
     protected String doConversion(Object obj) {
-        return ((Throwable) obj).getMessage();
+        final String message = ((Throwable) obj).getMessage();
+        return message == null || message.length() == 0 ? "[No exception message]" : message;
     }
     
 }
