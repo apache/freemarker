@@ -96,6 +96,10 @@ public abstract class TemplateNameFormat {
      */
     public static final TemplateNameFormat DEFAULT_2_4_0 = new Default020400();
     
+    /**
+     * @param baseName Maybe {@code null}, maybe a "file" name instead of a "directory" name.
+     * @param targetName No {@code null}. Maybe relative, maybe absolute.
+     */
     abstract String toAbsoluteName(String baseName, String targetName) throws MalformedTemplateNameException;
     
     /**
@@ -106,6 +110,10 @@ public abstract class TemplateNameFormat {
 
     private static final class Default020300 extends TemplateNameFormat {
         String toAbsoluteName(String baseName, String targetName) {
+            if (baseName == null) {
+                return targetName;
+            }
+            
             if (targetName.indexOf("://") > 0) {
                 return targetName;
             } else if (targetName.startsWith("/"))  {
@@ -174,6 +182,10 @@ public abstract class TemplateNameFormat {
 
     private static final class Default020400 extends TemplateNameFormat {
         String toAbsoluteName(String baseName, String targetName) {
+            if (baseName == null) {
+                return targetName;
+            }
+            
             if (findSchemeSectionEnd(targetName) != 0) {
                 return targetName;
             } else if (targetName.startsWith("/"))  {
