@@ -33,11 +33,11 @@ public final class LibraryLoad extends TemplateElement {
     private String namespace;
 
     /**
-     * @param template the template that this <tt>Include</tt> is a part of.
+     * @param unboundTemplate the template that this <tt>Include</tt> is a part of.
      * @param templateName the name of the template to be included.
      * @param namespace the namespace to assign this library to
      */
-    LibraryLoad(UnboundTemplate template,
+    LibraryLoad(UnboundTemplate unboundTemplate,
             Expression templateName,
             String namespace)
     {

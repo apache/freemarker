@@ -53,11 +53,11 @@ final class PropertySetting extends TemplateElement {
         this.value = value;
     }
 
-    void setLocation(UnboundTemplate template, int beginColumn, int beginLine, int endColumn, int endLine)
+    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
     throws
         ParseException
     {
-        super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
+        super.setLocation(unboundTemplate, beginColumn, beginLine, endColumn, endLine);
         
         if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
             StringBuffer sb = new StringBuffer();
@@ -82,7 +82,7 @@ final class PropertySetting extends TemplateElement {
             }
             throw new ParseException(
                     sb.toString(),
-                    template, beginLine, beginColumn, endLine, endColumn);
+                    unboundTemplate, beginLine, beginColumn, endLine, endColumn);
         }
     }
 

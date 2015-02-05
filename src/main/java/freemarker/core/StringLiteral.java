@@ -41,12 +41,12 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
             FMParserTokenManager token_source = new FMParserTokenManager(scs);
             token_source.onlyTextOutput = true;
             FMParser parser = new FMParser(token_source);
-            parser.setTemplate(getTemplate());
+            parser.setTemplate(getUnboundTemplate());
             try {
                 dynamicValue = parser.FreeMarkerText();
             }
             catch(ParseException e) {
-                e.setTemplateName(getTemplate().getSourceName());
+                e.setTemplateName(getUnboundTemplate().getSourceName());
                 throw e;
             }
             this.constantValue = null;

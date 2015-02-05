@@ -250,9 +250,9 @@ public class TokenMgrError extends Error
    /**
     * @since 2.4.0
     */
-   public ParseException toParseException(UnboundTemplate template) {
+   public ParseException toParseException(UnboundTemplate unboundTemplate) {
        return new ParseException(getDetail(),
-               template,
+               unboundTemplate,
                getLineNumber() != null ? getLineNumber().intValue() : 0,
                getColumnNumber() != null ? getColumnNumber().intValue() : 0,
                getEndLineNumber() != null ? getEndLineNumber().intValue() : 0,

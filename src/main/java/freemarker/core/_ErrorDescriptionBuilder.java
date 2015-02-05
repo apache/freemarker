@@ -204,9 +204,9 @@ public class _ErrorDescriptionBuilder {
     }
 
     private void appendParts(StringBuffer sb, Object[] parts) {
-        UnboundTemplate template = this.template != null
+        UnboundTemplate unboundTemplate = this.template != null
                 ? this.template.getUnboundTemplate()
-                : (blamed != null ? blamed.getTemplate() : null); 
+                : (blamed != null ? blamed.getUnboundTemplate() : null); 
         for (int i = 0; i < parts.length; i++) {
             Object partObj = parts[i];
             if (partObj instanceof Object[]) {
@@ -218,7 +218,7 @@ public class _ErrorDescriptionBuilder {
                     partStr = "null";
                 }
                 
-                if (template != null) {
+                if (unboundTemplate != null) {
                     if (partStr.length() > 4
                             && partStr.charAt(0) == '<'
                             && (
@@ -226,7 +226,7 @@ public class _ErrorDescriptionBuilder {
                                     || (partStr.charAt(1) == '/') && (partStr.charAt(2) == '#' || partStr.charAt(2) == '@')
                                )
                             && partStr.charAt(partStr.length() - 1) == '>') {
-                        if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
+                        if (unboundTemplate.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
                             sb.append('[');
                             sb.append(partStr.substring(1, partStr.length() - 1));
                             sb.append(']');

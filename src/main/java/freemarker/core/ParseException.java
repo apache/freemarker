@@ -196,19 +196,19 @@ public class ParseException extends java.io.IOException implements FMParserConst
     /**
      * @since 2.4.0
      */
-    public ParseException(String description, UnboundTemplate template,
+    public ParseException(String description, UnboundTemplate unboundTemplate,
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber) {
-        this(description, template, lineNumber, columnNumber, endLineNumber, endColumnNumber, null);      
+        this(description, unboundTemplate, lineNumber, columnNumber, endLineNumber, endColumnNumber, null);      
     }
 
     /**
      * @since 2.4.0
      */
-    public ParseException(String description, UnboundTemplate template,
+    public ParseException(String description, UnboundTemplate unboundTemplate,
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
             Throwable cause) {
         this(description,
-                template == null ? null : template.getSourceName(),
+                unboundTemplate == null ? null : unboundTemplate.getSourceName(),
                         lineNumber, columnNumber,
                         endLineNumber, endColumnNumber,
                         cause);      
@@ -217,16 +217,16 @@ public class ParseException extends java.io.IOException implements FMParserConst
     /**
      * @since 2.4.0
      */
-    public ParseException(String description, UnboundTemplate template, Token tk) {
-        this(description, template, tk, null);
+    public ParseException(String description, UnboundTemplate unboundTemplate, Token tk) {
+        this(description, unboundTemplate, tk, null);
     }
 
     /**
      * @since 2.4.0
      */
-    public ParseException(String description, UnboundTemplate template, Token tk, Throwable cause) {
+    public ParseException(String description, UnboundTemplate unboundTemplate, Token tk, Throwable cause) {
         this(description,
-                template == null ? null : template.getSourceName(),
+                unboundTemplate == null ? null : unboundTemplate.getSourceName(),
                         tk.beginLine, tk.beginColumn,
                         tk.endLine, tk.endColumn,
                         cause);
@@ -244,7 +244,7 @@ public class ParseException extends java.io.IOException implements FMParserConst
      */
     public ParseException(String description, TemplateObject tobj, Throwable cause) {
         this(description,
-                tobj.getTemplate() == null ? null : tobj.getTemplate().getSourceName(),
+                tobj.getUnboundTemplate() == null ? null : tobj.getUnboundTemplate().getSourceName(),
                         tobj.beginLine, tobj.beginColumn,
                         tobj.endLine, tobj.endColumn,
                         cause);

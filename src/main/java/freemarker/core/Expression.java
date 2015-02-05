@@ -49,11 +49,11 @@ abstract public class Expression extends TemplateObject {
 
     // Hook in here to set the constant value if possible.
     
-    void setLocation(UnboundTemplate template, int beginColumn, int beginLine, int endColumn, int endLine)
+    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
     throws
         ParseException
     {
-        super.setLocation(template, beginColumn, beginLine, endColumn, endLine);
+        super.setLocation(unboundTemplate, beginColumn, beginLine, endColumn, endLine);
         if (isLiteral()) {
             try {
                 constantValue = _eval(null);

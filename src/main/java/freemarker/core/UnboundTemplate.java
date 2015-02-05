@@ -148,10 +148,10 @@ public class UnboundTemplate {
     }
     
     static public UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
-        UnboundTemplate template = new UnboundTemplate(sourceName, config);
-        template.rootElement = new TextBlock(content);
-        template.actualTagSyntax = config.getTagSyntax();
-        return template;
+        UnboundTemplate unboundTemplate = new UnboundTemplate(sourceName, config);
+        unboundTemplate.rootElement = new TextBlock(content);
+        unboundTemplate.actualTagSyntax = config.getTagSyntax();
+        return unboundTemplate;
     }
 
     /**

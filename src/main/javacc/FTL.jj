@@ -38,7 +38,7 @@ import java.util.*;
 public class FMParser {
 
     // Necessary for adding macros and setting location info.
-    private UnboundTemplate template;
+    private UnboundTemplate unboundTemplate;
     private String assumedEncoding;
     private boolean stripWhitespace, stripText;
 
@@ -62,14 +62,14 @@ public class FMParser {
     }
 
     FMParser(
-            UnboundTemplate template,
+            UnboundTemplate unboundTemplate,
             Reader reader, String assumedEncoding,
             boolean strictEscapeSyntax, boolean stripWhitespace,
             int tagSyntax, int incompatibleImprovements) {
         this(reader);
         this.assumedEncoding = assumedEncoding;
         
-        setTemplate(template);
+        setTemplate(unboundTemplate);
         
         token_source.setParser(this);
         
@@ -95,14 +95,14 @@ public class FMParser {
         this.incompatibleImprovements = incompatibleImprovements;
     }
 
-    void setTemplate(UnboundTemplate template)
+    void setTemplate(UnboundTemplate unboundTemplate)
     {
-        this.template = template;
+        this.unboundTemplate = unboundTemplate;
     }
 
     UnboundTemplate getTemplate()
     {
-        return template;
+        return unboundTemplate;
     }
 
     /**
@@ -1116,7 +1116,7 @@ Expression Parenthesis() :
     end = <CLOSE_PAREN>
     {
         result = new ParentheticalExpression(exp);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -1160,7 +1160,7 @@ Expression NotExpression() :
         for (int i = 0; i < nots.size(); i++) {
             result = new NotExpression(exp);
             Token tok = (Token) nots.get(nots.size() -i -1);
-            result.setLocation(template, tok, exp);
+            result.setLocation(unboundTemplate, tok, exp);
             exp = result;
         }
         return result;
@@ -1182,7 +1182,7 @@ Expression UnaryPlusMinusExpression() :
     exp = PrimaryExpression()
     {
         result = new UnaryPlusMinusExpression(exp, isMinus);  
-        result.setLocation(template, t, exp);
+        result.setLocation(unboundTemplate, t, exp);
         return result;
     }
 }
@@ -1214,7 +1214,7 @@ Expression AdditiveExpression() :
                 numberLiteralOnly(rhs);
                 result = new ArithmeticExpression(lhs, rhs, ArithmeticExpression.TYPE_SUBSTRACTION);
             }
-            result.setLocation(template, lhs, rhs);
+            result.setLocation(unboundTemplate, lhs, rhs);
             lhs = result;
         }
     )*
@@ -1250,7 +1250,7 @@ Expression MultiplicativeExpression() :
             numberLiteralOnly(lhs);
             numberLiteralOnly(rhs);
             result = new ArithmeticExpression(lhs, rhs, operation);
-            result.setLocation(template, lhs, rhs);
+            result.setLocation(unboundTemplate, lhs, rhs);
             lhs = result;
         }
     )*
@@ -1283,7 +1283,7 @@ Expression EqualityExpression() :
 	        notListLiteral(lhs, "scalar");
 	        notListLiteral(rhs, "scalar");
 	        result = new ComparisonExpression(lhs, rhs, t.image);
-	        result.setLocation(template, lhs, rhs);
+	        result.setLocation(unboundTemplate, lhs, rhs);
         }
     ]
     {
@@ -1322,7 +1322,7 @@ Expression RelationalExpression() :
             notStringLiteral(lhs, "number");
             notStringLiteral(rhs, "number");
             result = new ComparisonExpression(lhs, rhs, t.image);
-            result.setLocation(template, lhs, rhs);
+            result.setLocation(unboundTemplate, lhs, rhs);
         }
     ]
     {
@@ -1369,9 +1369,9 @@ Expression RangeExpression() :
            
             Range range = new Range(lhs, rhs, endType);
             if (rhs != null) {
-                range.setLocation(template, lhs, rhs);
+                range.setLocation(unboundTemplate, lhs, rhs);
             } else {
-                range.setLocation(template, lhs, dotDot);
+                range.setLocation(unboundTemplate, lhs, dotDot);
             }
             result = range;
         }
@@ -1398,7 +1398,7 @@ Expression AndExpression() :
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
             result = new AndExpression(lhs, rhs);
-            result.setLocation(template, lhs, rhs);
+            result.setLocation(unboundTemplate, lhs, rhs);
             lhs = result;
         }
     )*
@@ -1421,7 +1421,7 @@ Expression OrExpression() :
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
             result = new OrExpression(lhs, rhs);
-            result.setLocation(template, lhs, rhs);
+            result.setLocation(unboundTemplate, lhs, rhs);
             lhs = result;
         }
     )*
@@ -1441,7 +1441,7 @@ ListLiteral ListLiteral() :
     end = <CLOSE_BRACKET>
     {
         ListLiteral result = new ListLiteral(values);
-        result.setLocation(template, begin, end);
+        result.setLocation(unboundTemplate, begin, end);
         return result;
     }
 }
@@ -1458,9 +1458,9 @@ Expression NumberLiteral() :
     )
     {
         String s = t.image;
-        Expression result = new NumberLiteral(template.getConfiguration().getArithmeticEngine().toNumber(s));
+        Expression result = new NumberLiteral(unboundTemplate.getConfiguration().getArithmeticEngine().toNumber(s));
         Token startToken = (op != null) ? op : t;
-        result.setLocation(template, startToken, t);
+        result.setLocation(unboundTemplate, startToken, t);
         return result;
     }
 }
@@ -1473,7 +1473,7 @@ Identifier Identifier() :
     t = <ID>
     {
         Identifier id = new Identifier(t.image);
-        id.setLocation(template, t, t);
+        id.setLocation(unboundTemplate, t, t);
         return id;
     }
 }
@@ -1511,7 +1511,7 @@ BuiltinVariable BuiltinVariable() :
             pe.endColumnNumber = name.endColumn;
             throw pe;
         }
-        result.setLocation(template, dot, name);
+        result.setLocation(unboundTemplate, dot, name);
         return result;
     }
 }
@@ -1564,9 +1564,9 @@ Expression DefaultTo(Expression exp) :
     {
         DefaultToExpression result = new DefaultToExpression(exp, rhs);
         if (rhs == null) {
-            result.setLocation(template, exp, t);
+            result.setLocation(unboundTemplate, exp, t);
         } else {
-            result.setLocation(template, exp, rhs);
+            result.setLocation(unboundTemplate, exp, rhs);
         }
         return result;
     }
@@ -1580,7 +1580,7 @@ Expression Exists(Expression exp) :
     t = <EXISTS>
     {
         ExistsExpression result = new ExistsExpression(exp);
-        result.setLocation(template, exp, t);
+        result.setLocation(unboundTemplate, exp, t);
         return result;
     }
 }
@@ -1603,7 +1603,7 @@ Expression BuiltIn(Expression exp) :
             pe.endColumnNumber = t.endColumn;
             throw pe;
         }
-        result.setLocation(template, exp, t);
+        result.setLocation(unboundTemplate, exp, t);
         return result;
     }
 }
@@ -1642,7 +1642,7 @@ Expression DotVariable(Expression exp) :
             )
             {
                 if (!Character.isLetter(t.image.charAt(0))) {
-                    throw new ParseException(t.image + " is not a valid identifier.", template, t);
+                    throw new ParseException(t.image + " is not a valid identifier.", unboundTemplate, t);
                 }
             }
         )
@@ -1651,7 +1651,7 @@ Expression DotVariable(Expression exp) :
             notStringLiteral(exp, "hash");
             notBooleanLiteral(exp, "hash");
             Dot dot = new Dot(exp, t.image);
-            dot.setLocation(template, exp, t);
+            dot.setLocation(unboundTemplate, exp, t);
             return dot;
         }
 }
@@ -1673,7 +1673,7 @@ Expression DynamicKey(Expression exp) :
         notBooleanLiteral(exp, "list or hash");
         notNumberLiteral(exp, "list or hash");
         DynamicKeyName dkn = new DynamicKeyName(exp, arg);
-        dkn.setLocation(template, exp, t);
+        dkn.setLocation(unboundTemplate, exp, t);
         return dkn;
     }
 }
@@ -1693,7 +1693,7 @@ MethodCall MethodArgs(Expression exp) :
         {
             args.trimToSize();
             MethodCall result = new MethodCall(exp, args);
-            result.setLocation(template, exp, end);
+            result.setLocation(unboundTemplate, exp, end);
             return result;
         }
 }
@@ -1725,7 +1725,7 @@ StringLiteral StringLiteral(boolean interpolate) :
             throw pe;
         }
         StringLiteral result = new StringLiteral(s);
-        result.setLocation(template, t, t);
+        result.setLocation(unboundTemplate, t, t);
         if (interpolate && !raw) {
             if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.checkInterpolation();
         }
@@ -1745,7 +1745,7 @@ Expression BooleanLiteral() :
         t = <TRUE> { result = new BooleanLiteral(true); }
     )
     {
-        result.setLocation(template, t, t);
+        result.setLocation(unboundTemplate, t, t);
         return result;
     }
 }
@@ -1784,7 +1784,7 @@ HashLiteral HashLiteral() :
     end = <CLOSING_CURLY_BRACKET>
     {
         HashLiteral result = new HashLiteral(keys, values);
-        result.setLocation(template, begin, end);
+        result.setLocation(unboundTemplate, begin, end);
         return result;
     }
 }
@@ -1808,7 +1808,7 @@ DollarVariable StringOutput() :
     end = <CLOSING_CURLY_BRACKET>
     {
         DollarVariable result = new DollarVariable(exp, escapedExpression(exp));
-        result.setLocation(template, begin, end);
+        result.setLocation(unboundTemplate, begin, end);
         return result;
     }
 }
@@ -1840,15 +1840,15 @@ NumericalOutput NumericalOutput() :
 	                if (type != '-') {
 	                    switch (type) {
 	                    case 'm':
-	                        if (minFrac != -1) throw new ParseException("Invalid formatting string", template, fmt);
+	                        if (minFrac != -1) throw new ParseException("Invalid formatting string", unboundTemplate, fmt);
 	                        minFrac = Integer.parseInt(token);
 	                        break;
 	                    case 'M':
-	                        if (maxFrac != -1) throw new ParseException("Invalid formatting string", template, fmt);
+	                        if (maxFrac != -1) throw new ParseException("Invalid formatting string", unboundTemplate, fmt);
 	                        maxFrac = Integer.parseInt(token);
 	                        break;
 	                    default:
-	                        throw new ParseException("Invalid formatting string", template, fmt);
+	                        throw new ParseException("Invalid formatting string", unboundTemplate, fmt);
 	                    }
 	                    type = '-';
 	                } else if (token.equals("m")) {
@@ -1859,16 +1859,16 @@ NumericalOutput NumericalOutput() :
 	                    throw new ParseException();
 	                }
                 } catch (ParseException e) {
-                	throw new ParseException("Invalid format specifier " + fmt.image, template, fmt);
+                	throw new ParseException("Invalid format specifier " + fmt.image, unboundTemplate, fmt);
                 } catch (NumberFormatException e) {
-                	throw new ParseException("Invalid number in the format specifier " + fmt.image, template, fmt);
+                	throw new ParseException("Invalid number in the format specifier " + fmt.image, unboundTemplate, fmt);
                 }
             }
 
             if (maxFrac == -1) {
 	            if (minFrac == -1) {
 	                throw new ParseException(
-	                		"Invalid format specification, at least one of m and M must be specified!", template, fmt);
+	                		"Invalid format specification, at least one of m and M must be specified!", unboundTemplate, fmt);
 	            }
             	maxFrac = minFrac;
             } else if (minFrac == -1) {
@@ -1876,16 +1876,16 @@ NumericalOutput NumericalOutput() :
             }
             if (minFrac > maxFrac) {
             	throw new ParseException(
-            			"Invalid format specification, min cannot be greater than max!", template, fmt);
+            			"Invalid format specification, min cannot be greater than max!", unboundTemplate, fmt);
             }
             if (minFrac > 50 || maxFrac > 50) {// sanity check
-                throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
+                throw new ParseException("Cannot specify more than 50 fraction digits", unboundTemplate, fmt);
             }
             result = new NumericalOutput(exp, minFrac, maxFrac);
         } else {  // if format != null
             result = new NumericalOutput(exp);
         }
-        result.setLocation(template, begin, end);
+        result.setLocation(unboundTemplate, begin, end);
         return result;
     }
 }
@@ -1905,7 +1905,7 @@ TemplateElement If() :
     block = OptionalBlock()
     {
         cblock = new ConditionalBlock(condition, block, ConditionalBlock.TYPE_IF);
-        cblock.setLocation(template, start, block);
+        cblock.setLocation(unboundTemplate, start, block);
         ifBlock = new IfBlock(cblock);
     }
     (
@@ -1915,7 +1915,7 @@ TemplateElement If() :
         block = OptionalBlock()
         {
             cblock = new ConditionalBlock(condition, block, ConditionalBlock.TYPE_ELSE_IF);
-            cblock.setLocation(template, t, block);
+            cblock.setLocation(unboundTemplate, t, block);
             ifBlock.addBlock(cblock);
         }
     )*
@@ -1924,13 +1924,13 @@ TemplateElement If() :
             block = OptionalBlock()
             {
                 cblock = new ConditionalBlock(null, block, ConditionalBlock.TYPE_ELSE);
-                cblock.setLocation(template, t, block);
+                cblock.setLocation(unboundTemplate, t, block);
                 ifBlock.addBlock(cblock);
             }
     ]
     end = <END_IF>
     {
-        ifBlock.setLocation(template, start, end);
+        ifBlock.setLocation(unboundTemplate, start, end);
         return ifBlock;
     }
 }
@@ -1952,7 +1952,7 @@ AttemptBlock Attempt() :
     )
     {
         AttemptBlock result = new AttemptBlock(block, recoveryBlock);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -1967,7 +1967,7 @@ RecoveryBlock Recover() :
     block = OptionalBlock()
     {
         RecoveryBlock result = new RecoveryBlock(block);
-        result.setLocation(template, start, block);
+        result.setLocation(unboundTemplate, start, block);
         return result;
     }
 }
@@ -1989,7 +1989,7 @@ IteratorBlock List() :
     {
         --loopNesting;
         IteratorBlock result = new IteratorBlock(exp, index.image, block, false);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2011,7 +2011,7 @@ IteratorBlock ForEach() :
     {
         --loopNesting;
         IteratorBlock result = new IteratorBlock(exp, index.image, block, true);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2031,7 +2031,7 @@ VisitNode Visit() :
     end = LooseDirectiveEnd()
     {
         VisitNode result = new VisitNode(targetNode, namespaces);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2060,7 +2060,7 @@ RecurseNode Recurse() :
     {
         if (end == null) end = start;
         RecurseNode result = new RecurseNode(node, namespaces);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2073,10 +2073,10 @@ FallbackInstruction FallBack() :
     tok = <FALLBACK>
     {
         if (!inMacro) {
-            throw new ParseException("Cannot fall back outside a macro.", template, tok);
+            throw new ParseException("Cannot fall back outside a macro.", unboundTemplate, tok);
         }
         FallbackInstruction result = new FallbackInstruction();
-        result.setLocation(template, tok, tok);
+        result.setLocation(unboundTemplate, tok, tok);
         return result;
     }
 }
@@ -2093,10 +2093,10 @@ BreakInstruction Break() :
     {
         if (loopNesting < 1 && switchNesting < 1)
         {
-            throw new ParseException(start.image + " occurred outside a loop or a switch block.", template, start);
+            throw new ParseException(start.image + " occurred outside a loop or a switch block.", unboundTemplate, start);
         }
         BreakInstruction result = new BreakInstruction();
-        result.setLocation(template, start, start);
+        result.setLocation(unboundTemplate, start, start);
         return result;
     }
 }
@@ -2119,20 +2119,20 @@ ReturnInstruction Return() :
     {
         if (inMacro) {
             if (exp != null) {
-            	throw new ParseException("A macro cannot return a value", template, start);
+            	throw new ParseException("A macro cannot return a value", unboundTemplate, start);
             }
         } else if (inFunction) {
             if (exp == null) {
-            	throw new ParseException("A function must return a value", template, start);
+            	throw new ParseException("A function must return a value", unboundTemplate, start);
             }
         } else {
             if (exp == null) {
             	throw new ParseException(
-            			"A return instruction can only occur inside a macro or function", template, start);
+            			"A return instruction can only occur inside a macro or function", unboundTemplate, start);
             }
         }
         ReturnInstruction result = new ReturnInstruction(exp);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2150,7 +2150,7 @@ StopInstruction Stop() :
     )
     {
         StopInstruction result = new StopInstruction(exp);
-        result.setLocation(template, start, start);
+        result.setLocation(unboundTemplate, start, start);
         return result;
     }
 }
@@ -2167,7 +2167,7 @@ TemplateElement Nested() :
             t = <SIMPLE_NESTED>
             {
                 result = new BodyInstruction(null);
-                result.setLocation(template, t, t);
+                result.setLocation(unboundTemplate, t, t);
             }
         )
         |
@@ -2177,13 +2177,13 @@ TemplateElement Nested() :
             end = LooseDirectiveEnd()
             {
                 result = new BodyInstruction(bodyParameters);
-                result.setLocation(template, t, end);
+                result.setLocation(unboundTemplate, t, end);
             }
         )
     )
     {
         if (!inMacro) {
-            throw new ParseException("Cannot use a " + t.image + " instruction outside a macro.", template, t);
+            throw new ParseException("Cannot use a " + t.image + " instruction outside a macro.", unboundTemplate, t);
         }
         return result;
     }
@@ -2197,7 +2197,7 @@ TemplateElement Flush() :
     t = <FLUSH>
     {
         FlushInstruction result = new FlushInstruction();
-        result.setLocation(template, t, t);
+        result.setLocation(unboundTemplate, t, t);
         return result;
     }
 }
@@ -2218,7 +2218,7 @@ TemplateElement Trim() :
         t = <NOTRIM> { result = new TrimInstruction(false, false); }
     )
     {
-        result.setLocation(template, t, t);
+        result.setLocation(unboundTemplate, t, t);
         return result;
     }
 }
@@ -2245,7 +2245,7 @@ TemplateElement Assign() :
         {
             scope = Assignment.LOCAL;
             if (!inMacro && !inFunction) {
-                throw new ParseException("Local variable assigned outside a macro.", template, start);
+                throw new ParseException("Local variable assigned outside a macro.", unboundTemplate, start);
             }
         }
     )
@@ -2261,7 +2261,7 @@ TemplateElement Assign() :
 	        exp = Expression()
 	        {
 	            ass = new Assignment(varName, exp, scope);
-	            ass.setLocation(template, nameExp, exp);
+	            ass.setLocation(unboundTemplate, nameExp, exp);
 	            assignments.add(ass);
 	        }
 	        (
@@ -2277,7 +2277,7 @@ TemplateElement Assign() :
 	            exp = Expression()
 	            {
 	                ass = new Assignment(varName, exp, scope);
-	                ass.setLocation(template, nameExp, exp);
+	                ass.setLocation(unboundTemplate, nameExp, exp);
 	                assignments.add(ass);
 	            } 
 	        )*
@@ -2286,7 +2286,7 @@ TemplateElement Assign() :
 	            nsExp = Expression()
 	            {
 	                if (scope != Assignment.NAMESPACE) {
-	                	throw new ParseException("Cannot assign to namespace here.", template, id);
+	                	throw new ParseException("Cannot assign to namespace here.", unboundTemplate, id);
                 	}
 	            }
 	        ]
@@ -2297,7 +2297,7 @@ TemplateElement Assign() :
 	                ai.addAssignment((Assignment) assignments.get(i));
 	            }
 	            ai.setNamespaceExp(nsExp);
-	            ai.setLocation(template, start, end);
+	            ai.setLocation(unboundTemplate, start, end);
 	            return ai;
 	        }
 	    )
@@ -2308,7 +2308,7 @@ TemplateElement Assign() :
 	            nsExp = Expression()
 	            {
 	                if (scope != Assignment.NAMESPACE) {
-	                	throw new ParseException("Cannot assign to namespace here.", template, id);
+	                	throw new ParseException("Cannot assign to namespace here.", unboundTemplate, id);
 	            	}
 	            }
 	        ]
@@ -2318,26 +2318,26 @@ TemplateElement Assign() :
 	            end = <END_LOCAL>
 	            {
 	            	if (scope != Assignment.LOCAL) {
-	            		throw new ParseException("Mismatched assignment tags.", template, end);
+	            		throw new ParseException("Mismatched assignment tags.", unboundTemplate, end);
 	        		}
 	        	}
 	            |
 	            end = <END_ASSIGN>
 	            {
 	            	if (scope != Assignment.NAMESPACE) {
-	            		throw new ParseException("Mismatched assignment tags.", template, end);
+	            		throw new ParseException("Mismatched assignment tags.", unboundTemplate, end);
 	        		}
 	        	}
 	            |
 	            end = <END_GLOBAL>
 	            {
 	            	if (scope != Assignment.GLOBAL) throw new ParseException(
-	            			"Mismatched assignment tags", template, end);
+	            			"Mismatched assignment tags", unboundTemplate, end);
             	}
 	        )
 	        {
 	            BlockAssignment ba = new BlockAssignment(block, varName, scope, nsExp);
-	            ba.setLocation(template, start, end);
+	            ba.setLocation(unboundTemplate, start, end);
 	            return ba;
 	        }
 	    )
@@ -2376,14 +2376,14 @@ Include Include() :
                 		      : " Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
 	                              + "check if an update is available, and if it indeed supports camel "
 	                              + "case."),
-                		template, att);
+                		unboundTemplate, att);
             }
         }
     )*
     end = LooseDirectiveEnd()
     {
-        Include result = new Include(template, nameExp, encodingExp, parseExp, ignoreMissingExp);
-        result.setLocation(template, start, end);
+        Include result = new Include(unboundTemplate, nameExp, encodingExp, parseExp, ignoreMissingExp);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2400,9 +2400,9 @@ LibraryLoad Import() :
     ns = <ID>
     end = LooseDirectiveEnd()
     {
-        LibraryLoad result = new LibraryLoad(template, nameExp, ns.image);
-        result.setLocation(template, start, end);
-        template.addImport(result);
+        LibraryLoad result = new LibraryLoad(unboundTemplate, nameExp, ns.image);
+        result.setLocation(unboundTemplate, start, end);
+        unboundTemplate.addImport(result);
         return result;
     }
 }
@@ -2429,7 +2429,7 @@ Macro Macro() :
     )
     {
         if (inMacro || inFunction) {
-            throw new ParseException("Macros cannot be nested.", template, start);
+            throw new ParseException("Macros cannot be nested.", unboundTemplate, start);
         }
         if (isFunction) inFunction = true; else inMacro = true;
     }
@@ -2458,13 +2458,13 @@ Macro Macro() :
             if (catchAll != null) {
                 throw new ParseException(
                 "There may only be one \"catch-all\" parameter in a macro declaration, and it must be the last parameter.",
-                template, arg);
+                unboundTemplate, arg);
             }
             if (isCatchAll) {
                 if (defValue != null) {
                     throw new ParseException(
                     "\"Catch-all\" macro parameter may not have a default value.",
-                    template, arg);
+                    unboundTemplate, arg);
                 }
                 catchAll = arg.image;
             } else {
@@ -2473,7 +2473,7 @@ Macro Macro() :
                     throw new ParseException(
 		                    "In a macro declaration, parameters without a default value "
 		                    + "must all occur before the parameters with default values.",
-                    template, arg);
+                    unboundTemplate, arg);
                 }
                 args.put(arg.image, defValue);
             }
@@ -2485,19 +2485,19 @@ Macro Macro() :
     (
         end = <END_MACRO>
         {
-        	if(isFunction) throw new ParseException("Expected function end tag here.", template, start);
+        	if(isFunction) throw new ParseException("Expected function end tag here.", unboundTemplate, start);
     	}
         |
         end = <END_FUNCTION>
         {
-    		if(!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
+    		if(!isFunction) throw new ParseException("Expected macro end tag here.", unboundTemplate, start);
     	}
     )
     {
         inMacro = inFunction = false;
         Macro result = new Macro(name, argNames, args, catchAll, isFunction, block);
-        result.setLocation(template, start, end);
-        template.addMacro(result);
+        result.setLocation(unboundTemplate, start, end);
+        unboundTemplate.addMacro(result);
         return result;
     }
 }
@@ -2513,7 +2513,7 @@ CompressedBlock Compress() :
     end = <END_COMPRESS>
     {
         CompressedBlock cb = new CompressedBlock(block);
-        cb.setLocation(template, start, end);
+        cb.setLocation(unboundTemplate, start, end);
         return cb;
     }
 }
@@ -2564,9 +2564,9 @@ TemplateElement UnifiedMacroTransform() :
                 s = s.substring(0, s.length() -1).trim();
                 if (s.length() >0 && !s.equals(directiveName)) {
                     if (directiveName == null) {
-                        throw new ParseException("Expecting </@>", template, end);
+                        throw new ParseException("Expecting </@>", unboundTemplate, end);
                     } else {
-                        throw new ParseException("Expecting </@> or </@" + directiveName + ">", template, end);
+                        throw new ParseException("Expecting </@> or </@" + directiveName + ">", unboundTemplate, end);
                     }
                 }
             }
@@ -2576,7 +2576,7 @@ TemplateElement UnifiedMacroTransform() :
         TemplateElement result = (positionalArgs != null)
         		? new UnifiedCall(exp, positionalArgs, nestedBlock, bodyParameters)
 	            : new UnifiedCall(exp, namedArgs, nestedBlock, bodyParameters);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2613,7 +2613,7 @@ TemplateElement Call() :
             result = new UnifiedCall(new Identifier(macroName), namedArgs, null, null);
         }
         result.legacySyntax = true;
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2676,7 +2676,7 @@ Comment Comment() :
     end = UnparsedContent(start, buf)
     {
         Comment result = new Comment(buf.toString());
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2691,7 +2691,7 @@ TextBlock NoParse() :
     end = UnparsedContent(start, buf)
     {
         TextBlock result = new TextBlock(buf.toString(), true);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2727,7 +2727,7 @@ TransformBlock Transform() :
     )
     {
         TransformBlock result = new TransformBlock(exp, args, content);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2755,7 +2755,7 @@ SwitchBlock Switch() :
             if (caseIns.condition == null) {
                 if (defaultFound) {
                     throw new ParseException(
-                    "You can only have one default case in a switch statement", template, start);
+                    "You can only have one default case in a switch statement", unboundTemplate, start);
                 }
                 defaultFound = true;
             }
@@ -2766,7 +2766,7 @@ SwitchBlock Switch() :
     end = <END_SWITCH>
     {
         --switchNesting;
-        switchBlock.setLocation(template, start, end);
+        switchBlock.setLocation(unboundTemplate, start, end);
         return switchBlock;
     }
 }
@@ -2787,7 +2787,7 @@ Case Case() :
     block = OptionalBlock()
     {
         Case result = new Case(exp, block);
-        result.setLocation(template, start, block);
+        result.setLocation(unboundTemplate, start, block);
         return result;
     }
 }
@@ -2815,7 +2815,7 @@ EscapeBlock Escape() :
     }
     end = <END_ESCAPE>
     {
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2829,7 +2829,7 @@ NoEscapeBlock NoEscape() :
     start = <NOESCAPE>
     {
         if (escapes.isEmpty()) {
-            throw new ParseException("noescape with no matching escape encountered.", template, start);
+            throw new ParseException("noescape with no matching escape encountered.", unboundTemplate, start);
         }
         Object escape = escapes.removeFirst();
     }
@@ -2838,7 +2838,7 @@ NoEscapeBlock NoEscape() :
     {
         escapes.addFirst(escape);
         NoEscapeBlock result = new NoEscapeBlock(content);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2874,7 +2874,7 @@ PropertySetting Setting() :
     end = LooseDirectiveEnd()
     {
         PropertySetting result = new PropertySetting(key.image, value);
-        result.setLocation(template, start, end);
+        result.setLocation(unboundTemplate, start, end);
         return result;
     }
 }
@@ -2978,7 +2978,7 @@ TextBlock PCData() :
         if (stripText && mixedContentNesting == 1) return TextBlock.EMPTY_BLOCK;
 
         TextBlock result = new TextBlock(buf.toString(), false);
-        result.setLocation(template, start, t);
+        result.setLocation(unboundTemplate, start, t);
         return result;
     }
 }
@@ -3003,8 +3003,8 @@ Token UnparsedContent(Token start, StringBuffer buf) :
     {
         buf.setLength(buf.length() - t.image.length());
         if (!t.image.endsWith(";")
-                && template.getTemplateLanguageVersion().intValue() >= _TemplateAPI.VERSION_INT_2_3_21) {
-            throw new ParseException("Unclosed \"" + start.image + "\"", template, start);
+                && unboundTemplate.getTemplateLanguageVersion().intValue() >= _TemplateAPI.VERSION_INT_2_3_21) {
+            throw new ParseException("Unclosed \"" + start.image + "\"", unboundTemplate, start);
         }
         return t;
     }
@@ -3037,7 +3037,7 @@ MixedContent MixedContent() :
     )+
     {
         mixedContentNesting--;
-        mixedContent.setLocation(template, begin, elem);
+        mixedContent.setLocation(unboundTemplate, begin, elem);
         return mixedContent;
     }
 }
@@ -3068,7 +3068,7 @@ TemplateElement FreeMarkerText() :
         }
     )+
     {
-        nodes.setLocation(template, begin, elem);
+        nodes.setLocation(unboundTemplate, begin, elem);
         return nodes;
     }
 }
@@ -3125,7 +3125,7 @@ void HeaderElement() :
                             vs = ((TemplateScalarModel) exp).getAsString();
                         } catch (TemplateModelException tme) {}
                     }
-                    if (template != null) {
+                    if (unboundTemplate != null) {
                         if (ks.equalsIgnoreCase("encoding")) {
                             if (vs == null) {
                                 throw new ParseException("Expecting an encoding string.", exp);
@@ -3154,7 +3154,7 @@ void HeaderElement() :
                                     }
                                     String nsURI = ((TemplateScalarModel) valueModel).getAsString();
                                     try {
-                                        template.addPrefixNSMapping(prefix, nsURI);
+                                        unboundTemplate.addPrefixNSMapping(prefix, nsURI);
                                     } catch (IllegalArgumentException iae) {
                                         throw new ParseException(iae.getMessage(), exp);
                                     }
@@ -3171,7 +3171,7 @@ void HeaderElement() :
                                 for (TemplateModelIterator it = keys.iterator(); it.hasNext();) {
                                         String attName = ((TemplateScalarModel) it.next()).getAsString();
                                         Object attValue = DeepUnwrap.unwrap(attributeMap.get(attName));
-                                        template.setCustomAttribute(attName, attValue);
+                                        unboundTemplate.setCustomAttribute(attName, attValue);
                                 }
                             } catch (TemplateModelException tme) {
                             }
@@ -3195,7 +3195,7 @@ void HeaderElement() :
                                             : ". Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
                                               + "check if an update is available, and if it indeed supports camel "
                                               + "case. Until that, use " + correctName + " instead."),
-                                    template, key);
+                                    unboundTemplate, key);
                         }
                     }
                 }

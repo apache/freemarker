@@ -54,13 +54,13 @@ class BuiltInsForStringsMisc {
             token_source.incompatibleImprovements = _TemplateAPI.getTemplateLanguageVersionAsInt(this);
             token_source.SwitchTo(FMParserConstants.FM_EXPRESSION);
             FMParser parser = new FMParser(token_source);
-            parser.setTemplate(getTemplate());
+            parser.setTemplate(getUnboundTemplate());
             Expression exp = null;
             try {
                 try {
                     exp = parser.Expression();
                 } catch (TokenMgrError e) {
-                    throw e.toParseException(getTemplate());
+                    throw e.toParseException(getUnboundTemplate());
                 }
             } catch (ParseException e) {
                 throw new _MiscTemplateException(this, env, new Object[] {

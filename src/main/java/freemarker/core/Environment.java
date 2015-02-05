@@ -1729,7 +1729,7 @@ public final class Environment extends Configurable {
                     enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
         } else {
             sb.append(MessageUtil.formatLocationForEvaluationError(
-                    stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
+                    stackEl.getUnboundTemplate(), stackEl.beginLine, stackEl.beginColumn));
         }
         sb.append("]");
     }

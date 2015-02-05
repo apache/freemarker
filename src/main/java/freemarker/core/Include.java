@@ -38,12 +38,12 @@ final class Include extends TemplateElement {
     private final Boolean ignoreMissing;
 
     /**
-     * @param template the template that this <tt>#include</tt> is a part of.
+     * @param unboundTemplate the template that this <tt>#include</tt> is a part of.
      * @param includedTemplatePathExp the path of the template to be included.
      * @param encodingExp the encoding to be used or null, if it's the default.
      * @param parseExp whether the template should be parsed (or is raw text)
      */
-    Include(UnboundTemplate template,
+    Include(UnboundTemplate unboundTemplate,
             Expression includedTemplatePathExp,
             Expression encodingExp, Expression parseExp, Expression ignoreMissingExp) throws ParseException {
         this.includedTemplateNameExp = includedTemplatePathExp;
@@ -80,7 +80,7 @@ final class Include extends TemplateElement {
                         parse = Boolean.valueOf(StringUtil.getYesNo(parseExp.evalAndCoerceToString(null)));
                     } else {
                         try {
-                            parse = Boolean.valueOf(parseExp.evalToBoolean(template.getConfiguration()));
+                            parse = Boolean.valueOf(parseExp.evalToBoolean(unboundTemplate.getConfiguration()));
                         } catch(NonBooleanException e) {
                             throw new ParseException("Expected a boolean or string as the value of the parse attribute",
                                     parseExp, e);
@@ -103,7 +103,7 @@ final class Include extends TemplateElement {
                 try {
                     try {
                         ignoreMissing = Boolean.valueOf(
-                                ignoreMissingExp.evalToBoolean(template.getConfiguration()));
+                                ignoreMissingExp.evalToBoolean(unboundTemplate.getConfiguration()));
                     } catch(NonBooleanException e) {
                         throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
                                 ignoreMissingExp, e);

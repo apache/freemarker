@@ -48,37 +48,39 @@ class MessageUtil {
     // Can't be instantiated
     private MessageUtil() { }
         
-    static String formatLocationForSimpleParsingError(UnboundTemplate template, int line, int column) {
-        return formatLocation("in", template, line, column);
+    static String formatLocationForSimpleParsingError(UnboundTemplate unboundTemplate, int line, int column) {
+        return formatLocation("in", unboundTemplate, line, column);
     }
 
     static String formatLocationForSimpleParsingError(String templateSourceName, int line, int column) {
         return formatLocation("in", templateSourceName, line, column);
     }
 
-    static String formatLocationForDependentParsingError(UnboundTemplate template, int line, int column) {
-        return formatLocation("on", template, line, column);
+    static String formatLocationForDependentParsingError(UnboundTemplate unboundTemplate, int line, int column) {
+        return formatLocation("on", unboundTemplate, line, column);
     }
 
     static String formatLocationForDependentParsingError(String templateSourceName, int line, int column) {
         return formatLocation("on", templateSourceName, line, column);
     }
 
-    static String formatLocationForEvaluationError(UnboundTemplate template, int line, int column) {
-        return formatLocation("at", template, line, column);
+    static String formatLocationForEvaluationError(UnboundTemplate unboundTemplate, int line, int column) {
+        return formatLocation("at", unboundTemplate, line, column);
     }
 
     static String formatLocationForEvaluationError(Macro macro, int line, int column) {
-        UnboundTemplate t = macro.getTemplate();
-        return formatLocation("at", t != null ? t.getSourceName() : null, macro.getName(), macro.isFunction(), line, column);
+        UnboundTemplate t = macro.getUnboundTemplate();
+        return formatLocation("at",
+                t != null ? t.getSourceName() : null, macro.getName(), macro.isFunction(), line, column);
     }
     
     static String formatLocationForEvaluationError(String templateSourceName, int line, int column) {
         return formatLocation("at", templateSourceName, line, column);
     }
 
-    private static String formatLocation(String preposition, UnboundTemplate template, int line, int column) {
-        return formatLocation(preposition, template != null ? template.getSourceName() : null, line, column);
+    private static String formatLocation(String preposition, UnboundTemplate unboundTemplate, int line, int column) {
+        return formatLocation(preposition,
+                unboundTemplate != null ? unboundTemplate.getSourceName() : null, line, column);
     }
     
     private static String formatLocation(String preposition, String templateSourceName, int line, int column) {

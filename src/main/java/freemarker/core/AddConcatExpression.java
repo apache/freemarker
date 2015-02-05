@@ -60,7 +60,7 @@ final class AddConcatExpression extends Expression {
             ArithmeticEngine ae =
                 env != null
                     ? env.getArithmeticEngine()
-                    : getTemplate().getConfiguration().getArithmeticEngine();
+                    : getUnboundTemplate().getConfiguration().getArithmeticEngine();
             return new SimpleNumber(ae.add(first, second));
         }
         else if(leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel)

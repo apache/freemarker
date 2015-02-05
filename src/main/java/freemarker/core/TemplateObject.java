@@ -26,7 +26,7 @@ package freemarker.core;
  */
 public abstract class TemplateObject {
     
-    private UnboundTemplate template;
+    private UnboundTemplate unboundTemplate;
     int beginColumn, beginLine, endColumn, endLine;
     
     /** This is needed for an ?eval hack; the expression AST nodes will be the descendants of the template, however,
@@ -34,93 +34,116 @@ public abstract class TemplateObject {
      *  by a negative line numbers, starting from this constant as line 1. */
     static final int RUNTIME_EVAL_LINE_DISPLACEMENT = -1000000000;  
 
-    final void setLocation(UnboundTemplate template, Token begin, Token end)
+    final void setLocation(UnboundTemplate unboundTemplate, Token begin, Token end)
     throws
         ParseException
     {
-        setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
+        setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(UnboundTemplate template, Token begin, TemplateObject end)
+    final void setLocation(UnboundTemplate unboundTemplate, Token begin, TemplateObject end)
     throws
         ParseException
     {
-        setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
+        setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(UnboundTemplate template, TemplateObject begin, Token end)
+    final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, Token end)
     throws
         ParseException
     {
-        setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
+        setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    final void setLocation(UnboundTemplate template, TemplateObject begin, TemplateObject end)
+    final void setLocation(UnboundTemplate unboundTemplate, TemplateObject begin, TemplateObject end)
     throws
         ParseException
     {
-        setLocation(template, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
+        setLocation(unboundTemplate, begin.beginColumn, begin.beginLine, end.endColumn, end.endLine);
     }
 
-    void setLocation(UnboundTemplate template, int beginColumn, int beginLine, int endColumn, int endLine)
+    void setLocation(UnboundTemplate unboundTemplate, int beginColumn, int beginLine, int endColumn, int endLine)
     throws
         ParseException
     {
-        this.template = template;
+        this.unboundTemplate = unboundTemplate;
         this.beginColumn = beginColumn;
         this.beginLine = beginLine;
         this.endColumn = endColumn;
         this.endLine = endLine;
     }
     
+    /**
+     * <b>Internal API - subject to change</b>
+     */
     public final int getBeginColumn() {
         return beginColumn;
     }
 
+    /**
+     * <b>Internal API - subject to change</b>
+     */
     public final int getBeginLine() {
         return beginLine;
     }
 
+    /**
+     * <b>Internal API - subject to change</b>
+     */
     public final int getEndColumn() {
         return endColumn;
     }
 
+    /**
+     * <b>Internal API - subject to change</b>
+     */
     public final int getEndLine() {
         return endLine;
     }
 
     /**
+     * <b>Internal API - subject to change</b>;
      * Returns a string that indicates
      * where in the template source, this object is.
      */
     public String getStartLocation() {
-        return MessageUtil.formatLocationForEvaluationError(template, beginLine, beginColumn);
+        return MessageUtil.formatLocationForEvaluationError(unboundTemplate, beginLine, beginColumn);
     }
 
     /**
-     * As of 2.3.20. the same as {@link #getStartLocation}. Meant to be used where there's a risk of XSS
+     * <b>Internal API - subject to change</b>
+     * 
+     * <p>As of 2.3.20. the same as {@link #getStartLocation}. Meant to be used where there's a risk of XSS
      * when viewing error messages.
      */
     public String getStartLocationQuoted() {
         return getStartLocation();
     }
 
+    /**
+     * <b>Internal API - subject to change</b>
+     */
     public String getEndLocation() {
-        return MessageUtil.formatLocationForEvaluationError(template, endLine, endColumn);
+        return MessageUtil.formatLocationForEvaluationError(unboundTemplate, endLine, endColumn);
     }
 
     /**
-     * As of 2.3.20. the same as {@link #getEndLocation}. Meant to be used where there's a risk of XSS
+     * <b>Internal API - subject to change</b>
+     * 
+     * <p>As of 2.3.20. the same as {@link #getEndLocation}. Meant to be used where there's a risk of XSS
      * when viewing error messages.
      */
     public String getEndLocationQuoted() {
         return getEndLocation();
     }
     
+    /**
+     * <b>Internal API - subject to change</b>
+     */
     public final String getSource() {
         String s;
-        if (template != null) {
-            s = template.getSource(beginColumn, beginLine, endColumn, endLine);
+        if (unboundTemplate != null) {
+            s = unboundTemplate.getSource(beginColumn, beginLine, endColumn, endLine);
         } else {
             s = null;
         }
@@ -140,8 +163,10 @@ public abstract class TemplateObject {
     }
 
     /**
-     * @return whether the point in the template file specified by the 
-     * column and line numbers is contained within this template object.
+     * <b>Internal API - subject to change</b>
+     * 
+     * @return whether the point in the template file specified by the column and line numbers is contained within this
+     *         template object.
      */
     public boolean contains(int column, int line) {
         if (line < beginLine || line > endLine) {
@@ -160,14 +185,27 @@ public abstract class TemplateObject {
         return true;
     }
 
-    public UnboundTemplate getTemplate()
-    {
-        return template;
+    /**
+     * <b>Internal API - subject to change</b>
+     * 
+     * @since 2.4.0
+     */
+    public UnboundTemplate getUnboundTemplate() {
+        return unboundTemplate;
+    }
+
+    /**
+     * <b>Internal API - subject to change</b>
+     * 
+     * @deprecated The name of this method is misleading now; use {@link #getUnboundTemplate()} instead.
+     */
+    public UnboundTemplate getTemplate() {
+        return getUnboundTemplate();
     }
     
     TemplateObject copyLocationFrom(TemplateObject from)
     {
-        template = from.template;
+        unboundTemplate = from.unboundTemplate;
         beginColumn = from.beginColumn;
         beginLine = from.beginLine;
         endColumn = from.endColumn;
@@ -176,8 +214,9 @@ public abstract class TemplateObject {
     }    
 
     /**
-     * FTL generated from the AST of the node, which must be parseable to an AST that does the same as the original
-     * source, assuming we turn off automatic white-space removal when parsing the canonical form.
+     * <b>Internal API - subject to change</b>; FTL generated from the AST of the node, which must be parseable to an
+     * AST that does the same as the original source, assuming we turn off automatic white-space removal when parsing
+     * the canonical form.
      * 
      * @see TemplateElement#getDescription()
      * @see #getNodeTypeSymbol()

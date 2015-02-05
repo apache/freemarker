@@ -59,7 +59,7 @@ public class _TemplateAPI {
     }
     
     public static int getTemplateLanguageVersionAsInt(TemplateObject to) {
-        return to.getTemplate().getTemplateLanguageVersion().intValue();
+        return to.getUnboundTemplate().getTemplateLanguageVersion().intValue();
     }
 
     /** For unit testing only */

@@ -41,7 +41,6 @@ import freemarker.template.utility.CollectionUtils;
  */
 public class TemplateException extends Exception {
 
-    private static final int FTL_STACK_TOP_FEW_MAX_LINES = 6;
     private static final String FTL_INSTRUCTION_STACK_TRACE_TITLE
             = "FTL stack trace (\"~\" means nesting-related):";
 
@@ -200,7 +199,7 @@ public class TemplateException extends Exception {
                                 ? ftlInstructionStackSnapshot[0] : null);
                 // Line number below 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
-                    final UnboundTemplate unboundTemplate = templateObject.getTemplate();
+                    final UnboundTemplate unboundTemplate = templateObject.getUnboundTemplate();
                     templateName = getTemplateNameOrNull(unboundTemplate);
                     templateSourceName = unboundTemplate != null ? unboundTemplate.getSourceName() : null;
                     lineNumber = new Integer(templateObject.getBeginLine());

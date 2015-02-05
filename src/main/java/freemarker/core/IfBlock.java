@@ -58,7 +58,7 @@ final class IfBlock extends TemplateElement {
         if (nestedElements.size() == 1) {
             ConditionalBlock cblock = (ConditionalBlock) nestedElements.get(0);
             cblock.isLonelyIf = true;
-            cblock.setLocation(getTemplate(), cblock, this);
+            cblock.setLocation(getUnboundTemplate(), cblock, this);
             return cblock.postParseCleanup(stripWhitespace);
         }
         else {

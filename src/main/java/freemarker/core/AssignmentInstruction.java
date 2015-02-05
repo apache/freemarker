@@ -106,7 +106,7 @@ final class AssignmentInstruction extends TemplateElement {
         super.postParseCleanup(stripWhitespace);
         if (nestedElements.size() == 1) {
             Assignment ass = (Assignment) nestedElements.get(0);
-            ass.setLocation(getTemplate(), this, this);
+            ass.setLocation(getUnboundTemplate(), this, this);
             return ass;
         } 
         return this;
