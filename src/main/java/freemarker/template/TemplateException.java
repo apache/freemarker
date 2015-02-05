@@ -201,8 +201,6 @@ public class TemplateException extends Exception {
                 // Line number below 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
                     final UnboundTemplate unboundTemplate = templateObject.getTemplate();
-                    // [UT_DEFERRED] Was template.getName():
-                    
                     templateName = getTemplateNameOrNull(unboundTemplate);
                     templateSourceName = unboundTemplate != null ? unboundTemplate.getSourceName() : null;
                     lineNumber = new Integer(templateObject.getBeginLine());

@@ -209,9 +209,9 @@ public final class Environment extends Configurable {
      * the {@link Environment} parent switchings that occur at {@code #include}/{@code #import} and {@code #nested}
      * directive calls, that is, it's not very meaningful outside FreeMarker internals.
      * 
-     * @deprecated Use {@link #getMainTemplate()} instead (or {@link #getCurrentNamespace()} and then
-     *             {@link Namespace#getTemplate()}); the value returned by this method is often not what you expect when
-     *             it comes to macro/function invocations.
+     * @deprecated Use {@link #getMainTemplate()} or {@link #getCurrentTemplate()} (also relevant,
+     *             {@link #getCurrentNamespace()} and then {@link Namespace#getTemplate()}); the value returned by this
+     *             method is often not what you expect when it comes to macro/function invocations.
      */
     public Template getTemplate() {
         return (Template)getParent();
@@ -230,10 +230,10 @@ public final class Environment extends Configurable {
     }
     
     /**
-     * Used only internally as of yet, no backward compatibility - Returns the {@link Template} that we are "lexically"
-     * inside at moment. This template will change when entering an {@code #include} or calling a macro or function in
-     * another template, or returning to yet another template with {@code #nested}. As such, it's useful in
-     * {@link TemplateDirectiveModel} to find out if from where the directive was called from.
+     * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
+     * entering an {@code #include} or calling a macro or function in another template, or returning into another
+     * template with {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where
+     * the directive was called from.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
@@ -242,8 +242,6 @@ public final class Environment extends Configurable {
      */
     public Template getCurrentTemplate() {
         return currentTemplate;
-        //int ln = instructionStack.size();
-        //return ln == 0 ? getMainTemplate().getUnboundTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
 
     /**
