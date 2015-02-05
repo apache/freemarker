@@ -184,6 +184,9 @@ public class Configuration extends Configurable implements Cloneable {
     /** FreeMarker version 2.3.22 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_22 = new Version(2, 3, 22);
 
+    /** FreeMarker version 2.4.0 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_4_0 = new Version(2, 4, 0);
+    
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
     /** @deprecated Use {@link #DEFAULT_INCOMPATIBLE_IMPROVEMENTS} instead. */

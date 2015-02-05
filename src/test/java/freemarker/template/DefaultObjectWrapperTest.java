@@ -78,9 +78,14 @@ public class DefaultObjectWrapperTest {
         }
         expected.add(Configuration.VERSION_2_3_21);
         expected.add(Configuration.VERSION_2_3_22);
+        expected.add(Configuration.VERSION_2_3_22);
 
         List<Version> actual = new ArrayList<Version>();
         for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
+            if (i > _TemplateAPI.VERSION_INT_2_3_22 && i < _TemplateAPI.VERSION_INT_2_4_0) {
+                continue;
+            }
+            
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;
             int micro = i % 1000;
