@@ -308,8 +308,9 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            // WRONG: it also had to check Macro.isFunction()
-            return (tm instanceof TemplateTransformModel || tm instanceof Macro || tm instanceof TemplateDirectiveModel) ?
+            // [2.4] WRONG: it also had to check Macro.isFunction()
+            return (tm instanceof TemplateTransformModel || tm instanceof BoundCallable
+                    || tm instanceof TemplateDirectiveModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -355,7 +356,7 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             // WRONG: it also had to check Macro.isFunction()
-            return (tm instanceof Macro)  ?
+            return (tm instanceof BoundCallable)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -419,7 +420,7 @@ class BuiltInsForMultipleTypes {
             if (!(tm instanceof BoundCallable)) {
                 throw new UnexpectedTypeException(
                         target, tm,
-                        "macro or function", new Class[] { Macro.class },
+                        "macro or function", new Class[] { BoundCallable.class },
                         env);
             } else {
                 return ((BoundCallable) tm).getNamespace();

@@ -19,8 +19,8 @@ package freemarker.template.utility;
 import java.util.HashSet;
 import java.util.Set;
 
+import freemarker.core.BoundCallable;
 import freemarker.core.Environment;
-import freemarker.core.Macro;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.CollectionModel;
@@ -286,8 +286,9 @@ public class ClassUtil
                 appendTemplateModelTypeName(sb, typeNamesAppended, primaryInterface);
             }
     
-            if (tm instanceof Macro) {
-                appendTypeName(sb, typeNamesAppended, ((Macro) tm).isFunction() ? "function" : "macro");
+            if (tm instanceof BoundCallable) {
+                appendTypeName(sb, typeNamesAppended,
+                        ((BoundCallable) tm).getUnboundCallable().isFunction() ? "function" : "macro");
             }
             
             appendTemplateModelTypeName(sb, typeNamesAppended, tm.getClass());

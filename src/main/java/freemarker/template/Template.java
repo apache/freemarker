@@ -160,7 +160,7 @@ public class Template extends Configurable {
      */
     public Template(
             String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(new UnboundTemplate(reader, sourceName, toNonNull(cfg), encoding), name, cfg);
+        this(new UnboundTemplate(reader, sourceName != null ? sourceName : name, toNonNull(cfg), encoding), name, cfg);
         this.encoding = encoding;
     }
 
@@ -199,7 +199,9 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        return new Template(UnboundTemplate.createPlainTextTemplate(sourceName, content, config), name, config);
+        return new Template(UnboundTemplate.createPlainTextTemplate(
+                sourceName != null ? sourceName : name,
+                content, config), name, config);
     }
 
     /**

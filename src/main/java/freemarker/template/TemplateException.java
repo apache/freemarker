@@ -200,10 +200,11 @@ public class TemplateException extends Exception {
                                 ? ftlInstructionStackSnapshot[0] : null);
                 // Line number below 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
-                    final UnboundTemplate template = templateObject.getTemplate();
+                    final UnboundTemplate unboundTemplate = templateObject.getTemplate();
                     // [UT_DEFERRED] Was template.getName():
-                    templateName = template != null ? template.getSourceName() : null;
-                    templateSourceName = template != null ? template.getSourceName() : null;
+                    
+                    templateName = getTemplateNameOrNull(unboundTemplate);
+                    templateSourceName = unboundTemplate != null ? unboundTemplate.getSourceName() : null;
                     lineNumber = new Integer(templateObject.getBeginLine());
                     columnNumber = new Integer(templateObject.getBeginColumn());
                     endLineNumber = new Integer(templateObject.getEndLine());
@@ -213,6 +214,19 @@ public class TemplateException extends Exception {
                 deleteFTLInstructionStackSnapshotIfNotNeeded();
             }
         }
+    }
+
+    private String getTemplateNameOrNull(final UnboundTemplate unboundTemplate) {
+        if (unboundTemplate == null) {
+            return null;
+        }
+        
+        Template template = env != null ? env.getCurrentTemplate() : null;
+        if (template == null) {
+            return null;
+        }
+        
+        return template.getUnboundTemplate() == unboundTemplate ? template.getName() : null;
     }
     
     /**

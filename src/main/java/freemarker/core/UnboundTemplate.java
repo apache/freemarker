@@ -37,6 +37,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Template.WrongEncodingException;
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -68,7 +69,7 @@ public class UnboundTemplate {
     private TemplateElement rootElement;
     private String defaultNS;
     private int actualTagSyntax;
-    private Version templateLanguageVersion;
+    private final Version templateLanguageVersion;
     
     private final ArrayList lines = new ArrayList();
     
@@ -80,6 +81,8 @@ public class UnboundTemplate {
         
         NullArgumentException.check(cfg);
         this.cfg = cfg;
+        
+        this.templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
     }
     
     /**
@@ -130,6 +133,18 @@ public class UnboundTemplate {
 
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
+    }
+    
+    private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
+        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        int v = incompatibleImprovements.intValue();
+        if (v < _TemplateAPI.VERSION_INT_2_3_19) {
+            return Configuration.VERSION_2_3_0;
+        } else if (v > _TemplateAPI.VERSION_INT_2_3_21) {
+            return Configuration.VERSION_2_3_21;
+        } else { // if 2.3.19 or 2.3.20 or 2.3.21
+            return incompatibleImprovements;
+        }
     }
     
     static public UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
