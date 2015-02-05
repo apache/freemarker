@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -150,6 +151,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         final Environment.Namespace localVars; 
         final TemplateElement nestedContent;
         final Environment.Namespace nestedContentNamespace;
+        final Template nestedContentTemplate;
         final List nestedContentParameterNames;
         final ArrayList prevLocalContextStack;
         final Context prevMacroContext;
@@ -161,11 +163,11 @@ public final class Macro extends TemplateElement implements TemplateModel {
             this.localVars = env.new Namespace();
             this.nestedContent = nestedContent;
             this.nestedContentNamespace = env.getCurrentNamespace();
+            this.nestedContentTemplate = env.getCurrentTemplate();
             this.nestedContentParameterNames = nestedContentParameterNames;
             this.prevLocalContextStack = env.getLocalContextStack();
             this.prevMacroContext = env.getCurrentMacroContext();
         }
-                
         
         Macro getMacro() {
             return Macro.this;

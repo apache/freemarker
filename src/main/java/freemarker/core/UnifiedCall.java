@@ -71,18 +71,18 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
     }
 
     void accept(Environment env) throws TemplateException, IOException {
-        TemplateModel tm = nameExp.eval(env);
+        final TemplateModel tm = nameExp.eval(env);
         if (tm == Macro.DO_NOTHING_MACRO) return; // shortcut here.
-        if (tm instanceof Macro) {
-            Macro macro = (Macro) tm;
-            if (macro.isFunction() && !legacySyntax) {
+        if (tm instanceof BoundCallable) {
+            final BoundCallable boundMacro = (BoundCallable) tm;
+            final Macro unboundMacro = boundMacro.getUnboundCallable();
+            if (unboundMacro.isFunction() && !legacySyntax) {
                 throw new _MiscTemplateException(env, new Object[] {
-                        "Routine ", new _DelayedJQuote(macro.getName()), " is a function, not a directive. "
+                        "Routine ", new _DelayedJQuote(unboundMacro.getName()), " is a function, not a directive. "
                         + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
                         "<@someDirective someParam=f() />", "." });
             }    
-            env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames,
-                    nestedBlock);
+            env.invoke(boundMacro, namedArgs, positionalArgs, bodyParameterNames, nestedBlock);
         }
         else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 

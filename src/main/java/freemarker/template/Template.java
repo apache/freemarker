@@ -160,7 +160,7 @@ public class Template extends Configurable {
      */
     public Template(
             String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(new UnboundTemplate(reader, toNonNull(cfg), sourceName, encoding), name, cfg);
+        this(new UnboundTemplate(reader, sourceName, toNonNull(cfg), encoding), name, cfg);
         this.encoding = encoding;
     }
 

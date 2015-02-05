@@ -67,6 +67,7 @@ import freemarker.template._TemplateAPI;
 import freemarker.template.utility.DateUtil;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.NullWriter;
+import freemarker.template.utility.StringUtil;
 import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
@@ -153,18 +154,20 @@ public final class Environment extends Configurable {
     
     private Collator cachedCollator;
 
-    private Writer out;
+    private Template currentTemplate;
+    private Namespace currentNamespace;
     private Macro.Context currentMacroContext;
+    
+    private Writer out;
     private ArrayList localContextStack; 
     private final Namespace mainNamespace;
-    private Namespace currentNamespace, globalNamespace;
+    private Namespace globalNamespace;
     private HashMap loadedLibs;
 
     private boolean inAttemptBlock;
     private Throwable lastThrowable;
     
     private TemplateModel lastReturnValue;
-    private HashMap macroToNamespaceLookup = new HashMap();
 
     private TemplateNodeModel currentVisitorNode;    
     private TemplateSequenceModel nodeNamespaces;
@@ -194,9 +197,10 @@ public final class Environment extends Configurable {
         super(template);
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
+        this.currentTemplate = getMainTemplate();
         this.out = out;
         this.rootDataModel = rootDataModel;
-        importMacros(template);
+        predefineMacros(template);
     }
 
     /**
@@ -233,10 +237,11 @@ public final class Environment extends Configurable {
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
+     * 
+     * @since 2.4.0
      */
-    Template getCurrentTemplate() {
-        // TODO
-        return getTemplate();
+    public Template getCurrentTemplate() {
+        return currentTemplate;
         //int ln = instructionStack.size();
         //return ln == 0 ? getMainTemplate().getUnboundTemplate() : ((TemplateObject) instructionStack.get(ln - 1)).getTemplate();
     }
@@ -528,11 +533,15 @@ public final class Environment extends Configurable {
         TemplateElement nestedContent = invokingMacroContext.nestedContent;
         if (nestedContent != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
+            
+            final Namespace prevCurrentNamespace = currentNamespace;  
             currentNamespace = invokingMacroContext.nestedContentNamespace;
             
+            final Template prevCurrentTemplate = currentTemplate;
+            currentTemplate = invokingMacroContext.nestedContentTemplate;
+            
             final Configurable prevParent;
-            final boolean parentReplacementOn
-                    = isIcI2322OrLater();
+            final boolean parentReplacementOn = isIcI2322OrLater();
             if (parentReplacementOn) {
                 prevParent = getParent();
                 setParent(currentNamespace.getTemplate());
@@ -552,7 +561,8 @@ public final class Environment extends Configurable {
                     popLocalContext();
                 }
                 this.currentMacroContext = invokingMacroContext;
-                currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
+                currentNamespace = prevCurrentNamespace;
+                currentTemplate = prevCurrentTemplate;
                 if (parentReplacementOn) {
                     setParent(prevParent);
                 }
@@ -603,8 +613,8 @@ public final class Environment extends Configurable {
         }
         try {
             TemplateModel macroOrTransform = getNodeProcessor(node);
-            if (macroOrTransform instanceof Macro) {
-                invoke((Macro) macroOrTransform, null, null, null, null);
+            if (macroOrTransform instanceof BoundCallable) {
+                invoke((BoundCallable) macroOrTransform, null, null, null, null);
             }
             else if (macroOrTransform instanceof TemplateTransformModel) {
                 visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
@@ -666,8 +676,8 @@ public final class Environment extends Configurable {
     
     void fallback() throws TemplateException, IOException {
         TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
-        if (macroOrTransform instanceof Macro) {
-            invoke((Macro) macroOrTransform, null, null, null, null);
+        if (macroOrTransform instanceof BoundCallable) {
+            invoke((BoundCallable) macroOrTransform, null, null, null, null);
         }
         else if (macroOrTransform instanceof TemplateTransformModel) {
             visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null); 
@@ -677,17 +687,18 @@ public final class Environment extends Configurable {
     /**
      * Calls the macro or function with the given arguments and nested block.
      */
-    void invoke(Macro macro, 
+    void invoke(BoundCallable boundCallable, 
                Map namedArgs, List positionalArgs, 
                List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
-        if (macro == Macro.DO_NOTHING_MACRO) {
+        Macro callable = boundCallable.getUnboundCallable();
+        if (callable == Macro.DO_NOTHING_MACRO) {
             return;
         }
         
-        pushElement(macro);
+        pushElement(callable);
         try {
-            final Macro.Context macroCtx = macro.new Context(this, nestedBlock, bodyParameterNames);
-            setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
+            final Macro.Context macroCtx = callable.new Context(this, nestedBlock, bodyParameterNames);
+            setMacroContextLocalsFromArguments(macroCtx, callable, namedArgs, positionalArgs);
             
             final Macro.Context prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
@@ -695,8 +706,11 @@ public final class Environment extends Configurable {
             final ArrayList prevLocalContextStack = localContextStack;
             localContextStack = null;
             
-            final Namespace prevNamespace = currentNamespace;
-            currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
+            final Namespace prevCurrentNamespace = currentNamespace;
+            currentNamespace = boundCallable.getNamespace();
+            
+            final Template prevCurrentTemplate = currentTemplate;
+            currentTemplate = boundCallable.getTemplate();
             
             final Configurable prevParent;
             final boolean parentReplacementOn
@@ -718,7 +732,8 @@ public final class Environment extends Configurable {
             } finally {
                 currentMacroContext = prevMacroCtx;
                 localContextStack = prevLocalContextStack;
-                currentNamespace = prevNamespace;
+                currentNamespace = prevCurrentNamespace;
+                currentTemplate = prevCurrentTemplate;
                 if (parentReplacementOn) {
                     setParent(prevParent);
                 }
@@ -801,12 +816,8 @@ public final class Environment extends Configurable {
      * Defines the given macro in the current namespace (doesn't call it).
      */
     void visitMacroDef(Macro macro) {
-        macroToNamespaceLookup.put(macro, currentNamespace);
-        currentNamespace.put(macro.getName(), macro);
-    }
-    
-    Namespace getMacroNamespace(Macro macro) {
-        return (Namespace) macroToNamespaceLookup.get(macro);
+        BoundCallable boundCallable = new BoundCallable(macro, currentTemplate, currentNamespace);
+        currentNamespace.put(macro.getName(), boundCallable);
     }
     
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
@@ -1942,7 +1953,7 @@ public final class Environment extends Configurable {
         TemplateModel result = null;
         if (nsURI == null) {
             result = ns.get(localName);
-            if (!(result instanceof Macro) && !(result instanceof TemplateTransformModel)) {
+            if (!(result instanceof BoundCallable) && !(result instanceof TemplateTransformModel)) {
                 result = null;
             }
         } else {
@@ -1955,25 +1966,25 @@ public final class Environment extends Configurable {
             }
             if (prefix.length() >0) {
                 result = ns.get(prefix + ":" + localName);
-                if (!(result instanceof Macro) && !(result instanceof TemplateTransformModel)) {
+                if (!(result instanceof BoundCallable) && !(result instanceof TemplateTransformModel)) {
                     result = null;
                 }
             } else {
                 if (nsURI.length() == 0) {
                     result = ns.get(Template.NO_NS_PREFIX + ":" + localName);
-                    if (!(result instanceof Macro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof BoundCallable) && !(result instanceof TemplateTransformModel)) {
                         result = null;
                     }
                 }
                 if (nsURI.equals(template.getDefaultNS())) {
                     result = ns.get(Template.DEFAULT_NAMESPACE_PREFIX + ":" + localName);
-                    if (!(result instanceof Macro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof BoundCallable) && !(result instanceof TemplateTransformModel)) {
                         result = null;
                     }
                 }
                 if (result == null) {
                     result = ns.get(localName);
-                    if (!(result instanceof Macro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof BoundCallable) && !(result instanceof TemplateTransformModel)) {
                         result = null;
                     }
                 }
@@ -2082,14 +2093,19 @@ public final class Environment extends Configurable {
             prevTemplate = null;
         }
         
-        importMacros(includedTemplate);
+        final Template prevCurrentTemplate = currentTemplate;
         try {
-            visit(includedTemplate.getRootTreeNode());
-        }
-        finally {
-            if (parentReplacementOn) {
-                setParent(prevTemplate);
+            currentTemplate = includedTemplate;
+            predefineMacros(includedTemplate);
+            try {
+                visit(includedTemplate.getRootTreeNode());
+            } finally {
+                if (parentReplacementOn) {
+                    setParent(prevTemplate);
+                }
             }
+        } finally {
+            currentTemplate = prevCurrentTemplate;
         }
     }
 
@@ -2214,7 +2230,7 @@ public final class Environment extends Configurable {
         }
     }
 
-    void importMacros(Template template) {
+    void predefineMacros(Template template) {
         for (Iterator it = template.getMacros().values().iterator(); it.hasNext();) {
             visitMacroDef((Macro) it.next());
         }
@@ -2298,6 +2314,11 @@ public final class Environment extends Configurable {
         public Template getTemplate() {
             return template == null ? Environment.this.getTemplate() : template;
         }
+        
+        public String toString() {
+            return StringUtil.jQuote(template.getName()) + super.toString();
+        }
+        
     }
 
      private static final Writer EMPTY_BODY_WRITER = new Writer() {

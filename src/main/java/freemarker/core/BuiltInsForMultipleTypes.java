@@ -416,13 +416,13 @@ class BuiltInsForMultipleTypes {
     static class namespaceBI extends BuiltIn {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
-            if (!(tm instanceof Macro)) {
+            if (!(tm instanceof BoundCallable)) {
                 throw new UnexpectedTypeException(
                         target, tm,
                         "macro or function", new Class[] { Macro.class },
                         env);
             } else {
-                return env.getMacroNamespace((Macro) tm);
+                return ((BoundCallable) tm).getNamespace();
             }
         }
     }
