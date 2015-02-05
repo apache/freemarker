@@ -120,6 +120,19 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
         TEMPLATES.putTemplate("inc4",
                 "<@tNames />"
                 );
+        
+        TEMPLATES.putTemplate("FM23MacroNsBug/main",
+                "<#include 'inc'>"
+                + "<#assign ns = 'main'>"
+                + "<@m />\n"
+                + "<#import 'inc' as i>"
+                + "<@i.m />\n"
+                + "<@m />\n");
+        TEMPLATES.putTemplate("FM23MacroNsBug/inc",
+                "<#assign ns = 'inc'>"
+                + "<#macro m>"
+                    + "ns: ${ns}"
+                + "</#macro>");
     }
     
     private final static String EXPECTED_2_3_21 =
@@ -129,31 +142,31 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
             + "---2---\n"
             + "[impM: <t=main ct=imp mt=main>\n"
                 + "{<t=main ct=main mt=main>}\n"
-                + "[inc: <t=inc ct=inc mt=main>\n"
-                    + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
-                    + "[incInc: <t=inc ct=inc mt=main>\n"
-                        + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
+                + "[inc: <t=inc ct=inc cnst=imp mt=main>\n"
+                    + "[incM: <t=inc ct=inc cnst=imp mt=main> {<t=imp ct=inc cnst=imp mt=main>}]\n"
+                    + "[incInc: <t=inc ct=inc cnst=imp mt=main>\n"
+                        + "[incM: <t=inc ct=inc cnst=imp mt=main> {<t=imp ct=inc cnst=imp mt=main>}]\n"
                     + "]\n"
                 + "]\n"
-                + "[incM: <t=main ct=inc mt=main> {<t=imp ct=imp mt=main>}]\n"
+                + "[incM: <t=main ct=inc cnst=imp mt=main> {<t=imp ct=imp mt=main>}]\n"
             + "]\n"
             + "---3---\n"
-            + "[inc: <t=inc ct=inc mt=main>\n"
-                + "[incM: <t=inc ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
-                + "[incInc: <t=inc ct=inc mt=main>\n"
-                    + "[incM: <t=inc ct=inc mt=main> {<t=main ct=inc mt=main>}]\n"
+            + "[inc: <t=inc ct=inc cnst=main mt=main>\n"
+                + "[incM: <t=inc ct=inc cnst=main mt=main> {<t=main ct=inc cnst=main mt=main>}]\n"
+                + "[incInc: <t=inc ct=inc cnst=main mt=main>\n"
+                    + "[incM: <t=inc ct=inc cnst=main mt=main> {<t=main ct=inc cnst=main mt=main>}]\n"
                 + "]\n"
             + "]\n"
             + "---4---\n"
-            + "[incM: <t=main ct=inc mt=main> {<t=main ct=main mt=main>}]\n"
+            + "[incM: <t=main ct=inc cnst=main mt=main> {<t=main ct=main mt=main>}]\n"
             + "---5---\n"
-            + "[inc2: <t=inc2 ct=inc2 mt=main>\n"
+            + "[inc2: <t=inc2 ct=inc2 cnst=main mt=main>\n"
                 + "[impM: <t=inc2 ct=imp mt=main>\n"
-                    + "{<t=main ct=inc2 mt=main>}\n"
-                    + "[inc: <t=inc ct=inc mt=main>\n"
-                        + "[incM: <t=inc ct=inc mt=main> {<t=imp ct=inc mt=main>}]\n"
+                    + "{<t=main ct=inc2 cnst=main mt=main>}\n"
+                    + "[inc: <t=inc ct=inc cnst=imp mt=main>\n"
+                        + "[incM: <t=inc ct=inc cnst=imp mt=main> {<t=imp ct=inc cnst=imp mt=main>}]\n"
                     + "]\n"
-                    + "[incM: <t=inc2 ct=inc mt=main> {<t=imp ct=imp mt=main>}]\n"
+                    + "[incM: <t=inc2 ct=inc cnst=imp mt=main> {<t=imp ct=imp mt=main>}]\n"
                 + "]\n"
             + "]\n"
             + "---6---\n"
@@ -162,19 +175,19 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
                 + "[imp2M: <t=main ct=imp2 mt=main> {<t=imp ct=imp mt=main>}]\n"
             + "]\n"
             + "---7---\n"
-            + "[inc3: <t=inc3 ct=inc3 mt=main>\n"
-                + "[mainM: <t=inc3 ct=main mt=main> {<t=main ct=inc3 mt=main>} <t=inc3 ct=main mt=main>]\n"
+            + "[inc3: <t=inc3 ct=inc3 cnst=main mt=main>\n"
+                + "[mainM: <t=inc3 ct=main mt=main> {<t=main ct=inc3 cnst=main mt=main>} <t=inc3 ct=main mt=main>]\n"
             + "]\n"
             + "[mainM: "
                 + "<t=main ct=main mt=main> "
-                + "{<t=main ct=main mt=main> <t=inc4 ct=inc4 mt=main> <t=main ct=main mt=main>} "
+                + "{<t=main ct=main mt=main> <t=inc4 ct=inc4 cnst=main mt=main> <t=main ct=main mt=main>} "
                 + "<t=main ct=main mt=main>"
             + "]\n"
             + "<t=main ct=main mt=main>\n"
             + "---8---\n"
-            + "mainF: <t=main ct=main mt=main>, impF: <t=main ct=imp mt=main>, incF: <t=main ct=inc mt=main>\n"
-            ;
-
+            + "mainF: <t=main ct=main mt=main>, impF: <t=main ct=imp mt=main>, "
+            + "incF: <t=main ct=inc cnst=main mt=main>\n";
+    
     @Test
     public void test2321() throws IOException, TemplateException {
         setConfiguration(createConfiguration(Configuration.VERSION_2_3_21));
@@ -194,6 +207,15 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
         assertSame(t, env.getMainTemplate());
         assertSame(t, env.getCurrentTemplate());
     }
+
+    @Test
+    public void testFM23MacroNsBugFixed() throws IOException, TemplateException {
+        setConfiguration(createConfiguration(Configuration.VERSION_2_3_0));
+        assertOutputForNamed("FM23MacroNsBug/main",
+                "ns: main\n"
+                + "ns: inc\n"
+                + "ns: main\n");
+    }
     
     private Configuration createConfiguration(Version version2321) {
         Configuration cfg = new Configuration(version2321);
@@ -209,7 +231,10 @@ public class TestEnvironmentGetTemplateVariants extends TemplateTest {
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 Writer out = env.getOut();
-                final String r = "<t=" + env.getTemplate().getName() + " ct=" + env.getCurrentTemplate().getName()
+                final Template currentTemplate = env.getCurrentTemplate();
+                final Template curNsTemplate = env.getCurrentNamespace().getTemplate();
+                final String r = "<t=" + env.getTemplate().getName() + " ct=" + currentTemplate.getName()
+                        + (curNsTemplate == currentTemplate ? "" : " cnst=" + curNsTemplate.getName())
                         + " mt=" + env.getMainTemplate().getName() + ">";
                 out.write(r);
                 env.setGlobalVariable("lastTNamesResult", new SimpleScalar(r));
