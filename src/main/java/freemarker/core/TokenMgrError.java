@@ -16,6 +16,8 @@
 
 package freemarker.core;
 
+import freemarker.template.Template;
+
 
 
 /**
@@ -238,14 +240,12 @@ public class TokenMgrError extends Error
        return detail;
    }
 
-   /**!!T
    /**
     * @deprecated Use {@link #toParseException(UnboundTemplate)} instead. 
-    *-/
+    */
    public ParseException toParseException(Template template) {
-       toParseException(template.getUnboundTemplate());
+       return toParseException(template.getUnboundTemplate());
    }
-   */
    
    /**
     * @since 2.4.0
