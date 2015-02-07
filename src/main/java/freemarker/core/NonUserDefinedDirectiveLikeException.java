@@ -29,7 +29,7 @@ import freemarker.template.TemplateTransformModel;
 class NonUserDefinedDirectiveLikeException extends UnexpectedTypeException {
 
     private static final Class[] EXPECTED_TYPES = new Class[] {
-        TemplateDirectiveModel.class, TemplateTransformModel.class, Macro.class };
+        TemplateDirectiveModel.class, TemplateTransformModel.class, BoundCallable.class };
     
     public NonUserDefinedDirectiveLikeException(Environment env) {
         super(env, "Expecting user-defined directive, transform or macro value here");

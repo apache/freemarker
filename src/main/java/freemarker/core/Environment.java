@@ -814,8 +814,7 @@ public final class Environment extends Configurable {
      * Defines the given macro in the current namespace (doesn't call it).
      */
     void visitMacroDef(Macro macro) {
-        BoundCallable boundCallable = new BoundCallable(macro, currentTemplate, currentNamespace);
-        currentNamespace.put(macro.getName(), boundCallable);
+        currentNamespace.put(macro.getName(), new BoundCallable(macro, currentTemplate, currentNamespace));
     }
     
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
