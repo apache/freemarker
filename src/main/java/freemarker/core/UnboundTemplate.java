@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import freemarker.cache.TemplateLoader;
@@ -39,7 +38,6 @@ import freemarker.template.Template;
 import freemarker.template.Template.WrongEncodingException;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
-import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -345,34 +343,15 @@ public class UnboundTemplate {
         attrs.put(key, value);
     }
 
-    Object getCustomAttribute(String name) {
-        HashMap<String, Object> attrs = customAttributes;
-        return attrs != null ? attrs.get(name) : null;
+    /**
+     * Returns the {@link Map} of custom attributes that are normally coming from the {@code #ftl} header, or
+     * {@code null} if there was none. The returned {@code Map} must not be modified, and might changes during
+     * template parsing as new attributes are added by the parser (i.e., it's not a snapshot).
+     */
+    Map<String, ?> getCustomAttributes() {
+        return this.customAttributes;
     }
 
-    /**
-     * Returns a snapshot (copy) of the custom attribute names.
-     */
-    String[] getCustomAttributeNames() {
-        if (customAttributes == null) {
-            return CollectionUtils.EMPTY_STRING_ARRAY;
-        }
-        
-        final Set<String> keys = customAttributes.keySet();
-        final String[] result = new String[keys.size()];
-        int i = 0;
-        for (String key : keys) {
-            result[i++] = key;
-        }
-        return result;
-    }
-    
-    void copyCustomAttributesInto(Map<String, Object> target) {
-        if (customAttributes != null) {
-            customAttributes.putAll(target);
-        }
-    }
-    
     /**
      * @return the root TemplateElement object.
      */

@@ -19,7 +19,6 @@ package freemarker.template;
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -62,17 +61,17 @@ public class CustomAttributeTest {
         assertSame(VALUE_1, t.getCustomAttribute(KEY_1));
         
         t.setCustomAttribute(KEY_2, VALUE_2);
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));        
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, t.getCustomAttributeNames());        
         assertSame(VALUE_1, t.getCustomAttribute(KEY_1));
         assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
         
         t.setCustomAttribute(KEY_1, VALUE_2);
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));        
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, t.getCustomAttributeNames());        
         assertSame(VALUE_2, t.getCustomAttribute(KEY_1));
         assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
         
         t.setCustomAttribute(KEY_1, null);
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));        
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, t.getCustomAttributeNames());        
         assertNull(t.getCustomAttribute(KEY_1));
         assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
         
@@ -102,7 +101,7 @@ public class CustomAttributeTest {
                 + "}>",
                 new Configuration(Configuration.VERSION_2_3_22));
         
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, t.getCustomAttributeNames());
         assertEquals(VALUE_LIST, t.getCustomAttribute(KEY_1));
         assertEquals(VALUE_BIGDECIMAL, t.getCustomAttribute(KEY_2));
         
@@ -112,7 +111,7 @@ public class CustomAttributeTest {
     }
     
     @Test
-    public void testFtl2Header() throws Exception {
+    public void testFtlHeader2() throws Exception {
         Template t = new Template(null, "<#ftl attributes={"
                 + "'" + KEY_1 + "': 'a', "
                 + "'" + KEY_2 + "': 'b', "
@@ -120,20 +119,20 @@ public class CustomAttributeTest {
                 + "}>",
                 new Configuration(Configuration.VERSION_2_3_22));
         
-        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
+        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, t.getCustomAttributeNames());
         assertEquals("a", t.getCustomAttribute(KEY_1));
         assertEquals("b", t.getCustomAttribute(KEY_2));
         assertEquals("c", t.getCustomAttribute(KEY_3));
         
         t.removeCustomAttribute(KEY_2);
-        assertArrayEquals(new String[] { KEY_1, KEY_3 }, sort(t.getCustomAttributeNames()));
+        assertArrayEquals(new String[] { KEY_1, KEY_3 }, t.getCustomAttributeNames());
         assertEquals("a", t.getCustomAttribute(KEY_1));
         assertNull(t.getCustomAttribute(KEY_2));
         assertEquals("c", t.getCustomAttribute(KEY_3));
     }
 
     @Test
-    public void testFtl3Header() throws Exception {
+    public void testFtlHeader3() throws Exception {
         Template t = new Template(null, "<#ftl attributes={"
                 + "'" + KEY_1 + "': 'a', "
                 + "'" + KEY_2 + "': 'b', "
@@ -141,21 +140,28 @@ public class CustomAttributeTest {
                 + "}>",
                 new Configuration(Configuration.VERSION_2_3_22));
         
-        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
+        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, t.getCustomAttributeNames());
         assertEquals("a", t.getCustomAttribute(KEY_1));
         assertEquals("b", t.getCustomAttribute(KEY_2));
         assertEquals("c", t.getCustomAttribute(KEY_3));
         
         t.setCustomAttribute(KEY_2, null);
-        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
+        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, t.getCustomAttributeNames());
         assertEquals("a", t.getCustomAttribute(KEY_1));
         assertNull(t.getCustomAttribute(KEY_2));
         assertEquals("c", t.getCustomAttribute(KEY_3));
     }
     
-    private Object[] sort(String[] customAttributeNames) {
-        Arrays.sort(customAttributeNames);
-        return customAttributeNames;
+    @Test
+    public void testFtlHeaderAndNullValue() throws Exception {
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        final Template t = new Template(null, "[#ftl attributes={ '" + KEY_1 + "': 'u' }]", cfg);
+        assertEquals("u", t.getCustomAttribute(KEY_1));
+        t.setCustomAttribute(KEY_1, null);
+        assertNull(t.getCustomAttribute(KEY_1));
+        t.removeCustomAttribute(KEY_1);
+        assertEquals(null, t.getCustomAttribute(KEY_1));
     }
 
     @Test
@@ -202,6 +208,58 @@ public class CustomAttributeTest {
         env.process();
     }
 
+    @Test
+    public void testScopesFallback() throws Exception {
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+        
+        final Template t = new Template(null, "[#ftl attributes={ '" + KEY_1 + "': 't' }]", cfg);
+        Environment env = t.createProcessingEnvironment(this, NullWriter.INSTANCE);
+        
+        assertEquals("t", env.getCustomAttribute(KEY_1));
+        assertEquals("t", t.getCustomAttribute(KEY_1));
+        assertNull(cfg.getCustomAttribute(KEY_1));
+        
+        env.setCustomAttribute(KEY_1, "e");
+        assertEquals("e", env.getCustomAttribute(KEY_1));
+        assertEquals("t", t.getCustomAttribute(KEY_1));
+        assertNull(cfg.getCustomAttribute(KEY_1));
+        
+        env.setCustomAttribute(KEY_1, null);
+        assertNull(env.getCustomAttribute(KEY_1));
+        assertEquals("t", t.getCustomAttribute(KEY_1));
+        assertNull(cfg.getCustomAttribute(KEY_1));
+        
+        env.removeCustomAttribute(KEY_1);
+        assertEquals("t", env.getCustomAttribute(KEY_1));
+        assertEquals("t", t.getCustomAttribute(KEY_1));
+        assertNull(cfg.getCustomAttribute(KEY_1));
+        
+        cfg.setCustomAttribute(KEY_2, "c2");
+        assertEquals("c2", env.getCustomAttribute(KEY_2));
+        assertEquals("c2", t.getCustomAttribute(KEY_2));
+        assertEquals("c2", cfg.getCustomAttribute(KEY_2));
+        
+        t.setCustomAttribute(KEY_2, "t2");
+        assertEquals("t2", env.getCustomAttribute(KEY_2));
+        assertEquals("t2", t.getCustomAttribute(KEY_2));
+        assertEquals("c2", cfg.getCustomAttribute(KEY_2));
+        
+        t.setCustomAttribute(KEY_2, null);
+        assertNull(env.getCustomAttribute(KEY_2));
+        assertNull(t.getCustomAttribute(KEY_2));
+        assertEquals("c2", cfg.getCustomAttribute(KEY_2));
+        
+        t.removeCustomAttribute(KEY_2);
+        assertEquals("c2", env.getCustomAttribute(KEY_2));
+        assertEquals("c2", t.getCustomAttribute(KEY_2));
+        assertEquals("c2", cfg.getCustomAttribute(KEY_2));
+        
+        cfg.setCustomAttribute(KEY_2, "c2+");
+        assertEquals("c2+", env.getCustomAttribute(KEY_2));
+        assertEquals("c2+", t.getCustomAttribute(KEY_2));
+        assertEquals("c2+", cfg.getCustomAttribute(KEY_2));
+    }
+    
     public void testScopesFromTemplateStep1() throws Exception {
         assertNull(CUST_ATT_TMP_1.get());
         assertEquals(123, CUST_ATT_TMP_2.get());
@@ -211,14 +269,6 @@ public class CustomAttributeTest {
         
         assertNull(CUST_ATT_CFG_1.get());
         assertEquals(12345, CUST_ATT_CFG_2.get());
-    }
-
-    public void testScopesFromTemplateStep2() throws Exception {
-        
-    }
-
-    public void testScopesFromTemplateStep3() throws Exception {
-        
     }
     
 }

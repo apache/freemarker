@@ -34,6 +34,7 @@ import freemarker.core.FMParser;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core.UnboundTemplate;
+import freemarker.core._CoreAPI;
 
 /**
  * <p>Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from
@@ -604,6 +605,11 @@ public class Template extends Configurable {
      */
     public List containingElements(int column, int line) {
         return unboundTemplate.containingElements(column, line);
+    }
+
+    @Override
+    protected Map<String, ?> getInitialCustomAttributes() {
+        return _CoreAPI.getCustomAttributes(unboundTemplate);
     }
 
     /**

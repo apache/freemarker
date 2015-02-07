@@ -132,7 +132,7 @@ public class Configurable
     
     private LinkedHashMap<Object, Object> customAttributes;
     // Can't be final because we are cloneable:
-    private Object customAttributesLock = new Object[] {};
+    private Object customAttributesLock = new Object();
     
     private Locale locale;
     private String numberFormat;
@@ -1653,10 +1653,10 @@ public class Configurable
      * Used internally for setting custom attributes, both named and unnamed ones.
      */
     void setCustomAttribute(Object key, Object value) {
-        synchronized(customAttributesLock) {
+        synchronized (customAttributesLock) {
             LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             if (customAttributes == null) {
-                customAttributes = new LinkedHashMap<Object, Object>();
+                customAttributes = createInitialCustomAttributes();
                 this.customAttributes = customAttributes;
             }
             customAttributes.put(key, value);
@@ -1667,19 +1667,29 @@ public class Configurable
      * User internally for getting unnamed custom attributes.
      */
     Object getCustomAttribute(Object key, CustomAttribute attr) {
-        synchronized(customAttributesLock) {
+        synchronized (customAttributesLock) {
             LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             Object value = customAttributes != null ? customAttributes.get(key) : null;
             if(value == null && (customAttributes == null || !customAttributes.containsKey(key))) {
                 value = attr.create();
                 if (customAttributes == null) {
-                    customAttributes = new LinkedHashMap<Object, Object>();
+                    customAttributes = createInitialCustomAttributes();
                     this.customAttributes = customAttributes;
                 }
                 customAttributes.put(key, value);
             }
             return value;
         }
+    }
+    
+    /**
+     * Returns the non-{@code null} writable initial custom attribute map.
+     */
+    private LinkedHashMap<Object, Object> createInitialCustomAttributes() {
+        final Map<String, ?> initialCustomAttributes = getInitialCustomAttributes();
+        return initialCustomAttributes == null
+                ? new LinkedHashMap<Object, Object>()
+                : new LinkedHashMap<Object, Object>(initialCustomAttributes);
     }
     
     /**
@@ -1696,18 +1706,18 @@ public class Configurable
     }
     
     /**
-     * Returns an array with names of all custom attributes defined directly 
-     * on this configurable. (That is, it doesn't contain the names of custom attributes
-     * defined indirectly on its parent configurables.) The returned array is never null,
+     * Returns an array that contains the snapshot of the names of all custom attributes defined directly 
+     * in this configurable. (That is, it doesn't contain the names of custom attributes
+     * defined indirectly on its parent configurables.) The returned array is never {@code null},
      * but can be zero-length.
-     * The order of elements in the returned array is not defined and can change
-     * between invocations.  
+     * Since 2.4.0, the order of the names is the same as the attributes were added. Before 2.4.0, the order was
+     * undefined.  
      */
     public String[] getCustomAttributeNames() {
         synchronized(customAttributesLock) {
             final LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             if (customAttributes == null) {
-                return CollectionUtils.EMPTY_STRING_ARRAY;
+                return getInitialCustomAttributeNames();
             }
             
             Set<Object> keys = customAttributes.keySet();
@@ -1748,6 +1758,14 @@ public class Configurable
             LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             if (customAttributes != null) {
                 customAttributes.remove(name);
+            } else {
+                Map<String, ?> initialCustomAttributes = getInitialCustomAttributes();
+                if (initialCustomAttributes == null || !initialCustomAttributes.containsKey(name)) {
+                    return;
+                }
+                customAttributes = createInitialCustomAttributes();
+                this.customAttributes = customAttributes;
+                customAttributes.remove(name);
             }
         }
     }
@@ -1766,23 +1784,65 @@ public class Configurable
      */
     public Object getCustomAttribute(String name) {
         Object retval;
-        synchronized(customAttributesLock) {
+        synchronized (customAttributesLock) {
             final LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
             if (customAttributes == null) {
-                retval = null;
+                Map<String, ?> initialCustomAttributes = getInitialCustomAttributes();
+                if (initialCustomAttributes == null) {
+                    retval = null;
+                } else {
+                    retval = initialCustomAttributes.get(name);
+                    if (retval == null && initialCustomAttributes.containsKey(name)) {
+                        return null;
+                    }
+                }
             } else {
                 retval = customAttributes.get(name);
-                if(retval == null && customAttributes.containsKey(name)) {
+                if (retval == null && customAttributes.containsKey(name)) {
                     return null;
                 }
             }
         }
-        if(retval == null && parent != null) {
+        if (retval == null && parent != null) {
             return parent.getCustomAttribute(name);
         }
         return retval;
     }
     
+    /**
+     * Returns the initial (default) set of custom attributes, or {@code null}. The returned {@link Map} must not be
+     * modified. It shouldn't be accessed during template parsing, as during that the content is possibly changing.
+     * 
+     * <p>
+     * This was added so that it can be overidden in {@link Template}, where it gives the custom attributes defined in
+     * the {@code #ftl} header. The returned {@link Map} must not be modified! When the custom attributes need to be
+     * written, a copy of this {@link Map} will be made, modified, and after that this {@link Map} isn't used anymore
+     * from this {@link Configurable} instance.
+     * 
+     * @since 2.4.0
+     */
+    protected Map<String, ?> getInitialCustomAttributes() {
+        return null;
+    }
+
+    /**
+     * Returns the initial (default) set of custom attribute names (maybe an empty array, but not {@code null}).
+     */
+    private String[] getInitialCustomAttributeNames() {
+        Map<String, ?> initalCustomAttributes = getInitialCustomAttributes();
+        if (initalCustomAttributes == null) {
+            return CollectionUtils.EMPTY_STRING_ARRAY;
+        }
+        
+        final Set<String> keys = initalCustomAttributes.keySet();
+        final String[] result = new String[keys.size()];
+        int i = 0;
+        for (String key : keys) {
+            result[i++] = key;
+        }
+        return result;
+    }
+
     protected void doAutoImportsAndIncludes(Environment env)
     throws TemplateException, IOException
     {

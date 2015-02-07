@@ -18,6 +18,7 @@ package freemarker.core;
 
 import java.io.Writer;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -104,6 +105,10 @@ public class _CoreAPI {
      */
     public static Set/*<String>*/ getConfigurableSettingNames(Configurable cfgable) {
         return cfgable.getSettingNames();
+    }
+
+    public static Map<String, ?> getCustomAttributes(UnboundTemplate unboundTemplate) {
+        return unboundTemplate.getCustomAttributes();
     }
     
 }
