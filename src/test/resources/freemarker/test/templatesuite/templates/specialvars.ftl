@@ -18,3 +18,4 @@ ${.url_escaping_charset?lower_case} == iso-8859-1
 ${.vars['foo']} == x
 <#assign works = .version>
 ${.now?is_datetime?c} == true
+<@.pass />

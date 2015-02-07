@@ -31,7 +31,9 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 
 /**
- * An element representing a macro declaration.
+ * An element representing a macro or function declaration.
+ * 
+ * @see BoundCallable
  * 
  * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */

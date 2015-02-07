@@ -53,6 +53,8 @@ final class BuiltinVariable extends Expression {
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
     
+    private static final BoundCallable PASS_VALUE = new BoundCallable(Macro.DO_NOTHING_MACRO, null, null);
+    
     static final String[] SPEC_VAR_NAMES = new String[] {
         CURRENT_NODE,
         DATA_MODEL,
@@ -137,7 +139,7 @@ final class BuiltinVariable extends Expression {
             return new SimpleScalar(env.getTemplate().getName());
         }
         if (name == PASS) {
-            return Macro.DO_NOTHING_MACRO;
+            return PASS_VALUE;
         }
         if (name == VERSION) {
             return new SimpleScalar(Configuration.getVersionNumber());
