@@ -465,8 +465,9 @@ public class Configuration extends Configurable implements Cloneable {
      *   </li>
      * </ul>
      * 
-     * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
-     *     version, or less than 2.3.0.
+     * @throws IllegalArgumentException
+     *             If {@code incompatibleImmprovements} refers to a version that wasn't released yet when the currently
+     *             used FreeMarker version was released, or is less than 2.3.0, or is {@code null}.
      * 
      * @since 2.3.21
      */
@@ -1213,8 +1214,9 @@ public class Configuration extends Configurable implements Cloneable {
      * expected.) Note that if the {@code template_loader} have to be changed because of this, the template cache will
      * be emptied.
      * 
-     * @throws IllegalArgumentException if {@code incompatibleImmprovements} is greater than the current FreeMarker
-     *     version, or less than 2.3.0, or {@code null}.
+     * @throws IllegalArgumentException
+     *             If {@code incompatibleImmprovements} refers to a version that wasn't released yet when the currently
+     *             used FreeMarker version was released, or is less than 2.3.0, or is {@code null}.
      * 
      * @since 2.3.20
      */
