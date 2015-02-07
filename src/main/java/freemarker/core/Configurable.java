@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -48,6 +48,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
@@ -126,8 +127,12 @@ public class Configurable
     };
 
     private Configurable parent;
+    
     private Properties properties;
-    private HashMap customAttributes;
+    
+    private LinkedHashMap<Object, Object> customAttributes;
+    // Can't be final because we are cloneable:
+    private Object customAttributesLock = new Object[] {};
     
     private Locale locale;
     private String numberFormat;
@@ -228,8 +233,6 @@ public class Configurable
         // which means "not specified"
 
         setBooleanFormat(C_TRUE_FALSE);
-        
-        customAttributes = new HashMap();
     }
 
     /**
@@ -243,13 +246,13 @@ public class Configurable
         classicCompatible = null;
         templateExceptionHandler = null;
         properties = new Properties(parent.properties);
-        customAttributes = new HashMap();
     }
     
     protected Object clone() throws CloneNotSupportedException {
         Configurable copy = (Configurable)super.clone();
         copy.properties = new Properties(properties);
-        copy.customAttributes = (HashMap)customAttributes.clone();
+        copy.customAttributesLock = new Object();
+        copy.customAttributes = customAttributes == null ? null : (LinkedHashMap) customAttributes.clone();
         return copy;
     }
     
@@ -1647,25 +1650,35 @@ public class Configurable
     }
 
     /**
-     * Internal entry point for setting unnamed custom attributes
+     * Used internally for setting custom attributes, both named and unnamed ones.
      */
     void setCustomAttribute(Object key, Object value) {
-        synchronized(customAttributes) {
+        synchronized(customAttributesLock) {
+            LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
+            if (customAttributes == null) {
+                customAttributes = new LinkedHashMap<Object, Object>();
+                this.customAttributes = customAttributes;
+            }
             customAttributes.put(key, value);
         }
     }
 
     /**
-     * Internal entry point for getting unnamed custom attributes
+     * User internally for getting unnamed custom attributes.
      */
     Object getCustomAttribute(Object key, CustomAttribute attr) {
-        synchronized(customAttributes) {
-            Object o = customAttributes.get(key);
-            if(o == null && !customAttributes.containsKey(key)) {
-                o = attr.create();
-                customAttributes.put(key, o);
+        synchronized(customAttributesLock) {
+            LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
+            Object value = customAttributes != null ? customAttributes.get(key) : null;
+            if(value == null && (customAttributes == null || !customAttributes.containsKey(key))) {
+                value = attr.create();
+                if (customAttributes == null) {
+                    customAttributes = new LinkedHashMap<Object, Object>();
+                    this.customAttributes = customAttributes;
+                }
+                customAttributes.put(key, value);
             }
-            return o;
+            return value;
         }
     }
     
@@ -1679,9 +1692,7 @@ public class Configurable
      * {@link #removeCustomAttribute(String)}.
      */
     public void setCustomAttribute(String name, Object value) {
-        synchronized(customAttributes) {
-            customAttributes.put(name, value);
-        }
+        setCustomAttribute((Object) name, value);
     }
     
     /**
@@ -1693,14 +1704,32 @@ public class Configurable
      * between invocations.  
      */
     public String[] getCustomAttributeNames() {
-        synchronized(customAttributes) {
-            Collection names = new LinkedList(customAttributes.keySet());
-            for (Iterator iter = names.iterator(); iter.hasNext();) {
-                if(!(iter.next() instanceof String)) {
-                    iter.remove();
+        synchronized(customAttributesLock) {
+            final LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
+            if (customAttributes == null) {
+                return CollectionUtils.EMPTY_STRING_ARRAY;
+            }
+            
+            Set<Object> keys = customAttributes.keySet();
+            int stringKeyCnt = 0;
+            for (Object key : keys) {
+                if (key instanceof String) {
+                    stringKeyCnt++;
                 }
             }
-            return (String[])names.toArray(new String[names.size()]);
+            
+            if (stringKeyCnt == 0) {
+                return CollectionUtils.EMPTY_STRING_ARRAY;
+            }
+            
+            String[] result = new String[stringKeyCnt];
+            int i = 0;
+            for (Object key : keys) {
+                if (key instanceof String) {
+                    result[i++] = (String) key;
+                }
+            }
+            return result;
         }
     }
     
@@ -1715,8 +1744,11 @@ public class Configurable
      * @param name the name of the custom attribute
      */
     public void removeCustomAttribute(String name) {
-        synchronized(customAttributes) {
-            customAttributes.remove(name);
+        synchronized(customAttributesLock) {
+            LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
+            if (customAttributes != null) {
+                customAttributes.remove(name);
+            }
         }
     }
 
@@ -1734,10 +1766,15 @@ public class Configurable
      */
     public Object getCustomAttribute(String name) {
         Object retval;
-        synchronized(customAttributes) {
-            retval = customAttributes.get(name);
-            if(retval == null && customAttributes.containsKey(name)) {
-                return null;
+        synchronized(customAttributesLock) {
+            final LinkedHashMap<Object, Object> customAttributes = this.customAttributes;
+            if (customAttributes == null) {
+                retval = null;
+            } else {
+                retval = customAttributes.get(name);
+                if(retval == null && customAttributes.containsKey(name)) {
+                    return null;
+                }
             }
         }
         if(retval == null && parent != null) {

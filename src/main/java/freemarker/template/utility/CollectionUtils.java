@@ -23,6 +23,11 @@ public class CollectionUtils {
 
     public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
 
+    /**
+     * @since 2.3.22
+     */
+    public static final String[] EMPTY_STRING_ARRAY = new String[] { };
+    
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };
 
 }

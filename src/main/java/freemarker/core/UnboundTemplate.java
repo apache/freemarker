@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,7 @@ import freemarker.template.Template;
 import freemarker.template.Template.WrongEncodingException;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
+import freemarker.template.utility.CollectionUtils;
 import freemarker.template.utility.NullArgumentException;
 
 /**
@@ -62,7 +64,7 @@ public class UnboundTemplate {
     private final Configuration cfg;
     
     /** Attributes added via {@code <#ftl attributes=...>}. */
-    private HashMap<String, Object> customAttributes;
+    private LinkedHashMap<String, Object> customAttributes;
     
     private Map macros = new HashMap();
     private List imports = new Vector();
@@ -335,9 +337,9 @@ public class UnboundTemplate {
      * Used internally by the parser.
      */
     void setCustomAttribute(String key, Object value) {
-        HashMap<String, Object> attrs = customAttributes;
+        LinkedHashMap<String, Object> attrs = customAttributes;
         if (attrs == null) {
-            attrs = new HashMap<String, Object>();
+            attrs = new LinkedHashMap<String, Object>();
             customAttributes = attrs;
         }
         attrs.put(key, value);
@@ -348,9 +350,27 @@ public class UnboundTemplate {
         return attrs != null ? attrs.get(name) : null;
     }
 
-    Set<String> getCustomAttributeNames() {
-        HashMap<String, Object> attrs = customAttributes;
-        return attrs != null ? attrs.keySet() : Collections.<String>emptySet();
+    /**
+     * Returns a snapshot (copy) of the custom attribute names.
+     */
+    String[] getCustomAttributeNames() {
+        if (customAttributes == null) {
+            return CollectionUtils.EMPTY_STRING_ARRAY;
+        }
+        
+        final Set<String> keys = customAttributes.keySet();
+        final String[] result = new String[keys.size()];
+        int i = 0;
+        for (String key : keys) {
+            result[i++] = key;
+        }
+        return result;
+    }
+    
+    void copyCustomAttributesInto(Map<String, Object> target) {
+        if (customAttributes != null) {
+            customAttributes.putAll(target);
+        }
     }
     
     /**
