@@ -254,14 +254,22 @@ public class Configurable
     }
     
     /**
-     * Returns the parent <tt>Configurable</tt> object of this object.
-     * The parent stores the default values for this configurable. For example,
-     * the parent of the {@link freemarker.template.Template} object is the
-     * {@link freemarker.template.Configuration} object, so setting values not
-     * specified on template level are specified by the confuration object.
+     * Returns the parent {@link Configurable} object of this object. The parent stores the default setting values for
+     * this {@link Configurable}. For example, the parent of a {@link freemarker.template.Template} object is a
+     * {@link Configuration} object, so values not specified on {@link Template}-level are get from the
+     * {@link Configuration} object.
+     * 
+     * <p>
+     * Note on the parent of {@link Environment}: If you set {@link Configuration#setIncompatibleImprovements(Version)
+     * incompatible_improvements} to at least 2.3.22, it will be always the "main" {@link Template}, that is, the
+     * template for whose processing the {@link Environment} was created. With lower {@code incompatible_improvements},
+     * the current parent can temporary change <em>during template execution</em>, for example when your are inside an
+     * {@code #include}-d template (among others). Thus, don't build on which {@link Template} the parent of
+     * {@link Environment} is during template execution, unless you set {@code incompatible_improvements} to 2.3.22 or
+     * higher.
      *
-     * @return the parent <tt>Configurable</tt> object, or null, if this is
-     *    the root <tt>Configurable</tt> object.
+     * @return The parent {@link Configurable} object, or {@code null} if this is the root {@link Configurable} object
+     *         (i.e, if it's the {@link Configuration} object).
      */
     public final Configurable getParent() {
         return parent;
