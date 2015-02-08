@@ -512,17 +512,14 @@ public class Template extends Configurable {
     }
 
     /**
-     * Sets the character encoding to use for
-     * included files. Usually you don't set this value manually,
-     * instead it's assigned to the template upon loading.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
-
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
 
     /**
-     * Returns the character encoding used for reading included files.
+     * Returns the default character encoding used for reading included files.
      */
     public String getEncoding() {
         return this.encoding;
@@ -694,16 +691,22 @@ public class Template extends Configurable {
     }
 
     /**
-     *  @return the root TemplateElement object.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public TemplateElement getRootTreeNode() {
         return rootElement;
     }
     
+    /**
+     * @deprecated Should only be used internally, and might will be removed later.
+     */
     public Map getMacros() {
         return macros;
     }
 
+    /**
+     * @deprecated Should only be used internally, and might will be removed later.
+     */
     public List getImports() {
         return imports;
     }
@@ -791,12 +794,10 @@ public class Template extends Configurable {
     }
     
     /**
-     * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
-     * don't use it.
+     * @return an array of the {@link TemplateElement}s containing the given column and line numbers.
+     * @deprecated Should only be used internally, and might will be removed later.
      * 
      * @return an array of the elements containing the given column and line numbers.
-     * @param column the column
-     * @param line the line
      */
     public TreePath containingElements(int column, int line) {
         final ArrayList elements = new ArrayList();
