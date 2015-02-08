@@ -202,5 +202,16 @@ class UnboundCallable extends Macro {
             }
         }
     }
+    
+    @Override
+    public String toString() {
+        final UnboundTemplate unboundTemplate = getUnboundTemplate();
+        return "UnboundCallable("
+                + "name=" + getName()
+                + ", isFunction=" + isFunction()
+                + ", unboundTemplate"
+                + (unboundTemplate != null ? ".sourceName=" + unboundTemplate.getSourceName() : "=null")
+                + ")";
+    }
 
 }

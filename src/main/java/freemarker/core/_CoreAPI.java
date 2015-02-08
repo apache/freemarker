@@ -143,8 +143,8 @@ public class _CoreAPI {
         return new UnboundTemplate(reader, sourceName, cfg, assumedEncoding);
     }
     
-    public static boolean isFunction(BoundCallable boundCallable) {
-        return boundCallable.getUnboundCallable().isFunction();
+    public static boolean isBoundCallable(Object obj) {
+        return obj instanceof BoundCallable;
     }
     
 }

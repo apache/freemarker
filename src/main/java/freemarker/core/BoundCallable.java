@@ -50,7 +50,7 @@ import freemarker.template.TemplateException;
  * 
  * @since 2.4.0
  */
-public final class BoundCallable extends Macro {
+final class BoundCallable extends Macro {
     
     private final UnboundCallable unboundCallable;
     private final Template template;
@@ -77,9 +77,10 @@ public final class BoundCallable extends Macro {
     @Override
     public String toString() {
         return "BoundCallable("
-                + "unboundCallable=" + unboundCallable.getName()
-                + ", template=" + template.getName()
-                + ", namespace=" + namespace.getTemplate().getName()
+                + "name=" + getName()
+                + ", isFunction=" + isFunction()
+                + ", template" + (template != null ? ".name=" + template.getName() : "=null")
+                + ", namespace=" + (namespace != null ? namespace.getTemplate().getName() : "null")
                 + ")";
     }
 
