@@ -136,7 +136,7 @@ public final class TextBlock extends TemplateElement {
                     if (lastNewLineIndex >=0  || beginColumn == 1) {
                         char[] firstPart = substring(text, 0, lastNewLineIndex + 1);
                         char[] lastLine = substring(text, 1+lastNewLineIndex); 
-                        if (trim(lastLine).length == 0) {
+                        if (StringUtil.isTrimmedToEmpty(lastLine)) {
                             this.text = firstPart;
                             this.endColumn = 0;
                         } else {
@@ -185,7 +185,7 @@ public final class TextBlock extends TemplateElement {
                     }
                     char[] trailingPart = substring(text, firstLineIndex);
                     char[] openingPart = substring(text, 0, firstLineIndex);
-                    if (trim(openingPart).length ==0) {
+                    if (StringUtil.isTrimmedToEmpty(openingPart)) {
                         this.text = trailingPart;
                         this.beginLine++;
                         this.beginColumn=1;
@@ -195,7 +195,7 @@ public final class TextBlock extends TemplateElement {
                             lastNonWS--;
                         }
                         char[] printablePart = substring(text, 0, lastNonWS+1);
-                        if (trim(trailingPart).length == 0) {
+                        if (StringUtil.isTrimmedToEmpty(trailingPart)) {
                         // THIS BLOCK IS HEINOUS! THERE MUST BE A BETTER WAY! REVISIT (JR)
                             boolean trimTrailingPart = true;
                             for (TemplateElement te = this.nextTerminalNode(); 
@@ -343,7 +343,7 @@ public final class TextBlock extends TemplateElement {
         if (text == null || text.length == 0) {
             return true;
         }
-        if (!isWhitespace()) {
+        if (!StringUtil.isTrimmedToEmpty(text)) {
             return false;
         }
         boolean atTopLevel = (getParent().getParent() == null);
@@ -373,13 +373,6 @@ public final class TextBlock extends TemplateElement {
         return substring(c, from, c.length);
     }
     
-    private static char[] trim(char[] c) {
-        if (c.length == 0) {
-            return c;
-        }
-        return new String(c).trim().toCharArray();
-    }
-    
     private static char[] concat(char[] c1, char[] c2) {
         char[] c = new char[c1.length + c2.length];
         System.arraycopy(c1, 0, c, 0, c1.length);
@@ -387,10 +380,6 @@ public final class TextBlock extends TemplateElement {
         return c;
     }
     
-    boolean isWhitespace() {
-        return text == null || trim(text).length == 0;
-    }
-
     boolean isOutputCacheable() {
         return true;
     }

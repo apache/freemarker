@@ -30,4 +30,9 @@ public class CollectionUtils {
     
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };
 
+    /**
+     * @since 2.3.22
+     */
+    public static final char[] EMPTY_CHAR_ARRAY = new char[] { };
+    
 }
