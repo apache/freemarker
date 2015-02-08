@@ -16,184 +16,33 @@
 
 package freemarker.core;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import freemarker.template.TemplateModel;
 
 /**
- * An element representing a macro or function declaration.
+ * Exist for backward compatibility only; it has represented a macro or function declaration in the AST. The current
+ * representation isn't a public class, but is {@code insteanceof} this for backward compatibility.
  * 
+ * <p>
+ * Historical note: This class exists for bacward compatibility with 2.3. 2.4 has introduced {@link UnboundTemplate}-s,
+ * thus, the definition of a callable and the runtime callable value has become to two different things:
+ * {@link UnboundCallable} and {@link BoundCallable}. Both extends this class for backward compatibility.
+ * 
+ * @see UnboundCallable
  * @see BoundCallable
  * 
  * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */
-public class Macro extends TemplateElement implements TemplateModel {
-
-    static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
-            Collections.EMPTY_LIST, 
-            Collections.EMPTY_MAP,
-            null, false,
-            TextBlock.EMPTY_BLOCK);
+public abstract class Macro extends TemplateElement implements TemplateModel {
     
-    final static int TYPE_MACRO = 0;
-    final static int TYPE_FUNCTION = 1;
-    
-    private final String name;
-    private final String[] paramNames;
-    private final Map paramDefaults;
-    private final String catchAllParamName;
-    private final boolean function;
+    // Not public
+    Macro() { }
 
-    Macro(String name, List argumentNames, Map args, 
-            String catchAllParamName, boolean function,
-            TemplateElement nestedBlock) 
-    {
-        this.name = name;
-        this.paramNames = (String[])argumentNames.toArray(
-                new String[argumentNames.size()]);
-        this.paramDefaults = args;
-        
-        this.function = function;
-        this.catchAllParamName = catchAllParamName; 
-        
-        this.nestedBlock = nestedBlock;
-    }
-    
-    String[] getParamNames() {
-        return paramNames;
-    }
-    
-    Map getParamDefaults() {
-        return paramDefaults;
-    }
+    public abstract String getCatchAll();
 
-    public String getCatchAll() {
-        return catchAllParamName;
-    }
-    
-    public String[] getArgumentNames() {
-        return (String[])paramNames.clone();
-    }
+    public abstract String[] getArgumentNames();
 
-    String[] getArgumentNamesInternal() {
-        return paramNames;
-    }
+    public abstract String getName();
 
-    boolean hasArgNamed(String name) {
-        return paramDefaults.containsKey(name);
-    }
-    
-    public String getName() {
-        return name;
-    }
+    public abstract boolean isFunction();
 
-    void accept(Environment env) {
-        env.visitMacroDef(this);
-    }
-
-    protected String dump(boolean canonical) {
-        StringBuffer sb = new StringBuffer();
-        if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
-        sb.append(' ');
-        sb.append(_CoreStringUtils.toFTLTopLevelTragetIdentifier(name));
-        sb.append(function ? '(' : ' ');
-        int argCnt = paramNames.length;
-        for (int i = 0; i < argCnt; i++) {
-            if (i != 0) {
-                if (function) {
-                    sb.append(", ");
-                } else {
-                    sb.append(' ');
-                }
-            }
-            String argName = paramNames[i];
-            sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference(argName));
-            if (paramDefaults != null && paramDefaults.get(argName) != null) {
-                sb.append('=');
-                Expression defaultExpr = (Expression) paramDefaults.get(argName);
-                if (function) {
-                    sb.append(defaultExpr.getCanonicalForm());
-                } else {
-                    MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
-                }
-            }
-        }
-        if (catchAllParamName != null) {
-            if (argCnt != 0) sb.append(", ");
-            sb.append(catchAllParamName);
-            sb.append("...");
-        }
-        if (function) sb.append(')');
-        if (canonical) {
-            sb.append('>');
-            if (nestedBlock != null) {
-                sb.append(nestedBlock.getCanonicalForm());
-            }
-            sb.append("</").append(getNodeTypeSymbol()).append('>');
-        }
-        return sb.toString();
-    }
-    
-    String getNodeTypeSymbol() {
-        return function ? "#function" : "#macro";
-    }
-    
-    boolean isShownInStackTrace() {
-        return false;
-    }
-    
-    public boolean isFunction() {
-        return function;
-    }
-
-    int getParameterCount() {
-        return 1/*name*/ + paramNames.length * 2/*name=default*/ + 1/*catchAll*/ + 1/*type*/;
-    }
-
-    Object getParameterValue(int idx) {
-        if (idx == 0) {
-            return name;
-        } else {
-            final int argDescsEnd = paramNames.length * 2 + 1;
-            if (idx < argDescsEnd) {
-                String paramName = paramNames[(idx - 1) / 2];
-                if (idx % 2 != 0) {
-                    return paramName;
-                } else {
-                    return paramDefaults.get(paramName);
-                }
-            } else if (idx == argDescsEnd) {
-                return catchAllParamName;
-            } else if (idx == argDescsEnd + 1) {
-                return new Integer(function ? TYPE_FUNCTION : TYPE_MACRO);
-            } else {
-                throw new IndexOutOfBoundsException();
-            }
-        }
-    }
-
-    ParameterRole getParameterRole(int idx) {
-        if (idx == 0) {
-            return ParameterRole.ASSIGNMENT_TARGET;
-        } else {
-            final int argDescsEnd = paramNames.length * 2 + 1;
-            if (idx < argDescsEnd) {
-                if (idx % 2 != 0) {
-                    return ParameterRole.PARAMETER_NAME;
-                } else {
-                    return ParameterRole.PARAMETER_DEFAULT;
-                }
-            } else if (idx == argDescsEnd) {
-                return ParameterRole.CATCH_ALL_PARAMETER_NAME;
-            } else if (idx == argDescsEnd + 1) {
-                return ParameterRole.AST_NODE_SUBTYPE;
-            } else {
-                throw new IndexOutOfBoundsException();
-            }
-        }
-    }
-    
 }

@@ -53,7 +53,7 @@ final class BuiltinVariable extends Expression {
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
     
-    private static final BoundCallable PASS_VALUE = new BoundCallable(Macro.DO_NOTHING_MACRO, null, null);
+    private static final BoundCallable PASS_VALUE = new BoundCallable(UnboundCallable.NO_OP_MACRO, null, null);
     
     static final String[] SPEC_VAR_NAMES = new String[] {
         CURRENT_NODE,

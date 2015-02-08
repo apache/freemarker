@@ -72,7 +72,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
 
     void accept(Environment env) throws TemplateException, IOException {
         final TemplateModel tm = nameExp.eval(env);
-        if (tm == Macro.DO_NOTHING_MACRO) return; // shortcut here.
+        if (tm == UnboundCallable.NO_OP_MACRO) return; // shortcut here.
         if (tm instanceof BoundCallable) {
             final BoundCallable boundMacro = (BoundCallable) tm;
             final Macro unboundMacro = boundMacro.getUnboundCallable();

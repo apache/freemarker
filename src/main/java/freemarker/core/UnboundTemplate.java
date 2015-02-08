@@ -47,7 +47,7 @@ import freemarker.template.utility.NullArgumentException;
  * 
  * @since 2.4.0
  */
-public class UnboundTemplate {
+public final class UnboundTemplate {
 
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
@@ -64,7 +64,7 @@ public class UnboundTemplate {
     /** Attributes added via {@code <#ftl attributes=...>}. */
     private LinkedHashMap<String, Object> customAttributes;
     
-    private Map macros = new HashMap();
+    private Map<String, UnboundCallable> unboundCallables = new HashMap();
     private List imports = new Vector();
     private TemplateElement rootElement;
     private String defaultNS;
@@ -218,8 +218,8 @@ public class UnboundTemplate {
     /**
      * Called by code internally to maintain a table of macros
      */
-    void addMacro(Macro macro) {
-        macros.put(macro.getName(), macro);
+    void addUnboundCallable(UnboundCallable unboundCallable) {
+        unboundCallables.put(unboundCallable.getName(), unboundCallable);
     }
 
     /**
@@ -360,7 +360,7 @@ public class UnboundTemplate {
     }
 
     public Map getMacros() {
-        return macros;
+        return unboundCallables;
     }
 
     public List getImports() {

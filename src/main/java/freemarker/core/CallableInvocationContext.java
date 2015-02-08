@@ -28,8 +28,11 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 
+/**
+ * The local variables and such of an FTL macro or FTL function (or other future FTL callable) call.
+ */
 class CallableInvocationContext implements LocalContext {
-    final Macro callableDefinition;
+    final UnboundCallable callableDefinition;
     final Environment.Namespace localVars; 
     final TemplateElement nestedContent;
     final Environment.Namespace nestedContentNamespace;
@@ -38,12 +41,12 @@ class CallableInvocationContext implements LocalContext {
     final ArrayList prevLocalContextStack;
     final CallableInvocationContext prevMacroContext;
     
-    CallableInvocationContext(Macro macroDefinition,
+    CallableInvocationContext(UnboundCallable callableDefinition,
             Environment env, 
             TemplateElement nestedContent,
             List nestedContentParameterNames) 
     {
-        this.callableDefinition = macroDefinition;
+        this.callableDefinition = callableDefinition;
         this.localVars = env.new Namespace();
         this.nestedContent = nestedContent;
         this.nestedContentNamespace = env.getCurrentNamespace();

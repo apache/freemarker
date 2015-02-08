@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 
 /**
@@ -115,8 +116,23 @@ public class _CoreAPI {
         return unboundTemplate.getCustomAttributes();
     }
     
+    /**
+     * For emulating legacy {@link Template#addMacro(Macro)}.
+     */
     public static void addMacro(UnboundTemplate unboundTemplate, Macro macro) {
-        unboundTemplate.addMacro(macro);
+        // A bit of backward compatibility complication, since in 2.4 Macro was split to bound- and unbound callables:
+        final UnboundCallable unboundCallable; 
+        if (macro instanceof UnboundCallable) {
+            // It's coming from the AST:
+            unboundCallable = (UnboundCallable) macro;
+        } else if (macro instanceof BoundCallable) {
+            // It's coming from an FTL variable:
+            unboundCallable = ((BoundCallable) macro).getUnboundCallable(); 
+        } else {
+            // Impossible, Macro should have only two subclasses.
+            throw new BugException();
+        }
+        unboundTemplate.addUnboundCallable(unboundCallable);
     }
 
     public static void addImport(UnboundTemplate unboundTemplate, LibraryLoad libLoad) {

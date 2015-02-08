@@ -95,7 +95,7 @@
                 - content: "more"  // String
     #text  // f.c.TextBlock
         - content: "\n6 "  // String
-    #macro  // f.c.Macro
+    #macro  // f.c.UnboundCallable
         - assignment target: "foo"  // String
         - parameter name: "x"  // String
         - parameter default: null  // Null
@@ -112,7 +112,7 @@
             - passed value: y  // f.c.Identifier
     #text  // f.c.TextBlock
         - content: "\n7 "  // String
-    #function  // f.c.Macro
+    #function  // f.c.UnboundCallable
         - assignment target: "foo"  // String
         - parameter name: "x"  // String
         - parameter default: null  // Null

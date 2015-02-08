@@ -688,15 +688,15 @@ public final class Environment extends Configurable {
     void invoke(BoundCallable boundCallable, 
                Map namedArgs, List positionalArgs, 
                List bodyParameterNames, TemplateElement nestedBlock) throws TemplateException, IOException {
-        Macro callable = boundCallable.getUnboundCallable();
-        if (callable == Macro.DO_NOTHING_MACRO) {
+        UnboundCallable unboundCallable = boundCallable.getUnboundCallable();
+        if (unboundCallable == UnboundCallable.NO_OP_MACRO) {
             return;
         }
         
-        pushElement(callable);
+        pushElement(unboundCallable);
         try {
-            final CallableInvocationContext macroCtx = new CallableInvocationContext(callable, this, nestedBlock, bodyParameterNames);
-            setMacroContextLocalsFromArguments(macroCtx, callable, namedArgs, positionalArgs);
+            final CallableInvocationContext macroCtx = new CallableInvocationContext(unboundCallable, this, nestedBlock, bodyParameterNames);
+            setMacroContextLocalsFromArguments(macroCtx, unboundCallable, namedArgs, positionalArgs);
             
             final CallableInvocationContext prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
@@ -746,9 +746,9 @@ public final class Environment extends Configurable {
      */
     private void setMacroContextLocalsFromArguments(
             final CallableInvocationContext macroCtx,
-            final Macro macro,
+            final UnboundCallable unboundCallable,
             final Map namedArgs, final List positionalArgs) throws TemplateException, _MiscTemplateException {
-        String catchAllParamName = macro.getCatchAll();
+        String catchAllParamName = unboundCallable.getCatchAll();
         if (namedArgs != null) {
             final SimpleHash catchAllParamValue;
             if (catchAllParamName != null) {
@@ -761,7 +761,7 @@ public final class Environment extends Configurable {
             for (Iterator it = namedArgs.entrySet().iterator(); it.hasNext();) {
                 final Map.Entry argNameAndValExp = (Map.Entry) it.next();
                 final String argName = (String) argNameAndValExp.getKey();
-                final boolean isArgNameDeclared = macro.hasArgNamed(argName);
+                final boolean isArgNameDeclared = unboundCallable.hasArgNamed(argName);
                 if (isArgNameDeclared || catchAllParamName != null) {
                     Expression argValueExp = (Expression) argNameAndValExp.getValue();
                     TemplateModel argValue = argValueExp.eval(this);
@@ -772,7 +772,7 @@ public final class Environment extends Configurable {
                     }
                 } else {
                     throw new _MiscTemplateException(this, new Object[] {
-                            (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                            (unboundCallable.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(unboundCallable.getName()),
                             " has no parameter with name ", new _DelayedJQuote(argName), "." });
                 }
             }
@@ -785,11 +785,11 @@ public final class Environment extends Configurable {
                 catchAllParamValue = null;
             }
             
-            String[] argNames = macro.getArgumentNamesInternal();
+            String[] argNames = unboundCallable.getArgumentNamesInternal();
             final int argsCnt = positionalArgs.size();
             if (argNames.length < argsCnt && catchAllParamName == null) {
                 throw new _MiscTemplateException(this, new Object[] { 
-                        (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
+                        (unboundCallable.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(unboundCallable.getName()),
                         " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
                         new _DelayedToString(argsCnt), "."});
             }
@@ -813,8 +813,10 @@ public final class Environment extends Configurable {
     /**
      * Defines the given macro in the current namespace (doesn't call it).
      */
-    void visitMacroDef(Macro macro) {
-        currentNamespace.put(macro.getName(), new BoundCallable(macro, currentTemplate, currentNamespace));
+    void visitCallableDefinition(UnboundCallable unboundCallable) {
+        currentNamespace.put(
+                unboundCallable.getName(),
+                new BoundCallable(unboundCallable, currentTemplate, currentNamespace));
     }
     
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
@@ -2229,7 +2231,7 @@ public final class Environment extends Configurable {
 
     void predefineMacros(Template template) {
         for (Iterator it = template.getMacros().values().iterator(); it.hasNext();) {
-            visitMacroDef((Macro) it.next());
+            visitCallableDefinition((UnboundCallable) it.next());
         }
     }
 

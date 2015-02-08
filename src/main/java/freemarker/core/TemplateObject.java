@@ -194,15 +194,6 @@ public abstract class TemplateObject {
         return unboundTemplate;
     }
 
-    /**
-     * <b>Internal API - subject to change</b>
-     * 
-     * @deprecated The name of this method is misleading now; use {@link #getUnboundTemplate()} instead.
-     */
-    public UnboundTemplate getTemplate() {
-        return getUnboundTemplate();
-    }
-    
     TemplateObject copyLocationFrom(TemplateObject from)
     {
         unboundTemplate = from.unboundTemplate;
