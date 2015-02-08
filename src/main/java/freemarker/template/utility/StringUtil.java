@@ -1942,5 +1942,54 @@ public class StringUtil {
         
         return sb.toString();
     }
+
+    /**
+     * Behaves exactly like {@link String#trim()}, but works on arrays. If the resulting array would have the same
+     * content after trimming, it returns the original array instance. Otherwise it returns a new array instance (or
+     * {@link CollectionUtils#EMPTY_CHAR_ARRAY}).
+     * 
+     * @since 2.3.22
+     */
+    public static char[] trim(final char[] cs) {
+        if (cs.length == 0) {
+            return cs;
+        }
+        
+        int start = 0;
+        int end = cs.length;
+        while (start < end && cs[start] <= ' ') {
+            start++;
+        }
+        while (start < end && cs[end - 1] <= ' ') {
+            end--;
+        }
+        
+        if (start == 0 && end == cs.length) {
+            return cs;
+        }
+        if (start == end) {
+            return CollectionUtils.EMPTY_CHAR_ARRAY;
+        }
+        
+        char[] newCs = new char[end - start];
+        System.arraycopy(cs, start, newCs, 0, end - start);
+        return newCs;
+    }
+
+    /**
+     * Tells if {@link String#trim()} would return a 0-length string for the {@link String} equivalent of the argument.
+     * 
+     * @since 2.3.22
+     */
+    public static boolean isTrimmedToEmpty(char[] text) {
+        int ln = text.length;
+        for (int i = 0; i < ln; i++) {
+            // We follow Java's String.trim() here, which simply states that c <= ' ' is whitespace.
+            if (text[i] > ' ') {
+                return false;
+            }
+        }
+        return true;
+    }
     
 }
