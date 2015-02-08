@@ -114,7 +114,7 @@ final class BuiltinVariable extends Expression {
             return env.getGlobalVariables();
         }
         if (name == LOCALS) {
-            Macro.Context ctx = env.getCurrentMacroContext();
+            CallableInvocationContext ctx = env.getCurrentMacroContext();
             return ctx == null ? null : ctx.getLocals();
         }
         if (name == DATA_MODEL) {

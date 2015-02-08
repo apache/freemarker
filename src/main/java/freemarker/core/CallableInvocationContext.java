@@ -1,0 +1,163 @@
+/*
+ * Copyright 2014 Attila Szegedi, Daniel Dekany, Jonathan Revusky
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package freemarker.core;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModelIterator;
+
+class CallableInvocationContext implements LocalContext {
+    final Macro callableDefinition;
+    final Environment.Namespace localVars; 
+    final TemplateElement nestedContent;
+    final Environment.Namespace nestedContentNamespace;
+    final Template nestedContentTemplate;
+    final List nestedContentParameterNames;
+    final ArrayList prevLocalContextStack;
+    final CallableInvocationContext prevMacroContext;
+    
+    CallableInvocationContext(Macro macroDefinition,
+            Environment env, 
+            TemplateElement nestedContent,
+            List nestedContentParameterNames) 
+    {
+        this.callableDefinition = macroDefinition;
+        this.localVars = env.new Namespace();
+        this.nestedContent = nestedContent;
+        this.nestedContentNamespace = env.getCurrentNamespace();
+        this.nestedContentTemplate = env.getCurrentTemplate();
+        this.nestedContentParameterNames = nestedContentParameterNames;
+        this.prevLocalContextStack = env.getLocalContextStack();
+        this.prevMacroContext = env.getCurrentMacroContext();
+    }
+    
+    Macro getCallableDefinition() {
+        return callableDefinition;
+    }
+
+    void invoce(Environment env) throws TemplateException, IOException {
+        sanityCheck(env);
+        // Set default values for unspecified parameters
+        if (callableDefinition.nestedBlock != null) {
+            env.visit(callableDefinition.nestedBlock);
+        }
+    }
+
+    // Set default parameters, check if all the required parameters are defined.
+    void sanityCheck(Environment env) throws TemplateException {
+        boolean resolvedAnArg, hasUnresolvedArg;
+        Expression firstUnresolvedExpression;
+        InvalidReferenceException firstReferenceException;
+        do {
+            firstUnresolvedExpression = null;
+            firstReferenceException = null;
+            resolvedAnArg = hasUnresolvedArg = false;
+            for(int i = 0; i < callableDefinition.getParamNames().length; ++i) {
+                String argName = callableDefinition.getParamNames()[i];
+                if(localVars.get(argName) == null) {
+                    Expression valueExp = (Expression) callableDefinition.getParamDefaults().get(argName);
+                    if (valueExp != null) {
+                        try {
+                            TemplateModel tm = valueExp.eval(env);
+                            if(tm == null) {
+                                if(!hasUnresolvedArg) {
+                                    firstUnresolvedExpression = valueExp;
+                                    hasUnresolvedArg = true;
+                                }
+                            }
+                            else {
+                                localVars.put(argName, tm);
+                                resolvedAnArg = true;
+                            }
+                        }
+                        catch(InvalidReferenceException e) {
+                            if(!hasUnresolvedArg) {
+                                hasUnresolvedArg = true;
+                                firstReferenceException = e;
+                            }
+                        }
+                    }
+                    else if (!env.isClassicCompatible()) {
+                        boolean argWasSpecified = localVars.containsKey(argName);
+                        throw new _MiscTemplateException(env,
+                                new _ErrorDescriptionBuilder(new Object[] {
+                                        "When calling macro ", new _DelayedJQuote(callableDefinition.getName()), 
+                                        ", required parameter ", new _DelayedJQuote(argName),
+                                        " (parameter #", new Integer(i + 1), ") was ", 
+                                        (argWasSpecified
+                                                ? "specified, but had null/missing value."
+                                                : "not specified.") 
+                                }).tip(argWasSpecified
+                                        ? new Object[] {
+                                                "If the parameter value expression on the caller side is known to "
+                                                + "be legally null/missing, you may want to specify a default "
+                                                + "value for it with the \"!\" operator, like "
+                                                + "paramValue!defaultValue." }
+                                        : new Object[] { 
+                                                "If the omission was deliberate, you may consider making the "
+                                                + "parameter optional in the macro by specifying a default value "
+                                                + "for it, like ", "<#macro macroName paramName=defaultExpr>", ")" }
+                                        ));
+                    }
+                }
+            }
+        }
+        while(resolvedAnArg && hasUnresolvedArg);
+        if(hasUnresolvedArg) {
+            if(firstReferenceException != null) {
+                throw firstReferenceException;
+            } else if (!env.isClassicCompatible()) {
+                throw InvalidReferenceException.getInstance(firstUnresolvedExpression, env);
+            }
+        }
+    }
+
+    /**
+     * @return the local variable of the given name
+     * or null if it doesn't exist.
+     */ 
+    public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+         return localVars.get(name);
+    }
+
+    Environment.Namespace getLocals() {
+        return localVars;
+    }
+    
+    /**
+     * Set a local variable in this macro 
+     */
+    void setLocalVar(String name, TemplateModel var) {
+        localVars.put(name, var);
+    }
+
+    public Collection getLocalVariableNames() throws TemplateModelException {
+        HashSet result = new HashSet();
+        for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext();) {
+            result.add(it.next().toString());
+        }
+        return result;
+    }
+}

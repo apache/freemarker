@@ -156,7 +156,7 @@ public final class Environment extends Configurable {
 
     private Template currentTemplate;
     private Namespace currentNamespace;
-    private Macro.Context currentMacroContext;
+    private CallableInvocationContext currentMacroContext;
     
     private Writer out;
     private ArrayList localContextStack; 
@@ -526,7 +526,7 @@ public final class Environment extends Configurable {
      * Used for {@code #nested}.
      */
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
-        Macro.Context invokingMacroContext = getCurrentMacroContext();
+        CallableInvocationContext invokingMacroContext = getCurrentMacroContext();
         ArrayList prevLocalContextStack = localContextStack;
         TemplateElement nestedContent = invokingMacroContext.nestedContent;
         if (nestedContent != null) {
@@ -695,10 +695,10 @@ public final class Environment extends Configurable {
         
         pushElement(callable);
         try {
-            final Macro.Context macroCtx = callable.new Context(this, nestedBlock, bodyParameterNames);
+            final CallableInvocationContext macroCtx = new CallableInvocationContext(callable, this, nestedBlock, bodyParameterNames);
             setMacroContextLocalsFromArguments(macroCtx, callable, namedArgs, positionalArgs);
             
-            final Macro.Context prevMacroCtx = currentMacroContext;
+            final CallableInvocationContext prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
             
             final ArrayList prevLocalContextStack = localContextStack;
@@ -722,7 +722,7 @@ public final class Environment extends Configurable {
             }
             
             try {
-                macroCtx.runMacro(this);
+                macroCtx.invoce(this);
             } catch (ReturnInstruction.Return re) {
                 // Not an error, just a <#return>
             } catch (TemplateException te) {
@@ -745,7 +745,7 @@ public final class Environment extends Configurable {
      * Sets the local variables corresponding to the macro call arguments in the macro context.
      */
     private void setMacroContextLocalsFromArguments(
-            final Macro.Context macroCtx,
+            final CallableInvocationContext macroCtx,
             final Macro macro,
             final Map namedArgs, final List positionalArgs) throws TemplateException, _MiscTemplateException {
         String catchAllParamName = macro.getCatchAll();
@@ -837,7 +837,7 @@ public final class Environment extends Configurable {
         }
     }
 
-    Macro.Context getCurrentMacroContext() {
+    CallableInvocationContext getCurrentMacroContext() {
         return currentMacroContext;
     }
     

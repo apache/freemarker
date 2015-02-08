@@ -105,7 +105,7 @@ final class BodyInstruction extends TemplateElement {
     */
     
     class Context implements LocalContext {
-        Macro.Context invokingMacroContext;
+        CallableInvocationContext invokingMacroContext;
         Environment.Namespace bodyVars;
         
         Context(Environment env) throws TemplateException {
