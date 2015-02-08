@@ -440,16 +440,14 @@ public class Template extends Configurable {
     }
 
     /**
-     * Sets the character encoding to use for
-     * included files. Usually you don't set this value manually,
-     * instead it's assigned to the template upon loading.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
 
     /**
-     * Returns the character encoding used for reading included files.
+     * Returns the default character encoding used for reading included files.
      */
     public String getEncoding() {
         return this.encoding;
@@ -538,22 +536,21 @@ public class Template extends Configurable {
     }
 
     /**
-     * @return the root TemplateElement object.
-     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public TemplateElement getRootTreeNode() {
         return unboundTemplate.getRootTreeNode();
     }
     
     /**
-     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public Map getMacros() {
         return unboundTemplate.getMacros();
     }
 
     /**
-     * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
+     * @deprecated Should only be used internally, and might will be removed later.
      */
     public List getImports() {
         return unboundTemplate.getImports();
@@ -596,10 +593,8 @@ public class Template extends Configurable {
     }
     
     /**
-     * @return an array of the {@link TemplateElement}s containing the given 
-     * column and line numbers.
-     * @param column the column     
-     * @param line the line
+     * @return an array of the {@link TemplateElement}s containing the given column and line numbers.
+     * @deprecated Should only be used internally, and might will be removed later.
      * 
      * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
      */
