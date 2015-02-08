@@ -16,11 +16,15 @@
 
 package freemarker.core;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import freemarker.template.Configuration;
 
 
 /**
@@ -109,6 +113,22 @@ public class _CoreAPI {
 
     public static Map<String, ?> getCustomAttributes(UnboundTemplate unboundTemplate) {
         return unboundTemplate.getCustomAttributes();
+    }
+    
+    public static void addMacro(UnboundTemplate unboundTemplate, Macro macro) {
+        unboundTemplate.addMacro(macro);
+    }
+
+    public static void addImport(UnboundTemplate unboundTemplate, LibraryLoad libLoad) {
+        unboundTemplate.addImport(libLoad);
+    }
+    
+    public static UnboundTemplate newUnboundTemplate(Reader reader, String sourceName, Configuration cfg, String assumedEncoding) throws IOException {
+        return new UnboundTemplate(reader, sourceName, cfg, assumedEncoding);
+    }
+    
+    public static boolean isFunction(BoundCallable boundCallable) {
+        return boundCallable.getUnboundCallable().isFunction();
     }
     
 }

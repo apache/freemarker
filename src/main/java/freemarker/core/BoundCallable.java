@@ -42,22 +42,22 @@ public final class BoundCallable implements TemplateModel {
     private final Template template;
     private final Namespace namespace;
     
-    public BoundCallable(Macro macro, Template template, Namespace namespace) {
+    BoundCallable(Macro macro, Template template, Namespace namespace) {
         this.unboundCallable = macro;
         this.template = template;
         this.namespace = namespace;
     }
 
-    public Macro getUnboundCallable() {
+    Macro getUnboundCallable() {
         return unboundCallable;
     }
     
-    public Template getTemplate() {
+    Template getTemplate() {
         return template;
     }
 
     
-    public Namespace getNamespace() {
+    Namespace getNamespace() {
         return namespace;
     }
 

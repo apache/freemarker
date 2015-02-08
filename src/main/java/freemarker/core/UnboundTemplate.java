@@ -98,7 +98,7 @@ public class UnboundTemplate {
      * @param sourceName
      *            Shown in error messages as the template "file" location.
      */
-    public UnboundTemplate(Reader reader, String sourceName, Configuration cfg, String assumedEncoding)
+    UnboundTemplate(Reader reader, String sourceName, Configuration cfg, String assumedEncoding)
             throws IOException {
         this(sourceName, cfg);
 

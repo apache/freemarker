@@ -21,6 +21,7 @@ import java.util.Set;
 
 import freemarker.core.BoundCallable;
 import freemarker.core.Environment;
+import freemarker.core._CoreAPI;
 import freemarker.ext.beans.BeanModel;
 import freemarker.ext.beans.BooleanModel;
 import freemarker.ext.beans.CollectionModel;
@@ -287,8 +288,7 @@ public class ClassUtil
             }
     
             if (tm instanceof BoundCallable) {
-                appendTypeName(sb, typeNamesAppended,
-                        ((BoundCallable) tm).getUnboundCallable().isFunction() ? "function" : "macro");
+                appendTypeName(sb, typeNamesAppended, _CoreAPI.isFunction((BoundCallable) tm) ? "function" : "macro");
             }
             
             appendTemplateModelTypeName(sb, typeNamesAppended, tm.getClass());

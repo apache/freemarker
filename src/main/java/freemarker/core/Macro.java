@@ -37,7 +37,7 @@ import freemarker.template.TemplateModelIterator;
  * 
  * @deprecated Subject to be changed or renamed any time; no "stable" replacement exists yet.
  */
-public final class Macro extends TemplateElement implements TemplateModel {
+public class Macro extends TemplateElement implements TemplateModel {
 
     static final Macro DO_NOTHING_MACRO = new Macro(".pass", 
             Collections.EMPTY_LIST, 

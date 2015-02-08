@@ -31,6 +31,8 @@ import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.Configurable;
 import freemarker.core.Environment;
 import freemarker.core.FMParser;
+import freemarker.core.LibraryLoad;
+import freemarker.core.Macro;
 import freemarker.core.ParseException;
 import freemarker.core.TemplateElement;
 import freemarker.core.UnboundTemplate;
@@ -161,7 +163,8 @@ public class Template extends Configurable {
      */
     public Template(
             String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(new UnboundTemplate(reader, sourceName != null ? sourceName : name, toNonNull(cfg), encoding), name, cfg);
+        this(_CoreAPI.newUnboundTemplate(
+                reader, sourceName != null ? sourceName : name, toNonNull(cfg), encoding), name, cfg);
         this.encoding = encoding;
     }
 
@@ -503,25 +506,19 @@ public class Template extends Configurable {
         unboundTemplate.dump(out);
     }
 
-    /**!!T
     /**
-     * Called by code internally to maintain a table of macros
-     * 
      * @deprecated Should only be used internally, and might will be removed later.
-     *x/
+     */
     public void addMacro(Macro macro) {
-        macros.put(macro.getName(), macro);
+        _CoreAPI.addMacro(unboundTemplate, macro);
     }
 
     /**
-     * Called by code internally to maintain a list of imports
-     * 
      * @deprecated Should only be used internally, and might will be removed later.
-     *x/
-    public void addImport(LibraryLoad ll) {
-        imports.add(ll);
+     */
+    public void addImport(LibraryLoad libLoad) {
+        _CoreAPI.addImport(unboundTemplate, libLoad);
     }
-    */
 
     /**
      * Returns the template source at the location specified by the coordinates given, or {@code null} if unavailable.

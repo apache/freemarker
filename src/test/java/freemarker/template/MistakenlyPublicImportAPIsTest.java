@@ -43,7 +43,7 @@ public class MistakenlyPublicImportAPIsTest {
                 t2.process(null, NullWriter.INSTANCE);
                 fail();
             } catch (InvalidReferenceException e) {
-                // Apparenly, it has never worked like this...
+                // Apparently, it has never worked like this...
                 assertEquals("i1", e.getBlamedExpressionString());
             }
         }
@@ -73,14 +73,10 @@ public class MistakenlyPublicImportAPIsTest {
             StringWriter sw = new StringWriter();
             env = t2.createProcessingEnvironment(null, sw);
             env.setVariable("i2", i2);
-            
-            try {
-                env.process();
-                assertEquals("2", sw.toString());
-            } catch (NullPointerException e) {
-                // Expected on 2.3.x, because it won't find the namespace for the macro
-                // [2.4] Fix this "bug"
-            }
+
+            // Works since 2.4.0, was NPE earlier
+            env.process();
+            assertEquals("2", sw.toString());
         }
     }
     
