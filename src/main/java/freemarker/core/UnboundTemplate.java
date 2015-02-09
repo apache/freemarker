@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
@@ -43,7 +42,7 @@ import freemarker.template.utility.NullArgumentException;
 /**
  * The parsed representation of a template that's not yet bound to the {@link Template} properties that doesn't
  * influence the result of the parsing. This information wasn't separated from {@link Template} in FreeMarker 2.3.x,
- * and was factored out from it into thus class in 2.4.0, to allow more efficient caching.
+ * and was factored out from it into this class in 2.4.0, to allow more efficient caching.
  * 
  * @since 2.4.0
  */
@@ -60,21 +59,22 @@ public final class UnboundTemplate {
 
     private final String sourceName;
     private final Configuration cfg;
+    private final Version templateLanguageVersion;
     
     /** Attributes added via {@code <#ftl attributes=...>}. */
     private LinkedHashMap<String, Object> customAttributes;
     
-    private Map<String, UnboundCallable> unboundCallables = new HashMap();
-    private List imports = new Vector();
+    private Map<String, UnboundCallable> unboundCallables = new HashMap<String, UnboundCallable>();
+    // Earlier it was a Vector, so I thought the safest is to keep it synchronized:
+    private final List<LibraryLoad> imports = Collections.synchronizedList(new ArrayList<LibraryLoad>());
     private TemplateElement rootElement;
-    private String defaultNS;
+    private String defaultNamespaceURI;
     private int actualTagSyntax;
-    private final Version templateLanguageVersion;
     
     private final ArrayList lines = new ArrayList();
     
-    private Map prefixToNamespaceURILookup = new HashMap();
-    private Map namespaceURIToPrefixLookup = new HashMap();
+    private Map<String, String> nodePrefixToNamespaceURIMapping = new HashMap<String, String>();
+    private Map<String, String> namespaceURIToPrefixMapping = new HashMap<String, String>();
 
     private UnboundTemplate(String sourceName, Configuration cfg) {
         this.sourceName = sourceName;
@@ -131,8 +131,8 @@ public final class UnboundTemplate {
             reader.close();
         }
 
-        namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
-        prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
+        namespaceURIToPrefixMapping = Collections.unmodifiableMap(namespaceURIToPrefixMapping);
+        nodePrefixToNamespaceURIMapping = Collections.unmodifiableMap(nodePrefixToNamespaceURIMapping);
     }
     
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
@@ -147,7 +147,7 @@ public final class UnboundTemplate {
         }
     }
     
-    static public UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
+    static UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
         UnboundTemplate unboundTemplate = new UnboundTemplate(sourceName, config);
         unboundTemplate.rootElement = new TextBlock(content);
         unboundTemplate.actualTagSyntax = config.getTagSyntax();
@@ -225,8 +225,8 @@ public final class UnboundTemplate {
     /**
      * Called by code internally to maintain a list of imports
      */
-    void addImport(LibraryLoad ll) {
-        imports.add(ll);
+    void addImport(LibraryLoad libLoad) {
+        imports.add(libLoad);
     }
 
     /**
@@ -268,70 +268,6 @@ public final class UnboundTemplate {
     }
 
     /**
-     * This is a helper class that builds up the line table info for us.
-     */
-    private class LineTableBuilder extends FilterReader {
-
-        StringBuffer lineBuf = new StringBuffer();
-        int lastChar;
-
-        /**
-         * @param r
-         *            the character stream to wrap
-         */
-        LineTableBuilder(Reader r) {
-            super(r);
-        }
-
-        public int read() throws IOException {
-            int c = in.read();
-            handleChar(c);
-            return c;
-        }
-
-        public int read(char cbuf[], int off, int len) throws IOException {
-            int numchars = in.read(cbuf, off, len);
-            for (int i = off; i < off + numchars; i++) {
-                char c = cbuf[i];
-                handleChar(c);
-            }
-            return numchars;
-        }
-
-        public void close() throws IOException {
-            if (lineBuf.length() > 0) {
-                lines.add(lineBuf.toString());
-                lineBuf.setLength(0);
-            }
-            super.close();
-        }
-
-        private void handleChar(int c) {
-            if (c == '\n' || c == '\r') {
-                if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
-                    int lastIndex = lines.size() - 1;
-                    String lastLine = (String) lines.get(lastIndex);
-                    lines.set(lastIndex, lastLine + '\n');
-                } else {
-                    lineBuf.append((char) c);
-                    lines.add(lineBuf.toString());
-                    lineBuf.setLength(0);
-                }
-            }
-            else if (c == '\t') {
-                int numSpaces = 8 - (lineBuf.length() % 8);
-                for (int i = 0; i < numSpaces; i++) {
-                    lineBuf.append(' ');
-                }
-            }
-            else {
-                lineBuf.append((char) c);
-            }
-            lastChar = c;
-        }
-    }
-
-    /**
      * Used internally by the parser.
      */
     void setCustomAttribute(String key, Object value) {
@@ -355,22 +291,22 @@ public final class UnboundTemplate {
     /**
      * @return the root TemplateElement object.
      */
-    public TemplateElement getRootTreeNode() {
+    TemplateElement getRootTreeNode() {
         return rootElement;
     }
 
-    public Map getMacros() {
+    Map<String, UnboundCallable> getUnboundCallables() {
         return unboundCallables;
     }
 
-    public List getImports() {
+    List<LibraryLoad> getImports() {
         return imports;
     }
 
     /**
      * This is used internally.
      */
-    public void addPrefixNSMapping(String prefix, String nsURI) {
+    void addPrefixToNamespaceURIMapping(String prefix, String nsURI) {
         if (nsURI.length() == 0) {
             throw new IllegalArgumentException("Cannot map empty string URI");
         }
@@ -381,49 +317,49 @@ public final class UnboundTemplate {
             throw new IllegalArgumentException("The prefix: " + prefix
                     + " cannot be registered, it's reserved for special internal use.");
         }
-        if (prefixToNamespaceURILookup.containsKey(prefix)) {
+        if (nodePrefixToNamespaceURIMapping.containsKey(prefix)) {
             throw new IllegalArgumentException("The prefix: '" + prefix + "' was repeated. This is illegal.");
         }
-        if (namespaceURIToPrefixLookup.containsKey(nsURI)) {
+        if (namespaceURIToPrefixMapping.containsKey(nsURI)) {
             throw new IllegalArgumentException("The namespace URI: " + nsURI
                     + " cannot be mapped to 2 different prefixes.");
         }
         if (prefix.equals(DEFAULT_NAMESPACE_PREFIX)) {
-            this.defaultNS = nsURI;
+            this.defaultNamespaceURI = nsURI;
         } else {
-            prefixToNamespaceURILookup.put(prefix, nsURI);
-            namespaceURIToPrefixLookup.put(nsURI, prefix);
+            nodePrefixToNamespaceURIMapping.put(prefix, nsURI);
+            namespaceURIToPrefixMapping.put(nsURI, prefix);
         }
     }
 
-    public String getDefaultNS() {
-        return this.defaultNS;
+    public String getDefaultNamespaceURI() {
+        return this.defaultNamespaceURI;
     }
 
     /**
-     * @return the NamespaceUri mapped to this prefix in this template. (Or null if there is none.)
+     * @return The namespace URI mapped to this node value prefix, or {@code null}.
      */
-    public String getNamespaceForPrefix(String prefix) {
+    public String getNamespaceURIForPrefix(String prefix) {
         if (prefix.equals("")) {
-            return defaultNS == null ? "" : defaultNS;
+            return defaultNamespaceURI == null ? "" : defaultNamespaceURI;
         }
-        return (String) prefixToNamespaceURILookup.get(prefix);
+        return nodePrefixToNamespaceURIMapping.get(prefix);
     }
 
     /**
      * @return the prefix mapped to this nsURI in this template. (Or null if there is none.)
      */
-    public String getPrefixForNamespace(String nsURI) {
+    public String getPrefixForNamespaceURI(String nsURI) {
         if (nsURI == null) {
             return null;
         }
         if (nsURI.length() == 0) {
-            return defaultNS == null ? "" : NO_NS_PREFIX;
+            return defaultNamespaceURI == null ? "" : NO_NS_PREFIX;
         }
-        if (nsURI.equals(defaultNS)) {
+        if (nsURI.equals(defaultNamespaceURI)) {
             return "";
         }
-        return (String) namespaceURIToPrefixLookup.get(nsURI);
+        return namespaceURIToPrefixMapping.get(nsURI);
     }
 
     /**
@@ -432,16 +368,16 @@ public final class UnboundTemplate {
      */
     public String getPrefixedName(String localName, String nsURI) {
         if (nsURI == null || nsURI.length() == 0) {
-            if (defaultNS != null) {
+            if (defaultNamespaceURI != null) {
                 return NO_NS_PREFIX + ":" + localName;
             } else {
                 return localName;
             }
         }
-        if (nsURI.equals(defaultNS)) {
+        if (nsURI.equals(defaultNamespaceURI)) {
             return localName;
         }
-        String prefix = getPrefixForNamespace(nsURI);
+        String prefix = getPrefixForNamespaceURI(nsURI);
         if (prefix == null) {
             return null;
         }
@@ -450,13 +386,9 @@ public final class UnboundTemplate {
 
     /**
      * @return an array of the {@link TemplateElement}s containing the given column and line numbers.
-     * @param column
-     *            the column
-     * @param line
-     *            the line
      */
-    public List containingElements(int column, int line) {
-        final ArrayList elements = new ArrayList();
+    List<TemplateElement> containingElements(int column, int line) {
+        final ArrayList<TemplateElement> elements = new ArrayList<TemplateElement>();
         TemplateElement element = rootElement;
         mainloop: while (element.contains(column, line)) {
             elements.add(element);
@@ -470,6 +402,70 @@ public final class UnboundTemplate {
             break;
         }
         return elements.isEmpty() ? null : elements;
+    }
+
+    /**
+     * This is a helper class that builds up the line table info for us.
+     */
+    private class LineTableBuilder extends FilterReader {
+    
+        StringBuffer lineBuf = new StringBuffer();
+        int lastChar;
+    
+        /**
+         * @param r
+         *            the character stream to wrap
+         */
+        LineTableBuilder(Reader r) {
+            super(r);
+        }
+    
+        public int read() throws IOException {
+            int c = in.read();
+            handleChar(c);
+            return c;
+        }
+    
+        public int read(char cbuf[], int off, int len) throws IOException {
+            int numchars = in.read(cbuf, off, len);
+            for (int i = off; i < off + numchars; i++) {
+                char c = cbuf[i];
+                handleChar(c);
+            }
+            return numchars;
+        }
+    
+        public void close() throws IOException {
+            if (lineBuf.length() > 0) {
+                lines.add(lineBuf.toString());
+                lineBuf.setLength(0);
+            }
+            super.close();
+        }
+    
+        private void handleChar(int c) {
+            if (c == '\n' || c == '\r') {
+                if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
+                    int lastIndex = lines.size() - 1;
+                    String lastLine = (String) lines.get(lastIndex);
+                    lines.set(lastIndex, lastLine + '\n');
+                } else {
+                    lineBuf.append((char) c);
+                    lines.add(lineBuf.toString());
+                    lineBuf.setLength(0);
+                }
+            }
+            else if (c == '\t') {
+                int numSpaces = 8 - (lineBuf.length() % 8);
+                for (int i = 0; i < numSpaces; i++) {
+                    lineBuf.append(' ');
+                }
+            }
+            else {
+                lineBuf.append((char) c);
+            }
+            lastChar = c;
+        }
     }
 
 }

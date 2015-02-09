@@ -55,8 +55,8 @@ import freemarker.core._CoreAPI;
  * template object is already accessible from multiple threads.
  */
 public class Template extends Configurable {
-    public static final String DEFAULT_NAMESPACE_PREFIX = "D";
-    public static final String NO_NS_PREFIX = "N";
+    public static final String DEFAULT_NAMESPACE_PREFIX = UnboundTemplate.DEFAULT_NAMESPACE_PREFIX;
+    public static final String NO_NS_PREFIX = UnboundTemplate.NO_NS_PREFIX;
     
     /** This is only non-null during parsing. It's used internally to make some information available through the
      *  Template API-s earlier than the parsing was finished. */
@@ -203,7 +203,7 @@ public class Template extends Configurable {
      * @since 2.3.22
      */
     static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
-        return new Template(UnboundTemplate.createPlainTextTemplate(
+        return new Template(_CoreAPI.createPlainTextTemplate(
                 sourceName != null ? sourceName : name,
                 content, config), name, config);
     }
@@ -536,21 +536,21 @@ public class Template extends Configurable {
      * @deprecated Should only be used internally, and might will be removed later.
      */
     public TemplateElement getRootTreeNode() {
-        return unboundTemplate.getRootTreeNode();
+        return _CoreAPI.getRootTreeNode(unboundTemplate);
     }
     
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
     public Map getMacros() {
-        return unboundTemplate.getMacros();
+        return _CoreAPI.getMacros(unboundTemplate);
     }
 
     /**
      * @deprecated Should only be used internally, and might will be removed later.
      */
     public List getImports() {
-        return unboundTemplate.getImports();
+        return _CoreAPI.getImports(unboundTemplate);
     }
 
     /**
@@ -559,25 +559,25 @@ public class Template extends Configurable {
      * @deprecated Should only be used internally, and might will be removed later.
      */
     public void addPrefixNSMapping(String prefix, String nsURI) {
-        unboundTemplate.addPrefixNSMapping(prefix, nsURI);
+        _CoreAPI.addPrefixNSMapping(unboundTemplate, prefix, nsURI);
     }
     
     public String getDefaultNS() {
-        return unboundTemplate.getDefaultNS();
+        return unboundTemplate.getDefaultNamespaceURI();
     }
     
     /**
      * @return the NamespaceUri mapped to this prefix in this template. (Or null if there is none.)
      */
     public String getNamespaceForPrefix(String prefix) {
-        return unboundTemplate.getNamespaceForPrefix(prefix);
+        return unboundTemplate.getNamespaceURIForPrefix(prefix);
     }
     
     /**
      * @return the prefix mapped to this nsURI in this template. (Or null if there is none.)
      */
     public String getPrefixForNamespace(String nsURI) {
-        return unboundTemplate.getPrefixForNamespace(nsURI);
+        return unboundTemplate.getPrefixForNamespaceURI(nsURI);
     }
     
     /**
@@ -596,7 +596,7 @@ public class Template extends Configurable {
      * @deprecated The objects building up templates aren't part of the published API, and are subject to change.
      */
     public List containingElements(int column, int line) {
-        return unboundTemplate.containingElements(column, line);
+        return _CoreAPI.containingElements(unboundTemplate, column, line);
     }
 
     @Override

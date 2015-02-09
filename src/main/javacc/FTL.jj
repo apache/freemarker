@@ -3154,7 +3154,7 @@ void HeaderElement() :
                                     }
                                     String nsURI = ((TemplateScalarModel) valueModel).getAsString();
                                     try {
-                                        unboundTemplate.addPrefixNSMapping(prefix, nsURI);
+                                        unboundTemplate.addPrefixToNamespaceURIMapping(prefix, nsURI);
                                     } catch (IllegalArgumentException iae) {
                                         throw new ParseException(iae.getMessage(), exp);
                                     }

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -145,6 +146,35 @@ public class _CoreAPI {
     
     public static boolean isBoundCallable(Object obj) {
         return obj instanceof BoundCallable;
+    }
+
+    public static UnboundTemplate createPlainTextTemplate(String sourceName, String content, Configuration config) {
+        return UnboundTemplate.createPlainTextTemplate(sourceName, content, config);
+    }
+    
+    /** Used for implementing the deprecated {@link Template} method with similar name. */
+    public static TemplateElement getRootTreeNode(UnboundTemplate unboundTemplate) {
+        return unboundTemplate.getRootTreeNode();
+    }
+    
+    /** Used for implementing the deprecated {@link Template} method with similar name. */
+    public static Map getMacros(UnboundTemplate unboundTemplate) {
+        return unboundTemplate.getUnboundCallables();
+    }
+
+    /** Used for implementing the deprecated {@link Template} method with similar name. */
+    public static List getImports(UnboundTemplate unboundTemplate) {
+        return unboundTemplate.getImports();
+    }
+    
+    /** Used for implementing the deprecated {@link Template} method with similar name. */
+    public static void addPrefixNSMapping(UnboundTemplate unboundTemplate, String prefix, String nsURI) {
+        unboundTemplate.addPrefixToNamespaceURIMapping(prefix, nsURI);
+    }
+    
+    /** Used for implementing the deprecated {@link Template} method with similar name. */
+    public static List<TemplateElement> containingElements(UnboundTemplate unboundTemplate, int column, int line) {
+        return unboundTemplate.containingElements(column, line);
     }
     
 }

@@ -29,8 +29,8 @@ import freemarker.template.TemplateException;
  */
 public final class LibraryLoad extends TemplateElement {
 
-    private Expression importedTemplateNameExp;
-    private String namespace;
+    private final Expression importedTemplateNameExp;
+    private final String namespace;
 
     /**
      * @param unboundTemplate the template that this <tt>Include</tt> is a part of.
