@@ -8,7 +8,7 @@
       xmlns:ns="http://docbook.org/ns/docbook">
   <title>FreeMarker Manual</title>
 
-  <subtitle>For FreeMarker 2.3.22 Release Candidate 2 Nightly</subtitle>
+  <subtitle>For FreeMarker 2.3.22 Release Candidate 2</subtitle>
 
   <preface xml:id="preface">
     <title>Preface</title>
@@ -22303,9 +22303,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_22">
-        <title>2.3.22 Release Candidate 2 Nightly</title>
+        <title>2.3.22 Release Candidate 2</title>
 
-        <para>Date of release: 2015-02-[TODO]</para>
+        <para>Date of release: 2015-03-01 (planned for the final
+        release)</para>
 
         <para>To find changes since RC01, search for <quote>since
         RC02</quote>!</para>
@@ -23266,6 +23267,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Some fixes and improvements in template canonical form
                   output, and as a consequence of that, in FTL stack trace
                   instruction displaying.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Marked some historically public but otherwise internal
+                  API-s as deprecated, so that that the disclaimer is more
+                  apparent in IDE-s (since RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
