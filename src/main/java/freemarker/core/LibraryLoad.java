@@ -22,10 +22,11 @@ import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-
 /**
- * An instruction that gets another template
- * and processes it within the current template.
+ * <b>Internal API - subject to change:</b> Represents an import via {@code #import}.
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public final class LibraryLoad extends TemplateElement {
 

@@ -22,6 +22,10 @@ import freemarker.debug.impl.DebuggerService;
 import freemarker.template.TemplateException;
 
 /**
+ * <b>Internal API - subject to change: A debug breakpoint inserted into the template</b> 
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public class DebugBreak extends TemplateElement
 {

@@ -24,6 +24,9 @@ import freemarker.template.Template;
  * 
  * @see TemplateElement
  * @see Expression
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 public abstract class TemplateObject {
     
@@ -161,8 +164,10 @@ public abstract class TemplateObject {
         return true;
     }
 
-    public Template getTemplate()
-    {
+    /**
+     * @deprecated This method will be removed in FreeMarker 2.4 because of architectural changes!
+     */
+    public Template getTemplate() {
         return template;
     }
     
