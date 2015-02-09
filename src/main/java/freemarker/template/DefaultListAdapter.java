@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.template.utility.APIObjectWrapper;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 import freemarker.template.utility.RichObjectWrapper;
 
 /**
@@ -125,7 +125,7 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
     }
 
     public TemplateModel getAPI() throws TemplateModelException {
-        return ((APIObjectWrapper) getObjectWrapper()).wrapAsAPI(list);
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(list);
     }
 
 }

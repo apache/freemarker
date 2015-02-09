@@ -32,6 +32,9 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * <b>Internal API - subject to change:</b> Represent expression nodes in the parsed template.
+ * 
+ * @deprecated This is an internal FreeMarker API with no backward compatibility guarantees, so you shouldn't depend on
+ *             it.
  */
 abstract public class Expression extends TemplateObject {
 

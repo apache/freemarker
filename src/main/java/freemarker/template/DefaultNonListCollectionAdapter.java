@@ -24,7 +24,7 @@ import java.util.List;
 import freemarker.core._DelayedShortClassName;
 import freemarker.core._TemplateModelException;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.template.utility.APIObjectWrapper;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 /**
  * <b>Experimental - subject to change:</b> Adapts a non-{@link List} Java {@link Collection} to the corresponding
@@ -62,11 +62,11 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
      *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
-    public static DefaultNonListCollectionAdapter adapt(Collection collection, APIObjectWrapper wrapper) {
+    public static DefaultNonListCollectionAdapter adapt(Collection collection, ObjectWrapperWithAPISupport wrapper) {
         return new DefaultNonListCollectionAdapter(collection, wrapper);
     }
 
-    private DefaultNonListCollectionAdapter(Collection collection, APIObjectWrapper wrapper) {
+    private DefaultNonListCollectionAdapter(Collection collection, ObjectWrapperWithAPISupport wrapper) {
         super(wrapper);
         this.collection = collection;
     }
@@ -126,7 +126,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
     }
 
     public TemplateModel getAPI() throws TemplateModelException {
-        return ((APIObjectWrapper) getObjectWrapper()).wrapAsAPI(collection);
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(collection);
     }
 
 }
