@@ -22910,7 +22910,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>&lt;param-value&gt;[ WEB-INF/templates,
                   classpath:com/example/myapp/templates
                   ]&lt;/param-value&gt;</literal>. This internally creates a
-                  <literal>freemarker.cache.MultiTemplateLoader</literal>.</para>
+                  <literal>freemarker.cache.MultiTemplateLoader</literal>.
+                  (Since RC02.)</para>
                 </listitem>
 
                 <listitem>
@@ -23289,11 +23290,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
 
                 <listitem>
-                  <para>Fixed some bugs in 2.3.22-rc01, where still name was
-                  used instead of <literal>templateName</literal>, and where
-                  assumptions were made about the template name format instead
-                  of using the <literal>TemplateNameFormat</literal> setting
-                  (since RC02).</para>
+                  <para>Fixed some bugs in 2.3.22-rc01, where still
+                  <literal>name</literal> was used instead of
+                  <literal>sourceName</literal>, and where assumptions were
+                  made about the template name format instead of using the
+                  <literal>TemplateNameFormat</literal> setting (since
+                  RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
@@ -23430,8 +23432,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
                 <listitem>
                   <para>Marked some historically public but otherwise internal
-                  API-s as deprecated, so that that the disclaimer is more
-                  apparent in IDE-s (since RC02).</para>
+                  API-s as deprecated, so that the disclaimer is more apparent
+                  in IDE-s (since RC02).</para>
                 </listitem>
               </itemizedlist>
             </listitem>
